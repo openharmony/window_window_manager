@@ -6485,8 +6485,7 @@ bool JsWindow::CheckWindowMaskParams(napi_env env, napi_value jsObject)
     WindowLimits windowLimits;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowLimits(windowLimits));
     if (ret == WmErrorCode::WM_OK) {
-        if (size == 0 ||
-            static_cast<float>(size) * windowLimits.vpRatio_ > static_cast<float>(windowLimits.maxWidth_)) {
+        if (size == 0 || size > windowLimits.maxWidth_) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u, vpRatio:%{public}f, maxWidth:%{public}u",
                 size, windowLimits.vpRatio_, windowLimits.maxWidth_);
             return false;

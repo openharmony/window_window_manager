@@ -2119,8 +2119,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorSpace, Function | SmallTes
     int resultValue = 0;
     ScreenId screenId = 0;
     GraphicCM_ColorSpaceType colorSpace;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         screenSessionManagerProxy->SetScreenColorSpace(screenId, colorSpace);
         resultValue = 1;
     };
@@ -2143,16 +2142,40 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, Function | SmallTest |
     std::shared_ptr<Media::PixelMap> res = nullptr;
     CaptureOption option;
     option.displayId_ = 0;
-    DmErrorCode* errorCode = nullptr;
+    DmErrorCode errorCode = DmErrorCode::DM_OK;
     std::function<void()> func = [&]() {
-        res = screenSessionManagerProxy->GetScreenCapture(option, errorCode);
+        res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
     };
     func();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, nullptr);
+        if (errorCode == DmErrorCode::DM_OK) {
+            ASSERT_NE(res, nullptr);
+        } else {
+            ASSERT_EQ(res, nullptr);
+        }
     } else {
         ASSERT_EQ(res, nullptr);
     }
+}
+
+/**
+ * @tc.name: GetPrimaryDisplayInfo
+ * @tc.desc: GetPrimaryDisplayInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    sptr<DisplayInfo> res = nullptr;
+    std::function<void()> func = [&]() {
+        res = screenSessionManagerProxy->GetPrimaryDisplayInfo();
+    };
+    func();
+    ASSERT_NE(res, nullptr);
 }
 }
 }

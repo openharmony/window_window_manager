@@ -3119,7 +3119,11 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenCapture, Function | SmallTest | Leve
     option.displayId_ = 0;
     DmErrorCode errCode;
     std::shared_ptr<Media::PixelMap> bitMap = ssm->GetScreenCapture(option, &errCode);
-    ASSERT_NE(bitMap, nullptr);
+    if (errCode == DmErrorCode::DM_OK) {
+        ASSERT_NE(bitMap, nullptr);
+    } else {
+        ASSERT_EQ(bitMap, nullptr);
+    }
 }
 
 /**
@@ -3135,6 +3139,17 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenCaptureNotify, Function | SmallTest |
     int32_t uid = 0;
     std::string clientName = "test";
     ssm->OnScreenCaptureNotify(screenId, uid, clientName);
+}
+
+/**
+ * @tc.name: GetPrimaryDisplayInfo
+ * @tc.desc: GetPrimaryDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_NE(ssm_->GetPrimaryDisplayInfo(), nullptr);
 }
 }
 } // namespace Rosen

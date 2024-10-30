@@ -139,7 +139,6 @@ ohos_unittest("dmserver_screen_rotation_controller_test") {
 
   if (window_manager_feature_subscribe_motion) {
     if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
-      external_deps += [ "motion:motion_interface_native" ]
       defines = [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
     }
   }

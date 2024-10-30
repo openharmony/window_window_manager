@@ -256,49 +256,6 @@ HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | L
 }
 
 /**
- * @tc.name: ClearEnterWindow01
- * @tc.desc: ClearEnterWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, ClearEnterWindow01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "ClearEnterWindow01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    int resultValue = 0;
-    SceneSession::ClearEnterWindow();
-    ASSERT_EQ(resultValue, 0);
-}
-
-/**
- * @tc.name: GetEnterWindow01
- * @tc.desc: GetEnterWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, GetEnterWindow01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "GetEnterWindow01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    wptr<SceneSession> sceneSession_;
-    ASSERT_EQ(sceneSession_, SceneSession::GetEnterWindow());
-}
-
-/**
  * @tc.name: SetRequestedOrientation
  * @tc.desc: SetRequestedOrientation
  * @tc.type: FUNC
@@ -2029,6 +1986,41 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: HandleCompatibleModeDrag
+ * @tc.desc: HandleCompatibleModeDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleCompatibleModeDrag";
+    info.bundleName_ = "HandleCompatibleModeDrag";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    WSRect rect = {1, 1, 1, 1};
+    WSRect rect2 = {2, 1, 1, 1};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    ASSERT_EQ(sceneSession->winRect_, rect2);
+
+    rect2 = {1, 2, 1, 1};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    ASSERT_EQ(sceneSession->winRect_, rect2);
+
+    rect2 = {1, 1, 2, 1};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    ASSERT_EQ(sceneSession->winRect_, rect2);
+
+    rect2 = {1, 1, 1, 2};
+    sceneSession->winRect_ = rect2;
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    ASSERT_EQ(sceneSession->winRect_, rect2);
+}
+
+/**
  * @tc.name: SetMoveDragCallback
  * @tc.desc: SetMoveDragCallback
  * @tc.type: FUNC
@@ -2116,6 +2108,48 @@ HWTEST_F(SceneSessionTest, SetSessionGlobalRect, Function | SmallTest | Level2)
     sceneSession->SetSessionGlobalRect(test);
     sceneSession->SetScbCoreEnabled(true);
     EXPECT_EQ(test, sceneSession->GetSessionGlobalRect());
+}
+
+/**
+ * @tc.name: SetSessionGlobalRect/GetSessionGlobalRect
+ * @tc.desc: SetSessionGlobalRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsStatusBarVisibleInner01";
+    info.bundleName_ = "SetIsStatusBarVisibleInner01";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_OK);
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_ERROR_NULLPTR);
+
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        return WSError::WS_ERROR_NULLPTR;
+    };
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_ERROR_NULLPTR);
+
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        isLayoutFinished = false;
+        return WSError::WS_OK;
+    };
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
+
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        isLayoutFinished = true;
+        return WSError::WS_OK;
+    };
+    sceneSession->specificCallback_->onUpdateAvoidAreaByType_ = [](int32_t persistentId, AvoidAreaType type) {};
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_OK);
+
+    sceneSession->specificCallback_ = nullptr;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
 }
 } // namespace
 } // Rosen

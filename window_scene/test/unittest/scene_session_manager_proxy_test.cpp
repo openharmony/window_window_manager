@@ -1101,6 +1101,22 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, Function | 
         WMError::WM_ERROR_IPC_FAILED);
     ASSERT_EQ(isPcOrPadFreeMultiWindowMode, false);
 }
+
+/**
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    const std::vector<uint64_t> windowIds = {1, 2};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    sceneSessionManagerProxy->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+}
 }  // namespace
 }
 }

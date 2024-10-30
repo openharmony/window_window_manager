@@ -177,10 +177,10 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NEED_AVOID), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
@@ -759,10 +759,10 @@ HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction01, Function | SmallTest |
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(true);
+    data.WriteUint32(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleUpdatePropertyByAction(data, reply);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -775,10 +775,11 @@ HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction02, Function | SmallTest |
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(false);
+    const std::uint32_t invalidData = 0;
+    data.WriteUint32(invalidData);
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleUpdatePropertyByAction(data, reply);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
