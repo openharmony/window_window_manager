@@ -362,7 +362,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        AddSubWindowMapForExtensionWindow();
+        if (!isToastFlag) {
+            AddSubWindowMapForExtensionWindow();
+        }
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
