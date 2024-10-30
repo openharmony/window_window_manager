@@ -21,7 +21,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLiteStub"};
-[[maybe_unused]] constexpr uint32_t MAX_VECTOR_SIZE = 100;
+constexpr uint32_t MAX_VECTOR_SIZE = 100;
 constexpr uint32_t MAX_TOPN_INFO_SIZE = 200;
 }
 
