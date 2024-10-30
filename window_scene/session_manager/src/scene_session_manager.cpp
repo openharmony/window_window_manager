@@ -2382,7 +2382,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-
+ 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
         WSError err = CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage);
         if (err != WSError::WS_OK) {
@@ -3834,7 +3834,7 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
         }
         bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession);
         TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]",
-            sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(),
+            sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(), 
             sceneSession->IsVisible(), requireLock, shouldLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
