@@ -369,8 +369,13 @@ public:
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
-    void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /*
+     * Window Rotation
+     */
+    NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
+    void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
 
     /*
      * Window Visibility
@@ -413,7 +418,6 @@ public:
     static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
-    NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
 
     /*
      * Window Decor
