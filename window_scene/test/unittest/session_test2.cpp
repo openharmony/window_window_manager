@@ -27,6 +27,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
+#include "process_options.h"
 #include "key_event.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
@@ -733,6 +734,19 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoWant008, Function | SmallTest | Level
     std::shared_ptr<AAFwk::Want> want = nullptr;
     session_->SetSessionInfoWant(want);
     ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetSessionInfoProcessOptions
+ * @tc.desc: SetSessionInfoProcessOptions Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetSessionInfoProcessOptions, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
+    session_->SetSessionInfoProcessOptions(processOptions);
+    ASSERT_EQ(processOptions, session_->sessionInfo_.processOptions);
 }
 
 /**
