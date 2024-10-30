@@ -39,7 +39,7 @@ public:
     MOCK_METHOD2(Disconnect, WSError(bool isFromClient, const std::string& identityToken));
 
     MOCK_METHOD3(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason reason,
-        bool isGlobal, bool isFromMoveToGlobal = false));
+        bool isGlobal, bool isFromMoveToGlobal));
     MOCK_METHOD1(UpdateClientRect, WSError(const WSRect& rect));
 
     MOCK_METHOD0(Recover, WSError(void));
