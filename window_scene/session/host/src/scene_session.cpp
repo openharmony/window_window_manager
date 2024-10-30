@@ -1180,9 +1180,12 @@ WSError SceneSession::UpdateSessionRect(
          (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
         auto parentSession = GetParentSession();
         if (parentSession && parentSession->GetFloatingScale() != 0) {
-            auto parentGlobalRect = parentSession->GetGlobalScaledRect();
-            newRect.posX_ = (newRect.posX_ - parentGlobalRect.posX_) / parentSession->GetFloatingScale();
-            newRect.posY_ = (newRect.posY_ - parentGlobalRect.posY_) / parentSession->GetFloatingScale();
+            Rect parentGlobalRect;
+            WMError errorCode = parentSession->GetGlobalScaledRect(parentGlobalRect);
+            if (parentGlobalRect != nullptr) {
+                newRect.posX_ = (newRect.posX_ - parentGlobalRect.posX_) / parentSession->GetFloatingScale();
+                newRect.posY_ = (newRect.posY_ - parentGlobalRect.posY_) / parentSession->GetFloatingScale();
+            }
         }
     }
     Session::RectCheckProcess();
