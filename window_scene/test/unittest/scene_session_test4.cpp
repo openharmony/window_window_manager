@@ -745,7 +745,7 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
  * @tc.name: GetCustomDecorHeight02
  * @tc.desc: GetCustomDecorHeight
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionTest4, GetCustomDecorHeight02, Function | SmallTest | Level3)
 {
     SessionInfo info;

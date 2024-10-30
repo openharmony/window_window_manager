@@ -405,10 +405,10 @@ HWTEST_F(WindowSessionLifecycleTest, IsActive, Function | SmallTest | Level2)
 }
 
 /**
-* @tc.name: IsActive43
-* @tc.desc: IsActive
-* @tc.type: FUNC
-*/
+ * @tc.name: IsActive43
+ * @tc.desc: IsActive
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowSessionLifecycleTest, IsActive43, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);

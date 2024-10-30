@@ -999,7 +999,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnFoldStatusChangedReportUE, Function |
  * @tc.name: UpdateDisplayScale01
  * @tc.desc: UpdateDisplayScale test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale01, Function | SmallTest | Level2)
 {
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
@@ -1018,7 +1018,7 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale01, Function | SmallT
  * @tc.name: UpdateDisplayScale02
  * @tc.desc: UpdateDisplayScale test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale02, Function | SmallTest | Level2)
 {
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
