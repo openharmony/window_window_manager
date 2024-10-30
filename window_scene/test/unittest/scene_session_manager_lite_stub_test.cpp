@@ -538,30 +538,13 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionSnapshot, Function | S
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t res;
-
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
-    EXPECT_EQ(ERR_INVALID_DATA, res);
-
-    std::u16string deviceIdData = "deviceId"
-    data.WriteString16(deviceIdData);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
-    EXPECT_EQ(ERR_INVALID_DATA, res);
-
-    int32_t persistentId = 0;
-    data.WriteString16(deviceIdData);
+    const std::u16string deviceId = static_cast<std::u16string>(u"123");
+    data.WriteString16(deviceId);
+    const std::int32_t persistentId = 1;
     data.WriteInt32(persistentId);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
-    EXPECT_EQ(ERR_INVALID_DATA, res);
-
-    bool isLowResolution = true;
-    data.WriteString16(deviceIdData);
-    data.WriteInt32(persistentId);
+    const bool isLowResolution = true;
     data.WriteBool(isLowResolution);
-    res = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }

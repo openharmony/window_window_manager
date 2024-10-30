@@ -205,10 +205,10 @@ HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
 }
 
 /**
-* @tc.name: suspend_end_001
-* @tc.desc: call SuspendEnd and check return value
-* @tc.type: FUNC
-*/
+ * @tc.name: suspend_end_001
+ * @tc.desc: call SuspendEnd and check return value
+ * @tc.type: FUNC
+ */
 HWTEST_F(DisplayPowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
 {
     Mocker m;
@@ -222,10 +222,10 @@ HWTEST_F(DisplayPowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
 }
 
 /**
-* @tc.name: set_screen_brightness_001
-* @tc.desc: Call SetScreenBrightness with a valid value and check the GetScreenBrightness return value
-* @tc.type: FUNC
-*/
+ * @tc.name: set_screen_brightness_001
+ * @tc.desc: Call SetScreenBrightness with a valid value and check the GetScreenBrightness return value
+ * @tc.type: FUNC
+ */
 HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_001, Function | MediumTest | Level2)
 {
     bool ret = DisplayManager::GetInstance().SetScreenBrightness(defaultId_, brightnessLevel_);
@@ -233,10 +233,10 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_001, Function | MediumTest 
 }
 
 /**
-* @tc.name: set_screen_power_for_all_001
-* @tc.desc: Call SetScreenPowerForAll with valid value and check the GetScreenPower return value
-* @tc.type: FUNC
-*/
+ * @tc.name: set_screen_power_for_all_001
+ * @tc.desc: Call SetScreenPowerForAll with valid value and check the GetScreenPower return value
+ * @tc.type: FUNC
+ */
 HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_001, Function | MediumTest | Level2)
 {
     SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter> m;
@@ -253,10 +253,10 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_001, Function | MediumTe
 }
 
 /**
-* @tc.name: set_display_state_001
-* @tc.desc: Call SetDisplayState with valid value and check the GetDisplayState return value
-* @tc.type: FUNC
-*/
+ * @tc.name: set_display_state_001
+ * @tc.desc: Call SetDisplayState with valid value and check the GetDisplayState return value
+ * @tc.type: FUNC
+ */
 HWTEST_F(DisplayPowerUnitTest, set_display_state_001, Function | MediumTest | Level2)
 {
     DisplayState stateToSet = (initialState_ == DisplayState::OFF ? DisplayState::ON : DisplayState::OFF);
@@ -274,10 +274,10 @@ HWTEST_F(DisplayPowerUnitTest, set_display_state_001, Function | MediumTest | Le
 }
 
 /**
-* @tc.name: set_display_state_002
-* @tc.desc: Call SetDisplayState with invalid callback and check the GetDisplayState return value
-* @tc.type: FUNC
-*/
+ * @tc.name: set_display_state_002
+ * @tc.desc: Call SetDisplayState with invalid callback and check the GetDisplayState return value
+ * @tc.type: FUNC
+ */
 HWTEST_F(DisplayPowerUnitTest, set_display_state_002, Function | MediumTest | Level2)
 {
     Mocker m;

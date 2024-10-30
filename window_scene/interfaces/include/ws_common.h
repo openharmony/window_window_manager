@@ -344,6 +344,9 @@ struct SessionInfo {
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
+    bool isPcOrPadEnableActivation_ = false;
+    bool canStartAbilityFromBackground_ = false;
+    bool isFoundationCall_ = false;
 
     /*
      * UIExtension
@@ -686,6 +689,7 @@ enum class SessionUIDirtyFlag {
     Z_ORDER = 1 << 5,
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
+    GLOBAL_RECT = 1 << 8,
 };
 
 /**

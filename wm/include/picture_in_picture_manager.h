@@ -16,7 +16,6 @@
 #ifndef OHOS_PICTURE_IN_PICTURE_MANAGER_H
 #define OHOS_PICTURE_IN_PICTURE_MANAGER_H
 
-#include <refbase.h>
 #include "picture_in_picture_controller.h"
 #include "window.h"
 #include "wm_common.h"

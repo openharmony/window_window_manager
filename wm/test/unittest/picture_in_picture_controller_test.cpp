@@ -15,18 +15,12 @@
 
 #include <gtest/gtest.h>
 
-#include "datashare_predicates.h"
-#include "datashare_result_set.h"
-#include "datashare_helper.h"
 #include <gmock/gmock.h>
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
 #include "window.h"
 #include "wm_common.h"
 #include "xcomponent_controller.h"
-#include "result_set.h"
-#include "system_ability_definition.h"
-#include "uri.h"
 #include "ability_context_impl.h"
 
 using namespace testing;

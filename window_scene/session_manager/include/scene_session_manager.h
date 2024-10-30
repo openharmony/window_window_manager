@@ -413,8 +413,13 @@ public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() { return taskScheduler_; }
 
     int32_t GetCustomDecorHeight(int32_t persistentId);
+
+    /*
+     * Free Multi Window
+     */
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
+
     const SystemSessionConfig& GetSystemSessionConfig() const;
     void ClearDisplayStatusBarTemporarilyFlags();
     WSError NotifyEnterRecentTask(bool enterRecent);
@@ -525,6 +530,7 @@ private:
     void LoadFreeMultiWindowConfig(bool enable);
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    void InitVsyncStation();
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
