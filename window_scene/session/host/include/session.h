@@ -96,6 +96,7 @@ public:
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
     virtual void OnLayoutFinished() {}
+    virtual void OnRemoveBlank() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnExtensionDied() {}
     virtual void OnExtensionTimeout(int32_t errorCode) {}
@@ -157,6 +158,7 @@ public:
     void NotifyBackground();
     void NotifyDisconnect();
     void NotifyLayoutFinished();
+    void NotifyRemoveBlank();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
