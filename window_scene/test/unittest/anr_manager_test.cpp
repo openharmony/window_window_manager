@@ -22,7 +22,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 constexpr int32_t MAX_ANR_TIMER_COUNT { 64 };
-class AnrManagerTest : public testing ::Test {
+class AnrManagerTest : public testing::Test {
 public:
     static void SetUpTestCase(void) {}
     static void TearDownTestCase(void) {}
