@@ -495,6 +495,26 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: GetGlobalScaledRect
+ * @tc.desc: GetGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetGlobalScaledRect, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetGlobalScaledRect");
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    Rect globalScaledRect;
+    windowSceneSession->property_->SetPersistentId(6);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->GetGlobalScaledRect(globalScaledRect));
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->GetGlobalScaledRect(globalScaledRect));
+}
+
+/**
  * @tc.name: MoveTo01
  * @tc.desc: MoveTo
  * @tc.type: FUNC
