@@ -47,8 +47,11 @@ public:
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
     SuperFoldStatus GetCurrentStatus();
+
+    void SetCurrentStatus(SuperFoldStatus curState);
+    
 private:
-    SuperFoldStatus curState_;
+    SuperFoldStatus curState_ = SuperFoldStatus::HALF_FOLDED;
 
     struct Transition {
         SuperFoldStatus nextState;
@@ -58,23 +61,23 @@ private:
     using transEvent = std::pair<SuperFoldStatus, SuperFoldStatusChangeEvents>;
     std::map<transEvent, Transition> stateManagerMap_;
 
-    static void DoFoldToHalfFold();
+    static void DoAngleChangeFolded();
 
-    static void DoHalfFoldToFold();
+    static void DoAngleChangeHalfFolded();
 
-    static void DoHalFoldToExpand();
+    static void DoAngleChangeExpanded();
 
-    static void DoExpandToHalfFold();
+    static void DoKeyboardOn();
 
-    static void DoHalfFoldToKeyboard();
+    static void DoKeyboardOff();
 
-    static void DoKeyboardToHalfFold();
+    static void DoSoftKeyboardOn();
 
-    static void DoHalfFoldToSoftKeyboard();
+    static void DoSoftKeyboardOff();
 
-    static void DoSoftKeyboardToHalfFold();
+    static void DoKeyboardToExpanded();
 
-    static void DoSoftKeyboardToKeyboard();
+    static void DoExpandedToKeyboard();
 };
 } // Rosen
 } // OHOS
