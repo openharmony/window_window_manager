@@ -227,7 +227,7 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Leve
     }
 }
 
-/*
+/**
  * @tc.name: GetUnreliableWindowInfo
  * @tc.desc: GetUnreliableWindowInfo ok
  * @tc.type: FUNC

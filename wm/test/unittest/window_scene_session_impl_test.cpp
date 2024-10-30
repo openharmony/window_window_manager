@@ -377,7 +377,7 @@ HWTEST_F(WindowSceneSessionImplTest, IsValidSystemWindowType01, Function | Small
     ASSERT_TRUE(!windowSceneSession->IsValidSystemWindowType(WindowType::WINDOW_TYPE_APP_LAUNCHING));
 }
 
-/*
+/**
  * @tc.name: InvalidWindow
  * @tc.desc: InvalidWindow test
  * @tc.type: FUNC
@@ -767,7 +767,7 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyDrawingCompleted, Function | SmallTes
     window->NotifyDrawingCompleted();
 }
 
-/*
+/**
  * @tc.name: SetTransparent
  * @tc.desc: SetTransparent test
  * @tc.type: FUNC
@@ -791,7 +791,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTransparent, Function | SmallTest | Leve
     }
 }
 
-/*
+/**
  * @tc.name: GetTopwindowWithId
  * @tc.desc: GetTopwindowWithId test
  * @tc.type: FUNC
@@ -826,7 +826,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetTopwindowWithId, Function | SmallTest | 
     WindowSessionImpl::windowSessionMap_.erase(winName);
 }
 
-/*
+/**
  * @tc.name: SetAspectRatio01
  * @tc.desc: SetAspectRatio test
  * @tc.type: FUNC
@@ -840,7 +840,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio01, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetAspectRatio(0.1));
 }
 
-/*
+/**
  * @tc.name: SetAspectRatio02
  * @tc.desc: SetAspectRatio test
  * @tc.type: FUNC
@@ -866,7 +866,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio02, Function | SmallTest | Le
     ASSERT_EQ(ratio, session->GetAspectRatio());
 }
 
-/*
+/**
  * @tc.name: ResetAspectRatio
  * @tc.desc: ResetAspectRatio test GetAvoidAreaByType
  * @tc.type: FUNC
@@ -884,7 +884,7 @@ HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Le
     ASSERT_EQ(0, session->GetAspectRatio());
 }
 
-/*
+/**
  * @tc.name: GetAvoidAreaByType
  * @tc.desc: GetAvoidAreaByType test
  * @tc.type: FUNC
@@ -904,7 +904,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
 }
 
-/*
+/**
  * @tc.name: Immersive
  * @tc.desc: Immersive01 test
  * @tc.type: FUNC
@@ -929,7 +929,7 @@ HWTEST_F(WindowSceneSessionImplTest, Immersive, Function | SmallTest | Level3)
     ASSERT_EQ(false, window->IsFullScreen());
 }
 
-/*
+/**
  * @tc.name: SystemBarProperty
  * @tc.desc: SystemBarProperty01 test
  * @tc.type: FUNC
@@ -946,7 +946,7 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty, Function | SmallTest | L
         window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
 }
 
-/*
+/**
  * @tc.name: SystemBarProperty02
  * @tc.desc: SystemBarProperty02 test
  * @tc.type: FUNC
@@ -975,7 +975,7 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty02, Function | SmallTest |
     ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
 }
 
-/*
+/**
  * @tc.name: SystemBarProperty03
  * @tc.desc: SystemBarProperty03 test
  * @tc.type: FUNC
@@ -1001,7 +1001,7 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty03, Function | SmallTest |
     ASSERT_TRUE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
 }
 
-/*
+/**
  * @tc.name: SystemBarProperty04
  * @tc.desc: SystemBarProperty04 test
  * @tc.type: FUNC
@@ -1020,7 +1020,7 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty04, Function | SmallTest |
         window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
 }
 
-/*
+/**
  * @tc.name: SystemBarProperty05
  * @tc.desc: SystemBarProperty05 test
  * @tc.type: FUNC
@@ -1049,7 +1049,7 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty05, Function | SmallTest |
     ASSERT_FALSE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
 }
 
-/*
+/**
  * @tc.name: SystemBarProperty06
  * @tc.desc: SystemBarProperty06 test
  * @tc.type: FUNC
@@ -1075,7 +1075,7 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty06, Function | SmallTest |
     ASSERT_TRUE(window->property_->GetSystemBarProperty()[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_);
 }
 
-/*
+/**
  * @tc.name: SystemBarProperty07
  * @tc.desc: SystemBarProperty07 test
  * @tc.type: FUNC
@@ -1120,7 +1120,7 @@ HWTEST_F(WindowSceneSessionImplTest, SystemBarProperty07, Function | SmallTest |
     ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
-/*
+/**
  * @tc.name: SetSystemBarProperties
  * @tc.desc: SetSystemBarProperties test
  * @tc.type: FUNC
@@ -1155,7 +1155,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetSystemBarProperties, Function | SmallTes
     }
 }
 
-/*
+/**
  * @tc.name: GetSystemBarProperties
  * @tc.desc: GetSystemBarProperties test
  * @tc.type: FUNC
@@ -1172,7 +1172,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetSystemBarProperties, Function | SmallTes
     ASSERT_EQ(WMError::WM_OK, window->GetSystemBarProperties(properties));
 }
 
-/*
+/**
  * @tc.name: SpecificBarProperty
  * @tc.desc: SpecificBarProperty01 test
  * @tc.type: FUNC
@@ -1193,7 +1193,7 @@ HWTEST_F(WindowSceneSessionImplTest, SpecificBarProperty, Function | SmallTest |
     }
 }
 
-/*
+/**
  * @tc.name: NotifySpecificWindowSessionProperty
  * @tc.desc: NotifySpecificWindowSessionProperty01 test
  * @tc.type: FUNC
@@ -1221,7 +1221,7 @@ HWTEST_F(WindowSceneSessionImplTest, NotifySpecificWindowSessionProperty, Functi
         window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
 }
 
-/*
+/**
  * @tc.name: LimitCameraFloatWindowMininumSize
  * @tc.desc: LimitCameraFloatWindowMininumSize01 test
  * @tc.type: FUNC
@@ -1238,7 +1238,7 @@ HWTEST_F(WindowSceneSessionImplTest, LimitCameraFloatWindowMininumSize, Function
     window->LimitCameraFloatWindowMininumSize(width, height, vpr);
 }
 
-/*
+/**
  * @tc.name: NotifyWindowNeedAvoid
  * @tc.desc: NotifyWindowNeedAvoid test
  * @tc.type: FUNC
@@ -1259,7 +1259,7 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyWindowNeedAvoid, Function | SmallTest
     ASSERT_EQ(WMError::WM_OK, window->NotifyWindowNeedAvoid(false));
 }
 
-/*
+/**
  * @tc.name: SetLayoutFullScreenByApiVersion
  * @tc.desc: SetLayoutFullScreenByApiVersion test
  * @tc.type: FUNC
@@ -1279,7 +1279,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, Function |
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreenByApiVersion(false));
 }
 
-/*
+/**
  * @tc.name: SetGlobalMaximizeMode
  * @tc.desc: SetGlobalMaximizeMode test
  * @tc.type: FUNC
@@ -1304,7 +1304,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetGlobalMaximizeMode, Function | SmallTest
     ASSERT_EQ(WMError::WM_OK, window->SetGlobalMaximizeMode(MaximizeMode::MODE_RECOVER));
 }
 
-/*
+/**
  * @tc.name: CheckParmAndPermission
  * @tc.desc: CheckParmAndPermission test
  * @tc.type: FUNC
@@ -1326,7 +1326,7 @@ HWTEST_F(WindowSceneSessionImplTest, CheckParmAndPermission, Function | SmallTes
     }
 }
 
-/*
+/**
  * @tc.name: SetBackdropBlurStyle
  * @tc.desc: SetBackdropBlurStyle test
  * @tc.type: FUNC
@@ -1347,7 +1347,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackdropBlurStyle, Function | SmallTest 
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
 }
 
-/*
+/**
  * @tc.name: SetTurnScreenOn
  * @tc.desc: SetTurnScreenOn test
  * @tc.type: FUNC
@@ -1368,7 +1368,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTurnScreenOn, Function | SmallTest | Lev
     window->SetTurnScreenOn(false);
 }
 
-/*
+/**
  * @tc.name: SetBlur
  * @tc.desc: SetBlur test
  * @tc.type: FUNC
@@ -1386,7 +1386,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBlur(1.0));
 }
 
-/*
+/**
  * @tc.name: SetKeepScreenOn
  * @tc.desc: SetKeepScreenOn test
  * @tc.type: FUNC
@@ -1411,7 +1411,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
     ASSERT_FALSE(window->IsKeepScreenOn());
 }
 
-/*
+/**
  * @tc.name: SetPrivacyMode01
  * @tc.desc: SetPrivacyMode as true
  * @tc.type: FUNC
@@ -1433,7 +1433,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode01, Function | SmallTest | Le
     ASSERT_EQ(true, window->IsPrivacyMode());
 }
 
-/*
+/**
  * @tc.name: SetPrivacyMode02
  * @tc.desc: SetPrivacyMode as false
  * @tc.type: FUNC
@@ -1455,7 +1455,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode02, Function | SmallTest | Le
     ASSERT_EQ(false, window->IsPrivacyMode());
 }
 
-/*
+/**
  * @tc.name: SetPrivacyMode03
  * @tc.desc: Window is invalid
  * @tc.type: FUNC
@@ -1471,7 +1471,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetPrivacyMode03, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetPrivacyMode(false));
 }
 
-/*
+/**
  * @tc.name: IsPrivacyMode
  * @tc.desc: Set window privacy mode as true and false
  * @tc.type: FUNC
@@ -1495,7 +1495,7 @@ HWTEST_F(WindowSceneSessionImplTest, IsPrivacyModec, Function | SmallTest | Leve
     ASSERT_EQ(false, window->IsPrivacyMode());
 }
 
-/*
+/**
  * @tc.name: SetSystemPrivacyMode
  * @tc.desc: Set Ststemwindow privacy mode as true and false
  * @tc.type: FUNC
@@ -1518,7 +1518,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetSystemPrivacyMode, Function | SmallTest 
     ASSERT_EQ(false, window->property_->GetSystemPrivacyMode());
 }
 
-/*
+/**
  * @tc.name: SetSnapshotSkip
  * @tc.desc: SetSnapshotSkip test
  * @tc.type: FUNC
@@ -1545,7 +1545,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetSnapshotSkip, Function | SmallTest | Lev
     }
 }
 
-/*
+/**
  * @tc.name: SetImmersiveModeEnabledState
  * @tc.desc: SetImmersiveModeEnabledState test
  * @tc.type: FUNC
@@ -1590,7 +1590,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetImmersiveModeEnabledState, Function | Sm
     ASSERT_EQ(true, window->IsLayoutFullScreen());
 }
 
-/*
+/**
  * @tc.name: SetLayoutFullScreen01
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
@@ -1611,7 +1611,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest
     ASSERT_EQ(false, window->IsLayoutFullScreen());
 }
 
-/*
+/**
  * @tc.name: SetLayoutFullScreen02
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
@@ -1629,7 +1629,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, Function | SmallTest
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
 }
 
-/*
+/**
  * @tc.name: SetTitleAndDockHoverShown
  * @tc.desc: SetTitleAndDockHoverShown test
  * @tc.type: FUNC
@@ -1660,7 +1660,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, Function | Small
     EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
 }
 
-/*
+/**
  * @tc.name: SetFullScreen
  * @tc.desc: SetFullScreen test
  * @tc.type: FUNC
@@ -1682,7 +1682,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetFullScreen, Function | SmallTest | Level
     ASSERT_EQ(false, window->IsFullScreen());
 }
 
-/*
+/**
  * @tc.name: SetShadowOffsetX
  * @tc.desc: SetShadowOffsetX test
  * @tc.type: FUNC
@@ -1699,7 +1699,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetX, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowOffsetX(1.0));
 }
 
-/*
+/**
  * @tc.name: SetShadowOffsetY
  * @tc.desc: SetShadowOffsetY test
  * @tc.type: FUNC
@@ -1716,7 +1716,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetY, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowOffsetY(1.0));
 }
 
-/*
+/**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: GetStatusBarHeight test
  * @tc.type: FUNC
@@ -1730,7 +1730,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetStatusBarHeight, Function | SmallTest | 
     ASSERT_EQ(0, window->GetStatusBarHeight());
 }
 
-/*
+/**
  * @tc.name: SetGestureBackEnabled
  * @tc.desc: SetGestureBackEnabled test
  * @tc.type: FUNC
@@ -1764,7 +1764,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetGestureBackEnabled, Function | SmallTest
     ASSERT_EQ(true, enable);
 }
 
-/*
+/**
  * @tc.name: CompatibleFullScreenRecover
  * @tc.desc: CompatibleFullScreenRecover test
  * @tc.type: FUNC
@@ -1789,7 +1789,7 @@ HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenRecover, Function | Sma
     ASSERT_EQ(WSError::WS_OK, window->CompatibleFullScreenRecover());
 }
 
-/*
+/**
  * @tc.name: CompatibleFullScreenMinimize
  * @tc.desc: CompatibleFullScreenMinimize test
  * @tc.type: FUNC
@@ -1814,7 +1814,7 @@ HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenMinimize, Function | Sm
     ASSERT_EQ(WSError::WS_OK, window->CompatibleFullScreenMinimize());
 }
 
-/*
+/**
  * @tc.name: CompatibleFullScreenClose
  * @tc.desc: CompatibleFullScreenClose test
  * @tc.type: FUNC

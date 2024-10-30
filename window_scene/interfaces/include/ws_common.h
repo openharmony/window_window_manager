@@ -345,7 +345,7 @@ struct SessionInfo {
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
 
-    /*
+    /**
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -354,7 +354,7 @@ struct SessionInfo {
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
 
-    /*
+    /**
      * Multi instance
      */
     bool isNewAppInstance_ = false;

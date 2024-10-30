@@ -152,7 +152,7 @@ public:
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
-    /*
+    /**
      * Callbacks for ILifecycleListener
      */
     void NotifyActivation();
@@ -166,7 +166,7 @@ public:
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
 
-    /*
+    /**
      * Cross Display Move Drag
      */
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
@@ -344,12 +344,12 @@ public:
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
     
-    /*
+    /**
      * Window Rotate Animation
      */
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
-    /*
+    /**
      * Window Focus
      */
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
@@ -374,7 +374,7 @@ public:
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
 
-    /*
+    /**
      * Multi Window
      */
     void SetIsMidScene(bool isMidScene);
@@ -403,7 +403,7 @@ public:
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
 
-    /*
+    /**
      * Window ZOrder
      */
     virtual void SetZOrder(uint32_t zOrder);
@@ -524,7 +524,7 @@ protected:
     void UpdateSessionTouchable(bool touchable);
     virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
 
-    /*
+    /**
      * Gesture Back
      */
     virtual void UpdateGestureBackEnabled() {}
@@ -621,7 +621,7 @@ protected:
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
 
-    /*
+    /**
      * Window Rotate Animation
      */
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
@@ -633,13 +633,13 @@ protected:
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
-    /*
+    /**
      * Window ZOrder
      */
     uint32_t zOrder_ = 0;
     uint32_t lastZOrder_ = 0;
 
-    /*
+    /**
      * Window Focus
      */
     bool isFocused_ = false;
@@ -684,12 +684,12 @@ private:
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
 
-    /*
+    /**
      * Window Rotate Animation
      */
     int32_t GetRotateAnimationDuration();
 
-    /*
+    /**
      * Window Property
      */
     void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
@@ -721,7 +721,7 @@ private:
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
 
-    /*
+    /**
      * Window Focus
      */
     mutable std::shared_mutex uiRequestFocusMutex_;
@@ -733,7 +733,7 @@ private:
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
-    /*
+    /**
      * Multi Window
      */
     bool isMidScene_ = false;
