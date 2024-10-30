@@ -112,7 +112,7 @@ constexpr int SCALE_MAX_WIDTH = 8;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
-[[maybe_unused]] constexpr int32_t STATUS_BAR_AVOID_AREA = 0;
+constexpr int32_t STATUS_BAR_AVOID_AREA = 0;
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_SCREEN = "-s";
@@ -121,7 +121,7 @@ const std::string ARG_DUMP_PIPLINE = "-p";
 const std::string ARG_DUMP_SCB = "-b";
 const std::string ARG_DUMP_DETAIL = "-c";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
-[[maybe_unused]] const int32_t LOGICAL_DISPLACEMENT_32 = 32;
+const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 
 constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
@@ -638,7 +638,7 @@ void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decor
         } else {
             systemConfig_.freeMultiWindowConfig_.isSystemDecorEnable_ = item.boolValue_;
         }
-        [[maybe_unused]] bool decorEnable = item.boolValue_;
+        bool decorEnable = item.boolValue_;
         uint32_t support = 0;
         std::vector<std::string> supportedModes;
         item = decorConfig["supportedMode"];
