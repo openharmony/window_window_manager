@@ -33,9 +33,10 @@ public:
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         sptr<IRemoteObject> token));
 
-    MOCK_METHOD2(Foreground, WSError(sptr<WindowSessionProperty> property, bool isFromClient));
-    MOCK_METHOD1(Background, WSError(bool isFromClient));
-    MOCK_METHOD1(Disconnect, WSError(bool isFromClient));
+    MOCK_METHOD3(
+        Foreground, WSError(sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken));
+    MOCK_METHOD2(Background, WSError(bool isFromClient, const std::string& identityToken));
+    MOCK_METHOD2(Disconnect, WSError(bool isFromClient, const std::string& identityToken));
 
     MOCK_METHOD3(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason& reason, bool isGlobal));
 

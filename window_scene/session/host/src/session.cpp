@@ -1008,7 +1008,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     return WSError::WS_OK;
 }
 
-WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient)
+WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken)
 {
     HandleDialogForeground();
     SessionState state = GetSessionState();
@@ -1086,7 +1086,7 @@ void Session::HandleDialogForeground()
     }
 }
 
-WSError Session::Background(bool isFromClient)
+WSError Session::Background(bool isFromClient, const std::string& identityToken)
 {
     HandleDialogBackground();
     SessionState state = GetSessionState();
@@ -1117,7 +1117,7 @@ void Session::ResetSessionConnectState()
     SetCallingPid(-1);
 }
 
-WSError Session::Disconnect(bool isFromClient)
+WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
 {
     auto state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);

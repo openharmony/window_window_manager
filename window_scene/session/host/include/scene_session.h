@@ -149,12 +149,13 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
     WSError ReconnectInner(sptr<WindowSessionProperty> property);
-    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
-    WSError Background(bool isFromClient = false) override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
+        const std::string& identityToken = "") override;
+    WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     virtual void RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func) {};
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
     WSError BackgroundTask(const bool isSaveSnapshot = true);
-    WSError Disconnect(bool isFromClient = false) override;
+    WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
     virtual void BindKeyboardPanelSession(sptr<SceneSession> panelSession) {};
@@ -460,6 +461,12 @@ private:
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
     void HandleStyleEvent(MMI::WindowArea area) override;
     WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+
+    /*
+     * Window Lifecycle
+     */
+    bool CheckIdentityTokenIfMatched(const std::string& identityToken);
+    bool CheckPidIfMatched();
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);

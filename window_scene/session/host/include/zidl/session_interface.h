@@ -37,9 +37,10 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         const std::string& identityToken = "") { return WSError::WS_OK; }
-    virtual WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) = 0;
-    virtual WSError Background(bool isFromClient = false) = 0;
-    virtual WSError Disconnect(bool isFromClient = false) = 0;
+    virtual WSError Foreground(
+        sptr<WindowSessionProperty> property, bool isFromClient = false, const std::string& identityToken = "") = 0;
+    virtual WSError Background(bool isFromClient = false, const std::string& identityToken = "") = 0;
+    virtual WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") = 0;
     virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Hide() = 0;
     virtual WSError DrawingCompleted() = 0;
