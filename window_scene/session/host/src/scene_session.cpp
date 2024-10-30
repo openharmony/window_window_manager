@@ -1176,8 +1176,8 @@ WSError SceneSession::UpdateSessionRect(
         }
     }
     if (isFromMoveToGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
-        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
-            (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+        (systemConfig_.IsPhoneWindow() ||
+         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
         auto parentSession = GetParentSession();
         if (parentSession && parentSession->GetFloatingScale() != 0) {
             auto parentGlobalRect = parentSession->GetGlobalScaledRect();
