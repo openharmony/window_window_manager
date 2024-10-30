@@ -74,7 +74,7 @@ private:
     void ExecuteExportTask();
     std::unordered_map<std::string, Task> exportFuncMap_; // will used in OS_SceneSession
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    std::weak_ptr<AppExecFwk::EventHandler> exportHandler_;
+    std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
     pid_t ssmTid_ = 0;
 };
 } // namespace OHOS::Rosen

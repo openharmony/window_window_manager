@@ -45,6 +45,7 @@ public:
     void SetRequestRect(const struct Rect& rect);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
+    void SetFocusableOnShow(bool isFocusableOnShow);
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
     void SetHideNonSystemFloatingWindows(bool hide);
@@ -109,6 +110,7 @@ public:
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;
     bool GetFocusable() const;
+    bool GetFocusableOnShow() const;
     bool GetTouchable() const;
     bool GetDragEnabled() const;
     bool GetHideNonSystemFloatingWindows() const;
@@ -207,14 +209,14 @@ public:
     int32_t GetRealParentId() const;
     void SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage);
     UIExtensionUsage GetUIExtensionUsage() const;
-    void SetExtensionFlag(bool isExtensionFlag);
-    bool GetExtensionFlag() const;
+    void SetIsUIExtFirstSubWindow(bool isUIExtFirstSubWindow);
+    bool GetIsUIExtFirstSubWindow() const;
     void SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess);
     bool GetIsUIExtensionAbilityProcess() const;
     void SetParentWindowType(WindowType parentWindowType);
     WindowType GetParentWindowType() const;
-    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
-    bool GetIsUIExtensionSubWindowFlag() const;
+    void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
+    bool GetIsUIExtAnySubWindow() const;
 
     /*
      * Multi instance
@@ -279,6 +281,7 @@ private:
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
+    bool focusableOnShow_ { true };
     bool touchable_ { true };
     bool dragEnabled_ = { true };
     bool raiseEnabled_ = { true };
@@ -362,9 +365,9 @@ private:
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
     UIExtensionUsage uiExtensionUsage_ { UIExtensionUsage::EMBEDDED };
-    bool isExtensionFlag_ = false;
+    bool isUIExtFirstSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
-    bool isUIExtensionSubWindowFlag_ = false;
+    bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
     /*

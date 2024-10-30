@@ -16,8 +16,6 @@
 #ifndef OHOS_PICTURE_IN_PICTURE_MANAGER_H
 #define OHOS_PICTURE_IN_PICTURE_MANAGER_H
 
-#include <refbase.h>
-#include <shared_mutex>
 #include "picture_in_picture_controller.h"
 #include "window.h"
 #include "wm_common.h"
@@ -64,8 +62,6 @@ private:
     static std::map<int32_t, wptr<PictureInPictureController>> autoStartControllerMap_;
 
     static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
-    static std::shared_mutex controllerMapMutex_;
-    static std::mutex mutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -158,6 +158,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainWindowStatesByPid03, Function | Small
     sceneSession->SetSessionState(sessionState);
     sceneSession->SetRSVisible(isVisible);
     sceneSession->SetForegroundInteractiveStatus(isForegroundInteractive);
+    sceneSession->GetSessionProperty()->SetIsPcAppInPad(isPcOrPadEnableActivation);
     sceneSession->SetCallingPid(callingPid);
     ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
     std::vector<MainWindowState> windowStates;
@@ -221,6 +222,68 @@ HWTEST_F(SceneSessionManagerTest11, GetLastInstanceKey, Function | SmallTest | L
     ASSERT_EQ(ssm_->GetLastInstanceKey(BUNDLE_NAME), instanceKey0);
     MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     ASSERT_EQ(ssm_->GetLastInstanceKey(BUNDLE_NAME), "");
+}
+
+/**
+ * @tc.name: UpdateOccupiedAreaIfNeed
+ * @tc.desc: SceneSesionManager update occupiedArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, Function | SmallTest | Level1)
+{
+    int ret = 0;
+    int32_t persistentId = 0;
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.moduleName_ = "test3";
+    info.persistentId_ = 1;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
+
+    persistentId = 1;
+    ssm_->UpdateOccupiedAreaIfNeed(persistentId);
+
+    ssm_->sceneSessionMap_.erase(1);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GetAllSessionDumpDetailInfo
+ * @tc.desc: SceneSesionManager test GetAllSessionDumpDetailInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAllSessionDumpDetailInfo, Function | SmallTest | Level1)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "GetAllSessionDumpDetailInfo1";
+    info1.bundleName_ = "GetAllSessionDumpDetailInfo1";
+    info1.persistentId_ = 1;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    ASSERT_NE(sceneSession1, nullptr);
+    sceneSession1->UpdateNativeVisibility(true);
+
+    SessionInfo info2;
+    info2.abilityName_ = "GetAllSessionDumpDetailInfo2";
+    info2.bundleName_ = "GetAllSessionDumpDetailInfo2";
+    info2.persistentId_ = 2;
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    sceneSession2->UpdateNativeVisibility(false);
+
+    ssm_->sceneSessionMap_.insert({0, nullptr});
+    ssm_->sceneSessionMap_.insert({1, sceneSession1});
+    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    std::string dumpInfo;
+    ASSERT_EQ(ssm_->GetAllSessionDumpDetailInfo(dumpInfo), WSError::WS_OK);
 }
 }  // namespace
 }

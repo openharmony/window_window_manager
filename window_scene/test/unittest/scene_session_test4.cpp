@@ -404,15 +404,14 @@ HWTEST_F(SceneSessionTest4, SetRequestedOrientation, Function | SmallTest | Leve
     Orientation orientation { Orientation::BEGIN };
     session->sessionChangeCallback_ = nullptr;
     session->SetRequestedOrientation(orientation);
-    session->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->sessionChangeCallback_->OnRequestedOrientationChange_ = nullptr;
+    session->onRequestedOrientationChange_ = nullptr;
     session->SetRequestedOrientation(orientation);
     NotifyReqOrientationChangeFunc func = [](uint32_t orientation) {
         return;
     };
-    session->sessionChangeCallback_->OnRequestedOrientationChange_ = func;
+    session->onRequestedOrientationChange_ = func;
     session->SetRequestedOrientation(orientation);
-    EXPECT_NE(nullptr, session->sessionChangeCallback_->OnRequestedOrientationChange_);
+    EXPECT_NE(nullptr, session->onRequestedOrientationChange_);
 }
 
 /**
@@ -746,7 +745,7 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
  * @tc.name: GetCustomDecorHeight02
  * @tc.desc: GetCustomDecorHeight
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionTest4, GetCustomDecorHeight02, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -1232,6 +1231,59 @@ HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction02, Function | SmallTes
     sceneSession->SetSessionProperty(property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, sceneSession->UpdateSessionPropertyByAction(property, action));
+}
+
+/**
+ * @tc.name: IsMovable01
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, isMovable01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "isMovable01";
+    info.bundleName_ = "isMovable01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(false, sceneSession->IsMovable());
+}
+
+/**
+ * @tc.name: IsMovable02
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsMovable02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMovable02";
+    info.bundleName_ = "IsMovable02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, sceneSession->UpdateFocus(false));
+    ASSERT_EQ(false, sceneSession->IsMovable());
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
+}
+
+/**
+ * @tc.name: IsMovable03
+ * @tc.desc: IsMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsMovable03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMovable03";
+    info.bundleName_ = "IsMovable03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
+    ASSERT_EQ(false, sceneSession->IsMovable());
 }
 }
 }

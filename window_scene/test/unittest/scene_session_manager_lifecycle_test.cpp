@@ -118,7 +118,7 @@ namespace {
  * @tc.name: NotifySessionForeground
  * @tc.desc: SceneSesionManager NotifySessionForeground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionForeground, Function | SmallTest | Level3)
 {
     sptr<SceneSession> scensession = nullptr;
@@ -135,7 +135,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionForeground, Function | S
  * @tc.name: NotifySessionForeground
  * @tc.desc: SceneSesionManager NotifySessionForeground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionBackground, Function | SmallTest | Level3)
 {
     sptr<SceneSession> scensession = nullptr;
@@ -184,7 +184,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RecoverSessionInfo, Function | SmallT
  * @tc.name: NotifySessionMovedToFront
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionMovedToFront, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -202,7 +202,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionMovedToFront, Function |
  * @tc.name: PendingSessionToBackgroundForDelegator
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level3)
 {
     WSError ret;
@@ -222,7 +222,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, PendingSessionToBackgroundForDelegato
  * @tc.name: OnSessionStateChange
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, OnSessionStateChange, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
@@ -297,7 +297,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RecoverAndReconnectSceneSession02, Fu
  * @tc.name: CreateSceneSession
  * @tc.desc: CreateSceneSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, CreateSceneSession, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -363,7 +363,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, CreateSceneSession, Function | SmallT
  * @tc.name: RequestSceneSessionBackground
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground, Function | SmallTest | Level3)
 {
     sptr<SceneSession> sceneSession;
@@ -410,7 +410,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground, Functi
  * @tc.name: RequestSceneSessionDestruction
  * @tc.desc: RequestSceneSessionDestruction
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -430,12 +430,12 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Funct
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
-    sptr<AAFwk::SessionInfo> scnSessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    ASSERT_NE(nullptr, scnSessionInfo);
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, true);
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, false);
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, true);
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, scnSessionInfo, false);
+    sptr<AAFwk::SessionInfo> sceneSessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    ASSERT_NE(nullptr, sceneSessionInfo);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, false);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
+    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, false);
     ssm_->AddClientDeathRecipient(sessionStage, sceneSession);
     ASSERT_EQ(AncoSceneState::DEFAULT_STATE, sceneSession->GetSessionInfo().ancoSceneState);
 }
@@ -444,7 +444,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Funct
  * @tc.name: RequestSceneSessionBackground002
  * @tc.desc: SceneSesionManager request scene session background
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground002, Function | SmallTest | Level3)
 {
     bool isDelegator = false;
@@ -461,7 +461,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground002, Fun
  * @tc.name: RequestSceneSessionDestruction002
  * @tc.desc: SceneSesionManager request scene session destruction
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction002, Function | SmallTest | Level3)
 {
     bool needRemoveSession = false;
@@ -478,7 +478,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction002, Fu
  * @tc.name: NotifyForegroundInteractiveStatus
  * @tc.desc: SceneSesionManager notify scene session interactive status
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, NotifyForegroundInteractiveStatus, Function | SmallTest | Level3)
 {
     bool interactive = false;
@@ -497,7 +497,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifyForegroundInteractiveStatus, Fu
  * @tc.name: NotifySessionCreate
  * @tc.desc: SceneSesionManager notify session create
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionCreate, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -551,7 +551,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, UpdateRecoveredSessionInfo02, Functio
  * @tc.name: RequestSceneSession01
  * @tc.desc: SceneSesionManager test RequestSceneSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession01, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -568,7 +568,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession01, Function | Sma
  * @tc.name: RequestSceneSession02
  * @tc.desc: SceneSesionManager test RequestSceneSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession02, Function | SmallTest | Level3)
 {
     SessionInfo info1;
@@ -591,7 +591,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession02, Function | Sma
  * @tc.name: RequestSceneSession03
  * @tc.desc: SceneSesionManager test RequestSceneSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession03, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -612,7 +612,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession03, Function | Sma
  * @tc.name: RequestSceneSession04
  * @tc.desc: SceneSesionManager test RequestSceneSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession04, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -630,7 +630,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession04, Function | Sma
  * @tc.name: RequestSceneSessionBackground01
  * @tc.desc: SceneSesionManager test RequestSceneSessionBackground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground01, Function | SmallTest | Level3)
 {
     bool isDelegator = false;
@@ -650,7 +650,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground01, Func
  * @tc.name: RequestSceneSessionBackground02
  * @tc.desc: SceneSesionManager test RequestSceneSessionBackground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground02, Function | SmallTest | Level3)
 {
     bool isDelegator = false;
@@ -671,7 +671,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground02, Func
  * @tc.name: RequestSceneSessionBackground03
  * @tc.desc: SceneSesionManager test RequestSceneSessionBackground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground03, Function | SmallTest | Level3)
 {
     bool isDelegator = false;
@@ -693,7 +693,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground03, Func
  * @tc.name: RequestSceneSessionBackground04
  * @tc.desc: SceneSesionManager test RequestSceneSessionBackground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground04, Function | SmallTest | Level3)
 {
     bool isDelegator = true;
@@ -714,7 +714,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground04, Func
  * @tc.name: RequestSceneSessionDestruction01
  * @tc.desc: SceneSesionManager test RequestSceneSessionDestruction
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction01, Function | SmallTest | Level3)
 {
     bool needRemoveSession = false;
@@ -730,7 +730,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction01, Fun
  * @tc.name: RequestSceneSessionDestruction02
  * @tc.desc: SceneSesionManager test RequestSceneSessionDestruction
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction02, Function | SmallTest | Level3)
 {
     bool needRemoveSession = false;
@@ -801,7 +801,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, StartOrMinimizeUIAbilityBySCB2, Funct
  * @tc.name: RequestSceneSessionByCall01
  * @tc.desc: SceneSesionManager test RequestSceneSessionByCall
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall01, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -817,7 +817,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall01, Function
  * @tc.name: RequestSceneSessionByCall02
  * @tc.desc: SceneSesionManager test RequestSceneSessionByCall
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall02, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -835,7 +835,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall02, Function
  * @tc.name: RequestSceneSessionByCall03
  * @tc.desc: SceneSesionManager test RequestSceneSessionByCall
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall03, Function | SmallTest | Level3)
 {
     SessionInfo info;
@@ -850,11 +850,11 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall03, Function
 }
 
 /**
- * @tc.name: removeFailRecoveredSession
- * @tc.desc: removeFailRecoveredSession
+ * @tc.name: RemoveFailRecoveredSession
+ * @tc.desc: RemoveFailRecoveredSession
  * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerLifecycleTest, removeFailRecoveredSession, Function | SmallTest | Level3)
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest, RemoveFailRecoveredSession, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
@@ -869,7 +869,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, removeFailRecoveredSession, Function 
     ssm_->failRecoveredPersistentIdSet_.insert(1);
     ssm_->failRecoveredPersistentIdSet_.insert(2);
     ssm_->failRecoveredPersistentIdSet_.insert(3);
-    ssm_->removeFailRecoveredSession();
+    ssm_->RemoveFailRecoveredSession();
     EXPECT_EQ(ssm_->failRecoveredPersistentIdSet_.size(), 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
@@ -878,7 +878,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, removeFailRecoveredSession, Function 
  * @tc.name: ClearSession
  * @tc.desc: ClearSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, ClearSession, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -895,7 +895,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, ClearSession, Function | SmallTest | 
  * @tc.name: RegisterVisibilityChangedDetectFunc
  * @tc.desc: RegisterVisibilityChangedDetectFunc
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RegisterVisibilityChangedDetectFunc, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -915,7 +915,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RegisterVisibilityChangedDetectFunc, 
  * @tc.name: RecoveryVisibilityPidCount
  * @tc.desc: RecoveryVisibilityPidCount
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerLifecycleTest, RecoveryVisibilityPidCount, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);

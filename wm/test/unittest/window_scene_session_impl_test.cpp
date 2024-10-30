@@ -204,7 +204,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession03, Function
     ASSERT_NE(nullptr, option);
     option->SetWindowTag(WindowTag::SUB_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession03");
-    option->SetExtensionTag(true);
+    option->SetIsUIExtFirstSubWindow(true);
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
     
@@ -780,7 +780,6 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyRemoveStartingWindow, Function | Smal
     option->SetDisplayId(0);
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    ASSERT_NE(nullptr, window->property_);
     window->property_->SetPersistentId(1);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -791,7 +790,7 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyRemoveStartingWindow, Function | Smal
     window->NotifyRemoveStartingWindow();
 }
 
-/*
+/**
  * @tc.name: SetTransparent
  * @tc.desc: SetTransparent test
  * @tc.type: FUNC
@@ -1779,10 +1778,13 @@ HWTEST_F(WindowSceneSessionImplTest, SetGestureBackEnabled, Function | SmallTest
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetGestureBackEnabled(false));
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(true));
-    ASSERT_EQ(true, window->GetGestureBackEnabled());
     ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(false));
-    ASSERT_EQ(false, window->GetGestureBackEnabled());
+    bool enable = true;
+    ASSERT_EQ(WMError::WM_OK, window->GetGestureBackEnabled(enable));
+    ASSERT_EQ(false, enable);
+    ASSERT_EQ(WMError::WM_OK, window->SetGestureBackEnabled(true));
+    ASSERT_EQ(WMError::WM_OK, window->GetGestureBackEnabled(enable));
+    ASSERT_EQ(true, enable);
 }
 
 /*

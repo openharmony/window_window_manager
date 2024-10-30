@@ -1657,6 +1657,33 @@ HWTEST_F(DisplayManagerTest, Clear04, Function | SmallTest | Level1)
     DisplayManager::GetInstance().pImpl_->Clear();
     ASSERT_EQ(DisplayManager::GetInstance().pImpl_->powerEventListenerAgent_, nullptr);
 }
+
+/**
+ * @tc.name: GetScreenCapture
+ * @tc.desc: GetScreenCapture test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenCapture, Function | SmallTest | Level1)
+{
+    CaptureOption captureOption;
+    sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_NE(display, nullptr);
+    captureOption.displayId_ = display->GetId();
+    DmErrorCode errCode;
+    std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenCapture(captureOption,
+        &errCode);
+}
+
+/**
+ * @tc.name: GetPrimaryDisplaySync
+ * @tc.desc: GetPrimaryDisplaySync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetPrimaryDisplaySync, Function | SmallTest | Level1)
+{
+    sptr<Display> display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
+    ASSERT_NE(display, nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

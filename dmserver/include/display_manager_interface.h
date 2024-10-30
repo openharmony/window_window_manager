@@ -232,6 +232,18 @@ public:
     {
         return DMError::DM_OK;
     }
+
+    virtual std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr)
+    {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
+
+    virtual sptr<DisplayInfo> GetPrimaryDisplayInfo()
+    {
+        return nullptr;
+    }
 };
 } // namespace OHOS::Rosen
 

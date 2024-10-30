@@ -23,6 +23,7 @@
 #include "session_permission.h"
 #include "screen_rotation_property.h"
 #include "parameters.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -36,6 +37,7 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_FOLD_STATUS = "-f";
 
 constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
+constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
@@ -52,6 +54,7 @@ const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const std::string ARG_SET_ON_TENT_MODE = "-ontent";
 const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
 const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
+const std::string ARG_SET_SUPER_FOLD_STATUS = "-supertrans";
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -670,5 +673,34 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
         TLOGI(WmsLogTag::DMS, "SetHoverStatusChange: %{public}d", value);
     }
 }
+
+void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
+{
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_SUPER_FOLD_STATUS)) {
+        std::string valueStr = input.substr(commaPos + 1, SUPER_FOLD_STATUS_MAX);
+        if (valueStr.empty()) {
+            return;
+        }
+        if (valueStr.size() == 1 && !std::isdigit(valueStr[0])) {
+            return;
+        }
+        if (valueStr.size() == SUPER_FOLD_STATUS_MAX && !std::isdigit(valueStr[0])
+            && !std::isdigit(valueStr[1])) {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        if (value <=  static_cast<int32_t>(SuperFoldStatusChangeEvents::UNDEFINED) ||
+            value >= static_cast<int32_t>(SuperFoldStatusChangeEvents::INVALID)) {
+            TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
+            return;
+        }
+        SuperFoldStateManager::GetInstance().
+            HandleSuperFoldStatusChange(static_cast<SuperFoldStatusChangeEvents>(value));
+        TLOGI(WmsLogTag::DMS, "state: %{public}d, event: %{public}d",
+            SuperFoldStateManager::GetInstance().GetCurrentStatus(), value);
+    }
+}
+
 } // Rosen
 } // OHOS

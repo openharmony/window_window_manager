@@ -179,6 +179,11 @@ void WindowSessionProperty::SetFocusable(bool isFocusable)
     focusable_ = isFocusable;
 }
 
+void WindowSessionProperty::SetFocusableOnShow(bool isFocusableOnShow)
+{
+    focusableOnShow_ = isFocusableOnShow;
+}
+
 void WindowSessionProperty::SetTouchable(bool isTouchable)
 {
     touchable_ = isTouchable;
@@ -282,6 +287,11 @@ WindowType WindowSessionProperty::GetWindowType() const
 bool WindowSessionProperty::GetFocusable() const
 {
     return focusable_;
+}
+
+bool WindowSessionProperty::GetFocusableOnShow() const
+{
+    return focusableOnShow_;
 }
 
 bool WindowSessionProperty::GetTouchable() const
@@ -1018,7 +1028,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
         parcel.WriteUint32(requestRect_.height_) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
-        parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
+        parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
+        parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isSystemPrivacyMode_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
@@ -1043,7 +1054,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteInt32(realParentId_) &&
-        parcel.WriteBool(isExtensionFlag_) &&
+        parcel.WriteBool(isUIExtFirstSubWindow_) &&
         parcel.WriteBool(isUIExtensionAbilityProcess_) &&
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
@@ -1071,6 +1082,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetRequestRect(reqRect);
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetFocusable(parcel.ReadBool());
+    property->SetFocusableOnShow(parcel.ReadBool());
     property->SetTouchable(parcel.ReadBool());
     property->SetTokenState(parcel.ReadBool());
     property->SetTurnScreenOn(parcel.ReadBool());
@@ -1113,7 +1125,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCallingSessionId(parcel.ReadUint32());
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetRealParentId(parcel.ReadInt32());
-    property->SetExtensionFlag(parcel.ReadBool());
+    property->SetIsUIExtFirstSubWindow(parcel.ReadBool());
     property->SetIsUIExtensionAbilityProcess(parcel.ReadBool());
     property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
     property->SetParentWindowType(static_cast<WindowType>(parcel.ReadUint32()));
@@ -1142,7 +1154,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     requestRect_ = property->requestRect_;
     windowRect_ = property->windowRect_;
     type_ = property->type_;
-    focusable_= property->focusable_;
+    focusable_ = property->focusable_;
+    focusableOnShow_ = property->focusableOnShow_;
     touchable_ = property->touchable_;
     dragEnabled_ = property->dragEnabled_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
@@ -1508,14 +1521,14 @@ int32_t WindowSessionProperty::GetRealParentId() const
     return realParentId_;
 }
 
-void WindowSessionProperty::SetExtensionFlag(bool isExtensionFlag)
+void WindowSessionProperty::SetIsUIExtFirstSubWindow(bool isUIExtFirstSubWindow)
 {
-    isExtensionFlag_ = isExtensionFlag;
+    isUIExtFirstSubWindow_ = isUIExtFirstSubWindow;
 }
 
-bool WindowSessionProperty::GetExtensionFlag() const
+bool WindowSessionProperty::GetIsUIExtFirstSubWindow() const
 {
-    return isExtensionFlag_;
+    return isUIExtFirstSubWindow_;
 }
 
 void WindowSessionProperty::SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess)
@@ -1528,14 +1541,14 @@ bool WindowSessionProperty::GetIsUIExtensionAbilityProcess() const
     return isUIExtensionAbilityProcess_;
 }
 
-void WindowSessionProperty::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag)
+void WindowSessionProperty::SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow)
 {
-    isUIExtensionSubWindowFlag_ = isUIExtensionSubWindowFlag;
+    isUIExtAnySubWindow_ = isUIExtAnySubWindow;
 }
 
-bool WindowSessionProperty::GetIsUIExtensionSubWindowFlag() const
+bool WindowSessionProperty::GetIsUIExtAnySubWindow() const
 {
-    return isUIExtensionSubWindowFlag_;
+    return isUIExtAnySubWindow_;
 }
 
 void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)

@@ -864,6 +864,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPTURE: {
+            ProcGetScreenCapture(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_INFO: {
+            auto info = GetPrimaryDisplayInfo();
+            reply.WriteParcelable(info);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -963,5 +972,17 @@ void ScreenSessionManagerStub::ProcSetVirtualScreenSecurityExemption(MessageParc
     data.ReadUInt64Vector(&windowIdList);
     DMError ret = SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
     static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+}
+
+void ScreenSessionManagerStub::ProcGetScreenCapture(MessageParcel& data, MessageParcel& reply)
+{
+    CaptureOption option;
+    option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
+    option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
+    option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    std::shared_ptr<Media::PixelMap> capture = GetScreenCapture(option, &errCode);
+    reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
+    static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
 }
 } // namespace OHOS::Rosen

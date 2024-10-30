@@ -67,7 +67,6 @@ public:
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseAppMainWindowToTop() override;
-    WSError RemoveStartingWindow() override;
 
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
@@ -99,7 +98,6 @@ public:
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     
@@ -107,6 +105,11 @@ public:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
+
+     /*
+      * Starting Window
+      */
+    WSError RemoveStartingWindow() override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

@@ -31,6 +31,7 @@
 #include "occupied_area_change_info.h"
 #include "window_visibility_info.h"
 #include "pattern_detach_callback_interface.h"
+#include "vsync_station.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -47,6 +48,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSTransaction;
 class RSSyncTransactionController;
+class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     const SizeChangeReason reason, const DisplayId displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
@@ -87,6 +89,7 @@ using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
     const bool newIsVisible)>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
+using RequestVsyncFunc = std::function<void(std::shared_ptr<VsyncCallback>& callback)>;
 
 class ILifecycleListener {
 public:
@@ -144,7 +147,6 @@ public:
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError DrawingCompleted() override;
-    WSError RemoveStartingWindow() override;
     void ResetSessionConnectState();
     void ResetIsActive();
 
@@ -197,6 +199,7 @@ public:
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     void SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want);
+    void SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions);
     void ResetSessionInfoResultCode();
     void SetSessionInfoPersistentId(int32_t persistentId);
     void SetSessionInfoCallerPersistentId(int32_t callerPersistentId);
@@ -224,8 +227,6 @@ public:
     WSRect GetLayoutRect() const;
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
-    void SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow);
-    bool GetEnableRemoveStartingWindow() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -343,7 +344,7 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
-    
+
     /*
      * Window Rotate Animation
      */
@@ -358,7 +359,7 @@ public:
     bool GetFocusable() const;
     void SetFocusedOnShow(bool focusedOnShow); // Used when creating ability
     bool IsFocusedOnShow() const;
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override; // Used when showing window
+    WSError SetFocusableOnShow(bool isFocusableOnShow); // Used when showing window
     bool IsFocusableOnShow() const;
     virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
@@ -472,6 +473,8 @@ public:
     // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
+    bool GetIsPendingToBackgroundState() const;
+    void SetIsPendingToBackgroundState(bool isPendingToBackgroundState);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
@@ -498,12 +501,20 @@ public:
     void SetMainSessionUIStateDirty(bool dirty);
     bool GetUIStateDirty() const;
     void ResetDirtyFlags();
+    void ResetDragDirtyFlags();
     static bool IsScbCoreEnabled();
     static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
+
+    /*
+     * Starting Window
+     */
+    WSError RemoveStartingWindow() override;
+    void SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow);
+    bool GetEnableRemoveStartingWindow() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -625,6 +636,8 @@ protected:
      */
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
 
+    RequestVsyncFunc requestNextVsyncFunc_;
+
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
@@ -661,7 +674,10 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
-    uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
+    // only accessed on SSM thread
+    uint32_t dirtyFlags_ = 0;
+    bool isNeedSyncSessionRect_ { true }; // where need sync to session rect,  currently use in split drag
+
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
     static bool isScbCoreEnabled_;
@@ -691,6 +707,8 @@ private:
      */
     void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
     void InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property);
+
+    void UpdateGravityWhenUpdateWindowMode(WindowMode mode);
 
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
@@ -727,7 +745,7 @@ private:
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
-    bool enableRemoveStartingWindow_ {false};
+
     /*
      * Multi Window
      */
@@ -748,13 +766,19 @@ private:
     bool systemTouchable_ { true };
     std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
-    std::atomic<bool> isAttach_{ false };
+    std::atomic<bool> isAttach_ { false };
+    std::atomic<bool> isPendingToBackgroundState_ { false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
+
+    /*
+     * Starting Window
+     */
+    bool enableRemoveStartingWindow_ {false};
 };
 } // namespace OHOS::Rosen
 

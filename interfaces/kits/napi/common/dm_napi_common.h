@@ -26,6 +26,7 @@
 #include "js_native_api_types.h"
 #include "window_manager_hilog.h"
 #include "dm_common.h"
+#include "napi/native_api.h"
 
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, OHOS::Rosen::HILOG_DOMAIN_WINDOW,
                                                 "NapiWindowManagerCommonLayer" };
@@ -164,7 +165,7 @@ napi_value AsyncProcess(napi_env env,
         }
         return nullptr;
     }
-    if (!NAPICall(env, napi_queue_async_work(env, info->asyncWork))) {
+    if (!NAPICall(env, napi_queue_async_work_with_qos(env, info->asyncWork, napi_qos_user_initiated))) {
         delete info;
         if (callbackRef != nullptr) {
             static_cast<void>(napi_delete_reference(env, callbackRef));

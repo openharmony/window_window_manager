@@ -76,10 +76,10 @@ void GestureNavigationEnabledTest::TearDown()
 
 namespace {
 /**
-* @tc.name: SetGestureNavigationEnabled
-* @tc.desc: Check gesture navigation enabled
-* @tc.type: FUNC
-*/
+ * @tc.name: SetGestureNavigationEnabled
+ * @tc.desc: Check gesture navigation enabled
+ * @tc.type: FUNC
+ */
 HWTEST_F(GestureNavigationEnabledTest, SetGestureNavigationEnabled, Function | MediumTest | Level1)
 {
     ASSERT_NE(lisenter_, nullptr);
