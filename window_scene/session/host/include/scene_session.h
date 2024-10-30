@@ -198,6 +198,8 @@ public:
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
+    bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
+        bool canStartAbilityFromBackground);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
