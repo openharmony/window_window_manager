@@ -374,7 +374,6 @@ public:
     /*
      * Window Rotation
      */
-    NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
 
     /*
@@ -746,6 +745,11 @@ private:
      * Window Visibility
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
+
+    /*
+     * Window Rotation
+     */
+    NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
