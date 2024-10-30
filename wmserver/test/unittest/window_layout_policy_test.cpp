@@ -1392,7 +1392,7 @@ HWTEST_F(WindowLayoutPolicyTest, AdjustFixedOrientationRSSurfaceNode, Function |
 HWTEST_F(WindowLayoutPolicyTest, IsTileRectSatisfiedWithSizeLimits, Function | SmallTest | Level2)
 {
     sptr<WindowNode> windowNode = nullptr;
-    auto result = layoutPolicyTile_ -> IsTileRectSatisfiedWithSizeLimits(windowNode);
+    auto result = layoutPolicyTile_->IsTileRectSatisfiedWithSizeLimits(windowNode);
     ASSERT_EQ(true, result);
 }
 

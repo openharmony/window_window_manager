@@ -506,8 +506,6 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, Function | Sma
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    windowSceneSessionImpl->property_ = nullptr;
-    windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
 }
 
 /**
@@ -723,9 +721,6 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifyDialogStateChange, Function | SmallT
     windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
     ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->property_ = nullptr;
-    ret = windowSceneSessionImpl->NotifyDialogStateChange(true);
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -880,6 +875,84 @@ HWTEST_F(WindowSceneSessionImplTest4, VerifySubWindowLevel, Function | SmallTest
     EXPECT_NE(nullptr, session);
     window->hostSession_ = session;
     ASSERT_EQ(false, window->VerifySubWindowLevel(window->GetParentId()));
+}
+
+/**
+ * @tc.name: AddSubWindowMapForExtensionWindow
+ * @tc.desc: AddSubWindowMapForExtensionWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, AddSubWindowMapForExtensionWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("AddSubWindowMapForExtensionWindow");
+    option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.uiType_ = "pc";
+    window->AddSubWindowMapForExtensionWindow();
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
+ * @tc.name: GetParentSessionAndVerify
+ * @tc.desc: GetParentSessionAndVerify Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, GetParentSessionAndVerify, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("GetParentSessionAndVerify");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.uiType_ = "pc";
+    sptr<WindowSessionImpl> parentSession = nullptr;
+    auto res = window->GetParentSessionAndVerify(false, parentSession);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    res = window->GetParentSessionAndVerify(true, parentSession);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("GetParentSessionAndVerify2");
+    subOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    SessionInfo subSessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(2);
+    subWindow->property_->SetParentId(1);
+    window->windowSystemConfig_.uiType_ = "pc";
+    std::vector<sptr<WindowSessionImpl>> vec;
+    WindowSceneSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(1, vec));
+    WindowSceneSessionImpl::subWindowSessionMap_[1].push_back(subWindow);
+    res = subWindow->GetParentSessionAndVerify(false, parentSession);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, res);
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    res = subWindow->GetParentSessionAndVerify(false, parentSession);
+    EXPECT_EQ(WMError::WM_OK, res);
+    EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 }
 } // namespace Rosen

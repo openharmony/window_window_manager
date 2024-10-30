@@ -2007,8 +2007,10 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
         displayInfo->GetScreenId(), displayInfo->GetRotation());
+    IPCSkeleton::SetCallingIdentity(identity);
 }
 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
@@ -2038,7 +2040,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             }
             sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
             TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
-            screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
+            {
+                std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+                screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
+            }
             NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
             NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
             return;
@@ -2049,8 +2054,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             screenId);
         return;
     }
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
-
+    {
+        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+        screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
+    }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
@@ -4781,7 +4788,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
         }
         clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
     };
-    taskScheduler_->PostAsyncTask(task, "ProxyForUnFreeze NotifyDisplayChanged", delayTime);
+    taskScheduler_->PostAsyncTask(task, "clientProxy_ SwitchUserCallback task", delayTime);
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
@@ -4999,7 +5006,11 @@ void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
         return;
     }
     for (auto& agent : agents) {
-        agent->NotifyAvailableAreaChanged(area);
+        int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER)) {
+            agent->NotifyAvailableAreaChanged(area);
+        }
     }
 }
 

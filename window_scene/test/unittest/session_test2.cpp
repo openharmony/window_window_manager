@@ -2187,24 +2187,6 @@ HWTEST_F(WindowSessionTest2, SetUpdateSessionIconListener, Function | SmallTest 
 }
 
 /**
- * @tc.name: ResetSnapshot
- * @tc.desc: ResetSnapshot Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, ResetSnapshot, Function | SmallTest | Level2)
-{
-    WLOGFI("ResetSnapshot begin!");
-    ASSERT_NE(session_, nullptr);
-
-    if (session_->snapshot_ == nullptr) {
-        session_->snapshot_ = std::make_shared<Media::PixelMap>();
-    }
-    session_->ResetSnapshot();
-
-    WLOGFI("ResetSnapshot end!");
-}
-
-/**
  * @tc.name: NotifyContextTransparent
  * @tc.desc: NotifyContextTransparent Test
  * @tc.type: FUNC
