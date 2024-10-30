@@ -2089,22 +2089,9 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is null", where);
                 return;
             }
-            auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->GetDisplayId());
-            if (display == nullptr) {
-                TLOGNE(WmsLogTag::DEFAULT, "%{public}s get display failed displayId: %{public}" PRIu64,
-                    where, window->GetDisplayId());
-                return;
-            }
-            auto displayInfo = display->GetDisplayInfo();
-            if (displayInfo == nullptr) {
-                TLOGNE(WmsLogTag::DEFAULT, "%{public}s get display info failed displayId: %{public}" PRIu64,
-                    where, window->GetDisplayId());
-                return;
-            }
-            float vpr = display->GetVirtualPixelRatio();
-            if (MathHelper::NearZero(vpr)) {
-                TLOGNE(WmsLogTag::DEFAULT, "%{public}s failed, because of wrong vpr: %{public}f",
-                    where, vpr);
+            float vpr = 0.f;
+            auto err = window->GetVirtualPixelRatio(vpr);
+            if (err != WMError::WM_OK) {
                 return;
             }
             TitleButtonRect titleButtonRect;
