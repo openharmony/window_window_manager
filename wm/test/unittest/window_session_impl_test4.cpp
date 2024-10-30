@@ -20,6 +20,7 @@
 #include "accessibility_event_info.h"
 #include "color_parser.h"
 #include "mock_session.h"
+#include "window_accessibility_controller.h"
 #include "window_helper.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
@@ -2064,6 +2065,13 @@ HWTEST_F(WindowSessionImplTest4, ClearListenersById_switchFreeMultiWindowListene
     window_->ClearListenersById(persistentId);
     ASSERT_EQ(window_->switchFreeMultiWindowListeners_.find(persistentId),
               window_->switchFreeMultiWindowListeners_.end());
+
+    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
+    sleep(1);
+    WindowAccessibilityController::GetInstance().SetAnchorOffset(0, 0);
+    sleep(1);
+    WindowAccessibilityController::GetInstance().OffWindowZoom();
+    sleep(1);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_switchFreeMultiWindowListeners end";
 }
