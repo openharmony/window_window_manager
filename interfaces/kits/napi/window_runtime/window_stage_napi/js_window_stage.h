@@ -65,7 +65,7 @@ private:
     napi_value OnSetShowOnLockScreen(napi_env env, napi_callback_info info);
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
     napi_value OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info);
-    static napi_value OnRemoveStartingWindow(napi_env env, napi_callback_info info);
+    napi_value OnRemoveStartingWindow(napi_env env, napi_callback_info info);
 
     std::weak_ptr<WindowScene> windowScene_;
 };

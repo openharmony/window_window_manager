@@ -381,7 +381,7 @@ public:
  * @class IWindowVisibilityChangedListener
  *
  * @brief Listener to observe one window visibility changed.
-*/
+ */
 class IWindowVisibilityChangedListener : virtual public RefBase {
 public:
     virtual void OnWindowVisibilityChangedCallback(const bool isVisible) {};
@@ -392,7 +392,7 @@ using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
-*/
+ */
 class IWindowNoInteractionListener : virtual public RefBase {
 public:
     /**
@@ -754,7 +754,7 @@ public:
      * @param isTopmost whether main window is topmost
      * @return WMError
      */
-    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_OK; }
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief Get whether main window is topmost
      *
@@ -1750,6 +1750,13 @@ public:
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
 
     /**
+     * @brief Is pc window or pad free multi-window.
+     *
+     * @return True means pc window or pad free multi-window, false means the opposite.
+     */
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
@@ -2076,6 +2083,17 @@ public:
     }
 
     /**
+     * @brief Hide the display content when snapshot.
+     *
+     * @param needHide bool.
+     * @return WMError
+     */
+    virtual WMError HidePrivacyContentForHost(bool needHide)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Set the modality of window.
      *
      * @param isModal bool.
@@ -2247,6 +2265,14 @@ public:
     }
 
     /**
+     * @brief Flush layout size.
+     *
+     * @param width The width after layout
+     * @param height The height after layout
+     */
+    virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
+    /**
      * @brief get callingWindow windowStatus.
      * @param windowStatus
      * @return WM_OK means set success, others means set Failed.
@@ -2369,18 +2395,18 @@ public:
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
-     * @brief Get IsUIExtensionFlag of window.
+     * @brief Get isUIExtFirstSubWindow flag
      *
-     * @return true - is UIExtension window, flase - is not UIEXtension window.
+     * @return true - is the first sub window of UIExtension, false - is not the first sub window of UIExtension
      */
-    virtual bool GetIsUIExtensionFlag() const { return false; }
+    virtual bool GetIsUIExtFirstSubWindow() const { return false; }
 
     /**
-     * @brief Get IsUIExtensionSubWindowFlag of window.
+     * @brief Get whether this window is a sub window of any level of UIExtension.
      *
      * @return true - is UIExtension sub window, false - is not UIExtension sub window.
      */
-    virtual bool GetIsUIExtensionSubWindowFlag() const { return false; }
+    virtual bool GetIsUIExtAnySubWindow() const { return false; }
 
     /**
      * @brief Set whether to enable gesture back.
@@ -2390,11 +2416,11 @@ public:
     virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
 
     /**
-     * @brief Get whether the gesture back is enabled or not.
-     *
-     * @return the value true means to enable gesture back, and false means the opposite.
+     * @brief Get whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
      */
-    virtual bool GetGestureBackEnabled() const { return true; }
+    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
 };
 }
 }

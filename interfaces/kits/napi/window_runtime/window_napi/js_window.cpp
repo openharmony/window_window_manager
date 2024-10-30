@@ -2518,11 +2518,9 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
     bool isDockHoverShown = true;
     if (argc > 0 && !ConvertFromJsValue(env, argv[INDEX_ZERO], isTitleHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isTitleHoverShown parameter");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (argc > 1 && !ConvertFromJsValue(env, argv[INDEX_ONE], isDockHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isDockHoverShown parameter");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     const char* const funcName = __func__;
     NapiAsyncTask::CompleteCallback complete =
@@ -3700,6 +3698,10 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]device not support");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]not allowed since window is not main window");
@@ -6485,8 +6487,7 @@ bool JsWindow::CheckWindowMaskParams(napi_env env, napi_value jsObject)
     WindowLimits windowLimits;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowLimits(windowLimits));
     if (ret == WmErrorCode::WM_OK) {
-        if (size == 0 ||
-            static_cast<float>(size) * windowLimits.vpRatio_ > static_cast<float>(windowLimits.maxWidth_)) {
+        if (size == 0 || size > windowLimits.maxWidth_) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid windowMask size:%{public}u, vpRatio:%{public}f, maxWidth:%{public}u",
                 size, windowLimits.vpRatio_, windowLimits.maxWidth_);
             return false;
@@ -6779,45 +6780,66 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != INDEX_ONE) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+    if (argc < INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "argc is invalid: %{public}zu.", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    bool enabled = true;
+    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &enabled) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to enabled.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
-        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]set failed since invalid window type");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
-    }
-    bool enable = true;
-    napi_get_value_bool(env, argv[INDEX_ZERO], &enable);
-    TLOGI(WmsLogTag::WMS_IMMS, "[NAPI]enable: %{public}d", enable);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetGestureBackEnabled(enable));
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d", ret);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
-    }
-    return NapiGetUndefined(env);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr.");
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        if (!WindowHelper::IsMainWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "invalid window type.");
+            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetGestureBackEnabled(enabled));
+    };
+    auto complete = [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "set failed, ret = %{public}d.", *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set failed."));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetGestureBackEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
 }
- 
+
 napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
-        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "[NAPI] get failed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    bool isEnabled = windowToken_->GetGestureBackEnabled();
+    bool enable = true;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetGestureBackEnabled(enable));
+    if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
+        TLOGE(WmsLogTag::WMS_IMMS, "device is not support.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    } else if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret = %{public}d", ret);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
     TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s], enable = %{public}u",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isEnabled);
-    return CreateJsValue(env, isEnabled);
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enable);
+    return CreateJsValue(env, enable);
 }
 
 static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::string& windowName,
@@ -6827,6 +6849,12 @@ static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::s
         TLOGE(WmsLogTag::WMS_SUB, "window is null");
         task.Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "window is null"));
+        return;
+    }
+    if (windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowOption is null");
+        task.Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "windowOption is null"));
         return;
     }
     if (!WindowHelper::IsSubWindow(windowToken->GetType()) &&
@@ -6877,14 +6905,15 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     sptr<WindowOption> windowOption = new WindowOption();
-    if (windowOption == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "window option is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY));
-        return NapiGetUndefined(env);
-    }
     if (!ParseSubWindowOptions(env, argv[1], windowOption)) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to options");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    if ((windowOption->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
         return NapiGetUndefined(env);
     }
     if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -7032,7 +7061,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "requestFocus", moduleName, JsWindow::RequestFocus);
     BindNativeFunction(env, object, "createSubWindowWithOptions", moduleName, JsWindow::CreateSubWindowWithOptions);
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
-    BindNativeFunction(env, object, "getGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
+    BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
 }
 }  // namespace Rosen
 }  // namespace OHOS

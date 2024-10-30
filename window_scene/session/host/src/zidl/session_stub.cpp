@@ -210,8 +210,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyFrameLayoutFinish(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocus(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOCUSABLE_ON_SHOW):
-            return HandleSetFocusableOnShow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
@@ -382,6 +380,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetCompatibleModeEnableInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
+        reply.WriteBool(property->GetDragEnabled());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -406,7 +405,7 @@ int SessionStub::HandleDrawingCompleted(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Called!");
-    const WSError errCode = RemoveStartingWindow();
+    WSError errCode = RemoveStartingWindow();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -451,9 +450,17 @@ int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& rep
 
 int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply)
 {
-    bool isTitleHoverShown = data.ReadBool();
-    bool isDockHoverShown = data.ReadBool();
-    TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShown, isDockHoverShown: %{public}d, %{public}d",
+    bool isTitleHoverShown = true;
+    if (!data.ReadBool(isTitleHoverShown)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isTitleHoverShown failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool isDockHoverShown = true;
+    if (!data.ReadBool(isDockHoverShown)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isDockHoverShown failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d",
         isTitleHoverShown, isDockHoverShown);
     WSError errCode = OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -604,6 +611,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadBool(abilitySessionInfo->isFromIcon)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromIcon failed.");
+        return ERR_INVALID_DATA;
+    }
     bool hasStartWindowOption = false;
     if (!data.ReadBool(hasStartWindowOption)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");
@@ -636,6 +647,11 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     uint32_t changeReason = 0;
     if (!data.ReadUint32(changeReason)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read changeReason failed");
+        return ERR_INVALID_DATA;
+    }
+    if (changeReason < static_cast<uint32_t>(SizeChangeReason::UNDEFINED) ||
+        changeReason > static_cast<uint32_t>(SizeChangeReason::END)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Unknown reason");
         return ERR_INVALID_DATA;
     }
     SizeChangeReason reason = static_cast<SizeChangeReason>(changeReason);
@@ -746,7 +762,10 @@ int SessionStub::HandleGetGlobalMaximizeMode(MessageParcel& data, MessageParcel&
 
 int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
 {
-    bool status = static_cast<bool>(data.ReadUint32());
+    bool status = false;
+    if (!data.ReadBool(status)) {
+        return ERR_INVALID_DATA;
+    }
     WLOGFD("HandleNeedAvoid status:%{public}d", static_cast<int32_t>(status));
     WSError errCode = OnNeedAvoid(status);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -755,8 +774,14 @@ int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply)
 {
-    AvoidAreaType type = static_cast<AvoidAreaType>(data.ReadUint32());
-    WLOGFD("HandleGetAvoidArea type:%{public}d", static_cast<int32_t>(type));
+    uint32_t typeId = 0;
+    if (!data.ReadUint32(typeId) ||
+        typeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+        typeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+        return ERR_INVALID_DATA;
+    }
+    AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
+    WLOGFD("HandleGetAvoidArea type:%{public}d", typeId);
     AvoidArea avoidArea = GetAvoidAreaByType(type);
     reply.WriteParcelable(&avoidArea);
     return ERR_NONE;
@@ -906,7 +931,7 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
     int32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    int32_t reason = 0;
+    uint32_t reason = 0;
     if (!data.ReadInt32(posX)) {
         TLOGE(WmsLogTag::WMS_PIP, "read posX error");
         return ERR_INVALID_DATA;
@@ -924,8 +949,12 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     Rect rect = {posX, posY, width, height};
-    if (!data.ReadInt32(reason)) {
+    if (!data.ReadUint32(reason)) {
         TLOGE(WmsLogTag::WMS_PIP, "read reason error");
+        return ERR_INVALID_DATA;
+    }
+    if (reason > static_cast<uint32_t>(SizeChangeReason::END)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Unknown reason");
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdatePiPRect(rect, static_cast<SizeChangeReason>(reason));
@@ -939,6 +968,15 @@ int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel
     uint32_t controlType = 0;
     int32_t status = 0;
     if (data.ReadUint32(controlType) && data.ReadInt32(status)) {
+        if (controlType > static_cast<uint32_t>(WsPiPControlType::END)) {
+            TLOGE(WmsLogTag::WMS_PIP, "Unknown controlType");
+            return ERR_INVALID_DATA;
+        }
+        if (status > static_cast<int32_t>(WsPiPControlStatus::PLAY) ||
+            status < static_cast<int32_t>(WsPiPControlStatus::DISABLED)) {
+            TLOGE(WmsLogTag::WMS_PIP, "Unknown status");
+            return ERR_INVALID_DATA;
+        }
         WSError errCode = UpdatePiPControlStatus(static_cast<WsPiPControlType>(controlType),
             static_cast<WsPiPControlStatus>(status));
         reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -1084,6 +1122,11 @@ int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel
         TLOGE(WmsLogTag::DEFAULT, "read action error");
         return ERR_INVALID_DATA;
     }
+    if (actionValue < static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RECT) ||
+        actionValue > static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST)) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid action");
+        return ERR_INVALID_DATA;
+    }
     auto action = static_cast<WSPropertyChangeAction>(actionValue);
     TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
     sptr<WindowSessionProperty> property = nullptr;
@@ -1136,19 +1179,6 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     WSError ret = RequestFocus(isFocused);
-    reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleSetFocusableOnShow(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_FOCUS, "in");
-    bool isFocusableOnShow = true;
-    if (!data.ReadBool(isFocusableOnShow)) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocusableOnShow failed");
-        return ERR_INVALID_DATA;
-    }
-    WSError ret = SetFocusableOnShow(isFocusableOnShow);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

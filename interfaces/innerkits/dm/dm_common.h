@@ -355,6 +355,33 @@ enum class FoldStatus: uint32_t {
 };
 
 /**
+ * @brief Enumerates the super fold state change events.
+ */
+enum class SuperFoldStatusChangeEvents : uint32_t {
+    UNDEFINED = 0,
+    ANGLE_CHANGE_EXPANDED,
+    ANGLE_CHANGE_HALF_FOLDED,
+    ANGLE_CHANGE_FOLDED,
+    KEYBOARD_ON,
+    KEYBOARD_OFF,
+    SOFT_KEYBOARD_ON,
+    SOFT_KEYBOARD_OFF,
+    INVALID,
+};
+
+/**
+ * @brief Enumerates the super fold state.
+ */
+enum class SuperFoldStatus : uint32_t {
+    UNKNOWN,
+    FOLDED,
+    HALF_FOLDED,
+    EXPANDED,
+    KEYBOARD,
+    SOFT_KEYBOARD,
+};
+
+/**
  * @brief Enumerates the fold display mode.
  */
 enum class FoldDisplayMode: uint32_t {
@@ -395,6 +422,12 @@ struct SupportedScreenModes : public RefBase {
     uint32_t width_;
     uint32_t height_;
     uint32_t refreshRate_;
+};
+
+struct CaptureOption {
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    bool isNeedNotify_ = true;
+    bool isNeedPointer_ = true;
 };
 
 struct ExpandOption {

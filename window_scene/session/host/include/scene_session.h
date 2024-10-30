@@ -18,6 +18,7 @@
 
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
+#include "vsync_station.h"
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
@@ -32,6 +33,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 }
 
 class SceneSession;
+
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
@@ -125,12 +127,10 @@ public:
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
-        NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         ClearCallbackMapFunc clearCallbackFunc_;
-        NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
         NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
@@ -161,6 +161,7 @@ public:
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
+    void SetNeedSyncSessionRect(bool needSync);
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
@@ -172,6 +173,7 @@ public:
     virtual SessionGravity GetKeyboardGravity() const { return SessionGravity::SESSION_GRAVITY_DEFAULT; };
     virtual void OnKeyboardPanelUpdated() {};
     virtual void OnCallingSessionUpdated() {};
+    virtual uint32_t GetCallingSessionId() { return INVALID_SESSION_ID; };
     bool GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
         uint32_t& screenWidth, uint32_t& screenHeight);
     bool GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
@@ -196,6 +198,8 @@ public:
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
+    bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
+        bool canStartAbilityFromBackground);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
@@ -232,6 +236,7 @@ public:
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
+    void RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback);
 
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -241,7 +246,8 @@ public:
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
-
+    // Provide the ability to prohibit dragging for scb
+    WMError SetWindowEnableDragBySystem(bool enableDrag);
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
@@ -340,6 +346,7 @@ public:
     bool IsFloatingWindowAppType() const;
     bool IsNeedDefaultAnimation() const;
     bool IsDirtyWindow();
+    bool IsDirtyDragWindow();
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
     void SetStartingWindowExitAnimationFlag(bool enable);
@@ -366,6 +373,11 @@ public:
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /*
+     * Window Rotation
+     */
+    void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
 
     /*
      * Window Visibility
@@ -404,8 +416,6 @@ public:
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 
-    static const wptr<SceneSession> GetEnterWindow();
-    static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
     static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
@@ -456,7 +466,12 @@ public:
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
     void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
+
+    /*
+     * Window ZOrder: PC
+     */
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
+    void PcUpdateZOrderAndDirty(const uint32_t zOrder);
 
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
@@ -464,6 +479,14 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
+
+    void SetRequestNextVsyncFunc(const RequestVsyncFunc& func);
+    void OnNextVsyncDragReceived();
+
+    /*
+     * Window Layout
+     */
+    void ResetSizeChangeReasonIfDirty();
 
     /*
      * Gesture Back
@@ -515,6 +538,11 @@ protected:
      * Window Hierarchy
      */
     NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
+
+    /*
+     * PiP Window
+     */
+    NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -571,6 +599,7 @@ private:
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason);
+    void UpdateRectForDrag(WSRect& rect);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -645,8 +674,6 @@ private:
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
-    static wptr<SceneSession> enterSession_;
-    static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     mutable std::mutex sessionChangeCbMutex_;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
@@ -671,14 +698,14 @@ private:
     int32_t customDecorHeight_ = 0;
 
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
-    std::string clientIdentityToken_ = { "" };
-    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
     std::atomic_bool isTemporarilyShowWhenLocked_ { false };
     std::shared_mutex modalUIExtensionInfoListMutex_;
     std::vector<ExtensionWindowEventInfo> modalUIExtensionInfoList_;
     mutable std::shared_mutex uiExtNodeIdToPersistentIdMapMutex_;
     std::map<uint64_t, int32_t> uiExtNodeIdToPersistentIdMap_;
+    std::string clientIdentityToken_ = { "" };
+    SessionChangeByActionNotifyManagerFunc sessionChangeByActionNotifyManagerFunc_;
 
     bool isAddBlank_ = false;
     bool bufferAvailableCallbackEnable_ = false;
@@ -721,6 +748,11 @@ private:
      * Window Visibility
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
+
+    /*
+     * Window Rotation
+     */
+    NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

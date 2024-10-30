@@ -15,24 +15,12 @@
 
 #include "picture_in_picture_controller.h"
 
-#include <event_handler.h>
 #include <refbase.h>
-#include <power_mgr_client.h>
 #include <transaction/rs_sync_transaction_controller.h>
 #include "picture_in_picture_manager.h"
-#include "picture_in_picture_option.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
-#include "window.h"
-#include "wm_common.h"
 #include "singleton_container.h"
-#include "datashare_predicates.h"
-#include "datashare_result_set.h"
-#include "datashare_helper.h"
-#include "iservice_registry.h"
-#include "result_set.h"
-#include "system_ability_definition.h"
-#include "uri.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -71,6 +59,10 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 
 PictureInPictureController::~PictureInPictureController()
 {
+    TLOGI(WmsLogTag::WMS_PIP, "Destruction");
+    if (!isAutoStartEnabled_) {
+        return;
+    }
     PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
 }
 
@@ -172,7 +164,6 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
 WMError PictureInPictureController::StartPictureInPicture(StartPipType startType)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    std::lock_guard<std::mutex> lock(mutex_);
     if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -275,8 +266,7 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
 
 WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType, bool withAnim)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u anim: %{public}d", destroyWindow, withAnim);
-    std::lock_guard<std::mutex> lock(mutex_);
+    TLOGI(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u anim: %{public}d", destroyWindow, withAnim);
     if ((!isStoppedFromClient_ && curState_ == PiPWindowState::STATE_STOPPING) ||
         curState_ == PiPWindowState::STATE_STOPPED) {
         TLOGE(WmsLogTag::WMS_PIP, "Repeat stop request, curState: %{public}u", curState_);

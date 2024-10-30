@@ -26,7 +26,7 @@ std::recursive_mutex g_instanceMutex;
 
 ScreenSessionManagerLite::~ScreenSessionManagerLite()
 {
-    TLOGD(WmsLogTag::DMS, "ScreenSessionManagerLite destroy");
+    TLOGD(WmsLogTag::DMS, "destroy");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     destroyed_ = true;
 }

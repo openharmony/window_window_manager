@@ -2658,8 +2658,8 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea03, Function | SmallTest |
 HWTEST_F(ScreenSessionManagerTest, NotifyAvailableAreaChanged01, Function | SmallTest | Level3)
 {
     DMRect area = DMRect{};
-    ssm_->NotifyAvailableAreaChanged(area);
     ASSERT_NE(ssm_, nullptr);
+    ssm_->NotifyAvailableAreaChanged(area);
 }
 
 /**
@@ -2742,9 +2742,10 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, Function | SmallTest | Leve
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, Function | SmallTest | Level3)
 {
-    ScreenId screenId = 1050;
+    ScreenId screenId = 2000;
+    ASSERT_EQ(ssm_->GetScreenSession(screenId), nullptr);
     auto ret = ssm_->GetScreenProperty(screenId);
-    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(sizeof(ret), sizeof(ScreenProperty));
 }
 
 /**
@@ -2758,7 +2759,8 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, Function | SmallTest | L
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ssm_->screenSessionMap_[screenId] = screenSession;
-    auto ret = ssm_->GetScreenProperty(screenId);
+    ScreenProperty property = ssm_->GetScreenProperty(screenId);
+    ASSERT_EQ(sizeof(property), sizeof(screenSession->property_));
 }
 
 /**
@@ -3080,6 +3082,74 @@ HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, Function | SmallTest | L
     ASSERT_EQ(ssm->isCoordinationFlag_, false);
     ssm->SetCoordinationFlag(true);
     ASSERT_EQ(ssm->isCoordinationFlag_, true);
+}
+
+/**
+ * @tc.name: GetTentMode
+ * @tc.desc: Test get tent mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetTentMode, Function | SmallTest | Level1)
+{
+    auto tentMode = ssm_->GetTentMode();
+    ASSERT_EQ(tentMode, false);
+}
+
+/**
+ * @tc.name: OnTentModeChanged
+ * @tc.desc: Test change tent mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnTentModeChanged, Function | SmallTest | Level1)
+{
+    bool isTentMode = false;
+    ssm_->OnTentModeChanged(isTentMode);
+    ASSERT_EQ(ssm_->GetTentMode(), false);
+}
+/**
+ * @tc.name: GetScreenCapture
+ * @tc.desc: GetScreenCapture
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenCapture, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    CaptureOption option;
+    option.displayId_ = 0;
+    DmErrorCode errCode;
+    std::shared_ptr<Media::PixelMap> bitMap = ssm->GetScreenCapture(option, &errCode);
+    if (errCode == DmErrorCode::DM_OK) {
+        ASSERT_NE(bitMap, nullptr);
+    } else {
+        ASSERT_EQ(bitMap, nullptr);
+    }
+}
+
+/**
+ * @tc.name: OnScreenCaptureNotify
+ * @tc.desc: OnScreenCaptureNotify
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnScreenCaptureNotify, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    ScreenId screenId = 0;
+    int32_t uid = 0;
+    std::string clientName = "test";
+    ssm->OnScreenCaptureNotify(screenId, uid, clientName);
+}
+
+/**
+ * @tc.name: GetPrimaryDisplayInfo
+ * @tc.desc: GetPrimaryDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_NE(ssm_->GetPrimaryDisplayInfo(), nullptr);
 }
 }
 } // namespace Rosen

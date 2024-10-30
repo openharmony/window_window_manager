@@ -122,6 +122,33 @@ HWTEST_F(SensorFoldStateManagerTest, NotifyReportFoldStatusToScb, Function | Sma
     mgr.NotifyReportFoldStatusToScb(currentStatus, nextStatus, postureAngle);
     ASSERT_EQ(mgr.GetCurrentState(), FoldStatus::UNKNOWN);
 }
+
+/**
+ * @tc.name: IsTentMode
+ * @tc.desc: IsTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, IsTentMode, Function | SmallTest | Level1)
+{
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    mgr.isTentMode_ = true;
+    bool ret = mgr.IsTentMode();
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SetTentMode
+ * @tc.desc: SetTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, SetTentMode, Function | SmallTest | Level1)
+{
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    mgr.isTentMode_ = false;
+    mgr.SetTentMode(false);
+    bool ret = mgr.IsTentMode();
+    ASSERT_EQ(ret, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

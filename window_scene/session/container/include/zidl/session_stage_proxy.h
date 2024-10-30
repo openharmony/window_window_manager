@@ -75,6 +75,7 @@ public:
     void NotifySessionFullScreen(bool fullScreen) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     WSError SetSplitButtonVisible(bool isVisible) override;
+    WSError SetEnableDragBySystem(bool dragEnable) override;
 
 private:
     bool ReadSmallStringVectorFromParcel(

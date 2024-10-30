@@ -308,6 +308,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetCompatibleModeEnableInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetAppInstanceKey(reply.ReadString());
+        property->SetDragEnabled(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -345,7 +346,6 @@ WSError SessionProxy::RemoveStartingWindow()
         TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
@@ -467,6 +467,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     }
     if (!data.WriteString(abilitySessionInfo->instanceKey)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(abilitySessionInfo->isFromIcon)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromIcon failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (abilitySessionInfo->startWindowOption) {
@@ -917,7 +921,7 @@ WSError SessionProxy::OnNeedAvoid(bool status)
         WLOGFE("WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!(data.WriteUint32(static_cast<uint32_t>(status)))) {
+    if (!data.WriteBool(status)) {
         WLOGFE("Write status failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -1462,7 +1466,7 @@ WSError SessionProxy::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         WLOGFE("write height_ failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(static_cast<int32_t>(reason))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         WLOGFE("reason write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -1927,34 +1931,6 @@ WSError SessionProxy::RequestFocus(bool isFocused)
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
-}
-
-WSError SessionProxy::SetFocusableOnShow(bool isFocusableOnShow)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteBool(isFocusableOnShow)) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "Write isFocused failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOCUSABLE_ON_SHOW),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

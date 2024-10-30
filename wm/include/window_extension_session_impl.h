@@ -48,7 +48,13 @@ public:
     void RegisterTransferComponentDataForResultListener(
         const NotifyTransferComponentDataForResultFunc& func) override;
     void TriggerBindModalUIExtension() override;
+
+    /*
+     * Window Privacy
+     */
     WMError SetPrivacyMode(bool isPrivacyMode) override;
+    WMError HidePrivacyContentForHost(bool needHide) override;
+
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
@@ -91,7 +97,12 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
+
+    /*
+     * Free Multi Window
+     */
     bool GetFreeMultiWindowModeEnabledState() override;
+
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     int32_t GetRealParentId() const override;
@@ -100,6 +111,11 @@ public:
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
+    /*
+     * PC Window
+     */
+    bool IsPcOrPadFreeMultiWindowMode() const override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;

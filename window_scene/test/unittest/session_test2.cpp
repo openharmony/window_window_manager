@@ -27,6 +27,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
+#include "process_options.h"
 #include "key_event.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
@@ -837,6 +838,19 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoWant008, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetSessionInfoProcessOptions
+ * @tc.desc: SetSessionInfoProcessOptions Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetSessionInfoProcessOptions, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
+    session_->SetSessionInfoProcessOptions(processOptions);
+    ASSERT_EQ(processOptions, session_->sessionInfo_.processOptions);
+}
+
+/**
  * @tc.name: SetSessionInfoPersistentId009
  * @tc.desc: SetSessionInfoPersistentId Test
  * @tc.type: FUNC
@@ -1260,7 +1274,19 @@ HWTEST_F(WindowSessionTest2, DrawingCompleted, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetSystemActive48
+ * @tc.name: RemoveStartingWindow
+ * @tc.desc: RemoveStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, RemoveStartingWindow, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    auto result = session_->RemoveStartingWindow();
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: SetSystemActive
  * @tc.desc: SetSystemActive
  * @tc.type: FUNC
  */

@@ -23,7 +23,6 @@
 #include <key_event.h>
 #include <pointer_event.h>
 
-#include "anr_handler.h"
 #include "window_manager_hilog.h"
 #include "session_permission.h"
 

@@ -308,6 +308,7 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
@@ -396,17 +397,26 @@ public:
     virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
 
     /**
-     * @brief Get whether the gesture back is enabled or not.
-     *
-     * @return the value true means to enable gesture back, and false means the opposite.
+     * @brief Get whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
      */
-    virtual bool GetGestureBackEnabled() const { return true; }
+    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Flush layout size.
+     *
+     * @param width The width after layout
+     * @param height The height after layout
+     */
+    virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
     /**
      * @brief notify window remove starting window.
      *
      * @return WMError
      */
-    virtual bool NotifyRemoveStartingWindow() const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

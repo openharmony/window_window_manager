@@ -712,6 +712,33 @@ HWTEST_F(WindowSessionImplTest, UpdateViewportConfig, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: UpdateViewportConfig01
+ * @tc.desc: UpdateViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateViewportConfig01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("UpdateViewportConfig01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    Rect rectW;
+    rectW.posX_ = 0;
+    rectW.posY_ = 0;
+    rectW.height_ = 0;
+    rectW.width_ = 0;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    rectW.width_ = 10;
+    rectW.height_ = 0;
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    rectW.width_ = 10;
+    rectW.height_ = 10;
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    ASSERT_NE(window, nullptr);
+}
+
+/**
  * @tc.name: CreateWindowAndDestroy01
  * @tc.desc: GetPersistentId
  * @tc.type: FUNC
@@ -1019,6 +1046,9 @@ HWTEST_F(WindowSessionImplTest, SetRequestedOrientation, Function | SmallTest | 
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
     Orientation ori = Orientation::VERTICAL;
     window->SetRequestedOrientation(ori);
     Orientation ret = window->GetRequestedOrientation();
@@ -1047,7 +1077,7 @@ HWTEST_F(WindowSessionImplTest, SetRequestedOrientation, Function | SmallTest | 
     window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
     Orientation ret6 = window->GetRequestedOrientation();
     ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
 }
 
@@ -1062,8 +1092,19 @@ HWTEST_F(WindowSessionImplTest, GetRequestedOrientation, Function | SmallTest | 
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetRequestedOrientation");
+
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
+                               "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
     Orientation ori = Orientation::HORIZONTAL;
     window->SetRequestedOrientation(ori);
     Orientation ret = window->GetRequestedOrientation();
@@ -1335,7 +1376,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
     sptr<IMainWindowCloseListener> listener12 = nullptr;
     res = window->RegisterMainWindowCloseListeners(listener12);
