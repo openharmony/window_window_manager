@@ -298,6 +298,11 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
+    InitVsyncStation();
+}
+
+void SceneSessionManager::InitVsyncStation()
+{
     NodeId nodeId = 0;
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
 }
@@ -9807,7 +9812,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         if (parentSession) {
             parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
         }
-        if (usage == UIExtensionUsage::MODAL && parentSession) {
+        if (usage == UIExtensionUsage::MODAL && parentSession && parentSession->GetCallingPid() != GetPid()) {
             ExtensionWindowEventInfo extensionInfo {
                 .persistentId = persistentId,
                 .pid = pid,
@@ -11046,6 +11051,10 @@ WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (pid < 0) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid pid!");
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u", pid, skip);
     auto task = [this, pid, skip]() THREAD_SAFETY_GUARD(SCENE_GUARD) {

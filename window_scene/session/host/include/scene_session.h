@@ -127,12 +127,10 @@ public:
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
-        NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         ClearCallbackMapFunc clearCallbackFunc_;
-        NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
         NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
@@ -199,6 +197,8 @@ public:
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
+    bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
+        bool canStartAbilityFromBackground);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
@@ -235,6 +235,7 @@ public:
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
+    void RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback);
 
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -414,8 +415,6 @@ public:
 
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 
-    static const wptr<SceneSession> GetEnterWindow();
-    static void ClearEnterWindow();
     static MaximizeMode maximizeMode_;
     static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
@@ -538,6 +537,11 @@ protected:
      * Window Hierarchy
      */
     NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
+
+    /*
+     * PiP Window
+     */
+    NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -669,8 +673,6 @@ private:
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
-    static wptr<SceneSession> enterSession_;
-    static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     mutable std::mutex sessionChangeCbMutex_;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
@@ -745,6 +747,11 @@ private:
      * Window Visibility
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
+
+    /*
+     * Window Rotation
+     */
+    NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

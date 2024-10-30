@@ -291,7 +291,6 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
     EXPECT_NE(session, nullptr);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();;
 
-    SceneSession::enterSession_ = wptr<SceneSession>(session);
     info.isSystem_ = false;
     session->property_ = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));

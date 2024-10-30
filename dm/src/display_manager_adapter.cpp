@@ -856,4 +856,10 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const C
     INIT_PROXY_CHECK_RETURN(nullptr);
     return displayManagerServiceProxy_->GetScreenCapture(captureOption, errorCode);
 }
+
+sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+}
 } // namespace OHOS::Rosen
