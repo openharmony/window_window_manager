@@ -45,8 +45,7 @@ public:
         : SceneSession(info, specificCallback) {}
     ~KSSceneSessionMocker() {}
 
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false,
-        bool isFromMoveToGlobal = false) override
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override
     {
         updateRectCallback_(rect, reason);
         return WSError::WS_OK;
