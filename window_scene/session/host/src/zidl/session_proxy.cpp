@@ -1738,4 +1738,32 @@ WSError SessionProxy::RequestFocus(bool isFocused)
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
+
+WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isEnabled)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write isEnabled failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
 } // namespace OHOS::Rosen
