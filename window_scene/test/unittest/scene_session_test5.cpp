@@ -291,7 +291,6 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
     EXPECT_NE(session, nullptr);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();;
 
-    SceneSession::enterSession_ = wptr<SceneSession>(session);
     info.isSystem_ = false;
     session->property_ = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
@@ -1525,6 +1524,33 @@ HWTEST_F(SceneSessionTest5, UpdateClientRect01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: ResetSizeChangeReasonIfDirty
+ * @tc.desc: ResetSizeChangeReasonIfDirty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ResetSizeChangeReasonIfDirty, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ResetSizeChangeReasonIfDirty";
+    info.bundleName_ = "ResetSizeChangeReasonIfDirty";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    session->UpdateSizeChangeReason(SizeChangeReason::DRAG);
+    session->ResetDirtyFlags();
+    session->ResetSizeChangeReasonIfDirty();
+    EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::DRAG);
+
+    session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    session->ResetSizeChangeReasonIfDirty();
+    EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::DRAG);
+
+    session->UpdateSizeChangeReason(SizeChangeReason::MOVE);
+    session->ResetSizeChangeReasonIfDirty();
+    EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::UNDEFINED);
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
@@ -1592,6 +1618,68 @@ HWTEST_F(SceneSessionTest5, SetNotifyVisibleChangeFunc, Function | SmallTest | L
 
     session->SetNotifyVisibleChangeFunc([](int32_t persistentId) {});
     EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
+}
+/**
+ * @tc.name: SetRequestNextVsyncFunc
+ * @tc.desc: SetRequestNextVsyncFunc01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetRequestNextVsyncFunc01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    RequestVsyncFunc requestVsyncFunc;
+    session->SetRequestNextVsyncFunc(requestVsyncFunc);
+    ASSERT_EQ(nullptr, session->requestNextVsyncFunc_);
+
+    RequestVsyncFunc requestVsyncFunc1 = [](std::shared_ptr<VsyncCallback>& callback) {
+        SessionInfo info1;
+        info1.abilityName_ = "test2";
+        info1.bundleName_ = "test2";
+    };
+    session->SetRequestNextVsyncFunc(requestVsyncFunc1);
+    EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
+    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+}
+
+/**
+ * @tc.name: NotifyServerToUpdateRect01
+ * @tc.desc: NotifyServerToUpdateRect01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyServerToUpdateRect01";
+    info.bundleName_ = "NotifyServerToUpdateRect01";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    
+    session->foregroundInteractiveStatus_.store(true);
+    EXPECT_EQ(session->GetForegroundInteractiveStatus(), true);
+
+    SessionUIParam uiParam;
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false);
+
+    uiParam.rect_ = { 100, 100, 200, 200 };
+    session->SetNeedSyncSessionRect(false);
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // not sync
+    EXPECT_NE(session->GetSessionRect(), uiParam.rect_);
+
+    uiParam.needSync_ = false;
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // not sync
+    EXPECT_NE(session->GetSessionRect(), uiParam.rect_);
+
+    uiParam.needSync_ = true;
+    session->SetNeedSyncSessionRect(true); // sync first
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), true);
+    EXPECT_EQ(session->GetSessionRect(), uiParam.rect_);
+
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // skip same rect
 }
 }
 }

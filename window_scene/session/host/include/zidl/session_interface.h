@@ -273,14 +273,6 @@ public:
      */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 
-    /**
-     * @brief Set focusable of window when show.
-     *
-     * @param isFocusableOnShow True means window can get focus when it shows to foreground, false means the opposite.
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
-    virtual WSError SetFocusableOnShow(bool isFocusableOnShow) { return WSError::WS_OK; }
-
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
     /**
      * @brief Callback for session modal type changes.

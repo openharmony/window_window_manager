@@ -16,18 +16,21 @@
 #ifndef OHOS_VSYNC_STATION_H
 #define OHOS_VSYNC_STATION_H
 
+#include <atomic>
 #include <memory>
 #include <unordered_set>
 
 #include <event_handler.h>
-#include <ui/rs_display_node.h>
-#include <vsync_receiver.h>
 
 #include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 class RSFrameRateLinker;
+class VSyncReceiver;
+
+using FrameRateLinkerId = uint64_t;
+using NodeId = uint64_t;
 
 class VsyncStation : public std::enable_shared_from_this<VsyncStation> {
 public:
@@ -46,6 +49,9 @@ public:
     void SetFrameRateLinkerEnable(bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
+
+    void DecreaseRequestVsyncTimes() { requestVsyncTimes_--; }
+    int32_t GetRequestVsyncTimes() { return requestVsyncTimes_.load(); }
 
 private:
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiver();
@@ -68,6 +74,8 @@ private:
     using Callbacks = std::unordered_set<std::shared_ptr<VsyncCallback>>;
     Callbacks vsyncCallbacks_;
     // Above guarded by mutex_
+
+    std::atomic<int32_t> requestVsyncTimes_ {0};
 };
 } // namespace Rosen
 } // namespace OHOS

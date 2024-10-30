@@ -495,10 +495,10 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterTransferComponentDataForResultL
 }
 
 /**
-* @tc.name: TriggerBindModalUIExtension01
-* @tc.desc: TriggerBindModalUIExtension01 Test
-* @tc.type: FUNC
-*/
+ * @tc.name: TriggerBindModalUIExtension01
+ * @tc.desc: TriggerBindModalUIExtension01 Test
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, window_);
@@ -506,10 +506,10 @@ HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension01, Function
 }
 
 /**
-* @tc.name: TriggerBindModalUIExtension02
-* @tc.desc: TriggerBindModalUIExtension02 Test
-* @tc.type: FUNC
-*/
+ * @tc.name: TriggerBindModalUIExtension02
+ * @tc.desc: TriggerBindModalUIExtension02 Test
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowExtensionSessionImplTest, TriggerBindModalUIExtension02, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
@@ -1515,6 +1515,12 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, Function | S
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
+    Rect preRect;
+    preRect.posX_ = 0;
+    preRect.posY_ = 0;
+    preRect.height_ = 200;
+    preRect.width_ = 200;
+    window_->property_->SetWindowRect(preRect);
     EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, densityValue), _, _, _));
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
@@ -1542,6 +1548,12 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, Function | S
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window_->uiContent_.get());
+    Rect preRect;
+    preRect.posX_ = 0;
+    preRect.posY_ = 0;
+    preRect.height_ = 100;
+    preRect.width_ = 100;
+    window_->property_->SetWindowRect(preRect);
     EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, vpr), _, _, _));
 
     window_->isDensityFollowHost_ = true;

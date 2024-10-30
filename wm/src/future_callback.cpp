@@ -19,21 +19,43 @@
 namespace OHOS {
 namespace Rosen {
 
-WSError FutureCallback::OnUpdateSessionRect(const WSRect& rect)
+WSError FutureCallback::OnUpdateSessionRect(const Rect& rect, WindowSizeChangeReason reason,
+    int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "rect:%{public}s", rect.ToString().c_str());
-    future_.SetValue(rect);
-    return WSError::WS_OK;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, rect:%{public}s, reason:%{public}u",
+        persistentId, rect.ToString().c_str(), reason);
+    switch (reason) {
+        case WindowSizeChangeReason::MOVE:
+            moveToFuture_.SetValue(rect);
+            return WSError::WS_OK;
+        case WindowSizeChangeReason::RESIZE:
+            resizeFuture_.SetValue(rect);
+            return WSError::WS_OK;
+        default:
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, reason:%{public}u is not move or resize",
+                persistentId, reason);
+    }
+    return WSError::WS_DO_NOTHING;
 }
 
-WSRect FutureCallback::GetResult(long timeOut)
+Rect FutureCallback::GetResizeAsyncResult(long timeOut)
 {
-    return future_.GetResult(timeOut);
+    return resizeFuture_.GetResult(timeOut);
 }
 
-void FutureCallback::ResetLock()
+Rect FutureCallback::GetMoveToAsyncResult(long timeOut)
 {
-    future_.ResetLock({});
+    return moveToFuture_.GetResult(timeOut);
+}
+
+void FutureCallback::ResetResizeLock()
+{
+    resizeFuture_.ResetLock({});
+}
+
+void FutureCallback::ResetMoveToLock()
+{
+    moveToFuture_.ResetLock({});
 }
 } // namespace Rosen
 } // namespace OHOS

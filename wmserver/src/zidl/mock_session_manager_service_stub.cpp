@@ -113,11 +113,11 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByIdNamesMap(Message
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Fail to read mapSize");
         return ERR_INVALID_DATA;
     }
-    std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
     if (mapSize > MAX_USER_SIZE) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Too many users!");
         return ERR_INVALID_DATA;
     }
+    std::unordered_map<int32_t, std::vector<std::string>> idBundlesMap;
     for (int i = 0; i < mapSize; i++) {
         int32_t userId = data.ReadInt32();
         std::vector<std::string> bundleNameList;
@@ -125,7 +125,7 @@ int32_t MockSessionManagerServiceStub::HandleSetSnapshotSkipByIdNamesMap(Message
             TLOGE(WmsLogTag::WMS_MULTI_USER, "Fail to read bundleNameList");
             return ERR_INVALID_DATA;
         }
-        idBundlesMap[userId] = bundleNameList;
+        idBundlesMap[userId] = std::move(bundleNameList);
     }
     int32_t errCode = SetSnapshotSkipByIdNamesMap(idBundlesMap);
     reply.WriteInt32(errCode);

@@ -34,7 +34,6 @@ group("unittest") {
     ":wm_window_agent_test",
     ":wm_window_display_change_adapter_test",
     ":wm_window_effect_test",
-    ":wm_window_frame_trace_impl_test",
     ":wm_window_impl_listener_test",
     ":wm_window_impl_test",
     ":wm_window_impl_test2",
@@ -492,19 +491,6 @@ ohos_unittest("wm_window_manager_stub_proxy_test") {
   ]
 }
 
-ohos_unittest("wm_window_frame_trace_impl_test") {
-  module_out_path = module_out_path
-  defines = [ "FRAME_TRACE_ENABLE" ]
-  sources = [ "window_frame_trace_impl_test.cpp" ]
-
-  deps = [ ":wm_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
 ohos_unittest("wm_window_agent_test") {
   module_out_path = module_out_path
   defines = [ "FRAME_TRACE_ENABLE" ]
@@ -552,11 +538,8 @@ ohos_unittest("wm_picture_in_picture_controller_test") {
   deps = [ ":wm_unittest_common" ]
 
   external_deps = [
-    "ability_base:zuri",
     "ace_engine:ace_xcomponent_controller",
     "c_utils:utils",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
     "hilog:libhilog",
   ]
 }
