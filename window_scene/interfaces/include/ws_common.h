@@ -344,6 +344,9 @@ struct SessionInfo {
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
+    bool isPcOrPadEnableActivation_ = false;
+    bool canStartAbilityFromBackground_ = false;
+    bool isFoundationCall_ = false;
 
     /**
      * UIExtension

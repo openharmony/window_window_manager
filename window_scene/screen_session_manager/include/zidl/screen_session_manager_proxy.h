@@ -182,6 +182,8 @@ public:
         uint32_t& actualRefreshRate) override;
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
+    sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
+
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

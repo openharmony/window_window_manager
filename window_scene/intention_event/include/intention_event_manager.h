@@ -48,12 +48,10 @@ public:
 private:
     void DispatchKeyEventCallback(
         int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const;
-    void UpdateLastMouseEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     bool CheckPointerEvent(const std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     Ace::UIContent* uiContent_ = nullptr;
     std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_;
-    mutable std::mutex mouseEventMutex_;
 };
 };
 } // namespace OHOS::Rosen
