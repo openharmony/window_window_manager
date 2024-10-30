@@ -1032,7 +1032,7 @@ HWTEST_F(WindowSessionImplTest4, UpdateOrientation, Function | SmallTest | Level
  * @tc.name: SetTitleButtonVisible01
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible01 start";
@@ -1057,7 +1057,7 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible01, Function | SmallTest |
  * @tc.name: SetTitleButtonVisible02
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible02, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible02 start";
@@ -1077,7 +1077,7 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible02, Function | SmallTest |
  * @tc.name: SetTitleButtonVisible03
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible03, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible03 start";
@@ -1105,7 +1105,7 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible03, Function | SmallTest |
  * @tc.name: GetTitleButtonVisible01
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1173,7 +1173,7 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect03, Function | SmallTest | Level2)
  * @tc.name: GetTitleButtonVisible02
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1203,7 +1203,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, Function | SmallTest |
  * @tc.name: GetTitleButtonVisible03
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1235,7 +1235,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
  * @tc.name: GetAppForceLandscapeConfig01
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, GetAppForceLandscapeConfig01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1260,7 +1260,7 @@ HWTEST_F(WindowSessionImplTest4, GetAppForceLandscapeConfig01, Function | SmallT
  * @tc.name: UpdatePiPControlStatus01
  * @tc.desc: UpdatePiPControlStatus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, UpdatePiPControlStatus01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1285,7 +1285,7 @@ HWTEST_F(WindowSessionImplTest4, UpdatePiPControlStatus01, Function | SmallTest 
  * @tc.name: SetAutoStartPiP
  * @tc.desc: SetAutoStartPiP
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
 {
     auto option = sptr<WindowOption>::MakeSptr();
@@ -1308,7 +1308,7 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
  * @tc.name: NotifyWindowVisibility01
  * @tc.desc: NotifyWindowVisibility
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1333,7 +1333,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest 
  * @tc.name: NotifyMainWindowClose01
  * @tc.desc: NotifyMainWindowClose
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();

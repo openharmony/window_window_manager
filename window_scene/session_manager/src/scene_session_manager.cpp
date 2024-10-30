@@ -4713,7 +4713,7 @@ void SceneSessionManager::RequestAllAppSessionUnfocus()
 /**
  * request focus and ignore its state
  * only used when app main window start before foreground
-*/
+ */
 WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "RequestSessionFocusImmediately, id: %{public}d", persistentId);

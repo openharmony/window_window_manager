@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef OHOS_ROSEN_SUPER_FOLD_STATE_MANAGER_H
 #define OHOS_ROSEN_SUPER_FOLD_STATE_MANAGER_H
