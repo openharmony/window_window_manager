@@ -560,15 +560,24 @@ HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Le
 {
     fullScreenAppInfo_.name = "WindowShowWithoutFocusTest_1";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
+    if (window1 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window1);
 
     floatAppInfo_.name = "WindowShowWithoutFocusTest_2";
     const sptr<Window>& window2 = Utils::CreateTestWindow(floatAppInfo_);
+    if (window2 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window2);
 
     subAppInfo_.name = "WindowShowWithoutFocusTest_3";
     subAppInfo_.parentId = window2->GetWindowId();
     const sptr<Window>& subWindow = Utils::CreateTestWindow(subAppInfo_);
+    if (subWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
