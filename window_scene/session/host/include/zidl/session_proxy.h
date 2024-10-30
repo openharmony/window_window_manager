@@ -27,9 +27,10 @@ public:
     explicit SessionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<ISession>(impl) {}
     virtual ~SessionProxy() = default;
 
-    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false) override;
-    WSError Background(bool isFromClient = false) override;
-    WSError Disconnect(bool isFromClient = false) override;
+    WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
+        const std::string& identityToken = "") override;
+    WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
+    WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
