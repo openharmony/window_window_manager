@@ -3480,6 +3480,18 @@ void SceneSessionManager::OnConfigurationUpdated(const std::shared_ptr<AppExecFw
         "OnConfigurationUpdated");
 }
 
+bool GetEnableRemoveStartingWindowFromBMS(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
+{
+    auto metadata = abilityInfo->metadata;
+    for (auto item : metadata) {
+        if (item.name == "enable.remove.starting.window") {
+            return item.value == "true" ? true : false;
+            break;
+        }
+    }
+    return false;
+}
+
 void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
 {
     auto sessionInfo = sceneSession->GetSessionInfo();
@@ -3497,6 +3509,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
         WLOGFE("abilityInfo is nullptr!");
         return;
     }
+    sceneSession->SetEnableRemoveStartingWindow(GetEnableRemoveStartingWindowFromBMS(abilityInfo));
     sceneSession->SetSessionInfoAbilityInfo(abilityInfo);
     sceneSession->SetSessionInfoTime(GetCurrentTime());
     if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
