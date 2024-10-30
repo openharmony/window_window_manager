@@ -85,10 +85,13 @@ if (!ispreview) {
     ]
 
     external_deps = [
-      "ace_engine:ace_uicontent",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
     ]
+
+    if (!build_ohos_sdk && !is_mingw) {
+      external_deps += [ "ace_engine:ace_uicontent" ]
+    }
 
     cflags = [ "-std=c++11" ]
     part_name = "window_manager"

@@ -30,9 +30,9 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "IntentionEventManager" };
 constexpr int32_t TRANSPARENT_FINGER_ID = 10000;
-[[maybe_unused]] constexpr int32_t DELAY_TIME = 15;
-[[maybe_unused]] constexpr unsigned int FREQUENT_CLICK_TIME_LIMIT = 3;
-[[maybe_unused]] constexpr int FREQUENT_CLICK_COUNT_LIMIT = 8;
+constexpr int32_t DELAY_TIME = 15;
+constexpr unsigned int FREQUENT_CLICK_TIME_LIMIT = 3;
+constexpr int FREQUENT_CLICK_COUNT_LIMIT = 8;
 static const bool IS_BETA = OHOS::system::GetParameter("const.logsystem.versiontype", "").find("beta") !=
     std::string::npos;
 
@@ -95,7 +95,7 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
     if (IS_BETA) {
         // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event
-        [[maybe_unused]] int id = HiviewDFX::XCollie::GetInstance().SetTimerCount("FREQUENT_CLICK_WARNING", FREQUENT_CLICK_TIME_LIMIT,
+        int id = HiviewDFX::XCollie::GetInstance().SetTimerCount("FREQUENT_CLICK_WARNING", FREQUENT_CLICK_TIME_LIMIT,
             FREQUENT_CLICK_COUNT_LIMIT);
     }
     return true;
