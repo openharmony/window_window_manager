@@ -4806,7 +4806,8 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
-void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback) {
+void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback)
+{
     auto task = [weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
