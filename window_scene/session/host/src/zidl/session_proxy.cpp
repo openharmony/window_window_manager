@@ -704,7 +704,8 @@ WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool
 }
 
 /** @note @window.layout */
-WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal, bool isFromMoveToGlobal)
+WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason,
+    bool isGlobal, bool isFromMoveToGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
