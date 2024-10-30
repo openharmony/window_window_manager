@@ -90,7 +90,7 @@ using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
-using IsLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 
 class SceneSession : public Session {
 public:
@@ -290,7 +290,7 @@ public:
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
-    void SetGetIsLastFrameLayoutFinishedFunc(IsLayoutFinishedFunc&& isLayoutFinishedFunc);
+    void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
@@ -759,7 +759,7 @@ private:
      */
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
-    IsLayoutFinishedFunc isLayoutFinishedFunc_;
+    IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

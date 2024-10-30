@@ -188,7 +188,7 @@ bool RootScene::IsLastFrameLayoutFinished()
 {
     int32_t requestTimes = vsyncStation_->GetRequestVsyncTimes();
     TLOGI(WmsLogTag::WMS_LAYOUT, "RootScene vsync request times: %{public}d", requestTimes);
-    return requestTimes == 0;
+    return requestTimes <= 0;
 }
 
 void RootScene::OnFlushUIParams()
