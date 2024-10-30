@@ -75,7 +75,7 @@ private:
     Callbacks vsyncCallbacks_;
     // Above guarded by mutex_
 
-    std::atomic<int32_t> requestVsyncTimes_;
+    std::atomic<int32_t> requestVsyncTimes_ {0};
 };
 } // namespace Rosen
 } // namespace OHOS
