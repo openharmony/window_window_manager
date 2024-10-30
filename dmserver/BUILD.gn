@@ -76,6 +76,7 @@ ohos_shared_library("libdms") {
     "ipc:ipc_single",
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = []

@@ -50,6 +50,7 @@ ohos_shared_library("transactionmanager_napi") {
     "ffrt:libffrt",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "libxml2:libxml2",
     "napi:ace_napi",
   ]
 

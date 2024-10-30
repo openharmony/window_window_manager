@@ -121,6 +121,7 @@ ohos_shared_library("sms") {
     "graphic_2d:window_animation",
     "input:libmmi-client",
     "input:libmmi-napi",
+    "samgr:samgr_proxy",
   ]
   if (window_manager_use_sceneboard) {
     deps += [ "${window_base_path}/window_scene/session_manager_service:session_manager_service" ]
@@ -227,6 +228,7 @@ if (window_manager_use_sceneboard) {
       "ipc:ipc_single",
       "libxml2:libxml2",
       "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
     ]
 
     if (defined(global_parts_info) &&

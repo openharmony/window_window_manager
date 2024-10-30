@@ -68,7 +68,9 @@ ohos_shared_library("scenesessionmanager_napi") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "libxml2:libxml2",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   defines = []
