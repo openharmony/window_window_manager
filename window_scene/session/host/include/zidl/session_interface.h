@@ -156,6 +156,11 @@ public:
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
+
+    /*
+     *  Gesture Back
+     */
+    virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 
