@@ -118,7 +118,7 @@ using RootSceneProcessBackEventFunc = std::function<void()>;
 using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
-using IsLayoutFinishedOnRootSceneFunc = std::function<bool()>;
+using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -372,7 +372,7 @@ public:
     WSRect GetAINavigationBarArea(uint64_t displayId);
     void ClearDisplayStatusBarTemporarilyFlags();
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
-    void SetGetIsLastFrameLayoutFinishedFunc(IsLayoutFinishedOnRootSceneFunc&& func);
+    void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -981,7 +981,7 @@ private:
      * Window Immersive
      */
     OnFlushUIParamsFunc onFlushUIParamsFunc_;
-    IsLayoutFinishedOnRootSceneFunc isLayoutFinishedOnRootSceneFunc_;
+    IsRootSceneLastFrameLayoutFinishedFunc isRootSceneLastFrameLayoutFinishedFunc_;
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;

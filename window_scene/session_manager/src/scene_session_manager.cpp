@@ -1526,7 +1526,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         if (sceneSession->moveDragController_) {
             sceneSession->moveDragController_->SetIsPcWindow(systemConfig_.IsPcWindow());
         }
-        sceneSession->SetGetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
+        sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
     }
@@ -4550,9 +4550,9 @@ void SceneSessionManager::SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func)
     onFlushUIParamsFunc_ = std::move(func);
 }
 
-void SceneSessionManager::SetGetIsLastFrameLayoutFinishedFunc(IsLayoutFinishedOnRootSceneFunc&& func)
+void SceneSessionManager::SetIsLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func)
 {
-    isLayoutFinishedOnRootSceneFunc_ = std::move(func);
+    isRootSceneLastFrameLayoutFinishedFunc_ = std::move(func);
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
@@ -11316,11 +11316,11 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
 
 WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
 {
-    if (isLayoutFinishedOnRootSceneFunc_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "isLayoutFinishedOnRootSceneFunc is null");
+    if (isRootSceneLastFrameLayoutFinishedFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isRootSceneLastFrameLayoutFinishedFunc is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    isLayoutFinished = isLayoutFinishedOnRootSceneFunc_();
+    isLayoutFinished = isRootSceneLastFrameLayoutFinishedFunc_();
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

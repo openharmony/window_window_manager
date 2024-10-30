@@ -1306,7 +1306,7 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 
 void SceneSession::SetIsStatusBarVisible(bool isVisible)
 {
-    auto task = [weakThis = wptr(this), isVisible]() {
+    auto task = [weakThis = wptr(this), isVisible] {
         sptr<SceneSession> sceneSession = weakThis.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
@@ -1326,14 +1326,14 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
-    if (isLayoutFinishedFunc_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "isLayoutFinishedFunc is null, id: %{public}d", GetPersistentId());
+    if (isLastFrameLayoutFinishedFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
     bool isLayoutFinished = false;
-    WSError ret = isLayoutFinishedFunc_(isLayoutFinished);
+    WSError ret = isLastFrameLayoutFinishedFunc_(isLayoutFinished);
     if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "isLayoutFinishedFunc failed: %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed: %{public}d", ret);
         return ret;
     }
     if (isLayoutFinished) {
@@ -4694,9 +4694,9 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
     return isDisplayStatusBarTemporarily_.load();
 }
 
-void SceneSession::SetGetIsLastFrameLayoutFinishedFunc(IsLayoutFinishedFunc&& isLayoutFinishedFunc)
+void SceneSession::SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func)
 {
-    isLayoutFinishedFunc_ = std::move(isLayoutFinishedFunc);
+    isLastFrameLayoutFinishedFunc_ = std::move(func);
 }
 
 void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)
