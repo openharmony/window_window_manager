@@ -194,10 +194,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             }
             if (IS_BETA) {
                 /*
-                * Triggers input down event recorded.
-                * If the special num of the events reached within the sepcial time interval,
-                * a panic behavior is reported.
-                */
+                 * Triggers input down event recorded.
+                 * If the special num of the events reached within the sepcial time interval,
+                 * a panic behavior is reported.
+                 */
                 HiviewDFX::XCollie::GetInstance().TriggerTimerCount("FREQUENT_CLICK_WARNING", true, "");
             }
         }

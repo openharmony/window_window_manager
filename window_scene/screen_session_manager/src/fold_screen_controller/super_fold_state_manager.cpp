@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "fold_screen_controller/super_fold_state_manager.h"

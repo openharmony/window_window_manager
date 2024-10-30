@@ -68,10 +68,10 @@ void WindowRaiseToAppTopTest::TearDown()
 
 namespace {
 /**
-* @tc.name: WindowRaiseToAppTopTest1
-* @tc.desc: to raise to app top, normal
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRaiseToAppTopTest1
+ * @tc.desc: to raise to app top, normal
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "mainWindow.1";
@@ -109,10 +109,10 @@ HWTEST_F(WindowRaiseToAppTopTest, NormalRaise1, Function | MediumTest | Level3)
 }
 
 /**
-* @tc.name: WindowRaiseToAppTopTest2
-* @tc.desc: to raise to app top, with dialog
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRaiseToAppTopTest2
+ * @tc.desc: to raise to app top, with dialog
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "mainWindow.1";
@@ -157,10 +157,10 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWithDialog1, Function | MediumTest | Leve
 }
 
 /**
-* @tc.name: WindowRaiseToAppTopTest3
-* @tc.desc: to raise to app top, in hide
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRaiseToAppTopTest3
+ * @tc.desc: to raise to app top, in hide
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "mainWindow.1";
@@ -208,10 +208,10 @@ HWTEST_F(WindowRaiseToAppTopTest, RaiseWhenHide, Function | MediumTest | Level3)
 }
 
 /**
-* @tc.name: WindowRaiseToAppTopTest3
-* @tc.desc: to raise to app top, not app subwindow
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRaiseToAppTopTest3
+ * @tc.desc: to raise to app top, not app subwindow
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRaiseToAppTopTest, NotAppSubWindow, Function | MediumTest | Level3)
 {
     CommonTestUtils::GuaranteeFloatWindowPermission("window_raisetoapptop_test");

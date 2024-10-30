@@ -202,7 +202,7 @@ public:
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
 
-    /*
+    /**
      * UIExtension
      */
     void SetRealParentId(int32_t realParentId);
@@ -218,7 +218,7 @@ public:
     void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
     bool GetIsUIExtAnySubWindow() const;
 
-    /*
+    /**
      * Multi instance
      */
     void SetAppInstanceKey(const std::string& appInstanceKey);
@@ -360,7 +360,7 @@ private:
      */
     uint32_t subWindowLevel_ = 1;
 
-    /*
+    /**
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -370,7 +370,7 @@ private:
     bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
-    /*
+    /**
      * Multi instance
      */
     std::string appInstanceKey_;

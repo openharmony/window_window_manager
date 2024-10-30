@@ -84,11 +84,11 @@ public:
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
     /**
-    * @brief Register drawingcontent changed listener.
-    *
-    * @param listener IDrawingContentChangedListener.
-    * @return WM_OK means register success, others means register failed.
-    */
+     * @brief Register drawingcontent changed listener.
+     *
+     * @param listener IDrawingContentChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
     WMError RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
 
     /**
@@ -114,19 +114,19 @@ public:
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
 
     /**
-    * @brief Register camera window changed listener.
-    *
-    * @param listener ICameraWindowChangedListener.
-    * @return WM_OK means register success, others means register failed.
-    */
+     * @brief Register camera window changed listener.
+     *
+     * @param listener ICameraWindowChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
     WMError RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
 
     /**
-   * @brief Unregister camera window changed listener.
-   *
-   * @param listener ICameraWindowChangedListener.
-   * @return WM_OK means unregister success, others means unregister failed.
-   */
+     * @brief Unregister camera window changed listener.
+     *
+     * @param listener ICameraWindowChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
     WMError UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
 
     /**
@@ -206,11 +206,11 @@ public:
      */
     WMError RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
     /**
-    * @brief Unregister WindowStyle changed listener.
-    *
-    * @param listener IWindowStyleChangedListener
-    * @return WM_OK means unregister success, others means unregister failed.
-    */
+     * @brief Unregister WindowStyle changed listener.
+     *
+     * @param listener IWindowStyleChangedListener
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
     /**
      * @brief Get window style type.

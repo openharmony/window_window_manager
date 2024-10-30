@@ -510,7 +510,7 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
     dumpInfo_.append(oss.str());
 }
 
-/*
+/**
  * hidumper inject methods
  */
 void ScreenSessionDumper::ShowNotifyFoldStatusChangedInfo()
