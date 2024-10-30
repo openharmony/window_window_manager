@@ -32,12 +32,12 @@ constexpr int LINE_WIDTH = 30;
 constexpr int DUMPER_PARAM_INDEX_ONE = 1;
 constexpr int DUMPER_PARAM_INDEX_TWO = 2;
 constexpr int DUMPER_PARAM_INDEX_THREE = 3;
-constexpr int SUPER_FOLD_CHANGE_EVENT_MAX = 10;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_FOLD_STATUS = "-f";
 
 constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
+constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
@@ -54,7 +54,7 @@ const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const std::string ARG_SET_ON_TENT_MODE = "-ontent";
 const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
 const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
-const std::string ARG_SET_SUPER_FOLD_STATUS = "-trans";
+const std::string ARG_SET_SUPER_FOLD_STATUS = "-supertrans";
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -678,16 +678,20 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
 {
     size_t commaPos = input.find_last_of(',');
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_SUPER_FOLD_STATUS)) {
-        std::string valueStr = input.substr(commaPos + 1, MOTION_SENSOR_PARAM_SIZE);
+        std::string valueStr = input.substr(commaPos + 1, SUPER_FOLD_STATUS_MAX);
+        if (valueStr.empty()) {
+            return;
+        }
         if (valueStr.size() == 1 && !std::isdigit(valueStr[0])) {
             return;
         }
-        if (valueStr.size() == MOTION_SENSOR_PARAM_SIZE && valueStr != "-1") {
+        if (valueStr.size() == SUPER_FOLD_STATUS_MAX && !std::isdigit(valueStr[0])
+            && !std::isdigit(valueStr[1])) {
             return;
         }
         int32_t value = std::stoi(valueStr);
-        if (value <  static_cast<int32_t>(SuperFoldStatusChangeEvents::UNDEFINED) ||
-            value >= static_cast<int32_t>(SUPER_FOLD_CHANGE_EVENT_MAX)) {
+        if (value <=  static_cast<int32_t>(SuperFoldStatusChangeEvents::UNDEFINED) ||
+            value >= static_cast<int32_t>(SuperFoldStatusChangeEvents::INVALID)) {
             TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
             return;
         }
