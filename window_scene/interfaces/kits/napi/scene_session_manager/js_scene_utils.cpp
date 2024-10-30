@@ -757,6 +757,21 @@ bool ConvertStringMapFromJs(napi_env env, napi_value value, std::unordered_map<s
     return true;
 }
 
+bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config)
+{
+    napi_value jsDuration = nullptr;
+    napi_get_named_property(env, value, "duration", &jsDuration);
+    if (GetType(env, jsDuration) != napi_undefined) {
+        int32_t duration = ROTATE_ANIMATION_DURATION;
+        if (!ConvertFromJsValue(env, jsDuration, duration)) {
+            TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to duration");
+            return false;
+        }
+        config.duration_ = duration;
+    }
+    return true;
+}
+
 bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
 {
     if (value == nullptr || !CheckTypeForNapiValue(env, value, napi_object)) {
@@ -789,21 +804,6 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
             continue;
         }
         payload[propName] = std::move(valName);
-    }
-    return true;
-}
-
-bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config)
-{
-    napi_value jsDuration = nullptr;
-    napi_get_named_property(env, value, "duration", &jsDuration);
-    if (GetType(env, jsDuration) != napi_undefined) {
-        int32_t duration = ROTATE_ANIMATION_DURATION;
-        if (!ConvertFromJsValue(env, jsDuration, duration)) {
-            TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to duration");
-            return false;
-        }
-        config.duration_ = duration;
     }
     return true;
 }

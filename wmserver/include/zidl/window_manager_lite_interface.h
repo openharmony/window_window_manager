@@ -48,6 +48,7 @@ public:
         std::vector<int32_t>& clearFailedIds) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
     virtual WMError TerminateSessionByPersistentId(int32_t persistentId) = 0;
+    virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
 };
 }
 }

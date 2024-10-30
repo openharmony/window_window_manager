@@ -1662,6 +1662,13 @@ public:
     virtual bool IsFloatingWindowAppType() const { return false; }
 
     /**
+     * @brief Is pc window of app type or not.
+     *
+     * @return True means pc window of app type, false means the opposite.
+     */
+    virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
@@ -1935,6 +1942,13 @@ public:
      * @return True means use default density, window's layout not follow to system change, false means the opposite.
      */
     virtual bool GetDefaultDensityEnabled() { return false; }
+
+    /**
+     * @brief Get virtual pixel ratio.
+     *
+     * @return Value of PixelRatio obtained from displayInfo.
+     */
+    virtual float GetVirtualPixelRatio() { return 1.0f; }
 
     /**
      * @brief Hide None Secure Windows.

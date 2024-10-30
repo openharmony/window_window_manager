@@ -176,6 +176,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshot() const
 {
+    std::lock_guard<std::mutex> lock(snapshotMutex_);
     return snapshot_;
 }
 
@@ -462,6 +463,14 @@ void Session::UpdateSessionState(SessionState state)
         state == SessionState::STATE_INACTIVE ||
         state == SessionState::STATE_BACKGROUND) {
         RemoveWindowDetectTask();
+    }
+    /* The state will be set background first when destroy keyboard, there is no need to notify scb if the state is
+     * already background, which may cause performance deterioration.
+     */
+    if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && state == state_ &&
+        state == SessionState::STATE_BACKGROUND) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is already hide");
+        return;
     }
     state_ = state;
     SetMainSessionUIStateDirty(true);
@@ -1950,19 +1959,22 @@ void Session::SaveSnapshot(bool useFfrt)
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        session->snapshot_ = session->Snapshot(runInFfrt);
-        if (!(session->snapshot_ && session->scenePersistence_)) {
+        auto pixelMap = session->Snapshot(runInFfrt);
+        if (pixelMap == nullptr) {
             return;
         }
+        {
+            std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+            session->snapshot_ = pixelMap;
+        }
         std::function<void()> func = [weakThis]() {
-            auto session = weakThis.promote();
-            if (session == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "session is null");
-                return;
+            if (auto session = weakThis.promote()) {
+                TLOGI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
+                std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+                session->snapshot_ = nullptr;
             }
-            session->ResetSnapshot();
         };
-        session->scenePersistence_->SaveSnapshot(session->snapshot_, func);
+        session->scenePersistence_->SaveSnapshot(pixelMap, func);
     };
     if (!useFfrt) {
         task();
@@ -3088,18 +3100,13 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     property->SetTouchHotAreas(touchHotAreas);
 }
 
-void Session::ResetSnapshot()
-{
-    snapshot_.reset();
-}
-
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id %{public}d", GetPersistentId());
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    return scenePersistence_->IsSavingSnapshot() ? snapshot_ :
+    return scenePersistence_->IsSavingSnapshot() ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale);
 }
 

@@ -185,6 +185,7 @@ BaseAdapterLite::~BaseAdapterLite()
     WLOGFI("BaseAdapterLite destroy");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerServiceProxy_ = nullptr;
+    Clear();
 }
 
 void BaseAdapterLite::Clear()

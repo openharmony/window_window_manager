@@ -70,6 +70,17 @@ bool CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
     }
     return true;
 }
+
+Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation, uint32_t transformHint)
+{
+    Ace::ViewportConfig config;
+    config.SetSize(rect.width_, rect.height_);
+    config.SetPosition(rect.posX_, rect.posY_);
+    config.SetDensity(density);
+    config.SetOrientation(orientation);
+    config.SetTransformHint(transformHint);
+    return config;
+}
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -196,12 +207,16 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
 }
 
+bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
+{
+    return windowSystemConfig_.uiType_ == UI_TYPE_PC ||
+           IsFreeMultiWindowMode() || property_->GetIsPcAppInPad();
+}
+
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && windowOption_ != nullptr) {
+    if (IsPcOrPadCapabilityEnabled() && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
             TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
@@ -695,6 +710,22 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
+void WindowSessionImpl::UpdateVirtualPixelRatio(const sptr<Display>& display)
+{
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null when rotation!");
+        return;
+    }
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null when rotation!");
+        return;
+    }
+    virtualPixelRatio_ = GetVirtualPixelRatio(displayInfo);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_);
+}
+
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config)
 {
@@ -704,6 +735,9 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         if (!window) {
             return;
         }
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        window->UpdateVirtualPixelRatio(display);
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         if (rsTransaction) {
             RSTransaction::FlushImplicitTransaction();
@@ -728,7 +762,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo);
         RSNode::CloseImplicitAnimation();
         if (rsTransaction) {
             rsTransaction->Commit();
@@ -991,6 +1025,13 @@ WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
+float WindowSessionImpl::GetVirtualPixelRatio()
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_);
+    return virtualPixelRatio_;
+}
+
 float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 {
     if (useUniqueDensity_) {
@@ -1018,6 +1059,11 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         WLOGFE("displayInfo is null!");
         return;
     }
+    if (rect.width_ <= 0 || rect.height_ <= 0) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "invalid width: %{public}d, height: %{public}d, id: %{public}d",
+              rect.width_, rect.height_, GetPersistentId());
+        return;
+    }
     auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
@@ -1026,12 +1072,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     virtualPixelRatio_ = density;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[rotation,deviceRotation,transformHint,virtualPixelRatio]:[%{public}u,"
         "%{public}u,%{public}u,%{public}f]", rotation, deviceRotation, transformHint, virtualPixelRatio_);
-    Ace::ViewportConfig config;
-    config.SetSize(rect.width_, rect.height_);
-    config.SetPosition(rect.posX_, rect.posY_);
-    config.SetDensity(density);
-    config.SetOrientation(orientation);
-    config.SetTransformHint(transformHint);
+    auto config = FillViewportConfig(rect, density, orientation, transformHint);
     std::map<AvoidAreaType, AvoidArea> avoidAreasToUpdate;
     if (reason == WindowSizeChangeReason::ROTATION) {
         if (auto hostSession = GetHostSession()) {
@@ -1093,11 +1134,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         return;
     }
     auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    if ((isPC || IsFreeMultiWindowMode() || isPcAppInPad) && (isSubWindow || isDialogWindow)) {
+    if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
         uiContent->HideWindowTitleButton(true, true, true);
         return;
@@ -2369,9 +2409,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    bool isPcAppInPad = property_->GetIsPcAppInPad();
-    if (!(isPC || IsFreeMultiWindowMode() || isPcAppInPad)) {
+    if (IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
@@ -3561,8 +3599,8 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
                   WindowHelper::IsMainWindow(GetType())) ||
                  (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
                   FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.uiType_ == UI_TYPE_PHONE ||
-                 (windowSystemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+                (windowSystemConfig_.uiType_ == "phone" ||
+                 (windowSystemConfig_.uiType_ == "pad" && !IsFreeMultiWindowMode()))) {
                 sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
                 listener->OnSizeChange(occupiedAreaChangeInfo);
                 continue;
@@ -3703,8 +3741,8 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 
 void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "WindowMode: %{public}d", mode);
     auto windowStatus = GetWindowStatusInner(mode);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "WindowMode: %{public}d, windowStatus: %{public}d", mode, windowStatus);
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
     auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
     for (auto& listener : windowStatusChangeListeners) {

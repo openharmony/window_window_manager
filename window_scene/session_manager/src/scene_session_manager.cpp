@@ -201,7 +201,7 @@ SceneSessionManager::~SceneSessionManager()
 void SceneSessionManager::Init()
 {
     auto deviceType = system::GetParameter("const.product.devicetype", "unknown");
-    bool isScbCoreEnabled = deviceType == UI_TYPE_PHONE &&
+    bool isScbCoreEnabled = (deviceType == UI_TYPE_PHONE || deviceType == "tablet") &&
         system::GetParameter("persist.window.scbcore.enable", "1") == "1";
     Session::SetScbCoreEnabled(isScbCoreEnabled);
 
@@ -550,10 +550,15 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         if (sceneSession == nullptr) {
             continue;
         }
-        if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        auto property = sceneSession->GetSessionProperty();
+        if (property == nullptr) {
             continue;
         }
-        sceneSession->SwitchFreeMultiWindow(enable);
+        bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
+            property->GetExtensionFlag();
+        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) || isUiExtSubWindow) {
+            sceneSession->SwitchFreeMultiWindow(enable);
+        }
     }
     WindowStyleType type = enable ?
             WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
@@ -5542,12 +5547,16 @@ WindowModeType SceneSessionManager::CheckWindowModeType()
     bool inSplit = false;
     bool inFloating = false;
     bool fullScreen = false;
+    bool isSmallFold = IsSmallFoldProduct();
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& session : sceneSessionMap_) {
             if (session.second == nullptr ||
                 !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
                 !Rosen::SceneSessionManager::GetInstance().IsSessionVisibleForeground(session.second)) {
+                continue;
+            }
+            if (isSmallFold && IsInSecondaryScreen(session.second)) {
                 continue;
             }
             auto mode = session.second->GetWindowMode();

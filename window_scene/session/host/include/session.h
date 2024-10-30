@@ -387,7 +387,6 @@ public:
     void HandlePointDownDialog();
     bool CheckDialogOnForeground();
     virtual void PresentFocusIfPointDown();
-    void ResetSnapshot();
     std::shared_ptr<Media::PixelMap> GetSnapshotPixelMap(const float oriScale = 1.0f, const float newScale = 1.0f);
     virtual std::vector<Rect> GetTouchHotAreas() const
     {
@@ -514,6 +513,7 @@ protected:
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+    mutable std::mutex snapshotMutex_;
     std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
     std::mutex lifeCycleTaskQueueMutex_;
