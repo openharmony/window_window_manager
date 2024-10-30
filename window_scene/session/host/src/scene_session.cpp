@@ -4413,6 +4413,19 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
+void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->onRequestedOrientationChange_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
