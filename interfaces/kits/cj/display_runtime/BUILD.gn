@@ -50,6 +50,7 @@ ohos_shared_library("cj_display_ffi") {
       "ability_runtime:runtime",
       "bounds_checking_function:libsec_shared",
       "c_utils:utils",
+      "graphic_2d:2d_graphics_new",
       "hilog:libhilog",
       "hitrace:hitrace_meter",
       "napi:ace_napi",
