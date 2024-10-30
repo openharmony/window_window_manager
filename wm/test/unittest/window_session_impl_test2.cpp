@@ -1828,7 +1828,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitch, Function | SmallTest | Level
  * @tc.name: SetUiDvsyncSwitchSucc
  * @tc.desc: SetUiDvsyncSwitch Test Succ
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1843,7 +1843,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, Function | SmallTest | L
  * @tc.name: SetUiDvsyncSwitchErr
  * @tc.desc: SetUiDvsyncSwitch Test Err
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
