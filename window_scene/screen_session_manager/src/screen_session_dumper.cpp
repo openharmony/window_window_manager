@@ -164,6 +164,8 @@ void ScreenSessionDumper::ExcuteInjectCmd()
         SetEnterOrExitTentMode(params_[0]);
     } else if (params_[0].find(ARG_SET_HOVER_STATUS) != std::string::npos) {
         SetHoverStatusChange(params_[0]);
+    } else if (params_[0].find(ARG_SET_SUPER_FOLD_STATUS) != std::string::npos) {
+        SetSuperFoldStatusChange(params_[0]);
     }
 }
 
