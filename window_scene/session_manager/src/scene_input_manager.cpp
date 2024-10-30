@@ -222,7 +222,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
                 static_cast<MMI::DisplayMode>(displayMode)),
             .displayDirection = displayRotation,
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
-            .transform = transformData};
+            .transform = transformData,
+            .ppi = screenProperty.GetXDpi()};
         displayInfos.emplace_back(displayInfo);
     }
 }

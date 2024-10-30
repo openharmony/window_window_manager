@@ -1137,7 +1137,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         return ret;
     }
     UpdateTitleButtonVisibility();
-    UpdateFocusableOnShow(withFocus);
+    property_->SetFocusableOnShow(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
@@ -2237,10 +2237,6 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        if (surfaceNode_ != nullptr &&
-            (windowSystemConfig_.IsPcWindow() || GetFreeMultiWindowModeEnabledState())) {
-            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
-        }
         hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         UpdateDecorEnable(true);
@@ -3258,22 +3254,6 @@ WMError WindowSceneSessionImpl::UpdateAnimationFlagProperty(bool withAnimation)
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
 }
 
-void WindowSceneSessionImpl::UpdateFocusableOnShow(bool withFocus)
-{
-    if (withFocus) {
-        return; // default value of focusableOnShow
-    }
-    if (auto hostSession = GetHostSession()) {
-        auto ret = hostSession->SetFocusableOnShow(withFocus);
-        if (ret != WSError::WS_OK) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "SetFocusableOnShow failed, ret: %{public}d, name: %{public}s, id: %{public}d",
-                static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
-        }
-    } else {
-        TLOGE(WmsLogTag::WMS_FOCUS, "failed because of nullptr");
-    }
-}
-
 WMError WindowSceneSessionImpl::SetAlpha(float alpha)
 {
     WLOGFI("%{public}d alpha %{public}f", property_->GetPersistentId(), alpha);
@@ -3414,13 +3394,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     WMError ret = UpdateWindowModeImmediately(mode);
 
     if (windowSystemConfig_.IsPcWindow()) {
-        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-            surfaceNode_->SetFrameGravity(Gravity::LEFT);
-        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
-        } else if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-            surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
-        } else if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
             ret = SetLayoutFullScreenByApiVersion(true);
             if (ret != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
@@ -3506,7 +3480,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     NotifySwitchFreeMultiWindow(enable);
-    //Switch process finish, update system config
+    // Switch process finish, update system config
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;

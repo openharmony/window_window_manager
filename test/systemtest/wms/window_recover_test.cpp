@@ -113,7 +113,7 @@ HWTEST_F(WindowRecoverTest, RecoverAndReconnectSceneSession, Function | SmallTes
  * @tc.name: RecoverAndConnectSpecificSession
  * @tc.desc: RecoverAndConnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowRecoverTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();

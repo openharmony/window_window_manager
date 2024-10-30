@@ -162,10 +162,10 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, Function | SmallTest | Le
 }
 
 /**
-* @tc.name: NotifyWindowInfoChange
-* @tc.desc: check func NotifyWindowInfoChange
-* @tc.type: FUNC
-*/
+ * @tc.name: NotifyWindowInfoChange
+ * @tc.desc: check func NotifyWindowInfoChange
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChange start";
@@ -192,10 +192,10 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, Function | SmallTest | L
 }
 
 /**
-* @tc.name: NotifyWindowInfoChangeFromSession
-* @tc.desc: check func NotifyWindowInfoChangeFromSession
-* @tc.type: FUNC
-*/
+ * @tc.name: NotifyWindowInfoChangeFromSession
+ * @tc.desc: check func NotifyWindowInfoChangeFromSession
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChangeFromSession start";
@@ -220,10 +220,10 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, Function | Sm
 }
 
 /**
-* @tc.name: NotifyMMIWindowPidChange
-* @tc.desc: check func NotifyMMIWindowPidChange
-* @tc.type: FUNC
-*/
+ * @tc.name: NotifyMMIWindowPidChange
+ * @tc.desc: check func NotifyMMIWindowPidChange
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyMMIWindowPidChange start";
@@ -283,60 +283,25 @@ HWTEST_F(SceneInputManagerTest, UpdateFocusedSessionId, Function | SmallTest | L
 }
 
 /**
- * @tc.name: PrintWindowInfo
- * @tc.desc: PrintWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneInputManagerTest, PrintWindowInfo, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    std::vector<MMI::WindowInfo> windowInfoList;
-    SceneInputManager::GetInstance().PrintWindowInfo(windowInfoList);
-    MMI::WindowInfo windowInfo;
-    windowInfoList.emplace_back(windowInfo);
-    SceneInputManager::GetInstance().PrintWindowInfo(windowInfoList);
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(-1);
-    SceneInputManager::GetInstance().PrintWindowInfo(windowInfoList);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: FlushFullInfoToMMI
  * @tc.desc: FlushFullInfoToMMI
  * @tc.type: FUNC
  */
 HWTEST_F(SceneInputManagerTest, FlushFullInfoToMMI, Function | SmallTest | Level3)
 {
-    int ret = 0;
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
     SceneInputManager::GetInstance().FlushFullInfoToMMI(displayInfos, windowInfoList);
+    ASSERT_EQ(displayInfos.size(), 0);
     MMI::DisplayInfo displayInfo;
     displayInfos.emplace_back(displayInfo);
     SceneInputManager::GetInstance().FlushFullInfoToMMI(displayInfos, windowInfoList);
+    ASSERT_EQ(displayInfos.size(), 1);
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
     SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
     SceneInputManager::GetInstance().FlushFullInfoToMMI(displayInfos, windowInfoList);
+    ASSERT_EQ(windowInfoList.size(), 0);
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: FlushChangeInfoToMMI
- * @tc.desc: FlushChangeInfoToMMI
- * @tc.type: FUNC
- */
-HWTEST_F(SceneInputManagerTest, FlushChangeInfoToMMI, Function | SmallTest | Level3)
-{
-    int ret = 0;
-    std::map<uint64_t, std::vector<MMI::WindowInfo>> screenId2Windows;
-    SceneInputManager::GetInstance().FlushChangeInfoToMMI(screenId2Windows);
-    std::vector<MMI::WindowInfo> windowInfoList;
-    MMI::WindowInfo windowInfo;
-    windowInfoList.emplace_back(windowInfo);
-    screenId2Windows.emplace(1, windowInfoList);
-    SceneInputManager::GetInstance().FlushChangeInfoToMMI(screenId2Windows);
-    ASSERT_EQ(ret, 0);
 }
 
 /**
@@ -346,14 +311,13 @@ HWTEST_F(SceneInputManagerTest, FlushChangeInfoToMMI, Function | SmallTest | Lev
  */
 HWTEST_F(SceneInputManagerTest, ConstructDisplayInfos, Function | SmallTest | Level3)
 {
-    int ret = 0;
     std::vector<MMI::DisplayInfo> displayInfos;
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
+    int ret = displayInfos.size();
     ScreenProperty screenProperty0;
-    Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties().insert(
-        std::make_pair(0, screenProperty0));
+    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] = new ScreenSession(0, screenProperty0, 0);
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(ret + 1, displayInfos.size());
 }
 
 /**
@@ -735,24 +699,27 @@ HWTEST_F(SceneInputManagerTest, UpdateSecSurfaceInfo, Function | SmallTest | Lev
  */
 HWTEST_F(SceneInputManagerTest, UpdateDisplayAndWindowInfo, Function | SmallTest | Level3)
 {
-    int ret = 0;
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
     MMI::DisplayInfo displayinfo;
     displayInfos.emplace_back(displayinfo);
     SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    ASSERT_EQ(windowInfoList.size(), 0);
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     windowinfo.defaultHotAreas = std::vector<MMI::Rect>(MMI::WindowInfo::DEFAULT_HOTAREA_COUNT + 1);
     SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    ASSERT_NE(windowInfoList[0].defaultHotAreas.size(), MMI::WindowInfo::DEFAULT_HOTAREA_COUNT);
     windowinfo.defaultHotAreas = std::vector<MMI::Rect>();
     windowInfoList = std::vector<MMI::WindowInfo>(MAX_WINDOWINFO_NUM - 1);
     SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    ASSERT_NE(windowInfoList.size(), MAX_WINDOWINFO_NUM);
     windowInfoList = std::vector<MMI::WindowInfo>(MAX_WINDOWINFO_NUM + 1);
     SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
+    ASSERT_NE(windowInfoList.size(), MAX_WINDOWINFO_NUM);
     windowInfoList[0].defaultHotAreas.resize(MMI::WindowInfo::DEFAULT_HOTAREA_COUNT + 1);
     SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(displayInfos, windowInfoList);
-    ASSERT_EQ(ret, 0);
+    ASSERT_NE(windowInfoList[0].defaultHotAreas.size(), MMI::WindowInfo::DEFAULT_HOTAREA_COUNT);
 }
 
 /**

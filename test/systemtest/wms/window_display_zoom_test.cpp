@@ -169,6 +169,8 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, Function | MediumTest | Level3)
 
     WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
     sleep(1);
+    WindowAccessibilityController::GetInstance().SetAnchorOffset(0, 0);
+    sleep(1);
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);
 
