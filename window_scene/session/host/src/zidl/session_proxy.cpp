@@ -748,6 +748,32 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
 }
 
 /** @note @window.layout */
+WMError SessionProxy::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_GLOBAL_SCALED_RECT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    Rect tempRect = { reply.ReadInt32(), reply.ReadInt32(), reply.ReadUint32(), reply.ReadUint32() };
+    globalScaledRect = tempRect;
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
+/** @note @window.layout */
 WSError SessionProxy::UpdateClientRect(const WSRect& rect)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}u, %{public}u]",

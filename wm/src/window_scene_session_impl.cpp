@@ -1500,6 +1500,18 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
     return static_cast<WMError>(ret);
 }
 
+WMError WindowSceneSessionImpl::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    auto ret = hostSession->GetGlobalScaledRect(globalScaledRect);
+    return static_cast<WMError>(ret);
+}
+
 void WindowSceneSessionImpl::LimitCameraFloatWindowMininumSize(uint32_t& width, uint32_t& height, float& vpr)
 {
     // Float camera window has a special limit:
