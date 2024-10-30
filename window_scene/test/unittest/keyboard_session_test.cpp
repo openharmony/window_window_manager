@@ -1020,9 +1020,6 @@ HWTEST_F(KeyboardSessionTest, UpdateCallingSessionIdAndPosition01, Function | Sm
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->property_->SetCallingSessionId(-1);
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
-    keyboardSession->UpdateCallingSessionIdAndPosition(0);
-    keyboardSession->state_ = SessionState::STATE_CONNECT;
     keyboardSession->UpdateCallingSessionIdAndPosition(0);
     keyboardSession->UpdateCallingSessionIdAndPosition(-1);
     keyboardSession->property_->SetCallingSessionId(0);
@@ -1123,7 +1120,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession01, Function | SmallTest | Leve
     sptr<KSSceneSessionMocker> callingSession = GetSceneSessionMocker("callingSession", "callingSession");
     ASSERT_NE(callingSession, nullptr);
 
-    callingSession->updateRectCallback_ = [&resultRect](const WSRect& rect, const SizeChangeReason reason) {
+    callingSession->updateRectCallback_ = [&resultRect](const WSRect& rect, const SizeChangeReason& reason) {
         resultRect.posX_ = rect.posX_;
         resultRect.posY_ = rect.posY_;
         resultRect.width_ = rect.width_;
@@ -1206,11 +1203,11 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession03, Function | SmallTest | Leve
     ASSERT_NE(callingSession, nullptr);
     callingSession->winRect_ = { 1, 1, 1, 1 };
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 0;
-    callingSession->updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason reason) {};
+    callingSession->updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason& reason) {};
     keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
         return callingSession;
     };
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+
     keyboardSession->isVisible_ = true;
     auto callingOriPosY = 0;
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);

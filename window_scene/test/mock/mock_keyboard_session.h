@@ -38,7 +38,7 @@ public:
     sptr<SceneSession> callingSession_;
 };
 
-using UpdateSessionRectCallBack = std::function<void(const WSRect& rect, const SizeChangeReason reason)>;
+using UpdateSessionRectCallBack = std::function<void(const WSRect& rect, const SizeChangeReason& reason)>;
 class KSSceneSessionMocker : public SceneSession {
 public:
     KSSceneSessionMocker(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -51,7 +51,7 @@ public:
         return WSError::WS_OK;
     };
 
-    UpdateSessionRectCallBack updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason reason) {};
+    UpdateSessionRectCallBack updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason& reason) {};
 };
 } // namespace Rosen
 } // namespace OHOS
