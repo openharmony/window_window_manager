@@ -131,6 +131,7 @@ ohos_shared_library("scene_session_manager") {
     "libxml2:libxml2",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
 
@@ -281,6 +282,7 @@ ohos_shared_library("session_manager_lite") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
 

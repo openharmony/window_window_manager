@@ -54,6 +54,7 @@ ohos_shared_library("libintention_event") {
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "input:libmmi-client",
+    "libxml2:libxml2",
   ]
 
   defines = []
