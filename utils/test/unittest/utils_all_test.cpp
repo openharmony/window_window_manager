@@ -193,7 +193,7 @@ HWTEST_F(UtilsAllTest, SRHOnImageAvailable, Function | SmallTest | Level2)
     ASSERT_EQ(true, surfaceReaderHandlerImpl->flag_);
 }
 /**
- * tc.name: SRHOnImageAvailable01
+ * @tc.name: SRHOnImageAvailable01
  * @tc.desc: test SurfaceReaderHandlerImpl::OnImageAvailable
  * @tc.type: FUNC
  */
@@ -205,6 +205,7 @@ HWTEST_F(UtilsAllTest, SRHResetFlag, Function | SmallTest | Level2)
     ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
     surfaceReaderHandlerImpl->flag_ = true;
     surfaceReaderHandlerImpl->ResetFlag();
+    ASSERT_EQ(false, surfaceReaderHandlerImpl->flag_);
 }
 /**
  * @tc.name: SysCapUtilGetClientName
