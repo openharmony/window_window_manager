@@ -97,6 +97,7 @@ public:
     WMError HideNonSystemFloatingWindows(bool shouldHide) override;
     WMError SetSingleFrameComposerEnabled(bool enable) override;
     bool IsFloatingWindowAppType() const override;
+    bool IsPcOrPadCapabilityEnabled() const override;
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
@@ -272,6 +273,7 @@ protected:
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
+    float GetVirtualPixelRatio() override;
     virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
@@ -362,6 +364,11 @@ protected:
      */
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
+
+    /*
+     * Window Layout
+     */
+    void UpdateVirtualPixelRatio(const sptr<Display>& display);
 
 private:
     //Trans between colorGamut and colorSpace

@@ -94,6 +94,7 @@ constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t REMOVE_DISPLAY_MODE = 0;
+constexpr int32_t IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD = 10;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
@@ -1446,6 +1447,18 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
         return sessionDisplayPowerController_->SetDisplayState(state);
     }
 
+    UpdateDisplayState(screenIds, state);
+    bool ret = sessionDisplayPowerController_->SetDisplayState(state);
+    if (!ret && state == DisplayState::OFF) {
+        state = lastDisplayState_;
+        UpdateDisplayState(screenIds, state);
+    }
+    lastDisplayState_ = state;
+    return ret;
+}
+
+void ScreenSessionManager::UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state)
+{
     for (auto screenId : screenIds) {
         sptr<ScreenSession> screenSession = GetScreenSession(screenId);
         if (screenSession == nullptr) {
@@ -1457,7 +1470,6 @@ bool ScreenSessionManager::SetDisplayState(DisplayState state)
         TLOGI(WmsLogTag::DMS, "[UL_POWER]set screenSession displayState property: %{public}u",
             screenSession->GetScreenProperty().GetDisplayState());
     }
-    return sessionDisplayPowerController_->SetDisplayState(state);
 }
 
 void ScreenSessionManager::BlockScreenOnByCV(void)
@@ -1996,8 +2008,10 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::UPDATE_ROTATION);
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
         displayInfo->GetScreenId(), displayInfo->GetRotation());
+    IPCSkeleton::SetCallingIdentity(identity);
 }
 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
@@ -2027,7 +2041,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             }
             sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
             TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
-            screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
+            {
+                std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+                screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
+            }
             NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
             NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
             return;
@@ -2038,8 +2055,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             screenId);
         return;
     }
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
-
+    {
+        std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+        screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
+    }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
 }
@@ -2927,7 +2946,13 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
         TLOGE(WmsLogTag::DMS, "SetVirtualScreenRefreshRate, rsInterface error: %{public}d", res);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
+    // when skipFrameInterval > 10 means the skipFrameInterval is the virtual screen refresh rate
+    if (refreshInterval > IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD) {
+        screenSession->UpdateRefreshRate(refreshInterval);
+    } else {
+        screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
+    }
+    TLOGI(WmsLogTag::DMS, "refreshInterval is %{public}d", refreshInterval);
     return DMError::DM_OK;
 }
 
@@ -4770,7 +4795,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
         }
         clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
     };
-    taskScheduler_->PostAsyncTask(task, "ProxyForUnFreeze NotifyDisplayChanged", delayTime);
+    taskScheduler_->PostAsyncTask(task, "clientProxy_ SwitchUserCallback task", delayTime);
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
@@ -4988,7 +5013,11 @@ void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
         return;
     }
     for (auto& agent : agents) {
-        agent->NotifyAvailableAreaChanged(area);
+        int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER)) {
+            agent->NotifyAvailableAreaChanged(area);
+        }
     }
 }
 
