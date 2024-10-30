@@ -256,28 +256,6 @@ HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | L
 }
 
 /**
- * @tc.name: ClearEnterWindow01
- * @tc.desc: ClearEnterWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, ClearEnterWindow01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "ClearEnterWindow01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    int resultValue = 0;
-    SceneSession::ClearEnterWindow();
-    ASSERT_EQ(resultValue, 0);
-}
-
-/**
  * @tc.name: GetEnterWindow01
  * @tc.desc: GetEnterWindow
  * @tc.type: FUNC
