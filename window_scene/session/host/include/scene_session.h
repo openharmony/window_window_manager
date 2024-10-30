@@ -474,7 +474,7 @@ public:
      * Window ZOrder: PC
      */
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
-    void PcUpdateZOrderAndDirty(const uint32_t zOrder);
+    void UpdatePCZOrderAndMarkDirty(const uint32_t zOrder);
 
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
