@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-[[maybe_unused]] constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "AnomalyDetection" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "AnomalyDetection" };
 }
 
 void AnomalyDetection::SceneZOrderCheckProcess()
