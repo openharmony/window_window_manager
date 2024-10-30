@@ -1182,7 +1182,7 @@ WSError SceneSession::UpdateSessionRect(
         if (parentSession && parentSession->GetFloatingScale() != 0) {
             Rect parentGlobalRect;
             WMError errorCode = parentSession->GetGlobalScaledRect(parentGlobalRect);
-            if (parentGlobalRect != nullptr) {
+            if (parentGlobalRect) {
                 newRect.posX_ = (newRect.posX_ - parentGlobalRect.posX_) / parentSession->GetFloatingScale();
                 newRect.posY_ = (newRect.posY_ - parentGlobalRect.posY_) / parentSession->GetFloatingScale();
             }
