@@ -401,6 +401,13 @@ public:
      * @return the value true means to enable gesture back, and false means the opposite.
      */
     virtual bool GetGestureBackEnabled() const { return true; }
+
+    /**
+     * @brief Get whether the gesture back is enabled or not.
+     *
+     * @return the value true means to enable gesture back, and false means the opposite.
+     */
+    virtual bool NotifyRemoveStartingWindow() const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

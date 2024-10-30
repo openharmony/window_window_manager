@@ -101,6 +101,7 @@ public:
     virtual void OnExtensionTimeout(int32_t errorCode) {}
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
+    virtual void OnAppRemoveStartingWindow() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -143,6 +144,7 @@ public:
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
     WSError DrawingCompleted() override;
+    WSError RemoveStartingWindow() override;
     void ResetSessionConnectState();
     void ResetIsActive();
 
@@ -222,6 +224,8 @@ public:
     WSRect GetLayoutRect() const;
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
+    void SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow);
+    bool GetEnableRemoveStartingWindow() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -723,7 +727,7 @@ private:
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
-
+    bool enableRemoveStartingWindow_ {false};
     /*
      * Multi Window
      */

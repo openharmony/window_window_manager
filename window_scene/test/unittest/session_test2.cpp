@@ -69,6 +69,7 @@ private:
         void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
             int64_t uiExtensionIdLevel) override {}
         void OnDrawingCompleted() override {}
+        void OnAppRemoveStartingWindow() override {}
     };
     std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 
