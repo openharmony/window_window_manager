@@ -1056,6 +1056,32 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest 
 }
 
 /**
+ * @tc.name: UpdateVirtualPixelRatio
+ * @tc.desc: test UpdateVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UpdateVirtualPixelRatio, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateVirtualPixelRatio start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateVirtualPixelRatio");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    window->property_->SetDisplayId(-1);
+    sptr<Display> display = nullptr;
+    window->UpdateVirtualPixelRatio(display);
+    ASSERT_EQ(window->virtualPixelRatio_, 1.0f);
+
+    window->property_->SetDisplayId(0);
+    display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    window->UpdateVirtualPixelRatio(display);
+    ASSERT_NE(window->virtualPixelRatio_, 1.0f);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateVirtualPixelRatio end";
+}
+
+/**
  * @tc.name: SetAutoStartPiP
  * @tc.desc: SetAutoStartPiP
  * @tc.type: FUNC
