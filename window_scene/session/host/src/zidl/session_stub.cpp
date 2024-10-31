@@ -486,7 +486,7 @@ int SessionStub::HandleUpdateClientRect(MessageParcel& data, MessageParcel& repl
     }
     WSRect rect = { posX, posY, width, height };
     WSError errCode = UpdateClientRect(rect);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteUint32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

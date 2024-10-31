@@ -859,13 +859,12 @@ HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus03, Function | SmallTest | 
  * @tc.name: PreLayoutOnShow01
  * @tc.desc: PreLayoutOnShow
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("PreLayoutOnShow01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(2345);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
