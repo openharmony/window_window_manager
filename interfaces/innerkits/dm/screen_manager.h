@@ -112,7 +112,7 @@ public:
      */
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
 
-     /**
+    /**
      * @brief Make screens as mirror-screen
      *
      * @param mainScreenId Main screen id.
@@ -123,7 +123,7 @@ public:
     DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode);
 
-     /**
+    /**
      * @brief Set Screen Relative Position
      *
      * @param mainScreenOptions Main screen id and position.

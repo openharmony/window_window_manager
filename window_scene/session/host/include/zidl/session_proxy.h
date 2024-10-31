@@ -102,7 +102,7 @@ public:
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     
-    /*
+    /**
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
