@@ -701,7 +701,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, reason:%{public}d %{public}s, "
-            "rect:%{public}s, clientRect:%{public}s", 
+            "rect:%{public}s, clientRect:%{public}s",
             funcName, session->GetPersistentId(), session->reason_, updateReason.c_str(),
             rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
 
