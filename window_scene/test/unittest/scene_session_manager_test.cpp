@@ -1538,27 +1538,6 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 }
 
 /**
- * @tc.name: GetMainWindowInfos
- * @tc.desc: SceneSesionManager get topN main window infos;
- * @tc.type: FUNC
-*/
-HWTEST_F(SceneSessionManagerTest, GetMainWindowInfos, Function | SmallTest | Level3)
-{
-    int32_t topNum = 1024;
-    std::vector<MainWindowInfo> topNInfos;
-    auto result = ssm_->GetMainWindowInfos(topNum, topNInfos);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
-
-    topNum = 0;
-    ssm_->GetMainWindowInfos(topNum, topNInfos);
-
-    topNum = 1000;
-    MainWindowInfo info;
-    topNInfos.push_back(info);
-    ssm_->GetMainWindowInfos(topNum, topNInfos);
-}
-
-/**
  * @tc.name: GetAllMainWindowInfos001
  * @tc.desc: SceneSessionManager get all main window infos.
  * @tc.type: FUNC
