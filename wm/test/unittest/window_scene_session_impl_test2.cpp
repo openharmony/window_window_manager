@@ -72,7 +72,7 @@ RSSurfaceNode::SharedPtr WindowSceneSessionImplTest2::CreateRSSurfaceNode()
 }
 
 namespace {
-/*
+/**
  * @tc.name: SetBackdropBlur
  * @tc.desc: SetBackdropBlur test
  * @tc.type: FUNC
@@ -91,7 +91,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetBackdropBlur, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlur(1.0));
 }
 
-/*
+/**
  * @tc.name: SetShadowColor
  * @tc.desc: SetShadowColor test
  * @tc.type: FUNC
@@ -110,7 +110,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetShadowColor, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowColor("#ff22ee44"));
 }
 
-/*
+/**
  * @tc.name: SetCornerRadius
  * @tc.desc: SetCornerRadius test
  * @tc.type: FUNC
@@ -127,7 +127,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetCornerRadius, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
 }
 
-/*
+/**
  * @tc.name: SetShadowRadius
  * @tc.desc: SetShadowRadius test
  * @tc.type: FUNC
