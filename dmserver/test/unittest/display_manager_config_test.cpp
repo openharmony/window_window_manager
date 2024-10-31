@@ -31,8 +31,8 @@ class DisplayManagerConfigTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
+    virtual void SetUp() override;
+    virtual void TearDown() override;
 };
 
 void DisplayManagerConfigTest::SetUpTestCase()
