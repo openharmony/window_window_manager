@@ -4148,7 +4148,7 @@ bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
 
 WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 {
-    if (windowSystemConfig_.IsPcWindow()) {
+    if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4165,7 +4165,7 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
  
 WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
 {
-    if (windowSystemConfig_.IsPcWindow()) {
+    if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
