@@ -1407,11 +1407,11 @@ HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
 }
 
 /*
- * @tc.name: SetKeepScreenOn
- * @tc.desc: SetKeepScreenOn test
+ * @tc.name: SetKeepScreenOn01
+ * @tc.desc: Window is Invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Level3)
+HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn01, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
@@ -1419,7 +1419,19 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetKeepScreenOn(false));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetKeepScreenOn(true));
+}
 
+/*
+ * @tc.name: SetKeepScreenOn02
+ * @tc.desc: Window is Valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    window->property_->SetWindowName("SetKeepScreenOn");
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
