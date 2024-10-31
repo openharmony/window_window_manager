@@ -1235,7 +1235,7 @@ HWTEST_F(SceneSessionTest2, SetSelfToken, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificSession =
         new SceneSession::SpecificSessionCallback();
     sceneSession = new (std::nothrow) SceneSession(info, specificSession);
-    EXPECT_NE(nullptr, sceneSessionn);
+    EXPECT_NE(nullptr, sceneSession);
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
     sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
     sceneSession->UpdateSessionState(SessionState::STATE_ACTIVE);
