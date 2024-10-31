@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class ScreenSessionManagerStubTest : public testing::Test {
 public:
@@ -340,7 +340,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest12, Function | SmallTest |
     data.WriteUint32(static_cast<uint32_t>(type));
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
-    
+
     uint32_t code = static_cast<uint32_t>(
         IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER);
 
@@ -936,7 +936,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest39, Function | SmallTest |
 
 /**
  * @tc.name: OnRemoteRequest40
- * @tc.desc: normal function
+ * @tc.desc: normal function, TRANS_ID_SET_SCREENID_PRIVACY_STATE test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest40, Function | SmallTest | Level2)
@@ -946,16 +946,18 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest40, Function | SmallTest |
     MessageOption option;
 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUint64(0);
+    DisplayId displayId = 0;
+    data.WriteUint64(displayId);
+    data.WriteBool(false);
     uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_SPACE);
+        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
 
 /**
  * @tc.name: OnRemoteRequest41
- * @tc.desc: normal function
+ * @tc.desc: normal function, TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest41, Function | SmallTest | Level2)
@@ -965,296 +967,14 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest41, Function | SmallTest |
     MessageOption option;
 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUint64(0);
+    DisplayId displayId = 0;
+    data.WriteUint64(displayId);
+    std::vector<std::string> privacyWindowList{"win0", "win1"};
+    data.WriteStringVector(privacyWindowList);
     uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_SPACE);
+        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest42
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest42, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_HDR_FORMAT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest43
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest43, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUint64(0);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_HDR_FORMAT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest44
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest44, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUint64(0);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_HDR_FORMAT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest45
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest45, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_PIXEL_FORMAT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest46
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest46, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUint64(0);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_PIXEL_FORMAT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest47
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest47, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest48
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest48, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_GAMUT_MAP);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest49
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest49, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUint64(0);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_GAMUT_MAP);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest050
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest050, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_GAMUT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest051
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest051, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUint64(0);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest052
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest052, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest053
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest053, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_RESOLUTION);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest054
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest054, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_SPACE);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest055
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest055, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest056
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest056, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
 }
 
 /**
@@ -1276,49 +996,6 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest057, Function | SmallTest 
 }
 
 /**
- * @tc.name: OnRemoteRequest58
- * @tc.desc: normal function, TRANS_ID_SET_SCREENID_PRIVACY_STATE test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest58, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    DisplayId displayId = 0;
-    data.WriteUint64(displayId);
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest59
- * @tc.desc: normal function, TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest59, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    DisplayId displayId = 0;
-    data.WriteUint64(displayId);
-    std::vector<std::string> privacyWindowList{"win0", "win1"};
-    data.WriteStringVector(privacyWindowList);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
  * @tc.name: OnRemoteRequest60
  * @tc.desc: normal function, TRANS_ID_SET_SCREEN_OFF_DELAY_TIME test
  * @tc.type: FUNC
@@ -1328,7 +1005,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest60, Function | SmallTest |
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-
+ 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     data.WriteInt32(2000);
     uint32_t code = static_cast<uint32_t>(
@@ -2111,6 +1788,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest98, Function | SmallTest |
     MessageOption option;
 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+
     int32_t size = 200;
     data.WriteInt32(size);
     for (int32_t i = 0; i < size; i++) {
@@ -2437,250 +2115,6 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest114, Function | SmallTest 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(
         IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest115
- * @tc.desc: normal function, TRANS_ID_GET_SCREEN_POWER
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest115, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1115;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER);
-
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest116
- * @tc.desc: normal function, TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest116, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1116;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    data.WriteBool(false);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest117
- * @tc.desc: normal function, TRANS_ID_SET_RESOLUTION
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest117, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1117;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    uint32_t width = 1080;
-    data.WriteUint32(width);
-    uint32_t height = 2560;
-    data.WriteUint32(height);
-    float virtualPixelRatio = 64;
-    data.WriteFloat(virtualPixelRatio);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_RESOLUTION);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest118
- * @tc.desc: normal function, TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest118, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1118;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest119
- * @tc.desc: normal function, TRANS_ID_SCREEN_SET_COLOR_GAMUT
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest119, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1119;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    int32_t colorGamutIdx = 64;
-    data.WriteInt32(colorGamutIdx);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_GAMUT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest120
- * @tc.desc: normal function, TRANS_ID_SCREEN_SET_GAMUT_MAP
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest120, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1119;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    uint32_t colorGamutIdx = 64;
-    data.WriteUint32(colorGamutIdx);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_GAMUT_MAP);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest121
- * @tc.desc: normal function, TRANS_ID_SCREEN_SET_COLOR_TRANSFORM
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest121, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1121;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest122
- * @tc.desc: normal function, TRANS_ID_SCREEN_SET_PIXEL_FORMAT
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest122, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1122;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    int32_t pixelFormat = 64;
-    data.WriteInt32(pixelFormat);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_PIXEL_FORMAT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest123
- * @tc.desc: normal function, TRANS_ID_SCREEN_SET_HDR_FORMAT
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest123, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1123;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    int32_t modeIdx = 120;
-    data.WriteInt32(modeIdx);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_HDR_FORMAT);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest124
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest124, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    ScreenId testScreenId = 1123;
-    data.WriteUint64(static_cast<uint64_t>(testScreenId));
-    int32_t colorSpace = 32;
-    data.WriteInt32(colorSpace);
-    uint32_t code = static_cast<uint32_t>(
-        IDisplayManager::DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_SPACE);
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: OnRemoteRequest125
- * @tc.desc: TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest125, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    ScreenId screenId = 0;
-    float scaleX = 1.0f;
-    float scaleY = 1.0f;
-    float pivotX = 0.5f;
-    float pivotY = 0.5f;
-    ASSERT_TRUE(data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor()) &&
-                data.WriteUint64(static_cast<uint64_t>(screenId)) && data.WriteFloat(scaleX) &&
-                data.WriteFloat(scaleY) && data.WriteFloat(pivotX) && data.WriteFloat(pivotY));
-    uint32_t code =
-        static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
