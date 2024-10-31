@@ -1948,6 +1948,14 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Enable or disable move window.
+     *
+     * @param enable The value true means to enable window moving, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set window container color.
      *
      * @param activeColor Background active color.

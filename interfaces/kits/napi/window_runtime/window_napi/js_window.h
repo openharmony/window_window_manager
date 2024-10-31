@@ -158,6 +158,7 @@ public:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
+    static napi_value SetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
@@ -243,6 +244,7 @@ private:
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
