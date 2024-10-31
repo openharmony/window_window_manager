@@ -497,6 +497,27 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
 }
 
 /**
+ * @tc.name: ScreenManager07
+ * @tc.desc: Get and set screenMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level2)
+{
+    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
+    ASSERT_TRUE(screen);
+    auto modes = screen->GetSupportedModes();
+    auto defaultModeId = screen->GetModeId();
+    ASSERT_GT(modes.size(), 0);
+    for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
+        ASSERT_EQ(DMError::DM_OK, screen->SetScreenActiveMode(modeIdx));
+        sleep(TEST_SLEEP_S);
+        ASSERT_EQ(modeIdx, screen->GetModeId());
+        sleep(TEST_SLEEP_S);
+    }
+    ASSERT_EQ(DMError::DM_OK, screen->SetScreenActiveMode(defaultModeId));
+}
+
+/**
  * @tc.name: ScreenManager08
  * @tc.desc: Create a virtual screen as expansion of default screen, and destroy virtual screen
  * @tc.type: FUNC
