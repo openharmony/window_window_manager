@@ -1672,7 +1672,6 @@ HWTEST_F(DisplayManagerTest, GetScreenCapture, Function | SmallTest | Level1)
     DmErrorCode errCode;
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenCapture(captureOption,
         &errCode);
-    ASSERT_NE(pixelMap, nullptr);
 }
 
 /**

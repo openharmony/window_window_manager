@@ -121,7 +121,7 @@ public:
     void SetScreenSceneDpiChangeListener(const SetScreenSceneDpiFunc& func);
     void SetScreenSceneDpi(float density);
     void SetDensityInCurResolution(float densityInCurResolution);
-    void SetDefaultDensity(float DefaultDensity);
+    void SetDefaultDensity(float defaultDensity);
     void UpdateVirtualPixelRatio(const RRect& bounds);
     void SetScreenType(ScreenType type);
 

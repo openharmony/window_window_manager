@@ -55,7 +55,7 @@ std::ostream& operator<<(std::ostream& os, const Rect& r);
     Event: Used for record a rect edge in/out event
     y_: rect edge Y value
     type: OPEN/CLOSE: lhs rect in/out; VOID_OPEN/VOID_CLOSE: rhs rect in/out
-*/
+ */
 class Event {
 public:
     // Use different value to differentiate lhs and rhs ranges.
