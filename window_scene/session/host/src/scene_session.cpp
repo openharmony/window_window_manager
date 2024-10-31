@@ -659,29 +659,30 @@ WSError SceneSession::SetAspectRatio(float ratio)
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rect, reason, rsTransaction, updateReason]() {
+    const char* const funcname = __func__;
+    auto task = [weakThis = wptr(this), rect, reason, rsTransaction, updateReason, funcname]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null", funcname);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END &&
             (session->GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
              session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
             if (!session->sessionStage_) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s",
-                    session->GetPersistentId(), rect.ToString().c_str());
+                TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: skip same rect update id:%{public}d rect:%{public}s",
+                    funcname, session->GetPersistentId(), rect.ToString().c_str());
                 return WSError::WS_OK;
             } else if (session->GetClientRect() == rect) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s "
-                    "clientRect:%{public}s", session->GetPersistentId(), rect.ToString().c_str(),
+                TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: skip same rect update id:%{public}d rect:%{public}s "
+                    "clientRect:%{public}s", funcname, session->GetPersistentId(), rect.ToString().c_str(),
                     session->GetClientRect().ToString().c_str());
                 return WSError::WS_OK;
             }
         }
         if (rect.IsInvalid()) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d rect:%{public}s is invalid",
-                session->GetPersistentId(), rect.ToString().c_str());
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d rect:%{public}s is invalid",
+                funcname, session->GetPersistentId(), rect.ToString().c_str());
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
@@ -690,17 +691,17 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         // position change no need to notify client, since frame layout finish will notify
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_) &&
             (session->reason_ != SizeChangeReason::MOVE || !session->rectChangeListenerRegistered_)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "position change no need notify client id:%{public}d, rect:%{public}s, "
+            TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: position change no need notify client id:%{public}d, rect:%{public}s, "
                 "preRect: %{public}s",
-                session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
+                funcname, session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
         } else {
             session->winRect_ = rect;
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s, "
-            "clientRect:%{public}s", session->GetPersistentId(), session->reason_, updateReason.c_str(),
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: UpdateRect id:%{public}d, reason:%{public}d %{public}s, rect:%{public}s, "
+            "clientRect:%{public}s", funcname, session->GetPersistentId(), session->reason_, updateReason.c_str(),
             rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
 
         return WSError::WS_OK;
