@@ -115,7 +115,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent1, Function | SmallTest | Level2)
     keyEvent = nullptr;
     listener->OnInputEvent(keyEvent);
     keyEvent = tempKeyEvent;
-    auto channel = InputTransferStation::GetInstance().GetInputChannel(0);
+    auto channel = InputTransferStation::GetInstance().GetInputChannel(1);
     listener->OnInputEvent(keyEvent);
     EXPECT_NE(nullptr, channel);
 }
@@ -161,7 +161,7 @@ HWTEST_F(InputTransferStationTest, OnInputEvent3, Function | SmallTest | Level2)
     pointerEvent->SetAgentWindowId(0);
     listener->OnInputEvent(pointerEvent);
     pointerEvent->SetAgentWindowId(static_cast<uint32_t>(-1));
-    auto channel = InputTransferStation::GetInstance().GetInputChannel(0);
+    auto channel = InputTransferStation::GetInstance().GetInputChannel(1);
     listener->OnInputEvent(pointerEvent);
     EXPECT_NE(nullptr, channel);
 }
