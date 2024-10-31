@@ -3189,9 +3189,12 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
+        info.isCalledRightlyByCallerId_ = (info.callerToken_ == callerSession->GetAbilityToken()) &&
+            SessionPermission::VerifyPermissionByBundleName(info.bundleName_,
+                                                            "ohos.permission.CALLED_TRANSITION_ON_LOCK_SCREEN",
+                                                            SceneSessionManager::GetInstance().GetCurrentUserId());
         TLOGI(WmsLogTag::WMS_SCB,
-            "isCalledRightlyByCallerId result is: %{public}d", false);
-        info.isCalledRightlyByCallerId_ = false;
+            "isCalledRightlyByCallerId result is: %{public}d", info.isCalledRightlyByCallerId_);
     }
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [weakThis = wptr(this), sessionInfo] {

@@ -196,6 +196,14 @@ napi_value JsWindow::MoveWindowToAsync(napi_env env, napi_callback_info info)
 }
 
 /** @note @window.layout */
+napi_value JsWindow::GetGlobalScaledRect(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "GetGlobalScaledRect");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetGlobalScaledRect(env, info) : nullptr;
+}
+
+/** @note @window.layout */
 napi_value JsWindow::Resize(napi_env env, napi_callback_info info)
 {
     WLOGD("Resize");
@@ -1590,6 +1598,29 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     NapiAsyncTask::Schedule("JsWindow::OnMoveWindowToAsync",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info)
+{
+    wptr<Window> weakToken(windowToken_);
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    Rect globalScaledRect;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetGlobalScaledRect(globalScaledRect));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] OnGetGlobalScaledRect end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+    napi_value globalScaledRectObj = GetRectAndConvertToJsValue(env, globalScaledRect);
+    if (globalScaledRectObj == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return globalScaledRectObj;
 }
 
 /** @note @window.layout */
@@ -6949,6 +6980,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "moveTo", moduleName, JsWindow::MoveTo);
     BindNativeFunction(env, object, "moveWindowTo", moduleName, JsWindow::MoveWindowTo);
     BindNativeFunction(env, object, "moveWindowToAsync", moduleName, JsWindow::MoveWindowToAsync);
+    BindNativeFunction(env, object, "getGlobalRect", moduleName, JsWindow::GetGlobalScaledRect);
     BindNativeFunction(env, object, "resetSize", moduleName, JsWindow::Resize);
     BindNativeFunction(env, object, "resize", moduleName, JsWindow::ResizeWindow);
     BindNativeFunction(env, object, "resizeAsync", moduleName, JsWindow::ResizeWindowAsync);

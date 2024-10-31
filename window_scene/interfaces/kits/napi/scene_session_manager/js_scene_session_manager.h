@@ -221,6 +221,8 @@ private:
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
     void ProcessAbilityManagerCollaboratorRegistered();
     void OnAbilityManagerCollaboratorRegistered();
+    void RegisterRootSceneCallbacksOnSSManager();
+    void RegisterSSManagerCallbacksOnRootScene();
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
