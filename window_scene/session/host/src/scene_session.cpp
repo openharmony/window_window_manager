@@ -4685,6 +4685,25 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
+{
+    auto task = [weakThis = wptr(this), isDefaultDensityEnabled]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "OnDefaultDensityEnabled, isDefaultDensityEnabled: %{public}d",
+            isDefaultDensityEnabled);
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onDefaultDensityEnabledFunc_) {
+            session->sessionChangeCallback_->onDefaultDensityEnabledFunc_(isDefaultDensityEnabled);
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnDefaultDensityEnabled");
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
 {
     const char* const funcName = __func__;
