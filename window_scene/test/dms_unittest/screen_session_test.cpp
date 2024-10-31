@@ -2193,7 +2193,7 @@ HWTEST_F(ScreenSessionTest, PowerStatusChange, Function | SmallTest | Level2)
  * @tc.name: SetScreenScale
  * @tc.desc: SetScreenScale test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(ScreenSessionTest, SetScreenScale, Function | SmallTest | Level2)
 {
     ScreenSession session;

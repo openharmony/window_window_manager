@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef OHOS_ROSEN_SUPER_FOLD_STATE_MANAGER_H
 #define OHOS_ROSEN_SUPER_FOLD_STATE_MANAGER_H
@@ -47,8 +47,11 @@ public:
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
     SuperFoldStatus GetCurrentStatus();
+
+    void SetCurrentStatus(SuperFoldStatus curState);
+    
 private:
-    SuperFoldStatus curState_;
+    SuperFoldStatus curState_ = SuperFoldStatus::HALF_FOLDED;
 
     struct Transition {
         SuperFoldStatus nextState;
@@ -58,23 +61,23 @@ private:
     using transEvent = std::pair<SuperFoldStatus, SuperFoldStatusChangeEvents>;
     std::map<transEvent, Transition> stateManagerMap_;
 
-    static void DoFoldToHalfFold();
+    static void DoAngleChangeFolded();
 
-    static void DoHalfFoldToFold();
+    static void DoAngleChangeHalfFolded();
 
-    static void DoHalFoldToExpand();
+    static void DoAngleChangeExpanded();
 
-    static void DoExpandToHalfFold();
+    static void DoKeyboardOn();
 
-    static void DoHalfFoldToKeyboard();
+    static void DoKeyboardOff();
 
-    static void DoKeyboardToHalfFold();
+    static void DoSoftKeyboardOn();
 
-    static void DoHalfFoldToSoftKeyboard();
+    static void DoSoftKeyboardOff();
 
-    static void DoSoftKeyboardToHalfFold();
+    static void DoKeyboardToExpanded();
 
-    static void DoSoftKeyboardToKeyboard();
+    static void DoExpandedToKeyboard();
 };
 } // Rosen
 } // OHOS

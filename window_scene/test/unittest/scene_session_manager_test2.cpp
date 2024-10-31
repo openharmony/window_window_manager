@@ -1462,7 +1462,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, Function | SmallT
  * @tc.name: StartWindowInfoReportLoop
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, StartWindowInfoReportLoop, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1477,7 +1477,7 @@ HWTEST_F(SceneSessionManagerTest2, StartWindowInfoReportLoop, Function | SmallTe
  * @tc.name: GetFocusWindowInfo
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1489,7 +1489,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo, Function | SmallTest | Le
  * @tc.name: GetFocusWindowInfo
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1508,7 +1508,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, Function | SmallTest | L
  * @tc.name: SetSessionLabel
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1526,7 +1526,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, Function | SmallTest | Level
  * @tc.name: SetSessionIcon
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1544,7 +1544,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, Function | SmallTest | Level3
  * @tc.name: InitWithRenderServiceAdded
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1555,7 +1555,7 @@ HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, Function | SmallT
  * @tc.name: PendingSessionToForeground
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1570,10 +1570,31 @@ HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, Function | SmallT
 }
 
 /**
+ * @tc.name: GetFocusSessionToken
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetFocusSessionToken, Function | SmallTest | Level3)
+{
+    WSError ret;
+    sptr<IRemoteObject> token = new IRemoteObjectMocker();
+    ret = ssm_->GetFocusSessionToken(token);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ret = ssm_->GetFocusSessionToken(token);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
+}
+
+/**
  * @tc.name: GetFocusSessionElement
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1592,7 +1613,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, Function | SmallTest 
  * @tc.name: GetAllAbilityInfos
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Level3)
 {
     WSError ret;
@@ -1625,7 +1646,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAllAbilityInfos, Function | SmallTest | Le
  * @tc.name: GetIsLayoutFullScreen
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, Function | SmallTest | Level3)
 {
     WSError ret;
@@ -1655,7 +1676,7 @@ HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, Function | SmallTest |
  * @tc.name: UpdateSessionAvoidAreaListener
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1679,7 +1700,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, Function | Sm
  * @tc.name: UpdateSessionTouchOutsideListener
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1704,7 +1725,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, Function |
  * @tc.name: GetSessionSnapshotById
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1716,7 +1737,7 @@ HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, Function | SmallTest 
  * @tc.name: ClearSession
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, ClearSession, Function | SmallTest | Level3)
 {
     WSError ret;
@@ -1728,7 +1749,7 @@ HWTEST_F(SceneSessionManagerTest2, ClearSession, Function | SmallTest | Level3)
  * @tc.name: ClearAllSessions
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, Function | SmallTest | Level3)
 {
     WSError ret;
@@ -1740,7 +1761,7 @@ HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, Function | SmallTest | Leve
  * @tc.name: GetTopWindowId
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3)
 {
     WMError ret;
@@ -1766,7 +1787,7 @@ HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, Function | SmallTest | Level3
  * @tc.name: InitPersistentStorage
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1781,7 +1802,7 @@ HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, Function | SmallTest |
  * @tc.name: GetSessionSnapshotFilePath
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotFilePath, Function | SmallTest | Level3)
 {
     string ret;
@@ -1805,7 +1826,7 @@ HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotFilePath, Function | SmallT
  * @tc.name: GetAccessibilityWindowInfo
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, Function | SmallTest | Level3)
 {
     WMError ret;
@@ -1830,7 +1851,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, Function | SmallT
  * @tc.name: OnScreenshot
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1862,7 +1883,7 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, Function | SmallTest | Level3)
  * @tc.name: ProcessSubSessionForeground
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, ProcessSubSessionForeground, Function | SmallTest | Level3)
 {
     {
@@ -1934,7 +1955,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, Function | SmallTe
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function | SmallTest | Level3)
 {
     sptr<ISessionStage> sessionStage;
@@ -1990,7 +2011,7 @@ HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function |
  * @tc.name: ClosePipWindowIfExist
  * @tc.desc: ClosePipWindowIfExist
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -2009,7 +2030,7 @@ HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest |
  * @tc.name: RecoverAndConnectSpecificSession
  * @tc.desc: RecoverAndConnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -2029,7 +2050,7 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, Function | 
  * @tc.name: CacheSubSessionForRecovering
  * @tc.desc: CacheSubSessionForRecovering
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property;
@@ -2066,7 +2087,7 @@ HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | Smal
  * @tc.name: SetAlivePersistentIds
  * @tc.desc: SetAlivePersistentIds
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, SetAlivePersistentIds, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -2079,7 +2100,7 @@ HWTEST_F(SceneSessionManagerTest2, SetAlivePersistentIds, Function | SmallTest |
  * @tc.name: NotifyCreateToastSession
  * @tc.desc: NotifyCreateToastSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();

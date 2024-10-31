@@ -294,9 +294,9 @@ void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTen
     TLOGI(WmsLogTag::DMS, "report tentStatus: %{public}d", status);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-        "TENT_MODE",
+        "FOLD_TENT_MODE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "TENT_STATUS", status);
+        "FOLD_TENT_STATUS", status);
     if (ret != 0) {
         TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
