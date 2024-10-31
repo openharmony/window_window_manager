@@ -79,6 +79,7 @@ using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutPa
 using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
+using NotifyDefaultDensityEnabledFunc = std::function<void(bool isDefaultDensityEnabled)>;
 using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHoverShown,
     bool isDockHoverShown)>;
 using NotifyRestoreMainWindowFunc = std::function<void()>;
@@ -132,6 +133,7 @@ public:
         ClearCallbackMapFunc clearCallbackFunc_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
+        NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
     };
 
     // func for change window scene pattern property
@@ -182,6 +184,9 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
+    WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
+    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     virtual void OpenKeyboardSyncTransaction() {};
@@ -189,7 +194,8 @@ public:
         bool isKeyboardShow, bool isRotating) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override;
+    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason,
+        bool isGlobal = false, bool isFromMoveToGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;

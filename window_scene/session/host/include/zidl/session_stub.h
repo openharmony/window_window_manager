@@ -68,12 +68,12 @@ private:
     int HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
-    int HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply);
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply);
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
+    int HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply);
     int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);

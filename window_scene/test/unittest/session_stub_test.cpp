@@ -271,9 +271,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Lev
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY), data, reply, option);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
-    res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
@@ -368,11 +365,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Lev
     ASSERT_EQ(data.WriteUint64(2), true);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteUint32(1), true);
     res = session_->ProcessRemoteRequest(
