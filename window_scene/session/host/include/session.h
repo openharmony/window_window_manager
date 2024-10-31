@@ -209,6 +209,10 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
+
+    /*
+     * Window Layout
+     */
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
 
@@ -522,20 +526,14 @@ protected:
     std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
     bool isActive_ = false;
     bool isSystemActive_ = false;
-    WSRect winRect_;
-    WSRect clientRect_; // rect saved when prelayout or notify client to update rect
-    WSRect lastLayoutRect_; // rect saved when go background
-    WSRect layoutRect_; // rect of root view
-    WSRect globalRect_; // globalRect include translate
+
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
-    SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
-    NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
@@ -571,6 +569,14 @@ protected:
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
+
+    WSRect winRect_;
+    WSRect clientRect_; // rect saved when prelayout or notify client to update rect
+    WSRect lastLayoutRect_; // rect saved when go background
+    WSRect layoutRect_; // rect of root view
+    WSRect globalRect_; // globalRect include translate
+    SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
+    NotifySessionRectChangeFunc sessionRectChangeFunc_;
 
     /*
      * Window ZOrder
