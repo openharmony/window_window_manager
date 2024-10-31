@@ -120,7 +120,7 @@ namespace {
         controller->ConvertBoundaryRectsByRotation(boundaryRects, displayId);
     }
 
-      /**
+    /**
      * @tc.name: CurrentRotation90
      * @tc.desc: CurrentRotation90 func
      * @tc.type: FUNC
@@ -145,7 +145,7 @@ namespace {
         ASSERT_EQ(finalVector[0].height_, 20);
     }
 
-     /**
+    /**
      * @tc.name: CurrentRotation180
      * @tc.desc: CurrentRotation180 func
      * @tc.type: FUNC

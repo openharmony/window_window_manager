@@ -66,9 +66,9 @@ void WindowDisplayChangeAdapterTest::TearDown()
 
 namespace {
 /**
- *@tc.name: OnChange
- *@tc.desc: Window Display Information Change
- *@tc.type: FUNC
+ * @tc.name: OnChange
+ * @tc.desc: Window Display Information Change
+ * @tc.type: FUNC
  */
 HWTEST_F(WindowDisplayChangeAdapterTest, OnChange, Function | SmallTest | Level2)
 {
@@ -83,9 +83,9 @@ HWTEST_F(WindowDisplayChangeAdapterTest, OnChange, Function | SmallTest | Level2
 }
 
 /**
- *@tc.name: OnDisplayInfoChange
- *@tc.desc: notify Display Information Change
- *@tc.type: FUNC
+ * @tc.name: OnDisplayInfoChange
+ * @tc.desc: notify Display Information Change
+ * @tc.type: FUNC
  */
 HWTEST_F(WindowDisplayChangeAdapterTest, OnDisplayInfoChange, Function | SmallTest | Level2)
 {

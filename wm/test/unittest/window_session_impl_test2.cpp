@@ -1938,7 +1938,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Le
     window->SetUiDvsyncSwitch(false);
 }
 
-/*
+/**
  * @tc.name: SetRestoredRouterStack_0100
  * @tc.desc: basic function test of set or get restored router stack.
  * @tc.type: FUNC

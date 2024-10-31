@@ -223,7 +223,7 @@ public:
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
 
-    /*
+    /**
      * PiP Window
      */
     PiPTemplateInfo GetPiPTemplateInfo() const;
@@ -263,7 +263,7 @@ public:
     void SetMovable(bool isMovable);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
 
-    /*
+    /**
      * Window Hierarchy
      */
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
@@ -326,7 +326,7 @@ public:
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
 
-    /*
+    /**
      * Window Watermark
      */
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
@@ -382,17 +382,17 @@ public:
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
-    /*
+    /**
      * Window Rotation
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
 
-    /*
+    /**
      * Window Visibility
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
-    /*
+    /**
      * Window Lifecycle
      */
     void ClearJsSceneSessionCbMap(bool needRemove); // ONLY Accessed on OS_sceneSession thread
@@ -429,7 +429,7 @@ public:
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
 
-    /*
+    /**
      * Window Decor
      */
     int32_t GetCustomDecorHeight() const;
@@ -467,7 +467,7 @@ public:
     bool IsImmersiveType() const;
     bool IsPcOrPadEnableActivation() const;
 
-    /*
+    /**
      * Multi User
      */
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
@@ -475,7 +475,7 @@ public:
     void UnregisterSessionChangeListeners() override;
     void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
 
-    /*
+    /**
      * Window ZOrder: PC
      */
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
@@ -483,7 +483,7 @@ public:
 
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
-    /*
+    /**
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
@@ -491,12 +491,12 @@ public:
     void SetRequestNextVsyncFunc(const RequestVsyncFunc& func);
     void OnNextVsyncDragReceived();
 
-    /*
+    /**
      * Window Layout
      */
     void ResetSizeChangeReasonIfDirty();
 
-    /*
+    /**
      * Gesture Back
      */
     bool GetGestureBackEnabled();
@@ -533,7 +533,7 @@ protected:
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
 
-    /*
+    /**
      * Gesture Back
      */
     void UpdateGestureBackEnabled() override;
@@ -556,7 +556,7 @@ protected:
      */
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
 
-    /*
+    /**
      * Window Hierarchy
      */
     NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
@@ -581,7 +581,7 @@ private:
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
 
-    /*
+    /**
      * Window Lifecycle
      */
     bool CheckIdentityTokenIfMatched(const std::string& identityToken);
@@ -590,7 +590,7 @@ private:
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
-    /*
+    /**
      * Move Drag
      */
     void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
@@ -600,7 +600,7 @@ private:
         bool isGlobal, bool needFlush);
     void HandleMoveDragEnd(WSRect& rect, const SizeChangeReason reason);
 
-    /*
+    /**
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
@@ -690,7 +690,7 @@ private:
         WSPropertyChangeAction action);
     void NotifyPrivacyModeChange();
 
-    /*
+    /**
      * PiP Window
      */
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
@@ -716,7 +716,7 @@ private:
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
 
-    /*
+    /**
      * Window Decor
      */
     mutable std::mutex customDecorHeightMutex_;
@@ -748,12 +748,12 @@ private:
     // Multi User
     bool isMinimizedByUserSwitch_ { false };
 
-    /*
+    /**
      * Window ZOrder: PC
      */
     bool isPcScenePanel_ { false };
 
-    /*
+    /**
      * Move Drag
      */
     static std::shared_mutex windowDragHotAreaMutex_;
@@ -762,13 +762,13 @@ private:
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
 
-    /*
+    /**
      * Gesture Back
      */
     bool isEnableGestureBack_ { true };
     bool isEnableGestureBackHadSet_ { false };
 
-    /*
+    /**
      * Window Visibility
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
