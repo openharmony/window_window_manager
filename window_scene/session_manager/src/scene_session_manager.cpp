@@ -6881,7 +6881,7 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
         snapshot.topAbility.SetBundleName(sessionInfo.bundleName_.c_str());
         snapshot.topAbility.SetModuleName(sessionInfo.moduleName_.c_str());
         snapshot.topAbility.SetAbilityName(sessionInfo.abilityName_.c_str());
-        auto oriSnapshot = sceneSession->Snapshot();
+        auto oriSnapshot = sceneSession->Snapshot(false, sceneSession->GetFloatingScale(), false);
         if (oriSnapshot != nullptr) {
             snapshot.snapshot = oriSnapshot;
             return WMError::WM_OK;
