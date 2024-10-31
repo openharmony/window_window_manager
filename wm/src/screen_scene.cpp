@@ -50,19 +50,23 @@ ScreenScene::~ScreenScene()
 
 WMError ScreenScene::Destroy()
 {
-    if (!uiContent_) {
-        TLOGD(WmsLogTag::DMS, "Destroy uiContent_ is nullptr!");
-        return WMError::WM_OK;
-    }
-    std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
-    uiContent_ = nullptr;
-    vsyncStation_->Destroy();
-    auto task = [uiContent]() {
-        if (uiContent != nullptr) {
-            uiContent->Destroy();
-            TLOGD(WmsLogTag::DMS, "ScreenScene: uiContent destroy success!");
+    std::function<void()> task; //延长task的生命周期
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!uiContent_) {
+            TLOGD(WmsLogTag::DMS, "Destroy uiContent_ is nullptr!");
+            return WMError::WM_OK;
         }
-    };
+        std::shared_ptr<Ace::UIContent> uiContent = std::move(uiContent_);
+        uiContent_ = nullptr;
+        vsyncStation_->Destroy();
+        task = [uiContent]() {
+            if (uiContent != nullptr) {
+                uiContent->Destroy();
+                TLOGD(WmsLogTag::DMS, "ScreenScene: uiContent destroy success!");
+            }
+        };
+    }
     if (handler_) {
         handler_->PostSyncTask(task, "ScreenScene:Destroy");
     } else {
@@ -82,6 +86,7 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
         TLOGE(WmsLogTag::DMS, "context is nullptr!");
         return;
     }
+    std::lock_guard<std::mutex> lock(mutex_);
     uiContent_ = Ace::UIContent::Create(context, reinterpret_cast<NativeEngine*>(env));
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
@@ -122,6 +127,7 @@ void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason 
         TLOGI(WmsLogTag::DMS, "ScreenScene has been destructed!");
         return;
     }
+    std::lock_guard<std::mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
         return;
@@ -140,6 +146,7 @@ void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
         TLOGI(WmsLogTag::DMS, "ScreenScene has been destructed!");
         return;
     }
+    std::lock_guard<std::mutex> lock(mutex_);
     if (uiContent_) {
         TLOGD(WmsLogTag::DMS, "notify root scene ace");
         uiContent_->UpdateConfiguration(configuration);
@@ -168,6 +175,7 @@ void ScreenScene::OnBundleUpdated(const std::string& bundleName)
         return;
     }
     TLOGD(WmsLogTag::DMS, "bundle %{public}s updated", bundleName.c_str());
+    std::lock_guard<std::mutex> lock(mutex_);
     if (uiContent_) {
         uiContent_->UpdateResource();
     }
@@ -180,6 +188,7 @@ void ScreenScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
         return;
     }
     frameLayoutFinishCb_ = callback;
+    std::lock_guard<std::mutex> lock(mutex_);
     if (uiContent_) {
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     }
