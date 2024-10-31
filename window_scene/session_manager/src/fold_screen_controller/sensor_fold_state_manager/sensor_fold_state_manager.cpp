@@ -22,6 +22,10 @@
 #include "session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
 
+#ifdef POWER_MANAGER_ENABLE
+#include <power_mgr_client.h>
+#endif
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SensorFoldStateManager"};
@@ -43,11 +47,12 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         return;
     }
     if (mState_ == nextState) {
-        WLOGFI("fold state doesn't change, foldState = %{public}d.", mState_);
+        WLOGFD("fold state doesn't change, foldState = %{public}d.", mState_);
         return;
     }
     WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
     ReportNotifyFoldStatusChange((int32_t)mState_, (int32_t)nextState, angle);
+    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
     NotifyReportFoldStatusToScb(mState_, nextState, angle);
     
