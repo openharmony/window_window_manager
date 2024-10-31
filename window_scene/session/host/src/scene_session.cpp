@@ -658,6 +658,19 @@ void SceneSession::RegisterSystemBarPropertyChangeCallback(NotifySystemBarProper
     PostTask(task, __func__);
 }
 
+void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            return;
+        }
+        session->onNeedAvoid_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     auto task = [weakThis = wptr(this), mode]() {
@@ -1278,9 +1291,9 @@ WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSes
         TLOGE(WmsLogTag::WMS_DIALOG, "dialog session is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onBindDialogTarget_) {
+    if (onBindDialogTarget_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "id: %{public}d", sceneSession->GetPersistentId());
-        sessionChangeCallback_->onBindDialogTarget_(sceneSession);
+        onBindDialogTarget_(sceneSession);
     }
     return WSError::WS_OK;
 }
@@ -1394,8 +1407,8 @@ WSError SceneSession::OnNeedAvoid(bool status)
         }
         TLOGI(WmsLogTag::WMS_IMMS, "SceneSession OnNeedAvoid status:%{public}d, id:%{public}d",
             static_cast<int32_t>(status), session->GetPersistentId());
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnNeedAvoid_) {
-            session->sessionChangeCallback_->OnNeedAvoid_(status);
+        if (session->onNeedAvoid_) {
+            session->onNeedAvoid_(status);
         }
         return WSError::WS_OK;
     };
@@ -4879,6 +4892,18 @@ void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientati
     PostTask(task, __func__);
 }
 
+void SceneSession::RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+        }
+        session->onBindDialogTarget_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -5187,12 +5212,10 @@ void SceneSession::UnregisterSessionChangeListeners()
             return;
         }
         if (session->sessionChangeCallback_) {
-            session->sessionChangeCallback_->onBindDialogTarget_ = nullptr;
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
             session->sessionChangeCallback_->onSessionModalTypeChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
-            session->sessionChangeCallback_->OnNeedAvoid_ = nullptr;
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
             session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;

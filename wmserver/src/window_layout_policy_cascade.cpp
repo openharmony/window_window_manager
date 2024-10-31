@@ -120,9 +120,9 @@ void WindowLayoutPolicyCascade::LayoutSplitNodes(DisplayId displayId, WindowUpda
         for (const auto& childNode : appWindowNodeVec) {
             if (type == WindowUpdateType::WINDOW_UPDATE_REMOVED) {
                 /*
-                * If updateType is remove we need to layout all appNodes, cause remove split node or
-                * divider means exit split mode, split node may change to other mode
-                */
+                 * If updateType is remove we need to layout all appNodes, cause remove split node or
+                 * divider means exit split mode, split node may change to other mode
+                 */
                 LayoutWindowNode(childNode);
             } else if (childNode->IsSplitMode()) { // add or update type, layout split node
                 if (layoutByDivider && type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {

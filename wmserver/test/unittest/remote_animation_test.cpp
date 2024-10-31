@@ -863,7 +863,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome01, Function | SmallTest | Le
     EXPECT_EQ(WMError::WM_OK, ret); // create animationTarget failed, and no callback
 }
 
-/*
+/**
  * @tc.name: NotifyAnimationByHome02
  * @tc.desc: NotifyAnimationByHome with animationFirst false and create animationTarget success
  * @tc.type: FUNC
@@ -885,7 +885,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome02, Function | SmallTest | Le
     EXPECT_EQ(WindowNodeState::HIDE_ANIMATION_DONE, srcNode->stateMachine_.currState_);
 }
 
-/*
+/**
  * @tc.name: NotifyAnimationByHome03
  * @tc.desc: NotifyAnimationByHome with animationFirst true and create animationTarget success
  * @tc.type: FUNC
@@ -908,7 +908,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationByHome03, Function | SmallTest | Le
     EXPECT_EQ(WindowNodeState::HIDE_ANIMATION_DONE, srcNode->stateMachine_.currState_);
 }
 
-/*
+/**
  * @tc.name: NotifyAnimationTargetsUpdate01
  * @tc.desc: NotifyAnimationTargetsUpdate failed
  * @tc.type: FUNC
@@ -950,7 +950,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate01, Function | SmallTe
     EXPECT_EQ(0, testController->floatingWindowTargets_.size());
 }
 
-/*
+/**
  * @tc.name: NotifyAnimationTargetsUpdate02
  * @tc.desc: NotifyAnimationTargetsUpdate success
  * @tc.type: FUNC
@@ -978,7 +978,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationTargetsUpdate02, Function | SmallTe
     EXPECT_EQ(1, testController->floatingWindowTargets_.size());
 }
 
-/*
+/**
  * @tc.name: NotifyAnimationScreenUnlock01
  * @tc.desc: NotifyAnimationScreenUnlock success
  * @tc.type: FUNC
@@ -998,7 +998,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationScreenUnlock01, Function | SmallTes
     EXPECT_EQ(WMError::WM_ERROR_NO_REMOTE_ANIMATION, ret);
 }
 
-/*
+/**
  * @tc.name: NotifyAnimationUpdateWallpaper01
  * @tc.desc: NotifyAnimationUpdateWallpaper success
  * @tc.type: FUNC
@@ -1016,7 +1016,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationUpdateWallpaper01, Function | Small
     EXPECT_EQ(nullptr, testController->animationTarget_);
 }
 
-/*
+/**
  * @tc.name: CreateAnimationFinishedCallback01
  * @tc.desc: CreateAnimationFinishedCallback
  * @tc.type: FUNC
@@ -1044,7 +1044,7 @@ HWTEST_F(RemoteAnimationTest, CreateAnimationFinishedCallback01, Function | Smal
     EXPECT_EQ(true, testFlag);
 }
 
-/*
+/**
  * @tc.name: GetWindowAnimationTargets01
  * @tc.desc: GetWindowAnimationTargets for null window root
  * @tc.type: FUNC
@@ -1057,7 +1057,7 @@ HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets01, Function | SmallTest 
     EXPECT_EQ(WMError::WM_ERROR_NO_MEM, RemoteAnimation::GetWindowAnimationTargets(missionIds, targets));
 }
 
-/*
+/**
  * @tc.name: GetWindowAnimationTargets02
  * @tc.desc: GetWindowAnimationTargets for not exit mission
  * @tc.type: FUNC
@@ -1072,7 +1072,7 @@ HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets02, Function | SmallTest 
     EXPECT_EQ(true, targets.empty());
 }
 
-/*
+/**
  * @tc.name: GetWindowAnimationTargets03
  * @tc.desc: GetWindowAnimationTargets successful
  * @tc.type: FUNC
@@ -1094,7 +1094,7 @@ HWTEST_F(RemoteAnimationTest, GetWindowAnimationTargets03, Function | SmallTest 
     usleep(SLEEP_TIME_IN_US);
 }
 
-/*
+/**
  * @tc.name: GetAndDrawSnapShot
  * @tc.desc: GetWindowAnimationTargets successful
  * @tc.type: FUNC
@@ -1107,7 +1107,7 @@ HWTEST_F(RemoteAnimationTest, GetAndDrawSnapShot, Function | SmallTest | Level2)
     ASSERT_FALSE(snapSucc);
 }
 
-/*
+/**
  * @tc.name: GetExpectRect
  * @tc.desc: GetWindowAnimationTargets successful
  * @tc.type: FUNC
@@ -1124,7 +1124,7 @@ HWTEST_F(RemoteAnimationTest, GetExpectRect, Function | SmallTest | Level2)
     RemoteAnimation::GetExpectRect(dstNode, dstTarget);
 }
 
-/*
+/**
  * @tc.name: NotifyAnimationAbilityDied
  * @tc.desc: NotifyAnimationAbilityDied for null window root
  * @tc.type: FUNC
@@ -1137,7 +1137,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationAbilityDied, Function | SmallTest |
     EXPECT_EQ(true, targets.empty());
 }
 
-/*
+/**
  * @tc.name: NotifyAnimationMinimize
  * @tc.desc: NotifyAnimationMinimize
  * @tc.type: FUNC
@@ -1154,7 +1154,7 @@ HWTEST_F(RemoteAnimationTest, NotifyAnimationMinimize, Function | SmallTest | Le
     ASSERT_EQ(result, WMError::WM_ERROR_NO_MEM);
 }
 
-/*
+/**
  * @tc.name: CreateAnimationFinishedCallback02
  * @tc.desc: CreateAnimationFinishedCallback
  * @tc.type: FUNC
