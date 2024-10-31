@@ -55,6 +55,7 @@
 #include "connection/screen_cast_connection.h"
 #include "publish/screen_session_publish.h"
 #include "dms_xcollie.h"
+#include "screen_sensor_plugin.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -306,6 +307,11 @@ void ScreenSessionManager::Init()
 
     if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
         g_isPcDevice = true;
+    }
+
+    if (!LoadMotionSensor()) {
+        screenEventTracker_.RecordEvent("Dms load motion plugin failed.");
+        TLOGW(WmsLogTag::DMS, "load motion plugin failed.");
     }
 
     RegisterScreenChangeListener();
@@ -3815,6 +3821,38 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
     return screenSession;
 }
 
+bool ScreenSessionManager::IsExtendMode()
+{
+    std::vector<ScreenId> mainVector;
+    std::vector<ScreenId> extendVector;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (const auto& pair : screenSessionMap_) {
+        sptr<ScreenSession> session = pair.second;
+        if (!session) {
+            TLOGE(WmsLogTag::DMS, "screenId=%{public}" PRIu64", session is null", pair.first);
+            continue;
+        }
+        if (session->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+            extendVector.push_back(session->GetScreenId());
+        }
+        if (session->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
+            mainVector.push_back(session->GetScreenId());
+        }
+    }
+    std::ostringstream oss;
+    oss << "main screenId:";
+    for (const auto& screenId : mainVector) {
+        oss << static_cast<uint64_t>(screenId);
+    };
+    oss << ", extend screenId:";
+    for (const auto& screenId : extendVector) {
+        oss << static_cast<uint64_t>(screenId);
+    };
+    oss << std::endl;
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    return mainVector.size() > 0 && extendVector.size() > 0;
+}
+
 sptr<ScreenSessionGroup> ScreenSessionManager::AddToGroupLocked(sptr<ScreenSession> newScreen, bool isUnique)
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -3854,6 +3892,11 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
     }
     screenGroup->groupSmsId_ = 1;
     Point point;
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+        if (IsExtendMode()) {
+            point = {newScreen->GetScreenProperty().GetStartX(), newScreen->GetScreenProperty().GetStartY()};
+        }
+    }
     if (!screenGroup->AddChild(newScreen, point, GetScreenSession(GetDefaultScreenId()))) {
         TLOGE(WmsLogTag::DMS, "fail to add screen to group. screen=%{public}" PRIu64"", newScreen->screenId_);
         screenIdManager_.DeleteScreenId(smsGroupScreenId);
