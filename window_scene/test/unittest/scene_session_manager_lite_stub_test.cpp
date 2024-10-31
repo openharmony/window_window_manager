@@ -489,7 +489,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Functio
     data.WriteRemoteObject(token);
     data.WriteInt32(continueStateValue);
     res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data2, reply);
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
