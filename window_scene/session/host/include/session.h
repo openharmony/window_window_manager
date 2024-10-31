@@ -152,7 +152,7 @@ public:
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
 
-    /*
+    /**
      * Callbacks for ILifecycleListener
      */
     void NotifyActivation();
@@ -166,7 +166,7 @@ public:
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
 
-    /*
+    /**
      * Cross Display Move Drag
      */
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
@@ -218,6 +218,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
@@ -344,12 +345,12 @@ public:
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
     
-    /*
+    /**
      * Window Rotate Animation
      */
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
-    /*
+    /**
      * Window Focus
      */
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
@@ -358,7 +359,7 @@ public:
     bool GetFocusable() const;
     void SetFocusedOnShow(bool focusedOnShow); // Used when creating ability
     bool IsFocusedOnShow() const;
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override; // Used when showing window
+    WSError SetFocusableOnShow(bool isFocusableOnShow); // Used when showing window
     bool IsFocusableOnShow() const;
     virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
@@ -374,7 +375,7 @@ public:
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
 
-    /*
+    /**
      * Multi Window
      */
     void SetIsMidScene(bool isMidScene);
@@ -403,7 +404,7 @@ public:
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
 
-    /*
+    /**
      * Window ZOrder
      */
     virtual void SetZOrder(uint32_t zOrder);
@@ -472,6 +473,8 @@ public:
     // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
+    bool GetIsPendingToBackgroundState() const;
+    void SetIsPendingToBackgroundState(bool isPendingToBackgroundState);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
@@ -524,7 +527,7 @@ protected:
     void UpdateSessionTouchable(bool touchable);
     virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
 
-    /*
+    /**
      * Gesture Back
      */
     virtual void UpdateGestureBackEnabled() {}
@@ -621,7 +624,7 @@ protected:
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
 
-    /*
+    /**
      * Window Rotate Animation
      */
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
@@ -633,13 +636,13 @@ protected:
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
-    /*
+    /**
      * Window ZOrder
      */
     uint32_t zOrder_ = 0;
     uint32_t lastZOrder_ = 0;
 
-    /*
+    /**
      * Window Focus
      */
     bool isFocused_ = false;
@@ -664,7 +667,10 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
-    uint32_t dirtyFlags_ = 0;   // only accessed on SSM thread
+    // only accessed on SSM thread
+    uint32_t dirtyFlags_ = 0;
+    bool isNeedSyncSessionRect_ { true }; // where need sync to session rect,  currently use in split drag
+
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
     static bool isScbCoreEnabled_;
@@ -684,16 +690,18 @@ private:
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
 
-    /*
+    /**
      * Window Rotate Animation
      */
     int32_t GetRotateAnimationDuration();
 
-    /*
+    /**
      * Window Property
      */
     void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
     void InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property);
+
+    void UpdateGravityWhenUpdateWindowMode(WindowMode mode);
 
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
@@ -719,7 +727,7 @@ private:
     mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
 
-    /*
+    /**
      * Window Focus
      */
     mutable std::shared_mutex uiRequestFocusMutex_;
@@ -731,7 +739,7 @@ private:
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
-    /*
+    /**
      * Multi Window
      */
     bool isMidScene_ = false;
@@ -751,7 +759,8 @@ private:
     bool systemTouchable_ { true };
     std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
-    std::atomic<bool> isAttach_{ false };
+    std::atomic<bool> isAttach_ { false };
+    std::atomic<bool> isPendingToBackgroundState_ { false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;

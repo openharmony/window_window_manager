@@ -45,6 +45,7 @@ public:
     void SetRequestRect(const struct Rect& rect);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
+    void SetFocusableOnShow(bool isFocusableOnShow);
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
     void SetHideNonSystemFloatingWindows(bool hide);
@@ -109,6 +110,7 @@ public:
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;
     bool GetFocusable() const;
+    bool GetFocusableOnShow() const;
     bool GetTouchable() const;
     bool GetDragEnabled() const;
     bool GetHideNonSystemFloatingWindows() const;
@@ -200,7 +202,7 @@ public:
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
 
-    /*
+    /**
      * UIExtension
      */
     void SetRealParentId(int32_t realParentId);
@@ -216,7 +218,7 @@ public:
     void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
     bool GetIsUIExtAnySubWindow() const;
 
-    /*
+    /**
      * Multi instance
      */
     void SetAppInstanceKey(const std::string& appInstanceKey);
@@ -276,9 +278,11 @@ private:
     std::string windowName_;
     SessionInfo sessionInfo_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
+    mutable std::mutex windowRectMutex_;
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
+    bool focusableOnShow_ { true };
     bool touchable_ { true };
     bool dragEnabled_ = { true };
     bool raiseEnabled_ = { true };
@@ -357,7 +361,7 @@ private:
      */
     uint32_t subWindowLevel_ = 1;
 
-    /*
+    /**
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -367,7 +371,7 @@ private:
     bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
-    /*
+    /**
      * Multi instance
      */
     std::string appInstanceKey_;

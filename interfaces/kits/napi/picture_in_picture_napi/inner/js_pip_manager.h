@@ -32,7 +32,6 @@ public:
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
     static napi_value SetTypeNodeEnabled(napi_env env, napi_callback_info info);
-    static napi_value SetPipNodeType(napi_env env, napi_callback_info info);
 private:
     napi_value OnInitXComponentController(napi_env env, napi_callback_info info);
     napi_value OnGetCustomUIController(napi_env env, napi_callback_info info);
@@ -40,7 +39,6 @@ private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUnregisterCallback(napi_env env, napi_callback_info info);
     napi_value OnSetTypeNodeEnabled(napi_env env, napi_callback_info info);
-    napi_value OnSetPipNodeType(napi_env env, napi_callback_info info);
 };
 } // namespace Rosen
 } // namespace OHOS

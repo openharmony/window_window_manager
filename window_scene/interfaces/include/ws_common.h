@@ -344,8 +344,11 @@ struct SessionInfo {
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
+    bool isPcOrPadEnableActivation_ = false;
+    bool canStartAbilityFromBackground_ = false;
+    bool isFoundationCall_ = false;
 
-    /*
+    /**
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -354,7 +357,7 @@ struct SessionInfo {
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
 
-    /*
+    /**
      * Multi instance
      */
     bool isNewAppInstance_ = false;
@@ -686,6 +689,7 @@ enum class SessionUIDirtyFlag {
     Z_ORDER = 1 << 5,
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
+    GLOBAL_RECT = 1 << 8,
 };
 
 /**

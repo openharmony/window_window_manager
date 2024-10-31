@@ -45,6 +45,7 @@ private:
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
     int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);
@@ -81,7 +82,6 @@ private:
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocus(MessageParcel& data, MessageParcel& reply);
-    int HandleSetFocusableOnShow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);

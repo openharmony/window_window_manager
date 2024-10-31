@@ -116,6 +116,7 @@ public:
     virtual WSError UpdateSessionRect(
         const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
@@ -273,14 +274,6 @@ public:
      */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 
-    /**
-     * @brief Set focusable of window when show.
-     *
-     * @param isFocusableOnShow True means window can get focus when it shows to foreground, false means the opposite.
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
-    virtual WSError SetFocusableOnShow(bool isFocusableOnShow) { return WSError::WS_OK; }
-
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
     /**
      * @brief Callback for session modal type changes.
@@ -290,7 +283,7 @@ public:
      */
     virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
-    /*
+    /**
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }

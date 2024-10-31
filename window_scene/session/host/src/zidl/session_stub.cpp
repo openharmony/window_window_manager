@@ -112,6 +112,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSystemSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
             return HandleUpdateSessionRect(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_GLOBAL_SCALED_RECT):
+            return HandleGetGlobalScaledRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP):
             return HandleRaiseToAppTop(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED):
@@ -208,8 +210,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyFrameLayoutFinish(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocus(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOCUSABLE_ON_SHOW):
-            return HandleSetFocusableOnShow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
@@ -654,6 +654,20 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     }
     WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+/** @note @window.layout */
+int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    Rect tempRect;
+    WMError errorCode = GetGlobalScaledRect(tempRect);
+    reply.WriteInt32(tempRect.posX_);
+    reply.WriteInt32(tempRect.posY_);
+    reply.WriteUint32(tempRect.width_);
+    reply.WriteUint32(tempRect.height_);
+    reply.WriteInt32(static_cast<int32_t>(errorCode));
     return ERR_NONE;
 }
 
@@ -1171,19 +1185,6 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     WSError ret = RequestFocus(isFocused);
-    reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleSetFocusableOnShow(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_FOCUS, "in");
-    bool isFocusableOnShow = true;
-    if (!data.ReadBool(isFocusableOnShow)) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocusableOnShow failed");
-        return ERR_INVALID_DATA;
-    }
-    WSError ret = SetFocusableOnShow(isFocusableOnShow);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

@@ -14,7 +14,6 @@
  */
 
 #include "picture_in_picture_option.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {

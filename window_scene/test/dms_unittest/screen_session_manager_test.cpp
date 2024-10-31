@@ -3140,6 +3140,17 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenCaptureNotify, Function | SmallTest |
     std::string clientName = "test";
     ssm->OnScreenCaptureNotify(screenId, uid, clientName);
 }
+
+/**
+ * @tc.name: GetPrimaryDisplayInfo
+ * @tc.desc: GetPrimaryDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_NE(ssm_->GetPrimaryDisplayInfo(), nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
