@@ -69,9 +69,9 @@ HWTEST_F(AnrManagerTest, IsANRTriggered, Function | SmallTest | Level1)
     ret = anrMgr.IsANRTriggered(123);
     ASSERT_EQ(ret, true);
 
-    DelayedSingleton<EventStage>::GetInstance()->isAnrProcess_.emplace(156, true);
+    DelayedSingleton<EventStage>::GetInstance()->isAnrProcess_.emplace(156, false);
     ret = anrMgr.IsANRTriggered(156);
-    ASSERT_EQ(ret, true);
+    ASSERT_EQ(ret, false);
 }
 
 /**
@@ -139,7 +139,7 @@ HWTEST_F(AnrManagerTest, GetBundleName, Function | SmallTest | Level1)
     auto ret = anrMgr.GetBundleName(0, 0);
     ASSERT_EQ(ret, "unknown");
 
-    anrMgr.appInfoGetter_ = [](int32_t pid, std::string &bundleName, int32_t uid) {
+    anrMgr.appInfoGetter_ = [](int32_t pid, std::string& bundleName, int32_t uid) {
         bundleName = std::to_string(pid) + std::to_string(uid);
     };
     ret = anrMgr.GetBundleName(1, 2);
