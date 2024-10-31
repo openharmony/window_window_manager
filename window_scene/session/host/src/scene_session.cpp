@@ -1172,7 +1172,8 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeRe
 }
 
 /** @note @window.layout */
-WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal)
+WSError SceneSession::UpdateSessionRect(
+    const WSRect &rect, const SizeChangeReason reason, bool isGlobal, bool isFromMoveToGlobal)
 {
     if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
@@ -1189,6 +1190,17 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
                 newRect.posX_ -= parentRect.posX_;
                 newRect.posY_ -= parentRect.posY_;
             }
+        }
+    }
+    if (isFromMoveToGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
+        (systemConfig_.IsPhoneWindow() ||
+         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
+        auto parentSession = GetParentSession();
+        if (parentSession && parentSession->GetFloatingScale() != 0) {
+            Rect parentGlobalRect;
+            WMError errorCode = parentSession->GetGlobalScaledRect(parentGlobalRect);
+            newRect.posX_ = (newRect.posX_ - parentGlobalRect.posX_) / parentSession->GetFloatingScale();
+            newRect.posY_ = (newRect.posY_ - parentGlobalRect.posY_) / parentSession->GetFloatingScale();
         }
     }
     Session::RectCheckProcess();

@@ -652,7 +652,12 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isGlobal failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
+    auto isFromMoveToGlobal = false;
+    if (!data.ReadBool(isFromMoveToGlobal)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read isFromMoveToGlobal failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
