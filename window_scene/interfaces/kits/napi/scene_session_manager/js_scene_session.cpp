@@ -1460,20 +1460,19 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
 
 void JsSceneSession::ProcessNeedAvoidRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "session is null, id: %{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnNeedAvoid_ = [weakThis = wptr(this)](bool status) {
+    session->RegisterNeedAvoidCallback([weakThis = wptr(this)](bool status) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessNeedAvoidRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnNeedAvoid(status);
-    };
-    TLOGD(WmsLogTag::WMS_IMMS, "success");
+    });
 }
 
 void JsSceneSession::ProcessIsCustomAnimationPlaying()
