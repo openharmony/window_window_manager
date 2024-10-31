@@ -480,7 +480,7 @@ int SessionStub::HandleUpdateClientRect(MessageParcel& data, MessageParcel& repl
     int32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadInt32(width) || !data.ReadInt32(height)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
         return ERR_INVALID_DATA;
     }

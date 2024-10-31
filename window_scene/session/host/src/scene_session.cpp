@@ -1122,14 +1122,17 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
+            return;
         }
         if (rect.IsInvalid()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d rect:%{public}s is invalid",
                 funcName, session->GetPersistentId(), rect.ToString().c_str());
+            return;
         }
         if (rect == session->GetClientRect()) {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d skip same rect",
                 funcName, session->GetPersistentId());
+            return;
         }
         session->SetClientRect(rect);
     };
