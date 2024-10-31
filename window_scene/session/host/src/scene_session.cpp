@@ -646,7 +646,7 @@ void SceneSession::RegisterSystemBarPropertyChangeCallback(NotifySystemBarProper
     auto task = [weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
             return;
         }
         session->onSystemBarPropertyChange_ = std::move(callback);
@@ -659,7 +659,7 @@ void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
     auto task = [weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
             return;
         }
         session->onNeedAvoid_ = std::move(callback);
