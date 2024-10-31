@@ -792,7 +792,7 @@ HWTEST_F(SceneSessionTest2, UpdateAvoidArea, Function | SmallTest | Level2)
 
 /**
  * @tc.name: ChangeSessionVisibilityWithStatusBar
- * @tc.desc:  * @tc.name: ChangeSessionVisibilityWithStatusBar
+ * @tc.desc: normal function
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, ChangeSessionVisibilityWithStatusBar, Function | SmallTest | Level2)
