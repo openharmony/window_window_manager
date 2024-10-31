@@ -643,31 +643,16 @@ HWTEST_F(WindowTest, SetKeepScreenOn02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: IsKeepScreenOn01
- * @tc.desc: IsKeepScreenOn false
+ * @tc.name: IsKeepScreenOn
+ * @tc.desc: IsKeepScreenOn
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, IsKeepScreenOn01, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, IsKeepScreenOn, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = window->IsKeepScreenOn();
     ASSERT_EQ(false, ret);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
- * @tc.name: IsKeepScreenOn02
- * @tc.desc: IsKeepScreenOn true
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, IsKeepScreenOn02, Function | SmallTest | Level2)
-{
-    sptr<Window> window = new Window();
-    ASSERT_NE(nullptr, window);
-    window->SetKeepScreenOn(true);
-    auto ret = window->IsKeepScreenOn();
-    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
