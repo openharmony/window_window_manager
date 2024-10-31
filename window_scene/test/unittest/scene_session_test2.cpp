@@ -1704,7 +1704,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession->SetPipActionEvent("pointerEvent", 0));
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, sceneSession->SetPipActionEvent("pointerEvent", 0));
 
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
