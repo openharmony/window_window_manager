@@ -94,7 +94,7 @@ namespace {
         ASSERT_EQ(ScreenSettingHelper::dpiObserver_, nullptr);
     }
 
-     /**
+    /**
      * @tc.name: UnregisterSettingDpiObserver02
      * @tc.desc: UnregisterSettingDpiObserver02
      * @tc.type: FUNC
@@ -323,7 +323,7 @@ namespace {
         ASSERT_EQ(result, false);
     }
 
-     /**
+    /**
      * @tc.name: GetSettingRotationScreenID02
      * @tc.desc: GetSettingRotationScreenID02
      * @tc.type: FUNC

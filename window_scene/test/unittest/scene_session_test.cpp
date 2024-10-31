@@ -1236,9 +1236,7 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(sceneSession->OnNeedAvoid(false), WSError::WS_OK);
 
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    sceneSession->sessionChangeCallback_->OnNeedAvoid_ = [](bool state){};
+    sceneSession->onNeedAvoid_ = [](bool state) {};
     ASSERT_EQ(sceneSession->OnNeedAvoid(false), WSError::WS_OK);
 }
 
@@ -1714,8 +1712,7 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     sceneSession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
@@ -1726,7 +1723,13 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     EXPECT_NE(sceneSession, nullptr);
 
     sceneSession->SetSessionProperty(nullptr);
-    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    ASSERT_EQ(res, false);
+
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
+    sceneSession->SetSessionProperty(property);
+    res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    ASSERT_EQ(res, false);
 }
 
 /**
@@ -1749,8 +1752,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect, Function | SmallTest | Level2)
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     sceneSession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
@@ -1779,8 +1781,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect1, Function | SmallTest | Level2)
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     sceneSession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
@@ -1809,8 +1810,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     sceneSession->SetSessionProperty(property);
     WSRect rect({1, 1, 1, 1});
@@ -1834,7 +1834,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 10);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     sceneSession->SetSessionProperty(property);
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -2051,7 +2051,7 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTe
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     sceneSession->SetSessionProperty(property);
 
     uint32_t screenWidth = 0;
@@ -2098,6 +2098,48 @@ HWTEST_F(SceneSessionTest, SetSessionGlobalRect, Function | SmallTest | Level2)
     sceneSession->SetSessionGlobalRect(test);
     sceneSession->SetScbCoreEnabled(true);
     EXPECT_EQ(test, sceneSession->GetSessionGlobalRect());
+}
+
+/**
+ * @tc.name: SetSessionGlobalRect/GetSessionGlobalRect
+ * @tc.desc: SetSessionGlobalRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsStatusBarVisibleInner01";
+    info.bundleName_ = "SetIsStatusBarVisibleInner01";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_OK);
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_ERROR_NULLPTR);
+
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        return WSError::WS_ERROR_NULLPTR;
+    };
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_ERROR_NULLPTR);
+
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        isLayoutFinished = false;
+        return WSError::WS_OK;
+    };
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
+
+    sceneSession->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
+        isLayoutFinished = true;
+        return WSError::WS_OK;
+    };
+    sceneSession->specificCallback_->onUpdateAvoidAreaByType_ = [](int32_t persistentId, AvoidAreaType type) {};
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_OK);
+
+    sceneSession->specificCallback_ = nullptr;
+    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
 }
 } // namespace
 } // Rosen

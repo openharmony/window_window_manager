@@ -816,7 +816,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, Function | SmallTe
  * @tc.name: MoveToAsync01
  * @tc.desc: MoveToAsync
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -837,7 +837,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync01, Function | SmallTest | Leve
  * @tc.name: MoveToAsync02
  * @tc.desc: MoveToAsync
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -878,7 +878,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
  * @tc.name: ResizeAsync01
  * @tc.desc: ResizeAsync
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -897,7 +897,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync01, Function | SmallTest | Leve
  * @tc.name: ResizeAsync02
  * @tc.desc: ResizeAsync
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -1443,7 +1443,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode02, Function | SmallTest | Le
  * @tc.name: PreLayoutOnShow01
  * @tc.desc: PreLayoutOnShow
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -1466,7 +1466,7 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, Function | SmallTest | 
  * @tc.name: KeepKeyboardOnFocus01
  * @tc.desc: KeepKeyboardOnFocus
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, KeepKeyboardOnFocus01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> keyboardOption = new (std::nothrow) WindowOption();
@@ -1487,7 +1487,7 @@ HWTEST_F(WindowSceneSessionImplTest4, KeepKeyboardOnFocus01, Function | SmallTes
  * @tc.name: MoveAndResizeKeyboard01
  * @tc.desc: MoveAndResizeKeyboard
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> keyboardOption = new (std::nothrow) WindowOption();
@@ -1516,7 +1516,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard01, Function | SmallT
  * @tc.name: MoveAndResizeKeyboard02
  * @tc.desc: MoveAndResizeKeyboard
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest4, MoveAndResizeKeyboard02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> keyboardOption = new (std::nothrow) WindowOption();

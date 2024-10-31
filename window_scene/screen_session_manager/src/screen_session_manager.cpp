@@ -55,6 +55,7 @@
 #include "connection/screen_cast_connection.h"
 #include "publish/screen_session_publish.h"
 #include "dms_xcollie.h"
+#include "screen_sensor_plugin.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -306,6 +307,11 @@ void ScreenSessionManager::Init()
 
     if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
         g_isPcDevice = true;
+    }
+
+    if (!LoadMotionSensor()) {
+        screenEventTracker_.RecordEvent("Dms load motion plugin failed.");
+        TLOGW(WmsLogTag::DMS, "load motion plugin failed.");
     }
 
     RegisterScreenChangeListener();
@@ -1467,6 +1473,21 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.SetPhyBounds(screenBounds);
     property.SetBounds(screenBounds);
     property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
+    if (isDensityDpiLoad_) {
+        if (screenId == SCREEN_ID_MAIN) {
+            TLOGI(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
+            property.SetVirtualPixelRatio(subDensityDpi_);
+            property.SetDefaultDensity(subDensityDpi_);
+            property.SetDensityInCurResolution(subDensityDpi_);
+        } else {
+            TLOGI(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
+            property.SetVirtualPixelRatio(densityDpi_);
+            property.SetDefaultDensity(densityDpi_);
+            property.SetDensityInCurResolution(densityDpi_);
+        }
+    } else {
+        property.UpdateVirtualPixelRatio(screenBounds);
+    }
     property.SetRefreshRate(screenRefreshRate);
     property.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
 
@@ -1478,32 +1499,27 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.CalcDefaultDisplayOrientation();
 }
 
-void ScreenSessionManager::InitScreenDensity(sptr<ScreenSession> session, const ScreenProperty& property)
+void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property)
 {
-    if (session->GetScreenProperty().GetScreenType() == ScreenType::REAL && !session->isInternal_) {
-        // 表示拓展屏
-        float extendDensity = CalcDefaultExtendScreenDensity(property);
-        TLOGI(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
-        session->SetVirtualPixelRatio(extendDensity);
-        session->SetDefaultDensity(extendDensity);
-        session->SetDensityInCurResolution(extendDensity);
+    if (session->GetScreenProperty().GetScreenType() != ScreenType::REAL || session->isInternal_) {
+        // 表示非拓展屏
+        TLOGI(WmsLogTag::DMS, "Not expandable screen, no need to set dpi");
         return;
     }
-    if (isDensityDpiLoad_) {
-        if (session->GetScreenId() == SCREEN_ID_MAIN) {
-            TLOGI(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
-            session->SetVirtualPixelRatio(subDensityDpi_);
-            session->SetDefaultDensity(subDensityDpi_);
-            session->SetDensityInCurResolution(subDensityDpi_);
-        } else {
-            TLOGI(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
-            session->SetVirtualPixelRatio(densityDpi_);
-            session->SetDefaultDensity(densityDpi_);
-            session->SetDensityInCurResolution(densityDpi_);
-        }
-    } else {
-        session->UpdateVirtualPixelRatio(property.GetBounds());
+    float extendDensity = CalcDefaultExtendScreenDensity(property);
+    TLOGI(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
+    session->SetVirtualPixelRatio(extendDensity);
+    session->SetDefaultDensity(extendDensity);
+    session->SetDensityInCurResolution(extendDensity);
+    ScreenId screenId = session->GetScreenId();
+    property.SetVirtualPixelRatio(extendDensity);
+    property.SetDefaultDensity(extendDensity);
+    property.SetDensityInCurResolution(extendDensity);
+    {
+        std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
+        phyScreenPropMap_[screenId] = property;
     }
+    return;
 }
 
 float ScreenSessionManager::CalcDefaultExtendScreenDensity(const ScreenProperty& property)
@@ -1561,6 +1577,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         return session;
     }
     session->RegisterScreenChangeListener(this);
+    InitExtendScreenDensity(session, property);
     InitAbstractScreenModesInfo(session);
     session->groupSmsId_ = 1;
     {
@@ -1573,7 +1590,6 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     screenEventTracker_.RecordEvent("create screen session success.");
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
-    InitScreenDensity(session, property);
     RegisterRefreshRateChangeListener();
     TLOGI(WmsLogTag::DMS, "CreateScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
     return session;
@@ -3805,6 +3821,38 @@ sptr<ScreenSession> ScreenSessionManager::InitAndGetScreen(ScreenId rsScreenId)
     return screenSession;
 }
 
+bool ScreenSessionManager::IsExtendMode()
+{
+    std::vector<ScreenId> mainVector;
+    std::vector<ScreenId> extendVector;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (const auto& pair : screenSessionMap_) {
+        sptr<ScreenSession> session = pair.second;
+        if (!session) {
+            TLOGE(WmsLogTag::DMS, "screenId=%{public}" PRIu64", session is null", pair.first);
+            continue;
+        }
+        if (session->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+            extendVector.push_back(session->GetScreenId());
+        }
+        if (session->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
+            mainVector.push_back(session->GetScreenId());
+        }
+    }
+    std::ostringstream oss;
+    oss << "main screenId:";
+    for (const auto& screenId : mainVector) {
+        oss << static_cast<uint64_t>(screenId);
+    };
+    oss << ", extend screenId:";
+    for (const auto& screenId : extendVector) {
+        oss << static_cast<uint64_t>(screenId);
+    };
+    oss << std::endl;
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    return mainVector.size() > 0 && extendVector.size() > 0;
+}
+
 sptr<ScreenSessionGroup> ScreenSessionManager::AddToGroupLocked(sptr<ScreenSession> newScreen, bool isUnique)
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -3844,6 +3892,11 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
     }
     screenGroup->groupSmsId_ = 1;
     Point point;
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+        if (IsExtendMode()) {
+            point = {newScreen->GetScreenProperty().GetStartX(), newScreen->GetScreenProperty().GetStartY()};
+        }
+    }
     if (!screenGroup->AddChild(newScreen, point, GetScreenSession(GetDefaultScreenId()))) {
         TLOGE(WmsLogTag::DMS, "fail to add screen to group. screen=%{public}" PRIu64"", newScreen->screenId_);
         screenIdManager_.DeleteScreenId(smsGroupScreenId);

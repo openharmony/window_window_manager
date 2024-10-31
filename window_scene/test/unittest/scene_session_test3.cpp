@@ -257,8 +257,7 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     scensession->SetSessionProperty(property);
 
     sptr<SceneSession> sceneSession = nullptr;
@@ -272,9 +271,26 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
 
     sceneSession1->sessionChangeCallback_ = new (std::nothrow) MainSession::SessionChangeCallback();
     EXPECT_NE(sceneSession1->sessionChangeCallback_, nullptr);
-    sceneSession1->sessionChangeCallback_->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
+    sceneSession1->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
     result = scensession->BindDialogSessionTarget(sceneSession1);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RegisterBindDialogSessionCallback1
+ * @tc.desc: test RegisterBindDialogSessionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RegisterBindDialogSessionCallback1, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterBindDialogSessionCallback1";
+    info.bundleName_ = "RegisterBindDialogSessionCallback1";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sceneSession->onBindDialogTarget_ = nullptr;
+    NotifyBindDialogSessionFunc func = [](const sptr<SceneSession>& sceneSession) {};
+    sceneSession->RegisterBindDialogSessionCallback(std::move(func));
+    ASSERT_NE(sceneSession->onBindDialogTarget_, nullptr);
 }
 
 /**
