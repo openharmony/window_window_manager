@@ -187,7 +187,7 @@ HWTEST_F(DisplayTestLite, GetWidth01, Function | SmallTest | Level1)
 HWTEST_F(DisplayTestLite, GetWidth02, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "DisplayLite::GetWidth start";
-    sptr<DisplayInfo> displayInfo = nullptr;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
     sptr<DisplayLite> display = new DisplayLite("", displayInfo);
     int32_t width;
     width = display->GetWidth();
@@ -221,7 +221,7 @@ HWTEST_F(DisplayTestLite, GetHeight01, Function | SmallTest | Level1)
 HWTEST_F(DisplayTestLite, GetHeight02, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "DisplayLite::GetWidth start";
-    sptr<DisplayInfo> displayInfo = nullptr;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
     sptr<DisplayLite> display = new DisplayLite("", displayInfo);
     int32_t Height;
     Height = display->GetWidth();
@@ -238,7 +238,7 @@ HWTEST_F(DisplayTestLite, GetHeight02, Function | SmallTest | Level1)
 HWTEST_F(DisplayTestLite, GetCutoutInfo, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "DisplayLite::GetCutoutInfo start";
-    sptr<DisplayInfo> displayInfo = nullptr;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
     sptr<DisplayLite> display = new DisplayLite("", displayInfo);
     sptr<CutoutInfo> info = display->GetCutoutInfo();
     ASSERT_EQ(info, nullptr);

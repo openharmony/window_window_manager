@@ -186,7 +186,6 @@ BaseAdapterLite::~BaseAdapterLite()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     Clear();
     displayManagerServiceProxy_ = nullptr;
-    Clear();
 }
 
 void BaseAdapterLite::Clear()
