@@ -649,31 +649,31 @@ HWTEST_F(SceneSessionTest2, UpdatePiPRect, Function | SmallTest | Level2)
     EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession;
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scenesession, nullptr);
-    scenesession->isActive_ = true;
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    scenesession->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
 
     Rect rect = {0, 0, 800, 600};
     SizeChangeReason reason = SizeChangeReason::PIP_START;
-    WSError result = scenesession->UpdatePiPRect(rect, reason);
+    WSError result = sceneSession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    scenesession->SetSessionProperty(property);
-    result = scenesession->UpdatePiPRect(rect, reason);
+    sceneSession->SetSessionProperty(property);
+    result = sceneSession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_DO_NOTHING);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    scenesession->SetSessionProperty(property);
-    scenesession->isTerminating_ = true;
-    result = scenesession->UpdatePiPRect(rect, reason);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isTerminating_ = true;
+    result = sceneSession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    scenesession->isTerminating_ = false;
-    result = scenesession->UpdatePiPRect(rect, reason);
+    sceneSession->isTerminating_ = false;
+    result = sceneSession->UpdatePiPRect(rect, reason);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
