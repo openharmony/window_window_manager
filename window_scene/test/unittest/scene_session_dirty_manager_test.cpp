@@ -799,12 +799,22 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfo, Function | SmallTes
  */
 HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask, Function | SmallTest | Level2)
 {
-    int ret = 0;
     auto preFlushWindowInfoCallback = manager_->flushWindowInfoCallback_;
     manager_->flushWindowInfoCallback_ = nullptr;
     manager_->ResetFlushWindowInfoTask();
+    EXPECT_TRUE(manager_->hasPostTask_.load());
     manager_->flushWindowInfoCallback_ = preFlushWindowInfoCallback;
-    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ResetFlushWindowInfoTask1
+ * @tc.desc: ResetFlushWindowInfoTask1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask1, Function | SmallTest | Level2)
+{
+    manager_->ResetFlushWindowInfoTask();
+    EXPECT_TRUE(manager_->hasPostTask_.load());
 }
 
 /**
