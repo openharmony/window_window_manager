@@ -1133,12 +1133,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
     isStarting_ = false;
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && GetParentSession() &&
-        !GetParentSession()->IsSessionForeground()) {
-        TLOGD(WmsLogTag::WMS_DIALOG, "parent is not foreground");
-        SetSessionState(SessionState::STATE_BACKGROUND);
-    }
-
     NotifyForeground();
 
     isTerminating_ = false;
