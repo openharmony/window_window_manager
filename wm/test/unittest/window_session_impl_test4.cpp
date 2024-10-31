@@ -260,6 +260,40 @@ HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetWindowTitleMoveEnabled
+ * @tc.desc: SetWindowTitleMoveEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowTitleMoveEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowTitleMoveEnabledtest01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowTitleMoveEnabled");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+
+    bool enable = true;
+    WMError res = window->SetWindowTitleMoveEnabled(enable);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->SetWindowTitleMoveEnabled(enable);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    enable = false;
+    res = window->SetWindowTitleMoveEnabled(enable);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowTitleMoveEnabledtest01 end";
+}
+
+/**
  * @tc.name: SetSubWindowModal
  * @tc.desc: SetSubWindowModal and check the retCode
  * @tc.type: FUNC

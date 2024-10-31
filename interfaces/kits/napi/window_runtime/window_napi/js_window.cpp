@@ -835,6 +835,13 @@ napi_value JsWindow::SetWindowDecorVisible(napi_env env, napi_callback_info info
     return (me != nullptr) ? me->OnSetWindowDecorVisible(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowTitleMoveEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowTitleMoveEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetSubWindowModal(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_SUB, "[NAPI]");
@@ -6152,6 +6159,41 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindow::OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    napi_value nativeVal = argv[0];
+    if (nativeVal == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to visible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enable = true;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+        napi_get_value_bool(env, nativeVal, &enable));
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowTitleMoveEnabled(enable));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window set title move enable failed");
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -7045,6 +7087,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "enableLandscapeMultiWindow", moduleName, JsWindow::EnableLandscapeMultiWindow);
     BindNativeFunction(env, object, "disableLandscapeMultiWindow", moduleName, JsWindow::DisableLandscapeMultiWindow);
     BindNativeFunction(env, object, "setWindowDecorVisible", moduleName, JsWindow::SetWindowDecorVisible);
+    BindNativeFunction(env, object, "setWindowTitleMoveEnabled", moduleName, JsWindow::SetWindowTitleMoveEnabled);
     BindNativeFunction(env, object, "setSubWindowModal", moduleName, JsWindow::SetSubWindowModal);
     BindNativeFunction(env, object, "enableDrag", moduleName, JsWindow::EnableDrag);
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
