@@ -1638,7 +1638,7 @@ static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback &execu
             task.Resolve(env, NapiGetUndefined(env));
         } else {
             task.Reject(env, JsErrUtils::CreateJsError(
-                env, *errCodePtr, "JsWindow::ß failed"));
+                env, *errCodePtr, "JsWindow::OnMoveWindowToGlobal failed"));
         }
     };
 }
