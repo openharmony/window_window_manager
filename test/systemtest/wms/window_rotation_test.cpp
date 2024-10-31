@@ -131,10 +131,10 @@ void WindowRotationTest::TearDown()
 
 namespace {
 /**
-* @tc.name: WindowRotationTest1
-* @tc.desc: create window and SetRequestedOrientation.
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRotationTest1
+ * @tc.desc: create window and SetRequestedOrientation.
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRotationTest, WindowRotationTest1, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.1";
@@ -167,10 +167,10 @@ HWTEST_F(WindowRotationTest, WindowRotationTest1, Function | MediumTest | Level3
 }
 
 /**
-* @tc.name: WindowRotationTest2
-* @tc.desc: create window with orientation property.
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRotationTest2
+ * @tc.desc: create window with orientation property.
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.2";
@@ -204,10 +204,10 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
 }
 
 /**
-* @tc.name: WindowRotationTest3
-* @tc.desc: create floating window with orientation property
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRotationTest3
+ * @tc.desc: create floating window with orientation property
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3)
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -240,10 +240,10 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
 
 
 /**
-* @tc.name: WindowRotationTest4
-* @tc.desc: create window with orientation after setting screen default orientation.
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRotationTest4
+ * @tc.desc: create window with orientation after setting screen default orientation.
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3)
 {
     auto displayDefault = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -282,11 +282,11 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
 }
 
 /**
-* @tc.name: WindowRotationTest5
-* @tc.desc: create window with orientation after setting screen default orientation, and toggle shown state for all app
-*           windows.
-* @tc.type: FUNC
-*/
+ * @tc.name: WindowRotationTest5
+ * @tc.desc: create window with orientation after setting screen default orientation, and toggle shown state for all app
+ *           windows.
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3)
 {
     auto displayDefault = DisplayManager::GetInstance().GetDefaultDisplay();

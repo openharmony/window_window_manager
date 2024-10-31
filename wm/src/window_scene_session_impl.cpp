@@ -362,7 +362,9 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        AddSubWindowMapForExtensionWindow();
+        if (!isToastFlag) {
+            AddSubWindowMapForExtensionWindow();
+        }
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
@@ -1495,6 +1497,18 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
             layoutCallback_->GetMoveToAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
+    return static_cast<WMError>(ret);
+}
+
+WMError WindowSceneSessionImpl::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    auto ret = hostSession->GetGlobalScaledRect(globalScaledRect);
     return static_cast<WMError>(ret);
 }
 

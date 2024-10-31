@@ -948,6 +948,15 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateScreenCapture(uint3
     option.isNeedNotify_ = true;
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> captureImage = DisplayManager::GetInstance().GetScreenCapture(option, &errCode);
+
+    if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] param error.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
+    }
+    if (errCode == DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] not support.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORTED;
+    }
     if (errCode == DmErrorCode::DM_ERROR_NO_PERMISSION) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] pixelMap no permission.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_NO_PERMISSION;

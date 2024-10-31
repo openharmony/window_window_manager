@@ -420,6 +420,29 @@ HWTEST_F(WindowSessionTest, IsTopDialog, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetGlobalScaledRect
+ * @tc.desc: GetGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetGlobalScaledRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    Rect globalScaledRect;
+    sceneSession->globalRect_ = {100, 100, 50, 40};
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->scaleX_ = 0.5f;
+    sceneSession->scaleY_ = 0.5f;
+    WMError ret = sceneSession->GetGlobalScaledRect(globalScaledRect);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(100, globalScaledRect.posX_);
+    ASSERT_EQ(100, globalScaledRect.posY_);
+    ASSERT_EQ(25, globalScaledRect.width_);
+    ASSERT_EQ(20, globalScaledRect.height_);
+}
+
+
+/**
  * @tc.name: RaiseToAppTop01
  * @tc.desc: RaiseToAppTop
  * @tc.type: FUNC

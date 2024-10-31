@@ -2714,7 +2714,7 @@ HWTEST_F(WindowTest, Test05, Function | SmallTest | Level2)
  * @tc.name: SetTitleButtonVisible
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
 {
     sptr<Window> window = new (std::nothrow) Window();

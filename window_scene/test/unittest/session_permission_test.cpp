@@ -77,7 +77,7 @@ HWTEST_F(SessionPermissionTest, IsSACalling, Function | SmallTest | Level1)
  * @tc.name: VerifyCallingPermission
  * @tc.desc: test function : VerifyCallingPermission1
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, VerifyCallingPermission, Function | SmallTest | Level1)
 {
     const std::string *permissionNode = new string;
@@ -89,7 +89,7 @@ HWTEST_F(SessionPermissionTest, VerifyCallingPermission, Function | SmallTest | 
  * @tc.name: VerifyPermissionByCallerToken
  * @tc.desc: test function : VerifyPermissionByCallerToken
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, VerifyPermissionByCallerToken, Function | SmallTest | Level1)
 {
     const uint32_t callerToken = 1000;
@@ -102,7 +102,7 @@ HWTEST_F(SessionPermissionTest, VerifyPermissionByCallerToken, Function | SmallT
  * @tc.name: IsSameBundleNameAsCalling
  * @tc.desc: test function : IsSameBundleNameAsCalling1
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, IsSameBundleNameAsCalling, Function | SmallTest | Level1)
 {
     const std::string *bundleName = new string;
@@ -135,7 +135,7 @@ HWTEST_F(SessionPermissionTest, IsSameAppAsCalling, Function | SmallTest | Level
  * @tc.name: VerifySessionPermission
  * @tc.desc: test function : VerifySessionPermission
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, VerifySessionPermission, Function | SmallTest | Level1)
 {
     bool result = SessionPermission::VerifySessionPermission();
@@ -146,7 +146,7 @@ HWTEST_F(SessionPermissionTest, VerifySessionPermission, Function | SmallTest | 
  * @tc.name: JudgeCallerIsAllowedToUseSystemAPI
  * @tc.desc: test function : JudgeCallerIsAllowedToUseSystemAPI
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, JudgeCallerIsAllowedToUseSystemAPI, Function | SmallTest | Level1)
 {
     bool result = SessionPermission::JudgeCallerIsAllowedToUseSystemAPI();
@@ -157,7 +157,7 @@ HWTEST_F(SessionPermissionTest, JudgeCallerIsAllowedToUseSystemAPI, Function | S
  * @tc.name: IsShellCall
  * @tc.desc: test function : IsShellCall
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, IsShellCall, Function | SmallTest | Level1)
 {
     bool result = SessionPermission::IsShellCall();
@@ -168,7 +168,7 @@ HWTEST_F(SessionPermissionTest, IsShellCall, Function | SmallTest | Level1)
  * @tc.name: IsStartByHdcd
  * @tc.desc: test function : IsStartByHdcd
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, IsStartByHdcd, Function | SmallTest | Level1)
 {
     bool result = SessionPermission::IsStartByHdcd();
@@ -179,7 +179,7 @@ HWTEST_F(SessionPermissionTest, IsStartByHdcd, Function | SmallTest | Level1)
  * @tc.name: IsStartedByInputMethod
  * @tc.desc: test function : IsStartedByInputMethod
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, Function | SmallTest | Level1)
 {
     bool result = SessionPermission::IsStartedByInputMethod();
@@ -190,7 +190,7 @@ HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, Function | SmallTest | L
  * @tc.name: session_permission_test001
  * @tc.desc: test function : session_permission_test001
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, session_permission_test001, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test001 start";
@@ -203,7 +203,7 @@ HWTEST_F(SessionPermissionTest, session_permission_test001, Function | SmallTest
  * @tc.name: session_permission_test002
  * @tc.desc: test function : session_permission_test002
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, session_permission_test002, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test002 start";
@@ -216,7 +216,7 @@ HWTEST_F(SessionPermissionTest, session_permission_test002, Function | SmallTest
  * @tc.name: IsStartedByUIExtension
  * @tc.desc: test function : IsStartedByUIExtension
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SessionPermissionTest, IsStartedByUIExtension, Function | SmallTest | Level1)
 {
     bool result = SessionPermission::IsStartedByUIExtension();

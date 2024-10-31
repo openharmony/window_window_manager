@@ -59,7 +59,7 @@ private:
     void ExcuteInjectCmd();
 /*
     hidumper 命令注入隔离
-*/
+ */
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
     void SetMotionSensorvalue(std::string input);

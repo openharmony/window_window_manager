@@ -381,7 +381,7 @@ public:
  * @class IWindowVisibilityChangedListener
  *
  * @brief Listener to observe one window visibility changed.
-*/
+ */
 class IWindowVisibilityChangedListener : virtual public RefBase {
 public:
     virtual void OnWindowVisibilityChangedCallback(const bool isVisible) {};
@@ -392,7 +392,7 @@ using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
-*/
+ */
 class IWindowNoInteractionListener : virtual public RefBase {
 public:
     /**
@@ -898,6 +898,13 @@ public:
      * @return WMError
      */
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
+     * @brief Get window global scaled rect.
+     *
+     * @param Rect
+     * @return WMError
+     */
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief resize the window instance (w,h)
      *

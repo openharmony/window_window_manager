@@ -463,6 +463,12 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionSnapshot, Function | S
 {
     MessageParcel data;
     MessageParcel reply;
+    const std::u16string deviceId = static_cast<std::u16string>(u"123");
+    data.WriteString16(deviceId);
+    const std::int32_t persistentId = 1;
+    data.WriteInt32(persistentId);
+    const bool isLowResolution = true;
+    data.WriteBool(isLowResolution);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionSnapshot(data, reply);
     EXPECT_EQ(ERR_NONE, res);
