@@ -11,10 +11,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -23,97 +24,87 @@ namespace Rosen {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
-void SuperFoldStateManager::DoFoldToHalfFold()
+void SuperFoldStateManager::DoAngleChangeFolded()
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoFoldToHalfFold()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeFolded()");
 }
 
-void SuperFoldStateManager::DoHalfFoldToFold()
+void SuperFoldStateManager::DoAngleChangeHalfFolded()
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoHalfFoldToFold()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeHalfFolded())");
 }
 
-void SuperFoldStateManager::DoHalFoldToExpand()
+void SuperFoldStateManager::DoAngleChangeExpanded()
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoHalFoldToExpand()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeExpanded()");
 }
 
-void SuperFoldStateManager::DoExpandToHalfFold()
+void SuperFoldStateManager::DoKeyboardOn()
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoExpandToHalfFold()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOn()");
 }
 
-void SuperFoldStateManager::DoHalfFoldToKeyboard()
+void SuperFoldStateManager::DoKeyboardOff()
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoHalfFoldToKeyboard()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOff()");
 }
 
-void SuperFoldStateManager::DoKeyboardToHalfFold()
+void SuperFoldStateManager::DoSoftKeyboardOn()
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardToHalfFold()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoSoftKeyboardOn()");
 }
 
-void SuperFoldStateManager::DoHalfFoldToSoftKeyboard()
+void SuperFoldStateManager::DoSoftKeyboardOff()
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoHalfFoldToSoftKeyboard()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoSoftKeyboardOff()");
 }
 
-void SuperFoldStateManager::DoSoftKeyboardToHalfFold()
+void SuperFoldStateManager::DoExpandedToKeyboard()
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoSoftKeyboardToHalfFold()");
-}
-
-void SuperFoldStateManager::DoSoftKeyboardToKeyboard()
-{
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoSoftKeyboardToKeyboard()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoExpandedToKeyboard()");
 }
 
 SuperFoldStateManager::SuperFoldStateManager()
 {
-    initStateManagerMap(SuperFoldStatus::FOLDED,
-        SuperFoldStatusChangeEvents::FOLDED_TO_HALF_FOLDED,
-        SuperFoldStatus::HALF_FOLDED,
-        &SuperFoldStateManager::DoFoldToHalfFold);
-
     initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
-        SuperFoldStatusChangeEvents::HALF_FOLDED_TO_FOLDED,
-        SuperFoldStatus::FOLDED,
-        &SuperFoldStateManager::DoHalfFoldToFold);
-
-    initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
-        SuperFoldStatusChangeEvents::HALF_FOLDED_TO_EXPANDED,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED,
         SuperFoldStatus::EXPANDED,
-        &SuperFoldStateManager::DoHalFoldToExpand);
+        &SuperFoldStateManager::DoAngleChangeExpanded);
 
     initStateManagerMap(SuperFoldStatus::EXPANDED,
-        SuperFoldStatusChangeEvents::EXPANDED_TO_HALF_FOLDED,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED,
         SuperFoldStatus::HALF_FOLDED,
-        &SuperFoldStateManager::DoExpandToHalfFold);
+        &SuperFoldStateManager::DoAngleChangeHalfFolded);
 
     initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
-        SuperFoldStatusChangeEvents::HALF_FOLDED_TO_KEYBOARD,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED,
+        SuperFoldStatus::FOLDED,
+        &SuperFoldStateManager::DoAngleChangeFolded);
+
+    initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
+        SuperFoldStatusChangeEvents::KEYBOARD_ON,
         SuperFoldStatus::KEYBOARD,
-        &SuperFoldStateManager::DoHalfFoldToKeyboard);
+        &SuperFoldStateManager::DoKeyboardOn);
+
+    initStateManagerMap(SuperFoldStatus::EXPANDED,
+        SuperFoldStatusChangeEvents::KEYBOARD_ON,
+        SuperFoldStatus::KEYBOARD,
+        &SuperFoldStateManager::DoExpandedToKeyboard);
 
     initStateManagerMap(SuperFoldStatus::KEYBOARD,
-        SuperFoldStatusChangeEvents::KEYBOARD_TO_HALF_FOLDED,
+        SuperFoldStatusChangeEvents::KEYBOARD_OFF,
         SuperFoldStatus::HALF_FOLDED,
-        &SuperFoldStateManager::DoKeyboardToHalfFold);
+        &SuperFoldStateManager::DoKeyboardOff);
 
     initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
-        SuperFoldStatusChangeEvents::HALF_FOLDED_TO_SOFT_KEYBOARD,
+        SuperFoldStatusChangeEvents::SOFT_KEYBOARD_ON,
         SuperFoldStatus::SOFT_KEYBOARD,
-        &SuperFoldStateManager::DoHalfFoldToSoftKeyboard);
+        &SuperFoldStateManager::DoSoftKeyboardOn);
 
     initStateManagerMap(SuperFoldStatus::SOFT_KEYBOARD,
-        SuperFoldStatusChangeEvents::SOFT_KEYBOARD_TO_HALF_FOLDED,
+        SuperFoldStatusChangeEvents::SOFT_KEYBOARD_OFF,
         SuperFoldStatus::HALF_FOLDED,
-        &SuperFoldStateManager::DoSoftKeyboardToKeyboard);
-
-    initStateManagerMap(SuperFoldStatus::SOFT_KEYBOARD,
-        SuperFoldStatusChangeEvents::SOFT_KEYBOARD_TO_KEYBOARD,
-        SuperFoldStatus::KEYBOARD,
-        &SuperFoldStateManager::DoSoftKeyboardToKeyboard);
+        &SuperFoldStateManager::DoSoftKeyboardOff);
 }
 
 SuperFoldStateManager::~SuperFoldStateManager() = default;
@@ -156,6 +147,11 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
 SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 {
     return curState_;
+}
+
+void SuperFoldStateManager::SetCurrentStatus(SuperFoldStatus curState)
+{
+    curState_ = curState;
 }
 
 } // Rosen

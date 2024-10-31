@@ -114,8 +114,12 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
-        const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) { return WSError::WS_OK; }
+        const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
@@ -252,10 +256,6 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
-    {
-        return WSError::WS_OK;
-    }
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
@@ -282,7 +282,7 @@ public:
      */
     virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
-    /*
+    /**
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }

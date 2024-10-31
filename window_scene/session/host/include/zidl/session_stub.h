@@ -45,6 +45,7 @@ private:
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
     int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);
@@ -67,7 +68,6 @@ private:
     int HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
-    int HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply);
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply);
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);

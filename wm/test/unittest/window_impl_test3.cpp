@@ -119,7 +119,7 @@ void WindowImplTest3::TearDown()
 }
 
 namespace {
-/*
+/**
  * @tc.name: RegisterAnimationTransitionController
  * @tc.desc: RegisterAnimationTransitionController test
  * @tc.type: FUNC
@@ -143,7 +143,7 @@ HWTEST_F(WindowImplTest3, RegisterAnimationTransitionController, Function | Smal
     window->RegisterAnimationTransitionController(listener);
 }
 
-/*
+/**
  * @tc.name: RegisterDialogDeathRecipientListener
  * @tc.desc: RegisterDialogDeathRecipientListener | NotifyDestroy test
  * @tc.type: FUNC
@@ -165,7 +165,7 @@ HWTEST_F(WindowImplTest3, RegisterDialogDeathRecipientListener, Function | Small
     window->NotifyDestroy();
 }
 
-/*
+/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot test
  * @tc.type: FUNC
@@ -184,7 +184,7 @@ HWTEST_F(WindowImplTest3, NotifyScreenshot, Function | SmallTest | Level3)
     window->screenshotListeners_[window->GetWindowId()].clear();
 }
 
-/*
+/**
  * @tc.name: NotifyTouchDialogTarget
  * @tc.desc: NotifyTouchDialogTarget test
  * @tc.type: FUNC
@@ -204,7 +204,7 @@ HWTEST_F(WindowImplTest3, NotifyTouchDialogTarget, Function | SmallTest | Level3
     window->dialogTargetTouchListeners_[window->GetWindowId()].clear();
 }
 
-/*
+/**
  * @tc.name: NotifySizeChange
  * @tc.desc: NotifySizeChange test
  * @tc.type: FUNC
@@ -224,7 +224,7 @@ HWTEST_F(WindowImplTest3, NotifySizeChange, Function | SmallTest | Level3)
     window->windowChangeListeners_[window->GetWindowId()].clear();
 }
 
-/*
+/**
  * @tc.name: NotifyModeChange
  * @tc.desc: NotifyModeChange test
  * @tc.type: FUNC
@@ -243,7 +243,7 @@ HWTEST_F(WindowImplTest3, NotifyModeChange, Function | SmallTest | Level3)
     window->windowChangeListeners_[window->GetWindowId()].clear();
 }
 
-/*
+/**
  * @tc.name: NotifyAvoidAreaChange
  * @tc.desc: NotifyAvoidAreaChange test
  * @tc.type: FUNC
@@ -263,7 +263,7 @@ HWTEST_F(WindowImplTest3, NotifyAvoidAreaChange, Function | SmallTest | Level3)
     window->avoidAreaChangeListeners_[window->GetWindowId()].clear();
 }
 
-/*
+/**
  * @tc.name: NotifyDisplayMoveChange
  * @tc.desc: NotifyDisplayMoveChange test
  * @tc.type: FUNC
@@ -281,7 +281,7 @@ HWTEST_F(WindowImplTest3, NotifyDisplayMoveChange, Function | SmallTest | Level3
     window->NotifyDisplayMoveChange(DisplayId{}, DisplayId{});
 }
 
-/*
+/**
  * @tc.name: SetAceAbilityHandler
  * @tc.desc: SetAceAbilityHandler test
  * @tc.type: FUNC
@@ -299,7 +299,7 @@ HWTEST_F(WindowImplTest3, SetAceAbilityHandler, Function | SmallTest | Level3)
     window->SetAceAbilityHandler(handler);
 }
 
-/*
+/**
  * @tc.name: HandleBackKeyPressedEvent
  * @tc.desc: HandleBackKeyPressedEvent test
  * @tc.type: FUNC
@@ -325,7 +325,7 @@ HWTEST_F(WindowImplTest3, HandleBackKeyPressedEvent, Function | SmallTest | Leve
     window->HandleBackKeyPressedEvent(keyEvent);
 }
 
-/*
+/**
  * @tc.name: ConsumeKeyEvent
  * @tc.desc: ConsumeKeyEvent test
  * @tc.type: FUNC
@@ -356,7 +356,7 @@ HWTEST_F(WindowImplTest3, ConsumeKeyEvent, Function | SmallTest | Level3)
     window->ConsumeKeyEvent(keyEvent);
 }
 
-/*
+/**
  * @tc.name: ConsumePointerEvent
  * @tc.desc: ConsumePointerEvent test
  * @tc.type: FUNC
@@ -387,7 +387,7 @@ HWTEST_F(WindowImplTest3, ConsumePointerEvent, Function | SmallTest | Level3)
     window->ConsumePointerEvent(pointerEvent);
 }
 
-/*
+/**
  * @tc.name: HandleModeChangeHotZones
  * @tc.desc: HandleModeChangeHotZones test
  * @tc.type: FUNC
@@ -406,7 +406,7 @@ HWTEST_F(WindowImplTest3, HandleModeChangeHotZones, Function | SmallTest | Level
     window->HandleModeChangeHotZones(0, 0);
 }
 
-/*
+/**
  * @tc.name: UpdatePointerEventForStretchableWindow
  * @tc.desc: UpdatePointerEventForStretchableWindow test
  * @tc.type: FUNC
@@ -476,7 +476,7 @@ HWTEST_F(WindowImplTest3, MoveDrag, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: TransferPointerEvent
  * @tc.desc: TransferPointerEvent test
  * @tc.type: FUNC
@@ -503,7 +503,7 @@ HWTEST_F(WindowImplTest3, TransferPointerEvent, Function | SmallTest | Level3)
     window->TransferPointerEvent(pointerEvent);
 }
 
-/*
+/**
  * @tc.name: UpdateConfiguration
  * @tc.desc: UpdateConfiguration test
  * @tc.type: FUNC
@@ -544,7 +544,7 @@ HWTEST_F(WindowImplTest3, UpdateConfiguration, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: UpdateWindowState
  * @tc.desc: UpdateWindowState test
  * @tc.type: FUNC
@@ -572,7 +572,7 @@ HWTEST_F(WindowImplTest3, UpdateWindowState, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: RestoreSplitWindowMode
  * @tc.desc: RestoreSplitWindowMode test
  * @tc.type: FUNC
@@ -596,7 +596,7 @@ HWTEST_F(WindowImplTest3, RestoreSplitWindowMode, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: IsFocused
  * @tc.desc: IsFocused test
  * @tc.type: FUNC
@@ -622,7 +622,7 @@ HWTEST_F(WindowImplTest3, IsFocused, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: UpdateSubWindowStateAndNotify
  * @tc.desc: update subwindow state
  * @tc.type: FUNC
@@ -666,7 +666,7 @@ HWTEST_F(WindowImplTest3, UpdateSubWindowStateAndNotify, Function | SmallTest | 
     ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
 }
 
-/*
+/**
  * @tc.name: UpdateWindowStateWhenHide
  * @tc.desc: UpdateWindowStateWhenHide test
  * @tc.type: FUNC
@@ -698,7 +698,7 @@ HWTEST_F(WindowImplTest3, UpdateWindowStateWhenHide, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
 }
 
-/*
+/**
  * @tc.name: UpdateWindowStateWhenShow
  * @tc.desc: UpdateWindowStateWhenShow test
  * @tc.type: FUNC
@@ -728,7 +728,7 @@ HWTEST_F(WindowImplTest3, UpdateWindowStateWhenShow, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
 }
 
-/*
+/**
  * @tc.name: RaiseToAppTop
  * @tc.desc: RaiseToAppTop test
  * @tc.type: FUNC
@@ -759,7 +759,7 @@ HWTEST_F(WindowImplTest3, RaiseToAppTop, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
- /*
+/**
  * @tc.name: UpdateDecorEnable
  * @tc.desc: UpdateDecorEnable test
  * @tc.type: FUNC
@@ -992,7 +992,7 @@ HWTEST_F(WindowImplTest3, SetAlpha01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: CreateWindowImpl
  * @tc.desc: CreateSurfaceNode with different type
  * @tc.type: FUNC
@@ -1051,7 +1051,7 @@ HWTEST_F(WindowImplTest3, CreateWindowImpl, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window4->Destroy());
 }
 
-/*
+/**
  * @tc.name: Create
  * @tc.desc: Create
  * @tc.type: FUNC
@@ -1079,7 +1079,7 @@ HWTEST_F(WindowImplTest3, Create, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window1->Destroy());
 }
 
-/*
+/**
  * @tc.name: Create1
  * @tc.desc: Create WindowCreateCheck
  * @tc.type: FUNC
@@ -1115,7 +1115,7 @@ HWTEST_F(WindowImplTest3, Create1, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window2->Destroy());
 }
 
-/*
+/**
  * @tc.name: Create2
  * @tc.desc: Create WindowCreateCheck
  * @tc.type: FUNC
@@ -1151,7 +1151,7 @@ HWTEST_F(WindowImplTest3, Create2, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window2->Destroy());
 }
 
-/*
+/**
  * @tc.name: GetTopWindowWithId
  * @tc.desc: CreateSurfaceNode with different type
  * @tc.type: FUNC
@@ -1192,7 +1192,7 @@ HWTEST_F(WindowImplTest3, NotifyForegroundInteractiveStatus, Function | SmallTes
     ASSERT_EQ(WindowState::STATE_DESTROYED, window->GetWindowState());
 }
 
-/*
+/**
  * @tc.name: GetTopWindowWithContext
  * @tc.desc: GetTopWindowWithContexttest01
  * @tc.type: FUNC
@@ -1213,7 +1213,7 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithContext01, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: GetSubWindow
  * @tc.desc: GetSubWindowtest02
  * @tc.type: FUNC
@@ -1239,7 +1239,7 @@ HWTEST_F(WindowImplTest3, GetSubWindowtext02, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: SetFloatingMaximize
  * @tc.desc: SetFloatingMaximize test
  * @tc.type: FUNC
@@ -1295,7 +1295,7 @@ HWTEST_F(WindowImplTest3, SetAspectRatio02, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetAspectRatio(0.0));
 }
 
-/*
+/**
  * @tc.name: MapDialogWindowToAppIfNeeded
  * @tc.desc: MapDialogWindowToAppIfNeededtest
  * @tc.type: FUNC
@@ -1318,7 +1318,7 @@ HWTEST_F(WindowImplTest3, MapDialogWindowToAppIfNeededtest, Function | SmallTest
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: GetConfigurationFromAbilityInfo
  * @tc.desc: GetConfigurationFromAbilityInfotest
  * @tc.type: FUNC

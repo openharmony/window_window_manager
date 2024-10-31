@@ -154,7 +154,6 @@ public:
     WMError RequestFocusByClient(bool isFocused) const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override;
-    WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
     bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
@@ -418,6 +417,7 @@ protected:
      */
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
+    WMError GetVirtualPixelRatio(float& vpr);
 
 private:
     //Trans between colorGamut and colorSpace
