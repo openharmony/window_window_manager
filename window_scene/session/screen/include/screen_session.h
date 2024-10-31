@@ -52,6 +52,7 @@ public:
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
     virtual void OnHoverStatusChange(int32_t hoverStatus, ScreenId extendScreenId) = 0;
     virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
+    virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -241,6 +242,7 @@ public:
     void SetPhysicalRotation(int rotation, FoldStatus foldStatus);
     void SetStartPosition(uint32_t startX, uint32_t startY);
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
+    void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
 
 private:
     ScreenProperty property_;
