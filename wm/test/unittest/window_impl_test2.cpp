@@ -632,7 +632,7 @@ HWTEST_F(WindowImplTest2, CalculatePointerDirection, Function | SmallTest | Leve
     ASSERT_EQ(5, window->CalculatePointerDirection(102, 50));
 }
 
- /*
+/**
  * @tc.name: FindWindowById
  * @tc.desc: FindWindowById Test
  * @tc.type: FUNC
@@ -657,7 +657,7 @@ HWTEST_F(WindowImplTest2, FindWindowById, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
- /*
+/**
  * @tc.name: GetSubWindow
  * @tc.desc: GetSubWindow Test
  * @tc.type: FUNC
@@ -688,7 +688,7 @@ HWTEST_F(WindowImplTest2, GetSubWindow, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
- /*
+/**
  * @tc.name: UpdateConfigurationForAll
  * @tc.desc: UpdateConfigurationForAll Test
  * @tc.type: FUNC
@@ -706,7 +706,7 @@ HWTEST_F(WindowImplTest2, UpdateConfigurationForAll, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
- /*
+/**
  * @tc.name: SetAlpha
  * @tc.desc: SetAlpha | GetAlpha
  * @tc.type: FUNC
@@ -727,7 +727,7 @@ HWTEST_F(WindowImplTest2, SetAlpha, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
- /*
+/**
  * @tc.name: GetAvoidAreaByType
  * @tc.desc: Test GetAvoidAreaByType when ret is not ok
  * @tc.type: FUNC
@@ -748,7 +748,7 @@ HWTEST_F(WindowImplTest2, GetAvoidAreaByType, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: SetWindowType
  * @tc.desc: SetWindowType Test
  * @tc.type: FUNC
@@ -774,7 +774,7 @@ HWTEST_F(WindowImplTest2, SetWindowType, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: SetWindowMode
  * @tc.desc: SetWindowMode Test
  * @tc.type: FUNC
@@ -812,7 +812,7 @@ HWTEST_F(WindowImplTest2, SetWindowMode, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: WindowFlag
  * @tc.desc: GetWindowFlags | SetWindowFlags | AddWindowFlag | RemoveWindowFlag
  * @tc.type: FUNC
@@ -840,7 +840,7 @@ HWTEST_F(WindowImplTest2, WindowFlag, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: OnNewWant
  * @tc.desc: OnNewWant test
  * @tc.type: FUNC
@@ -867,7 +867,7 @@ HWTEST_F(WindowImplTest2, OnNewWant, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: GetContentInfo
  * @tc.desc: GetContentInfo test
  * @tc.type: FUNC
@@ -893,7 +893,7 @@ HWTEST_F(WindowImplTest2, GetContentInfo, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: Snapshot
  * @tc.desc: Snapshot test
  * @tc.type: FUNC
@@ -919,7 +919,7 @@ HWTEST_F(WindowImplTest2, Snapshot, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: DumpInfo
  * @tc.desc: DumpInfo test
  * @tc.type: FUNC
@@ -951,7 +951,7 @@ HWTEST_F(WindowImplTest2, DumpInfo, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: SetLayoutFullScreen
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
@@ -1009,7 +1009,7 @@ HWTEST_F(WindowImplTest2, SetLayoutFullScreen, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: SetImmersiveModeEnabledState
  * @tc.desc: SetImmersiveModeEnabledState test
  * @tc.type: FUNC
@@ -1069,7 +1069,7 @@ HWTEST_F(WindowImplTest2, SetImmersiveModeEnabledState, Function | SmallTest | L
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: SetFullScreen
  * @tc.desc: SetFullScreen test
  * @tc.type: FUNC
@@ -1131,7 +1131,7 @@ HWTEST_F(WindowImplTest2, SetFullScreen, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: UpdateTitleButtonVisibility
  * @tc.desc: UpdateTitleButtonVisibility test
  * @tc.type: FUNC
@@ -1158,7 +1158,7 @@ HWTEST_F(WindowImplTest2, UpdateTitleButtonVisibility, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: WindowCreateCheck
  * @tc.desc: WindowCreateCheck test
  * @tc.type: FUNC
@@ -1174,7 +1174,7 @@ HWTEST_F(WindowImplTest2, WindowCreateCheck, Function | SmallTest | Level3)
     ASSERT_NE(WMError::WM_OK, window->WindowCreateCheck(static_cast<uint32_t>(-1)));
 }
 
-/*
+/**
  * @tc.name: BindDialogTarget
  * @tc.desc: BindDialogTarget test
  * @tc.type: FUNC
@@ -1204,7 +1204,7 @@ HWTEST_F(WindowImplTest2, BindDialogTarget, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: Destroy
  * @tc.desc: Destroy test
  * @tc.type: FUNC
@@ -1230,7 +1230,7 @@ HWTEST_F(WindowImplTest2, Destroy, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: UpdateSurfaceNodeAfterCustomAnimation
  * @tc.desc: UpdateSurfaceNodeAfterCustomAnimation test
  * @tc.type: FUNC
@@ -1327,7 +1327,7 @@ HWTEST_F(WindowImplTest2, ShowHide, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: CloseWindow
  * @tc.desc: CloseWindow test
  * @tc.type: FUNC
@@ -1350,7 +1350,7 @@ HWTEST_F(WindowImplTest2, CloseWindow, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: PendingCloseWindow
  * @tc.desc: PendingCloseWindow test
  * @tc.type: FUNC
@@ -1364,7 +1364,7 @@ HWTEST_F(WindowImplTest2, PendingCloseWindow, Function | SmallTest | Level3)
     ASSERT_EQ(nullptr, window->context_);
 }
 
-/*
+/**
  * @tc.name: InvalidWindow
  * @tc.desc: InvalidWindow test
  * @tc.type: FUNC
@@ -1380,7 +1380,7 @@ HWTEST_F(WindowImplTest2, InvalidWindow, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Close());
 }
 
-/*
+/**
  * @tc.name: BackgroundColor
  * @tc.desc: GetBackgroundColor | SetBackGroundColor test
  * @tc.type: FUNC
@@ -1407,7 +1407,7 @@ HWTEST_F(WindowImplTest2, BackgroundColor, Function | SmallTest | Level3)
     ASSERT_EQ(0, window->GetBackgroundColor());
 }
 
-/*
+/**
  * @tc.name: SetTransparent
  * @tc.desc: SetTransparent test
  * @tc.type: FUNC
@@ -1432,7 +1432,7 @@ HWTEST_F(WindowImplTest2, SetTransparent, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: TransferLifeCycleEventToString
  * @tc.desc: TransferLifeCycleEventToString test
  * @tc.type: FUNC
@@ -1446,7 +1446,7 @@ HWTEST_F(WindowImplTest2, TransferLifeCycleEventToString, Function | SmallTest |
         static_cast<LifeCycleEvent>(uint32_t(-1))));
 }
 
-/*
+/**
  * @tc.name: NotifyWindowTransition
  * @tc.desc: NotifyWindowTransition test
  * @tc.type: FUNC

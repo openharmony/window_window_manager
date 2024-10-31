@@ -53,6 +53,7 @@ public:
         bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
@@ -98,11 +99,10 @@ public:
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
-    WSError SetFocusableOnShow(bool isFocusableOnShow) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     
-    /*
+    /**
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;

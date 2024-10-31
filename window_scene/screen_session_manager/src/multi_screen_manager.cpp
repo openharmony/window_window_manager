@@ -520,7 +520,7 @@ void MultiScreenManager::InternalScreenOnChange(sptr<ScreenSession> internalSess
         DoFirstMainChange(externalSession, internalSession, SCREEN_EXTEND);
         TLOGI(WmsLogTag::DMS, "6: external mirror to external extend");
     } else {
-        TLOGE(WmsLogTag::DMS, "paramater error!");
+        TLOGE(WmsLogTag::DMS, "no need to change or paramater error!");
         return;
     }
 }
