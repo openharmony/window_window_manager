@@ -691,7 +691,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         // position change no need to notify client, since frame layout finish will notify
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_) &&
             (session->reason_ != SizeChangeReason::MOVE || !session->rectChangeListenerRegistered_)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: position change no need notify client id:%{public}d, rect:%{public}s, "
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: position change no need notify client id:%{public}d, rect:%{public}s, "
                 "preRect: %{public}s",
                 funcname, session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;

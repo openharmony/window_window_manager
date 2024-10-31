@@ -210,12 +210,6 @@ public:
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
 
-    /*
-     * Window Layout
-     */
-    void SetClientRect(const WSRect& rect);
-    WSRect GetClientRect() const;
-
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
@@ -465,6 +459,12 @@ public:
     static void SetScbCoreEnabled(bool enabled);
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
 
+    /*
+     * Window Layout
+     */
+    void SetClientRect(const WSRect& rect);
+    WSRect GetClientRect() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -526,7 +526,6 @@ protected:
     std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
     bool isActive_ = false;
     bool isSystemActive_ = false;
-
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
@@ -570,6 +569,9 @@ protected:
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
+    /*
+     * Window Layout
+     */
     WSRect winRect_;
     WSRect clientRect_; // rect saved when prelayout or notify client to update rect
     WSRect lastLayoutRect_; // rect saved when go background

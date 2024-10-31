@@ -656,9 +656,9 @@ WSError SessionProxy::UpdateClientRect(const WSRect& rect)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(static_cast<int32_t>(rect.posX_)) ||
-          !data.WriteInt32(static_cast<int32_t>(rect.posY_)) ||
-          !data.WriteUint32(static_cast<uint32_t>(rect.width_)) ||
-          !data.WriteUint32(static_cast<uint32_t>(rect.height_))) {
+        !data.WriteInt32(static_cast<int32_t>(rect.posY_)) ||
+        !data.WriteUint32(static_cast<uint32_t>(rect.width_)) ||
+        !data.WriteUint32(static_cast<uint32_t>(rect.height_))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write rect failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
