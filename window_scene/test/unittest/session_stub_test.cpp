@@ -194,6 +194,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+    data.WriteBool(true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
@@ -224,6 +225,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+    data.WriteInt32(1);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
@@ -436,14 +438,18 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     if (!data.ReadBool()) {
         ASSERT_EQ(ERR_INVALID_DATA, res);
     }
+    ASSERT_EQ(data.WriteInt32(2), true);
     res = session_->HandleMarkProcessed(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleGetGlobalMaximizeMode(data, reply);
     ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteBool(true), true);
     res = session_->HandleNeedAvoid(data, reply);
     ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteUint32(2), true);
     res = session_->HandleGetAvoidAreaByType(data, reply);
     ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteFloat(2.0), true);
     res = session_->HandleSetAspectRatio(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
@@ -451,6 +457,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     session_->HandleTransferAbilityResult(data, reply);
     res = session_->HandleNotifyExtensionDied(data, reply);
     ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteInt32(2), true);
     res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleGetStatusBarHeight(data, reply);
