@@ -647,8 +647,7 @@ HWTEST_F(SceneSessionTest2, UpdatePiPRect, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scenesession;
-    scenesession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(scenesession, nullptr);
     scenesession->isActive_ = true;
 
@@ -813,7 +812,6 @@ HWTEST_F(SceneSessionTest2, ChangeSessionVisibilityWithStatusBar, Function | Sma
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
     result = sceneSession->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, false);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-    delete sceneSession;
 }
 
 /**
@@ -827,8 +825,7 @@ HWTEST_F(SceneSessionTest2, SetShouldHideNonSecureWindows, Function | SmallTest 
     info.abilityName_ = "SetShouldHideNonSecureWindows";
     info.bundleName_ = "SetShouldHideNonSecureWindows";
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     EXPECT_FALSE(sceneSession->shouldHideNonSecureWindows_.load());
@@ -847,8 +844,7 @@ HWTEST_F(SceneSessionTest2, UpdateExtWindowFlags, Function | SmallTest | Level2)
     info.abilityName_ = "UpdateExtWindowFlags";
     info.bundleName_ = "UpdateExtWindowFlags";
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
@@ -881,8 +877,7 @@ HWTEST_F(SceneSessionTest2, GetCombinedExtWindowFlags, Function | SmallTest | Le
     info.abilityName_ = "GetCombinedExtWindowFlags";
     info.bundleName_ = "GetCombinedExtWindowFlags";
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     auto combinedExtWindowFlags = sceneSession->GetCombinedExtWindowFlags();
@@ -910,8 +905,7 @@ HWTEST_F(SceneSessionTest2, RemoveExtWindowFlags, Function | SmallTest | Level2)
     info.abilityName_ = "RemoveExtWindowFlags";
     info.bundleName_ = "RemoveExtWindowFlags";
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
@@ -932,8 +926,7 @@ HWTEST_F(SceneSessionTest2, ClearExtWindowFlags, Function | SmallTest | Level2)
     info.abilityName_ = "ClearExtWindowFlags";
     info.bundleName_ = "ClearExtWindowFlags";
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     EXPECT_TRUE(sceneSession->extWindowFlagsMap_.empty());
@@ -955,8 +948,7 @@ HWTEST_F(SceneSessionTest2, CalculateCombinedExtWindowFlags, Function | SmallTes
     info.abilityName_ = "CalculateCombinedExtWindowFlags";
     info.bundleName_ = "CalculateCombinedExtWindowFlags";
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     EXPECT_EQ(sceneSession->combinedExtWindowFlags_.bitData, 0);
@@ -1391,8 +1383,7 @@ HWTEST_F(SceneSessionTest2, SetForceHideState, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetForceHideState";
     info.bundleName_ = "SetForceHideState";
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     sceneSession->SetForceHideState(ForceHideState::NOT_HIDDEN);
