@@ -3737,15 +3737,16 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
+    if (isDefaultDensityEnabled_ == enabled) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled not change");
+        return WMError::WM_OK;
+    }
+
     auto hostSession = GetHostSession();
     if (hostSession != nullptr) {
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
-    if (isDefaultDensityEnabled_ == enabled) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled not change");
-        return WMError::WM_OK;
-    }
     isDefaultDensityEnabled_ = enabled;
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
