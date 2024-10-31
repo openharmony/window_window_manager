@@ -196,6 +196,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
+            return HandleDefaultDensityEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE):
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
@@ -445,6 +447,15 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
     bool isLayoutFullScreen = data.ReadBool();
     TLOGD(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
     WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    bool isDefaultDensityEnabled = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled: %{public}d", isDefaultDensityEnabled);
+    WSError errCode = OnDefaultDensityEnabled(isDefaultDensityEnabled);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

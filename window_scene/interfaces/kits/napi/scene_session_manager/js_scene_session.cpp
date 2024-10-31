@@ -69,6 +69,7 @@ const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
 const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
+const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
 const std::string TITLE_DOCK_HOVER_SHOW_CB = "titleAndDockHoverShowChange";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
@@ -129,6 +130,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {KEYBOARD_GRAVITY_CHANGE_CB,            ListenerFuncType::KEYBOARD_GRAVITY_CHANGE_CB},
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
+    {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
     {TITLE_DOCK_HOVER_SHOW_CB,              ListenerFuncType::TITLE_DOCK_HOVER_SHOW_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
     {PRIVACY_MODE_CHANGE_CB,                ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
@@ -686,6 +688,45 @@ void JsSceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnLayoutFullScreenChange");
+}
+
+void JsSceneSession::ProcessDefaultDensityEnabledRegister()
+{
+    auto sessionchangeCallback = sessionchangeCallback_.promote();
+    if (sessionchangeCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionchangeCallback is nullptr");
+        return;
+    }
+    sessionchangeCallback->onDefaultDensityEnabledFunc_ = [weakThis = wptr(this)](bool isDefaultDensityEnabled) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessDefaultDensityEnabledRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnDefaultDensityEnabled(isDefaultDensityEnabled);
+    };
+    TLOGI(WmsLogTag::WMS_LAYOUT, "success");
+}
+
+void JsSceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
+{
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isDefaultDensityEnabled, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGE(WmsLogTag::WMS_LIFE, "OnDefaultDensityEnabled jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(DEFAULT_DENSITY_ENABLED_CB);
+        if (!jsCallBack) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "OnDefaultDensityEnabled jsCallBack is nullptr");
+            return;
+        }
+        napi_value paramsObj = CreateJsValue(env, isDefaultDensityEnabled);
+        napi_value argv[] = {paramsObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnDefaultDensityEnabled");
 }
 
 void JsSceneSession::ProcessRestoreMainWindowRegister()
@@ -2254,6 +2295,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::LAYOUT_FULL_SCREEN_CB):
             ProcessLayoutFullScreenChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB):
+            ProcessDefaultDensityEnabledRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::TITLE_DOCK_HOVER_SHOW_CB):
             ProcessTitleAndDockHoverShowChangeRegister();
