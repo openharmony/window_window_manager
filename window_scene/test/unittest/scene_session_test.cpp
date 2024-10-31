@@ -1201,10 +1201,10 @@ HWTEST_F(SceneSessionTest, OnNeedAvoid, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, specificCallback_);
-    EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(sceneSession->OnNeedAvoid(false), WSError::WS_OK);
+    sptr<SceneSession> scensession;
+    scensession = new (std::nothrow) SceneSession(info, specificCallback_);
+    EXPECT_NE(scensession, nullptr);
+    ASSERT_EQ(scensession->OnNeedAvoid(false), WSError::WS_OK);
 }
 
 /**

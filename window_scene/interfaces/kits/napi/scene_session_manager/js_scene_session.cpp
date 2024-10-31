@@ -1238,13 +1238,13 @@ void JsSceneSession::ProcessNeedAvoidRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "session is null, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_IMMS, "session is null, id: %{public}d", persistentId_);
         return;
     }
     session->RegisterNeedAvoidCallback([weakThis = wptr(this)](bool status) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnNeedAvoid(status);
