@@ -64,7 +64,7 @@ HWTEST_F(ExtensionWindowImplTest, HideNonSecureWindows, Function | SmallTest | L
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> wondow = new(std::nothrow) MockWindowExtensionSessionImpl(option);
+    sptr<MockWindowExtensionSessionImpl> window = new(std::nothrow) MockWindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
    
@@ -84,7 +84,7 @@ HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, Function | SmallTest | Level
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> wondow = new(std::nothrow) MockWindowExtensionSessionImpl(option);
+    sptr<MockWindowExtensionSessionImpl> window = new(std::nothrow) MockWindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
    
@@ -104,7 +104,7 @@ HWTEST_F(ExtensionWindowImplTest, IsPcOrPadFreeMultiWindowMode, Function | Small
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> wondow = new(std::nothrow) MockWindowExtensionSessionImpl(option);
+    sptr<MockWindowExtensionSessionImpl> window = new(std::nothrow) MockWindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
    
@@ -120,7 +120,7 @@ HWTEST_F(ExtensionWindowImplTest, HidePrivacyContentForHost, Function | SmallTes
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> wondow = new(std::nothrow) MockWindowExtensionSessionImpl(option);
+    sptr<MockWindowExtensionSessionImpl> window = new(std::nothrow) MockWindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
    
