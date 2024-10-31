@@ -78,6 +78,14 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for processing set default density enabled.
+     *
+     * @param isDefaultDensityEnabled Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) { return WSError::WS_OK; }
+
+    /**
      * @brief Callback for processing restore main window.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
