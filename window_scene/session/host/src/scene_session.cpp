@@ -1122,20 +1122,16 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (rect.IsInvalid()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d rect:%{public}s is invalid",
                 funcName, session->GetPersistentId(), rect.ToString().c_str());
-            return WSError::WS_ERROR_INVALID_PARAM;
         }
         if (rect == session->GetClientRect()) {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d skip same rect",
                 funcName, session->GetPersistentId());
-            return WSError::WS_DO_NOTHING;
         }
         session->SetClientRect(rect);
-        return WSError::WS_OK;
     };
     PostTask(task, "UpdateClientRect" + GetRectInfo(rect));
     return WSError::WS_OK;
