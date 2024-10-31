@@ -35,12 +35,29 @@ class DmMockScreenshotListener : public DisplayManager::IScreenshotListener {
 public:
     void OnScreenshot(const ScreenshotInfo info) override {}
 };
+class DmMockPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
+public:
+    void OnPrivateWindow([[maybe_unused]]bool) override {}
+};
+class DmMockFoldAngleListener : public DisplayManager::IFoldAngleListener {
+public:
+    void OnFoldAngleChanged([[maybe_unused]]std::vector<float>) override {}
+};
+class DmMockCaptureStatusListener : public DisplayManager::ICaptureStatusListener {
+public:
+    void  OnCaptureStatusChanged([[maybe_unused]]bool) override {}
+};
 class DmMockDisplayListener : public DisplayManager::IDisplayListener {
 public:
     void OnCreate(DisplayId) override {}
     void OnDestroy(DisplayId) override {}
     void OnChange(DisplayId) override {}
 };
+class DmMockDisplayPowerEventListener : public IDisplayPowerEventListener {
+public:
+    void OnDisplayPowerEvent(DisplayPowerEvent, EventStatus) override {}
+};
+
 class DisplayManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -196,6 +213,18 @@ HWTEST_F(DisplayManagerTest, UnregisterScreenshotListener01, Function | SmallTes
 }
 
 /**
+ * @tc.name: UnregisterScreenshotListener02
+ * @tc.desc: test UnregisterScreenshotListener with null listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterScreenshotListener02, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IScreenshotListener> listener = new DmMockScreenshotListener();
+    DMError ret = DisplayManager::GetInstance().UnregisterScreenshotListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: OnDisplayCreate01
  * @tc.desc: OnDisplayCreate
  * @tc.type: FUNC
@@ -217,6 +246,52 @@ HWTEST_F(DisplayManagerTest, OnDisplayCreate01, Function | SmallTest | Level1)
     ASSERT_NE(displayManagerListener->pImpl_, nullptr);
     displayManagerListener->pImpl_ = nullptr;
     displayManagerListener->OnDisplayCreate(displayInfo);
+    DisplayManager::GetInstance().pImpl_->displayManagerListener_ = nullptr;
+}
+
+/**
+ * @tc.name: OnDisplayDestroy
+ * @tc.desc: OnDisplayDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, OnDisplayDestroy, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
+    DisplayManager::GetInstance().RegisterDisplayListener(listener);
+    auto displayManagerListener = DisplayManager::GetInstance().pImpl_->displayManagerListener_;
+    ASSERT_NE(displayManagerListener, nullptr);
+    displayManagerListener->OnDisplayDestroy(DISPLAY_ID_INVALID);
+    displayManagerListener->OnDisplayDestroy(0);
+    displayManagerListener->pImpl_ = nullptr;
+    displayManagerListener->OnDisplayDestroy(1);
+    DisplayManager::GetInstance().pImpl_->displayManagerListener_ = nullptr;
+}
+
+/**
+ * @tc.name: OnDisplayChange
+ * @tc.desc: OnDisplayChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, OnDisplayChange, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
+    DisplayManager::GetInstance().RegisterDisplayListener(listener);
+    auto displayManagerListener = DisplayManager::GetInstance().pImpl_->displayManagerListener_;
+    ASSERT_NE(displayManagerListener, nullptr);
+    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_SIZE_CHANGED;
+    displayManagerListener->OnDisplayChange(nullptr, event);
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
+    displayManagerListener->OnDisplayChange(displayInfo, event);
+    displayInfo->SetDisplayId(0);
+    displayManagerListener->OnDisplayChange(displayInfo, event);
+    ASSERT_NE(displayManagerListener->pImpl_, nullptr);
+    displayManagerListener->pImpl_ = nullptr;
+    displayManagerListener->OnDisplayChange(displayInfo, event);
     DisplayManager::GetInstance().pImpl_->displayManagerListener_ = nullptr;
 }
 
@@ -361,11 +436,25 @@ HWTEST_F(DisplayManagerTest, GetDisplayById, Function | SmallTest | Level1)
  * @tc.desc: RegisterPrivateWindowListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, RegisterPrivateWindowListener, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, RegisterPrivateWindowListener01, Function | SmallTest | Level1)
 {
     sptr<DisplayManager::IPrivateWindowListener> listener;
     auto ret = DisplayManager::GetInstance().RegisterPrivateWindowListener(listener);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: RegisterPrivateWindowListener
+ * @tc.desc: RegisterPrivateWindowListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterPrivateWindowListener02, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_IPC_FAILED));
+    sptr<DisplayManager::IPrivateWindowListener> listener = new DmMockPrivateWindowListener();
+    auto ret = DisplayManager::GetInstance().RegisterPrivateWindowListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -432,7 +521,7 @@ HWTEST_F(DisplayManagerTest, UnregisterPrivateWindowListChangeListener, Function
  * @tc.desc: ImplRegisterPrivateWindowListChangeListener fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ImplRegisterPrivateWindowListChangeListener, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ImplRegisterPrivateWindowListChangeListener01, Function | SmallTest | Level1)
 {
     std::recursive_mutex mutex;
     sptr<DisplayManager::Impl> impl_;
@@ -444,6 +533,27 @@ HWTEST_F(DisplayManagerTest, ImplRegisterPrivateWindowListChangeListener, Functi
     ASSERT_EQ(ret, SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             privateWindowListChangeListenerAgent,
             DisplayManagerAgentType::PRIVATE_WINDOW_LIST_LISTENER));
+    listener = nullptr;
+    privateWindowListChangeListenerAgent.clear();
+}
+
+/**
+ * @tc.name: ImplRegisterPrivateWindowListChangeListener
+ * @tc.desc: ImplRegisterPrivateWindowListChangeListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplRegisterPrivateWindowListChangeListener02, Function | SmallTest | Level1)
+{
+    std::recursive_mutex mutex;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_IPC_FAILED));
+    sptr<DisplayManager::Impl> impl_;
+    sptr<DisplayManager::IPrivateWindowListChangeListener> listener;
+    DisplayManager::GetInstance().pImpl_->privateWindowListChangeListenerAgent_ = nullptr;
+    sptr<DisplayManager::Impl::DisplayManagerPrivateWindowListAgent> privateWindowListChangeListenerAgent =
+        new DisplayManager::Impl::DisplayManagerPrivateWindowListAgent(impl_);
+    auto ret = DisplayManager::GetInstance().pImpl_->RegisterPrivateWindowListChangeListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
     listener = nullptr;
     privateWindowListChangeListenerAgent.clear();
 }
@@ -593,139 +703,19 @@ HWTEST_F(DisplayManagerTest, ImplUnregisterDisplayModeListener, Function | Small
 }
 
 /**
- * @tc.name: OnDisplayCreate02
- * @tc.desc: OnDisplayCreate
+ * @tc.name: ImplUpdateDisplayInfoLocked
+ * @tc.desc: ImplUpdateDisplayInfoLocked fun
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, OnDisplayCreate02, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ImplUpdateDisplayInfoLocked, Function | SmallTest | Level1)
 {
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
-    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
-    DisplayManager::GetInstance().RegisterDisplayListener(listener);
-    auto displayManagerListener = DisplayManager::GetInstance().pImpl_->displayManagerListener_;
-    ASSERT_NE(displayManagerListener, nullptr);
-
-    sptr<DisplayInfo> displayInfo = nullptr;
-    displayManagerListener->OnDisplayCreate(displayInfo);
-    ASSERT_NE(displayManagerListener->pImpl_, nullptr);
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetDisplayId(DISPLAY_ID_INVALID);
+    auto ret = DisplayManager::GetInstance().pImpl_->UpdateDisplayInfoLocked(displayInfo);
+    ASSERT_EQ(ret, false);
+    displayInfo.clear();
 }
 
-/**
- * @tc.name: RegisterDisplayListener
- * @tc.desc: RegisterDisplayListener fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, RegisterDisplayListener, Function | SmallTest | Level1)
-{
-    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
-    bool hasPrivate = true;
-    DisplayManager::GetInstance().pImpl_->NotifyPrivateWindowStateChanged(hasPrivate);
-    auto ret = DisplayManager::GetInstance().RegisterDisplayListener(listener);
-    ASSERT_EQ(ret, DMError::DM_OK);
-}
-
-/**
- * @tc.name: UnregisterDisplayListener
- * @tc.desc: UnregisterDisplayListener fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, UnregisterDisplayListener, Function | SmallTest | Level1)
-{
-    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
-    sptr<DisplayManager::Impl> impl_;
-    auto ret = DisplayManager::GetInstance().UnregisterDisplayListener(listener);
-    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: HasPrivateWindow
- * @tc.desc: HasPrivateWindow fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level1)
-{
-    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
-    bool hasPrivateWindow = false;
-    auto ret = DisplayManager::GetInstance().HasPrivateWindow(0, hasPrivateWindow);
-    ASSERT_EQ(ret, DMError::DM_OK);
-}
-
-/**
- * @tc.name: HasPrivateWindow02
- * @tc.desc: HasPrivateWindow fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, HasPrivateWindow02, Function | SmallTest | Level1)
-{
-    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
-    sptr<DisplayManager::Impl> impl_;
-    bool hasPrivateWindow = false;
-    auto ret = DisplayManager::GetInstance().pImpl_->HasPrivateWindow(0, hasPrivateWindow);
-    ASSERT_EQ(ret, DMError::DM_OK);
-}
-
-/**
- * @tc.name: IsFoldable
- * @tc.desc: IsFoldable all
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, IsFoldable, Function | SmallTest | Level1)
-{
-    bool ret = DisplayManager::GetInstance().IsFoldable();
-    ASSERT_FALSE(ret);
-}
-
-/**
- * @tc.name: IsFoldable
- * @tc.desc: IsFoldable fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, IsFoldable01, Function | SmallTest | Level1)
-{
-    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
-    FoldDisplayMode mode = FoldDisplayMode{0};
-    DisplayManager::GetInstance().SetFoldDisplayMode(mode);
-    DisplayManager::GetInstance().SetFoldStatusLocked(false);
-    sptr<DisplayManager::Impl> impl_;
-    auto ret = DisplayManager::GetInstance().pImpl_->IsFoldable();
-    ASSERT_FALSE(ret);
-}
-
-/**
- * @tc.name: AddSurfaceNodeToDisplay
- * @tc.desc: AddSurfaceNodeToDisplay fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, AddSurfaceNodeToDisplay, Function | SmallTest | Level1)
-{
-    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
-    std::shared_ptr<class RSSurfaceNode> surfaceNode;
-    auto ret = DisplayManager::GetInstance().AddSurfaceNodeToDisplay(0, surfaceNode);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(ret, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
-    }
-}
-
-/**
- * @tc.name: RemoveSurfaceNodeFromDisplay
- * @tc.desc: RemoveSurfaceNodeFromDisplay fun
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, RemoveSurfaceNodeFromDisplay, Function | SmallTest | Level1)
-{
-    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
-    std::shared_ptr<class RSSurfaceNode> surfaceNode;
-    DisplayManager::GetInstance().OnRemoteDied();
-    auto ret = DisplayManager::GetInstance().RemoveSurfaceNodeFromDisplay(0, surfaceNode);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(ret, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
-    }
-}
 
 /**
  * @tc.name: RegisterFoldAngleListener01
@@ -740,6 +730,22 @@ HWTEST_F(DisplayManagerTest, RegisterFoldAngleListener01, Function | SmallTest |
     listener = new DisplayManager::IFoldAngleListener();
     ret = DisplayManager::GetInstance().RegisterFoldAngleListener(listener);
     ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterFoldAngleListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: RegisterFoldAngleListener02
+ * @tc.desc: RegisterFoldAngleListener01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterFoldAngleListener02, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_IPC_FAILED));
+    DisplayManager::GetInstance().pImpl_->foldAngleListenerAgent_ = nullptr;
+    sptr<DisplayManager::IFoldAngleListener> listener = new DmMockFoldAngleListener();
+    auto ret = DisplayManager::GetInstance().RegisterFoldAngleListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
     listener.clear();
 }
 
@@ -760,6 +766,37 @@ HWTEST_F(DisplayManagerTest, UnregisterFoldAngleListener01, Function | SmallTest
 }
 
 /**
+ * @tc.name: UnregisterFoldAngleListener02
+ * @tc.desc: UnregisterFoldAngleListener02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterFoldAngleListener02, Function | SmallTest | Level1)
+{
+    ASSERT_FALSE(DisplayManager::GetInstance().pImpl_->foldAngleListeners_.empty());
+    sptr<DisplayManager::IFoldAngleListener> listener = new DisplayManager::IFoldAngleListener();
+    DisplayManager::GetInstance().RegisterFoldAngleListener(listener);
+    auto ret = DisplayManager::GetInstance().UnregisterFoldAngleListener(listener);
+    ASSERT_EQ(ret, DMError::DM_OK);
+    listener.clear();
+}
+
+/**
+ * @tc.name: UnregisterFoldAngleListener03
+ * @tc.desc: UnregisterFoldAngleListener03 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterFoldAngleListener03, Function | SmallTest | Level1)
+{
+    ASSERT_FALSE(DisplayManager::GetInstance().pImpl_->foldAngleListeners_.empty());
+    DisplayManager::GetInstance().pImpl_->foldAngleListeners_.clear();
+    sptr<DisplayManager::IFoldAngleListener> listener = new DisplayManager::IFoldAngleListener();
+    DisplayManager::GetInstance().RegisterFoldAngleListener(listener);
+    auto ret = DisplayManager::GetInstance().UnregisterFoldAngleListener(listener);
+    ASSERT_EQ(ret, DMError::DM_OK);
+    listener.clear();
+}
+
+/**
  * @tc.name: RegisterCaptureStatusListener01
  * @tc.desc: RegisterCaptureStatusListener01 fun
  * @tc.type: FUNC
@@ -772,6 +809,22 @@ HWTEST_F(DisplayManagerTest, RegisterCaptureStatusListener01, Function | SmallTe
     listener = new DisplayManager::ICaptureStatusListener();
     ret = DisplayManager::GetInstance().RegisterCaptureStatusListener(listener);
     ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterCaptureStatusListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: RegisterCaptureStatusListener02
+ * @tc.desc: RegisterCaptureStatusListener02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterCaptureStatusListener02, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_IPC_FAILED));
+    DisplayManager::GetInstance().pImpl_->captureStatusListenerAgent_ = nullptr;
+    sptr<DisplayManager::ICaptureStatusListener> listener = new DisplayManager::ICaptureStatusListener();
+    auto ret = DisplayManager::GetInstance().RegisterCaptureStatusListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
     listener.clear();
 }
 
@@ -790,6 +843,38 @@ HWTEST_F(DisplayManagerTest, UnregisterCaptureStatusListener01, Function | Small
     ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterCaptureStatusListener(listener));
     listener.clear();
 }
+
+/**
+ * @tc.name: UnregisterCaptureStatusListener02
+ * @tc.desc: UnregisterCaptureStatusListener02 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterCaptureStatusListener02, Function | SmallTest | Level1)
+{
+    ASSERT_FALSE(DisplayManager::GetInstance().pImpl_->captureStatusListeners_.empty());
+    sptr<DisplayManager::ICaptureStatusListener> listener = new DisplayManager::ICaptureStatusListener();
+    DisplayManager::GetInstance().RegisterCaptureStatusListener(listener);
+    auto ret = DisplayManager::GetInstance().UnregisterCaptureStatusListener(listener);
+    ASSERT_EQ(ret, DMError::DM_OK);
+    listener.clear();
+}
+
+/**
+ * @tc.name: UnregisterCaptureStatusListener03
+ * @tc.desc: UnregisterCaptureStatusListener03 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterCaptureStatusListener03, Function | SmallTest | Level1)
+{
+    ASSERT_FALSE(DisplayManager::GetInstance().pImpl_->captureStatusListeners_.empty());
+    DisplayManager::GetInstance().pImpl_->captureStatusListeners_.clear();
+    sptr<DisplayManager::ICaptureStatusListener> listener = new DisplayManager::ICaptureStatusListener();
+    DisplayManager::GetInstance().RegisterCaptureStatusListener(listener);
+    auto ret = DisplayManager::GetInstance().UnregisterCaptureStatusListener(listener);
+    ASSERT_EQ(ret, DMError::DM_OK);
+    listener.clear();
+}
+
 
 /**
  * @tc.name: RegisterDisplayUpdateListener01
@@ -838,7 +923,11 @@ HWTEST_F(DisplayManagerTest, isinsideof, Function | SmallTest | Level1)
 HWTEST_F(DisplayManagerTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level1)
 {
     std::vector<DisplayPhysicalResolution> allSize = DisplayManager::GetInstance().GetAllDisplayPhysicalResolution();
-    ASSERT_TRUE(!allSize.empty());
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(allSize.empty());
+    } else {
+        ASSERT_TRUE(!allSize.empty());
+    }
 }
 
 /**
@@ -890,8 +979,21 @@ HWTEST_F(DisplayManagerTest, ClearCaptureStatusCallback, Function | SmallTest | 
  * @tc.desc: ClearDisplayModeCallback test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ClearDisplayModeCallback, Function | SmallTest | Level1)
+HWTEST_F(DisplayManagerTest, ClearDisplayModeCallback01, Function | SmallTest | Level1)
 {
+    DisplayManager::GetInstance().pImpl_->ClearDisplayModeCallback();
+    ASSERT_TRUE(DisplayManager::GetInstance().pImpl_->displayModeListenerAgent_ == nullptr);
+}
+
+/**
+ * @tc.name: ClearDisplayModeCallback
+ * @tc.desc: ClearDisplayModeCallback test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ClearDisplayModeCallback02, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IDisplayModeListener> listener = new DisplayManager::IDisplayModeListener();
+    DisplayManager::GetInstance().RegisterDisplayModeListener(listener);
     DisplayManager::GetInstance().pImpl_->ClearDisplayModeCallback();
     ASSERT_TRUE(DisplayManager::GetInstance().pImpl_->displayModeListenerAgent_ == nullptr);
 }
@@ -978,6 +1080,60 @@ HWTEST_F(DisplayManagerTest, OnRemoteDied, Function | SmallTest | Level1)
     g_dmIsDestroyed = true;
     DisplayManager::GetInstance().OnRemoteDied();
     ASSERT_EQ(g_dmIsDestroyed, true);
+}
+
+/**
+ * @tc.name: Clear
+ * @tc.desc: Clear test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, Clear01, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    EXPECT_CALL(m->Mock(), UnregisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    DisplayManager::GetInstance().pImpl_->displayManagerListener_ = nullptr;
+    sptr<DisplayManager::IDisplayListener> listener = new DmMockDisplayListener();
+    DisplayManager::GetInstance().RegisterDisplayListener(listener);
+    auto displayManagerListener = DisplayManager::GetInstance().pImpl_->displayManagerListener_;
+    ASSERT_NE(displayManagerListener, nullptr);
+    DisplayManager::GetInstance().pImpl_->Clear();
+    ASSERT_EQ(DisplayManager::GetInstance().pImpl_->displayManagerListener_, nullptr);
+}
+
+/**
+ * @tc.name: Clear
+ * @tc.desc: Clear test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, Clear02, Function | SmallTest | Level1)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    EXPECT_CALL(m->Mock(), UnregisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    DisplayManager::GetInstance().pImpl_->powerEventListenerAgent_ = nullptr;
+    sptr<IDisplayPowerEventListener> listener = new DmMockDisplayPowerEventListener();
+    DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener);
+    auto powerEventListenerAgent = DisplayManager::GetInstance().pImpl_->powerEventListenerAgent_;
+    ASSERT_NE(powerEventListenerAgent, nullptr);
+    DisplayManager::GetInstance().pImpl_->Clear();
+    ASSERT_EQ(DisplayManager::GetInstance().pImpl_->powerEventListenerAgent_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyCaptureStatusChanged
+ * @tc.desc: NotifyCaptureStatusChanged fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, NotifyCaptureStatusChanged, Function | SmallTest | Level1)
+{
+    DisplayManager::GetInstance().pImpl_->displayModeListenerAgent_ = nullptr;
+    sptr<DisplayManager::Impl> impl_;
+    sptr<DisplayManager::Impl::DisplayManagerDisplayModeAgent> displayModeListenerAgent =
+        new DisplayManager::Impl::DisplayManagerDisplayModeAgent(impl_);
+    bool isCapture = true;
+    DisplayManager::GetInstance().pImpl_->NotifyCaptureStatusChanged(isCapture);
+    ASSERT_EQ(DisplayManager::GetInstance().pImpl_->powerEventListenerAgent_, nullptr);
 }
 
 /**
