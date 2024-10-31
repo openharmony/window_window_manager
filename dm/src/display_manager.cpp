@@ -118,6 +118,7 @@ private:
 
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
+    std::map<DisplayId, std::chrono::steady_clock::time_point> displayUptateTimeMap_;
     DisplayStateCallback displayStateCallback_;
     std::recursive_mutex& mutex_;
     std::set<sptr<IDisplayListener>> displayListeners_;
@@ -613,12 +614,37 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
     WLOGFD("GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
-    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
+    auto currentTime = std::chrono::steady_clock::now();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto lastRequestIter = displayUptateTimeMap_.find(displayId);
+        if (displayId != DISPLAY_ID_INVALID && lastRequestIter != displayUptateTimeMap_.end()) {
+            auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestIter->second)
+                .count();
+            if (interval < MAX_INTERVAL_US) {
+                auto iter = displayMap_.find(displayId);
+                if (iter != displayMap_.end()) {
+                    return displayMap_[displayId];
+                }
+            }
+        }
+    }
+    WLOGFI("update displayId: %{public}" PRIu64" ", displayId);
+    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
+    if (displayInfo == nullptr) {
+        WLOGFW("display null id : %{public}" PRIu64" ", displayId);
+        return nullptr;
+    }
+
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!UpdateDisplayInfoLocked(displayInfo)) {
         displayMap_.erase(displayId);
+        //map erase函数删除不存在key行为安全
+        displayUptateTimeMap_.erase(displayId);
         return nullptr;
     }
+
+    displayUptateTimeMap_[displayId] = currentTime;
     return displayMap_[displayId];
 }
 
