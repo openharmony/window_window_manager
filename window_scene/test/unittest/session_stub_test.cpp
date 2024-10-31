@@ -155,13 +155,15 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
-    ASSERT_EQ(data.WriteUint32(1), true);
+    ASSERT_EQ(data.WriteUint32(100), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     AAFwk::Want options;
     EXPECT_NE(data.WriteString("HandleSessionException"), false);
     EXPECT_NE(data.WriteParcelable(&options), false);
+    EXPECT_NE(data.WriteBool(false), false);
+    EXPECT_NE(data.WriteInt32(33), false);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
