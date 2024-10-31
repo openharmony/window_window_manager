@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_visibility_info.h"
+#include "window_vis ibility_info.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
