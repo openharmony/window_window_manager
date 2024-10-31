@@ -261,6 +261,7 @@ public:
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
+    void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
