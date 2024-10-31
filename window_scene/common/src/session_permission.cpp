@@ -350,5 +350,25 @@ std::string SessionPermission::GetCallingBundleName()
     IPCSkeleton::SetCallingIdentity(identity);
     return callingBundleName;
 }
+
+bool SessionPermission::VerifyPermissionByBundleName(
+    const std::string& permissionName, const std::string& bundleName, uint32_t userId)
+{
+    auto bundleManagerServiceProxy = GetBundleManagerProxy();
+    if (!bundleManagerServiceProxy) {
+        TLOGW(WmsLogTag::DEFAULT, "failed to get BundleManagerServiceProxy");
+        return false;
+    }
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    AppExecFwk::BundleInfo bundleInfo;
+    bool result = bundleManagerServiceProxy->GetBundleInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (!result) {
+        TLOGW(WmsLogTag::DEFAULT, "get bundle info failed!");
+        return false;
+    }
+    return VerifyPermissionByCallerToken(bundleInfo.applicationInfo.accessTokenId, permissionName);
+}
 } // namespace Rosen
 } // namespace OHOS

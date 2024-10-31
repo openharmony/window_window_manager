@@ -53,6 +53,7 @@ public:
     WSError OnRestoreMainWindow() override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) override;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
@@ -101,7 +102,7 @@ public:
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     
-    /*
+    /**
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
