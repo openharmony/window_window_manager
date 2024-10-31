@@ -663,6 +663,50 @@ HWTEST_F(SceneSessionManagerTest10, EraseSceneSessionAndMarkDirtyLockFree, Funct
     ASSERT_EQ(ssm_->sessionMapDirty_, static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE));
     ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
 }
+
+/**
+ * @tc.name: UpdateAvoidAreaByType
+ * @tc.desc: test UpdateAvoidAreaByType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, UpdateAvoidAreaByType, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
+    ssm_->avoidAreaListenerSessionSet_.insert(sceneSession->GetPersistentId());
+    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
+    ssm_->avoidAreaListenerSessionSet_.erase(sceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: NotifyStatusBarShowStatus
+ * @tc.desc: test NotifyStatusBarShowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(WSError::WS_OK, ssm_->NotifyStatusBarShowStatus(sceneSession->GetPersistentId(), false));
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
 }  // namespace
 }
 }
