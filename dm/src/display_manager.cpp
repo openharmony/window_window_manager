@@ -90,6 +90,7 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     DMError ResetAllFreezeStatus();
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
+    sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
 private:
     void ClearDisplayStateCallback();
@@ -117,6 +118,7 @@ private:
     std::string GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo);
 
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
+    DisplayId primaryDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
     std::map<DisplayId, std::chrono::steady_clock::time_point> displayUptateTimeMap_;
     DisplayStateCallback displayStateCallback_;
@@ -2086,9 +2088,49 @@ DMError DisplayManager::Impl::SetVirtualScreenSecurityExemption(ScreenId screenI
         screenId, pid, windowIdList);
 }
 
+sptr<Display> DisplayManager::Impl::GetPrimaryDisplaySync()
+{
+    static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
+    if (primaryDisplayId_ != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto iter = displayMap_.find(primaryDisplayId_);
+        if (iter != displayMap_.end()) {
+            return displayMap_[primaryDisplayId_];
+        }
+    }
+
+    uint32_t retryTimes = 0;
+    sptr<DisplayInfo> displayInfo = nullptr;
+    while (retryTimes < MAX_RETRY_NUM) {
+        displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
+        if (displayInfo != nullptr) {
+            break;
+        }
+        retryTimes++;
+        WLOGFW("get display info null, retry %{public}u times", retryTimes);
+        std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
+    }
+    if (retryTimes >= MAX_RETRY_NUM || displayInfo == nullptr) {
+        WLOGFE("get display info failed");
+        return nullptr;
+    }
+
+    auto displayId = displayInfo->GetDisplayId();
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!UpdateDisplayInfoLocked(displayInfo)) {
+        displayMap_.erase(displayId);
+        return nullptr;
+    }
+    lastRequestTime = currentTime;
+    primaryDisplayId_ = displayId;
+    return displayMap_[displayId];
+}
+
 sptr<Display> DisplayManager::GetPrimaryDisplaySync()
 {
-    return pImpl_->GetDefaultDisplaySync();
+    return pImpl_->GetPrimaryDisplaySync();
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureOption& captureOption,

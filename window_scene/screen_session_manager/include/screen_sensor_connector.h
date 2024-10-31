@@ -19,16 +19,13 @@
 #include <map>
 #include <refbase.h>
 #include "dm_common.h"
-#ifdef WM_SUBSCRIBE_MOTION_ENABLE
-#include "motion_agent.h"
-#include "motion_callback_stub.h"
-#endif
 #include "screen_rotation_property.h"
 #include "screen_tent_property.h"
 #ifdef SENSOR_ENABLE
 #include "sensor_agent.h"
 #endif
 #include "window_manager_hilog.h"
+#include "screen_sensor_plugin.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -44,19 +41,6 @@ public:
 };
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
-using OHOS::Msdp::MotionCallbackStub;
-using OHOS::Msdp::MotionEvent;
-
-class RotationMotionEventCallback : public MotionCallbackStub {
-public:
-    void OnMotionChanged(const MotionEvent& motionData) override;
-};
-
-class TentMotionEventCallback : public MotionCallbackStub {
-public:
-    void OnMotionChanged(const MotionEvent& motionData) override;
-};
-
 class MotionSubscriber {
 friend ScreenSensorConnector;
 public:
@@ -66,7 +50,6 @@ private:
     static void SubscribeMotionSensor();
     static void UnsubscribeMotionSensor();
 
-    static sptr<RotationMotionEventCallback> motionEventCallback_;
     static bool isMotionSensorSubscribed_;
 };
 
@@ -79,7 +62,6 @@ private:
     static void SubscribeMotionSensor();
     static void UnsubscribeMotionSensor();
 
-    static sptr<TentMotionEventCallback> motionEventCallback_;
     static bool isMotionSensorSubscribed_;
 };
 #endif

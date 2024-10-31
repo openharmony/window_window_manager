@@ -16,6 +16,7 @@
 #ifndef OHOS_VSYNC_STATION_H
 #define OHOS_VSYNC_STATION_H
 
+#include <atomic>
 #include <memory>
 #include <unordered_set>
 
@@ -49,6 +50,9 @@ public:
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
 
+    void DecreaseRequestVsyncTimes() { requestVsyncTimes_--; }
+    int32_t GetRequestVsyncTimes() { return requestVsyncTimes_.load(); }
+
 private:
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiver();
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiverLocked();
@@ -70,6 +74,8 @@ private:
     using Callbacks = std::unordered_set<std::shared_ptr<VsyncCallback>>;
     Callbacks vsyncCallbacks_;
     // Above guarded by mutex_
+
+    std::atomic<int32_t> requestVsyncTimes_ {0};
 };
 } // namespace Rosen
 } // namespace OHOS

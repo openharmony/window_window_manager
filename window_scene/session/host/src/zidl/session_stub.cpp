@@ -112,6 +112,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSystemSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
             return HandleUpdateSessionRect(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_GLOBAL_SCALED_RECT):
+            return HandleGetGlobalScaledRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP):
             return HandleRaiseToAppTop(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED):
@@ -652,6 +654,20 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     }
     WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+/** @note @window.layout */
+int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    Rect tempRect;
+    WMError errorCode = GetGlobalScaledRect(tempRect);
+    reply.WriteInt32(tempRect.posX_);
+    reply.WriteInt32(tempRect.posY_);
+    reply.WriteUint32(tempRect.width_);
+    reply.WriteUint32(tempRect.height_);
+    reply.WriteInt32(static_cast<int32_t>(errorCode));
     return ERR_NONE;
 }
 
