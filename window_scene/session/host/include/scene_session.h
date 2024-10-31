@@ -123,7 +123,6 @@ public:
         NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
-        NotifyNeedAvoidFunc OnNeedAvoid_;
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
@@ -292,6 +291,7 @@ public:
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
+    void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
@@ -555,6 +555,7 @@ protected:
      * Window Immersive
      */
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
+    NotifyNeedAvoidFunc onNeedAvoid_;
 
     /**
      * Window Hierarchy
