@@ -3805,6 +3805,12 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled not change");
         return WMError::WM_OK;
     }
+
+    auto hostSession = GetHostSession();
+    if (hostSession != nullptr) {
+        hostSession->OnDefaultDensityEnabled(enabled);
+    }
+
     isDefaultDensityEnabled_ = enabled;
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
