@@ -961,19 +961,20 @@ void JsSceneSession::ProcessCreateSubSessionRegister()
 
 void JsSceneSession::ProcessBindDialogTargetRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "sessionchangeCallback is nullptr");
-        return;
-    }
-    sessionchangeCallback->onBindDialogTarget_ = [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
+    NotifyBindDialogSessionFunc onBindDialogTarget = [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessBindDialogTargetRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnBindDialogTarget(sceneSession);
     };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterBindDialogSessionCallback(std::move(onBindDialogTarget));
     TLOGD(WmsLogTag::WMS_DIALOG, "success");
 }
 
@@ -1459,20 +1460,19 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
 
 void JsSceneSession::ProcessNeedAvoidRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "session is null, id: %{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnNeedAvoid_ = [weakThis = wptr(this)](bool status) {
+    session->RegisterNeedAvoidCallback([weakThis = wptr(this)](bool status) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessNeedAvoidRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnNeedAvoid(status);
-    };
-    TLOGD(WmsLogTag::WMS_IMMS, "success");
+    });
 }
 
 void JsSceneSession::ProcessIsCustomAnimationPlaying()
