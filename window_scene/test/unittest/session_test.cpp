@@ -489,17 +489,17 @@ HWTEST_F(WindowSessionTest, UpdateSessionRect01, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
     WSRect rect = {0, 0, 320, 240}; // width: 320, height: 240
-    auto result = scensession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
+    auto result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
+    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
         new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensessionchangeCallBack, nullptr);
-    scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
-    result = scensession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
+    EXPECT_NE(sceneSessionChangeCallBack, nullptr);
+    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
+    result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -513,23 +513,23 @@ HWTEST_F(WindowSessionTest, OnSessionEvent01, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    auto result = scensession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
+    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
         new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensessionchangeCallBack, nullptr);
-    scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
-    result = scensession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    EXPECT_NE(sceneSessionChangeCallBack, nullptr);
+    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
+    result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
     int resultValue = 0;
     NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId, SessionEventParam param)
     { resultValue = 1; };
-    scensessionchangeCallBack->OnSessionEvent_ = onSessionEvent_;
-    result = scensession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    sceneSessionChangeCallBack->OnSessionEvent_ = onSessionEvent_;
+    result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 

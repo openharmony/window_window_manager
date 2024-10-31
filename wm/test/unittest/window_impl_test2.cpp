@@ -595,7 +595,6 @@ HWTEST_F(WindowImplTest2, PrivacyMode01, Function | SmallTest | Level3)
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(8).WillRepeatedly(Return(WMError::WM_OK));
-    window->state_ = WindowState::STATE_SHOWN;
 
     window->SetPrivacyMode(true);
     window->SetSystemPrivacyMode(true);
@@ -1069,7 +1068,6 @@ HWTEST_F(WindowImplTest2, SetImmersiveModeEnabledState, Function | SmallTest | L
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-
 
 /**
  * @tc.name: SetFullScreen
