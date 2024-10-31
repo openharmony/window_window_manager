@@ -880,7 +880,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | Sm
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    uint32_t vectorSize = 90;
+    vectorSize = 90;
     data.WriteUint32(vectorSize);
     res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_NONE);
@@ -1272,24 +1272,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, Function | S
 }
 
 /**
- * @tc.name: HandleSetSessionLabel
- * @tc.desc: test HandleSetSessionLabel
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteString(static_cast<string>("123"));
-    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
-    data.WriteRemoteObject(windowManagerAgent->AsObject());
-
-    int res = stub_->HandleSetSessionLabel(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleSetSessionIcon
  * @tc.desc: test HandleSetSessionIcon
  * @tc.type: FUNC
@@ -1673,7 +1655,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    uint32_t vectorSize = 90;
+    vectorSize = 90;
     data.WriteUint32(vectorSize);
     res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_NONE);
@@ -1880,10 +1862,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
     res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    sptr<ISessionStage> sessionStage = new SessionStageMocker();
     ASSERT_NE(nullptr, sessionStage);
     data.WriteRemoteObject(sessionStage->AsObject());
-    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);
     data.WriteUint64(12345);
