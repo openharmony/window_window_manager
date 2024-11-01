@@ -413,6 +413,24 @@ HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateClientRect01
+ * @tc.desc: UpdateClientRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateClientRect01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateClientRect01 start";
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    WSRect rect = { 200, 200, 200, 200 };
+    ASSERT_EQ(sProxy->UpdateClientRect(rect), WSError::WS_ERROR_IPC_FAILED);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sProxy->UpdateClientRect(rect), WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateClientRect01 start";
+}
+
+/**
  * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: normal function
  * @tc.type: FUNC
