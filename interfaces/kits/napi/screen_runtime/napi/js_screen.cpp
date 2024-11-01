@@ -19,7 +19,9 @@
 #include "screen.h"
 #include "screen_info.h"
 #include "window_manager_hilog.h"
+#ifdef XPOWER_EVENT_ENABLE
 #include "xpower_event_js.h"
+#endif // XPOWER_EVENT_ENABLE
 
 namespace OHOS {
 namespace Rosen {
@@ -113,7 +115,7 @@ napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
-    
+
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetOrientation(orientation));
@@ -142,9 +144,11 @@ napi_value JsScreen::SetScreenActiveMode(napi_env env, napi_callback_info info)
 {
     WLOGI("SetScreenActiveMode is called");
     JsScreen* me = CheckParamsAndGetThis<JsScreen>(env, info);
+#ifdef XPOWER_EVENT_ENABLE
     if (me != nullptr) {
         HiviewDFX::ReportXPowerJsStackSysEvent(env, "EPS_LCD_FREQ");
     }
+#endif // XPOWER_EVENT_ENABLE
     return (me != nullptr) ? me->OnSetScreenActiveMode(env, info) : nullptr;
 }
 
@@ -173,7 +177,7 @@ napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
-    
+
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetScreenActiveMode(modeId));

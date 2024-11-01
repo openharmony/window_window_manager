@@ -870,6 +870,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction,
             .animationDuration_ = rotateAnimationDuration };
         sessionStage_->UpdateRect(rect, reason, config);
+        SetClientRect(rect);
         RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
@@ -2530,6 +2531,20 @@ WSRect Session::GetSessionRequestRect() const
     rect = SessionHelper::TransferToWSRect(property->GetRequestRect());
     WLOGFD("id: %{public}d, rect: %{public}s", persistentId_, rect.ToString().c_str());
     return rect;
+}
+
+/** @note @window.layout */
+void Session::SetClientRect(const WSRect& rect)
+{
+    clientRect_ = rect;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
+        GetPersistentId(), rect.ToString().c_str());
+}
+
+/** @note @window.layout */
+WSRect Session::GetClientRect() const
+{
+    return clientRect_;
 }
 
 WindowType Session::GetWindowType() const
