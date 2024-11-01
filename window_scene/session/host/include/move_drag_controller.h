@@ -47,7 +47,7 @@ public:
     MoveDragController(int32_t persistentId, bool isSystemWindow = false);
     ~MoveDragController() = default;
 
-    /*
+    /**
      * Cross Display Move Drag
      */
     enum class TargetRectCoordinate {
@@ -84,7 +84,7 @@ public:
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
 
-    /*
+    /**
      * Cross Display Move Drag
      */
     uint64_t GetMoveDragStartDisplayId() const;
@@ -97,7 +97,7 @@ public:
     void MoveDragInterrupt();
     void ResetCrossMoveDragProperty();
 
-    /*
+    /**
      * Monitor screen connection status
      */
     void OnConnect(ScreenId screenId) override;
@@ -165,7 +165,7 @@ private:
     void ResSchedReportData(int32_t type, bool onOffTag);
     void NotifyWindowInputPidChange(bool isServerPid);
 
-    /*
+    /**
      * Cross Display Move Drag
      */
     std::pair<int32_t, int32_t> CalcUnifiedTranslate(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -226,7 +226,7 @@ private:
         {AreaType::LEFT_BOTTOM,   Gravity::TOP_RIGHT}
     };
 
-    /*
+    /**
      * Cross Display Move Drag
      */
     bool isSystemWindow_ = false;

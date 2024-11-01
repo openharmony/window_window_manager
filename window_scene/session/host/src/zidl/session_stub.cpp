@@ -162,8 +162,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSystemEnableDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
             return HandleUpdateClientRect(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY):
-            return HandleSetKeyboardSessionGravity(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID):
             return HandleSetCallingSessionId(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT):
@@ -198,6 +196,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
+            return HandleDefaultDensityEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE):
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
@@ -433,6 +433,15 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
+int SessionStub::HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    bool isDefaultDensityEnabled = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled: %{public}d", isDefaultDensityEnabled);
+    WSError errCode = OnDefaultDensityEnabled(isDefaultDensityEnabled);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
 {
     WSError errCode = OnRestoreMainWindow();
@@ -652,7 +661,12 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isGlobal failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = UpdateSessionRect(rect, reason, isGlobal);
+    auto isFromMoveToGlobal = false;
+    if (!data.ReadBool(isFromMoveToGlobal)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read isFromMoveToGlobal failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -1059,27 +1073,6 @@ int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, M
     bool isRegister = data.ReadBool();
     WSError errCode = UpdateRectChangeListenerRegistered(isRegister);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
-    uint32_t gravityValue = 0;
-    if (!data.ReadUint32(gravityValue) ||
-        gravityValue < static_cast<uint32_t>(SessionGravity::SESSION_GRAVITY_FLOAT) ||
-        gravityValue > static_cast<uint32_t>(SessionGravity::SESSION_GRAVITY_DEFAULT)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Gravity read failed, gravityValue: %{public}d", gravityValue);
-        return ERR_INVALID_DATA;
-    }
-    SessionGravity gravity = static_cast<SessionGravity>(gravityValue);
-    uint32_t percent = 0;
-    if (!data.ReadUint32(percent)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Percent read failed.");
-        return ERR_INVALID_DATA;
-    }
-    WSError ret = SetKeyboardSessionGravity(gravity, percent);
-    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 

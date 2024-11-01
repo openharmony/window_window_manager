@@ -899,6 +899,14 @@ public:
      */
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
+     * @brief move the window to global (x, y)
+     *
+     * @param x
+     * @param y
+     * @return WMError
+     */
+    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief Get window global scaled rect.
      *
      * @param Rect
@@ -1775,7 +1783,7 @@ public:
      * @brief Transfer accessibility event data
      *
      * @param func Function to notify transfer component data.
-    */
+     */
     virtual WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) { return WMError::WM_OK; };
 
@@ -1815,7 +1823,7 @@ public:
      *
      * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.
      * @return WM_OK means set keep keyboard flag success, others means failed.
-    */
+     */
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag)
     {
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -2009,7 +2017,7 @@ public:
      *
      * @param titleButtonRect.
      * @return WMError.
-    */
+     */
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -2240,7 +2248,7 @@ public:
      * @brief clear keyEvent filter.
      *
      * @return WMError
-    */
+     */
     virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     /**
@@ -2366,14 +2374,14 @@ public:
      */
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
-    /*
+    /**
      * @brief Get the real parent id of UIExtension
      *
      * @return Real parent id of UIExtension
      */
     virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 
-    /*
+    /**
      * @brief Get the parent window type of UIExtension
      *
      * @return Parent window type of UIExtension

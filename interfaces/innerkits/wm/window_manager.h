@@ -513,11 +513,11 @@ public:
      */
     WMError UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     /**
- * @brief Register drawingcontent changed listener.
- *
- * @param listener IDrawingContentChangedListener.
- * @return WM_OK means register success, others means register failed.
- */
+     * @brief Register drawingcontent changed listener.
+     *
+     * @param listener IDrawingContentChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
     WMError RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
 
     /**
@@ -723,7 +723,7 @@ public:
      * @param uid user id
      * @param visible visibility
      * @return WM_OK means notify success, others means notify failed.
-    */
+     */
     WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
 
     /**
@@ -732,7 +732,7 @@ public:
      * @param sourcePersistentId Window id which the focus shift from
      * @param targetPersistentId Window id which the focus shift to
      * @return WM_OK means shift window focus success, others means failed.
-    */
+     */
     WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
 
     /**
@@ -741,7 +741,7 @@ public:
      * @param windowId Window id which want to snapshot.
      * @param pixelMap Snapshot output pixel map.
      * @return WM_OK means get snapshot success, others means failed.
-    */
+     */
     WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
 
     /**
@@ -768,11 +768,11 @@ public:
     WMError RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
 
     /**
-    * @brief Unregister WindowStyle changed listener.
-    *
-    * @param listener IWindowStyleChangedListener
-    * @return WM_OK means unregister success, others means unregister failed.
-    */
+     * @brief Unregister WindowStyle changed listener.
+     *
+     * @param listener IWindowStyleChangedListener
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
 
     /**

@@ -127,19 +127,18 @@ HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, Function | SmallTest | Level1)
     SessionInfo info;
     info.abilityName_ = "GetKeyboardGravity";
     info.bundleName_ = "GetKeyboardGravity";
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, nullptr, nullptr);
-    ASSERT_TRUE((keyboardSession != nullptr));
-    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, keyboardSession->GetKeyboardGravity());
-
     sptr<SceneSession::SpecificSessionCallback> specificCb =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCb, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb);
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, nullptr);
+    ASSERT_TRUE((keyboardSession != nullptr));
+    keyboardSession->property_ = nullptr;
+    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, keyboardSession->GetKeyboardGravity());
+ 
     sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(windowSessionProperty, nullptr);
-    sceneSession->property_ = windowSessionProperty;
-    keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, nullptr);
-    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, keyboardSession->GetKeyboardGravity());
+    keyboardSession->property_ = windowSessionProperty;
+    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_BOTTOM, keyboardSession->GetKeyboardGravity());
 }
 
 /**
@@ -323,63 +322,6 @@ HWTEST_F(KeyboardSessionTest, NotifyClientToUpdateRect02, Function | SmallTest |
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     keyboardSession->SetSessionProperty(windowSessionProperty);
     auto ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionTest", nullptr);
-    ASSERT_EQ(ret, WSError::WS_OK);
-}
-
-/**
- * @tc.name: SetKeyboardSessionGravity
- * @tc.desc: SetKeyboardSessionGravity
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest, SetKeyboardSessionGravity, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetKeyboardSessionGravity";
-    info.bundleName_ = "SetKeyboardSessionGravity";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
-    EXPECT_NE(keyboardCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
-
-    auto ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCb =
-        new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(sessionChangeCb, nullptr);
-    keyboardSession->sessionChangeCallback_ = sessionChangeCb;
-    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-
-    keyboardSession->keyboardGravityChangeFunc_ = [](SessionGravity) {
-        return 0;
-    };
-    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-
-    keyboardSession->isKeyboardPanelEnabled_ = true;
-    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
-    keyboardSession->isKeyboardPanelEnabled_ = false;
-    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-
-    keyboardSession->isKeyboardPanelEnabled_ = true;
-    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
-    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, 0);
-    ASSERT_EQ(ret, WSError::WS_OK);
-
-    keyboardSession->state_ = SessionState::STATE_DISCONNECT;
-    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT, 0);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 
@@ -779,6 +721,7 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession, Function | SmallTe
     sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
     EXPECT_NE(keyboardSession, nullptr);
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     keyboardSession->SetSessionProperty(property);
 
@@ -786,10 +729,11 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession, Function | SmallTe
 
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCb);
     EXPECT_NE(sceneSession, nullptr);
-    property->sessionGravity_ = SessionGravity::SESSION_GRAVITY_FLOAT;
+
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
     ASSERT_FALSE(keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, true));
 
-    property->sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     ASSERT_TRUE(keyboardSession->CheckIfNeedRaiseCallingSession(sceneSession, false));
 
     property->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
@@ -901,7 +845,7 @@ HWTEST_F(KeyboardSessionTest, GetKeyboardGravity01, Function | SmallTest | Level
     ASSERT_NE(windowSessionProperty, nullptr);
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->property_->sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     ASSERT_NE(keyboardSession, nullptr);
     ret = keyboardSession->GetKeyboardGravity();
     EXPECT_EQ(SessionGravity::SESSION_GRAVITY_BOTTOM, ret);
@@ -976,7 +920,7 @@ HWTEST_F(KeyboardSessionTest, CheckIfNeedRaiseCallingSession01, Function | Small
     ASSERT_NE(windowSessionProperty, nullptr);
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->property_->sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     keyboardSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     callingSession->systemConfig_.freeMultiWindowSupport_ = true;
@@ -1068,10 +1012,7 @@ HWTEST_F(KeyboardSessionTest, RelayoutKeyBoard01, Function | SmallTest | Level1)
     ASSERT_NE(windowSessionProperty, nullptr);
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->property_->sessionGravity_ = SessionGravity::SESSION_GRAVITY_BOTTOM;
-    keyboardSession->property_->sessionGravitySizePercent_ = 0;
-    keyboardSession->RelayoutKeyBoard();
-    keyboardSession->property_->sessionGravitySizePercent_ = 100;
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     keyboardSession->RelayoutKeyBoard();
 }
 
@@ -1155,7 +1096,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession01, Function | SmallTest | Leve
     };
     keyboardSession->RaiseCallingSession(keyboardPanelRect, true, rsTransaction);
     // for cover CheckIfNeedRaiseCallingSession
-    keyboardSession->property_->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     // for empty rect check;
     keyboardSession->winRect_.posX_ = 1;
@@ -1608,10 +1549,10 @@ HWTEST_F(KeyboardSessionTest, OnCallingSessionUpdated01, Function | SmallTest | 
     keyboardSession->OnCallingSessionUpdated();
     ASSERT_EQ(keyboardSession->state_, SessionState::STATE_FOREGROUND);
 
-    // keyboardSession's gravity is SessionGravity::SESSION_GRAVITY_FLOAT
-    WSError res = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT,
-        50); // 50 is percent
-    ASSERT_EQ(res, WSError::WS_OK);
+    // keyboardSession's gravity is WindowGravity::Window_GRAVITY_FLOAT
+    EXPECT_NE(keyboardSession->property_, nullptr);
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
+
     ASSERT_EQ(keyboardSession->GetKeyboardGravity(), SessionGravity::SESSION_GRAVITY_FLOAT);
     keyboardSession->OnCallingSessionUpdated();
     ASSERT_EQ(keyboardSession->state_, SessionState::STATE_FOREGROUND);

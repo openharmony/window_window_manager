@@ -108,9 +108,9 @@ HWTEST_F(SessionManagerAgentControllerTest, UpdateFocusChangeInfo, Function | Sm
  */
 HWTEST_F(SessionManagerAgentControllerTest, UpdateWindowModeTypeInfo, Function | SmallTest | Level3)
 {
+    int32_t pid = 65535;
     sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
-    int32_t pid = 65535;
     ASSERT_EQ(WMError::WM_OK, SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
         windowManagerAgent, type, pid));
     SessionManagerAgentController::GetInstance().UpdateWindowModeTypeInfo(WindowModeType::WINDOW_MODE_SPLIT);

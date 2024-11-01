@@ -658,6 +658,19 @@ void SceneSession::RegisterSystemBarPropertyChangeCallback(NotifySystemBarProper
     PostTask(task, __func__);
 }
 
+void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            return;
+        }
+        session->onNeedAvoid_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     auto task = [weakThis = wptr(this), mode]() {
@@ -956,14 +969,12 @@ void SceneSession::NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, 
 
 bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect)
 {
-    SessionGravity gravity;
-    uint32_t percent = 0;
     auto sessionProperty = GetSessionProperty();
     if (!sessionProperty) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
         return false;
     }
-    sessionProperty->GetSessionGravity(gravity, percent);
+    SessionGravity gravity = GetKeyboardGravity();
     if (GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT)) {
         uint32_t screenWidth = 0;
@@ -974,9 +985,7 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
         newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
             static_cast<int32_t>(screenWidth) : rect.width_;
         newRequestRect.width_ = newWinRect.width_;
-        newWinRect.height_ =
-            (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM && percent != 0)
-                ? static_cast<int32_t>(screenHeight * percent / 100u) : rect.height_;
+        newWinRect.height_ = rect.height_;
         newRequestRect.height_ = newWinRect.height_;
         newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
         newRequestRect.posX_ = newWinRect.posX_;
@@ -1159,7 +1168,8 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, const SizeChangeRe
 }
 
 /** @note @window.layout */
-WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal)
+WSError SceneSession::UpdateSessionRect(
+    const WSRect &rect, const SizeChangeReason reason, bool isGlobal, bool isFromMoveToGlobal)
 {
     if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
@@ -1176,6 +1186,17 @@ WSError SceneSession::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
                 newRect.posX_ -= parentRect.posX_;
                 newRect.posY_ -= parentRect.posY_;
             }
+        }
+    }
+    if (isFromMoveToGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
+        (systemConfig_.IsPhoneWindow() ||
+         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
+        auto parentSession = GetParentSession();
+        if (parentSession && parentSession->GetFloatingScale() != 0) {
+            Rect parentGlobalRect;
+            WMError errorCode = parentSession->GetGlobalScaledRect(parentGlobalRect);
+            newRect.posX_ = (newRect.posX_ - parentGlobalRect.posX_) / parentSession->GetFloatingScale();
+            newRect.posY_ = (newRect.posY_ - parentGlobalRect.posY_) / parentSession->GetFloatingScale();
         }
     }
     Session::RectCheckProcess();
@@ -1278,9 +1299,9 @@ WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSes
         TLOGE(WmsLogTag::WMS_DIALOG, "dialog session is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onBindDialogTarget_) {
+    if (onBindDialogTarget_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "id: %{public}d", sceneSession->GetPersistentId());
-        sessionChangeCallback_->onBindDialogTarget_(sceneSession);
+        onBindDialogTarget_(sceneSession);
     }
     return WSError::WS_OK;
 }
@@ -1394,8 +1415,8 @@ WSError SceneSession::OnNeedAvoid(bool status)
         }
         TLOGI(WmsLogTag::WMS_IMMS, "SceneSession OnNeedAvoid status:%{public}d, id:%{public}d",
             static_cast<int32_t>(status), session->GetPersistentId());
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnNeedAvoid_) {
-            session->sessionChangeCallback_->OnNeedAvoid_(status);
+        if (session->onNeedAvoid_) {
+            session->onNeedAvoid_(status);
         }
         return WSError::WS_OK;
     };
@@ -4664,6 +4685,25 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
+{
+    auto task = [weakThis = wptr(this), isDefaultDensityEnabled]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "OnDefaultDensityEnabled, isDefaultDensityEnabled: %{public}d",
+            isDefaultDensityEnabled);
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onDefaultDensityEnabledFunc_) {
+            session->sessionChangeCallback_->onDefaultDensityEnabledFunc_(isDefaultDensityEnabled);
+        }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnDefaultDensityEnabled");
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
 {
     const char* const funcName = __func__;
@@ -4875,6 +4915,18 @@ void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientati
             return;
         }
         session->onRequestedOrientationChange_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
+void SceneSession::RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+        }
+        session->onBindDialogTarget_ = std::move(callback);
     };
     PostTask(task, __func__);
 }
@@ -5187,12 +5239,10 @@ void SceneSession::UnregisterSessionChangeListeners()
             return;
         }
         if (session->sessionChangeCallback_) {
-            session->sessionChangeCallback_->onBindDialogTarget_ = nullptr;
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
             session->sessionChangeCallback_->onSessionModalTypeChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
-            session->sessionChangeCallback_->OnNeedAvoid_ = nullptr;
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
             session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
