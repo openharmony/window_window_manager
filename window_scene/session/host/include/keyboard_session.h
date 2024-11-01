@@ -52,6 +52,7 @@ public:
     void OpenKeyboardSyncTransaction() override;
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
     bool IsVisibleForeground() const override;
+    uint32_t GetCallingSessionId() override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
@@ -59,7 +60,6 @@ private:
 
     WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
-    uint32_t GetCallingSessionId();
 
     int32_t GetStatusBarHeight();
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,

@@ -48,7 +48,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         curZOrder = session->GetZOrder();
         // callingSession check for input method
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            uint32_t callingWindowId = session->GetSessionProperty()->GetCallingSessionId();
+            uint32_t callingWindowId = session->GetCallingSessionId();
             const auto& callingSession =
                 SceneSessionManager::GetInstance().GetSceneSession(static_cast<int32_t>(callingWindowId));
             if ((callingSession != nullptr) && (callingSession->GetZOrder() > session->GetZOrder())) {

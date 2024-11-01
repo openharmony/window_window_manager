@@ -172,7 +172,6 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
 WMError PictureInPictureController::StartPictureInPicture(StartPipType startType)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    std::lock_guard<std::mutex> lock(mutex_);
     if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
@@ -275,8 +274,7 @@ WMError PictureInPictureController::StopPictureInPictureFromClient()
 
 WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, StopPipType stopPipType, bool withAnim)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u anim: %{public}d", destroyWindow, withAnim);
-    std::lock_guard<std::mutex> lock(mutex_);
+    TLOGI(WmsLogTag::WMS_PIP, "destroyWindow: %{public}u anim: %{public}d", destroyWindow, withAnim);
     if ((!isStoppedFromClient_ && curState_ == PiPWindowState::STATE_STOPPING) ||
         curState_ == PiPWindowState::STATE_STOPPED) {
         TLOGE(WmsLogTag::WMS_PIP, "Repeat stop request, curState: %{public}u", curState_);

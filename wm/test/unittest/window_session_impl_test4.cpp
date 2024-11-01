@@ -1082,29 +1082,6 @@ HWTEST_F(WindowSessionImplTest4, UpdateVirtualPixelRatio, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetAutoStartPiP
- * @tc.desc: SetAutoStartPiP
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
-{
-    auto option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
-    option->SetWindowName("SetAutoStartPiP");
-    auto window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "SetAutoStartPiP", "SetAutoStartPiP", "SetAutoStartPiP" };
-    auto session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    bool isAutoStart = true;
-    window->SetAutoStartPiP(isAutoStart);
-    window->hostSession_ = nullptr;
-    window->SetAutoStartPiP(isAutoStart);
-}
-
-/**
  * @tc.name: IsPcOrPadCapabilityEnabled
  * @tc.desc: IsPcOrPadCapabilityEnabled test
  * @tc.type: FUNC

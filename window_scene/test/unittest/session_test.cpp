@@ -56,18 +56,18 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 
     class TLifecycleListener : public ILifecycleListener {
-        public:
-            virtual ~TLifecycleListener() {}
-            void OnActivation() override {}
-            void OnConnect() override {}
-            void OnForeground() override {}
-            void OnBackground() override {}
-            void OnDisconnect() override {}
-            void OnExtensionDied() override {}
-            void OnExtensionTimeout(int32_t errorCode) override {}
-            void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-                int64_t uiExtensionIdLevel) override {}
-            void OnDrawingCompleted() override {}
+    public:
+        virtual ~TLifecycleListener() {}
+        void OnActivation() override {}
+        void OnConnect() override {}
+        void OnForeground() override {}
+        void OnBackground() override {}
+        void OnDisconnect() override {}
+        void OnExtensionDied() override {}
+        void OnExtensionTimeout(int32_t errorCode) override {}
+        void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+            int64_t uiExtensionIdLevel) override {}
+        void OnDrawingCompleted() override {}
     };
     std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 
@@ -183,17 +183,17 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetCompatibleModeInPc
- * @tc.desc: GetCompatibleModeInPc test
+ * @tc.name: SetCompatibleModeEnableInPad
+ * @tc.desc: SetCompatibleModeEnableInPad test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, GetCompatibleModeInPc, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     bool enable = true;
-    property->SetCompatibleModeInPc(enable);
-    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
+    property->SetCompatibleModeEnableInPad(enable);
+    ASSERT_EQ(property->GetCompatibleModeEnableInPad(), true);
 }
 
 /**
@@ -1245,94 +1245,6 @@ HWTEST_F(WindowSessionTest, TransferBackPressedEventForConsumed02, Function | Sm
 
     bool isConsumed = false;
     ASSERT_EQ(WSError::WS_OK, session_->TransferBackPressedEventForConsumed(isConsumed));
-}
-
-/**
- * @tc.name: CreateDetectStateTask001
- * @tc.desc: Create detection task when there are no pre_existing tasks.
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, CreateDetectStateTask001, Function | SmallTest | Level2)
-{
-    session_->systemConfig_.uiType_ = "phone";
-    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    DetectTaskInfo detectTaskInfo;
-    detectTaskInfo.taskState = DetectTaskState::NO_TASK;
-    int32_t beforeTaskNum = GetTaskCount();
-    session_->SetDetectTaskInfo(detectTaskInfo);
-    session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_FULLSCREEN);
-
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
-    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
-    session_->handler_->RemoveTask(taskName);
-}
-
-/**
- * @tc.name: CreateDetectStateTask002
- * @tc.desc: Detect state when window mode changed.
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, CreateDetectStateTask002, Function | SmallTest | Level2)
-{
-    session_->systemConfig_.uiType_ = "phone";
-    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    auto task = [](){};
-    int64_t delayTime = 3000;
-    session_->handler_->PostTask(task, taskName, delayTime);
-    int32_t beforeTaskNum = GetTaskCount();
-
-    DetectTaskInfo detectTaskInfo;
-    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
-    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
-    session_->SetDetectTaskInfo(detectTaskInfo);
-    session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-
-    ASSERT_EQ(beforeTaskNum - 1, GetTaskCount());
-    ASSERT_EQ(DetectTaskState::NO_TASK, session_->GetDetectTaskInfo().taskState);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, session_->GetDetectTaskInfo().taskWindowMode);
-    session_->handler_->RemoveTask(taskName);
-}
-
-/**
- * @tc.name: CreateDetectStateTask003
- * @tc.desc: Detect sup and down tree tasks fo the same type.
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, CreateDetectStateTask003, Function | SmallTest | Level2)
-{
-    session_->systemConfig_.uiType_ = "phone";
-    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    DetectTaskInfo detectTaskInfo;
-    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
-    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
-    int32_t beforeTaskNum = GetTaskCount();
-    session_->SetDetectTaskInfo(detectTaskInfo);
-    session_->CreateDetectStateTask(false, WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
-    ASSERT_EQ(DetectTaskState::DETACH_TASK, session_->GetDetectTaskInfo().taskState);
-    session_->handler_->RemoveTask(taskName);
-}
-
-/**
- * @tc.name: CreateDetectStateTask004
- * @tc.desc: Detection tasks under the same window mode.
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, CreateDetectStateTask004, Function | SmallTest | Level2)
-{
-    session_->systemConfig_.uiType_ = "phone";
-    std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    DetectTaskInfo detectTaskInfo;
-    int32_t beforeTaskNum = GetTaskCount();
-    detectTaskInfo.taskState = DetectTaskState::DETACH_TASK;
-    detectTaskInfo.taskWindowMode = WindowMode::WINDOW_MODE_FULLSCREEN;
-    session_->SetDetectTaskInfo(detectTaskInfo);
-    session_->CreateDetectStateTask(true, WindowMode::WINDOW_MODE_FULLSCREEN);
-
-    ASSERT_EQ(beforeTaskNum + 1, GetTaskCount());
-    ASSERT_EQ(DetectTaskState::ATTACH_TASK, session_->GetDetectTaskInfo().taskState);
-    session_->handler_->RemoveTask(taskName);
 }
 
 /**
