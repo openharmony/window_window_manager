@@ -1508,6 +1508,7 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
     }
     float extendDensity = CalcDefaultExtendScreenDensity(property);
     TLOGI(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
+    extendDefaultDpi_ = static_cast<uint32_t>(extendDensity * BASELINE_DENSITY);
     session->SetVirtualPixelRatio(extendDensity);
     session->SetDefaultDensity(extendDensity);
     session->SetDensityInCurResolution(extendDensity);
@@ -2352,7 +2353,11 @@ void ScreenSessionManager::SetDpiFromSettingData(bool isInternal)
     }
     if (!ret) {
         TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi");
-        settingDpi = defaultDpi;
+        if (isInternal) {
+            settingDpi = defaultDpi;
+        } else {
+            settingDpi = extendDefaultDpi_;
+        }
     } else {
         TLOGI(WmsLogTag::DMS, "get setting dpi success,settingDpi: %{public}u", settingDpi);
     }
