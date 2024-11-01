@@ -309,7 +309,7 @@ HWTEST_F(SceneSessionTest3, ClearSpecificSessionCbMap1, Function | SmallTest | L
 
     sptr<MainSession::SessionChangeCallback> sessionChangeCallback =
         new (std::nothrow) MainSession::SessionChangeCallback();
-    sessionChangeCallback->clearCallbackFunc_ = [](bool) {};
+    sceneSession->clearCallbackMapFunc_ = [](bool) {};
     sceneSession->sessionChangeCallback_ = sessionChangeCallback;
     sceneSession->ClearSpecificSessionCbMap();
 }

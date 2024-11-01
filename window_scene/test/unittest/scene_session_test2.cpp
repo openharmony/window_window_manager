@@ -1086,7 +1086,7 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     auto func = [sceneSession](bool hide) {
         sceneSession->SetPrivacyMode(hide);
     };
-    sceneSession->sessionChangeCallback_->OnForceHideChange_ = func;
+    sceneSession->onForceHideChangeFunc_ = func;
     EXPECT_NE(nullptr, &func);
     sceneSession->NotifyForceHideChange(true);
 

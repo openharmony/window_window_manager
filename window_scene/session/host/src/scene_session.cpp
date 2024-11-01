@@ -375,12 +375,55 @@ void SceneSession::ClearSpecificSessionCbMap()
 
 void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
 {
-    if (sessionChangeCallback_ && sessionChangeCallback_->clearCallbackFunc_) {
+    if (clearCallbackMapFunc_) {
         TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, needRemove: %{public}d", GetPersistentId(), needRemove);
-        sessionChangeCallback_->clearCallbackFunc_(needRemove);
+        clearCallbackMapFunc_(needRemove);
     } else {
         TLOGE(WmsLogTag::WMS_LIFE, "get callback failed, id: %{public}d", GetPersistentId());
     }
+}
+
+void SceneSession::RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), callback = std::move(callback), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->onShowWhenLockedFunc_ = std::move(callback);
+        session->onShowWhenLockedFunc_(session->GetShowWhenLockedFlagValue());
+    };
+    PostTask(task, where);
+}
+
+void SceneSession::RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), callback = std::move(callback), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->onForceHideChangeFunc_ = std::move(callback);
+    };
+    PostTask(task, where);
+}
+
+void SceneSession::RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), callback = std::move(callback), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->clearCallbackMapFunc_ = std::move(callback);
+    };
+    PostTask(task, where);
 }
 
 WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityToken)
@@ -1423,8 +1466,8 @@ WSError SceneSession::OnNeedAvoid(bool status)
 WSError SceneSession::OnShowWhenLocked(bool showWhenLocked)
 {
     WLOGFD("SceneSession ShowWhenLocked status:%{public}d", static_cast<int32_t>(showWhenLocked));
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnShowWhenLocked_) {
-        sessionChangeCallback_->OnShowWhenLocked_(showWhenLocked);
+    if (onShowWhenLockedFunc_) {
+        onShowWhenLockedFunc_(showWhenLocked);
     }
     return WSError::WS_OK;
 }
@@ -3144,8 +3187,8 @@ void SceneSession::NotifyForceHideChange(bool hide)
         return;
     }
     property->SetForceHide(hide);
-    if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
-        sessionChangeCallback_->OnForceHideChange_(hide);
+    if (onForceHideChangeFunc_) {
+        onForceHideChangeFunc_(hide);
     }
     SetForceTouchable(!hide);
     if (hide) {
@@ -5241,11 +5284,8 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
-            session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
-            session->sessionChangeCallback_->OnForceHideChange_ = nullptr;
             session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
-            session->sessionChangeCallback_->clearCallbackFunc_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
             session->sessionChangeCallback_->onRestoreMainWindowFunc_ = nullptr;
