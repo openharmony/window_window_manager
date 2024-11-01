@@ -653,6 +653,33 @@ WSError SessionProxy::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     return static_cast<WSError>(ret);
 }
 
+WSError SessionProxy::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isDefaultDensityEnabled)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write isDefaultDensityEnabled failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::OnRestoreMainWindow()
 {
     MessageParcel data;
@@ -704,7 +731,8 @@ WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool
 }
 
 /** @note @window.layout */
-WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal)
+WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason,
+    bool isGlobal, bool isFromMoveToGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -729,6 +757,11 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReas
     }
 
     if (!data.WriteBool(isGlobal)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write bool failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isFromMoveToGlobal)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write bool failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -1683,36 +1716,6 @@ WSError SessionProxy::UpdateRectChangeListenerRegistered(bool isRegister)
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
-}
-
-WSError SessionProxy::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(gravity))) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write gravity failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(percent)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write percent failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(reply.ReadInt32());
 }
 
 void SessionProxy::SetCallingSessionId(const uint32_t callingSessionId)

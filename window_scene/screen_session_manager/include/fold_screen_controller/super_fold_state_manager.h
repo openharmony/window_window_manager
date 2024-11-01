@@ -20,8 +20,6 @@
 #include <refbase.h>
 #include <functional>
 #include <map>
-#include <vector>
-#include <memory>
 #include <utility>
 
 #include "dm_common.h"
@@ -74,8 +72,6 @@ private:
     static void DoSoftKeyboardOn();
 
     static void DoSoftKeyboardOff();
-
-    static void DoKeyboardToExpanded();
 
     static void DoExpandedToKeyboard();
 };

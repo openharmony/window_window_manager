@@ -161,6 +161,7 @@ void WindowSessionProperty::SetSessionInfo(const SessionInfo& info)
 
 void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 {
+    std::lock_guard<std::mutex> lock(windowRectMutex_);
     windowRect_ = rect;
 }
 
@@ -271,6 +272,7 @@ SessionInfo& WindowSessionProperty::EditSessionInfo()
 
 Rect WindowSessionProperty::GetWindowRect() const
 {
+    std::lock_guard<std::mutex> lock(windowRectMutex_);
     return windowRect_;
 }
 
@@ -516,18 +518,6 @@ WindowState WindowSessionProperty::GetWindowState() const
 void WindowSessionProperty::SetWindowState(WindowState state)
 {
     windowState_ = state;
-}
-
-void WindowSessionProperty::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
-{
-    sessionGravity_ = gravity;
-    sessionGravitySizePercent_ = percent;
-}
-
-void WindowSessionProperty::GetSessionGravity(SessionGravity& gravity, uint32_t& percent)
-{
-    gravity = sessionGravity_;
-    percent = sessionGravitySizePercent_;
 }
 
 void WindowSessionProperty::SetKeyboardLayoutParams(const KeyboardLayoutParams& params)
@@ -1048,7 +1038,6 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingPiPTemplateInfo(parcel) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
         parcel.WriteBool(isSystemCalling_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(sessionGravity_)) && parcel.WriteUint32(sessionGravitySizePercent_) &&
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
@@ -1117,7 +1106,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFloatingWindowAppType(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
     property->SetSystemCalling(parcel.ReadBool());
-    property->SetKeyboardSessionGravity(static_cast<SessionGravity>(parcel.ReadUint32()), parcel.ReadUint32());
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
     property->SetWindowState(static_cast<WindowState>(parcel.ReadUint32()));

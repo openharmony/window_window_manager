@@ -72,7 +72,7 @@ RSSurfaceNode::SharedPtr WindowSceneSessionImplTest2::CreateRSSurfaceNode()
 }
 
 namespace {
-/*
+/**
  * @tc.name: SetBackdropBlur
  * @tc.desc: SetBackdropBlur test
  * @tc.type: FUNC
@@ -91,7 +91,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetBackdropBlur, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlur(1.0));
 }
 
-/*
+/**
  * @tc.name: SetShadowColor
  * @tc.desc: SetShadowColor test
  * @tc.type: FUNC
@@ -110,7 +110,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetShadowColor, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowColor("#ff22ee44"));
 }
 
-/*
+/**
  * @tc.name: SetCornerRadius
  * @tc.desc: SetCornerRadius test
  * @tc.type: FUNC
@@ -127,7 +127,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetCornerRadius, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
 }
 
-/*
+/**
  * @tc.name: SetShadowRadius
  * @tc.desc: SetShadowRadius test
  * @tc.type: FUNC
@@ -283,7 +283,6 @@ HWTEST_F(WindowSceneSessionImplTest2, DestroySubWindow01, Function | SmallTest |
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
 
     ASSERT_NE(nullptr, windowSceneSession);
-    
     windowSceneSession->DestroySubWindow();
     ASSERT_EQ(INVALID_SESSION_ID, windowSceneSession->property_->GetParentPersistentId());
 }
@@ -863,9 +862,14 @@ HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget01, Function | SmallTest |
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestMode", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSession->property_->SetPersistentId(1);
+    windowSceneSession->hostSession_ = session;
     sptr<IRemoteObject> targetToken;
     WMError ret = windowSceneSession->BindDialogTarget(targetToken);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 
 /**

@@ -311,6 +311,13 @@ HWTEST_F(SceneSessionManagerTest9, UpdateFocus04, Function | SmallTest | Level3)
     sceneSession->UpdateFocus(false);
     ssm_->UpdateFocus(1, false);
 
+    ssm_->listenerController_ = nullptr;
+    ssm_->UpdateFocus(1, true);
+
+    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
+    ssm_->listenerController_ = listenerController;
+    ssm_->UpdateFocus(1, true);
+
     sessionInfo.isSystem_ = false;
     ssm_->focusedSessionId_ = 1;
     sceneSession->UpdateFocus(true);
@@ -571,8 +578,11 @@ HWTEST_F(SceneSessionManagerTest9, NotifyCompleteFirstFrameDrawing03, Function |
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->listenerController_ = nullptr;
     ssm_->NotifyCompleteFirstFrameDrawing(1);
 
+    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
+    ssm_->listenerController_ = listenerController;
     sessionInfo.isSystem_ = false;
     ssm_->eventHandler_ = nullptr;
     ssm_->NotifyCompleteFirstFrameDrawing(1);
@@ -600,10 +610,13 @@ HWTEST_F(SceneSessionManagerTest9, SetSessionLabel02, Function | SmallTest | Lev
     ASSERT_NE(nullptr, token);
     sceneSession->SetAbilityToken(token);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->listenerController_ = nullptr;
 
     std::string label = "testLabel";
     ssm_->SetSessionLabel(token, label);
 
+    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
+    ssm_->listenerController_ = listenerController;
     sessionInfo.isSystem_ = false;
     ssm_->SetSessionLabel(token, label);
 

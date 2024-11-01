@@ -74,6 +74,7 @@ enum class ListenerFuncType : uint32_t {
     KEYBOARD_GRAVITY_CHANGE_CB,
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
+    DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
     PRIVACY_MODE_CHANGE_CB,
     RESTORE_MAIN_WINDOW_CB,
@@ -253,6 +254,7 @@ private:
     void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
+    void ProcessDefaultDensityEnabledRegister();
     void ProcessRestoreMainWindowRegister();
     void ProcessTitleAndDockHoverShowChangeRegister();
     void ProcessFrameLayoutFinishRegister();
@@ -307,6 +309,7 @@ private:
     void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
+    void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void RestoreMainWindow();
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
     void NotifyFrameLayoutFinish();

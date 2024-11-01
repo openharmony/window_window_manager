@@ -709,7 +709,7 @@ struct TitleButtonRect {
     }
 };
 
-/*
+/**
  * Config of keyboard animation
  */
 class KeyboardAnimationCurve : public Parcelable {

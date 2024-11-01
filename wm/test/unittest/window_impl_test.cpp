@@ -1331,7 +1331,7 @@ HWTEST_F(WindowImplTest, SetBrightness03, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: RequestVsync
  * @tc.desc: RequestVsync test
  * @tc.type: FUNC
@@ -1363,7 +1363,7 @@ HWTEST_F(WindowImplTest, RequestVsync, Function | SmallTest | Level3)
     window->RequestVsync(callback);
 }
 
-/*
+/**
  * @tc.name: Create3
  * @tc.desc: Create3 WindowCreateCheck
  * @tc.type: FUNC
