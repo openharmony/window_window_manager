@@ -1350,11 +1350,11 @@ HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | 
     EXPECT_EQ(true, sessionUIState->GetUIStateDirty());
 }
 /**
- * @tc.name: SetIsStartingBeforeVisible
- * @tc.desc: test SetIsStartingBeforeVisible
+ * @tc.name: SetStartingBeforeVisible
+ * @tc.desc: test SetStartingBeforeVisible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest3, SetIsStartingBeforeVisible, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionTest3, SetStartingBeforeVisible, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->SetStartingBeforeVisible(true);
