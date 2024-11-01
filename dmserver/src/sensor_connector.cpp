@@ -37,6 +37,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Sensor
     constexpr int32_t MOTION_ACTION_LEFT_LANDSCAPE = 1;
     constexpr int32_t MOTION_ACTION_PORTRAIT_INVERTED = 2;
     constexpr int32_t MOTION_ACTION_RIGHT_LANDSCAPE = 3;
+    const int32_t MOTION_TYPE_ROTATION = 700;
 #endif
 }
 
@@ -48,7 +49,7 @@ long GravitySensorSubscriber::lastCallbackTime_ = 0;
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
 bool MotionSubscriber::isMotionSensorSubscribed_ = false;
-sptr<RotationMotionEventCallback> MotionSubscriber::motionEventCallback_ = nullptr;
+static void RotationMotionEventCallback(const MotionSensorEvent& motionData);
 #endif
 
 void SensorConnector::SubscribeRotationSensor()
@@ -196,15 +197,10 @@ void MotionSubscriber::SubscribeMotionSensor()
         WLOGFE("dms: motion sensor's already subscribed");
         return;
     }
-    sptr<RotationMotionEventCallback> callback = new (std::nothrow) RotationMotionEventCallback();
-    if (callback == nullptr) {
+    if (!SubscribeCallback(MOTION_TYPE_ROTATION, RotationMotionEventCallback)) {
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor subscribe failed");
         return;
     }
-    int32_t ret = OHOS::Msdp::SubscribeCallback(OHOS::Msdp::MOTION_TYPE_ROTATION, callback);
-    if (ret != 0) {
-        return;
-    }
-    motionEventCallback_ = callback;
     isMotionSensorSubscribed_ = true;
 }
 
@@ -214,14 +210,14 @@ void MotionSubscriber::UnsubscribeMotionSensor()
         WLOGFI("dms: Unsubscribe motion sensor");
         return;
     }
-    int32_t ret = OHOS::Msdp::UnsubscribeCallback(OHOS::Msdp::MOTION_TYPE_ROTATION, motionEventCallback_);
-    if (ret != 0) {
+    if (!UnsubscribeCallback(MOTION_TYPE_ROTATION, RotationMotionEventCallback)) {
+        TLOGE(WmsLogTag::DMS, "dms: motion sensor unsubscribe failed");
         return;
     }
     isMotionSensorSubscribed_ = false;
 }
 
-void RotationMotionEventCallback::OnMotionChanged(const MotionEvent& motionData)
+void RotationMotionEventCallback(const MotionSensorEvent& motionData)
 {
     DeviceRotation motionRotation = DeviceRotation::INVALID;
     switch (motionData.status) {

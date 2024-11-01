@@ -56,7 +56,7 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
-    /*
+    /**
      *    Avoid fold to expand process queues public interface
      */
     bool GetModeChangeRunningStatus();
@@ -65,7 +65,7 @@ public:
     FoldDisplayMode GetLastCacheDisplayMode();
     
 protected:
-    /*
+    /**
      *    Avoid fold to expand process queues private variable
      */
     std::atomic<int> pengdingTask_{FOLD_TO_EXPAND_TASK_NUM};

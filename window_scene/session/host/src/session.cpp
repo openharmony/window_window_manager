@@ -102,6 +102,16 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
     }
 }
 
+Session::~Session()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+            // do nothing
+        });
+    }
+}
+
 void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
     const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
 {
@@ -409,6 +419,16 @@ void Session::NotifyLayoutFinished()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnLayoutFinished();
+        }
+    }
+}
+
+void Session::NotifyRemoveBlank()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveBlank();
         }
     }
 }
@@ -2701,6 +2721,26 @@ void Session::SetSessionRect(const WSRect& rect)
 WSRect Session::GetSessionRect() const
 {
     return winRect_;
+}
+
+/** @note @window.layout */
+WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        WSRect scaledRect = session->GetSessionGlobalRect();
+        scaledRect.width_ *= session->scaleX_;
+        scaledRect.height_ *= session->scaleY_;
+        globalScaledRect = { scaledRect.posX_, scaledRect.posY_, scaledRect.width_, scaledRect.height_ };
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+            session->GetPersistentId(), globalScaledRect.ToString().c_str());
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, "GetGlobalScaledRect");
 }
 
 /** @note @window.layout */

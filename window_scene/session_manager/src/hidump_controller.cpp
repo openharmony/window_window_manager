@@ -309,8 +309,6 @@ void HidumpController::DumpKeyboardParam(
         << std::endl
         << session->GetSCBKeepKeyboardFlag() << "|"
         << session->IsSystemInput() << "|"
-        << static_cast<uint32_t>(property->sessionGravity_) << "|"
-        << property->sessionGravitySizePercent_ << "|"
         << property->GetKeepKeyboardFlag() << "|"
         << std::setprecision(precision) << property->GetTextFieldPositionY() << "|"
         << std::setprecision(precision) << property->GetTextFieldHeight() << "|"
