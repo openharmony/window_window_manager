@@ -16,7 +16,6 @@
 #ifndef WINDOW_WINDOW_MANAGER_PIP_REPORT_H
 #define WINDOW_WINDOW_MANAGER_PIP_REPORT_H
 
-#include <map>
 #include <mutex>
 #include "wm_single_instance.h"
 #include "wm_common.h"

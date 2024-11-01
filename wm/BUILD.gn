@@ -69,14 +69,12 @@ ohos_static_library("libwm_static") {
     "src/root_scene.cpp",
     "src/screen_scene.cpp",
     "src/static_call.cpp",
-    "src/vsync_station.cpp",
     "src/window.cpp",
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
     "src/window_display_change_adapter.cpp",
     "src/window_extension_session_impl.cpp",
-    "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",
     "src/window_input_channel.cpp",
     "src/window_manager.cpp",
@@ -206,14 +204,12 @@ ohos_shared_library("libwm") {
     "src/root_scene.cpp",
     "src/screen_scene.cpp",
     "src/static_call.cpp",
-    "src/vsync_station.cpp",
     "src/window.cpp",
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
     "src/window_display_change_adapter.cpp",
     "src/window_extension_session_impl.cpp",
-    "src/window_frame_trace_impl.cpp",
     "src/window_impl.cpp",
     "src/window_input_channel.cpp",
     "src/window_manager.cpp",
@@ -251,7 +247,6 @@ ohos_shared_library("libwm") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
-    "ability_base:zuri",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_context",
@@ -261,8 +256,6 @@ ohos_shared_library("libwm") {
     "ace_engine:ace_xcomponent_controller",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "graphic_2d:librender_service_client",
     "graphic_2d:window_animation",
@@ -422,7 +415,11 @@ ohos_shared_library("libwm_ndk") {
 
   sources = [ "src/oh_window_event_filter.cpp" ]
 
-  deps = [ ":libwm" ]
+  deps = [
+    ":libwm",
+    "${window_base_path}/utils:libwmutil_base",
+  ]
+
   innerapi_tags = [ "ndk" ]
 
   external_deps = [

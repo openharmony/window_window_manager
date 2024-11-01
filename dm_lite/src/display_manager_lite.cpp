@@ -590,6 +590,18 @@ bool DisplayManagerLite::SuspendEnd()
     return SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendEnd();
 }
 
+ScreenId DisplayManagerLite::GetInternalScreenId()
+{
+    WLOGFD("[UL_POWER]GetInternalScreenId start");
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().GetInternalScreenId();
+}
+
+bool DisplayManagerLite::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
+{
+    WLOGFD("[UL_POWER]SetScreenPowerById start");
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().SetScreenPowerById(screenId, state, reason);
+}
+
 bool DisplayManagerLite::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
     return pImpl_->SetDisplayState(state, callback);
@@ -607,7 +619,6 @@ bool DisplayManagerLite::Impl::SetDisplayState(DisplayState state, DisplayStateC
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayStateCallback_ != nullptr || callback == nullptr) {
-            WLOGFI("[UL_POWER]previous callback not called or callback invalid");
             if (displayStateCallback_ != nullptr) {
                 WLOGFI("[UL_POWER]previous callback not called, the displayStateCallback_ is not null");
             }
@@ -661,9 +672,15 @@ void DisplayManagerLite::Impl::ClearDisplayStateCallback()
     }
 }
 
+bool DisplayManagerLite::TryToCancelScreenOff()
+{
+    WLOGFD("[UL_POWER]TryToCancelScreenOff start");
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().TryToCancelScreenOff();
+}
+
 bool DisplayManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    WLOGFI("[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    WLOGFD("[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     SingletonContainer::Get<DisplayManagerAdapterLite>().SetScreenBrightness(screenId, level);
     return true;
 }
@@ -671,7 +688,7 @@ bool DisplayManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 uint32_t DisplayManagerLite::GetScreenBrightness(uint64_t screenId) const
 {
     uint32_t level = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(screenId);
-    WLOGFI("GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    WLOGFD("[UL_POWER]GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     return level;
 }
 

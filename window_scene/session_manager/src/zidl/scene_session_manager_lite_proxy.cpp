@@ -187,7 +187,7 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToBackgroundForDelegator(con
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::RegisterSessionListener(const sptr<ISessionListener>& listener)
+WSError SceneSessionManagerLiteProxy::RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::RegisterSessionListener");
     MessageParcel data;
@@ -982,6 +982,75 @@ WMError SceneSessionManagerLiteProxy::GetMainWindowInfos(int32_t topNum, std::ve
     return static_cast<WMError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerLiteProxy::RegisterIAbilityManagerCollaborator(int32_t type,
+    const sptr<AAFwk::IAbilityManagerCollaborator>& impl)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "type:%{public}d", type);
+    if (!impl) {
+        TLOGE(WmsLogTag::WMS_MAIN, "impl is nullptr");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(type)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write type failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteRemoteObject(impl->AsObject())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write impl failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_COLLABORATOR),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int32_t type)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "type:%{public}d", type);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(type)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write type failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WMError SceneSessionManagerLiteProxy::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
 {
     MessageParcel data;
@@ -1066,75 +1135,6 @@ WSError SceneSessionManagerLiteProxy::RaiseWindowToTop(int32_t persistentId)
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
-}
-
-WSError SceneSessionManagerLiteProxy::RegisterIAbilityManagerCollaborator(int32_t type,
-    const sptr<AAFwk::IAbilityManagerCollaborator>& impl)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "type:%{public}d", type);
-    if (!impl) {
-        TLOGE(WmsLogTag::WMS_MAIN, "impl is nullptr");
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(type)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write type failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteRemoteObject(impl->AsObject())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write impl failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_COLLABORATOR),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(reply.ReadInt32());
-}
-
-WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int32_t type)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "type:%{public}d", type);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(type)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write type failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_COLLABORATOR),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(reply.ReadInt32());
 }
 
 WMError SceneSessionManagerLiteProxy::GetWindowStyleType(WindowStyleType& windowStyleType)
@@ -1265,7 +1265,7 @@ WMError SceneSessionManagerLiteProxy::GetCurrentPiPWindowInfo(std::string& bundl
     return errorCode;
 }
 
-WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId)
+WMError SceneSessionManagerLiteProxy::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
 {
     MessageParcel data;
     MessageParcel reply;

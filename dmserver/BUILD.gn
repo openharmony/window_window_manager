@@ -50,6 +50,7 @@ ohos_shared_library("libdms") {
     "src/display_power_controller.cpp",
     "src/screen_rotation_controller.cpp",
     "src/sensor_connector.cpp",
+    "src/sensor_plugin.cpp",
   ]
 
   configs = [
@@ -81,7 +82,6 @@ ohos_shared_library("libdms") {
   defines = []
   if (window_manager_feature_subscribe_motion) {
     if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
-      external_deps += [ "motion:motion_interface_native" ]
       defines += [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
     }
   }

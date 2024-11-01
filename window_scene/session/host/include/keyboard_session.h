@@ -52,18 +52,18 @@ public:
     void OpenKeyboardSyncTransaction() override;
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
     bool IsVisibleForeground() const override;
+    uint32_t GetCallingSessionId() override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
     int32_t GetFocusedSessionId();
 
-    WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
+    WSError SetKeyboardSessionGravity(SessionGravity gravity);
     void SetCallingSessionId(uint32_t callingSessionId) override;
-    uint32_t GetCallingSessionId();
 
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
         const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-    void RaiseCallingSession(const WSRect& keyboardPanelRect,
+    void RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateKeyboardAvoidArea();

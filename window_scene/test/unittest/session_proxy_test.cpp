@@ -471,6 +471,36 @@ HWTEST_F(SessionProxyTest, SetAutoStartPiP, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetGlobalScaledRect
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetGlobalScaledRect, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetGlobalScaledRect start";
+    Rect rect;
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WMError res = sProxy->GetGlobalScaledRect(rect);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->GetGlobalScaledRect(rect);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = sProxy->GetGlobalScaledRect(rect);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    res = sProxy->GetGlobalScaledRect(rect);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetGlobalScaledRect end";
+}
+
+/**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -527,7 +557,7 @@ HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus start";
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     WSError res = sProxy->RequestFocus(true);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus end";

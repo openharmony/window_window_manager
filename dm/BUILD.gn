@@ -36,10 +36,6 @@ config("libdm_public_config") {
   ]
 }
 
-config("libdm_ndk_public_config") {
-  include_dirs = [ "../interfaces/kits/dmndk/dm" ]
-}
-
 config("for_libdm_public_config") {
   include_dirs =
       [ "../../../multimedia/image_framework/interfaces/innerkits/include" ]
@@ -160,6 +156,10 @@ group("test") {
 }
 
 ## Build libdm_ndk.so
+config("libdm_ndk_public_config") {
+  include_dirs = [ "../interfaces/kits/dmndk/dm" ]
+}
+
 ohos_shared_library("libdm_ndk") {
   branch_protector_ret = "pac_ret"
   output_name = "libnative_display_manager"
@@ -175,18 +175,24 @@ ohos_shared_library("libdm_ndk") {
   public_configs = [ ":libdm_ndk_public_config" ]
 
   include_dirs = [
+    ".",
     "${window_base_path}/interfaces/kits/dmndk/dm",
     "${window_base_path}/interfaces/inner_kits/dm",
   ]
 
   sources = [ "src/oh_display_manager.cpp" ]
 
-  deps = [ ":libdm" ]
+  deps = [
+    ":libdm",
+    "${window_base_path}/utils:libwmutil_base",
+  ]
+
   innerapi_tags = [ "ndk" ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:pixelmap",
   ]
 
   part_name = "window_manager"

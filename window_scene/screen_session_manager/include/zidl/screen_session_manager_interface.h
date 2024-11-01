@@ -98,6 +98,8 @@ public:
     virtual bool SetDisplayState(DisplayState state) override { return false; }
     virtual DisplayState GetDisplayState(DisplayId displayId) override {return DisplayState::UNKNOWN; }
     virtual bool TryToCancelScreenOff() override { return false; }
+    virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level) override { return false; }
+    virtual uint32_t GetScreenBrightness(uint64_t screenId) override { return 0; }
     virtual std::vector<DisplayId> GetAllDisplayIds() override { return std::vector<DisplayId>{}; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override { return nullptr; }
     virtual void NotifyDisplayEvent(DisplayEvent event) override {}
@@ -196,6 +198,13 @@ public:
         std::vector<uint64_t>& windowIdList) override
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    virtual std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr) override
+    {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
     }
 };
 } // namespace Rosen

@@ -177,10 +177,10 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NEED_AVOID), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
@@ -269,9 +269,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG), data, reply, option);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID), data, reply, option);
@@ -363,11 +360,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Lev
     ASSERT_EQ(data.WriteUint64(2), true);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteUint32(1), true);
     res = session_->ProcessRemoteRequest(
@@ -521,11 +513,29 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect001, Function | SmallTest | Level2)
     data.WriteUint32(30);
     data.WriteUint32(height);
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+}
+
+/**
+ * @tc.name: HandleUpdatePiPRect002
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
     data.WriteInt32(10);
     data.WriteInt32(20);
     data.WriteUint32(30);
     data.WriteUint32(40);
-    data.WriteInt32(-1);
+    data.WriteUint32(22);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
+    data.WriteInt32(10);
+    data.WriteInt32(20);
+    data.WriteUint32(30);
+    data.WriteUint32(40);
+    data.WriteUint32(3);
     ASSERT_EQ(ERR_NONE, session_->HandleUpdatePiPRect(data, reply));
 }
 
@@ -540,11 +550,27 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPControlStatus, Function | SmallTest | L
     ASSERT_NE(session_, nullptr);
     MessageParcel data;
     MessageParcel reply;
-    auto controlType = WsPiPControlType::VIDEO_PLAY_PAUSE;
-    auto status = WsPiPControlStatus::PLAY;
-    data.WriteUint32(static_cast<uint32_t>(controlType));
-    data.WriteInt32(static_cast<int32_t>(status));
+    uint32_t controlType = -1;
+    int32_t status = 1;
+    data.WriteUint32(controlType);
+    data.WriteInt32(status);
     auto res = session_->HandleUpdatePiPControlStatus(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteUint32(10);
+    data.WriteInt32(status);
+    res = session_->HandleUpdatePiPControlStatus(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteUint32(2);
+    data.WriteInt32(-4);
+    res = session_->HandleUpdatePiPControlStatus(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteUint32(2);
+    data.WriteInt32(4);
+    res = session_->HandleUpdatePiPControlStatus(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteUint32(2);
+    data.WriteInt32(1);
+    res = session_->HandleUpdatePiPControlStatus(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
 
@@ -720,10 +746,10 @@ HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction01, Function | SmallTest |
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(true);
+    data.WriteUint32(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleUpdatePropertyByAction(data, reply);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -736,10 +762,11 @@ HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction02, Function | SmallTest |
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteBool(false);
+    const std::uint32_t invalidData = 0;
+    data.WriteUint32(invalidData);
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleUpdatePropertyByAction(data, reply);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**

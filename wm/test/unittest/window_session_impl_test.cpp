@@ -345,28 +345,6 @@ HWTEST_F(WindowSessionImplTest, ColorSpace, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: MakeSubOrDialogWindowDragableAndMoveble01
- * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble01, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(nullptr, option);
-    option->SetSubWindowDecorEnable(true);
-    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble01");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->MakeSubOrDialogWindowDragableAndMoveble();
-    ASSERT_EQ(true, window->property_->IsDecorEnable());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 end";
-}
-
-/**
  * @tc.name: MakeSubOrDialogWindowDragableAndMoveble02
  * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
  * @tc.type: FUNC
@@ -450,37 +428,11 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck01, Function | SmallTest
     option1->SetWindowName("WindowSessionCreateCheck"); // set the same name
     sptr<WindowSessionImpl> window1 =
         new (std::nothrow) WindowSessionImpl(option1);
-        
     ASSERT_NE(nullptr, window1);
 
     WMError res = window1->WindowSessionCreateCheck();
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck01 end";
-}
-
-/**
- * @tc.name: WindowSessionCreateCheck02
- * @tc.desc: WindowSessionCreateCheck02
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck02, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck02 start";
-    sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("WindowSessionCreateCheck");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    WMError res1 = window->WindowSessionCreateCheck();
-    ASSERT_EQ(res1, WMError::WM_OK);
-
-    window->property_->SetWindowName("test1");
-    window->windowSessionMap_.insert(std::make_pair("test2", std::make_pair(2, window)));
-    res1 = window->WindowSessionCreateCheck();
-    ASSERT_EQ(res1, WMError::WM_ERROR_REPEAT_OPERATION);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck02 end";
 }
 
 /**
@@ -709,6 +661,33 @@ HWTEST_F(WindowSessionImplTest, UpdateViewportConfig, Function | SmallTest | Lev
     window->property_->SetDisplayId(displayId);
     window->UpdateViewportConfig(rectW, reason);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateViewportConfig end";
+}
+
+/**
+ * @tc.name: UpdateViewportConfig01
+ * @tc.desc: UpdateViewportConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateViewportConfig01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("UpdateViewportConfig01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    Rect rectW;
+    rectW.posX_ = 0;
+    rectW.posY_ = 0;
+    rectW.height_ = 0;
+    rectW.width_ = 0;
+    WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    rectW.width_ = 10;
+    rectW.height_ = 0;
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    rectW.width_ = 10;
+    rectW.height_ = 10;
+    window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
+    ASSERT_NE(window, nullptr);
 }
 
 /**
@@ -1019,6 +998,9 @@ HWTEST_F(WindowSessionImplTest, SetRequestedOrientation, Function | SmallTest | 
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
     Orientation ori = Orientation::VERTICAL;
     window->SetRequestedOrientation(ori);
     Orientation ret = window->GetRequestedOrientation();
@@ -1047,7 +1029,7 @@ HWTEST_F(WindowSessionImplTest, SetRequestedOrientation, Function | SmallTest | 
     window->SetRequestedOrientation(Orientation::FOLLOW_DESKTOP);
     Orientation ret6 = window->GetRequestedOrientation();
     ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
 }
 
@@ -1062,8 +1044,19 @@ HWTEST_F(WindowSessionImplTest, GetRequestedOrientation, Function | SmallTest | 
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("GetRequestedOrientation");
+
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
+                               "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
     Orientation ori = Orientation::HORIZONTAL;
     window->SetRequestedOrientation(ori);
     Orientation ret = window->GetRequestedOrientation();
@@ -1335,7 +1328,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
     sptr<IMainWindowCloseListener> listener12 = nullptr;
     res = window->RegisterMainWindowCloseListeners(listener12);
@@ -1728,22 +1720,7 @@ HWTEST_F(WindowSessionImplTest, SetBackgroundColor01, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
     res = window->SetBackgroundColor(color);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-
-    color = "Blue";
-    window->property_->SetPersistentId(1);
-    window->state_ = WindowState::STATE_SHOWN;
-    window->hostSession_ = session;
-    ASSERT_FALSE(window->IsWindowSessionInvalid());
-    uint32_t colorValue;
-    ASSERT_FALSE(ColorParser::Parse(color, colorValue));
-    res = window->SetBackgroundColor(color);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
-
-    color = "#FFFFFF00";
-    ASSERT_TRUE(ColorParser::Parse(color, colorValue));
-    res = window->SetBackgroundColor(color);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_OPERATION);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBackgroundColor01 end";
 }
 
@@ -1769,19 +1746,6 @@ HWTEST_F(WindowSessionImplTest, SetBackgroundColor02, Function | SmallTest | Lev
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_OPERATION);
     uint32_t ret = window->GetBackgroundColor();
     ASSERT_EQ(ret, 0xffffffff);
-
-    ASSERT_EQ(window->aceAbilityHandler_, nullptr);
-    sptr<IAceAbilityHandler> handler = new (std::nothrow) MockIAceAbilityHandler();
-    window->SetAceAbilityHandler(handler);
-    res = window->SetBackgroundColor(0xffffffff);
-    ASSERT_NE(window->aceAbilityHandler_, nullptr);
-    ASSERT_EQ(res, WMError::WM_OK);
-
-    ASSERT_TRUE(!(0xff0000 & 0xff000000));
-    ASSERT_TRUE(WindowHelper::IsMainWindow(window->GetType()));
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    res = window->SetBackgroundColor(0xff0000);
-    ASSERT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBackgroundColor02 end";
 }

@@ -374,7 +374,7 @@ void ScreenSessionManagerClientProxy::OnDisplayStateChanged(DisplayId defaultDis
 }
 
 void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds)
+    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -395,6 +395,10 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
     }
     if (!data.WriteUInt64Vector(surfaceNodeIds)) {
         WLOGFE("Write surfaceNodeIds failed");
+        return;
+    }
+    if (!data.WriteBool(isBlackList)) {
+        WLOGFE("Write isBlackList failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
@@ -459,7 +463,7 @@ void ScreenSessionManagerClientProxy::OnScreenshot(DisplayId displayId)
     }
 }
 
-void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(bool& immersive)
+void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(ScreenId screenId, bool& immersive)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -472,6 +476,10 @@ void ScreenSessionManagerClientProxy::OnImmersiveStateChanged(bool& immersive)
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
         return;
     }
     if (remote->SendRequest(
@@ -562,6 +570,63 @@ void ScreenSessionManagerClientProxy::OnFoldStatusChangedReportUE(const std::vec
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         ScreenSessionManagerClientMessage::TRANS_ID_ON_FOLDSTATUS_CHANGED_REPORT_UE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerClientProxy::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid,
+    const std::string& clientName)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(mainScreenId) || !data.WriteInt32(uid) || !data.WriteString(clientName)) {
+        WLOGFE("Write screenId or uid or client failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CAPTURE_NOTIFY),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerClientProxy::OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(superFoldStatus))) {
+        WLOGFE("Write superFoldStatus failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SUPER_FOLD_STATUS_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;

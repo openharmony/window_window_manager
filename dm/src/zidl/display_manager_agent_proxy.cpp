@@ -489,6 +489,30 @@ void DisplayManagerAgentProxy::NotifyDisplayModeChanged(FoldDisplayMode displayM
     }
 }
 
+void DisplayManagerAgentProxy::NotifyScreenMagneticStateChanged(bool isMagneticState)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyScreenMagneticStateChanged: remote is nullptr");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(isMagneticState)) {
+        WLOGFE("Write isMagneticState failed");
+        return;
+    }
+    if (remote->SendRequest(TRANS_ID_ON_SCREEN_MAGNETIC_STATE_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area)
 {
     sptr<IRemoteObject> remote = Remote();

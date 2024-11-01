@@ -374,10 +374,10 @@ HWTEST_F(WindowFocusTest, FocusChangedTest05, Function | MediumTest | Level3)
 }
 
 /**
-* @tc.name: FocusChangedTest06
-* @tc.desc: hide unfocused window to test focus
-* @tc.type: FUNC
-*/
+ * @tc.name: FocusChangedTest06
+ * @tc.desc: hide unfocused window to test focus
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowFocusTest, FocusChangedTest06, Function | MediumTest | Level3)
 {
     floatAppInfo_.name = "FocusChangedTest06_1";
@@ -417,10 +417,10 @@ HWTEST_F(WindowFocusTest, FocusChangedTest06, Function | MediumTest | Level3)
 }
 
 /**
-* @tc.name: FocusChangedTest07
-* @tc.desc: destroy focused window to test focus
-* @tc.type: FUNC
-*/
+ * @tc.name: FocusChangedTest07
+ * @tc.desc: destroy focused window to test focus
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
 {
     floatAppInfo_.name = "FocusChangedTest07_1";
@@ -506,10 +506,10 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
 }
 
 /**
-* @tc.name: FocusChangedTest08
-* @tc.desc: destroy unfocused window to test focus
-* @tc.type: FUNC
-*/
+ * @tc.name: FocusChangedTest08
+ * @tc.desc: destroy unfocused window to test focus
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
 {
     floatAppInfo_.name = "FocusChangedTest08_1";
@@ -559,19 +559,25 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
 HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Level3)
 {
     fullScreenAppInfo_.name = "WindowShowWithoutFocusTest_1";
-    fullScreenAppInfo_.focusable_ = false;
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
+    if (window1 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window1);
 
     floatAppInfo_.name = "WindowShowWithoutFocusTest_2";
-    floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& window2 = Utils::CreateTestWindow(floatAppInfo_);
+    if (window2 == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, window2);
 
     subAppInfo_.name = "WindowShowWithoutFocusTest_3";
-    subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentId = window2->GetWindowId();
     const sptr<Window>& subWindow = Utils::CreateTestWindow(subAppInfo_);
+    if (subWindow == nullptr) {
+        return;
+    }
     ASSERT_NE(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());

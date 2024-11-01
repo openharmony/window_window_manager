@@ -366,8 +366,13 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList, Function | 
 HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode01, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
-    EXPECT_NE(FoldDisplayMode::FULL, screenSessionManagerClient_->GetFoldDisplayMode());
-    EXPECT_NE(FoldStatus::FOLDED, screenSessionManagerClient_->GetFoldStatus());
+    if (screenSessionManagerClient_->IsFoldable()) {
+        EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+        EXPECT_NE(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
+    } else {
+        EXPECT_NE(FoldDisplayMode::FULL, screenSessionManagerClient_->GetFoldDisplayMode());
+        EXPECT_EQ(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
+    }
     EXPECT_EQ(0, screenSessionManagerClient_->GetCurvedCompressionArea());
 }
 
@@ -385,7 +390,11 @@ HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode02, Function | SmallT
     screenSessionManagerClient_->GetPhyScreenProperty(screenId);
     screenSessionManagerClient_->UpdateAvailableArea(screenId, area);
     screenSessionManagerClient_->NotifyFoldToExpandCompletion(foldToExpand);
-    EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    if (screenSessionManagerClient_->IsFoldable()) {
+        EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    } else {
+        EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    }
     EXPECT_EQ(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
     EXPECT_EQ(0, screenSessionManagerClient_->GetCurvedCompressionArea());
 }
@@ -681,9 +690,10 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
+    bool isBlackList = false;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
 }
 
 /**
@@ -695,10 +705,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
 {
     std::vector<uint64_t> missionIds = {0, 1};
     std::vector<uint64_t> surfaceNodeIds;
+    bool isBlackList = false;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
-    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds);
+    screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
 }
 
 /**
@@ -738,7 +749,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnImmersiveStateChanged01, Function | S
     bool immersive = false;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnImmersiveStateChanged(immersive);
+    screenSessionManagerClient_->OnImmersiveStateChanged(0u, immersive);
 }
 
 /**
@@ -752,7 +763,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnImmersiveStateChanged02, Function | S
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
-    screenSessionManagerClient_->OnImmersiveStateChanged(immersive);
+    screenSessionManagerClient_->OnImmersiveStateChanged(0u, immersive);
 }
 
 /**
@@ -988,7 +999,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnFoldStatusChangedReportUE, Function |
  * @tc.name: UpdateDisplayScale01
  * @tc.desc: UpdateDisplayScale test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale01, Function | SmallTest | Level2)
 {
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
@@ -1007,7 +1018,7 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale01, Function | SmallT
  * @tc.name: UpdateDisplayScale02
  * @tc.desc: UpdateDisplayScale test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayScale02, Function | SmallTest | Level2)
 {
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
@@ -1272,6 +1283,20 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateScreenRotationProperty02, Functio
     screenSessionManagerClient_->GetScreenSnapshot(screenId, scaleX, scaleY);
     sptr<ScreenSession> screenSession1 = screenSessionManagerClient_->GetScreenSession(screenId);
     EXPECT_NE(screenSession1, nullptr);
+}
+
+/**
+ * @tc.name: ScreenCaptureNotify
+ * @tc.desc: ScreenCaptureNotify test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, ScreenCaptureNotify, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    int32_t uid = 0;
+    std::string clientName = "test";
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->ScreenCaptureNotify(screenId, uid, clientName);
 }
 } // namespace Rosen
 } // namespace OHOS

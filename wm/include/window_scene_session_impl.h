@@ -45,11 +45,13 @@ public:
     WMError Restore() override;
     void StartMove() override;
     bool GetStartMoveFlag() override;
-    WmErrorCode StartMoveSystemWindow() override;
+    WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError MoveToAsync(int32_t x, int32_t y) override;
+    WMError MoveWindowToGlobal(int32_t x, int32_t y) override;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
     WMError RaiseToAppTop() override;
@@ -148,24 +150,33 @@ public:
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
-    bool IsPcOrPadCapabilityEnabled() const override;
 
+    /*
+     * PC Window
+     */
+    bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+
+    /*
+     * Free Multi Window
+     */
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
+
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
     uint32_t GetStatusBarHeight() override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
-    bool GetIsUIExtensionFlag() const override;
-    bool GetIsUIExtensionSubWindowFlag() const override;
+    bool GetIsUIExtFirstSubWindow() const override;
+    bool GetIsUIExtAnySubWindow() const override;
 
     /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;
-    bool GetGestureBackEnabled() const override;
+    WMError GetGestureBackEnabled(bool& enable) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -200,7 +211,6 @@ private:
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     void RegisterSessionRecoverListener(bool isSpecificSession);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
-    void UpdateFocusableOnShow(bool withFocus);
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
@@ -261,11 +271,6 @@ private:
      */
     void AddSubWindowMapForExtensionWindow();
     WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
-
-    /*
-     * system window
-    */
-    WMError SetSystemWindowDisplayId(WindowType type);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

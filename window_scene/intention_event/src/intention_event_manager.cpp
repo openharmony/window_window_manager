@@ -30,8 +30,6 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "IntentionEventManager" };
 constexpr int32_t TRANSPARENT_FINGER_ID = 10000;
-std::shared_ptr<MMI::PointerEvent> g_lastMouseEvent = nullptr;
-int32_t g_lastLeaveWindowId = -1;
 constexpr int32_t DELAY_TIME = 15;
 constexpr unsigned int FREQUENT_CLICK_TIME_LIMIT = 3;
 constexpr int FREQUENT_CLICK_COUNT_LIMIT = 8;
@@ -78,19 +76,17 @@ IntentionEventManager::~IntentionEventManager() {}
 
 IntentionEventManager::InputEventListener::~InputEventListener()
 {
-    std::lock_guard<std::mutex> guard(mouseEventMutex_);
-    g_lastMouseEvent = nullptr;
 }
 
 bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
     if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "EnableInputEventListener uiContent is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "uiContent is null");
         return false;
     }
     if (eventHandler == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "EnableInputEventListener eventHandler is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null");
         return false;
     }
     auto listener =
@@ -103,26 +99,6 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
             FREQUENT_CLICK_COUNT_LIMIT);
     }
     return true;
-}
-
-void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
-    std::shared_ptr<MMI::PointerEvent> pointerEvent) const
-{
-    if (pointerEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "UpdateLastMouseEvent pointerEvent is null");
-        return;
-    }
-    g_lastLeaveWindowId = -1;
-    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
-        (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
-        std::lock_guard<std::mutex> guard(mouseEventMutex_);
-        g_lastMouseEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-    } else if (g_lastMouseEvent != nullptr) {
-        TLOGD(WmsLogTag::WMS_EVENT, "Clear last mouse event");
-        std::lock_guard<std::mutex> guard(mouseEventMutex_);
-        g_lastMouseEvent = nullptr;
-        SceneSession::ClearEnterWindow();
-    }
 }
 
 bool IntentionEventManager::InputEventListener::CheckPointerEvent(
@@ -194,10 +170,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             }
             if (IS_BETA) {
                 /*
-                * Triggers input down event recorded.
-                * If the special num of the events reached within the sepcial time interval,
-                * a panic behavior is reported.
-                */
+                 * Triggers input down event recorded.
+                 * If the special num of the events reached within the sepcial time interval,
+                 * a panic behavior is reported.
+                 */
                 HiviewDFX::XCollie::GetInstance().TriggerTimerCount("FREQUENT_CLICK_WARNING", true, "");
             }
         }
@@ -212,7 +188,6 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             pointerEvent->MarkProcessed();
         }
     }
-    UpdateLastMouseEvent(pointerEvent);
 }
 
 void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(

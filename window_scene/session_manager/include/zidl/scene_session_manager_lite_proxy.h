@@ -35,7 +35,7 @@ public:
         bool shouldBackToCaller = true) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
-    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
                             std::vector<SessionInfoBean>& sessionInfos) override;
@@ -83,7 +83,7 @@ public:
     WMError CloseTargetFloatWindow(const std::string& bundleName) override;
     WMError CloseTargetPiPWindow(const std::string& bundleName) override;
     WMError GetCurrentPiPWindowInfo(std::string& bundleName) override;
-    WMError GetRootMainWindowId(const int32_t persistentId, int32_t& hostWindowId) override;
+    WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
 
 private:

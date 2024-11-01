@@ -359,7 +359,6 @@ HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById, Function | SmallTest |
     ASSERT_EQ(dumper->fd_, 1);
 }
 
-#ifndef IS_RELEASE_VERSION
 /**
  * @tc.name: ShowNotifyFoldStatusChangedInfo
  * @tc.desc: test function : ShowNotifyFoldStatusChangedInfo
@@ -682,7 +681,127 @@ HWTEST_F(ScreenSessionDumperTest, SetHoverStatusChange, Function | SmallTest | L
     dumper ->SetHoverStatusChange("-hoverStatus,4");
     ASSERT_EQ(true, true);
 }
-#endif
+
+/**
+ * @tc.name: IsValidDisplayModeCommand
+ * @tc.desc: test function : IsValidDisplayModeCommand
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, IsValidDisplayModeCommand, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-f"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::string command = "-f";
+    bool ret = dumper->IsValidDisplayModeCommand(command);
+    ASSERT_EQ(ret, true);
+
+    command = "-m";
+    ret = dumper->IsValidDisplayModeCommand(command);
+    ASSERT_EQ(ret, true);
+
+    command = "-sub";
+    ret = dumper->IsValidDisplayModeCommand(command);
+    ASSERT_EQ(ret, true);
+    
+    command = "-coor";
+    ret = dumper->IsValidDisplayModeCommand(command);
+    ASSERT_EQ(ret, true);
+
+    command = "-test";
+    ret = dumper->IsValidDisplayModeCommand(command);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: SetFoldDisplayMode
+ * @tc.desc: test function : SetFoldDisplayMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetFoldDisplayMode, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u""};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    int ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, -1);
+
+    dumper->params_[0] = "-sub";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-coor";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-m";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-f";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-test";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: SetFoldStatusLocked
+ * @tc.desc: test function : SetFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetFoldStatusLocked, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u""};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    int ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, -1);
+
+    dumper->params_[0] = "-l";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-u";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-test";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: DumpTentMode
+ * @tc.desc: test function : DumpTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, DumpTentMode, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->DumpTentMode();
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetEnterOrExitTentMode
+ * @tc.desc: test function : SetEnterOrExitTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    
+    dumper->SetEnterOrExitTentMode("-offtent");
+    bool tentMode = ScreenSessionManager::GetInstance().GetTentMode();
+    ASSERT_EQ(tentMode, false);
+}
 }
 }
 }

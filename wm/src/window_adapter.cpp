@@ -985,13 +985,21 @@ WMError WindowAdapter::ReleaseForegroundSessionScreenLock()
     return wmsProxy->ReleaseForegroundSessionScreenLock();
 }
 
-WMError WindowAdapter::GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId)
+WMError WindowAdapter::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->GetDisplayIdByPersistentId(persistentId, displayId);
+    return wmsProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
 }
 
+WMError WindowAdapter::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+}
 } // namespace Rosen
 } // namespace OHOS

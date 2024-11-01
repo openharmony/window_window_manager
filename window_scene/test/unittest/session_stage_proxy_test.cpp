@@ -620,6 +620,18 @@ HWTEST_F(SessionStageProxyTest, SetSplitButtonVisible, Function | SmallTest | Le
     WSError res = sessionStage_->SetSplitButtonVisible(false);
     ASSERT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: SetEnableDragBySystem
+ * @tc.desc: test function : SetEnableDragBySystem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetEnableDragBySystem, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetEnableDragBySystem(false);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
 }
 }
 }

@@ -19,10 +19,12 @@
 
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
+#include <ui/rs_display_node.h>
 #include <ui/rs_ui_display_soloist.h>
 
 #include "window_frame_trace.h"
 #include "window_manager_hilog.h"
+#include <vsync_receiver.h>
 
 using namespace FRAME_TRACE;
 
@@ -139,6 +141,7 @@ __attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
         vsyncHandler_->PostTask(task, vsyncTimeoutTaskName_, VSYNC_TIME_OUT_MILLISECONDS);
     }
 
+    requestVsyncTimes_++;
     WindowFrameTraceImpl::GetInstance()->VsyncStartFrameTrace();
     auto task = [weakThis = weak_from_this()]
         (int64_t timestamp, int64_t frameCount, void* client) {
@@ -260,6 +263,5 @@ void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
         receiver->SetUiDvsyncSwitch(dvsyncSwitch);
     }
 }
-
 } // namespace Rosen
 } // namespace OHOS
