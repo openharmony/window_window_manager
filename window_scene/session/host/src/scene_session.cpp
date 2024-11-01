@@ -3012,8 +3012,8 @@ bool SceneSession::IsSystemSessionAboveApp() const
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->onIsCustomAnimationPlaying_) {
-        sessionChangeCallback_->onIsCustomAnimationPlaying_(isPlaying);
+    if (onIsCustomAnimationPlaying_) {
+        onIsCustomAnimationPlaying_(isPlaying);
     }
 }
 
@@ -4931,6 +4931,19 @@ void SceneSession::RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc
     PostTask(task, __func__);
 }
 
+void SceneSession::RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->onIsCustomAnimationPlaying_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -5243,7 +5256,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onSessionModalTypeChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
-            session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
             session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
