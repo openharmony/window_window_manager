@@ -25,6 +25,7 @@
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "common_test_utils.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
@@ -244,6 +245,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CreateAndConnectSpecificSession, Fun
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    CommonTestUtils::GuaranteeFloatWindowPermission("ws_scene_session_manager_supplement_test");
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     property->SetFloatingWindowAppType(true);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
