@@ -1349,6 +1349,22 @@ HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | 
     session_->SetMainSessionUIStateDirty(true);
     EXPECT_EQ(true, sessionUIState->GetUIStateDirty());
 }
+/**
+ * @tc.name: SetIsStartingBeforeVisible
+ * @tc.desc: test SetIsStartingBeforeVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetIsStartingBeforeVisible, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetIsStartingBeforeVisible(true);
+    ASSERT_EQ(true, session_->isStartingBeforeVisible_);
+    ASSERT_EQ(true, session_->IsStartingBeforeVisible());
+
+    session_->SetIsStartingBeforeVisible(false);
+    ASSERT_EQ(false, session_->isStartingBeforeVisible_);
+    ASSERT_EQ(false, session_->IsStartingBeforeVisible());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
