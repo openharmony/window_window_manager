@@ -6860,12 +6860,14 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "This is not system window.");
+        if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
+            !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
+            !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "This is not valid window.");
             *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }
-        *err = window->StartMoveSystemWindow();
+        *err = window->StartMoveWindow();
     };
 
     NapiAsyncTask::CompleteCallback complete = [err](napi_env env, NapiAsyncTask& task, int32_t status) {

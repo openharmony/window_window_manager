@@ -108,8 +108,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRectChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT):
             return HandleSessionEvent(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT):
-            return HandleSystemSessionEvent(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYNC_SESSION_EVENT):
+            return HandleSyncSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
             return HandleUpdateSessionRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_GLOBAL_SCALED_RECT):
@@ -415,11 +415,11 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SessionStub::HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t eventId = data.ReadUint32();
-    WLOGFD("HandleSystemSessionEvent eventId: %{public}d", eventId);
-    WSError errCode = OnSystemSessionEvent(static_cast<SessionEvent>(eventId));
+    WLOGFD("HandleSyncSessionEvent eventId: %{public}d", eventId);
+    WSError errCode = SyncSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

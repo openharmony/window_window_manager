@@ -58,15 +58,14 @@ public:
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
 
     /**
-     * @brief Receive session event from system application.
+     * @brief Receive session event from application.
      *
-     * This function provides the ability for system applications to move system window.\n
+     * This function provides the ability for applications to move window.\n
      * This interface will take effect after touch down event.\n
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
-     * @permission Make sure the caller has system permission.
      */
-    virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError SyncSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
 
     /**

@@ -91,6 +91,9 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         case TRANS_ID_ON_CAPTURE_STATUS_CHANGED: {
             return ProcCaptureStatusChanged(data);
         }
+        case TRANS_ID_ON_SCREEN_MAGNETIC_STATE_CHANGED: {
+            return ProcScreenMagneticStatechanged(data);
+        }
         default: {
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -279,6 +282,13 @@ int32_t DisplayManagerAgentStub::ProcAvailableAreaChanged(MessageParcel& data)
     rect.width_ = data.ReadUint32();
     rect.height_ = data.ReadUint32();
     NotifyAvailableAreaChanged(rect);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcScreenMagneticStatechanged(MessageParcel& data)
+{
+    bool isMagneticState = data.ReadBool();
+    NotifyScreenMagneticStateChanged(isMagneticState);
     return 0;
 }
 } // namespace OHOS::Rosen

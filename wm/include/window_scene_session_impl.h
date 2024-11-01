@@ -45,7 +45,7 @@ public:
     WMError Restore() override;
     void StartMove() override;
     bool GetStartMoveFlag() override;
-    WmErrorCode StartMoveSystemWindow() override;
+    WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;

@@ -126,11 +126,8 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
-        NotifyShowWhenLockedFunc OnShowWhenLocked_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
-        ClearCallbackMapFunc clearCallbackFunc_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
         NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
@@ -182,7 +179,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
-    WSError OnSystemSessionEvent(SessionEvent event) override;
+    WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
     WSError RaiseToAppTop() override;
@@ -400,6 +397,9 @@ public:
     void ClearJsSceneSessionCbMap(bool needRemove); // ONLY Accessed on OS_sceneSession thread
     void ClearSpecificSessionCbMap();
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
+    void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
+    void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
+    void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -569,6 +569,13 @@ protected:
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
+
+    /*
+     * Window Lifecycle
+     */
+    NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
+    NotifyForceHideChangeFunc onForceHideChangeFunc_;
+    ClearCallbackMapFunc clearCallbackMapFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
