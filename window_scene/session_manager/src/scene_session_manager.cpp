@@ -2385,7 +2385,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
- 
+
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
         WSError err = CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage);
         if (err != WSError::WS_OK) {
@@ -3830,8 +3830,8 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
             return;
         }
         bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession);
-        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]", 
-            sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(), 
+        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]",
+            sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(),
             sceneSession->IsVisible(), requireLock, shouldLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
@@ -3861,7 +3861,6 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
         return false;
     }
     HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
-    ProcessWindowModeType();
     return true;
 }
 
@@ -5795,7 +5794,6 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
         default:
             break;
     }
-    ProcessWindowModeType();
 }
 
 void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSession)
@@ -5878,7 +5876,8 @@ WindowModeType SceneSessionManager::CheckWindowModeType()
         for (const auto& session : sceneSessionMap_) {
             if (session.second == nullptr ||
                 !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
-                !Rosen::SceneSessionManager::GetInstance().IsSessionVisibleForeground(session.second)) {
+                !session.second->GetRSVisible() ||
+                !session.second->IsSessionForeground()) {
                 continue;
             }
             if (isSmallFold && IsInSecondaryScreen(session.second)) {
@@ -7711,6 +7710,7 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
             visibilityInfo.c_str());
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
+    ProcessWindowModeType();
 #ifdef MEMMGR_WINDOW_ENABLE
     if (memMgrWindowInfos.size() != 0) {
         WLOGD("Notify memMgrWindowInfos changed start");
