@@ -9294,7 +9294,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
 
 void SceneSessionManager::ProcessUpdateLastFocusedAppId(std::vector<uint32_t> zOrderList)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "last focused app: %{public}d, list size %{public}lu", lastFocusedAppSessionId_,
+    TLOGD(WmsLogTag::WMS_FOCUS, "last focused app: %{public}d, list size %{public}zu", lastFocusedAppSessionId_,
           zOrderList.size());
     if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || zOrderList.size() == 0) {
         return;
