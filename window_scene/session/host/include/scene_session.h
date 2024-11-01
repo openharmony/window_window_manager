@@ -422,6 +422,7 @@ public:
     bool GetPostProcessProperty() const;
     void PostProcessNotifyAvoidArea();
     bool IsImmersiveType() const;
+
     /*
      * Gesture Back
      */
