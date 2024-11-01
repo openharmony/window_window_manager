@@ -108,8 +108,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRectChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT):
             return HandleSessionEvent(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT):
-            return HandleSystemSessionEvent(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYNC_SESSION_EVENT):
+            return HandleSyncSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
             return HandleUpdateSessionRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_GLOBAL_SCALED_RECT):
@@ -422,22 +422,11 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
-int SessionStub::HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_SYSTEM, "In!");
-    uint32_t eventId = 0;
-    if (!data.ReadUint32(eventId)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "read eventId failed");
-        return ERR_INVALID_DATA;
-    }
-    WSError errCode;
-    if (eventId >= static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) &&
-        eventId <= static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
-        errCode = OnSystemSessionEvent(static_cast<SessionEvent>(eventId));
-    } else {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Invalid eventId: %{public}d", eventId);
-        return ERR_INVALID_DATA;
-    }
+    uint32_t eventId = data.ReadUint32();
+    WLOGFD("HandleSyncSessionEvent eventId: %{public}d", eventId);
+    WSError errCode = SyncSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

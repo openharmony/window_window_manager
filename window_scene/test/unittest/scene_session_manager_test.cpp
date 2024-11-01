@@ -189,14 +189,14 @@ HWTEST_F(SceneSessionManagerTest, SetWindowFlags, Function | SmallTest | Level3)
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     property->SetWindowFlags(flags);
-    sptr<SceneSession> scensession = nullptr;
-    WSError result01 = ssm_->SetWindowFlags(scensession, property);
+    sptr<SceneSession> sceneSession = nullptr;
+    WSError result01 = ssm_->SetWindowFlags(sceneSession, property);
     EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSError result02 = ssm_->SetWindowFlags(scensession, property);
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    WSError result02 = ssm_->SetWindowFlags(sceneSession, property);
     EXPECT_EQ(result02, WSError::WS_ERROR_NOT_SYSTEM_APP);
     property->SetSystemCalling(true);
-    WSError result03 = ssm_->SetWindowFlags(scensession, property);
+    WSError result03 = ssm_->SetWindowFlags(sceneSession, property);
     ASSERT_EQ(result03, WSError::WS_OK);
 }
 
@@ -374,13 +374,13 @@ HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags, Functio
  */
 HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall, Function | SmallTest | Level3)
 {
-    sptr<SceneSession> scensession = nullptr;
+    sptr<SceneSession> sceneSession = nullptr;
     WSError result01 = ssm_->RequestSceneSessionByCall(nullptr);
     EXPECT_EQ(result01, WSError::WS_OK);
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    WSError result02 = ssm_->RequestSceneSessionByCall(scensession);
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    WSError result02 = ssm_->RequestSceneSessionByCall(sceneSession);
     ASSERT_EQ(result02, WSError::WS_OK);
 }
 
