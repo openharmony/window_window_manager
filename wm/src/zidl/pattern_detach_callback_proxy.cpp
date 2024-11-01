@@ -15,7 +15,6 @@
 
 #include "zidl/pattern_detach_callback_proxy.h"
 
-
 namespace OHOS {
 namespace Rosen {
 
