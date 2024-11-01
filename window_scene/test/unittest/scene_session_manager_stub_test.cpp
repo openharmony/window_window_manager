@@ -1272,6 +1272,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, Function | S
 }
 
 /**
+ * @tc.name: HandleSetSessionLabel
+ * @tc.desc: test HandleSetSessionLabel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    std::string label = "TestLabel";
+    data.WriteString(label);
+    int result = stub_->HandleSetSessionLabel(data, reply);
+    EXPECT_EQ(result, 0);
+}
+
+/**
  * @tc.name: HandleSetSessionIcon
  * @tc.desc: test HandleSetSessionIcon
  * @tc.type: FUNC
@@ -2175,24 +2193,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, Functi
     MessageParcel reply;
     int res = stub_->HandleIsPcOrPadFreeMultiWindowMode(data, reply);
     EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleSetSessionLabel
- * @tc.desc: test HandleSetSessionLabel
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    sptr<IRemoteObject> token = nullptr;
-    data.WriteRemoteObject(token);
-    std::string label = "TestLabel";
-    data.WriteString(label);
-    int result = stub_->HandleSetSessionLabel(data, reply);
-    EXPECT_EQ(result, 0);
 }
 
 /**
