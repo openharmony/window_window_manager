@@ -1357,13 +1357,13 @@ HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | 
 HWTEST_F(WindowSessionTest3, SetIsStartingBeforeVisible, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->SetIsStartingBeforeVisible(true);
+    session_->SetStartingBeforeVisible(true);
     ASSERT_EQ(true, session_->isStartingBeforeVisible_);
-    ASSERT_EQ(true, session_->IsStartingBeforeVisible());
+    ASSERT_EQ(true, session_->GetStartingBeforeVisible());
 
-    session_->SetIsStartingBeforeVisible(false);
+    session_->SetStartingBeforeVisible(false);
     ASSERT_EQ(false, session_->isStartingBeforeVisible_);
-    ASSERT_EQ(false, session_->IsStartingBeforeVisible());
+    ASSERT_EQ(false, session_->GetStartingBeforeVisible());
 }
 }
 } // namespace Rosen

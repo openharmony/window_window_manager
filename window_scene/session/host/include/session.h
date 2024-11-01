@@ -366,8 +366,8 @@ public:
     virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
     bool CheckFocusable() const;
-    void SetIsStartingBeforeVisible(bool isStartingBeforeVisible);
-    bool IsStartingBeforeVisible() const;
+    void SetStartingBeforeVisible(bool isStartingBeforeVisible);
+    bool GetStartingBeforeVisible() const;
     bool IsFocused() const;
     bool GetFocused() const;
     virtual WSError UpdateFocus(bool isFocused);

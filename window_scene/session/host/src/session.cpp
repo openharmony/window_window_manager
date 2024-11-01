@@ -633,12 +633,12 @@ bool Session::IsFocusedOnShow() const
     return focusedOnShow_;
 }
 
-void Session::SetIsStartingBeforeVisible(bool isStartingBeforeVisible)
+void Session::SetStartingBeforeVisible(bool isStartingBeforeVisible)
 {
     isStartingBeforeVisible_ = isStartingBeforeVisible;
 }
 
-bool Session::IsStartingBeforeVisible() const
+bool Session::GetStartingBeforeVisible() const
 {
     return isStartingBeforeVisible_;
 }
