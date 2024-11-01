@@ -1657,6 +1657,98 @@ HWTEST_F(DisplayManagerTest, Clear04, Function | SmallTest | Level1)
     DisplayManager::GetInstance().pImpl_->Clear();
     ASSERT_EQ(DisplayManager::GetInstance().pImpl_->powerEventListenerAgent_, nullptr);
 }
+
+/**
+ * @tc.name: GetScreenCapture
+ * @tc.desc: GetScreenCapture test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenCapture, Function | SmallTest | Level1)
+{
+    CaptureOption captureOption;
+    sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_NE(display, nullptr);
+    captureOption.displayId_ = display->GetId();
+    DmErrorCode errCode;
+    std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenCapture(captureOption,
+        &errCode);
+}
+
+/**
+ * @tc.name: GetPrimaryDisplaySync
+ * @tc.desc: GetPrimaryDisplaySync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetPrimaryDisplaySync, Function | SmallTest | Level1)
+{
+    sptr<Display> display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
+    ASSERT_NE(display, nullptr);
+}
+
+/**
+ * @tc.name: RegisterScreenMagneticStateListener
+ * @tc.desc: RegisterScreenMagneticStateListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterScreenMagneticStateListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IScreenMagneticStateListener> listener;
+    auto ret = DisplayManager::GetInstance().RegisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IScreenMagneticStateListener();
+    ret = DisplayManager::GetInstance().RegisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->RegisterScreenMagneticStateListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: ImplRegisterScreenMagneticStateListener
+ * @tc.desc: ImplRegisterScreenMagneticStateListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplRegisterScreenMagneticStateListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IScreenMagneticStateListener> listener;
+    DisplayManager::GetInstance().pImpl_->screenMagneticStateListenerAgent_ = nullptr;
+    sptr<DisplayManager::Impl> impl_;
+    sptr<DisplayManager::Impl::DisplayManagerScreenMagneticStateAgent> screenMagneticStateListenerAgent =
+        new DisplayManager::Impl::DisplayManagerScreenMagneticStateAgent(impl_);
+    auto ret = DisplayManager::GetInstance().pImpl_->RegisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            screenMagneticStateListenerAgent,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER));
+    listener.clear();
+    screenMagneticStateListenerAgent.clear();
+}
+
+/**
+ * @tc.name: UnregisterScreenMagneticStateListener
+ * @tc.desc: UnregisterScreenMagneticStateListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterScreenMagneticStateListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IScreenMagneticStateListener> listener;
+    auto ret = DisplayManager::GetInstance().UnregisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManager::IScreenMagneticStateListener();
+    ret = DisplayManager::GetInstance().UnregisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DisplayManager::GetInstance().pImpl_->UnregisterScreenMagneticStateListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: ImplUnregisterScreenMagneticStateListener
+ * @tc.desc: ImplUnregisterScreenMagneticStateListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManager::IScreenMagneticStateListener> listener;
+    auto ret = DisplayManager::GetInstance().pImpl_->UnregisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DMError::DM_OK);
+    listener.clear();
+}
 }
 } // namespace Rosen
 } // namespace OHOS

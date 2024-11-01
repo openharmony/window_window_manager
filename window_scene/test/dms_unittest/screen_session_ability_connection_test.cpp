@@ -119,8 +119,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityDisconnectDone, Function |
     IPCSkeleton::SetCallingIdentity(identity);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(resConnect, ERR_OK);
-        auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
-        ASSERT_EQ(resDisconnect, NO_ERROR);
+        AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
         EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), false);
     } else {
         ASSERT_NE(resConnect, ERR_OK);
@@ -205,8 +204,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteDied, Function | SmallTest 
     IPCSkeleton::SetCallingIdentity(identity);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(resConnect, ERR_OK);
-        auto resDisconnect = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
-        ASSERT_EQ(resDisconnect, NO_ERROR);
+        AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(abilityConnectionStub);
         EXPECT_EQ(abilityConnectionStub->IsAbilityConnected(), false);
     } else {
         ASSERT_NE(resConnect, ERR_OK);

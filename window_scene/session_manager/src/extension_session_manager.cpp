@@ -207,4 +207,32 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
     taskScheduler_->PostAsyncTask(task, "RequestExtensionSessionDestruction");
     return WSError::WS_OK;
 }
+
+WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sptr<ExtensionSession>& extensionSession)
+{
+    const char* const where = __func__;
+    auto task = [this, where, weakExtSession = wptr<ExtensionSession>(extensionSession)] {
+        auto extSession = weakExtSession.promote();
+        if (extSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s session is nullptr", where);
+            return;
+        }
+        auto persistentId = extSession->GetPersistentId();
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Destroy session done with persistentId: %{public}d", persistentId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:%{public}s", where);
+        if (extensionSessionMap_.count(persistentId) == 0) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s session is invalid! persistentId: %{public}d",
+                where, persistentId);
+            return;
+        }
+        auto extSessionInfo = SetAbilitySessionInfo(extSession);
+        if (!extSessionInfo) {
+            return;
+        }
+        AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
+        extensionSessionMap_.erase(persistentId);
+    };
+    taskScheduler_->PostAsyncTask(task, __func__);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

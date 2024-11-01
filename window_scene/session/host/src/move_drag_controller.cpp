@@ -260,18 +260,19 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRec
         return originalRect;
     }
     if (originalRect.width_ == 0) {
-        WLOGE("original rect witch is zero");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "original rect witch is zero");
         return windowRect;
     }
+    // Drag and drop to full screen in proportion
     float newPosX = static_cast<float>(windowRect.width_) / static_cast<float>(originalRect.width_) *
-        static_cast<float>(moveTempProperty_.lastDownPointerPosX_);
+        static_cast<float>(moveTempProperty_.lastDownPointerPosX_ - originalRect.posX_);
     WSRect targetRect = {
         moveTempProperty_.lastDownPointerPosX_ - static_cast<int32_t>(newPosX),
         originalRect.posY_,
         windowRect.width_,
         windowRect.height_,
     };
-    TLOGI(WmsLogTag::WMS_LAYOUT, "original rect [%{public}d,%{public}d,%{public}u,%{public}u]", targetRect.posX_,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "target rect [%{public}d,%{public}d,%{public}u,%{public}u]", targetRect.posX_,
         targetRect.posY_, targetRect.width_, targetRect.height_);
     return targetRect;
 }

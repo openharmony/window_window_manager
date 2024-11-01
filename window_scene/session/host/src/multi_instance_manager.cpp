@@ -31,6 +31,11 @@ MultiInstanceManager& MultiInstanceManager::GetInstance()
     return instance;
 }
 
+bool MultiInstanceManager::IsSupportMultiInstance(const SystemSessionConfig& systemConfig)
+{
+    return systemConfig.IsPcWindow();
+}
+
 void MultiInstanceManager::Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr,
     const std::shared_ptr<TaskScheduler>& taskScheduler)
 {
@@ -98,7 +103,10 @@ uint32_t MultiInstanceManager::GetMaxInstanceCount(const std::string& bundleName
         TLOGE(WmsLogTag::WMS_LIFE, "App info not found, bundleName:%{public}s", bundleName.c_str());
         return 0u;
     }
-    return iter->second.multiAppMode.maxCount;
+    if (iter->second.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
+        return iter->second.multiAppMode.maxCount;
+    }
+    return 0u;
 }
 
 uint32_t MultiInstanceManager::GetInstanceCount(const std::string& bundleName)
@@ -191,8 +199,9 @@ void MultiInstanceManager::RemoveInstanceKey(const std::string& bundleName, cons
 }
 
 uint32_t MultiInstanceManager::FindMinimumAvailableInstanceId(const std::string& bundleName,
-    uint32_t maxInstanceCount) const
+    uint32_t maxInstanceCount)
 {
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     auto iter = bundleInstanceUsageMap_.find(bundleName);
     if (iter == bundleInstanceUsageMap_.end()) {
         TLOGE(WmsLogTag::WMS_LIFE, "not found available instanceId");

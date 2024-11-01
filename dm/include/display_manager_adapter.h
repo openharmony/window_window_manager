@@ -61,7 +61,7 @@ public:
     virtual std::vector<DisplayId> GetAllDisplayIds();
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr);
-    virtual DMError HasImmersiveWindow(bool& immersive);
+    virtual DMError HasImmersiveWindow(ScreenId screenId, bool& immersive);
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     virtual bool WakeUpBegin(PowerStateChangeReason reason);
     virtual bool WakeUpEnd();
@@ -98,6 +98,9 @@ public:
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList);
+    virtual std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr);
+    virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;

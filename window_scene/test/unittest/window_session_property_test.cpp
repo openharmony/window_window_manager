@@ -91,7 +91,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
  * @tc.name: SetRequestedOrientation
  * @tc.desc: SetRequestedOrientation test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTest | Level2)
 {
     Orientation orientation = Orientation::REVERSE_HORIZONTAL;
@@ -129,7 +129,7 @@ HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTes
  * @tc.name: SetDefaultRequestedOrientation
  * @tc.desc: SetDefaultRequestedOrientation test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, Function | SmallTest | Level2)
 {
     Orientation orientation = Orientation::REVERSE_HORIZONTAL;
@@ -368,7 +368,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTokenState, Function | SmallTest | Level2
  * @tc.name: SetMaximizeMode
  * @tc.desc: SetMaximizeMode test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetMaximizeMode, Function | SmallTest | Level2)
 {
     WindowSessionProperty windowSessionProperty;
@@ -382,7 +382,7 @@ HWTEST_F(WindowSessionPropertyTest, SetMaximizeMode, Function | SmallTest | Leve
  * @tc.name: SetSystemBarProperty
  * @tc.desc: SetSystemBarProperty test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetSystemBarProperty, Function | SmallTest | Level2)
 {
     SystemBarProperty *systemBarProperty = new SystemBarProperty();
@@ -394,26 +394,10 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemBarProperty, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetKeyboardSessionGravity
- * @tc.desc: SetKeyboardSessionGravity test
- * @tc.type: FUNC
-*/
-HWTEST_F(WindowSessionPropertyTest, SetKeyboardSessionGravity, Function | SmallTest | Level2)
-{
-    SessionGravity sessionGravity = SessionGravity::SESSION_GRAVITY_FLOAT;
-    uint32_t percent = 1234567890;
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetKeyboardSessionGravity(sessionGravity, percent);
-    WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_EQ(property->GetTokenState(), false);
-}
-
-
-/**
  * @tc.name: IsDecorEnable
  * @tc.desc: IsDecorEnable test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, Function | SmallTest | Level2)
 {
     WindowSessionProperty windowSessionProperty;
@@ -425,7 +409,7 @@ HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, Function | SmallTest | Level2
  * @tc.name: SetModeSupportInfo
  * @tc.desc: SetModeSupportInfo test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetModeSupportInfo, Function | SmallTest | Level2)
 {
     uint32_t modeSupportInfo = 1234567890;
@@ -438,7 +422,7 @@ HWTEST_F(WindowSessionPropertyTest, SetModeSupportInfo, Function | SmallTest | L
  * @tc.name: IsFloatingWindowAppType
  * @tc.desc: IsFloatingWindowAppType test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, Function | SmallTest | Level2)
 {
     WindowSessionProperty windowSessionProperty;
@@ -450,7 +434,7 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, Function | SmallTes
  * @tc.name: SetTouchHotAreas
  * @tc.desc: SetTouchHotAreas test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -477,7 +461,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Lev
  * @tc.name: UnmarshallingWindowLimits
  * @tc.desc: UnmarshallingWindowLimits test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowLimits, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
@@ -491,7 +475,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowLimits, Function | SmallT
  * @tc.name: UnMarshallingSystemBarMap
  * @tc.desc: UnMarshallingSystemBarMap test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, UnMarshallingSystemBarMap, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
@@ -505,7 +489,7 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSystemBarMap, Function | SmallT
  * @tc.name: UnmarshallingTouchHotAreas
  * @tc.desc: UnmarshallingTouchHotAreas test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
@@ -519,7 +503,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
  * @tc.name: UnmarshallingPiPTemplateInfo
  * @tc.desc: UnmarshallingPiPTemplateInfo test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
@@ -535,7 +519,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
  * @tc.name: CopyFrom
  * @tc.desc: CopyFrom test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, CopyFrom, Function | SmallTest | Level2)
 {
     WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
@@ -1041,7 +1025,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTokenState02, Function | SmallTest | Leve
  * @tc.name: MarshallingTouchHotAreas
  * @tc.desc: MarshallingTouchHotAreas test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
@@ -1062,7 +1046,7 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTe
  * @tc.name: UnmarshallingPiPTemplateInfo02
  * @tc.desc: UnmarshallingPiPTemplateInfo test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo02, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
@@ -1081,7 +1065,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo02, Function | S
  * @tc.name: MarshallingPiPTemplateInfo
  * @tc.desc: MarshallingPiPTemplateInfo test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, MarshallingPiPTemplateInfo, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();

@@ -562,6 +562,38 @@ void JsSceneSessionManager::ProcessAbilityManagerCollaboratorRegistered()
     SceneSessionManager::GetInstance().SetAbilityManagerCollaboratorRegisteredFunc(func);
 }
 
+void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
+{
+    RegisterDumpRootSceneElementInfoListener();
+    RegisterVirtualPixelRatioChangeListener();
+    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc([this] {
+        TLOGND(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
+        this->OnRootSceneBackEvent();
+    });
+    SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc([] {
+        RootScene::staticRootScene_->OnFlushUIParams();
+    });
+    SceneSessionManager::GetInstance().SetIsRootSceneLastFrameLayoutFinishedFunc([] {
+        return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
+    });
+}
+
+void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
+{
+    rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
+        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
+    });
+    if (!Session::IsScbCoreEnabled()) {
+        rootScene_->SetFrameLayoutFinishCallback([] {
+            SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
+            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
+        });
+    }
+    RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
+        SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
+    });
+}
+
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
@@ -1207,6 +1239,10 @@ static napi_value CreateWindowModes(napi_env env,
 {
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, windowModes.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
     auto index = 0;
     for (const auto& windowMode : windowModes) {
         napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(windowMode)));
@@ -1278,6 +1314,10 @@ static napi_value CreateAbilityInfos(napi_env env, const std::vector<SCBAbilityI
 {
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, scbAbilityInfos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
     auto index = 0;
     for (const auto& scbAbilityInfo : scbAbilityInfos) {
         napi_set_element(env, arrayValue, index++, CreateSCBAbilityInfo(env, scbAbilityInfo));
@@ -1313,7 +1353,7 @@ napi_value JsSceneSessionManager::OnGetAllAbilityInfos(napi_env env, napi_callba
     }
     auto errCode = std::make_shared<int32_t>(static_cast<int32_t>(WSErrorCode::WS_OK));
     auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    auto execute = [want, userId, infos = scbAbilityInfos, errCode] () {
+    auto execute = [want, userId, infos = scbAbilityInfos, errCode]() {
         auto code = WS_JS_TO_ERROR_CODE_MAP.at(
             SceneSessionManager::GetInstance().GetAllAbilityInfos(want, userId, *infos));
         *errCode = static_cast<int32_t>(code);
@@ -1337,8 +1377,8 @@ napi_value JsSceneSessionManager::OnGetAllAbilityInfos(napi_env env, napi_callba
 
 napi_value JsSceneSessionManager::OnGetBatchAbilityInfos(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = { nullptr };
+    size_t argc = DEFAULT_ARG_COUNT;
+    napi_value argv[DEFAULT_ARG_COUNT] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_TWO) {
         TLOGE(WmsLogTag::DEFAULT, "[NAPI]Argc is invalid: %{public}zu", argc);
@@ -1354,7 +1394,7 @@ napi_value JsSceneSessionManager::OnGetBatchAbilityInfos(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     std::vector<std::string> bundleNames;
-    if (!ParseArrayStringValue(env, argv[1], bundleNames)) {
+    if (!ParseArrayStringValue(env, argv[ARG_INDEX_ONE], bundleNames)) {
         TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to bundleNames");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -1362,7 +1402,7 @@ napi_value JsSceneSessionManager::OnGetBatchAbilityInfos(napi_env env, napi_call
     }
     auto errCode = std::make_shared<WSErrorCode>(WSErrorCode::WS_OK);
     auto scbAbilityInfos = std::make_shared<std::vector<SCBAbilityInfo>>();
-    auto execute = [bundleNames, userId, infos = scbAbilityInfos, errCode] {
+    auto execute = [bundleNames = std::move(bundleNames), userId, infos = scbAbilityInfos, errCode] {
         *errCode = WS_JS_TO_ERROR_CODE_MAP.at(
             SceneSessionManager::GetInstance().GetBatchAbilityInfos(bundleNames, userId, *infos));
     };
@@ -1455,31 +1495,14 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
         rootScene_ = sptr<RootScene>::MakeSptr();
     }
     RootScene::staticRootScene_ = rootScene_;
-    RegisterDumpRootSceneElementInfoListener();
-    RegisterVirtualPixelRatioChangeListener();
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, env, storage, context);
             ScenePersistentStorage::InitDir(context->GetPreferencesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
         });
-    rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
-        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
-    });
-    if (!Session::IsScbCoreEnabled()) {
-        rootScene_->SetFrameLayoutFinishCallback([]() {
-            SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
-            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
-        });
-    }
-    RootSceneProcessBackEventFunc processBackEventFunc = [this]() {
-        TLOGD(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
-        this->OnRootSceneBackEvent();
-    };
-    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc(processBackEventFunc);
-    RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
-        SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
-    });
+    RegisterRootSceneCallbacksOnSSManager();
+    RegisterSSManagerCallbacksOnRootScene();
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
     if (jsRootSceneSessionObj == nullptr) {
         WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
@@ -2943,7 +2966,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
         };
     napi_value result = nullptr;
     napi_value lastParam = argv[1];
-    NapiAsyncTask::Schedule("JsSceneSessionManager::OnGetSessionSnapshotPixelMap",
+    NapiAsyncTask::ScheduleHighQos("JsSceneSessionManager::OnGetSessionSnapshotPixelMap",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }

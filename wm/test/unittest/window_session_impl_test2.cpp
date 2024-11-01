@@ -616,6 +616,47 @@ HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfo, Function | SmallT
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->NotifyOccupiedAreaChangeInfo(info);
+
+    window->handler_ = nullptr;
+    window->NotifyOccupiedAreaChangeInfo(info);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: NotifyOccupiedAreaChangeInfoInner
+ * @tc.desc: NotifyOccupiedAreaChangeInfoInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyOccupiedAreaChangeInfoInner, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("NotifyOccupiedAreaChangeInfoInner");
+    ASSERT_NE(window, nullptr);
+
+    auto listeners = GetListenerList<IOccupiedAreaChangeListener, MockIOccupiedAreaChangeListener>();
+    ASSERT_NE(listeners.size(), 0);
+    listeners.insert(listeners.begin(), nullptr);
+    window->occupiedAreaChangeListeners_.insert({window->GetPersistentId(), listeners});
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sptr<OccupiedAreaChangeInfo> info = new (std::nothrow) OccupiedAreaChangeInfo();
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->NotifyOccupiedAreaChangeInfoInner(info);
+
     window->Destroy();
 }
 
@@ -925,44 +966,127 @@ HWTEST_F(WindowSessionImplTest2, GetContentInfo, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetDecorHeight
- * @tc.desc: GetDecorHeight
+ * @tc.name: SetDecorHeight
+ * @tc.desc: SetDecorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetDecorHeight, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, SetDecorHeight, Function | SmallTest | Level2)
 {
-    auto window = GetTestWindowImpl("GetDecorHeight");
+    auto window = GetTestWindowImpl("SetDecorHeight");
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(window->property_, nullptr);
+    int32_t height = 50;
+    EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
-    int32_t height = -1;
-    ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
-    
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
+
+    window->property_->SetDisplayId(0);
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
-    EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(-1));
     window->uiContent_ = std::move(uiContent);
-    ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
-    height = 1;
-    window->GetDecorHeight(height);
+    EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_OK);
+    window->property_->SetDisplayId(-1);
+    EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
+    window->property_->SetDisplayId(0);
+    EXPECT_EQ(window->SetDecorHeight(height), WMError::WM_OK);
     window->Destroy();
 }
 
 /**
- * @tc.name: GetTitleButtonArea
+ * @tc.name: GetDecorHeight01
+ * @tc.desc: GetDecorHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight01, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetDecorHeight01");
+    ASSERT_NE(window, nullptr);
+    int32_t height = -1;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
+
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(-1));
+    window->uiContent_ = std::move(uiContent);
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: GetDecorHeight02
+ * @tc.desc: GetDecorHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetDecorHeight02");
+    ASSERT_NE(window, nullptr);
+    int32_t height = -1;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
+
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(1));
+    window->uiContent_ = std::move(uiContent);
+    window->property_->SetDisplayId(-1);
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_ERROR_NULLPTR);
+    window->property_->SetDisplayId(0);
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    height = 1;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: GetTitleButtonArea01
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea01, Function | SmallTest | Level2)
 {
-    auto window = GetTestWindowImpl("GetTitleButtonArea");
+    auto window = GetTestWindowImpl("GetTitleButtonArea01");
     ASSERT_NE(window, nullptr);
-    ASSERT_NE(window->property_, nullptr);
+    TitleButtonRect titleButtonRect;
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    window->uiContent_ = nullptr;
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_ERROR_NULLPTR);
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(false));
     window->uiContent_ = std::move(uiContent);
-    TitleButtonRect titleButtonRect;
     ASSERT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: GetTitleButtonArea02
+ * @tc.desc: GetTitleButtonArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetTitleButtonArea02");
+    ASSERT_NE(window, nullptr);
+    TitleButtonRect titleButtonRect;
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(0);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_ERROR_NULLPTR);
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(true));
+    window->uiContent_ = std::move(uiContent);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    window->property_->SetDisplayId(-1);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_ERROR_NULLPTR);
+    window->property_->SetDisplayId(0);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
     window->Destroy();
 }
 
@@ -1712,21 +1836,6 @@ HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, Function | SmallTes
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetKeyboardAnimationConfig end";
 }
 
-/**
- * @tc.name: SetWindowGravity
- * @tc.desc: SetWindowGravity
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, SetWindowGravity, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: SetWindowGravity start";
-    window_ = GetTestWindowImpl("SetWindowGravity");
-    ASSERT_NE(window_, nullptr);
-    ASSERT_NE(window_->GetHostSession(), nullptr);
-    window_->hostSession_ = nullptr;
-    ASSERT_EQ(window_->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 100), WMError::WM_OK);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: SetWindowGravity end";
-}
 
 /**
  * @tc.name: GetSubWindow
@@ -1787,7 +1896,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitch, Function | SmallTest | Level
  * @tc.name: SetUiDvsyncSwitchSucc
  * @tc.desc: SetUiDvsyncSwitch Test Succ
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1802,7 +1911,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchSucc, Function | SmallTest | L
  * @tc.name: SetUiDvsyncSwitchErr
  * @tc.desc: SetUiDvsyncSwitch Test Err
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1814,7 +1923,7 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, Function | SmallTest | Le
     window->SetUiDvsyncSwitch(false);
 }
 
-/*
+/**
  * @tc.name: SetRestoredRouterStack_0100
  * @tc.desc: basic function test of set or get restored router stack.
  * @tc.type: FUNC

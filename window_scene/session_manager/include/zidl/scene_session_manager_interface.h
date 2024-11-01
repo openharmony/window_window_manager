@@ -117,7 +117,8 @@ public:
         TRANS_ID_SET_PROCESS_WATERMARK,
         TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
         TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
-        TRANS_ID_GET_PARENT_DISPLAYID,
+        TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
+        TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -176,7 +177,7 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override { return {}; }
-    
+
     /**
      * @brief get top window information by id of main window.
      *
@@ -241,7 +242,7 @@ public:
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
-    
+
     /**
      * @brief Raise a window to screen top by id of window.
      *
@@ -295,7 +296,7 @@ public:
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0;
 
     WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) override { return WMError::WM_OK; }
-    
+
     virtual WMError SkipSnapshotByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) = 0;
 
@@ -305,11 +306,11 @@ public:
         std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 
     WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
-    
-    virtual WMError GetDisplayIdByPersistentId(int32_t persistentId, int32_t& displayId) override
-    {
-        return WMError::WM_OK;
-    }
+
+    WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
+
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

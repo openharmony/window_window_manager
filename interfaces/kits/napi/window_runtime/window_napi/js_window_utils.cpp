@@ -445,7 +445,7 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
         WLOGFE("GetDrawableRect failed!");
     }
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
-    
+
     WindowType type = window->GetType();
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
@@ -546,9 +546,7 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
     for (size_t i = 0; i < infos.size(); i++) {
         auto info = infos[i];
         auto windowType = info->GetWindowType();
-        auto windowVisibilityState = info->GetWindowVisibilityState();
-        if (windowType >= WindowType::APP_MAIN_WINDOW_BASE && windowType < WindowType::APP_MAIN_WINDOW_END &&
-            windowVisibilityState != WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        if (windowType >= WindowType::APP_MAIN_WINDOW_BASE && windowType < WindowType::APP_MAIN_WINDOW_END) {
             napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, info));
         }
     }
@@ -672,7 +670,11 @@ bool ParseAndCheckRect(napi_env env, napi_value jsObject,
         (touchableRect.posY_ > static_cast<int32_t>(windowRect.height_)) ||
         (touchableRect.width_ > (windowRect.width_ - static_cast<uint32_t>(touchableRect.posX_))) ||
         (touchableRect.height_ > (windowRect.height_ - static_cast<uint32_t>(touchableRect.posY_)))) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Outside the window area");
+        TLOGE(WmsLogTag::WMS_EVENT, "Outside the window area, "
+            "touchRect:[%{public}d %{public}d %{public}u %{public}u], "
+            "windowRect:[%{public}d %{public}d %{public}u %{public}u]",
+            touchableRect.posX_, touchableRect.posY_, touchableRect.width_, touchableRect.height_,
+            windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         return false;
     }
     return true;

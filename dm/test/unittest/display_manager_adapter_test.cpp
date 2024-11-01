@@ -282,7 +282,7 @@ HWTEST_F(DisplayManagerAdapterTest, DisableMirror, Function | SmallTest | Level2
 HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, Function | SmallTest | Level2)
 {
     bool immersive = false;
-    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
+    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(0u, immersive);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
@@ -832,6 +832,18 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, Function | SmallTest | Leve
     ASSERT_NE(displayInfo, nullptr);
     ScreenId screenId = displayInfo->GetScreenId();
     displayManagerAdapter.SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
+}
+
+/**
+ * @tc.name: GetPrimaryDisplayInfo
+ * @tc.desc: GetPrimaryDisplayInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, Function | SmallTest | Level2)
+{
+    DisplayManagerAdapter& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
+    sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetPrimaryDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
 }
 }
 }

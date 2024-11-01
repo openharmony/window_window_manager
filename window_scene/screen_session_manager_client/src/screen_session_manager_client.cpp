@@ -261,10 +261,10 @@ void ScreenSessionManagerClient::OnUpdateFoldDisplayMode(FoldDisplayMode display
 }
 
 void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-    std::vector<uint64_t>& surfaceNodeIds)
+    std::vector<uint64_t>& surfaceNodeIds, bool isBlackList)
 {
     if (displayChangeListener_) {
-        displayChangeListener_->OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds);
+        displayChangeListener_->OnGetSurfaceNodeIdsFromMissionIds(missionIds, surfaceNodeIds, isBlackList);
     }
 }
 
@@ -275,10 +275,10 @@ void ScreenSessionManagerClient::OnScreenshot(DisplayId displayId)
     }
 }
 
-void ScreenSessionManagerClient::OnImmersiveStateChanged(bool& immersive)
+void ScreenSessionManagerClient::OnImmersiveStateChanged(ScreenId screenId, bool& immersive)
 {
     if (displayChangeListener_ != nullptr) {
-        displayChangeListener_->OnImmersiveStateChange(immersive);
+        displayChangeListener_->OnImmersiveStateChange(screenId, immersive);
     }
 }
 
@@ -320,6 +320,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
+    auto foldStatus = screenSessionManager_->GetFoldStatus();
+    screenSession->SetPhysicalRotation(rotation, foldStatus);
     screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
 }
 
@@ -588,5 +590,28 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
         TLOGE(WmsLogTag::DMS, "transactionProxy is nullptr");
     }
     session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+}
+
+void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(mainScreenId);
+    if (!screenSession) {
+        WLOGFE("screen session is null");
+        return;
+    }
+    WLOGFI("capture screenId: %{public}" PRIu64", uid=%{public}d", mainScreenId, uid);
+    screenSession->ScreenCaptureNotify(mainScreenId, uid, clientName);
+}
+
+void ScreenSessionManagerClient::OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    WLOGI("screenId=%{public}" PRIu64 " superFoldStatus=%{public}d", screenId,
+        static_cast<uint32_t>(superFoldStatus));
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
 }
 } // namespace OHOS::Rosen

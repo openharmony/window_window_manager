@@ -21,7 +21,6 @@
 #include "window_manager_hilog.h"
 #include "window.h"
 #include "xcomponent_controller.h"
-#include <algorithm>
 
 namespace OHOS {
 namespace Rosen {
@@ -56,8 +55,6 @@ namespace {
         {PiPTemplateType::VIDEO_LIVE, VIDEO_LIVE_CONTROLS},
     };
 }
-
-std::mutex JsPipWindowManager::mutex_;
 
 static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t> controlGroups)
 {
@@ -219,8 +216,8 @@ napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_i
 napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
 {
     napi_value result = nullptr;
-    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask.get(), pipOption]() {
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() {
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(
                 WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
@@ -242,13 +239,10 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         sptr<PictureInPictureController> pipController =
             new PictureInPictureController(pipOptionPtr, mainWindow, mainWindow->GetWindowId(), env);
         task->Resolve(env, CreateJsPipControllerObject(env, pipController));
-        delete task;
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
-    } else {
-        napiAsyncTask.release();
     }
     return result;
 }
@@ -256,7 +250,6 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
 napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
-    std::lock_guard<std::mutex> lock(mutex_);
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);

@@ -59,19 +59,18 @@ private:
     void ExcuteInjectCmd();
 /*
     hidumper 命令注入隔离
-*/
-#ifndef IS_RELEASE_VERSION
+ */
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
     void SetMotionSensorvalue(std::string input);
     void SetRotationLockedvalue(std::string input);
     void SetEnterOrExitTentMode(std::string input);
     void SetHoverStatusChange(std::string input);
+    void SetSuperFoldStatusChange(std::string input);
     void MockSendCastPublishEvent(std::string input);
     bool IsValidDisplayModeCommand(std::string command);
     int SetFoldDisplayMode();
     int SetFoldStatusLocked();
-#endif
 
 private:
     int fd_;

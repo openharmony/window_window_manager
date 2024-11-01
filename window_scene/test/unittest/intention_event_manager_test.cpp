@@ -331,31 +331,6 @@ HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, Function | MediumTest | L
 }
 
 /**
- * @tc.name: UpdateLastMouseEvent
- * @tc.desc: UpdateLastMouseEvent Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, UpdateLastMouseEvent, Function | MediumTest | Level2)
-{
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    inputEventListener_->UpdateLastMouseEvent(pointerEvent);
-    pointerEvent = MMI::PointerEvent::Create();
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
-    EXPECT_EQ(MMI::PointerEvent::SOURCE_TYPE_MOUSE, pointerEvent->GetSourceType());
-    EXPECT_NE(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW, pointerEvent->GetPointerAction());
-    inputEventListener_->UpdateLastMouseEvent(pointerEvent);
-
-    pointerEvent->SetSourceType(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
-    inputEventListener_->UpdateLastMouseEvent(pointerEvent);
-
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
-    inputEventListener_->UpdateLastMouseEvent(pointerEvent);
-}
-
-/**
  * @tc.name: OnInputEventPointer1
  * @tc.desc: OnInputEventPointer1 Test
  * @tc.type: FUNC

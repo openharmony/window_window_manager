@@ -269,10 +269,6 @@ WSError SystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
                 session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             }
         }
-        if (session->reason_ != SizeChangeReason::DRAG) {
-            session->reason_ = SizeChangeReason::UNDEFINED;
-            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        }
         return ret;
     };
     PostTask(task, "NotifyClientToUpdateRect");

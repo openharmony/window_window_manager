@@ -56,10 +56,9 @@ sptr<SceneSession> KeyboardSession::GetKeyboardPanelSession() const
 SessionGravity KeyboardSession::GetKeyboardGravity() const
 {
     SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
-    uint32_t percent = 0;
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty) {
-        sessionProperty->GetSessionGravity(gravity, percent);
+        gravity = static_cast<SessionGravity>(sessionProperty->GetKeyboardLayoutParams().gravity_);
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}d", gravity);
     return gravity;
@@ -163,13 +162,6 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
         }
 
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-        if (session->reason_ != SizeChangeReason::DRAG) {
-            session->reason_ = SizeChangeReason::UNDEFINED;
-            session->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        }
         return ret;
     };
     PostTask(task, "NotifyClientToUpdateRect");
@@ -195,7 +187,7 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 {
     WSRect panelRect = { 0, 0, 0, 0 };
     panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
-    RaiseCallingSession(panelRect);
+    RaiseCallingSession(panelRect, true);
     UpdateKeyboardAvoidArea();
 }
 
@@ -223,14 +215,10 @@ void KeyboardSession::OnCallingSessionUpdated()
     TLOGI(WmsLogTag::WMS_KEYBOARD, "callSession Rect: %{public}s", callingSessionRect.ToString().c_str());
 }
 
-WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
+WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity)
 {
     if (keyboardGravityChangeFunc_) {
         keyboardGravityChangeFunc_(gravity);
-    }
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        sessionProperty->SetKeyboardSessionGravity(gravity, percent);
     }
     RelayoutKeyBoard();
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
@@ -300,7 +288,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
-        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
+        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_));
         session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
@@ -400,10 +388,10 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
     return true;
 }
 
-void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
+void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    if (!IsSessionForeground() || !IsVisibleForeground()) {
+    if (!IsSessionForeground() || (needCheckVisible && !IsVisibleForeground())) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
     }
@@ -499,7 +487,7 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is nullptr");
         return;
     }
-    uint32_t curSessionId = sessionProperty->GetCallingSessionId();
+    uint32_t curSessionId = GetCallingSessionId();
     // When calling window id changes, restore the old calling session, raise the new calling session.
     if (curSessionId != INVALID_WINDOW_ID && callingSessionId != curSessionId && IsSessionForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "curId: %{public}d, newId: %{public}d", curSessionId, callingSessionId);
@@ -511,7 +499,7 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
         sessionProperty->SetCallingSessionId(callingSessionId);
         WSRect panelRect = { 0, 0, 0, 0 };
         panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
-        RaiseCallingSession(panelRect);
+        RaiseCallingSession(panelRect, true);
     } else {
         sessionProperty->SetCallingSessionId(callingSessionId);
     }
@@ -527,9 +515,7 @@ void KeyboardSession::RelayoutKeyBoard()
 
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
-    SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
-    uint32_t percent = 0;
-    sessionProperty->GetSessionGravity(gravity, percent);
+    SessionGravity gravity = GetKeyboardGravity();
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
         return;
     }
@@ -541,10 +527,6 @@ void KeyboardSession::RelayoutKeyBoard()
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) {
         requestRect.width_ = screenWidth;
         requestRect.posX_ = 0;
-        if (percent != 0) {
-            // 100: for calc percent.
-            requestRect.height_ = static_cast<uint32_t>(screenHeight) * percent / 100u;
-        }
     }
     requestRect.posY_ = static_cast<int32_t>(screenHeight - requestRect.height_);
     sessionProperty->SetRequestRect(requestRect);
@@ -586,7 +568,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             rsTransaction = session->GetRSTransaction();
         }
         if (isKeyboardShow) {
-            session->RaiseCallingSession(keyboardPanelRect, rsTransaction);
+            /* notify calling session when keyboard is not visible */
+            session->RaiseCallingSession(keyboardPanelRect, false, rsTransaction);
             session->UpdateKeyboardAvoidArea();
         } else {
             session->RestoreCallingSession(rsTransaction);

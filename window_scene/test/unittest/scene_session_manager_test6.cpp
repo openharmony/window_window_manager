@@ -28,6 +28,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -128,6 +129,23 @@ HWTEST_F(SceneSessionManagerTest6, MissionChanged, Function | SmallTest | Level3
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->MissionChanged(prevSession, currSession);
     EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: UpdateSecSurfaceInfo
+ * @tc.desc: UpdateSecSurfaceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdateSecSurfaceInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::map<NodeId, std::vector<SecSurfaceInfo>> callbackData;
+    std::shared_ptr<RSUIExtensionData> secExtData = std::make_shared<RSUIExtensionData>(callbackData);
+    ssm_->currentUserId_ = 101;
+    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
+
+    ssm_->currentUserId_ = 100;
+    ssm_->UpdateSecSurfaceInfo(secExtData, 100);
 }
 
 /**
@@ -377,6 +395,8 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType, Function | SmallTest | L
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    sceneSession->property_->SetDisplayId(displayId);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ASSERT_NE(nullptr, ssm_);
@@ -398,6 +418,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType, Function | SmallTest | L
  */
 HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest | Level3)
 {
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "privacy.test.first";
     sessionInfo.abilityName_ = "privacyAbilityName";
@@ -407,6 +428,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest |
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
@@ -420,6 +442,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest |
     sceneSession1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, sceneSession1->property_);
     sceneSession1->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession1->property_->SetDisplayId(displayId);
     sceneSession1->isVisible_ = true;
     sceneSession1->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
@@ -442,6 +465,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest |
  */
 HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType02, Function | SmallTest | Level3)
 {
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "privacy.test.first";
     sessionInfo.abilityName_ = "privacyAbilityName";
@@ -451,6 +475,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType02, Function | SmallTest |
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
@@ -477,6 +502,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType02, Function | SmallTest |
  */
 HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest | Level3)
 {
+    DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "privacy.test.first";
     sessionInfo.abilityName_ = "privacyAbilityName";
@@ -484,6 +510,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest |
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
@@ -1213,9 +1240,6 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify2, Function | Smal
     sceneSession->property_->SetPrivacyMode(true);
     sceneSession->property_->SetDisplayId(1);
     sceneSession->isVisible_ = false;
-    std::unordered_set<std::string> privacyBundles1;
-    std::unordered_set<std::string> privacyBundles2;
-    std::unordered_set<std::string> privacyBundles3;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession));
@@ -1232,6 +1256,75 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify2, Function | Smal
     sceneSession->property_->SetDisplayId(3);
     ssm_->UpdatePrivateStateAndNotify(3);
     ASSERT_EQ(ssm_->privacyBundleMap_[3].size(), 0);
+}
+
+/**
+ * @tc.name: UpdatePrivateStateAndNotify3
+ * @tc.desc: UpdatePrivateStateAndNotify3
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify3, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->privacyBundleMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->isVisible_ = true;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetPrivacyMode(true);
+    sceneSession->property_->SetDisplayId(1);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 1);
+    sceneSession->property_->SetPrivacyMode(false);
+    sceneSession->combinedExtWindowFlags_.privacyModeFlag = true;
+    sceneSession->property_->SetDisplayId(2);
+    ssm_->UpdatePrivateStateAndNotify(2);
+    ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 1);
+}
+
+/**
+ * @tc.name: UpdatePrivateStateAndNotify4
+ * @tc.desc: UpdatePrivateStateAndNotify4
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify4, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->privacyBundleMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetParentSession(sceneSession2);
+    ASSERT_NE(nullptr, sceneSession->GetParentSession());
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetPrivacyMode(true);
+    sceneSession->property_->SetDisplayId(1);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    ssm_->UpdatePrivateStateAndNotify(1);
+    ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 1);
+    sceneSession->property_->SetDisplayId(2);
+    sceneSession->GetParentSession()->SetSessionState(SessionState::STATE_BACKGROUND);
+    ssm_->UpdatePrivateStateAndNotify(2);
+    ASSERT_EQ(ssm_->privacyBundleMap_[2].size(), 0);
 }
 
 /**
@@ -1430,7 +1523,7 @@ HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, Function | SmallTest |
  * @tc.name: GetWindowStyleType
  * @tc.desc: GetWindowStyleType
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerTest6, GetWindowStyleType, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
@@ -1500,6 +1593,205 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
     RootSceneProcessBackEventFunc func = []() {};
     ssm_->SetRootSceneProcessBackEventFunc(func);
     ssm_->ProcessBackEvent();
+}
+
+
+/**
+ * @tc.name: RequestInputMethodCloseKeyboard
+ * @tc.desc: RequestInputMethodCloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    int32_t persistentId = 10;
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+
+    persistentId = 0;
+    sptr<Session> session = new Session(info);
+    session->property_ = nullptr;
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+    
+    bool enable = true;
+    auto result = ssm_->GetFreeMultiWindowEnableState(enable);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RequestSceneSession
+ * @tc.desc: RequestSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | Level3)
+{
+    SessionInfo info1;
+    info1.persistentId_ = 1;
+    info1.isPersistentRecover_ = false;
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+
+    SessionInfo info2;
+    info2.abilityName_ = "RequestSceneSession";
+    info2.bundleName_ = "RequestSceneSession";
+    info2.persistentId_ = 1;
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    sptr<SceneSession> getSceneSession1 = ssm_->RequestSceneSession(info1, windowSessionProperty);
+    ASSERT_EQ(info1.bundleName_, getSceneSession1->GetSessionInfo().bundleName_);
+
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    sptr<SceneSession> getSceneSession2 = ssm_->RequestSceneSession(info2, windowSessionProperty);
+    ASSERT_NE(info2.bundleName_, getSceneSession2->GetSessionInfo().bundleName_);
+}
+
+/**
+ * @tc.name: IsKeyboardForeground
+ * @tc.desc: IsKeyboardForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, IsKeyboardForeground, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<Session> session = new Session(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = nullptr;
+    auto result = ssm_->IsKeyboardForeground();
+    ASSERT_EQ(result, false);
+
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    session->property_ = new WindowSessionProperty();
+    ASSERT_NE(session->property_, nullptr);
+
+    if (session->property_) {
+        auto result1 = session->GetWindowType();
+        result1 = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+        ASSERT_EQ(result1, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    }
+    result = ssm_->IsKeyboardForeground();
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: DestroyDialogWithMainWindow
+ * @tc.desc: DestroyDialogWithMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> scnSession = nullptr;
+    auto result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    scnSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(scnSession, nullptr);
+
+    sptr<Session> session = new Session(info);
+    ASSERT_NE(session, nullptr);
+    session->GetDialogVector().clear();
+    result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->GetSceneSession(1);
+    result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    WindowVisibilityInfo windowVisibilityInfo;
+    windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;
+    result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RequestSceneSessionDestruction
+ * @tc.desc: RequestSceneSessionDestruction
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession;
+    ASSERT_EQ(sceneSession, nullptr);
+    bool needRemoveSession = true;
+    bool isSaveSnapshot = true;
+    bool isForceClean = true;
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(
+        sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(
+        sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
+}
+
+/**
+ * @tc.name: NotifySessionAINavigationBarChange
+ * @tc.desc: NotifySessionAINavigationBarChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, NotifySessionAINavigationBarChange, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    int32_t persistentId = 1;
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->NotifySessionAINavigationBarChange(persistentId);
+
+    persistentId = 0;
+    Session session(info);
+    session.isVisible_ = true;
+    session.state_ = SessionState::STATE_FOREGROUND;
+    ssm_->NotifySessionAINavigationBarChange(persistentId);
+}
+
+/**
+ * @tc.name: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.desc: GetProcessSurfaceNodeIdByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, specificCallback);
+    sptr<SceneSession> sceneSession3 = new (std::nothrow) SceneSession(info, specificCallback);
+    sceneSession1->SetCallingPid(123);
+    sceneSession2->SetCallingPid(123);
+    sceneSession3->SetCallingPid(111);
+
+    int32_t pid = 123;
+    std::vector<int32_t> persistentIds;
+    std::vector<uint64_t> surfaceNodeIds;
+    persistentIds.push_back(sceneSession1->GetPersistentId());
+    persistentIds.push_back(sceneSession2->GetPersistentId());
+    persistentIds.push_back(sceneSession3->GetPersistentId());
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
+    
+    ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
+    ASSERT_EQ(0, surfaceNodeIds.size());
 }
 
 /**
@@ -1723,204 +2015,6 @@ HWTEST_F(SceneSessionManagerTest6, WindowDestroyNotifyVisibility, Function | Sma
     ASSERT_NE(nullptr, ssm_);
     ssm_->WindowDestroyNotifyVisibility(sceneSession);
     ASSERT_FALSE(sceneSession->GetRSVisible());
-}
-
-/**
- * @tc.name: RequestInputMethodCloseKeyboard
- * @tc.desc: RequestInputMethodCloseKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
-    int32_t persistentId = 10;
-    ssm_->RequestInputMethodCloseKeyboard(persistentId);
-
-    persistentId = 0;
-    sptr<Session> session = new Session(info);
-    session->property_ = nullptr;
-    ssm_->RequestInputMethodCloseKeyboard(persistentId);
-    
-    bool enable = true;
-    auto result = ssm_->GetFreeMultiWindowEnableState(enable);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: RequestSceneSession
- * @tc.desc: RequestSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | Level3)
-{
-    SessionInfo info1;
-    info1.persistentId_ = 1;
-    info1.isPersistentRecover_ = false;
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-
-    SessionInfo info2;
-    info2.abilityName_ = "RequestSceneSession";
-    info2.bundleName_ = "RequestSceneSession";
-    info2.persistentId_ = 1;
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    sptr<SceneSession> getSceneSession1 = ssm_->RequestSceneSession(info1, windowSessionProperty);
-    ASSERT_EQ(info1.bundleName_, getSceneSession1->GetSessionInfo().bundleName_);
-
-    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    ssm_->sceneSessionMap_.insert({2, sceneSession2});
-    sptr<SceneSession> getSceneSession2 = ssm_->RequestSceneSession(info2, windowSessionProperty);
-    ASSERT_NE(info2.bundleName_, getSceneSession2->GetSessionInfo().bundleName_);
-}
-
-/**
- * @tc.name: IsKeyboardForeground
- * @tc.desc: IsKeyboardForeground
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, IsKeyboardForeground, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ASSERT_NE(sceneSession, nullptr);
-    sptr<Session> session = new Session(info);
-    ASSERT_NE(session, nullptr);
-    session->property_ = nullptr;
-    auto result = ssm_->IsKeyboardForeground();
-    ASSERT_EQ(result, false);
-
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
-    session->property_ = new WindowSessionProperty();
-    ASSERT_NE(session->property_, nullptr);
-
-    if (session->property_) {
-        auto result1 = session->GetWindowType();
-        result1 = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-        ASSERT_EQ(result1, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    }
-    result = ssm_->IsKeyboardForeground();
-    ASSERT_EQ(result, false);
-}
-
-/**
- * @tc.name: DestroyDialogWithMainWindow
- * @tc.desc: DestroyDialogWithMainWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> scnSession = nullptr;
-    auto result = ssm_->DestroyDialogWithMainWindow(scnSession);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    scnSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ASSERT_NE(scnSession, nullptr);
-
-    sptr<Session> session = new Session(info);
-    ASSERT_NE(session, nullptr);
-    session->GetDialogVector().clear();
-    result = ssm_->DestroyDialogWithMainWindow(scnSession);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
-    ssm_->GetSceneSession(1);
-    result = ssm_->DestroyDialogWithMainWindow(scnSession);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    WindowVisibilityInfo windowVisibilityInfo;
-    windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;
-    result = ssm_->DestroyDialogWithMainWindow(scnSession);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: RequestSceneSessionDestruction
- * @tc.desc: RequestSceneSessionDestruction
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, RequestSceneSessionDestruction, Function | SmallTest | Level3)
-{
-    sptr<SceneSession> sceneSession;
-    ASSERT_EQ(sceneSession, nullptr);
-    bool needRemoveSession = true;
-    bool isSaveSnapshot = true;
-    bool isForceClean = true;
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(
-        sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
-
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionDestruction(
-        sceneSession, needRemoveSession, isSaveSnapshot, isForceClean));
-}
-
-/**
- * @tc.name: NotifySessionAINavigationBarChange
- * @tc.desc: NotifySessionAINavigationBarChange
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, NotifySessionAINavigationBarChange, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
-    int32_t persistentId = 1;
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
-    ssm_->NotifySessionAINavigationBarChange(persistentId);
-
-    persistentId = 0;
-    Session session(info);
-    session.isVisible_ = true;
-    session.state_ = SessionState::STATE_FOREGROUND;
-    ssm_->NotifySessionAINavigationBarChange(persistentId);
-}
-
-/**
- * @tc.name: GetProcessSurfaceNodeIdByPersistentId
- * @tc.desc: GetProcessSurfaceNodeIdByPersistentId
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, ssm_);
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, specificCallback);
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, specificCallback);
-    sptr<SceneSession> sceneSession3 = new (std::nothrow) SceneSession(info, specificCallback);
-    sceneSession1->SetCallingPid(123);
-    sceneSession2->SetCallingPid(123);
-    sceneSession3->SetCallingPid(111);
-
-    int32_t pid = 123;
-    std::vector<int32_t> persistentIds;
-    std::vector<uint64_t> surfaceNodeIds;
-    persistentIds.push_back(sceneSession1->GetPersistentId());
-    persistentIds.push_back(sceneSession2->GetPersistentId());
-    persistentIds.push_back(sceneSession3->GetPersistentId());
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
-    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
-    
-    ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
-    ASSERT_EQ(0, surfaceNodeIds.size());
 }
 }
 } // namespace Rosen

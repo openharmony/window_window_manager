@@ -368,42 +368,45 @@ public:
      * @brief Get only sceneboard supported
      *
      * @return Return ture means only sceneboard supported, otherwise not.
-    */
+     */
     bool GetOnlySupportSceneBoard() const;
 
     /**
      * @brief Get subwindow decor enable
      *
      * @return Return ture means the subwindow decor enabled, otherwise not.
-    */
+     */
     bool GetSubWindowDecorEnable() const;
 
     /**
      * @brief Get subwindow title
      *
      * @return Return the subwindow title
-    */
+     */
     std::string GetSubWindowTitle() const;
 
     /**
      * @brief Get window topmost
      *
      * @return true means the window is topmost, otherwise not.
-    */
+     */
     bool GetWindowTopmost() const;
 
     /**
-     * @brief Set whether this window is a sub window of the UIExtension.
+     * @brief Set whether this window is a sub window of any level of UIExtension.
      *
-     * @return isUIExtensionSubWindowFlag.
-    */
-    void SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubWindowFlag);
-    /**
-     * @brief Get IsUIExtensionSubWindowFlag of window.
-     *
-     * @return true - is UIExtension sub window, false - is not UIExtension sub window.
+     * @param isUIExtAnySubWindow true - is any sub window of UIExtension,
+     *                            false - is not any sub window of UIExtension.
      */
-    bool GetIsUIExtensionSubWindowFlag() const;
+    void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
+
+    /**
+     * @brief Get whether this window is a sub window of any level of UIExtension.
+     *
+     * @return true - is a sub window of any level of UIExtension,
+     *         false - is not a sub window of any level of UIExtension.
+     */
+    bool GetIsUIExtAnySubWindow() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };

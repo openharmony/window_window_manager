@@ -42,13 +42,15 @@ public:
     void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     void OnScreenshot(DisplayId displayId) override;
-    void OnImmersiveStateChanged(bool& immersive) override;
+    void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
-        std::vector<uint64_t>& surfaceNodeIds) override;
+        std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
+    void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;

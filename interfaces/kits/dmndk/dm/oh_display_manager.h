@@ -311,6 +311,63 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterFoldDisplayModeCh
  */
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterFoldDisplayModeChangeListener(uint32_t listenerIndex);
 
+/**
+ * @brief Create all displays.
+ *
+ * @param allDisplays Output parameter for all displays information.
+ * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
+ *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAllDisplays(
+    NativeDisplayManager_DisplaysInfo **allDisplays);
+
+/**
+ * @brief Destroys all displays.
+ *
+ * @param allDisplays all displays to be free.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+void OH_NativeDisplayManager_DestroyAllDisplays(NativeDisplayManager_DisplaysInfo *allDisplays);
+
+/**
+ * @brief Create display information by display id.
+ * @param displayId The display id.
+ * @param displayInfo The pointer to the display information.
+ * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
+ *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateDisplayInfoById(uint32_t displayId,
+    NativeDisplayManager_DisplayInfo **displayInfo);
+
+/**
+ * @brief Destroy the display information.
+ *
+ * @param displayInfo the target display to be free.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+void OH_NativeDisplayManager_DestroyDisplayInfo(NativeDisplayManager_DisplayInfo *displayInfo);
+
+/**
+ * @brief Creates a primary display.
+ *
+ * @param displayInfo The information of the created display.
+ * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
+ *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
+ *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
+ * @syscap SystemCapability.Window.SessionManager.Core
+ * @since 14
+ */
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreatePrimaryDisplay(
+    NativeDisplayManager_DisplayInfo **displayInfo);
+
 #ifdef __cplusplus
 }
 #endif

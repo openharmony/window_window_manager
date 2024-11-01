@@ -38,7 +38,21 @@ public:
     }
     ~Impl() = default;
     DEFINE_VAR_FUNC_GET_SET(std::string, Name, name);
-    DEFINE_VAR_FUNC_GET_SET_WITH_LOCK(sptr<DisplayInfo>, DisplayInfo, displayInfo);
+    sptr<DisplayInfo> GetDisplayInfo()
+    {
+        std::lock_guard<std::mutex> lock(displayInfoMutex_);
+        return displayInfo_;
+    }
+
+    void SetDisplayInfo(sptr<DisplayInfo> value)
+    {
+        std::lock_guard<std::mutex> lock(displayInfoMutex_);
+        displayInfo_ = value;
+    }
+
+private:
+    sptr<DisplayInfo> displayInfo_;
+    std::mutex displayInfoMutex_;
 };
 
 Display::Display(const std::string& name, sptr<DisplayInfo> info)
@@ -208,7 +222,7 @@ sptr<CutoutInfo> Display::GetCutoutInfo() const
 
 DMError Display::HasImmersiveWindow(bool& immersive)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(immersive);
+    return SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(GetScreenId(), immersive);
 }
 
 DMError Display::GetSupportedHDRFormats(std::vector<uint32_t>& hdrFormats) const

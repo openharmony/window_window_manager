@@ -37,6 +37,16 @@ float ScreenProperty::GetRotation() const
     return rotation_;
 }
 
+void ScreenProperty::SetPhysicalRotation(float rotation)
+{
+    physicalRotation_ = rotation;
+}
+
+float ScreenProperty::GetPhysicalRotation() const
+{
+    return physicalRotation_;
+}
+
 void ScreenProperty::SetBounds(const RRect& bounds)
 {
     bounds_ = bounds;
@@ -219,6 +229,29 @@ void ScreenProperty::SetScreenRotation(Rotation rotation)
             bounds_.rect_.top_ -= static_cast<float>(height - width) / static_cast<float>(HALF_VALUE) +
                 static_cast<float>(offsetY_);
         }
+    }
+    switch (rotation) {
+        case Rotation::ROTATION_90:
+            rotation_ = 90.f;
+            break;
+        case Rotation::ROTATION_180:
+            rotation_ = 180.f;
+            break;
+        case Rotation::ROTATION_270:
+            rotation_ = 270.f;
+            break;
+        default:
+            rotation_ = 0.f;
+            break;
+    }
+    screenRotation_ = rotation;
+}
+
+void ScreenProperty::SetRotationAndScreenRotationOnly(Rotation rotation)
+{
+    bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
+    if (!enableRotation) {
+        return;
     }
     switch (rotation) {
         case Rotation::ROTATION_90:

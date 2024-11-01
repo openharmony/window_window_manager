@@ -470,15 +470,14 @@ HWTEST_F(SceneSessionManagerTest7, CheckPiPPriority, Function | SmallTest | Leve
     PiPTemplateInfo pipTemplateInfo;
     pipTemplateInfo.priority = 0;
     sceneSession->pipTemplateInfo_.priority = 1;
-    sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     auto ret = ssm_->CheckPiPPriority(pipTemplateInfo);
     EXPECT_EQ(ret, false);
-    sceneSession->isVisible_ = false;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
     ret = ssm_->CheckPiPPriority(pipTemplateInfo);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     pipTemplateInfo.priority = 1;
     ret = ssm_->CheckPiPPriority(pipTemplateInfo);
     EXPECT_EQ(ret, true);

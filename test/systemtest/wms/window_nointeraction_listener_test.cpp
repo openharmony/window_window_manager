@@ -131,9 +131,9 @@ void WindowNoInteractionTest::WaitForCallback(sptr<NoInteractionTesterListener>&
 namespace {
 
 /**
-* @tc.name: RegisterUnregisterNormal
-* @tc.type: FUNC
-*/
+ * @tc.name: RegisterUnregisterNormal
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowNoInteractionTest, RegisterUnregisterNormal, Function | MediumTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -178,9 +178,9 @@ HWTEST_F(WindowNoInteractionTest, UnregisterNotReg, Function | MediumTest | Leve
 }
 
 /**
-* @tc.name: KeyEventDownWindowShow
-* @tc.type: FUNC
-*/
+ * @tc.name: KeyEventDownWindowShow
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowShow, Function | MediumTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -215,9 +215,9 @@ HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowShow, Function | MediumTest 
 }
 
 /**
-* @tc.name: KeyEventDownWindowHide
-* @tc.type: FUNC
-*/
+ * @tc.name: KeyEventDownWindowHide
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowHide, Function | MediumTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -250,9 +250,9 @@ HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowHide, Function | MediumTest 
 }
 
 /**
-* @tc.name: KeyEventUpWindowShow
-* @tc.type: FUNC
-*/
+ * @tc.name: KeyEventUpWindowShow
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowShow, Function | MediumTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -285,9 +285,9 @@ HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowShow, Function | MediumTest | 
 }
 
 /**
-* @tc.name: KeyEventUpWindowHide
-* @tc.type: FUNC
-*/
+ * @tc.name: KeyEventUpWindowHide
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowHide, Function | MediumTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -320,9 +320,9 @@ HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowHide, Function | MediumTest | 
 }
 
 /**
-* @tc.name: PointerEventDown
-* @tc.type: FUNC
-*/
+ * @tc.name: PointerEventDown
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowNoInteractionTest, PointerEventDown, Function | MediumTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -356,9 +356,9 @@ HWTEST_F(WindowNoInteractionTest, PointerEventDown, Function | MediumTest | Leve
 }
 
 /**
-* @tc.name: PointerEventUp
-* @tc.type: FUNC
-*/
+ * @tc.name: PointerEventUp
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowNoInteractionTest, PointerEventUp, Function | MediumTest | Level1)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();

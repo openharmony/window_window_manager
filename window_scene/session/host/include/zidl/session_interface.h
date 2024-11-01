@@ -58,15 +58,14 @@ public:
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
 
     /**
-     * @brief Receive session event from system application.
+     * @brief Receive session event from application.
      *
-     * This function provides the ability for system applications to move system window.\n
+     * This function provides the ability for applications to move window.\n
      * This interface will take effect after touch down event.\n
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
-     * @permission Make sure the caller has system permission.
      */
-    virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError SyncSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
 
     /**
@@ -78,6 +77,14 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for processing set default density enabled.
+     *
+     * @param isDefaultDensityEnabled Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) { return WSError::WS_OK; }
+
+    /**
      * @brief Callback for processing restore main window.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
@@ -85,9 +92,10 @@ public:
     virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
 
     /**
-     * @brief Callback for processing full-screen layout changes.
+     * @brief Callback for processing title and dock hover show changes.
      *
-     * @param isLayoutFullScreen Indicates the {@link bool}
+     * @param isTitleHoverShown Indicates the {@link bool}
+     * @param isDockHoverShown Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
@@ -113,8 +121,12 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
-        const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) { return WSError::WS_OK; }
+        const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
@@ -251,10 +263,6 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
-    {
-        return WSError::WS_OK;
-    }
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
@@ -272,14 +280,6 @@ public:
      */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 
-    /**
-     * @brief Set focusable of window when show.
-     *
-     * @param isFocusableOnShow True means window can get focus when it shows to foreground, false means the opposite.
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
-    virtual WSError SetFocusableOnShow(bool isFocusableOnShow) { return WSError::WS_OK; }
-
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
     /**
      * @brief Callback for session modal type changes.
@@ -289,7 +289,7 @@ public:
      */
     virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
-    /*
+    /**
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }

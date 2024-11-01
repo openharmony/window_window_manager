@@ -72,7 +72,7 @@ RSSurfaceNode::SharedPtr WindowSceneSessionImplTest2::CreateRSSurfaceNode()
 }
 
 namespace {
-/*
+/**
  * @tc.name: SetBackdropBlur
  * @tc.desc: SetBackdropBlur test
  * @tc.type: FUNC
@@ -91,7 +91,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetBackdropBlur, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetBackdropBlur(1.0));
 }
 
-/*
+/**
  * @tc.name: SetShadowColor
  * @tc.desc: SetShadowColor test
  * @tc.type: FUNC
@@ -110,7 +110,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetShadowColor, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowColor("#ff22ee44"));
 }
 
-/*
+/**
  * @tc.name: SetCornerRadius
  * @tc.desc: SetCornerRadius test
  * @tc.type: FUNC
@@ -127,7 +127,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetCornerRadius, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetCornerRadius(1.0));
 }
 
-/*
+/**
  * @tc.name: SetShadowRadius
  * @tc.desc: SetShadowRadius test
  * @tc.type: FUNC
@@ -161,9 +161,15 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTransform01, Function | SmallTest | Lev
     ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     Transform trans_;
-    window->SetTransform(trans_);
-    ASSERT_TRUE(trans_ == window->GetTransform());
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransform(trans_));
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans_));
 }
 
 /**
@@ -259,13 +265,8 @@ HWTEST_F(WindowSceneSessionImplTest2, SetAlpha01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
     windowSceneSession->hostSession_ = session;
 
-    auto surfaceNode = windowSceneSession->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowSceneSession->CheckParmAndPermission());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
-    }
-    windowSceneSession->Destroy(true);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(0.0));
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
 }
 
 /**
@@ -282,7 +283,6 @@ HWTEST_F(WindowSceneSessionImplTest2, DestroySubWindow01, Function | SmallTest |
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
 
     ASSERT_NE(nullptr, windowSceneSession);
-    
     windowSceneSession->DestroySubWindow();
     ASSERT_EQ(INVALID_SESSION_ID, windowSceneSession->property_->GetParentPersistentId());
 }
@@ -862,9 +862,14 @@ HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget01, Function | SmallTest |
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, windowSceneSession);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestMode", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSession->property_->SetPersistentId(1);
+    windowSceneSession->hostSession_ = session;
     sptr<IRemoteObject> targetToken;
     WMError ret = windowSceneSession->BindDialogTarget(targetToken);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
@@ -906,7 +911,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled02, Function | 
  * @tc.name: NotifySessionForeground
  * @tc.desc: NotifySessionForeground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, NotifySessionForeground, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -924,7 +929,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionForeground, Function | SmallT
  * @tc.name: NotifySessionBackground
  * @tc.desc: NotifySessionBackground
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, NotifySessionBackground, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -961,7 +966,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionFullScreen, Function | SmallT
  * @tc.name: NotifyPrepareClosePiPWindow01
  * @tc.desc: NotifyPrepareClosePiPWindow
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, NotifyPrepareClosePiPWindow01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -980,7 +985,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifyPrepareClosePiPWindow01, Function | 
  * @tc.name: SetDefaultDensityEnabled01
  * @tc.desc: normal test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, SetDefaultDensityEnabled01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1008,7 +1013,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetDefaultDensityEnabled01, Function | Sma
  * @tc.name: SetDefaultDensityEnabled02
  * @tc.desc: window session is invalid
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, SetDefaultDensityEnabled02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1028,7 +1033,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetDefaultDensityEnabled02, Function | Sma
  * @tc.name: SetDefaultDensityEnabled03
  * @tc.desc: not app main window
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, SetDefaultDensityEnabled03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1049,7 +1054,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetDefaultDensityEnabled03, Function | Sma
  * @tc.name: SetDefaultDensityEnabled04
  * @tc.desc: isDefaultDensityEnabled_ not change
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, SetDefaultDensityEnabled04, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1070,7 +1075,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetDefaultDensityEnabled04, Function | Sma
  * @tc.name: GetDefaultDensityEnabled01
  * @tc.desc: normal test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetDefaultDensityEnabled01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1084,7 +1089,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetDefaultDensityEnabled01, Function | Sma
  * @tc.name: GetDefaultDensityEnabled02
  * @tc.desc: test default value
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetDefaultDensityEnabled02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1097,7 +1102,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetDefaultDensityEnabled02, Function | Sma
  * @tc.name: GetVirtualPixelRatio01
  * @tc.desc: main window isDefaultDensityEnabled_ true
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1127,7 +1132,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio01, Function | SmallTe
  * @tc.name: GetVirtualPixelRatio02
  * @tc.desc: main window isDefaultDensityEnabled_ false
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1160,7 +1165,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio02, Function | SmallTe
  * @tc.name: GetVirtualPixelRatio03
  * @tc.desc: sub window isDefaultDensityEnabled_ true
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1201,7 +1206,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio03, Function | SmallTe
  * @tc.name: GetVirtualPixelRatio04
  * @tc.desc: sub window isDefaultDensityEnabled_ false
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio04, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1242,7 +1247,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetVirtualPixelRatio04, Function | SmallTe
  * @tc.name: GetWindowLimits01
  * @tc.desc: GetWindowLimits
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetWindowLimits01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1273,7 +1278,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetWindowLimits01, Function | SmallTest | 
  * @tc.name: SetWindowLimits01
  * @tc.desc: SetWindowLimits
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, SetWindowLimits01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -1332,7 +1337,7 @@ HWTEST_F(WindowSceneSessionImplTest2, AdjustKeyboardLayout01, Function | SmallTe
  * @tc.name: HideNonSecureWindows01
  * @tc.desc: HideNonSecureWindows
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, HideNonSecureWindows01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1664,7 +1669,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerSuccess02, F
  * @tc.name: GetTitleButtonVisible01
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1691,7 +1696,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible01, Function | SmallT
  * @tc.name: GetTitleButtonVisible02
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1719,7 +1724,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, Function | SmallT
  * @tc.name: GetTitleButtonVisible03
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1747,7 +1752,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, Function | SmallT
  * @tc.name: SetTitleButtonVisible01
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
@@ -1763,7 +1768,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible01, Function | SmallT
  * @tc.name: SetTitleButtonVisible02
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
@@ -1780,7 +1785,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible02, Function | SmallT
  * @tc.name: SetTitleButtonVisible03
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallTest | Level2)
 {
     sptr option = new WindowOption();
@@ -1797,11 +1802,14 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     WMError res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    res = window->SetTitleButtonVisible(false, false, false, true);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
     res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_OK);
 }
