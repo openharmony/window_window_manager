@@ -15,12 +15,6 @@
 
 #include "zidl/pattern_detach_callback_proxy.h"
 
-#include <ipc_types.h>
-#include <message_option.h>
-#include <message_parcel.h>
-
-#include "window_manager_hilog.h"
-
 namespace OHOS {
 namespace Rosen {
 
