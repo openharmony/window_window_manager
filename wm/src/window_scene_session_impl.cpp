@@ -2337,6 +2337,9 @@ WMError WindowSceneSessionImpl::Recover()
             WLOGFW("Recover fail, already MODE_RECOVER");
             return WMError::WM_ERROR_REPEAT_OPERATION;
         }
+        enableImmersiveMode_ = false;
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
         hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
@@ -2399,6 +2402,9 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
             WLOGFW("Recover fail, already MODE_RECOVER");
             return WMError::WM_ERROR_REPEAT_OPERATION;
         }
+        enableImmersiveMode_ = false;
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
         hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         // need notify arkui maximize mode change
         if (reason == 1 && property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
