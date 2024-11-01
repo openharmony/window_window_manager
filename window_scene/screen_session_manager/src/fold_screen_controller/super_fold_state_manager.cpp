@@ -141,6 +141,13 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         action();
         transferState(nextState);
         // notify
+        auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screen session is null!");
+            return;
+        }
+        ScreenId screenId = screenSession->GetScreenId();
+        ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_);
     }
 }
 

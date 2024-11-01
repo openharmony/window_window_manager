@@ -39,6 +39,7 @@ const std::string ON_SCREEN_DENSITY_CHANGE = "screenDensityChange";
 const std::string ON_SCREEN_EXTEND_CHANGE = "screenExtendChange";
 const std::string ON_HOVER_STATUS_CHANGE_CALLBACK = "hoverStatusChange";
 const std::string ON_SCREEN_CAPTURE_NOTIFY = "screenCaptureNotify";
+const std::string ON_SUPER_FOLD_STATUS_CHANGE_CALLBACK = "superFoldStatusChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -723,6 +724,41 @@ void JsScreenSession::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, 
         }
     } else {
         WLOGFE("OnScreenCaptureNotify: env is nullptr");
+    }
+}
+
+void JsScreenSession::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus)
+{
+    const std::string callbackType = ON_SUPER_FOLD_STATUS_CHANGE_CALLBACK;
+    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    if (mCallback_.count(callbackType) == 0) {
+        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        return;
+    }
+    auto jsCallbackRef = mCallback_[callbackType];
+    auto asyncTask = [jsCallbackRef, callbackType, screenId, superFoldStatus, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnSuperFoldStatusChange");
+        if (jsCallbackRef == nullptr) {
+            WLOGFE("Call js callback failed, jsCallbackRef is null!");
+            return;
+        }
+        auto method = jsCallbackRef->GetNapiValue();
+        if (method == nullptr) {
+            WLOGFE("Call js callback failed, method is null!");
+            return;
+        }
+        napi_value id = CreateJsValue(env, static_cast<int64_t>(screenId));
+        napi_value status = CreateJsValue(env, static_cast<int32_t>(superFoldStatus));
+        napi_value argv[] = { id, status };
+        napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnSuperFoldStatusChange: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnSuperFoldStatusChange: env is nullptr");
     }
 }
 } // namespace OHOS::Rosen

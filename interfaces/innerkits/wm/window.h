@@ -1601,7 +1601,7 @@ public:
      * @brief start move system window. It is called by application.
      *
      */
-    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief Set flag that need remove window input channel.
      *
