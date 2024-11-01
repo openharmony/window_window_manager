@@ -558,8 +558,13 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync01, Function | SmallTest | Leve
     option->SetWindowName("MoveToAsync01");
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->MoveToAsync(10, 10));
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->MoveToAsync(10, 10));
 }
 
@@ -629,8 +634,11 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync01, Function | SmallTest | Leve
     option->SetWindowName("ResizeAsync01");
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->ResizeAsync(500, 500));
 }
 
