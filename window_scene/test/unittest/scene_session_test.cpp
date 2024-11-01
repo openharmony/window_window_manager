@@ -1430,26 +1430,31 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: OnSystemSessionEvent
+ * @tc.name: SyncSessionEvent
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnSystemSessionEvent";
-    info.bundleName_ = "OnSystemSessionEvent";
+    info.abilityName_ = "SyncSessionEvent";
+    info.bundleName_ = "SyncSessionEvent";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
-    auto result = sceneSession->OnSystemSessionEvent(event);
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    property->isSystemCalling_ = false;
+    result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 

@@ -184,7 +184,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
-    WSError OnSystemSessionEvent(SessionEvent event) override;
+    WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
