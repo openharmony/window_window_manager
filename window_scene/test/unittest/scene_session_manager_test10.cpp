@@ -723,7 +723,6 @@ HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | Sm
     sessionInfo.bundleName_ = "lastFocusedAppSession";
     sessionInfo.abilityName_ = "lastFocusedAppSession";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->lastFocusedAppSessionId_ = 1;
     sceneSession->zOrder_ = 101;
