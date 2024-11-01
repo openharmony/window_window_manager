@@ -1482,4 +1482,14 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
         listener->OnScreenCaptureNotify(mainScreenId, uid, clientName);
     }
 }
+
+void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnSuperFoldStatusChange(screenId, superFoldStatus);
+    }
+}
 } // namespace OHOS::Rosen

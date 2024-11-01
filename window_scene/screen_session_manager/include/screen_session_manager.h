@@ -35,6 +35,7 @@
 #include "screen_cutout_controller.h"
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS::Rosen {
 class RSInterfaces;
@@ -295,6 +296,7 @@ public:
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
+    void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
     void NotifyCastWhenScreenConnectChange(bool isConnected);
