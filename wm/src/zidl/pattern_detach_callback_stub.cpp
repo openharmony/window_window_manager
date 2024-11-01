@@ -15,8 +15,6 @@
 
 #include "zidl/pattern_detach_callback_stub.h"
 
-#include "window_manager_hilog.h"
-
 namespace OHOS {
 namespace Rosen {
 
