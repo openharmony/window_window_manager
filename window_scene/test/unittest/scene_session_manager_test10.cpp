@@ -714,7 +714,6 @@ HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallT
  */
 HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | SmallTest | Level1)
 {
-    // init
     ssm_->sceneSessionMap_.clear();
     std::vector<uint32_t> zOrderList;
     ssm_->lastFocusedAppSessionId_ = INVALID_SESSION_ID;
