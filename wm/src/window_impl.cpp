@@ -1371,6 +1371,10 @@ std::shared_ptr<AppExecFwk::AbilityInfo> WindowImpl::GetOriginalAbilityInfo() co
 
 WMError WindowImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
 {
+    if (!IsWindowValid()) {
+        TLOGE(WmsLogTag::WMS_DIALOG, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     uint32_t windowId = property_->GetWindowId();
     WMError ret = SingletonContainer::Get<WindowAdapter>().BindDialogTarget(windowId, targetToken);
     if (ret != WMError::WM_OK) {
