@@ -602,4 +602,16 @@ void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int3
     WLOGFI("capture screenId: %{public}" PRIu64", uid=%{public}d", mainScreenId, uid);
     screenSession->ScreenCaptureNotify(mainScreenId, uid, clientName);
 }
+
+void ScreenSessionManagerClient::OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    WLOGI("screenId=%{public}" PRIu64 " superFoldStatus=%{public}d", screenId,
+        static_cast<uint32_t>(superFoldStatus));
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+}
 } // namespace OHOS::Rosen

@@ -83,6 +83,7 @@ ohos_shared_library("screen_session_manager") {
     "src/screen_rotation_property.cpp",
     "src/screen_scene_config.cpp",
     "src/screen_sensor_connector.cpp",
+    "src/screen_sensor_plugin.cpp",
     "src/screen_session_dumper.cpp",
     "src/screen_session_manager.cpp",
     "src/screen_setting_helper.cpp",
@@ -143,7 +144,6 @@ ohos_shared_library("screen_session_manager") {
   defines = []
   if (window_manager_feature_subscribe_motion) {
     if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
-      external_deps += [ "motion:motion_interface_native" ]
       defines += [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
     }
   }

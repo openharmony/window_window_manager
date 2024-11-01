@@ -121,14 +121,14 @@ namespace {
  */
 HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionForeground, Function | SmallTest | Level3)
 {
-    sptr<SceneSession> scensession = nullptr;
+    sptr<SceneSession> sceneSession = nullptr;
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, scensession);
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
     uint32_t reason = 1;
     bool withAnimation = true;
-    scensession->NotifySessionForeground(reason, withAnimation);
+    sceneSession->NotifySessionForeground(reason, withAnimation);
 }
 
 /**
@@ -138,15 +138,15 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionForeground, Function | S
  */
 HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionBackground, Function | SmallTest | Level3)
 {
-    sptr<SceneSession> scensession = nullptr;
+    sptr<SceneSession> sceneSession = nullptr;
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, scensession);
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
     uint32_t reason = 1;
     bool withAnimation = true;
     bool isFromInnerkits = true;
-    scensession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+    sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
 }
 
 /**

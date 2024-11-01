@@ -59,11 +59,6 @@ void SuperFoldStateManager::DoSoftKeyboardOff()
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoSoftKeyboardOff()");
 }
 
-void SuperFoldStateManager::DoKeyboardToExpanded()
-{
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardToExpanded()");
-}
-
 void SuperFoldStateManager::DoExpandedToKeyboard()
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoExpandedToKeyboard()");
@@ -100,11 +95,6 @@ SuperFoldStateManager::SuperFoldStateManager()
         SuperFoldStatusChangeEvents::KEYBOARD_OFF,
         SuperFoldStatus::HALF_FOLDED,
         &SuperFoldStateManager::DoKeyboardOff);
-
-    initStateManagerMap(SuperFoldStatus::KEYBOARD,
-        SuperFoldStatusChangeEvents::KEYBOARD_OFF,
-        SuperFoldStatus::EXPANDED,
-        &SuperFoldStateManager::DoKeyboardToExpanded);
 
     initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
         SuperFoldStatusChangeEvents::SOFT_KEYBOARD_ON,
@@ -151,6 +141,13 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         action();
         transferState(nextState);
         // notify
+        auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screen session is null!");
+            return;
+        }
+        ScreenId screenId = screenSession->GetScreenId();
+        ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_);
     }
 }
 
