@@ -2535,7 +2535,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "rect: %{public}s", rect.ToString().c_str());
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction && needFlush) {
+    if (rsTransaction != nullptr && needFlush) {
         rsTransaction->Begin();
     }
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
@@ -2570,7 +2570,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
-    if (rsTransaction && needFlush) {
+    if (rsTransaction != nullptr && needFlush) {
         rsTransaction->Commit();
     }
 }
