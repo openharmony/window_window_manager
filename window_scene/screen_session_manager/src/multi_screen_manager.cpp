@@ -540,13 +540,13 @@ void MultiScreenManager::InternalScreenOffChange(sptr<ScreenSession> internalSes
         DoFirstMirrorChange(externalSession, internalSession, SCREEN_MIRROR);
         TLOGI(WmsLogTag::DMS, "3: internal mirror to external mirror");
     } else if (mainScreenId == internalScreenId && secondaryScreenMode == MultiScreenMode::SCREEN_EXTEND) {
-        DoFirstExtendChange(externalSession, internalSession, SCREEN_EXTEND);
+        DoFirstExtendChange(externalSession, internalSession, SCREEN_MIRROR);
         TLOGI(WmsLogTag::DMS, "10: internal extend to external mirror");
     } else if (mainScreenId != internalScreenId && secondaryScreenMode == MultiScreenMode::SCREEN_EXTEND) {
-        DoFirstMainChange(externalSession, internalSession, SCREEN_EXTEND);
+        DoFirstMainChange(externalSession, internalSession, SCREEN_MIRROR);
         TLOGI(WmsLogTag::DMS, "14: external extend to external mirror");
     } else {
-        TLOGE(WmsLogTag::DMS, "paramater error!");
+        TLOGE(WmsLogTag::DMS, "no need to change or paramater error!");
         return;
     }
 }
