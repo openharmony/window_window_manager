@@ -2928,18 +2928,17 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
 {
     auto task = [this, persistentId]() {
         int32_t callingSessionId = INVALID_SESSION_ID;
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession != nullptr && sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            callingSessionId = static_cast<int32_t>(sceneSession->GetCallingSessionId());
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
+                persistentId, callingSessionId);
+        }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
-            auto sceneSession = item.second;
+            sceneSession = item.second;
             if (sceneSession == nullptr) {
                 continue;
-            }
-            auto sessionProperty = sceneSession->GetSessionProperty();
-            if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-                sessionProperty != nullptr) {
-                callingSessionId = static_cast<int32_t>(sessionProperty->GetCallingSessionId());
-                TLOGD(WmsLogTag::WMS_KEYBOARD, "persistentId: %{public}d, callingSessionId: %{public}d",
-                    persistentId, callingSessionId);
             }
             if (!(sceneSession->IsVisible() ||
                 sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
@@ -7931,8 +7930,7 @@ void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr.");
             return;
         }
-        if (keyboardSession->GetSessionProperty() == nullptr ||
-            keyboardSession->GetSessionProperty()->GetCallingSessionId() != static_cast<uint32_t>(persistentId)) {
+        if (keyboardSession->GetCallingSessionId() != static_cast<uint32_t>(persistentId)) {
             return;
         }
 
