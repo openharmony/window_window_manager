@@ -741,8 +741,6 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     } else {
         titleBarHeight = static_cast<int32_t>(titleBarHeight * vpr);
     }
-    bool isMoveArea = (0 <= winX && winX <= static_cast<int32_t>(rect.width_)) &&
-        (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
     AreaType dragType = AreaType::UNDEFINED;
@@ -769,8 +767,9 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         if (dragType != AreaType::UNDEFINED) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
             needNotifyEvent = false;
-        } else if (isMoveArea || (WindowHelper::IsSystemWindow(windowType) &&
-            !(windowType == WindowType::WINDOW_TYPE_DIALOG))) {
+        } else if (WindowHelper::IsMainWindow(windowType) ||
+            WindowHelper::IsSubWindow(windowType) ||
+            WindowHelper::IsSystemWindow(windowType)) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
         } else {
             hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
@@ -2435,18 +2434,20 @@ void WindowSceneSessionImpl::StartMove()
     }
 }
 
-WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
+WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
+    auto isPC = windowSystemConfig_.IsPcWindow();
+    if (!(isPC || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (auto hostSession = GetHostSession()) {
-        WSError errorCode = hostSession->OnSystemSessionEvent(SessionEvent::EVENT_START_MOVE);
+        WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
         TLOGD(WmsLogTag::WMS_SYSTEM, "id: %{public}d , errorCode: %{public}d",
             GetPersistentId(), static_cast<int>(errorCode));
         switch (errorCode) {
             case WSError::WS_ERROR_REPEAT_OPERATION: {
                 return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
-            }
-            case WSError::WS_ERROR_NOT_SYSTEM_APP: {
-                return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
             }
             case WSError::WS_ERROR_NULLPTR: {
                 return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;

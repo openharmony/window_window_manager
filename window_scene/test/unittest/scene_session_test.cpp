@@ -512,40 +512,40 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info1.bundleName_ = "IsSystemSessionAboveApp01";
     info1.windowType_ = 2122;
 
-    sptr<SceneSession> scensession1;
-    scensession1 = new (std::nothrow) SceneSession(info1, nullptr);
-    EXPECT_NE(scensession1, nullptr);
-    ASSERT_EQ(true, scensession1->IsSystemSessionAboveApp());
+    sptr<SceneSession> sceneSession1;
+    sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    EXPECT_NE(sceneSession1, nullptr);
+    ASSERT_EQ(true, sceneSession1->IsSystemSessionAboveApp());
 
     SessionInfo info2;
     info2.abilityName_ = "HighZOrder02";
     info2.bundleName_ = "IsSystemSessionAboveApp02";
     info2.windowType_ = 2104;
 
-    sptr<SceneSession> scensession2;
-    scensession2 = new (std::nothrow) SceneSession(info2, nullptr);
-    EXPECT_NE(scensession2, nullptr);
-    ASSERT_EQ(true, scensession2->IsSystemSessionAboveApp());
+    sptr<SceneSession> sceneSession2;
+    sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    EXPECT_NE(sceneSession2, nullptr);
+    ASSERT_EQ(true, sceneSession2->IsSystemSessionAboveApp());
 
     SessionInfo info3;
     info3.abilityName_ = "HighZOrder03";
     info3.bundleName_ = "SCBDropdownPanel13";
     info3.windowType_ = 2109;
 
-    sptr<SceneSession> scensession3;
-    scensession3 = new (std::nothrow) SceneSession(info3, nullptr);
-    EXPECT_NE(scensession3, nullptr);
-    ASSERT_EQ(true, scensession3->IsSystemSessionAboveApp());
+    sptr<SceneSession> sceneSession3;
+    sceneSession3 = new (std::nothrow) SceneSession(info3, nullptr);
+    EXPECT_NE(sceneSession3, nullptr);
+    ASSERT_EQ(true, sceneSession3->IsSystemSessionAboveApp());
 
     SessionInfo info4;
     info4.abilityName_ = "HighZOrder04";
     info4.bundleName_ = "IsSystemSessionAboveApp04";
     info4.windowType_ = 2109;
 
-    sptr<SceneSession> scensession4;
-    scensession4 = new (std::nothrow) SceneSession(info4, nullptr);
-    EXPECT_NE(scensession4, nullptr);
-    ASSERT_EQ(false, scensession4->IsSystemSessionAboveApp());
+    sptr<SceneSession> sceneSession4;
+    sceneSession4 = new (std::nothrow) SceneSession(info4, nullptr);
+    EXPECT_NE(sceneSession4, nullptr);
+    ASSERT_EQ(false, sceneSession4->IsSystemSessionAboveApp());
 }
 
 /**
@@ -609,10 +609,10 @@ HWTEST_F(SceneSessionTest, IsDecorEnable, Function | SmallTest | Level2)
     info_.abilityName_ = "Background01";
     info_.bundleName_ = "IsDecorEnable";
     info_.windowType_ = 1000;
-    sptr<SceneSession> scensession_;
-    scensession_ = new (std::nothrow) SceneSession(info_, nullptr);
-    EXPECT_NE(scensession_, nullptr);
-    ASSERT_EQ(false, scensession_->IsDecorEnable());
+    sptr<SceneSession> sceneSession_;
+    sceneSession_ = new (std::nothrow) SceneSession(info_, nullptr);
+    EXPECT_NE(sceneSession_, nullptr);
+    ASSERT_EQ(false, sceneSession_->IsDecorEnable());
 }
 
 /**
@@ -642,18 +642,18 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     sceneSession->property_ = property;
     ASSERT_EQ(true, sceneSession->IsDecorEnable());
 
-    sptr<SceneSession> scensession_;
-    scensession_ = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession_, nullptr);
+    sptr<SceneSession> sceneSession_;
+    sceneSession_ = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession_, nullptr);
     property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetDecorEnable(false);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(true, scensession_->IsDecorEnable());
+    ASSERT_EQ(true, sceneSession_->IsDecorEnable());
 
-    scensession_->SetSessionProperty(nullptr);
-    ASSERT_EQ(false, scensession_->IsDecorEnable());
+    sceneSession_->SetSessionProperty(nullptr);
+    ASSERT_EQ(false, sceneSession_->IsDecorEnable());
 }
 
 /**
@@ -820,9 +820,8 @@ HWTEST_F(SceneSessionTest, NotifyIsCustomAnimationPlaying, Function | SmallTest 
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->NotifyIsCustomAnimationPlaying(false);
-
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    sceneSession->sessionChangeCallback_->onIsCustomAnimationPlaying_ = [](bool status){};
+    
+    sceneSession->onIsCustomAnimationPlaying_ = [](bool status) {};
     sceneSession->NotifyIsCustomAnimationPlaying(false);
 }
 
@@ -1430,26 +1429,31 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: OnSystemSessionEvent
+ * @tc.name: SyncSessionEvent
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnSystemSessionEvent";
-    info.bundleName_ = "OnSystemSessionEvent";
+    info.abilityName_ = "SyncSessionEvent";
+    info.bundleName_ = "SyncSessionEvent";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
     sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
-    auto result = sceneSession->OnSystemSessionEvent(event);
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    property->isSystemCalling_ = false;
+    result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 

@@ -604,7 +604,7 @@ WSError SessionProxy::OnSessionEvent(SessionEvent event)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::OnSystemSessionEvent(SessionEvent event)
+WSError SessionProxy::SyncSessionEvent(SessionEvent event)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -617,7 +617,7 @@ WSError SessionProxy::OnSystemSessionEvent(SessionEvent event)
         WLOGFE("Write event id failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<int32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT),
+    if (Remote()->SendRequest(static_cast<int32_t>(SessionInterfaceCode::TRANS_ID_SYNC_SESSION_EVENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
