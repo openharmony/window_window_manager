@@ -424,8 +424,13 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t eventId = data.ReadUint32();
-    WLOGFD("HandleSyncSessionEvent eventId: %{public}d", eventId);
+    TLOGD(WmsLogTag::WMS_LIFE, "Called!");
+    uint32_t eventId;
+    if (!data.ReadUint32(eventId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
     WSError errCode = SyncSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
