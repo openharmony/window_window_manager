@@ -19,7 +19,6 @@
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
-#include "common/include/session_permission.h"
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;

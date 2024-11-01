@@ -25,8 +25,6 @@
 
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_session.h"
-#include "js_scene_utils.h"
-#include "task_scheduler.h"
 
 namespace OHOS::Rosen {
 enum class ListenerFuncType : uint32_t {
