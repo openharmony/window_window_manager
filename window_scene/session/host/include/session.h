@@ -366,6 +366,8 @@ public:
     virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
     bool CheckFocusable() const;
+    void SetIsStartingBeforeVisible(bool isStartingBeforeVisible);
+    bool IsStartingBeforeVisible() const;
     bool IsFocused() const;
     bool GetFocused() const;
     virtual WSError UpdateFocus(bool isFocused);
@@ -737,6 +739,7 @@ private:
     bool focusedOnShow_ = true;
     std::atomic_bool systemFocusable_ = true;
     bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
+    bool isStartingBeforeVisible_ = false;
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
