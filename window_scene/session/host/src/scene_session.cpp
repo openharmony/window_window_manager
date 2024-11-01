@@ -4510,9 +4510,13 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
 
 void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
-    std::lock_guard<std::mutex> lock(pointerEventMutex_);
-    if (systemSessionPointerEventFunc_ != nullptr) {
-        systemSessionPointerEventFunc_(pointerEvent);
+    NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(pointerEventMutex_);
+        systemSessionPointerEventFunc = systemSessionPointerEventFunc_;
+    }
+    if (systemSessionPointerEventFunc != nullptr) {
+        systemSessionPointerEventFunc(pointerEvent);
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "PointerEventFunc_ nullptr, id:%{public}d", pointerEvent->GetId());
         pointerEvent->MarkProcessed();
@@ -4521,9 +4525,13 @@ void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> point
 
 bool SceneSession::SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent)
 {
-    std::shared_lock<std::shared_mutex> lock(keyEventMutex_);
-    if (systemSessionKeyEventFunc_ != nullptr) {
-        return systemSessionKeyEventFunc_(keyEvent, isPreImeEvent);
+    NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(keyEventMutex_);
+        systemSessionKeyEventFunc = systemSessionKeyEventFunc_;
+    }
+    if (systemSessionKeyEventFunc != nullptr) {
+        return systemSessionKeyEventFunc(keyEvent, isPreImeEvent);
     }
     return false;
 }
