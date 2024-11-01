@@ -20,7 +20,6 @@
 
 #include <event_handler.h>
 #include <refbase.h>
-#include <mutex>
 #include <ability_context.h>
 #include "picture_in_picture_option.h"
 #include "window.h"
@@ -135,7 +134,6 @@ private:
     std::shared_ptr<XComponentController> pipXComponentController_ = nullptr;
     std::shared_ptr<XComponentController> mainWindowXComponentController_ = nullptr;
     napi_env env_ = nullptr;
-    std::mutex mutex_;
     int32_t handleId_ = -1;
     bool isStoppedFromClient_ = false;
 };
