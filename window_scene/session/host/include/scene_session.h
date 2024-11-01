@@ -124,7 +124,6 @@ public:
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         ClearCallbackMapFunc clearCallbackFunc_;
-        NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     };
@@ -450,6 +449,11 @@ protected:
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
+
+    /*
+     * PiP Window
+     */
+    NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
