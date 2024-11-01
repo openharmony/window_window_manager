@@ -1908,7 +1908,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     RequestInputMethodCloseKeyboard(persistentId);
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
         sceneSession->SetIsStarting(true);
-        sceneSession->SetIsStartingBeforeVisible(true);
+        sceneSession->SetStartingBeforeVisible(true);
     }
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) && sceneSession->IsFocusedOnShow()) {
         if (Session::IsScbCoreEnabled()) {
@@ -9240,9 +9240,9 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 if (iter != uiParams.end()) {
                     if ((systemConfig_.IsPhoneWindow() ||
                          (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode())) &&
-                        sceneSession->IsStartingBeforeVisible() && sceneSession->IsAppSession()) {
+                        sceneSession->GetStartingBeforeVisible() && sceneSession->IsAppSession()) {
                         startingAppZOrderList.push_back(iter->second.zOrder_);
-                        sceneSession->SetIsStartingBeforeVisible(false);
+                        sceneSession->SetStartingBeforeVisible(false);
                     }
                     sessionMapDirty_ |= sceneSession->UpdateUIParam(iter->second);
                 } else {
