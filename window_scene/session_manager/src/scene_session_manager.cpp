@@ -9238,7 +9238,6 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 }
                 auto iter = uiParams.find(sceneSession->GetPersistentId());
                 if (iter != uiParams.end()) {
-                    systemConfig_.IsPhoneWindow() && !systemConfig_.IsPadWindow()
                     if ((systemConfig_.IsPhoneWindow() ||
                          (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode())) &&
                         sceneSession->IsStartingBeforeVisible() && sceneSession->IsAppSession()) {
