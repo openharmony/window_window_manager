@@ -9301,7 +9301,6 @@ void SceneSessionManager::ProcessUpdateLastFocusedAppId(std::vector<uint32_t> zO
         return;
     }
     auto lastFocusedAppSession = GetSceneSession(lastFocusedAppSessionId_);
-    // only when it's from a high zOrder to a low zOrder
     if (lastFocusedAppSession == nullptr) {
         return;
     }
