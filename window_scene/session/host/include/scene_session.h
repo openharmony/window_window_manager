@@ -124,7 +124,6 @@ public:
         NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
-        NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
@@ -390,6 +389,11 @@ public:
      * Window Rotation
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
+
+    /**
+     * Window Animation
+     */
+    void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
 
     /**
      * Window Visibility
@@ -782,6 +786,11 @@ private:
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
+
+    /**
+     * Window Animation
+     */
+    NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
 
     /**
      * Window Immersive
