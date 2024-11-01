@@ -85,6 +85,7 @@ using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t s
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
+using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 
 class SceneSession : public Session {
 public:
@@ -106,6 +107,7 @@ public:
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
+        PiPStateChangeCallback onPiPStateChange_;
     };
 
     // callback for notify SceneBoard

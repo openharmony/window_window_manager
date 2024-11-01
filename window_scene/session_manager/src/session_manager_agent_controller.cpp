@@ -220,5 +220,14 @@ void SessionManagerAgentController::NotifyWindowStyleChange(WindowStyleType type
     }
 }
 
+void SessionManagerAgentController::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground)
+{
+    for (auto& agent : smAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PIP)) {
+        if (agent != nullptr) {
+            agent->UpdatePiPWindowStateChanged(bundleName, isForeground);
+        }
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
