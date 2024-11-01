@@ -185,8 +185,6 @@ public:
     WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
-    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
-        bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     virtual void OpenKeyboardSyncTransaction() {};
