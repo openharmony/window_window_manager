@@ -411,13 +411,12 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     }
     WSError errCode;
     TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
-    if (eventId >= static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) &&
-        eventId <= static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
-        errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
-    } else {
+    if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
+        eventId > static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
     }
+    errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
