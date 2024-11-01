@@ -655,10 +655,10 @@ WSError SessionProxy::UpdateClientRect(const WSRect& rect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(static_cast<int32_t>(rect.posX_)) ||
-        !data.WriteInt32(static_cast<int32_t>(rect.posY_)) ||
-        !data.WriteInt32(static_cast<int32_t>(rect.width_)) ||
-        !data.WriteInt32(static_cast<int32_t>(rect.height_))) {
+    if (!data.WriteInt32(rect.posX_) ||
+        !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) ||
+        !data.WriteInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write rect failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
