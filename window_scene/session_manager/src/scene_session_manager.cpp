@@ -9292,11 +9292,11 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
     taskScheduler_->PostAsyncTask(task, "FlushUIParams");
 }
 
-void SceneSessionManager::ProcessUpdateLastFocusedAppId(std::vector<uint32_t> zOrderList)
+void SceneSessionManager::ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "last focused app: %{public}d, list size %{public}zu", lastFocusedAppSessionId_,
           zOrderList.size());
-    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || zOrderList.size() == 0) {
+    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || zOrderList.empty()) {
         return;
     }
     auto lastFocusedAppSession = GetSceneSession(lastFocusedAppSessionId_);
@@ -9304,14 +9304,13 @@ void SceneSessionManager::ProcessUpdateLastFocusedAppId(std::vector<uint32_t> zO
         return;
     }
     uint32_t lastFocusedAppZOrder = lastFocusedAppSession->GetZOrder();
-    auto it = std::find_if(zOrderList.begin(), zOrderList.end(), [this, lastFocusedAppZOrder](uint32_t zOrder) {
+    auto it = std::find_if(zOrderList.begin(), zOrderList.end(), [lastFocusedAppZOrder](uint32_t zOrder) {
         return zOrder > lastFocusedAppZOrder;
     });
-    if (it == zOrderList.end()) {
-        return;
+    if (it != zOrderList.end()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "clear with high zOrder app visible");
+        lastFocusedAppSessionId_ = INVALID_SESSION_ID;
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "clear with high zOrder app visible");
-    lastFocusedAppSessionId_ = INVALID_SESSION_ID;
 }
 
 void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) 

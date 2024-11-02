@@ -707,6 +707,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallT
     EXPECT_EQ(WSError::WS_OK, ssm_->NotifyStatusBarShowStatus(sceneSession->GetPersistentId(), false));
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
+
 /**
  * @tc.name: ProcessUpdateLastFocusedAppId
  * @tc.desc: test ProcessUpdateLastFocusedAppId
