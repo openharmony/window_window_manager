@@ -722,10 +722,12 @@ HWTEST_F(SceneSessionManagerTest10, IsNeedSkipWindowModeTypeCheck, Function | Sm
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetRSVisible(true);
+    sceneSession->SetRSVisible(false);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ASSERT_TRUE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false));
-    sceneSession->SetRSVisible(false);
+    sceneSession->SetRSVisible(true);
+    DisplayId displayId = 1001;
+    sceneSession->property_->SetDisplayId(displayId);
     ASSERT_TRUE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, true));
     ASSERT_FALSE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false));
 }
