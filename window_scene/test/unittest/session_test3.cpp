@@ -1349,6 +1349,7 @@ HWTEST_F(WindowSessionTest3, SetMainSessionUIStateDirty, Function | SmallTest | 
     session_->SetMainSessionUIStateDirty(true);
     EXPECT_EQ(true, sessionUIState->GetUIStateDirty());
 }
+
 /**
  * @tc.name: SetStartingBeforeVisible
  * @tc.desc: test SetStartingBeforeVisible
