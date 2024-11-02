@@ -1928,7 +1928,7 @@ WMError WindowSessionImpl::SetWindowTitleMoveEnabled(bool enable)
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->EnableContainerModalGesture(enable);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enable:%{public}d end", enable);
     return WMError::WM_OK;
 }
 
