@@ -713,7 +713,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallT
  * @tc.desc: IsNeedSkipWindowModeTypeCheck
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, IsNeedSkipWindowModeTypeCheck, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, IsNeedSkipWindowModeTypeCheck, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";
