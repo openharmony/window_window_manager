@@ -387,7 +387,7 @@ public:
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
 
     /*
-     * Multi Window 
+     * Multi Window
      */
     void SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func);
     WMError CloseTargetFloatWindow(const std::string& bundleName);

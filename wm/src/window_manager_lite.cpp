@@ -894,7 +894,7 @@ WMError WindowManagerLite::RegisterPiPStateChangedListener(const sptr<IPiPStateC
         auto iter = std::find(pImpl_->pipStateChangedListeners_.begin(),
             pImpl_->pipStateChangedListeners_.end(), listener);
         if (iter != pImpl_->pipStateChangedListeners_.end()) {
-            TLOGW(WmsLogTag::WMS_PIP, "Listener is already registered");
+            TLOGW(WmsLogTag::WMS_PIP, "Listener is already registered.");
             return WMError::WM_OK;
         }
         pImpl_->pipStateChangedListeners_.push_back(listener);

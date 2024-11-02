@@ -393,7 +393,7 @@ void WindowManagerAgentProxy::UpdatePiPWindowStateChanged(const std::string& bun
         TLOGE(WmsLogTag::WMS_PIP, "Write state failed");
         return;
     }
-    sptr<IRemoteObject> remote = Romote();
+    sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "remote is null");
         return;
