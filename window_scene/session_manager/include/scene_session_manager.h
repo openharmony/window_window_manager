@@ -461,12 +461,6 @@ public:
     void RefreshPcZOrderList(uint32_t startZOrder, std::vector<int32_t>&& persistentIds);
 
     /*
-     * PiP Window
-     */
-    WMError CloseTargetPiPWindow(const std::string& bundleName);
-    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
-
-    /*
      * Window Watermark
      */
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
@@ -490,6 +484,12 @@ public:
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
+
+    /*
+     * PiP Window
+     */
+    WMError CloseTargetPiPWindow(const std::string& bundleName);
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
     /*
      * Window displayId
