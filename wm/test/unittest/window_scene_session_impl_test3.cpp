@@ -525,7 +525,7 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, Function | SmallTest | Leve
 
     SessionInfo sessionInfo = {"CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_= session;
+    windowSceneSessionImpl->hostSession_ = session;
     ret = windowSceneSessionImpl->RaiseToAppTop();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
 }
