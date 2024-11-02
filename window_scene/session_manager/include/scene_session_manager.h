@@ -981,7 +981,12 @@ private:
     /*
      * Screen Manager
      */
-    bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
+    bool IsInDefaultScreen(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Window Mode Type
+     */
+    bool IsNeedSkipWindowModeTypeCheck(const sptr<SceneSession>& sceneSession, bool isSmallFold);
 
     /**
      * Window Immersive
