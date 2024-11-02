@@ -171,10 +171,6 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDragenabled, Function | SmallTest 
     session.property_ = property;
 
     WMError res = sceneSession->HandleActionUpdateDragenabled(property, action);
-    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, res);
-
-    session.property_->SetSystemCalling(true);
-    res = sceneSession->HandleActionUpdateDragenabled(property, action);
     ASSERT_EQ(WMError::WM_OK, res);
 }
 

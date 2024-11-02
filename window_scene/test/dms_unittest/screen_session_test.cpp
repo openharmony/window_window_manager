@@ -36,6 +36,7 @@ public:
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override {}
     void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override {}
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
+    void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:

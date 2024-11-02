@@ -749,6 +749,18 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
 }
 
+void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
+        NotifySizeChange(wmRect, wmReason);
+        lastSizeChangeReason_ = wmReason;
+        postTaskDone_ = true;
+    }
+    UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+    UpdateFrameLayoutCallbackIfNeeded(wmReason);
+}
+
 bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
 {
     if (wmReason == WindowSizeChangeReason::FULL_TO_SPLIT ||
@@ -762,14 +774,8 @@ bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wm
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
-        NotifySizeChange(wmRect, wmReason);
-        lastSizeChangeReason_ = wmReason;
-        postTaskDone_ = true;
-    }
     if (handler_ == nullptr) {
-        UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-        UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         return;
     }
 
@@ -785,12 +791,11 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             rsTransaction->Begin();
         }
         if (wmReason == WindowSizeChangeReason::DRAG) {
-            window->UpdateViewportConfig(window->GetRect(), wmReason, rsTransaction);
+            window->UpdateRectForOtherReasonTask(window->GetRect(), preRect, wmReason, rsTransaction);
             window->isDragTaskUpdateDone_ = true;
         } else {
-            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+            window->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         }
-        window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
@@ -1597,10 +1602,10 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsSubWindow(GetType())) {
         property_->SetDragEnabled(dragEnabled);
     } else {
-        WLOGFE("This is not main window.");
+        WLOGFE("This is not main window or sub window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
