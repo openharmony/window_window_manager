@@ -601,17 +601,16 @@ HWTEST_F(SceneSessionTest, IsDecorEnable, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSessionb = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(true, sceneSession->IsDecorEnable());
     SessionInfo info_;
     info_.abilityName_ = "Background01";
     info_.bundleName_ = "IsDecorEnable";
     info_.windowType_ = 1000;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info_, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(false, sceneSession->IsDecorEnable());
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info_, nullptr);
+    EXPECT_NE(sceneSession1, nullptr);
+    ASSERT_EQ(false, sceneSession1->IsDecorEnable());
 }
 
 /**
@@ -630,8 +629,7 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
@@ -641,17 +639,17 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     sceneSession->property_ = property;
     ASSERT_EQ(true, sceneSession->IsDecorEnable());
 
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession1, nullptr);
     property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetDecorEnable(false);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(true, sceneSession->IsDecorEnable());
+    ASSERT_EQ(true, sceneSession1->IsDecorEnable());
 
-    sceneSession_->SetSessionProperty(nullptr);
-    ASSERT_EQ(false, sceneSession->IsDecorEnable());
+    sceneSession1->SetSessionProperty(nullptr);
+    ASSERT_EQ(false, sceneSession1->IsDecorEnable());
 }
 
 /**
