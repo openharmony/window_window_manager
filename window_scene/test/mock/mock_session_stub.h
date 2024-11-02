@@ -41,6 +41,7 @@ public:
     MOCK_METHOD1(Show, WSError(sptr<WindowSessionProperty> property));
     MOCK_METHOD0(Hide, WSError(void));
     MOCK_METHOD0(DrawingCompleted, WSError(void));
+    MOCK_METHOD0(RemoveStartingWindow, WSError(void));
 
     MOCK_METHOD4(OnRemoteRequest, int(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option));
 

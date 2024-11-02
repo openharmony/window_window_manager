@@ -3572,7 +3572,6 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
-        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
@@ -3972,11 +3971,6 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
 WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property dragEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetDragEnabled(property->GetDragEnabled());
@@ -4510,9 +4504,13 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
 
 void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
-    std::lock_guard<std::mutex> lock(pointerEventMutex_);
-    if (systemSessionPointerEventFunc_ != nullptr) {
-        systemSessionPointerEventFunc_(pointerEvent);
+    NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(pointerEventMutex_);
+        systemSessionPointerEventFunc = systemSessionPointerEventFunc_;
+    }
+    if (systemSessionPointerEventFunc != nullptr) {
+        systemSessionPointerEventFunc(pointerEvent);
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "PointerEventFunc_ nullptr, id:%{public}d", pointerEvent->GetId());
         pointerEvent->MarkProcessed();
@@ -4521,9 +4519,13 @@ void SceneSession::SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> point
 
 bool SceneSession::SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent)
 {
-    std::shared_lock<std::shared_mutex> lock(keyEventMutex_);
-    if (systemSessionKeyEventFunc_ != nullptr) {
-        return systemSessionKeyEventFunc_(keyEvent, isPreImeEvent);
+    NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc = nullptr;
+    {
+        std::shared_lock<std::shared_mutex> lock(keyEventMutex_);
+        systemSessionKeyEventFunc = systemSessionKeyEventFunc_;
+    }
+    if (systemSessionKeyEventFunc != nullptr) {
+        return systemSessionKeyEventFunc(keyEvent, isPreImeEvent);
     }
     return false;
 }

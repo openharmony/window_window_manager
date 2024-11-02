@@ -1259,6 +1259,23 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
     return res;
 }
 
+WMError WindowSceneSessionImpl::NotifyRemoveStartingWindow()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WMError res = WindowHelper::IsMainWindow(GetType()) ?
+                  static_cast<WMError>(hostSession->RemoveStartingWindow()) :
+                  WMError::WM_ERROR_INVALID_WINDOW;
+    if (res == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d", GetPersistentId());
+    }
+    return res;
+}
+
 void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
     UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
@@ -2336,6 +2353,9 @@ WMError WindowSceneSessionImpl::Recover()
             WLOGFW("Recover fail, already MODE_RECOVER");
             return WMError::WM_ERROR_REPEAT_OPERATION;
         }
+        enableImmersiveMode_ = false;
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
         hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
@@ -2398,6 +2418,9 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
             WLOGFW("Recover fail, already MODE_RECOVER");
             return WMError::WM_ERROR_REPEAT_OPERATION;
         }
+        enableImmersiveMode_ = false;
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
         hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         // need notify arkui maximize mode change
         if (reason == 1 && property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {

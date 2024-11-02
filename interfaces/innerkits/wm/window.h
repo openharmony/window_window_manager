@@ -883,6 +883,12 @@ public:
      */
     virtual WMError NotifyDrawingCompleted() { return WMError::WM_OK; }
     /**
+     * @brief notify window remove starting window.
+     *
+     * @return WMError
+     */
+    virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief move the window to (x, y)
      *
      * @param x
