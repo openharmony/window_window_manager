@@ -312,6 +312,7 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
 
 int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     SessionInfoBean info;
     std::string continueSessionId;
     if (!data.ReadString(continueSessionId)) {
