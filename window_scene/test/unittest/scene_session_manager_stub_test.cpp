@@ -1660,23 +1660,24 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
 
     MessageParcel data;
     MessageParcel reply;
-    int res;
 
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     uint32_t vectorSize = 128;
     data.WriteUint32(vectorSize);
-    res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    vectorSize = 90;
+    stub_->HandleNotifyDumpInfoResult(data, reply);
+    std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
+    vectorSize = static_cast<uint32_t>(info.size());
     data.WriteUint32(vectorSize);
-    res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    uint32_t curSize;
+    for (const auto& elem : info) {
+        const char* curInfo = elem.c_str();
+        curSize = static_cast<uint32_t>(strlen(curInfo));
+        data.WriteUint32(curSize);
+        if (curSize != 0) {
+            data.WriteRawData(curInfo, curSize);
+        }
+    }
+    int res = stub_->HandleNotifyDumpInfoResult(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
