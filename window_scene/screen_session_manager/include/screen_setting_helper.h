@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <string>
+#include <sstream>
 
 #include "setting_observer.h"
 
@@ -40,8 +41,8 @@ public:
     static void SetSettingRotationScreenId(int32_t screenId);
     static bool GetSettingRotation(int32_t& rotation, const std::string& key = SETTING_ROTATION_KEY);
     static bool GetSettingRotationScreenID(int32_t& screenId, const std::string& key = SETTING_ROTATION_SCREEN_ID_KEY);
-    static void RemoveInvalidChar(std::string& dataStr, const std::string& inputString);
-    static bool SplitString(std::vector<std::string>& splitValues, const std::string& inputString);
+    static std::string RemoveInvalidChar(const std::string& input);
+    static bool SplitString(std::vector<std::string>& splitValues, const std::string& input, char delimiter = ',');
     static int32_t GetDataFromString(std::vector<uint64_t>& datas, const std::string& inputString);
     static bool GetSettingRecoveryResolutionString(std::vector<std::string>& resolutionStrings,
         const std::string& key = SETTING_RECOVERY_RESOLUTION_KEY);
