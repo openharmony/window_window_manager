@@ -260,6 +260,9 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Lev
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DRAWING_COMPLETED), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_APP_REMOVE_STARTING_WINDOW), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED),
         data,
         reply,

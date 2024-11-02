@@ -105,6 +105,7 @@ public:
     virtual void OnExtensionTimeout(int32_t errorCode) {}
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
+    virtual void OnAppRemoveStartingWindow() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -511,6 +512,13 @@ public:
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
 
+    /*
+     * Starting Window
+     */
+    WSError RemoveStartingWindow() override;
+    void SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow);
+    bool GetEnableRemoveStartingWindow() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -769,6 +777,11 @@ private:
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
+
+    /*
+     * Starting Window
+     */
+    bool enableRemoveStartingWindow_ {false};
 };
 } // namespace OHOS::Rosen
 
