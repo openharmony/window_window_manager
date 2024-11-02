@@ -3202,10 +3202,10 @@ WSError SceneSessionManager::ProcessBackEvent()
             WLOGFE("session is nullptr: %{public}d", focusedSessionId_);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        WLOGFI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
+        TLOGNI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
-            WLOGFD("RequestSessionBack when start session");
+            TLOGND("RequestSessionBack when start session");
             if (session->GetSessionInfo().abilityInfo != nullptr &&
                 session->GetSessionInfo().abilityInfo->unclearableMission) {
                 TLOGNI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
