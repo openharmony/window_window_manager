@@ -364,8 +364,6 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
     ANGLE_CHANGE_FOLDED,
     KEYBOARD_ON,
     KEYBOARD_OFF,
-    SOFT_KEYBOARD_ON,
-    SOFT_KEYBOARD_OFF,
     INVALID,
 };
 
@@ -378,7 +376,6 @@ enum class SuperFoldStatus : uint32_t {
     HALF_FOLDED,
     EXPANDED,
     KEYBOARD,
-    SOFT_KEYBOARD,
 };
 
 /**
