@@ -1425,7 +1425,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange01, Function | SmallTest
 
 /**
  * @tc.name: InternalScreenOffChange02
- * @tc.desc: internal extend to external mirror
+ * @tc.desc: no need to change or paramater error
  * @tc.type: FUNC
  */
 HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange02, Function | SmallTest | Level1)
@@ -1478,7 +1478,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange02, Function | SmallTest
 
 /**
  * @tc.name: InternalScreenOffChange03
- * @tc.desc: paramater error
+ * @tc.desc: internal extend to external mirror
  * @tc.type: FUNC
  */
 HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange03, Function | SmallTest | Level1)
@@ -1519,7 +1519,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange03, Function | SmallTest
 
     EXPECT_EQ(true, internalSession->GetIsExtend());
     EXPECT_EQ(false, externalSession->GetIsExtend());
-    EXPECT_EQ(ScreenCombination::SCREEN_EXTEND, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, internalSession->GetScreenCombination());
     EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
     {
         std::lock_guard<std::recursive_mutex>
@@ -1572,7 +1572,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange04, Function | SmallTest
 
     EXPECT_EQ(true, internalSession->GetIsExtend());
     EXPECT_EQ(false, externalSession->GetIsExtend());
-    EXPECT_EQ(ScreenCombination::SCREEN_EXTEND, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, internalSession->GetScreenCombination());
     EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
     {
         std::lock_guard<std::recursive_mutex>
