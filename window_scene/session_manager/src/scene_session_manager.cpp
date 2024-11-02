@@ -1920,6 +1920,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     RequestInputMethodCloseKeyboard(persistentId);
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
         sceneSession->SetIsStarting(true);
+        sceneSession->SetStartingBeforeVisible(true);
     }
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) && sceneSession->IsFocusedOnShow()) {
         if (Session::IsScbCoreEnabled()) {
@@ -9236,6 +9237,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             std::unique_lock<std::mutex> lock(nextFlushCompletedMutex_);
             nextFlushCompletedCV_.notify_all();
         }
+        std::vector<uint32_t> startingAppZOrderList;
         processingFlushUIParams_.store(true);
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -9249,6 +9251,12 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 }
                 auto iter = uiParams.find(sceneSession->GetPersistentId());
                 if (iter != uiParams.end()) {
+                    if ((systemConfig_.IsPhoneWindow() ||
+                         (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode())) &&
+                        sceneSession->GetStartingBeforeVisible() && sceneSession->IsAppSession()) {
+                        startingAppZOrderList.push_back(iter->second.zOrder_);
+                        sceneSession->SetStartingBeforeVisible(false);
+                    }
                     sessionMapDirty_ |= sceneSession->UpdateUIParam(iter->second);
                 } else {
                     sessionMapDirty_ |= sceneSession->UpdateUIParam();
@@ -9268,6 +9276,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     item.first, item.second.zOrder_, item.second.rect_.ToString().c_str(), item.second.transX_,
                     item.second.transY_, item.second.needSync_, item.second.interactive_);
             }
+            ProcessUpdateLastFocusedAppId(startingAppZOrderList);
             ProcessFocusZOrderChange(sessionMapDirty_);
             PostProcessFocus();
             PostProcessProperty(sessionMapDirty_);
@@ -9296,7 +9305,29 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
     taskScheduler_->PostAsyncTask(task, "FlushUIParams");
 }
 
-void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) {
+void SceneSessionManager::ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "last focused app: %{public}d, list size %{public}zu", lastFocusedAppSessionId_,
+          zOrderList.size());
+    if (lastFocusedAppSessionId_ == INVALID_SESSION_ID || zOrderList.empty()) {
+        return;
+    }
+    auto lastFocusedAppSession = GetSceneSession(lastFocusedAppSessionId_);
+    if (lastFocusedAppSession == nullptr) {
+        return;
+    }
+    uint32_t lastFocusedAppZOrder = lastFocusedAppSession->GetZOrder();
+    auto it = std::find_if(zOrderList.begin(), zOrderList.end(), [lastFocusedAppZOrder](uint32_t zOrder) {
+        return zOrder > lastFocusedAppZOrder;
+    });
+    if (it != zOrderList.end()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "clear with high zOrder app visible");
+        lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    }
+}
+
+void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) 
+{
     if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
         return;
     }
