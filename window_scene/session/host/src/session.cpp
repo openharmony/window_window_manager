@@ -1302,6 +1302,17 @@ WSError Session::DrawingCompleted()
     return WSError::WS_OK;
 }
 
+WSError Session::RemoveStartingWindow()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnAppRemoveStartingWindow();
+        }
+    }
+    return WSError::WS_OK;
+}
+
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
@@ -2801,6 +2812,16 @@ void Session::SetClientRect(const WSRect& rect)
 WSRect Session::GetClientRect() const
 {
     return clientRect_;
+}
+
+void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)
+{
+    enableRemoveStartingWindow_ = enableRemoveStartingWindow;
+}
+
+bool Session::GetEnableRemoveStartingWindow() const
+{
+    return enableRemoveStartingWindow_;
 }
 
 WindowType Session::GetWindowType() const
