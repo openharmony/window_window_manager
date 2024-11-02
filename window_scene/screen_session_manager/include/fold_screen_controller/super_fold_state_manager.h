@@ -35,19 +35,17 @@ public:
     SuperFoldStateManager();
     ~SuperFoldStateManager();
 
-    void initStateManagerMap(SuperFoldStatus curState,
+    void AddStateManagerMap(SuperFoldStatus curState,
     SuperFoldStatusChangeEvents event,
     SuperFoldStatus nextState,
     std::function<void ()> action);
 
-    void transferState(SuperFoldStatus nextState);
+    void TransferState(SuperFoldStatus nextState);
 
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
     SuperFoldStatus GetCurrentStatus();
 
-    void SetCurrentStatus(SuperFoldStatus curState);
-    
 private:
     SuperFoldStatus curState_ = SuperFoldStatus::HALF_FOLDED;
 
@@ -69,11 +67,13 @@ private:
 
     static void DoKeyboardOff();
 
-    static void DoSoftKeyboardOn();
-
-    static void DoSoftKeyboardOff();
+    static void DoFoldedToHalfFolded();
 
     static void DoExpandedToKeyboard();
+
+    void SetCurrentStatus(SuperFoldStatus curState);
+
+    FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 };
 } // Rosen
 } // OHOS
