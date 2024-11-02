@@ -1111,7 +1111,7 @@ HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo02, Function | SmallTest 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::string testBundleName = "test";
     EXPECT_CALL(m->Mock(), GetCurrentPiPWindowInfo(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(testBundleName),
-        return(WMError::WM_OK)));
+        Return(WMError::WM_OK)));
 
     std::string bundleName;
     auto errorCode = WindowManagerLite::GetInstance().GetCurrentPiPWindowInfo(bundleName);

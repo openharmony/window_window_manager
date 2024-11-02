@@ -1653,7 +1653,7 @@ HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function |
 
 /**
  * @tc.name: CloseTargetFloatWindow
- * @tc.desc: SceneSessionManager CloseTargetFloatWindow
+ * @tc.desc: SceneSesionManager CloseTargetFloatWindow
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, CloseTargetFloatWindow, Function | SmallTest | Level3)

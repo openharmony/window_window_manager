@@ -271,7 +271,7 @@ public:
      * @brief Unregister listener for PiP window state changed.
      *
      * @param listener the PiP state changed listener.
-     * @return WM_OK means Unegister success, others means Unregister failed.
+     * @return WM_OK means Unregister success, others means Unregister failed.
      */
     WMError UnregisterPiPStateChangedListener(const sptr<IPiPStateChangedListener>& listener);
 
