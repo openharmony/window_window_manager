@@ -3199,13 +3199,13 @@ WSError SceneSessionManager::ProcessBackEvent()
     auto task = [this]() {
         auto session = GetSceneSession(focusedSessionId_);
         if (!session) {
-            TLOGNE("session is nullptr: %{public}d", focusedSessionId_);
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is nullptr: %{public}d", focusedSessionId_);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        TLOGNI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
+        TLOGNI(WmsLogTag::WMS_MAIN, "ProcessBackEvent session persistentId:%{public}d needBlock:%{public}d",
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
-            TLOGND("RequestSessionBack when start session");
+            TLOGND(WmsLogTag::WMS_MAIN, "RequestSessionBack when start session");
             if (session->GetSessionInfo().abilityInfo != nullptr &&
                 session->GetSessionInfo().abilityInfo->unclearableMission) {
                 TLOGNI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
