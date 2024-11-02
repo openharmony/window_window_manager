@@ -4143,9 +4143,9 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
             TLOGE(WmsLogTag::WMS_SUB, "Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
             return false;
         }
-        const auto& parentState = mainSession->GetSessionState();
+        const auto& mainState = mainSession->GetSessionState();
         if (session->IsVisible() || (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
-            if (parentState == SessionState::STATE_INACTIVE || parentState == SessionState::STATE_BACKGROUND) {
+            if (mainState == SessionState::STATE_INACTIVE || mainState == SessionState::STATE_BACKGROUND) {
                 TLOGD(WmsLogTag::WMS_SUB, "Parent of this sub window is at background, id: %{public}d", session->GetPersistentId());
                 return false;
             }
