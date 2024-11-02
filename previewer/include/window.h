@@ -412,6 +412,13 @@ public:
      * @param height The height after layout
      */
     virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
+    /**
+     * @brief notify window remove starting window.
+     *
+     * @return WMError
+     */
+    virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
