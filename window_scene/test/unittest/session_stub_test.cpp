@@ -819,32 +819,32 @@ HWTEST_F(SessionStubTest, HandleUpdateClientRect01, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: HandleSystemSessionEvent1
- * @tc.desc: sessionStub HandleSystemSessionEvent
+ * @tc.name: HandleSyncSessionEvent1
+ * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleSystemSessionEvent1, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleSyncSessionEvent1, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
 
     data.WriteUint32(static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE));
-    int result = session_->HandleSystemSessionEvent(data, reply);
+    int result = session_->HandleSyncSessionEvent(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
 
 /**
- * @tc.name: HandleSystemSessionEvent2
- * @tc.desc: sessionStub HandleSystemSessionEvent
+ * @tc.name: HandleSyncSessionEvent2
+ * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleSystemSessionEvent2, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleSyncSessionEvent2, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
 
     data.WriteUint32(0xFFFFFFFF);
-    int result = session_->HandleSystemSessionEvent(data, reply);
+    int result = session_->HandleSyncSessionEvent(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
 }
 }
