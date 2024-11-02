@@ -205,7 +205,7 @@ bool SubSession::IsModal() const
 
 bool SubSession::IsVisibleForeground() const
 {
-    auto mainSession = GetMainSession();
+    const auto& mainSession = GetMainSession();
     if (mainSession && WindowHelper::IsMainWindow(mainSession->GetWindowType())) {
         return mainSession->IsVisibleForeground() && Session::IsVisibleForeground();
     }

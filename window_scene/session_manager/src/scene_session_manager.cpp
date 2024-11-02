@@ -4138,21 +4138,21 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
     const auto& state = session->GetSessionState();
     if (WindowHelper::IsSubWindow(session->GetWindowType())) {
-        const auto& parentSceneSession = session->GetParentSession();
-        if (parentSceneSession == nullptr) {
-            WLOGFW("Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
+        auto mainSession = session->GetMainSession();
+        if (mainSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_SUB, "Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
             return false;
         }
-        const auto& parentState = parentSceneSession->GetSessionState();
+        const auto& parentState = mainSession->GetSessionState();
         if (session->IsVisible() || (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
             if (parentState == SessionState::STATE_INACTIVE || parentState == SessionState::STATE_BACKGROUND) {
-                WLOGFD("Parent of this sub window is at background, id: %{public}d", session->GetPersistentId());
+                TLOGD(WmsLogTag::WMS_SUB, "Parent of this sub window is at background, id: %{public}d", session->GetPersistentId());
                 return false;
             }
-            WLOGFD("Sub window is at foreground, id: %{public}d", session->GetPersistentId());
+            TLOGD(WmsLogTag::WMS_SUB, "Sub window is at foreground, id: %{public}d", session->GetPersistentId());
             return true;
         }
-        WLOGFD("Sub window is at background, id: %{public}d", session->GetPersistentId());
+        LOGD(WmsLogTag::WMS_SUB, "Sub window is at background, id: %{public}d", session->GetPersistentId());
         return false;
     }
 
@@ -7498,8 +7498,8 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSubSceneSession(int32_t 
         if (sceneSession == nullptr) {
             continue;
         }
-        if (sceneSession->GetParentSession() != nullptr &&
-            sceneSession->GetParentSession()->GetWindowId() == parentWindowId) {
+        const auto& mainSession = sceneSession->GetMainSession();
+        if (mainSession != nullptr && mainSession->GetWindowId() == parentWindowId) {
             subSessions.push_back(sceneSession);
         }
     }
