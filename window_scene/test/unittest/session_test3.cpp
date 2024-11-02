@@ -879,14 +879,17 @@ HWTEST_F(WindowSessionTest3, NotifyClick, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     int resultValue = 0;
     bool hasRequestFocus = true;
-    NotifyClickFunc func = [&resultValue, &hasRequestFocus](bool requestFocus) {
+    bool hasIsClick = true;
+    NotifyClickFunc func = [&resultValue, &hasRequestFocus, &hasIsClick](bool requestFocus, bool isClick) {
         resultValue = 1;
         hasRequestFocus = requestFocus;
+        hasIsClick = isClick;
     };
     session_->SetClickListener(func);
-    session_->NotifyClick(false);
+    session_->NotifyClick(false, false);
     EXPECT_EQ(resultValue, 1);
     EXPECT_EQ(hasRequestFocus, false);
+    EXPECT_EQ(hasIsClick, false);
 }
 
 /**

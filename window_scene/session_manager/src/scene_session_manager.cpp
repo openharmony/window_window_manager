@@ -9509,7 +9509,7 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            sceneSession->NotifyClick();
+            sceneSession->NotifyClick(true, false);
             return WSError::WS_OK;
         } else {
             WLOGFE("session is not app main window!");
@@ -9554,7 +9554,7 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
         return WSError::WS_ERROR_INVALID_CALLING;
     }
-    targetSession->NotifyClick();
+    targetSession->NotifyClick(true, false);
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     return RequestSessionFocus(targetPersistentId, false, reason);
 }
