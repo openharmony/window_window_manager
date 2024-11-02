@@ -4138,7 +4138,7 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
     const auto& state = session->GetSessionState();
     if (WindowHelper::IsSubWindow(session->GetWindowType())) {
-        auto mainSession = session->GetMainSession();
+        const auto& mainSession = session->GetMainSession();
         if (mainSession == nullptr) {
             TLOGE(WmsLogTag::WMS_SUB, "Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
             return false;
