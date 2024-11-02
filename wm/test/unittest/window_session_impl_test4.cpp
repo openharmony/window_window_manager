@@ -274,7 +274,6 @@ HWTEST_F(WindowSessionImplTest4, SetWindowTitleMoveEnabled, Function | SmallTest
     ASSERT_NE(window, nullptr);
     WMError res = window->SetWindowTitleMoveEnabled(true);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -284,10 +283,10 @@ HWTEST_F(WindowSessionImplTest4, SetWindowTitleMoveEnabled, Function | SmallTest
     res = window->SetWindowTitleMoveEnabled(true);
     EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window_->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     res = window->SetWindowTitleMoveEnabled(true);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-    window_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     res = window->SetWindowTitleMoveEnabled(true);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
