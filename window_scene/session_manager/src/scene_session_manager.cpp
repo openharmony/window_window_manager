@@ -3199,7 +3199,7 @@ WSError SceneSessionManager::ProcessBackEvent()
     auto task = [this]() {
         auto session = GetSceneSession(focusedSessionId_);
         if (!session) {
-            WLOGFE("session is nullptr: %{public}d", focusedSessionId_);
+            TLOGNE("session is nullptr: %{public}d", focusedSessionId_);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         TLOGNI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
