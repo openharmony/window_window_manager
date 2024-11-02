@@ -3208,7 +3208,7 @@ WSError SceneSessionManager::ProcessBackEvent()
             WLOGFD("RequestSessionBack when start session");
             if (session->GetSessionInfo().abilityInfo != nullptr &&
                 session->GetSessionInfo().abilityInfo->unclearableMission) {
-                TLOGI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
+                TLOGNI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
                 return WSError::WS_OK;
             }
             session->RequestSessionBack(true);
