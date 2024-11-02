@@ -148,8 +148,7 @@ HWTEST_F(SceneSessionTest2, NotifyPropertyWhenConnect1, Function | SmallTest | L
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     int ret = 1;
     std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
@@ -958,8 +957,7 @@ HWTEST_F(SceneSessionTest2, SaveUpdatedIcon, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SaveUpdatedIcon";
     info.bundleName_ = "SaveUpdatedIcon";
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
 
     sceneSession->scenePersistence_ = new ScenePersistence("OpenHarmony", 1);
     EXPECT_NE(nullptr, sceneSession->scenePersistence_);
@@ -976,8 +974,7 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "NotifyTouchOutside";
     info.bundleName_ = "NotifyTouchOutside";
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
 
     sceneSession->sessionStage_ = new SessionStageMocker();
     EXPECT_NE(nullptr, sceneSession->sessionStage_);
@@ -1008,8 +1005,7 @@ HWTEST_F(SceneSessionTest2, CheckOutTouchOutsideRegister, Function | SmallTest |
     SessionInfo info;
     info.abilityName_ = "CheckOutTouchOutsideRegister";
     info.bundleName_ = "CheckOutTouchOutsideRegister";
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
 
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
@@ -1067,8 +1063,7 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     SessionInfo info;
     info.abilityName_ = "NotifyForceHideChange";
     info.bundleName_ = "NotifyForceHideChange";
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     sceneSession->NotifyForceHideChange(true);
 
     sptr<Session> session = new (std::nothrow) Session(info);
@@ -1111,8 +1106,7 @@ HWTEST_F(SceneSessionTest2, ClearSpecificSessionCbMap, Function | SmallTest | Le
     SessionInfo info;
     info.abilityName_ = "ClearSpecificSessionCbMap";
     info.bundleName_ = "ClearSpecificSessionCbMap";
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
     sceneSession->ClearSpecificSessionCbMap();
 }
@@ -1836,8 +1830,7 @@ HWTEST_F(SceneSessionTest2, GetShowWhenLockedFlagValue, Function | SmallTest | L
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, specificCallback_);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     EXPECT_NE(property, nullptr);
