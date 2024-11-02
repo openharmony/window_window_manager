@@ -2329,11 +2329,11 @@ void Session::NotifySessionTouchableChange(bool touchable)
     }
 }
 
-void Session::NotifyClick(bool requestFocus)
+void Session::NotifyClick(bool requestFocus, bool isClick)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "requestFocus: %{public}u", requestFocus);
+    TLOGD(WmsLogTag::WMS_FOCUS, "requestFocus: %{public}u, isClick: %{public}u", requestFocus, isClick);
     if (clickFunc_) {
-        clickFunc_(requestFocus);
+        clickFunc_(requestFocus, isClick);
     }
 }
 
