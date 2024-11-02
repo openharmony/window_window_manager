@@ -15,7 +15,6 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
-#include <algorithm>
 #include <securec.h>
 
 #include <ability_context.h>
@@ -62,10 +61,8 @@
 #include "perform_reporter.h"
 #include "dms_reporter.h"
 #include "res_sched_client.h"
-#include "res_type.h"
 #include "anomaly_detection.h"
 #include "hidump_controller.h"
-#include "window_pid_visibility_info.h"
 #include "session/host/include/multi_instance_manager.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE

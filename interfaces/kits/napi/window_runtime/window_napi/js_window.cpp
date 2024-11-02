@@ -2688,7 +2688,14 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
+        return NapiGetUndefined(env);
+    }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, isLayoutFullScreen](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -6701,6 +6708,10 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]OnSetImmersiveModeEnabledState is not allowed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
+    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
+        return NapiGetUndefined(env);
+    }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enable");
@@ -6862,12 +6873,14 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "This is not system window.");
+        if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
+            !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
+            !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "This is not valid window.");
             *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }
-        *err = window->StartMoveSystemWindow();
+        *err = window->StartMoveWindow();
     };
 
     NapiAsyncTask::CompleteCallback complete = [err](napi_env env, NapiAsyncTask& task, int32_t status) {

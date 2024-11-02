@@ -344,6 +344,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setUniqueDensityDpiFromSCB", moduleName,
         JsSceneSession::SetUniqueDensityDpiFromSCB);
     BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
+    BindNativeFunction(env, objValue, "removeBlank", moduleName, JsSceneSession::RemoveBlank);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
         JsSceneSession::SetBufferAvailableCallbackEnable);
     BindNativeFunction(env, objValue, "syncDefaultRequestedOrientation", moduleName,
@@ -410,7 +411,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
 {
     auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     session->RegisterSessionChangeCallback(sessionchangeCallback);
-    sessionchangeCallback->clearCallbackFunc_ = [weakThis = wptr(this)](bool needRemove) {
+    session->RegisterClearCallbackMapCallback([weakThis = wptr(this)](bool needRemove) {
         if (!needRemove) {
             TLOGND(WmsLogTag::WMS_LIFE, "clearCallbackFunc needRemove is false");
             return;
@@ -421,7 +422,7 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
             return;
         }
         jsSceneSession->ClearCbMap();
-    };
+    });
     sessionchangeCallback_ = sessionchangeCallback;
 
     taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
@@ -1518,44 +1519,38 @@ void JsSceneSession::ProcessNeedAvoidRegister()
 
 void JsSceneSession::ProcessIsCustomAnimationPlaying()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    sessionchangeCallback->onIsCustomAnimationPlaying_ = [weakThis = wptr(this)](bool status) {
+    session->RegisterIsCustomAnimationPlayingCallback([weakThis = wptr(this)](bool status) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessIsCustomAnimationPlaying jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnIsCustomAnimationPlaying(status);
-    };
-    WLOGFD("success");
+    });
 }
 
 void JsSceneSession::ProcessShowWhenLockedRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnShowWhenLocked_ = [weakThis = wptr(this)](bool showWhenLocked) {
+    const char* const where = __func__;
+    session->RegisterShowWhenLockedCallback([weakThis = wptr(this), where](bool showWhenLocked) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessShowWhenLockedRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnShowWhenLocked(showWhenLocked);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    sessionchangeCallback->OnShowWhenLocked_(session->GetShowWhenLockedFlagValue());
-    WLOGFD("success");
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessRequestedOrientationChange()
@@ -1577,20 +1572,21 @@ void JsSceneSession::ProcessRequestedOrientationChange()
 
 void JsSceneSession::ProcessForceHideChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnForceHideChange_ = [weakThis = wptr(this)](bool hide) {
+    const char* const where = __func__;
+    session->RegisterForceHideChangeCallback([weakThis = wptr(this), where](bool hide) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessForceHideChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnForceHideChange(hide);
-    };
-    WLOGFD("success");
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::OnForceHideChange(bool hide)
@@ -1994,6 +1990,13 @@ napi_value JsSceneSession::SetBlankFlag(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetBlankFlag(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::RemoveBlank(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnRemoveBlank(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info)
@@ -4721,6 +4724,17 @@ napi_value JsSceneSession::OnSetBlankFlag(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     session->SetBlankFlag(isAddBlank);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnRemoveBlank(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->NotifyRemoveBlank();
     return NapiGetUndefined(env);
 }
 

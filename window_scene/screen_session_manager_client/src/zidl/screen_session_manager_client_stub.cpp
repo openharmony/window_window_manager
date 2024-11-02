@@ -100,6 +100,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleScreenCaptureNotify(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SUPER_FOLD_STATUS_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnSuperFoldStatusChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -313,6 +317,16 @@ int ScreenSessionManagerClientStub::HandleScreenCaptureNotify(MessageParcel& dat
     auto clientName = data.ReadString();
     WLOGI("notify scb capture screenId=%{public}" PRIu64", uid=%{public}d.", screenId, uid);
     ScreenCaptureNotify(screenId, uid, clientName);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnSuperFoldStatusChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto superFoldStatus = static_cast<SuperFoldStatus>(data.ReadUint32());
+    WLOGI("super fold status screenId=%{public}" PRIu64", superFoldStatus=%{public}d.",
+        screenId, static_cast<uint32_t>(superFoldStatus));
+    OnSuperFoldStatusChanged(screenId, superFoldStatus);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

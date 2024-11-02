@@ -15,13 +15,8 @@
 
 #include "session/host/include/main_session.h"
 
-#include <ui/rs_surface_node.h>
-
-#include "key_event.h"
-#include "pointer_event.h"
 #include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {

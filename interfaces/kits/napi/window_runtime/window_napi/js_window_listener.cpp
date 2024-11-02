@@ -33,6 +33,13 @@ JsWindowListener::~JsWindowListener()
     WLOGI("[NAPI]~JsWindowListener");
 }
 
+void JsWindowListener::OnLastStrongRef(const void *)
+{
+    if (napi_status::napi_ok != napi_send_event(env_, [jsCallBack = std::move(jsCallBack_)] {}, napi_eprio_immediate)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to send event");
+    }
+}
+
 void JsWindowListener::SetMainEventHandler()
 {
     auto mainRunner = AppExecFwk::EventRunner::GetMainEventRunner();
@@ -120,7 +127,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, displayId, tints, eng = env_] (napi_env env,
             NapiAsyncTask& task, int32_t status) {
-            
+
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or eng is nullptr");

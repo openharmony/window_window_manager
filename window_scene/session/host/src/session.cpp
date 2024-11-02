@@ -102,6 +102,16 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
     }
 }
 
+Session::~Session()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+            // do nothing
+        });
+    }
+}
+
 void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
     const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
 {
@@ -409,6 +419,16 @@ void Session::NotifyLayoutFinished()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnLayoutFinished();
+        }
+    }
+}
+
+void Session::NotifyRemoveBlank()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveBlank();
         }
     }
 }

@@ -15,11 +15,7 @@
 
 #include "js_err_utils.h"
 #include "js_window_stage.h"
-#include <string>
-#include "js_runtime_utils.h"
 #include "js_window.h"
-#include "js_window_register_manager.h"
-#include "js_window_utils.h"
 #include "window_manager_hilog.h"
 #include "permission.h"
 
