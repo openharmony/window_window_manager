@@ -1948,7 +1948,7 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Enable or disable move window.
+     * @brief Enable or disable move window by title bar.
      *
      * @param enable The value true means to enable window moving, and false means the opposite.
      * @return Errorcode of window.
