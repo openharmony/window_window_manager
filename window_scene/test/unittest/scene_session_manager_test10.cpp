@@ -587,11 +587,11 @@ HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | 
 }
 
 /**
- * @tc.name: IsInSecondaryScreen
- * @tc.desc: test IsInSecondaryScreen
+ * @tc.name: IsInDefaultScreen
+ * @tc.desc: test IsInDefaultScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, IsInDefaultScreen, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "test";
@@ -603,12 +603,12 @@ HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | 
     DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     property->SetDisplayId(displayId);
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), false);
+    ASSERT_EQ(ssm_->IsInDefaultScreen(sceneSession), true);
 
     displayId = 5;
     property->SetDisplayId(displayId);
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), true);
+    ASSERT_EQ(ssm_->IsInDefaultScreen(sceneSession), false);
 }
 
 /**
@@ -662,6 +662,28 @@ HWTEST_F(SceneSessionManagerTest10, EraseSceneSessionAndMarkDirtyLockFree, Funct
     ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
     ASSERT_EQ(ssm_->sessionMapDirty_, static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE));
     ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
+}
+
+/**
+ * @tc.name: IsNeedSkipWindowModeTypeCheck
+ * @tc.desc: IsNeedSkipWindowModeTypeCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, IsNeedSkipWindowModeTypeCheck, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "IsNeedSkipWindowModeTypeCheck";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetRSVisible(true);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ASSERT_TRUE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false));
+    sceneSession->SetRSVisible(false);
+    ASSERT_TRUE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, true));
+    ASSERT_FALSE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false));
 }
 }  // namespace
 }
