@@ -4152,7 +4152,7 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
             TLOGD(WmsLogTag::WMS_SUB, "Sub window is at foreground, id: %{public}d", session->GetPersistentId());
             return true;
         }
-        LOGD(WmsLogTag::WMS_SUB, "Sub window is at background, id: %{public}d", session->GetPersistentId());
+        TLOGD(WmsLogTag::WMS_SUB, "Sub window is at background, id: %{public}d", session->GetPersistentId());
         return false;
     }
 
