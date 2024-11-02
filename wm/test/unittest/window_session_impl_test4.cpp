@@ -261,6 +261,44 @@ HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetWindowTitleMoveEnabled
+ * @tc.desc: SetWindowTitleMoveEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowTitleMoveEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowTitleMoveEnabledtest01 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowTitleMoveEnabled");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    WMError res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->SetWindowTitleMoveEnabled(false);
+    EXPECT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowTitleMoveEnabledtest01 end";
+}
+
+/**
  * @tc.name: SetSubWindowModal
  * @tc.desc: SetSubWindowModal and check the retCode
  * @tc.type: FUNC
