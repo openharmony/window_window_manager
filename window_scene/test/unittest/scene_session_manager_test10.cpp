@@ -716,7 +716,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallT
 HWTEST_F(SceneSessionManagerTest10, IsNeedSkipWindowModeTypeCheck, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.bundleName_ = "IsNeedSkipWindowModeTypeCheck";
     sessionInfo.abilityName_ = "IsNeedSkipWindowModeTypeCheck";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
