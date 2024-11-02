@@ -1664,6 +1664,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
     uint32_t vectorSize = 128;
     data.WriteUint32(vectorSize);
     stub_->HandleNotifyDumpInfoResult(data, reply);
+
     std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
     vectorSize = static_cast<uint32_t>(info.size());
     data.WriteUint32(vectorSize);
@@ -1676,31 +1677,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
             data.WriteRawData(curInfo, curSize);
         }
     }
+
     int res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-}
-
-/**
- * @tc.name: HandleRegisterCollaborator
- * @tc.desc: test HandleRegisterCollaborator
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | SmallTest | Level2)
-{
-    if (stub_ == nullptr) {
-        return;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    int res;
-
-    res = stub_->HandleRegisterCollaborator(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    int32_t type = CollaboratorType::RESERVE_TYPE;
-    data.WriteInt32(type);
-    res = stub_->HandleRegisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
@@ -2210,6 +2188,30 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetDisplayIdByWindowId, Function | S
 
     int res = stub_->HandleGetDisplayIdByWindowId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRegisterCollaborator
+ * @tc.desc: test HandleRegisterCollaborator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | SmallTest | Level2)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    int res;
+
+    res = stub_->HandleRegisterCollaborator(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    int32_t type = CollaboratorType::RESERVE_TYPE;
+    data.WriteInt32(type);
+    res = stub_->HandleRegisterCollaborator(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 }
 }
