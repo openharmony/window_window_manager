@@ -1869,9 +1869,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
 {
     auto persistentId = scnSession->GetPersistentId();
     RequestInputMethodCloseKeyboard(persistentId);
-    if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        sceneSession->SetIsStarting(true);
-        sceneSession->SetStartingBeforeVisible(true);
+    if (WindowHelper::IsMainWindow(scnSession->GetWindowType())) {
+        scnSession->SetIsStarting(true);
+        scnSession->SetStartingBeforeVisible(true);
     }
     if (WindowHelper::IsMainWindow(scnSession->GetWindowType()) && scnSession->IsFocusedOnShow()) {
         if (Session::IsScbCoreEnabled()) {
