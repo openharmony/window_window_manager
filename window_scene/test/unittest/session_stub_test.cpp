@@ -88,35 +88,6 @@ HWTEST_F(SessionStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleSystemSessionEvent1
- * @tc.desc: sessionStub HandleSystemSessionEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleSystemSessionEvent1, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE));
-    int result = session_->HandleSystemSessionEvent(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
-}
-
-/**
- * @tc.name: HandleSystemSessionEvent2
- * @tc.desc: sessionStub HandleSystemSessionEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleSystemSessionEvent2, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-
-    data.WriteUint32(0xFFFFFFFF);
-    int result = session_->HandleSystemSessionEvent(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
-}
-/**
  * @tc.name: ProcessRemoteRequestTest01
  * @tc.desc: sessionStub ProcessRemoteRequestTest01
  * @tc.type: FUNC
@@ -845,6 +816,36 @@ HWTEST_F(SessionStubTest, HandleUpdateClientRect01, Function | SmallTest | Level
     data.WriteUint32(800);
     res = session_->HandleUpdateClientRect(data, reply);
     ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleSystemSessionEvent1
+ * @tc.desc: sessionStub HandleSystemSessionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSystemSessionEvent1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteUint32(static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE));
+    int result = session_->HandleSystemSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSystemSessionEvent2
+ * @tc.desc: sessionStub HandleSystemSessionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSystemSessionEvent2, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteUint32(0xFFFFFFFF);
+    int result = session_->HandleSystemSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
 }
 }
 } // namespace Rosen
