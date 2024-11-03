@@ -633,11 +633,9 @@ HWTEST_F(SceneSessionTest3, SetRestoreMainWindowCallback, Function | SmallTest |
     info.bundleName_ = "SetRestoreMainWindowCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    NotifyRestoreMainWindowFunc func = []() {
+    sceneSession->SetRestoreMainWindowCallback([]() {
         return;
-    };
-
-    sceneSession->SetRestoreMainWindowCallback(func);
+    });
     ASSERT_NE(nullptr, sceneSession->onRestoreMainWindowFunc_);
 }
 

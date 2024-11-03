@@ -287,7 +287,6 @@ public:
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
-    NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
 
@@ -296,8 +295,6 @@ public:
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     void SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func);
-    void SetTitleAndDockHoverShowChangeCallback(const NotifyTitleAndDockHoverShowChangeFunc& func);
-    void SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
@@ -396,7 +393,6 @@ public:
      */
     void ClearJsSceneSessionCbMap(bool needRemove); // ONLY Accessed on OS_sceneSession thread
     void ClearSpecificSessionCbMap();
-    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
     void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
@@ -505,6 +501,12 @@ public:
     bool GetGestureBackEnabled();
     bool GetEnableGestureBackHadSet();
 
+    /**
+     * PC Window
+     */
+    void SetTitleAndDockHoverShowChangeCallback(const NotifyTitleAndDockHoverShowChangeFunc&& func);
+    void SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc&& func);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect,
         const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
@@ -576,6 +578,12 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
+
+    /**
+     * PC Window
+     */
+    NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
+    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
