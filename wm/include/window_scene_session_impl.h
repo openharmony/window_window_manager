@@ -42,7 +42,6 @@ public:
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
-    WMError Restore() override;
     void StartMove() override;
     bool GetStartMoveFlag() override;
     WmErrorCode StartMoveWindow() override;
@@ -64,15 +63,8 @@ public:
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
-
-    /**
-     * Window Immersive
-     */
     WMError SetLayoutFullScreen(bool status) override;
-    WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
-        bool isDockHoverShown = true) override;
     WMError SetFullScreen(bool status) override;
-
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     WMError GetWindowLimits(WindowLimits& windowLimits) override;
@@ -161,6 +153,9 @@ public:
      */
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError Restore() override;
+    WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
 
     /*
      * Free Multi Window

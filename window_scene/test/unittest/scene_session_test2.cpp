@@ -2059,10 +2059,9 @@ HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, Function | S
     info.abilityName_ = "SetTitleAndDockHoverShowChangeCallback";
     info.bundleName_ = "SetTitleAndDockHoverShowChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    NotifyTitleAndDockHoverShowChangeFunc func = [](bool isTitleHoverShown, bool isDockHoverShown) {
+    sceneSession->SetTitleAndDockHoverShowChangeCallback([](bool isTitleHoverShown, bool isDockHoverShown) {
         return;
-    };
-    sceneSession->SetTitleAndDockHoverShowChangeCallback(func);
+    });
     EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
 }
 }

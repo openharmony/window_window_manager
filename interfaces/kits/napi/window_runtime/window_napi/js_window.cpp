@@ -1395,20 +1395,21 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
 {
     NapiAsyncTask::CompleteCallback complete =
-        [windowToken = windowToken_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (windowToken == nullptr) {
+        [weakToken = wptr<Window>(windowToken_)](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto window = weakToken.promote();
+            if (window == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr or get invalid param");
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
-            if (!WindowHelper::IsMainWindow(windowToken->GetType())) {
+            if (!WindowHelper::IsMainWindow(window->GetType())) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "Restore fail, not main window");
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
                 return ;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken->Restore());
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Restore());
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
@@ -2635,14 +2636,15 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
     }
     const char* const funcName = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [windowToken = windowToken_, isTitleHoverShown, isDockHoverShown, funcName](napi_env env,
+        [weakToken = wptr<Window>(windowToken_), isTitleHoverShown, isDockHoverShown, funcName](napi_env env,
             NapiAsyncTask& task, int32_t status) {
-            if (windowToken == nullptr) {
+            auto window = weakToken.promote();
+            if (window == nullptr) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", funcName);
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
-            WMError errCode = windowToken->SetTitleAndDockHoverShown(isTitleHoverShown, isDockHoverShown);
+            WMError errCode = window->SetTitleAndDockHoverShown(isTitleHoverShown, isDockHoverShown);
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s set title and dock hover show failed!", funcName);
@@ -2652,7 +2654,7 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
                 task.Resolve(env, NapiGetUndefined(env));
             }
             TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s window [%{public}u, %{public}s] [%{public}d, %{public}d]",
-                funcName, windowToken->GetWindowId(), windowToken->GetWindowName().c_str(),
+                funcName, window->GetWindowId(), window->GetWindowName().c_str(),
                 isTitleHoverShown, isDockHoverShown);
         };
     napi_value lastParam = (argc <= 2) ? nullptr : (GetType(env, argv[2]) == napi_function ? argv[2] : nullptr);

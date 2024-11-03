@@ -1090,7 +1090,7 @@ void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityC
     PostTask(task, "SetKeyboardGravityChangeCallback");
 }
 
-void SceneSession::SetTitleAndDockHoverShowChangeCallback(const NotifyTitleAndDockHoverShowChangeFunc& func)
+void SceneSession::SetTitleAndDockHoverShowChangeCallback(const NotifyTitleAndDockHoverShowChangeFunc&& func)
 {
     const char* const funcName = __func__;
     auto task = [weakThis = wptr(this), func, funcName] {
@@ -1106,7 +1106,7 @@ void SceneSession::SetTitleAndDockHoverShowChangeCallback(const NotifyTitleAndDo
     PostTask(task, funcName);
 }
 
-void SceneSession::SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc& func)
+void SceneSession::SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc&& func)
 {
     const char* const funcName = __func__;
     auto task = [weakThis = wptr(this), func, funcName] {
@@ -5282,8 +5282,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
         }
-        session->onTitleAndDockHoverShowChangeFunc_ = nullptr;
-        session->onRestoreMainWindowFunc_ = nullptr;
         session->Session::UnregisterSessionChangeListeners();
     };
     PostTask(task, "UnregisterSessionChangeListeners");
