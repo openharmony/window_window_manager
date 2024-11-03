@@ -1652,6 +1652,32 @@ HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function |
 }
 
 /**
+ * @tc.name: SetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager SetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig, Function | SmallTest | Level3)
+{
+    std::string bundleName = "SetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = { 0, "MainPage" };
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTest | Level3)
+{
+    std::string bundleName = "GetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
+    ASSERT_EQ(config.mode_, 0);
+    ASSERT_EQ(config.homePage_, "");
+}
+
+/**
  * @tc.name: CloseTargetFloatWindow
  * @tc.desc: SceneSesionManager CloseTargetFloatWindow
  * @tc.type: FUNC
