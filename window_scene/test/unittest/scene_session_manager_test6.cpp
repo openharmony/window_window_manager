@@ -1065,43 +1065,91 @@ HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult02, Funct
 }
 
 /**
- * @tc.name: FillWindowInfo
- * @tc.desc: FillWindowInfo
+ * @tc.name: FillWindowInfo01
+ * @tc.desc: FillWindowInfo01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, FillWindowInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest6, FillWindowInfo01, Function | SmallTest | Level3)
 {
+    ASSERT_NE(nullptr, ssm_);
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     sptr<SceneSession> sceneSession = nullptr;
-    ASSERT_NE(nullptr, ssm_);
     auto ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(false, ret);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
-    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.abilityName_ = "FillWindowInfo01";
     sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, ssm_);
     ASSERT_NE(nullptr, sceneSession);
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
+    EXPECT_EQ(1, infos.size());
+}
+
+/**
+ * @tc.name: FillWindowInfo02
+ * @tc.desc: FillWindowInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, FillWindowInfo02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SCBGestureBack";
+    sessionInfo.abilityName_ = "FillWindowInfo02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ret = ssm_->FillWindowInfo(infos, sceneSession);
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(0, infos.size());
+}
+
+/**
+ * @tc.name: FillWindowInfo03
+ * @tc.desc: FillWindowInfo03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, FillWindowInfo03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "FillWindowInfo03";
     sessionInfo.isSystem_ = true;
-    ASSERT_NE(nullptr, ssm_);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
-    sessionInfo.isSystem_ = false;
+    EXPECT_EQ(1, infos.size());
+    EXPECT_EQ(1, infos[0]->wid_);
+}
+
+/**
+ * @tc.name: FillWindowInfo04
+ * @tc.desc: FillWindowInfo04
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, FillWindowInfo04, Function | SmallTest | Level3)
+{
     ASSERT_NE(nullptr, ssm_);
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "FillWindowInfo04";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->property_->SetDisplayId(1);
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
+    EXPECT_EQ(1, infos.size());
+    EXPECT_EQ(1, infos[0]->displayId_);
     sceneSession->property_ = nullptr;
-    ASSERT_NE(nullptr, ssm_);
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
-    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, sceneSession->property_);
-    ASSERT_NE(nullptr, ssm_);
-    ret = ssm_->FillWindowInfo(infos, sceneSession);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(1, infos.size());
+    EXPECT_NE(1, infos[0]->displayId_);
 }
 
 /**
