@@ -709,6 +709,34 @@ HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallT
 }
 
 /**
+ * @tc.name: ProcessUpdateLastFocusedAppId
+ * @tc.desc: test ProcessUpdateLastFocusedAppId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | SmallTest | Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    std::vector<uint32_t> zOrderList;
+    ssm_->lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "lastFocusedAppSession";
+    sessionInfo.abilityName_ = "lastFocusedAppSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    ssm_->lastFocusedAppSessionId_ = 1;
+    sceneSession->zOrder_ = 101;
+
+    ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
+    ASSERT_EQ(1, ssm_->lastFocusedAppSessionId_);
+
+    zOrderList.push_back(103);
+    ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
+    ASSERT_EQ(INVALID_SESSION_ID, ssm_->lastFocusedAppSessionId_);
+}
+
+/**
  * @tc.name: IsNeedSkipWindowModeTypeCheck
  * @tc.desc: IsNeedSkipWindowModeTypeCheck
  * @tc.type: FUNC

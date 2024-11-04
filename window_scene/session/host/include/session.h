@@ -105,6 +105,7 @@ public:
     virtual void OnExtensionTimeout(int32_t errorCode) {}
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
+    virtual void OnAppRemoveStartingWindow() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -366,6 +367,8 @@ public:
     virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
     bool CheckFocusable() const;
+    void SetStartingBeforeVisible(bool isStartingBeforeVisible);
+    bool GetStartingBeforeVisible() const;
     bool IsFocused() const;
     bool GetFocused() const;
     virtual WSError UpdateFocus(bool isFocused);
@@ -510,6 +513,13 @@ public:
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
+
+    /*
+     * Starting Window
+     */
+    WSError RemoveStartingWindow() override;
+    void SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow);
+    bool GetEnableRemoveStartingWindow() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -737,6 +747,7 @@ private:
     bool focusedOnShow_ = true;
     std::atomic_bool systemFocusable_ = true;
     bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
+    bool isStartingBeforeVisible_ = false;
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
@@ -769,6 +780,11 @@ private:
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
+
+    /*
+     * Starting Window
+     */
+    bool enableRemoveStartingWindow_ {false};
 };
 } // namespace OHOS::Rosen
 
