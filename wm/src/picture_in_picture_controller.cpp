@@ -327,26 +327,8 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
     }
     ResetExtController();
     if (!withAnim) {
+        TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow without animation");
         DestroyPictureInPictureWindow();
-    } else {
-        // handle destroy timeout
-        if (handler_ == nullptr) {
-            handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-        }
-        auto timeoutTask = [weakThis = wptr(this)]() {
-            auto pipController = weakThis.promote();
-            if (pipController == nullptr) {
-                TLOGE(WmsLogTag::WMS_PIP, "execute destroy timeout task failed, pipController is null");
-                return;
-            }
-            if (pipController->curState_ == PiPWindowState::STATE_STOPPED) {
-                TLOGI(WmsLogTag::WMS_PIP, "pip window already destroyed");
-                return;
-            }
-            TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow timeout");
-            pipController->DestroyPictureInPictureWindow();
-        };
-        handler_->PostTask(std::move(timeoutTask), DESTROY_TIMEOUT_TASK, PIP_DESTROY_TIMEOUT);
     }
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
