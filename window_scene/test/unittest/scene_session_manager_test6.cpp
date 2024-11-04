@@ -1717,6 +1717,37 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | Small
 }
 
 /**
+ * @tc.name: DestroyDialogWithMainWindow02
+ * @tc.desc: DestroyDialogWithMainWindow02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> scnSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(scnSession, nullptr);
+
+    sptr<Session> dialogSession1 = sptr<Session>::MakeSptr(info);
+    sptr<Session> dialogSession2 = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(dialogSession1, nullptr);
+    ASSERT_NE(dialogSession2, nullptr);
+    dialogSession1->persistentId_ = 0;
+    dialogSession2->persistentId_ = 1;
+    scnSession->dialogVec_.push_back(dialogSession1);
+    scnSession->dialogVec_.push_back(dialogSession2);
+
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({0, nullptr});
+    ssm_->sceneSessionMap_.insert({0, scnSession});
+
+    auto ret = ssm_->DestroyDialogWithMainWindow(scnSession);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: RequestSceneSessionDestruction
  * @tc.desc: RequestSceneSessionDestruction
  * @tc.type: FUNC
@@ -1940,6 +1971,16 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession, Function | SmallTest | L
     ScreenId screenId = 0;
     std::unordered_map<int32_t, SessionUIParam> uiParams;
     ssm_->FlushUIParams(screenId, std::move(uiParams));
+}
+
+/**
+ * @tc.name: CheckIfReuseSession02
+ * @tc.desc: CheckIfReuseSession02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession02, Function | SmallTest | Level3)
+{
+    
 }
 
 /**
