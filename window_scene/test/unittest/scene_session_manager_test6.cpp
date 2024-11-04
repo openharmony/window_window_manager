@@ -1149,7 +1149,7 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo04, Function | SmallTest | Leve
     ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
     EXPECT_EQ(2, infos.size());
-    EXPECT_NE(1, infos[0]->displayId_);
+    EXPECT_NE(1, infos[1]->displayId_);
 }
 
 /**
