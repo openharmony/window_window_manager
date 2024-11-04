@@ -224,6 +224,15 @@ const std::map<DM_ScreenHDRFormat, DM_HDRFormat> DM_NATIVE_TO_NDK_HDR_FORMAT_TYP
     { DM_ScreenHDRFormat::IMAGE_HDR_ISO_DUAL,     DM_HDRFormat::IMAGE_HDR_ISO_DUAL },
     { DM_ScreenHDRFormat::IMAGE_HDR_ISO_SINGLE,   DM_HDRFormat::IMAGE_HDR_ISO_SINGLE },
 };
+
+#define DISPLAY_MANAGER_FREE_MEMORY(ptr) \
+    do { \
+        if ((ptr)) { \
+            free((ptr)); \
+            (ptr) = NULL; \
+        } \
+    } while (0)
+
 }  // namespace Rosen
 }  // namespace OHOS
 #endif  // OHOS_OH_NATIVE_DISPLAY_MANAGER_INNER_H
