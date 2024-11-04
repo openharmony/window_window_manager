@@ -550,7 +550,7 @@ private:
     /*
      * Window Layout
      */
-    std::atomic_bool windowSizeChanged_ = true;
+    WSRect layoutRect_;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
