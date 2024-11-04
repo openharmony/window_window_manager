@@ -446,7 +446,7 @@ HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, Function | SmallTest | Le
         ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
     }
 }
-/*
+/**
  * @tc.name: GetWindowAnimationTargets01
  * @tc.desc: get window animation targets
  * @tc.type: FUNC

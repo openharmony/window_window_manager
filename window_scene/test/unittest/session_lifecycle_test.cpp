@@ -70,6 +70,7 @@ private:
         void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
             int64_t uiExtensionIdLevel) override {}
         void OnDrawingCompleted() override {}
+        void OnAppRemoveStartingWindow() override {}
     };
     std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 };
@@ -405,10 +406,10 @@ HWTEST_F(WindowSessionLifecycleTest, IsActive, Function | SmallTest | Level2)
 }
 
 /**
-* @tc.name: IsActive43
-* @tc.desc: IsActive
-* @tc.type: FUNC
-*/
+ * @tc.name: IsActive43
+ * @tc.desc: IsActive
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowSessionLifecycleTest, IsActive43, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);

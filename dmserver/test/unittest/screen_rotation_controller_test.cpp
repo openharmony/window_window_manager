@@ -647,53 +647,6 @@ HWTEST_F(ScreenRotationControllerTest, SubscribeMotionSensor, Function | SmallTe
     MotionSubscriber::UnsubscribeMotionSensor();
     ASSERT_EQ(false, MotionSubscriber::isMotionSensorSubscribed_);
 }
-
-/**
- * @tc.name: OnMotionChanged
- * @tc.desc: check function RotationMotionEventCallback->SubscribeMotionSensor
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenRotationControllerTest, OnMotionChanged, Function | SmallTest | Level3)
-{
-    bool needUnsubscribe = false;
-    if (MotionSubscriber::motionEventCallback_ == nullptr) {
-        needUnsubscribe = true;
-        MotionSubscriber::SubscribeMotionSensor();
-    }
-    ASSERT_NE(MotionSubscriber::motionEventCallback_, nullptr);
-    DeviceRotation currentRotation = ScreenRotationController::lastSensorRotationConverted_;
-    DeviceRotation motionRotation = DeviceRotation::INVALID;
-
-    MotionEvent motionData;
-
-    motionData.status = 0;
-    motionRotation = DeviceRotation::ROTATION_PORTRAIT;
-    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
-    ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
-
-    motionData.status = 1;
-    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
-    motionRotation = ScreenRotationController::IsDefaultDisplayRotationPortrait() ?
-        DeviceRotation::ROTATION_LANDSCAPE_INVERTED : DeviceRotation::ROTATION_LANDSCAPE;
-    ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
-
-    motionData.status = 2;
-    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
-    motionRotation = DeviceRotation::ROTATION_PORTRAIT_INVERTED;
-    ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
-
-    motionData.status = 3;
-    MotionSubscriber::motionEventCallback_->OnMotionChanged(motionData);
-    motionRotation = ScreenRotationController::IsDefaultDisplayRotationPortrait() ?
-        DeviceRotation::ROTATION_LANDSCAPE : DeviceRotation::ROTATION_LANDSCAPE_INVERTED;
-    ASSERT_EQ(motionRotation, ScreenRotationController::lastSensorRotationConverted_);
-
-    ScreenRotationController::HandleSensorEventInput(currentRotation);
-
-    if (needUnsubscribe) {
-        MotionSubscriber::UnsubscribeMotionSensor();
-    }
-}
 #endif
 }
 } // namespace Rosen

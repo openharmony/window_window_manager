@@ -585,21 +585,11 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayChangeLi
         NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
 }
 
-static void NativeDisplayManager_FreeMemory(void *memPtr)
-{
-    if (memPtr == nullptr) {
-        TLOGW(WmsLogTag::DMS, "[DMNDK] param is null. no need to free.");
-        return;
-    }
-    free(memPtr);
-    memPtr = nullptr;
-}
-
 static void NativeDisplayManager_SetColorSpace(NativeDisplayManager_DisplayInfo *displayInfo, sptr<DisplayInfo> info)
 {
     std::vector<uint32_t> colorSpaces = info->GetColorSpaces();
     if (colorSpaces.empty()) {
-        TLOGW(WmsLogTag::DMS, "[DMNDK] colorSpaces is empty displayId=%{public}d", displayInfo->id);
+        TLOGW(WmsLogTag::DMS, "[DMNDK] colorSpaces is empty displayId=%{public}u", displayInfo->id);
         return;
     }
     displayInfo->colorSpace = (NativeDisplayManager_DisplayColorSpace*)malloc(
@@ -612,22 +602,22 @@ static void NativeDisplayManager_SetColorSpace(NativeDisplayManager_DisplayInfo 
         sizeof(NativeDisplayManager_DisplayColorSpace));
     if (retMemset != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memset color space failed");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->colorSpace));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->colorSpace);
         return;
     }
     displayInfo->colorSpace->colorSpaceLength = static_cast<uint32_t>(colorSpaces.size());
     displayInfo->colorSpace->colorSpaces = (uint32_t*)malloc(sizeof(uint32_t) * colorSpaces.size());
     if (displayInfo->colorSpace->colorSpaces == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] malloc color spaces failed");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->colorSpace));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->colorSpace);
         return;
     }
     retMemset = memset_s(displayInfo->colorSpace->colorSpaces, sizeof(uint32_t) * colorSpaces.size(), 0,
         sizeof(uint32_t) * colorSpaces.size());
     if (retMemset != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memset color spaces failed");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->colorSpace->colorSpaces));
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->colorSpace));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->colorSpace->colorSpaces);
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->colorSpace);
         return;
     }
 
@@ -643,14 +633,14 @@ static void NativeDisplayManager_SetColorSpace(NativeDisplayManager_DisplayInfo 
             static_cast<uint32_t>(DM_NATIVE_TO_NDK_COLOR_SPACE_TYPE_MAP.at(colorSpaceValue));
         colorLoop++;
     }
-    TLOGI(WmsLogTag::DMS, "[DMNDK] color spaces count:%{public}d.", colorLoop);
+    TLOGI(WmsLogTag::DMS, "[DMNDK] color spaces count:%{public}u.", colorLoop);
 }
 
 static void NativeDisplayManager_SetHdrFormat(NativeDisplayManager_DisplayInfo *displayInfo, sptr<DisplayInfo> info)
 {
     std::vector<uint32_t> hdrFormats = info->GetHdrFormats();
     if (hdrFormats.empty()) {
-        TLOGW(WmsLogTag::DMS, "[DMNDK] hdrFormats is empty displayId=%{public}d", displayInfo->id);
+        TLOGW(WmsLogTag::DMS, "[DMNDK] hdrFormats is empty displayId=%{public}u", displayInfo->id);
         return;
     }
     displayInfo->hdrFormat = (NativeDisplayManager_DisplayHdrFormat*)malloc(
@@ -663,22 +653,22 @@ static void NativeDisplayManager_SetHdrFormat(NativeDisplayManager_DisplayInfo *
         sizeof(NativeDisplayManager_DisplayHdrFormat));
     if (retMemset != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memset hdr format failed");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->hdrFormat));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->hdrFormat);
         return;
     }
     displayInfo->hdrFormat->hdrFormatLength = static_cast<uint32_t>(hdrFormats.size());
     displayInfo->hdrFormat->hdrFormats = (uint32_t*)malloc(sizeof(uint32_t) * hdrFormats.size());
     if (displayInfo->hdrFormat->hdrFormats == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] malloc hdr format failed");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->hdrFormat));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->hdrFormat);
         return;
     }
     retMemset = memset_s(displayInfo->hdrFormat->hdrFormats, sizeof(uint32_t) * hdrFormats.size(), 0,
         sizeof(uint32_t) * hdrFormats.size());
     if (retMemset != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memset hdr format failed");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->hdrFormat->hdrFormats));
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->hdrFormat));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->hdrFormat->hdrFormats);
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->hdrFormat);
         return;
     }
 
@@ -693,7 +683,7 @@ static void NativeDisplayManager_SetHdrFormat(NativeDisplayManager_DisplayInfo *
             static_cast<uint32_t>(DM_NATIVE_TO_NDK_HDR_FORMAT_TYPE_MAP.at(hdrFormatValue));
         hdrLoop++;
     }
-    TLOGI(WmsLogTag::DMS, "[DMNDK] hdr format count:%{public}d", hdrLoop);
+    TLOGI(WmsLogTag::DMS, "[DMNDK] hdr format count:%{public}u", hdrLoop);
 }
 
 static void NativeDisplayManager_SetDisplayInfo(NativeDisplayManager_DisplayInfo *displayInfo,
@@ -723,7 +713,7 @@ static void NativeDisplayManager_SetDisplayInfo(NativeDisplayManager_DisplayInfo
     NativeDisplayManager_SetColorSpace(displayInfo, info);
     /* hdr format */
     NativeDisplayManager_SetHdrFormat(displayInfo, info);
-    TLOGI(WmsLogTag::DMS, "[DMNDK] set display id[%{public}d] finish.", displayInfo->id);
+    TLOGI(WmsLogTag::DMS, "[DMNDK] set display id[%{public}u] finish.", displayInfo->id);
 }
 
 static NativeDisplayManager_ErrorCode NativeDisplayManager_SetDisplaysInfo(const std::vector<sptr<Display>>& displays,
@@ -738,7 +728,7 @@ static NativeDisplayManager_ErrorCode NativeDisplayManager_SetDisplaysInfo(const
         auto info = display->GetDisplayInfo();
         if (info == nullptr) {
             TLOGE(WmsLogTag::DMS, "[DMNDK] get display id[%{public}" PRIu64"] info null.", display->GetId());
-            return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+            continue;
         }
         int ret = memcpy_s(displaysInfo[i].name, OH_DISPLAY_NAME_LENGTH, info->GetName().c_str(),
             OH_DISPLAY_NAME_LENGTH);
@@ -763,18 +753,18 @@ static void NativeDisplayManager_DestroyDisplaysInfoInner(uint32_t displaysLengt
         NativeDisplayManager_DisplayInfo displayItem = displaysInfo[i];
         if (displayItem.colorSpace != nullptr) {
             if (displayItem.colorSpace->colorSpaces != nullptr) {
-                NativeDisplayManager_FreeMemory(static_cast<void *>(displayItem.colorSpace->colorSpaces));
+                DISPLAY_MANAGER_FREE_MEMORY(displayItem.colorSpace->colorSpaces);
             }
-            NativeDisplayManager_FreeMemory(static_cast<void *>(displayItem.colorSpace));
+            DISPLAY_MANAGER_FREE_MEMORY(displayItem.colorSpace);
         }
         if (displayItem.hdrFormat != nullptr) {
             if (displayItem.hdrFormat->hdrFormats != nullptr) {
-                NativeDisplayManager_FreeMemory(static_cast<void *>(displayItem.hdrFormat->hdrFormats));
+                DISPLAY_MANAGER_FREE_MEMORY(displayItem.hdrFormat->hdrFormats);
             }
-            NativeDisplayManager_FreeMemory(static_cast<void *>(displayItem.hdrFormat));
+            DISPLAY_MANAGER_FREE_MEMORY(displayItem.hdrFormat);
         }
     }
-    NativeDisplayManager_FreeMemory(static_cast<void *>(displaysInfo));
+    DISPLAY_MANAGER_FREE_MEMORY(displaysInfo);
 }
 
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAllDisplays(
@@ -800,7 +790,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAllDisplays(
         sizeof(NativeDisplayManager_DisplaysInfo));
     if (retMemset != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memset displays failed.");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displaysInner));
+        DISPLAY_MANAGER_FREE_MEMORY(displaysInner);
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
     size_t displaySize = displays.size();
@@ -809,7 +799,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAllDisplays(
         (NativeDisplayManager_DisplayInfo*)malloc(sizeof(NativeDisplayManager_DisplayInfo) * displaySize);
     if (displaysInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] malloc displaysInfo failed.");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displaysInner));
+        DISPLAY_MANAGER_FREE_MEMORY(displaysInner);
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
     retMemset = memset_s(displaysInfo, sizeof(NativeDisplayManager_DisplayInfo) * displaySize, 0,
@@ -820,8 +810,8 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAllDisplays(
     }
     if (retMemset != EOK || setRet != NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memset or set displaysInfo failed setRet=%{public}d.", setRet);
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displaysInner));
         NativeDisplayManager_DestroyDisplaysInfoInner(displaysInner->displaysLength, displaysInfo);
+        DISPLAY_MANAGER_FREE_MEMORY(displaysInner);
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
     displaysInner->displaysInfo = displaysInfo;
@@ -836,11 +826,11 @@ void OH_NativeDisplayManager_DestroyAllDisplays(NativeDisplayManager_DisplaysInf
         return;
     }
     if (allDisplays->displaysInfo == nullptr) {
-        NativeDisplayManager_FreeMemory(static_cast<void *>(allDisplays));
+        DISPLAY_MANAGER_FREE_MEMORY(allDisplays);
         return;
     }
     NativeDisplayManager_DestroyDisplaysInfoInner(allDisplays->displaysLength, allDisplays->displaysInfo);
-    NativeDisplayManager_FreeMemory(static_cast<void *>(allDisplays));
+    DISPLAY_MANAGER_FREE_MEMORY(allDisplays);
 }
 
 static NativeDisplayManager_DisplayInfo* NativeDisplayManager_FillDisplayInfo(sptr<Display> display,
@@ -863,14 +853,14 @@ static NativeDisplayManager_DisplayInfo* NativeDisplayManager_FillDisplayInfo(sp
         sizeof(NativeDisplayManager_DisplayInfo));
     if (retMemset != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memset display info null.");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInner));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInner);
         *errCode = NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
         return nullptr;
     }
     int ret = memcpy_s(displayInner->name, OH_DISPLAY_NAME_LENGTH, info->GetName().c_str(), OH_DISPLAY_NAME_LENGTH);
     if (ret != EOK) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] memcpy display name failed.");
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInner));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInner);
         *errCode = NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
         return nullptr;
     }
@@ -879,7 +869,7 @@ static NativeDisplayManager_DisplayInfo* NativeDisplayManager_FillDisplayInfo(sp
     return displayInner;
 }
 
-NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateDisplayInfoById(uint32_t id,
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateDisplayById(uint32_t id,
     NativeDisplayManager_DisplayInfo **displayInfo)
 {
     if (displayInfo == nullptr) {
@@ -915,7 +905,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreatePrimaryDisplay(
     return errorCode;
 }
 
-void OH_NativeDisplayManager_DestroyDisplayInfo(NativeDisplayManager_DisplayInfo *displayInfo)
+void OH_NativeDisplayManager_DestroyDisplay(NativeDisplayManager_DisplayInfo *displayInfo)
 {
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] free display info is null.");
@@ -923,20 +913,20 @@ void OH_NativeDisplayManager_DestroyDisplayInfo(NativeDisplayManager_DisplayInfo
     }
     if (displayInfo->colorSpace != nullptr) {
         if (displayInfo->colorSpace->colorSpaces != nullptr) {
-            NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->colorSpace->colorSpaces));
+            DISPLAY_MANAGER_FREE_MEMORY(displayInfo->colorSpace->colorSpaces);
         }
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->colorSpace));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->colorSpace);
     }
     if (displayInfo->hdrFormat != nullptr) {
         if (displayInfo->hdrFormat->hdrFormats != nullptr) {
-            NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->hdrFormat->hdrFormats));
+            DISPLAY_MANAGER_FREE_MEMORY(displayInfo->hdrFormat->hdrFormats);
         }
-        NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo->hdrFormat));
+        DISPLAY_MANAGER_FREE_MEMORY(displayInfo->hdrFormat);
     }
-    NativeDisplayManager_FreeMemory(static_cast<void *>(displayInfo));
+    DISPLAY_MANAGER_FREE_MEMORY(displayInfo);
 }
 
-NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateScreenCapture(uint32_t displayId,
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CaptureScreenPixelmap(uint32_t displayId,
     OH_PixelmapNative **pixelMap)
 {
     if (pixelMap == nullptr) {
@@ -948,6 +938,15 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateScreenCapture(uint3
     option.isNeedNotify_ = true;
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> captureImage = DisplayManager::GetInstance().GetScreenCapture(option, &errCode);
+
+    if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] param error.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_INVALID_PARAM;
+    }
+    if (errCode == DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] not support.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORTED;
+    }
     if (errCode == DmErrorCode::DM_ERROR_NO_PERMISSION) {
         TLOGE(WmsLogTag::DMS, "[DMNDK] pixelMap no permission.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_NO_PERMISSION;

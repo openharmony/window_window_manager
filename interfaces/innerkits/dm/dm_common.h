@@ -356,30 +356,26 @@ enum class FoldStatus: uint32_t {
 
 /**
  * @brief Enumerates the super fold state change events.
-*/
+ */
 enum class SuperFoldStatusChangeEvents : uint32_t {
     UNDEFINED = 0,
-    FOLDED_TO_HALF_FOLDED,
-    HALF_FOLDED_TO_FOLDED,
-    HALF_FOLDED_TO_EXPANDED,
-    EXPANDED_TO_HALF_FOLDED,
-    HALF_FOLDED_TO_KEYBOARD,
-    KEYBOARD_TO_HALF_FOLDED,
-    HALF_FOLDED_TO_SOFT_KEYBOARD,
-    SOFT_KEYBOARD_TO_HALF_FOLDED,
-    SOFT_KEYBOARD_TO_KEYBOARD,
+    ANGLE_CHANGE_EXPANDED,
+    ANGLE_CHANGE_HALF_FOLDED,
+    ANGLE_CHANGE_FOLDED,
+    KEYBOARD_ON,
+    KEYBOARD_OFF,
+    INVALID,
 };
 
 /**
  * @brief Enumerates the super fold state.
-*/
+ */
 enum class SuperFoldStatus : uint32_t {
     UNKNOWN,
     FOLDED,
     HALF_FOLDED,
     EXPANDED,
     KEYBOARD,
-    SOFT_KEYBOARD,
 };
 
 /**

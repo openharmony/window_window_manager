@@ -312,9 +312,9 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterFoldDisplayModeCh
 NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterFoldDisplayModeChangeListener(uint32_t listenerIndex);
 
 /**
- * @brief Obtain all displays.
+ * @brief Create all displays.
  *
- * @param { allDisplays } the result of all displays.
+ * @param allDisplays Output parameter for all displays information.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
  *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
@@ -327,39 +327,39 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAllDisplays(
 /**
  * @brief Destroy all displays.
  *
- * @param { allDisplays } all displays to be free.
+ * @param allDisplays all displays to be free.
  * @syscap SystemCapability.Window.SessionManager.Core
  * @since 14
  */
 void OH_NativeDisplayManager_DestroyAllDisplays(NativeDisplayManager_DisplaysInfo *allDisplays);
 
 /**
- * @brief Obtain the target display by display id.
+ * @brief Create display information by display id.
  *
- * @param { displayId } the display id.
- * @param { displayInfo } the result of all displays.
+ * @param displayId The display id.
+ * @param displayInfo The pointer to the display information.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
  *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.
  * @syscap SystemCapability.Window.SessionManager.Core
  * @since 14
  */
-NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateDisplayInfoById(uint32_t displayId,
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateDisplayById(uint32_t displayId,
     NativeDisplayManager_DisplayInfo **displayInfo);
 
 /**
- * @brief Destroy the target display.
+ * @brief Destroy the display information.
  *
- * @param { displayInfo } the target display to be free.
+ * @param displayInfo the target display to be free.
  * @syscap SystemCapability.Window.SessionManager.Core
  * @since 14
  */
-void OH_NativeDisplayManager_DestroyDisplayInfo(NativeDisplayManager_DisplayInfo *displayInfo);
+void OH_NativeDisplayManager_DestroyDisplay(NativeDisplayManager_DisplayInfo *displayInfo);
 
 /**
- * @brief Obtain the primary display.
+ * @brief Create a primary display.
  *
- * @param { displayInfo } the result of primary display.
+ * @param displayInfo The information of the created display.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
  *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
  *         { @link DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL } If display manager service works abnormally.

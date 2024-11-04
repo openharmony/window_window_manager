@@ -46,6 +46,7 @@ public:
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override {};
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override {};
     void NotifyAvailableAreaChanged(DMRect area) override {};
+    void NotifyScreenMagneticStateChanged(bool isMagneticState) override {};
 };
 }
 }

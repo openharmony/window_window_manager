@@ -3229,4 +3229,31 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetScreenCapture(con
     }
     return pixelMap;
 }
+
+sptr<DisplayInfo> ScreenSessionManagerProxy::GetPrimaryDisplayInfo()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetPrimaryDisplayInfo: remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return nullptr;
+    }
+
+    sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
+    if (info == nullptr) {
+        WLOGFE("get display info.");
+    }
+    return info;
+}
 } // namespace OHOS::Rosen

@@ -13,14 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef OH_NATIVE_DISPLAY_CAPTURE_H
-#define OH_NATIVE_DISPLAY_CAPTURE_H
-
 /**
- * @addtogroup OH_DisplayManager
+ * @addtogroup OH_DisplayCapture
  * @{
  *
- * @brief Defines the data structures for the C APIs of the display capture.
+ * @brief Defines the data structures for the C APIs of the display module.
  *
  * @syscap SystemCapability.WindowManager.WindowManager.Core
  * @since 14
@@ -33,11 +30,14 @@
  * @brief Defines the data structures for the C APIs of the display capture.
  *
  * @kit ArkUI
- * @library libnative_display_manager.so.
+ * @library libnative_display_manager.so
  * @syscap SystemCapability.WindowManager.WindowManager.Core
  * @since 14
  * @version 1.0
  */
+
+#ifndef OH_NATIVE_DISPLAY_CAPTURE_H
+#define OH_NATIVE_DISPLAY_CAPTURE_H
 
 #include "image/pixelmap_native.h"
 #include "oh_display_info.h"
@@ -47,10 +47,10 @@ extern "C" {
 #endif
 
 /**
- * @brief Obtain screen capture.
+ * @brief Capture a screen pixelmap of the specified display.
  *
- * @param { displayId } this display to be captured.
- * @param { pixelMap } the pixelMap of the display by id.
+ * @param displayId The ID of the display to be captured.
+ * @param pixelMap The output pixel map of the captured display.
  * @return { @link DISPLAY_MANAGER_OK } If the operation is successful.
  *         { @link DISPLAY_MANAGER_ERROR_NO_PERMISSION } If no permission.
  *         { @link DISPLAY_MANAGER_ERROR_INVALID_PARAM } If Parameter error.
@@ -59,7 +59,7 @@ extern "C" {
  * @syscap SystemCapability.Window.SessionManager.Core
  * @since 14
  */
-NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateScreenCapture(uint32_t displayId,
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CaptureScreenPixelmap(uint32_t displayId,
     OH_PixelmapNative **pixelMap);
 
 #ifdef __cplusplus
