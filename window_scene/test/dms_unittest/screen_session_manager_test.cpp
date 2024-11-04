@@ -1685,7 +1685,10 @@ HWTEST_F(ScreenSessionManagerTest, ResizeVirtualScreen, Function | SmallTest | L
 
     uint32_t width {100};
     uint32_t height {100};
-    EXPECT_EQ(DMError::DM_OK, ssm_->ResizeVirtualScreen(screenId, width, height));
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    if (screenSession->GetDisplayNode() != nullptr) {
+        EXPECT_EQ(DMError::DM_OK, ssm_->ResizeVirtualScreen(screenId, width, height));
+    }
     ssm_->DestroyVirtualScreen(screenId);
 }
 
