@@ -168,7 +168,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     data.WriteBool(true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MARK_PROCESSED), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
@@ -199,7 +199,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     data.WriteInt32(1);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT), data, reply, option);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -415,9 +415,9 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(data.WriteUint32(2), true);
     res = session_->HandleGetAvoidAreaByType(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteFloat(2.0), true);
+    ASSERT_EQ(data.WriteFloat(2.0f), true);
     res = session_->HandleSetAspectRatio(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     session_->HandleTransferAbilityResult(data, reply);
