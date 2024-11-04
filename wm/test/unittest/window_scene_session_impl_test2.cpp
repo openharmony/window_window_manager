@@ -727,8 +727,39 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, Function | SmallTest |
     windowSceneSessionImpl->property_->SetPersistentId(6);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetParentPersistentId(0);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
     auto ret = windowSceneSessionImpl->RaiseAboveTarget(1);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
+
+    windowSceneSessionImpl->property_->SetParentPersistentId(1);
+    ret = windowSceneSessionImpl->RaiseAboveTarget(1);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    sptr<WindowSessionImpl> winSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    WindowSessionImpl::subWindowSessionMap_.insert(
+        std::make_pair<int32_t, std::vector<sptr<WindowSessionImpl>>>(1, {winSession}));
+    winSession->property_->SetPersistentId(6);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = windowSceneSessionImpl->RaiseAboveTarget(6);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    winSession->state_ = WindowState::STATE_CREATED;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = windowSceneSessionImpl->RaiseAboveTarget(6);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    winSession->state_ = WindowState::STATE_SHOWN;
+    ret = windowSceneSessionImpl->RaiseAboveTarget(6);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    windowSceneSessionImpl->property_->SetPersistentId(3);
+    ret = windowSceneSessionImpl->RaiseAboveTarget(6);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    WindowSessionImpl::subWindowSessionMap_.erase(1);
 }
 
 /**

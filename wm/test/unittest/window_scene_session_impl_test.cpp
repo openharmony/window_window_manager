@@ -459,6 +459,11 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Lev
     windowSceneSession->property_->SetPersistentId(6);
     windowSceneSession->property_->SetParentPersistentId(6);
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->RaiseToAppTop());
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSession->RaiseToAppTop());
 
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -466,10 +471,6 @@ HWTEST_F(WindowSceneSessionImplTest, RaiseToAppTop01, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_DO_NOTHING, windowSceneSession->RaiseToAppTop());
 
     windowSceneSession->state_ = WindowState::STATE_SHOWN;
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    windowSceneSession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->RaiseToAppTop());
 }
 
@@ -810,7 +811,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio, Function | SmallTest | Leve
     option->SetWindowName("SetAspectRatio");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAspectRatio(0.1));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetAspectRatio(0.1));
 
     window->property_->SetPersistentId(1);
     window->property_->SetDisplayId(3);
