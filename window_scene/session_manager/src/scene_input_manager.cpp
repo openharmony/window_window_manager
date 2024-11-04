@@ -159,18 +159,11 @@ std::string DumpTransformInDisplayInfo(const std::vector<float>& transform)
 std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
 {
     std::ostringstream infoStream("DisplayInfo: ");
-    infoStream << " id: " << info.id
-               << " x: " << info.x
-               << "y: " << info.y
-               << " width: " << info.width
-               << "height: " << info.height
-               << " dpi: " << info.dpi
-               << " name:" << info.name
-               << " uniq: " << info.uniq
-               << " displayMode: " << static_cast<int>(info.displayMode)
-               << " direction: " << static_cast<int>(info.direction)
-               << " transform: " << DumpTransformInDisplayInfo(info.transform);
-    std::string infoStr =  infoStream.str();
+    infoStream << " id: " << info.id << " x: " << info.x << " y: " << info.y
+               << " width: " << info.width << " height: " << info.height << " dpi: " << info.dpi
+               << " name:" << info.name << " uniq: " << info.uniq << " displayMode: " << static_cast<int>(info.displayMode)
+               << " direction: " << static_cast<int>(info.direction) << " transform: " << DumpTransformInDisplayInfo(info.transform);
+    std::string infoStr = infoStream.str();
     return infoStr;
 }
 } //namespace
@@ -421,10 +414,8 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         if (e.defaultHotAreas.size() > 0) {
             auto iter = lastWindowDefaultHotArea.find(e.id);
             if (iter == lastWindowDefaultHotArea.end() || iter->second != e.defaultHotAreas[0]) {
-                idListStream << "|" << e.defaultHotAreas[0].x
-                             << "|" << e.defaultHotAreas[0].y
-                             << "|" << e.defaultHotAreas[0].width
-                             << "|" << e.defaultHotAreas[0].height;
+                idListStream << "|" << e.defaultHotAreas[0].x << "|" << e.defaultHotAreas[0].y
+                             << "|" << e.defaultHotAreas[0].width << "|" << e.defaultHotAreas[0].height;
             }
             currWindowDefaultHotArea.insert({e.id, e.defaultHotAreas[0]});
         }
@@ -453,15 +444,11 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
     std::ostringstream displayListStream;
     static std::string lastDisplayList = "";
     for (auto& displayInfo : displayInfos) {
-        displayListStream << displayInfo.id << "|"
-                          << displayInfo.x << "|"
-                          << displayInfo.y << "|"
-                          << displayInfo.width << "|"
-                          << displayInfo.height << "|"
+        displayListStream << displayInfo.id << "|" << displayInfo.x << "|" << displayInfo.y << "|"
+                          << displayInfo.width << "|" << displayInfo.height << "|"
                           << static_cast<int32_t>(displayInfo.direction) << "|"
                           << static_cast<int32_t>(displayInfo.displayDirection) << "|"
-                          << static_cast<int32_t>(displayInfo.displayMode);
-        displayListStream << ",";
+                          << static_cast<int32_t>(displayInfo.displayMode) << ",";
     }
 
     std::string displayList = displayListStream.str();
