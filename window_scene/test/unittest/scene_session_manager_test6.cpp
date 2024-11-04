@@ -1100,7 +1100,7 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo02, Function | SmallTest | Leve
     sessionInfo.abilityName_ = "FillWindowInfo02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ret = ssm_->FillWindowInfo(infos, sceneSession);
+    auto ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(false, ret);
     EXPECT_EQ(0, infos.size());
 }
@@ -1120,7 +1120,7 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo03, Function | SmallTest | Leve
     sessionInfo.isSystem_ = true;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ret = ssm_->FillWindowInfo(infos, sceneSession);
+    auto ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
     EXPECT_EQ(1, infos.size());
     EXPECT_EQ(1, infos[0]->wid_);
@@ -1141,7 +1141,7 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo04, Function | SmallTest | Leve
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->property_->SetDisplayId(1);
-    ret = ssm_->FillWindowInfo(infos, sceneSession);
+    auto ret = ssm_->FillWindowInfo(infos, sceneSession);
     EXPECT_EQ(true, ret);
     EXPECT_EQ(1, infos.size());
     EXPECT_EQ(1, infos[0]->displayId_);
