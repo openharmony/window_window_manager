@@ -1772,10 +1772,10 @@ sptr<Session> Session::GetParentSession() const
     return parentSession_;
 }
 
-sptr<Session> Session::GetMainSession()
+sptr<Session> Session::GetMainSession() const
 {
     if (SessionHelper::IsMainWindow(GetWindowType())) {
-        return this;
+        return const_cast<Session*>(this);
     } else if (parentSession_) {
         return parentSession_->GetMainSession();
     } else {
