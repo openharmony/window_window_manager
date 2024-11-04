@@ -284,7 +284,7 @@ int SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(MessageParcel& d
 
 int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGE(WmsLogTag::WMS_LIFE, "In!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     SessionInfoBean info;
     std::u16string deviceIdU16;
     if (!data.ReadString16(deviceIdU16)) {
@@ -312,7 +312,7 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
 
 int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     SessionInfoBean info;
     std::string continueSessionId;
     if (!data.ReadString(continueSessionId)) {
