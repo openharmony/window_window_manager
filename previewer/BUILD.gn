@@ -146,6 +146,10 @@ if (!ispreview) {
       "napi:ace_napi",
     ]
 
+    if (!build_ohos_sdk && !is_mingw) {
+      external_deps += [ "ability_runtime:ability_manager" ]
+    }
+
     cflags_cc = [ "-DWINDOW_PREVIEW" ]
     cflags = [ "-std=c++11" ]
 
