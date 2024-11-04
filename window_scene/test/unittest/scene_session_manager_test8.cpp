@@ -832,6 +832,7 @@ HWTEST_F(SceneSessionManagerTest8, HandleActionUpdateTextfieldAvoidInfo01, Funct
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG;
     ASSERT_EQ(sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, action),
         WMError::WM_OK);
     ASSERT_EQ(sceneSession->HandleActionUpdateWindowMask(property, action),
@@ -839,49 +840,134 @@ HWTEST_F(SceneSessionManagerTest8, HandleActionUpdateTextfieldAvoidInfo01, Funct
 }
 
 /**
- * @tc.name: HandleActionUpdateTextfieldAvoidInfo02
- * @tc.desc: normal function
+ * @tc.name: CreateAndBackgroundSceneSession
+ * @tc.desc: CreateAndBackgroundSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, HandleActionUpdateTextfieldAvoidInfo02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession01, Function | SmallTest | Level3)
 {
     SessionInfo info;
-    info.abilityName_ = "HandleActionUpdateTextfieldAvoidInfo02";
-    info.bundleName_ = "HandleActionUpdateTextfieldAvoidInfo02";
-    info.moduleName_ = "HandleActionUpdateTextfieldAvoidInfo02";
+    info.abilityName_ = "CreateAndBackgroundSceneSession01";
+    info.bundleName_ = "CreateAndBackgroundSceneSession01";
+    info.moduleName_ = "CreateAndBackgroundSceneSession01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, action),
-        WMError::WM_OK);
-    ASSERT_EQ(sceneSession->HandleActionUpdateWindowMask(property, action),
-        WMError::WM_OK);
-    ASSERT_EQ(sceneSession->HandleActionUpdateTopmost(property, action),
-        WMError::WM_ERROR_NOT_SYSTEM_APP);
+    ssm_->CreateSceneSession(info, nullptr);
+    info.isSystem_ = true;
+    info.windowType_ = 3;
+    sptr<SceneSession> getSceneSession1 = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(nullptr, getSceneSession1);
+    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
+    ssm_->UpdateSceneSessionWant(info);
+
+    ssm_->RequestSceneSessionActivation(sceneSession, true);
+
+    sptr<AAFwk::SessionInfo> abilitySessionInfo;
+    ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
 }
 
 /**
- * @tc.name: SetWindowFlags01
- * @tc.desc: normal function
+ * @tc.name: CreateAndBackgroundSceneSession
+ * @tc.desc: CreateAndBackgroundSceneSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, SetWindowFlags01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession02, Function | SmallTest | Level3)
 {
     SessionInfo info;
-    info.abilityName_ = "SetWindowFlags01";
-    info.bundleName_ = "SetWindowFlags01";
-    info.moduleName_ = "SetWindowFlags01";
+    info.abilityName_ = "CreateAndBackgroundSceneSession02";
+    info.bundleName_ = "CreateAndBackgroundSceneSession02";
+    info.moduleName_ = "CreateAndBackgroundSceneSession02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
-    sceneSession->SetWindowFlags(property);
-    sceneSession->sessionChangeByActionNotifyManagerFunc_ = [](
-        const sptr<SceneSession>& sceneSession,
-        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action
-    ){};
-    sceneSession->NotifySessionChangeByActionNotifyManager(property, action);
+    ssm_->CreateSceneSession(info, nullptr);
+    info.isSystem_ = true;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    info.windowType_ = 1001;
+    sptr<SceneSession> getSceneSession2 = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(nullptr, getSceneSession2);
+
+    ASSERT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, getSceneSession3->GetWindowType());
+
+    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
+    ssm_->UpdateSceneSessionWant(info);
+
+    ssm_->RequestSceneSessionActivation(sceneSession, true);
+
+    sptr<AAFwk::SessionInfo> abilitySessionInfo;
+    ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
+}
+
+/**
+ * @tc.name: CreateAndBackgroundSceneSession
+ * @tc.desc: CreateAndBackgroundSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession03, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "CreateAndBackgroundSceneSession03";
+    info.bundleName_ = "CreateAndBackgroundSceneSession03";
+    info.moduleName_ = "CreateAndBackgroundSceneSession03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ssm_->CreateSceneSession(info, nullptr);
+    info.isSystem_ = true;
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    info.windowType_ = 2105;
+    sptr<SceneSession> getSceneSession3 = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(nullptr, getSceneSession3);
+
+    ASSERT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, getSceneSession3->GetWindowType());
+
+    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
+    ssm_->UpdateSceneSessionWant(info);
+
+    ssm_->RequestSceneSessionActivation(sceneSession, true);
+
+    sptr<AAFwk::SessionInfo> abilitySessionInfo;
+    ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
+}
+
+/**
+ * @tc.name: CreateAndBackgroundSceneSession
+ * @tc.desc: CreateAndBackgroundSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession04, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "CreateAndBackgroundSceneSession04";
+    info.bundleName_ = "CreateAndBackgroundSceneSession04";
+    info.moduleName_ = "CreateAndBackgroundSceneSession04";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ssm_->CreateSceneSession(info, nullptr);
+    info.isSystem_ = true;
+    property->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    info.windowType_ = 2500;
+    sptr<SceneSession> getSceneSession4 = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(nullptr, getSceneSession4);
+    ASSERT_EQ(WindowType::SYSTEM_SUB_WINDOW_BASE, getSceneSession4->GetWindowType());
+
+    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
+    ssm_->UpdateSceneSessionWant(info);
+
+    ssm_->RequestSceneSessionActivation(sceneSession, true);
+
+    sptr<AAFwk::SessionInfo> abilitySessionInfo;
+    ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
 }
 }
 } // namespace Rosen
