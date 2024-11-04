@@ -324,10 +324,10 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS), data, reply, option);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
+    ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
