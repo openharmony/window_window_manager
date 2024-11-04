@@ -1975,12 +1975,137 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession, Function | SmallTest | L
 
 /**
  * @tc.name: CheckIfReuseSession02
- * @tc.desc: CheckIfReuseSession02
+ * @tc.desc: Test if CollaboratorType not exist and collaboratorMap_ not exist
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession02, Function | SmallTest | Level3)
 {
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->bundleMgr_ = ssm_->GetBundleManager();
+    ssm_->currentUserId_ = 123;
+
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "SceneSessionManager";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "CheckIfReuseSession02";
+    sessionInfo.want = std::make_shared<AAFwk::Want>;
+
+    SceneSessionManager::SessionInfoList list = {
+        .uid_ = 123, .bundleName_ = "SceneSessionManagerTest6",
+        .abilityName_ = "CheckIfReuseSession02", .moduleName_ = "SceneSessionManager"
+    }
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    ssm_->abilityInfoMap_[list] = abilityInfo;
+    auto ret1 = ssm_->CheckIfReuseSession(sessionInfo);
+    ASSERT_EQ(ret1, BrokerStates::BROKER_UNKOWN);
+    ssm_->abilityInfoMap_.erase(list); 
+}
+
+/**
+ * @tc.name: CheckIfReuseSession03
+ * @tc.desc: Test if CollaboratorType is RESERVE_TYPE and collaboratorMap_ not exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->bundleMgr_ = ssm_->GetBundleManager();
+    ssm_->currentUserId_ = 123;
+
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "SceneSessionManager";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "CheckIfReuseSession03";
+    sessionInfo.want = std::make_shared<AAFwk::Want>;
+
+    SceneSessionManager::SessionInfoList list = {
+        .uid_ = 123, .bundleName_ = "SceneSessionManagerTest6",
+        .abilityName_ = "CheckIfReuseSession03", .moduleName_ = "SceneSessionManager"
+    }
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    abilityInfo->applicationInfo.codePath = std::to_string(CollaboratorType::RESERVE_TYPE);
+    ssm_->abilityInfoMap_[list] = abilityInfo;
+    auto ret2 = ssm_->CheckIfReuseSession(sessionInfo);
+    ASSERT_EQ(ret2, BrokerStates::BROKER_UNKOWN);
+    ssm_->abilityInfoMap_.erase(list); 
+}
+
+/**
+ * @tc.name: CheckIfReuseSession04
+ * @tc.desc: Test if CollaboratorType is RESERVE_TYPE and collaboratorMap_ exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->bundleMgr_ = ssm_->GetBundleManager();
+    ssm_->currentUserId_ = 123;
+
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "SceneSessionManager";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "CheckIfReuseSession04";
+    sessionInfo.want = std::make_shared<AAFwk::Want>;
+
+    SceneSessionManager::SessionInfoList list = {
+        .uid_ = 123, .bundleName_ = "SceneSessionManagerTest6",
+        .abilityName_ = "CheckIfReuseSession04", .moduleName_ = "SceneSessionManager"
+    }
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    abilityInfo->applicationInfo.codePath = std::to_string(CollaboratorType::RESERVE_TYPE);
+    ssm_->abilityInfoMap_[list] = abilityInfo;
+
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
+    ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
     
+    auto ret3 = ssm_->CheckIfReuseSession(sessionInfo);
+    ASSERT_EQ(ret3, BrokerStates::BROKER_UNKOWN);
+    ssm_->abilityInfoMap_.erase(list);
+    ssm_->collaboratorMap_.erase(1);
+}
+
+/**
+ * @tc.name: CheckIfReuseSession05
+ * @tc.desc: Test if CollaboratorType is OTHERS_TYPE and collaboratorMap_ exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession05, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->bundleMgr_ = ssm_->GetBundleManager();
+    ssm_->currentUserId_ = 123;
+
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "SceneSessionManager";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
+    sessionInfo.abilityName_ = "CheckIfReuseSession05";
+    sessionInfo.want = std::make_shared<AAFwk::Want>;
+
+    SceneSessionManager::SessionInfoList list = {
+        .uid_ = 123, .bundleName_ = "SceneSessionManagerTest6",
+        .abilityName_ = "CheckIfReuseSession05", .moduleName_ = "SceneSessionManager"
+    }
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    abilityInfo->applicationInfo.codePath = std::to_string(CollaboratorType::OTHERS_TYPE);
+    ssm_->abilityInfoMap_[list] = abilityInfo;
+
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
+    ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
+    
+    auto ret4 = ssm_->CheckIfReuseSession(sessionInfo);
+    ASSERT_EQ(ret4, BrokerStates::BROKER_UNKOWN);
+    ssm_->abilityInfoMap_.erase(list);
+    ssm_->collaboratorMap_.erase(1);
 }
 
 /**
