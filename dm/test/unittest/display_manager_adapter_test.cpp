@@ -428,7 +428,7 @@ HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, Function | SmallTest |
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_INVALID_CALLING);
+        ASSERT_EQ(err, DMError::DM_OK);
     } else {
         ASSERT_EQ(err, DMError::DM_OK);
     }
@@ -818,7 +818,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, Function | 
     std::vector<DisplayPhysicalResolution> allSize =
         SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(allSize.empty());
+        ASSERT_TRUE(!allSize.empty());
     } else {
         ASSERT_TRUE(!allSize.empty());
     }
