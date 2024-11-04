@@ -169,7 +169,7 @@ static void IsNeedNotify(napi_env env, std::unique_ptr<Param> &param, napi_value
 {
     GNAPI_LOG("Get Screenshot Option: IsNeedNotify");
     napi_value isNeedNotify;
-    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isNeedNotify", &isNeedNotify));
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isNotificationNeeded", &isNeedNotify));
     if (isNeedNotify != nullptr && GetType(env, isNeedNotify) == napi_boolean) {
         NAPI_CALL_RETURN_VOID(env, napi_get_value_bool(env, isNeedNotify, &param->option.isNeedNotify));
         GNAPI_LOG("IsNeedNotify: %{public}d", param->option.isNeedNotify);
@@ -182,7 +182,7 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
 {
     GNAPI_LOG("Get Screenshot Option: IsNeedPointer");
     napi_value isNeedPointer;
-    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isNeedPointer", &isNeedPointer));
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isPointerNeeded", &isNeedPointer));
     if (isNeedPointer != nullptr && GetType(env, isNeedPointer) == napi_boolean) {
         NAPI_CALL_RETURN_VOID(env, napi_get_value_bool(env, isNeedPointer, &param->option.isNeedPointer));
         GNAPI_LOG("IsNeedPointer: %{public}d", param->option.isNeedPointer);
