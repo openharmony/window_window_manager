@@ -5325,6 +5325,7 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
             session->sessionChangeCallback_->onRestoreMainWindowFunc_ = nullptr;
         }
+        session->onSetWindowRectAutoSaveFunc_ = nullptr;
         session->Session::UnregisterSessionChangeListeners();
     };
     PostTask(task, "UnregisterSessionChangeListeners");
@@ -5411,5 +5412,21 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
         session->isNeedSyncSessionRect_ = needSync;
     };
     PostTask(task, "SetNeedSyncSessionRect");
+}
+
+void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func)
+{
+    const char* funcName = __func__;
+    auto task = [weakThis = wptr(this), funcName, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session or onSetWindowRectAutoSaveFunc is null");
+            return ;
+        }
+        session->onSetWindowRectAutoSaveFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", funcName,
+            session->GetPersistentId());
+    };
+    PostTask(task, __func__);
 }
 } // namespace OHOS::Rosen

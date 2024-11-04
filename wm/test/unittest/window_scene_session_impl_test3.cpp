@@ -2107,6 +2107,32 @@ HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | Sm
     window->hostSession_ = session;
     window->InitSystemSessionDragEnable();
 }
+
+/**
+ * @tc.name: EnableWindowStateMemory
+ * @tc.desc: EnableWindowStateMemory
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowRectAutoSave");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

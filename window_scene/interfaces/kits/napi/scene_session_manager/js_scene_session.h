@@ -78,6 +78,7 @@ enum class ListenerFuncType : uint32_t {
     RESTORE_MAIN_WINDOW_CB,
     SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB,
     TITLE_DOCK_HOVER_SHOW_CB,
+    SET_WINDOW_RECT_AUTO_SAVE_CB,
 };
 
 class SceneSession;
@@ -259,6 +260,7 @@ private:
     void ProcessTitleAndDockHoverShowChangeRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
+    void ProcessSetWindowRectAutoSaveRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -315,6 +317,7 @@ private:
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
+    void OnSetWindowRectAutoSave(bool enable);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

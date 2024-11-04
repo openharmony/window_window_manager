@@ -248,4 +248,20 @@ WSError MainSession::OnRestoreMainWindow()
     return WSError::WS_OK;
 }
 
+WSError MainSession::OnSetWindowRectAutoSave(bool enable)
+{
+    auto task = [weakThis = wptr(this), enable] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return ;
+        }
+        if (session->onSetWindowRectAutoSaveFunc_) {
+            session->onSetWindowRectAutoSaveFunc_(enable);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
 } // namespace OHOS::Rosen

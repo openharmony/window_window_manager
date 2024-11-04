@@ -291,6 +291,14 @@ public:
     virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for setting whether the window memory state is enabled.
+     *
+     * @param enable If true, enable window state memory, else disable.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetWindowRectAutoSave(bool enable) { return WSError::WS_OK; }
+
+    /**
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
