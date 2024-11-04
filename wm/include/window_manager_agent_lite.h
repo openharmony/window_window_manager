@@ -40,6 +40,7 @@ public:
     void NotifyGestureNavigationEnabledResult(bool enable) override {};
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) override;
     void NotifyWindowStyleChange(WindowStyleType type) override;
+    void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override;
 };
 } // namespace Rosen
 } // namespace OHOS

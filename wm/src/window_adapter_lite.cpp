@@ -303,5 +303,29 @@ WMError WindowAdapterLite::GetAccessibilityWindowInfo(std::vector<sptr<Accessibi
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetAccessibilityWindowInfo(infos);
 }
+
+WMError WindowAdapterLite::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->CloseTargetFloatWindow(bundleName);
+}
+
+WMError WindowAdapterLite::CloseTargetPiPWindow(const std::string& bundleName)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->CloseTargetPiPWindow(bundleName);
+}
+
+WMError WindowAdapterLite::GetCurrentPiPWindowInfo(std::string& bundleName)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetCurrentPiPWindowInfo(bundleName);
+}
 } // namespace Rosen
 } // namespace OHOS
