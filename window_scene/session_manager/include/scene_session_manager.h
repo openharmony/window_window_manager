@@ -107,6 +107,7 @@ using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, con
 using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
+using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -386,6 +387,12 @@ public:
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
 
     /*
+     * Multi Window
+     */
+    void SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func);
+    WMError CloseTargetFloatWindow(const std::string& bundleName);
+
+    /*
      * Fold Screen Status Change Report
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
@@ -402,6 +409,12 @@ public:
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
+
+    /*
+     * PiP Window
+     */
+    WMError CloseTargetPiPWindow(const std::string& bundleName);
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
 protected:
     SceneSessionManager();
@@ -592,6 +605,12 @@ private:
     void NotifyAllAccessibilityInfo();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
+
+    /**
+     * PiP Window
+     */
+    void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     mutable std::shared_mutex sceneSessionMapMutex_;
@@ -628,6 +647,12 @@ private:
     ProcessStartUIAbilityErrorFunc startUIAbilityErrorFunc_;
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
+
+    /**
+     * Multi Window
+     */
+    ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
+
     AppWindowSceneConfig appWindowSceneConfig_;
     RotateAnimationConfig rotateAnimationConfig_;
     SystemSessionConfig systemConfig_;

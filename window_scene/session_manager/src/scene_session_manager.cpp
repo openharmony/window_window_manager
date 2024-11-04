@@ -1334,6 +1334,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = [this](uint64_t surfaceNodeId, bool isSkip) {
         this->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
     };
+    specificCb->onPiPStateChange_ = [this](const std::string& bundleName, bool isForeground) {
+        this->UpdatePiPWindowStateChanged(bundleName, isForeground);
+    };
     return specificCb;
 }
 
@@ -10541,5 +10544,71 @@ WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
     TLOGD(WmsLogTag::DEFAULT, "Can not find the sub system of PowerMgr");
     return WMError::WM_OK;
 #endif
+}
+
+void SceneSessionManager::SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
+    auto task = [this, func] {
+        closeTargetFloatWindowFunc_ = func;
+    };
+    taskScheduler_->PostTask(task, __func__);
+}
+
+WMError SceneSessionManager::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    if (!SessionPermission::IsSystemServiceCalling(false)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "failed, not system service called.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, bundleName] {
+        if (closeTargetFloatWindowFunc_) {
+            TLOGNI(WmsLogTag::WMS_MULTI_WINDOW, "bundleName:%{public}s", bundleName.c_str());
+            closeTargetFloatWindowFunc_(bundleName);
+        }
+    };
+    taskScheduler_->PostTask(task, __func__);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground)
+{
+    SessionManagerAgentController::GetInstance().UpdatePiPWindowStateChanged(bundleName, isForeground);
+}
+
+WMError SceneSessionManager::CloseTargetPiPWindow(const std::string& bundleName)
+{
+    if (!SessionPermission::IsSystemServiceCalling(false)) {
+        TLOGE(WmsLogTag::WMS_PIP, "failed, not system service called.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP &&
+            session->GetSessionInfo().bundleName_ == bundleName) {
+            session->NotifyCloseExistPipWindow();
+            break;
+        }
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
+{
+    if (!SessionPermission::IsSystemServiceCalling(false)) {
+        TLOGE(WmsLogTag::WMS_PIP, "failed, not system service called.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+            bundleName = session->GetSessionInfo().bundleName_;
+            return WMError::WM_OK;
+        }
+    }
+    TLOGW(WmsLogTag::WMS_PIP, "no PiP window");
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

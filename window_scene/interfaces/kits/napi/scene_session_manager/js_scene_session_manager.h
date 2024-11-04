@@ -40,6 +40,7 @@ enum class ListenerFunctionType : uint32_t {
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
+    CLOSE_TARGET_FLOAT_WINDOW_CB,
 };
 
 class JsSceneSessionManager final {
@@ -195,6 +196,8 @@ private:
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();
     void SetIsClearSession(napi_env env, napi_value jsSceneSessionObj, sptr<SceneSession>& sceneSession);
+    void OnCloseTargetFloatWindow(const std::string& bundleName);
+    void ProcessCloseTargetFloatWindow();
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
     void ProcessAbilityManagerCollaboratorRegistered();
     void OnAbilityManagerCollaboratorRegistered();
