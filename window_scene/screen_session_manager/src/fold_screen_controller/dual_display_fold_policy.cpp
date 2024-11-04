@@ -132,14 +132,12 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
     ReportFoldDisplayModeChange(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
     ChangeScreenDisplayModeProc(screenSession, displayMode);
-    if (currentDisplayMode_ != displayMode) {
-        ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
-    }
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
     }
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     SetdisplayModeChangeStatus(false);
 }
 
