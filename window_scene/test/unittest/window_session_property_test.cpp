@@ -328,10 +328,10 @@ HWTEST_F(WindowSessionPropertyTest, SetTokenState, Function | SmallTest | Level2
 HWTEST_F(WindowSessionPropertyTest, SetMaximizeMode, Function | SmallTest | Level2)
 {
     WindowSessionProperty windowSessionProperty;
-    MaximizeMode mode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    MaximizeMode mode = MaximizeMode::MODE_RECOVER;
     windowSessionProperty.SetMaximizeMode(mode);
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_NE(property->GetMaximizeMode(), mode);
+    ASSERT_EQ(property->GetMaximizeMode(), mode);
 }
 
 /**
