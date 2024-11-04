@@ -1414,7 +1414,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetBlur, Function | SmallTest | Level3)
 HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn01, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
     window->property_->SetWindowName("SetKeepScreenOn");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetKeepScreenOn(false));
@@ -1429,7 +1431,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn01, Function | SmallTest | L
 HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn02, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
     window->property_->SetWindowName("SetKeepScreenOn");
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
     window->property_->SetPersistentId(1);
