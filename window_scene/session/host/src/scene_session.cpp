@@ -50,7 +50,6 @@
 #include <running_lock.h>
 #include "screen_manager.h"
 #include "screen.h"
-#include "singleton_container.h"
 #include "fold_screen_state_internel.h"
 #include "session/host/include/multi_instance_manager.h"
 

@@ -22,7 +22,6 @@
 
 #include <event_handler.h>
 
-#include "accessibility_element_info.h"
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"

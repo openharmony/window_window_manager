@@ -20,7 +20,6 @@
 #include "surface_capture_future.h"
 #include "surface_draw.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
