@@ -44,6 +44,7 @@ private:
     // scene session
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
     int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);
