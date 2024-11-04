@@ -485,7 +485,7 @@ HWTEST_F(WindowAdapterTest, RecoverAndConnectSpecificSession, Function | SmallTe
         iSessionStage, eventChannel, nullptr, nullptr, session, token);
     
     sptr<IRemoteObject> remotObject = nullptr;
-    windowAdapter.windowMnagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
+    windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
     windowAdapter.RecoverAndConnectSpecificSession(
         iSessionStage, eventChannel, nullptr, nullptr, session, token);
 }
@@ -512,7 +512,7 @@ HWTEST_F(WindowAdapterTest, RecoverAndReconnectSceneSession, Function | SmallTes
     ASSERT_EQ(ret2, WMError::WM_DO_NOTHING);
 
     sptr<IRemoteObject> remotObject = nullptr;
-    windowAdapter.windowMnagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
+    windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
     auto ret3 = windowAdapter.RecoverAndReconnectSceneSession(
         iSessionStage, eventChannel, nullptr, session, nullptr, token);
     ASSERT_EQ(ret3, WMError::WM_DO_NOTHING);

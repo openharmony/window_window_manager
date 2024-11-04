@@ -1743,7 +1743,7 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow02, Function | Sma
     ssm_->sceneSessionMap_.insert({0, scnSession});
 
     auto ret = ssm_->DestroyDialogWithMainWindow(scnSession);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -1988,12 +1988,12 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession02, Function | SmallTest |
     sessionInfo.moduleName_ = "SceneSessionManager";
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "CheckIfReuseSession02";
-    sessionInfo.want = std::make_shared<AAFwk::Want>;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
 
     SceneSessionManager::SessionInfoList list = {
         .uid_ = 123, .bundleName_ = "SceneSessionManagerTest6",
         .abilityName_ = "CheckIfReuseSession02", .moduleName_ = "SceneSessionManager"
-    }
+    };
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(abilityInfo, nullptr);
@@ -2018,12 +2018,12 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession03, Function | SmallTest |
     sessionInfo.moduleName_ = "SceneSessionManager";
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "CheckIfReuseSession03";
-    sessionInfo.want = std::make_shared<AAFwk::Want>;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
 
     SceneSessionManager::SessionInfoList list = {
         .uid_ = 123, .bundleName_ = "SceneSessionManagerTest6",
         .abilityName_ = "CheckIfReuseSession03", .moduleName_ = "SceneSessionManager"
-    }
+    };
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(abilityInfo, nullptr);
@@ -2049,12 +2049,12 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession04, Function | SmallTest |
     sessionInfo.moduleName_ = "SceneSessionManager";
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "CheckIfReuseSession04";
-    sessionInfo.want = std::make_shared<AAFwk::Want>;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
 
     SceneSessionManager::SessionInfoList list = {
         .uid_ = 123, .bundleName_ = "SceneSessionManagerTest6",
         .abilityName_ = "CheckIfReuseSession04", .moduleName_ = "SceneSessionManager"
-    }
+    };
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(abilityInfo, nullptr);
@@ -2086,12 +2086,12 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession05, Function | SmallTest |
     sessionInfo.moduleName_ = "SceneSessionManager";
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";
     sessionInfo.abilityName_ = "CheckIfReuseSession05";
-    sessionInfo.want = std::make_shared<AAFwk::Want>;
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
 
     SceneSessionManager::SessionInfoList list = {
         .uid_ = 123, .bundleName_ = "SceneSessionManagerTest6",
         .abilityName_ = "CheckIfReuseSession05", .moduleName_ = "SceneSessionManager"
-    }
+    };
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(abilityInfo, nullptr);
