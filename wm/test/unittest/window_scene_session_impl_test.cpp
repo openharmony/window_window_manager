@@ -1427,7 +1427,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn01, Function | SmallTest | L
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn02, Function | SmallTest | Level3)
-{
+{   
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     window->property_->SetWindowName("SetKeepScreenOn");
