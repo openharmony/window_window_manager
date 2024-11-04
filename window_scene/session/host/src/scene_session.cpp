@@ -2616,7 +2616,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "rect: %{public}s", rect.ToString().c_str());
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction && needFlush) {
+    if (rsTransaction != nullptr && needFlush) {
         rsTransaction->Begin();
     }
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
@@ -2651,8 +2651,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
-    if (rsTransaction && needFlush) {
-        RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr && needFlush) {
         rsTransaction->Commit();
     }
 }
@@ -2904,12 +2903,18 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
         return;
     }
     property->SetSnapshotSkip(isSkip);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetSkipLayer(isSkip);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipLayer(isSkip);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
@@ -2920,11 +2925,17 @@ void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool is
     }
     TLOGI(WmsLogTag::DEFAULT, "watermarkName:%{public}s, isEnabled:%{public}d, wid:%{public}d",
         watermarkName.c_str(), isEnabled, GetPersistentId());
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetWatermarkEnabled(watermarkName, isEnabled);
     if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
         leashWinSurfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
@@ -2945,12 +2956,18 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     }
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
     WLOGFI("SetAbilityBGAlpha alpha8bit=%{public}u.", alpha8bit);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetAbilityBGAlpha(alpha8bit);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetAbilityBGAlpha(alpha8bit);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
@@ -2962,8 +2979,7 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
         return;
     }
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction) {
-        RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
     if (leashWinSurfaceNode != nullptr) {
@@ -2975,7 +2991,7 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
             surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), forceUIFirst);
         surfaceNode_->SetForceUIFirst(forceUIFirst);
     }
-    if (rsTransaction) {
+    if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
 }
@@ -4833,12 +4849,18 @@ void SceneSession::SetSkipDraw(bool skip)
         WLOGFE("surfaceNode_ is null");
         return;
     }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetSkipDraw(skip);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipDraw(skip);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)

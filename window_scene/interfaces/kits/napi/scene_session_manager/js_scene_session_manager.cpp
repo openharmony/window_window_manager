@@ -3389,10 +3389,10 @@ napi_value JsSceneSessionManager::OnGetWindowPid(napi_env env, napi_callback_inf
 
 void JsSceneSessionManager::OnCloseTargetFloatWindow(const std::string& bundleName)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]in");
-    auto task = [this, bundleName, jsCallBack = GetJSCallback(CLOSE_TARGET_FLOAT_WINDOW_CB), env = env_]() {
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]");
+    auto task = [this, bundleName, jsCallBack = GetJSCallback(CLOSE_TARGET_FLOAT_WINDOW_CB), env = env_] {
         if (jsCallBack == nullptr) {
-            TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsBundleNameObj = CreateJsValue(env, bundleName);
@@ -3405,7 +3405,7 @@ void JsSceneSessionManager::OnCloseTargetFloatWindow(const std::string& bundleNa
 void JsSceneSessionManager::ProcessCloseTargetFloatWindow()
 {
     ProcessCloseTargetFloatWindowFunc func = [this](const std::string& bundleName) {
-        TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "ProcessCloseTargetFloatWindow. bundleName:%{public}s", bundleName.c_str());
+        TLOGND(WmsLogTag::WMS_MULTI_WINDOW, "ProcessCloseTargetFloatWindow. bundleName:%{public}s", bundleName.c_str());
         this->OnCloseTargetFloatWindow(bundleName);
     };
     SceneSessionManager::GetInstance().SetCloseTargetFloatWindowFunc(func);

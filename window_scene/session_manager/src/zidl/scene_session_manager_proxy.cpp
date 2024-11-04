@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef SUPPORT_SCREEN
+#define SUPPORT_SCREEN
+#endif
 #include "session_manager/include/zidl/scene_session_manager_proxy.h"
 
 #include <ipc_types.h>

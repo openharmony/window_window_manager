@@ -3212,12 +3212,18 @@ WSError SceneSessionManager::ProcessBackEvent()
     auto task = [this]() {
         auto session = GetSceneSession(focusedSessionId_);
         if (!session) {
-            WLOGFE("session is nullptr: %{public}d", focusedSessionId_);
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is nullptr: %{public}d", focusedSessionId_);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        WLOGFI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
+        TLOGNI(WmsLogTag::WMS_MAIN, "ProcessBackEvent session persistentId:%{public}d needBlock:%{public}d",
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
+            TLOGND(WmsLogTag::WMS_MAIN, "RequestSessionBack when start session");
+            if (session->GetSessionInfo().abilityInfo != nullptr &&
+                session->GetSessionInfo().abilityInfo->unclearableMission) {
+                TLOGNI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
+                return WSError::WS_OK;
+            }
             session->RequestSessionBack(true);
             return WSError::WS_OK;
         }
@@ -3229,7 +3235,7 @@ WSError SceneSessionManager::ProcessBackEvent()
         return WSError::WS_OK;
     };
 
-    taskScheduler_->PostAsyncTask(task, "ProcessBackEvent");
+    taskScheduler_->PostAsyncTask(task, __func__);
     return WSError::WS_OK;
 }
 
@@ -11037,7 +11043,10 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<
 void SceneSessionManager::SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func)
 {
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
-    closeTargetFloatWindowFunc_ = func;
+    auto task = [this, func] {
+        closeTargetFloatWindowFunc_ = func;
+    };
+    taskScheduler_->PostTask(task, __func__);
 }
 
 WMError SceneSessionManager::CloseTargetFloatWindow(const std::string& bundleName)
@@ -11052,7 +11061,7 @@ WMError SceneSessionManager::CloseTargetFloatWindow(const std::string& bundleNam
             closeTargetFloatWindowFunc_(bundleName);
         }
     };
-    taskScheduler_->PostTask(task, "CloseTargetFloatWindow");
+    taskScheduler_->PostTask(task, __func__);
     return WMError::WM_OK;
 }
 
@@ -11068,7 +11077,7 @@ WMError SceneSessionManager::CloseTargetPiPWindow(const std::string& bundleName)
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& iter: sceneSessionMap_) {
+    for (const auto& iter : sceneSessionMap_) {
         auto& session = iter.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP &&
             session->GetSessionInfo().bundleName_ == bundleName) {
@@ -11086,7 +11095,7 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& iter: sceneSessionMap_) {
+    for (const auto& iter : sceneSessionMap_) {
         auto& session = iter.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
             bundleName = session->GetSessionInfo().bundleName_;
