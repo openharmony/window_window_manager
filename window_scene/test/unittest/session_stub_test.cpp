@@ -861,6 +861,9 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent2, Function | SmallTest | Level2
     data.WriteUint32(0xFFFFFFFF);
     int result = session_->HandleSyncSessionEvent(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    result = session_->HandleSyncSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
 }
 }
 } // namespace Rosen
