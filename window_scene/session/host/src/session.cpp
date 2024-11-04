@@ -291,6 +291,11 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.processOptions = info.processOptions;
 }
 
+DisplayId Session::GetScreenId() const
+{
+    return sessionInfo_.screenId_;
+}
+
 void Session::SetScreenId(uint64_t screenId)
 {
     sessionInfo_.screenId_ = screenId;
