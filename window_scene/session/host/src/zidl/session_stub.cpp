@@ -414,16 +414,16 @@ int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& 
 
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Called!");
+    TLOGD(WmsLogTag::WMS_EVENT, "Called!");
     uint32_t eventId = 0;
     if (!data.ReadUint32(eventId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
+    TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
     if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
         eventId > static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid eventId: %{public}d", eventId);
+        TLOGE(WmsLogTag::WMS_EVENT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
     }
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
