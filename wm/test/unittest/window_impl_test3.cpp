@@ -738,6 +738,9 @@ HWTEST_F(WindowImplTest3, RaiseToAppTop, Function | SmallTest | Level3)
     sptr<WindowOption> option = new WindowOption();
     option->parentId_ = INVALID_WINDOW_ID;
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RaiseToAppTop());
+
+    window->SetWindowState(WindowState::STATE_CREATED);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, window->RaiseToAppTop());
 
     window->property_->parentId_ = 100000;
