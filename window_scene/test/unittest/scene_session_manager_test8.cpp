@@ -676,6 +676,213 @@ HWTEST_F(SceneSessionManagerTest8, TerminateSessionNew, Function | SmallTest | L
     ssm_->TerminateSessionNew(sessionInfo, true, true);
 }
 
+/**
+ * @tc.name: UpdateRect01
+ * @tc.desc: UpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, UpdateRect02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateRect02";
+    info.bundleName_ = "UpdateRect02";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    SizeChangeReason reason = SizeChangeReason::DRAG_END;
+
+    WSRect rect = { 400, 400, 400, 400 };
+    sceneSession->winRect_ = rect;
+    sceneSession->SetClientRect(rect);
+    ASSERT_EQ(sceneSession->UpdateRect(rect, reason, "SceneSessionManagerTest8"), WSError::WS_OK);
+
+    rect.posX_ = 200;
+    rect.posY_ = 200;
+    rect.width_ = 600;
+    rect.height_ = 600;
+    sceneSession->winRect_ = rect;
+    ASSERT_EQ(sceneSession->UpdateRect(rect, reason, "SceneSessionManagerTest8"), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction
+ * @tc.desc: ProcessUpdatePropertyByAction function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ProcessUpdatePropertyByAction01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction01";
+    info.bundleName_ = "ProcessUpdatePropertyByAction01";
+    info.moduleName_ = "ProcessUpdatePropertyByAction01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction
+ * @tc.desc: ProcessUpdatePropertyByAction function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ProcessUpdatePropertyByAction02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction02";
+    info.bundleName_ = "ProcessUpdatePropertyByAction02";
+    info.moduleName_ = "ProcessUpdatePropertyByAction02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction
+ * @tc.desc: ProcessUpdatePropertyByAction function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ProcessUpdatePropertyByAction03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction03";
+    info.bundleName_ = "ProcessUpdatePropertyByAction03";
+    info.moduleName_ = "ProcessUpdatePropertyByAction03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction
+ * @tc.desc: ProcessUpdatePropertyByAction function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ProcessUpdatePropertyByAction04, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction04";
+    info.bundleName_ = "ProcessUpdatePropertyByAction04";
+    info.moduleName_ = "ProcessUpdatePropertyByAction04";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction
+ * @tc.desc: ProcessUpdatePropertyByAction function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ProcessUpdatePropertyByAction05, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction05";
+    info.bundleName_ = "ProcessUpdatePropertyByAction05";
+    info.moduleName_ = "ProcessUpdatePropertyByAction05";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ProcessUpdatePropertyByAction
+ * @tc.desc: ProcessUpdatePropertyByAction function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ProcessUpdatePropertyByAction06, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessUpdatePropertyByAction06";
+    info.bundleName_ = "ProcessUpdatePropertyByAction06";
+    info.moduleName_ = "ProcessUpdatePropertyByAction06";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleActionUpdateTextfieldAvoidInfo01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, HandleActionUpdateTextfieldAvoidInfo01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateTextfieldAvoidInfo01";
+    info.bundleName_ = "HandleActionUpdateTextfieldAvoidInfo01";
+    info.moduleName_ = "HandleActionUpdateTextfieldAvoidInfo01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, action),
+        WMError::WM_OK);
+    ASSERT_EQ(sceneSession->HandleActionUpdateWindowMask(property, action),
+        WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleActionUpdateTextfieldAvoidInfo02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, HandleActionUpdateTextfieldAvoidInfo02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateTextfieldAvoidInfo02";
+    info.bundleName_ = "HandleActionUpdateTextfieldAvoidInfo02";
+    info.moduleName_ = "HandleActionUpdateTextfieldAvoidInfo02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, action),
+        WMError::WM_OK);
+    ASSERT_EQ(sceneSession->HandleActionUpdateWindowMask(property, action),
+        WMError::WM_OK);
+    ASSERT_EQ(sceneSession->HandleActionUpdateTopmost(property, action),
+        WMError::WM_ERROR_NOT_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: SetWindowFlags01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SetWindowFlags01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowFlags01";
+    info.bundleName_ = "SetWindowFlags01";
+    info.moduleName_ = "SetWindowFlags01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetWindowFlags(property);
+    sceneSession->sessionChangeByActionNotifyManagerFunc_ = [](
+        const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action
+    ){};
+    sceneSession->NotifySessionChangeByActionNotifyManager(property, action);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
