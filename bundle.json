@@ -73,7 +73,8 @@
           "libjpeg-turbo",
           "libxml2",
           "bounds_checking_function",
-          "device_status"
+          "device_status",
+          "ets_frontend"
         ],
         "third_party": [
         ]
