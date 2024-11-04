@@ -16,9 +16,7 @@
 #include "session/host/include/session.h"
 
 #include "ability_info.h"
-#include "ability_start_setting.h"
 #include "input_manager.h"
-#include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include <transaction/rs_interfaces.h>
@@ -29,15 +27,12 @@
 #include "common/include/session_permission.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
-#include "util.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
-#include "session/host/include/ws_ffrt_helper.h"
-#include "singleton_container.h"
 #include "perform_reporter.h"
 
 namespace OHOS::Rosen {
