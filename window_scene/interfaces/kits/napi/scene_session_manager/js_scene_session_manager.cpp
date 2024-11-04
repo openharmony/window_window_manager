@@ -21,6 +21,7 @@
 #include "napi_common_want.h"
 #include "native_value.h"
 #include "pixel_map_napi.h"
+#include "session/host/include/pc_fold_screen_controller.h"
 #include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
@@ -50,6 +51,7 @@ constexpr int DEFAULT_ARG_COUNT = 4;
 constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
 constexpr int ARG_INDEX_THREE = 3;
+constexpr int ARG_INDEX_FOUR = 4;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
@@ -213,6 +215,10 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::RefreshAppInfo);
     BindNativeFunction(env, exportObj, "getWindowPid", moduleName,
         JsSceneSessionManager::GetWindowPid);
+    BindNativeFunction(env, exportObj, "updatePcFoldScreenStatus", moduleName,
+        JsSceneSessionManager::UpdatePcFoldScreenStatus);
+    BindNativeFunction(env, exportObj, "resetPcFoldScreenArrangeRule", moduleName,
+        JsSceneSessionManager::ResetPcFoldScreenArrangeRule);
     return NapiGetUndefined(env);
 }
 
@@ -1092,6 +1098,18 @@ napi_value JsSceneSessionManager::GetWindowPid(napi_env env, napi_callback_info 
         return nullptr;
     }
     return me->OnGetWindowPid(env, info);
+}
+
+napi_value JsSceneSessionManager::UpdatePcFoldScreenStatus(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdatePcFoldScreenStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnResetPcFoldScreenArrangeRule(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::RefreshPcZOrder(napi_env env, napi_callback_info info)
@@ -3497,6 +3515,93 @@ napi_value JsSceneSessionManager::OnGetWindowPid(napi_env env, napi_callback_inf
     napi_value result = nullptr;
     napi_create_int32(env, pid, &result);
     return result;
+}
+
+napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_FIVE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    int64_t displayId;
+    if (!ConvertFromJsValue(env, argv[0], displayId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    ScreenFoldStatus status = ScreenFoldStatus::UNKNOWN;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], status)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to type");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect defaultDisplayRect;
+    if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], defaultDisplayRect)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rect");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect virtualDisplayRect;
+    if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], virtualDisplayRect)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rect");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect foldCreaseRect;
+    if (argv[ARG_INDEX_FOUR] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_FOUR], foldCreaseRect)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rect");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    PcFoldScreenController::UpdateFoldScreenStatus(displayId, status);
+    PcFoldScreenController::SetDefaultDisplayRect(defaultDisplayRect);
+    PcFoldScreenController::SetVirtualDisplayRect(virtualDisplayRect);
+    PcFoldScreenController::SetFoldCreaseRect(foldCreaseRect);
+
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    WSRect rect;
+    if (argv[0] == nullptr || !ConvertRectInfoFromJs(env, argv[0], rect)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rect");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    PcFoldScreenController::ResetArrangeRule(rect);
+
+    return NapiGetUndefined(env);
 }
 
 void JsSceneSessionManager::OnCloseTargetFloatWindow(const std::string& bundleName)
