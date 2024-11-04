@@ -19,6 +19,7 @@
 
 #include <ability_context.h>
 #include <ability_manager_client.h>
+#include <application_context.h>
 #include <bundlemgr/launcher_service.h>
 #include <hisysevent.h>
 #include <parameters.h>
@@ -308,6 +309,7 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
     InitVsyncStation();
+    UpdateDarkColorModeToRS();
 }
 
 void SceneSessionManager::InitVsyncStation()
@@ -8426,6 +8428,25 @@ WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persi
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, "UpdateSessionWindowVisibilityListener");
+}
+
+void SceneSessionManager::UpdateDarkColorModeToRS()
+{
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "app context is nullptr");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "app configuration is nullptr");
+        return;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
+    TLOGI(WmsLogTag::DEFAULT, "SetGlobalDarkColorMode with colorMode: %{public}s, ret: %{public}d",
+        colorMode.c_str(), ret);
 }
 
 void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
