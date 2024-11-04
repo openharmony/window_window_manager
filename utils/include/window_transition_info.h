@@ -15,6 +15,9 @@
 
 #ifndef OHOS_ROSEN_WINDOW_TRANSITION_INFO_H
 #define OHOS_ROSEN_WINDOW_TRANSITION_INFO_H
+#ifndef SUPPORT_GRAPHICS
+#define SUPPORT_GRAPHICS
+#endif
 #include <iremote_object.h>
 #include <string>
 
