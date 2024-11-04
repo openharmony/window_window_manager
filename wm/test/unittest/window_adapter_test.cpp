@@ -466,6 +466,59 @@ HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, Function | SmallTest |
 }
 
 /**
+ * @tc.name: RecoverAndConnectSpecificSession
+ * @tc.desc: WindowAdapter/RecoverAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    sptr<ISessionStage> iSessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    sptr<ISession> session = nullptr;
+    sptr<IRemoteObject> token = nullptr;
+    windowAdapter.RecoverAndConnectSpecificSession(
+        iSessionStage, eventChannel, nullptr, nullptr, session, token);
+
+    windowAdapter.isProxyValid_ = true;
+    windowAdapter.RecoverAndConnectSpecificSession(
+        iSessionStage, eventChannel, nullptr, nullptr, session, token);
+    
+    sptr<IRemoteObject> remotObject = nullptr;
+    windowAdapter.windowMnagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
+    windowAdapter.RecoverAndConnectSpecificSession(
+        iSessionStage, eventChannel, nullptr, nullptr, session, token);
+}
+
+/**
+ * @tc.name: RecoverAndReconnectSceneSession
+ * @tc.desc: WindowAdapter/RecoverAndReconnectSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    sptr<ISessionStage> iSessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    sptr<ISession> session = nullptr;
+    sptr<IRemoteObject> token = nullptr;
+    auto ret1 = windowAdapter.RecoverAndReconnectSceneSession(
+        iSessionStage, eventChannel, nullptr, session, nullptr, token);
+    ASSERT_EQ(ret1, WMError::WM_DO_NOTHING);
+
+    windowAdapter.isProxyValid_ = true;
+    auto ret2 = windowAdapter.RecoverAndReconnectSceneSession(
+        iSessionStage, eventChannel, nullptr, session, nullptr, token);
+    ASSERT_EQ(ret2, WMError::WM_DO_NOTHING);
+
+    sptr<IRemoteObject> remotObject = nullptr;
+    windowAdapter.windowMnagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
+    auto ret3 = windowAdapter.RecoverAndReconnectSceneSession(
+        iSessionStage, eventChannel, nullptr, session, nullptr, token);
+    ASSERT_EQ(ret3, WMError::WM_DO_NOTHING);
+}
+
+/**
  * @tc.name: UpdateProperty
  * @tc.desc: WindowAdapter/UpdateProperty
  * @tc.type: FUNC
