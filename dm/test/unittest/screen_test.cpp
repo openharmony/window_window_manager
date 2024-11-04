@@ -72,14 +72,25 @@ namespace {
  */
 HWTEST_F(ScreenTest, GetBasicProperty01, Function | SmallTest | Level1)
 {
-    ASSERT_GT(screen_->GetName().size(), 0);
-    ASSERT_GE(screen_->GetWidth(), 0);
-    ASSERT_GE(screen_->GetHeight(), 0);
-    ASSERT_GE(screen_->GetVirtualWidth(), 0);
-    ASSERT_GE(screen_->GetVirtualHeight(), 0);
-    ASSERT_GT(screen_->GetVirtualPixelRatio(), 0);
-    ASSERT_EQ(screen_->IsReal(), true);
-    ASSERT_NE(screen_->GetScreenInfo(), nullptr);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_GT(screen_->GetName().size(), 0);
+        ASSERT_GT(screen_->GetWidth(), 0);
+        ASSERT_GT(screen_->GetHeight(), 0);
+        ASSERT_GT(screen_->GetVirtualWidth(), 0);
+        ASSERT_GT(screen_->GetVirtualHeight(), 0);
+        ASSERT_GT(screen_->GetVirtualPixelRatio(), 0);
+        ASSERT_EQ(screen_->IsReal(), true);
+        ASSERT_NE(screen_->GetScreenInfo(), nullptr);
+    } else {
+        ASSERT_GT(screen_->GetName().size(), 0);
+        ASSERT_GE(screen_->GetWidth(), 0);
+        ASSERT_GE(screen_->GetHeight(), 0);
+        ASSERT_GE(screen_->GetVirtualWidth(), 0);
+        ASSERT_GE(screen_->GetVirtualHeight(), 0);
+        ASSERT_GT(screen_->GetVirtualPixelRatio(), 0);
+        ASSERT_EQ(screen_->IsReal(), true);
+        ASSERT_NE(screen_->GetScreenInfo(), nullptr);
+    }
 }
 
 /**
