@@ -1816,19 +1816,35 @@ HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
 
     orientation = Orientation::VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_90, res);
+    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+        EXPECT_EQ(Rotation::ROTATION_0, res);
+    } else {
+        EXPECT_EQ(Rotation::ROTATION_90, res);
+    }
     
     orientation = Orientation::HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_0, res);
+    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+        EXPECT_EQ(Rotation::ROTATION_90, res);
+    } else {
+        EXPECT_EQ(Rotation::ROTATION_0, res);
+    }
 
     orientation = Orientation::REVERSE_VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_270, res);
+    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+        EXPECT_EQ(Rotation::ROTATION_180, res);
+    } else {
+        EXPECT_EQ(Rotation::ROTATION_270, res);
+    }
 
     orientation = Orientation::REVERSE_HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
-    EXPECT_EQ(Rotation::ROTATION_180, res);
+    if (ScreenSessionManager::GetInstance().IsFoldable()) {
+        EXPECT_EQ(Rotation::ROTATION_270, res);
+    } else {
+        EXPECT_EQ(Rotation::ROTATION_180, res);
+    }
 
     orientation = Orientation::LOCKED;
     res = session->CalcRotation(orientation, foldDisplayMode);
