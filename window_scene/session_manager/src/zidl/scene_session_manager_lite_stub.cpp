@@ -284,7 +284,7 @@ int SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(MessageParcel& d
 
 int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetSessionInfo!");
+    TLOGE(WmsLogTag::WMS_LIFE, "In!");
     SessionInfoBean info;
     std::u16string deviceIdU16;
     if (!data.ReadString16(deviceIdU16)) {
@@ -299,12 +299,12 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
     }
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
-        WLOGFE("GetSessionInfo error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo fail");
         return ERR_INVALID_DATA;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        WLOGFE("GetSessionInfo result error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo result fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
