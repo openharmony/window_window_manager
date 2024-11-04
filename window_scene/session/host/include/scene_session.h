@@ -92,6 +92,7 @@ using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enable)>;
 
 class SceneSession : public Session {
 public:
@@ -221,6 +222,12 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+
+    /*
+     * Window Lifecycle: main
+     */
+    
+    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
 
     /**
      * PiP Window
@@ -581,6 +588,11 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
+
+    /*
+     * Window Lifecycle: main
+     */
+    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();

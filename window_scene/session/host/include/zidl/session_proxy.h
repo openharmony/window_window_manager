@@ -102,6 +102,7 @@ public:
     WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
+    WSError OnSetWindowRectAutoSave(bool enable) override;
     
     /**
      * Gesture Back

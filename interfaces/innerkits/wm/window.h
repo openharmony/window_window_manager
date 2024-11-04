@@ -2137,6 +2137,14 @@ public:
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set whether the window memory state is enabled.
+     *
+     * @param enabled bool.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the rect of host window.
      *
      * @param hostWindowId window Id of the host window.
