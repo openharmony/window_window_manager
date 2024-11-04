@@ -48,7 +48,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         WLOGFW("fold state is UNKNOWN");
         return;
     }
-    if (mState_ == nextState && !IsTentMode()) {
+    if (mState_ == nextState) {
         WLOGFD("fold state doesn't change, foldState = %{public}d.", mState_);
         return;
     }
@@ -57,7 +57,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
     NotifyReportFoldStatusToScb(mState_, nextState, angle);
-    
+
     mState_ = nextState;
     if (foldScreenPolicy != nullptr) {
         foldScreenPolicy->SetFoldStatus(mState_);
