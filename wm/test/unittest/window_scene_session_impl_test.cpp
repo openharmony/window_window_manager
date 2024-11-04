@@ -792,6 +792,29 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyDrawingCompleted, Function | SmallTes
 }
 
 /**
+ * @tc.name: NotifyRemoveStartingWindow
+ * @tc.desc: NotifyRemoveStartingWindow session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, NotifyRemoveStartingWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifyRemoveStartingWindow");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    window->hostSession_ = session;
+    window->NotifyRemoveStartingWindow();
+}
+
+/**
  * @tc.name: SetTransparent
  * @tc.desc: SetTransparent test
  * @tc.type: FUNC
