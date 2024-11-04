@@ -2000,7 +2000,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession02, Function | SmallTest |
     ssm_->abilityInfoMap_[list] = abilityInfo;
     auto ret1 = ssm_->CheckIfReuseSession(sessionInfo);
     ASSERT_EQ(ret1, BrokerStates::BROKER_UNKOWN);
-    ssm_->abilityInfoMap_.erase(list); 
+    ssm_->abilityInfoMap_.erase(list);
 }
 
 /**
@@ -2031,7 +2031,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession03, Function | SmallTest |
     ssm_->abilityInfoMap_[list] = abilityInfo;
     auto ret2 = ssm_->CheckIfReuseSession(sessionInfo);
     ASSERT_EQ(ret2, BrokerStates::BROKER_UNKOWN);
-    ssm_->abilityInfoMap_.erase(list); 
+    ssm_->abilityInfoMap_.erase(list);
 }
 
 /**
