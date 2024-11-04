@@ -177,10 +177,10 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NEED_AVOID), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
@@ -227,6 +227,9 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Lev
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DRAWING_COMPLETED), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_APP_REMOVE_STARTING_WINDOW), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED),
         data,
         reply,
@@ -269,9 +272,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG), data, reply, option);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID), data, reply, option);
@@ -363,11 +363,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Lev
     ASSERT_EQ(data.WriteUint64(2), true);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteUint32(1), true);
     res = session_->ProcessRemoteRequest(
@@ -746,7 +741,7 @@ HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function |
 
 /**
  * @tc.name: HandleUpdatePropertyByAction01
- * @tc.desc: sessionStub sessionStubTest
+ * @tc.desc: No error
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
@@ -762,7 +757,7 @@ HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction01, Function | SmallTest |
 
 /**
  * @tc.name: HandleUpdatePropertyByAction02
- * @tc.desc: sessionStub sessionStubTest
+ * @tc.desc: Invalid data
  * @tc.type: FUNC
  * @tc.require: #I6JLSI
  */
@@ -772,6 +767,21 @@ HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction02, Function | SmallTest |
     MessageParcel reply;
     const std::uint32_t invalidData = 0;
     data.WriteUint32(invalidData);
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleUpdatePropertyByAction(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleUpdatePropertyByAction03
+ * @tc.desc: No action
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleUpdatePropertyByAction(data, reply);
     ASSERT_EQ(ERR_INVALID_DATA, res);

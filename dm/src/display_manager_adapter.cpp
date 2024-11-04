@@ -449,6 +449,10 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     }
     WLOGFI("dms OnRemoteDied");
     adapter_.Clear();
+    if (SingletonContainer::IsDestroyed()) {
+        WLOGFE("SingletonContainer is destroyed");
+        return;
+    }
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
     SingletonContainer::Get<ScreenManager>().OnRemoteDied();
     return;
@@ -855,5 +859,11 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const C
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
     return displayManagerServiceProxy_->GetScreenCapture(captureOption, errorCode);
+}
+
+sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
 }
 } // namespace OHOS::Rosen

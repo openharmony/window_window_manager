@@ -102,6 +102,16 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
     }
 }
 
+Session::~Session()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+            // do nothing
+        });
+    }
+}
+
 void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
     const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
 {
@@ -413,6 +423,16 @@ void Session::NotifyLayoutFinished()
     }
 }
 
+void Session::NotifyRemoveBlank()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveBlank();
+        }
+    }
+}
+
 void Session::NotifyExtensionDied()
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -611,6 +631,16 @@ bool Session::IsFocusedOnShow() const
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "IsFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow_, GetPersistentId());
     return focusedOnShow_;
+}
+
+void Session::SetStartingBeforeVisible(bool isStartingBeforeVisible)
+{
+    isStartingBeforeVisible_ = isStartingBeforeVisible;
+}
+
+bool Session::GetStartingBeforeVisible() const
+{
+    return isStartingBeforeVisible_;
 }
 
 WSError Session::SetTouchable(bool touchable)
@@ -1142,6 +1172,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     NotifyForeground();
 
     isTerminating_ = false;
+    isNeedSyncSessionRect_ = true;
     return WSError::WS_OK;
 }
 
@@ -1205,12 +1236,14 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         isActive_ = false;
     }
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! id: %{public}d, state: %{public}u",
             GetPersistentId(), state);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
+    SetIsPendingToBackgroundState(false);
     NotifyBackground();
     return WSError::WS_OK;
 }
@@ -1236,7 +1269,9 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     bufferAvailable_ = false;
+    isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -1274,6 +1309,17 @@ WSError Session::DrawingCompleted()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnDrawingCompleted();
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError Session::RemoveStartingWindow()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnAppRemoveStartingWindow();
         }
     }
     return WSError::WS_OK;
@@ -1343,6 +1389,18 @@ void Session::SetForegroundInteractiveStatus(bool interactive)
 bool Session::GetForegroundInteractiveStatus() const
 {
     return foregroundInteractiveStatus_.load();
+}
+
+bool Session::GetIsPendingToBackgroundState() const
+{
+    return isPendingToBackgroundState_.load();
+}
+
+void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isPendingToBackgroundState:%{public}d",
+        GetPersistentId(), isPendingToBackgroundState);
+    return isPendingToBackgroundState_.store(isPendingToBackgroundState);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
@@ -2678,6 +2736,26 @@ WSRect Session::GetSessionRect() const
 }
 
 /** @note @window.layout */
+WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        WSRect scaledRect = session->GetSessionGlobalRect();
+        scaledRect.width_ *= session->scaleX_;
+        scaledRect.height_ *= session->scaleY_;
+        globalScaledRect = { scaledRect.posX_, scaledRect.posY_, scaledRect.width_, scaledRect.height_ };
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+            session->GetPersistentId(), globalScaledRect.ToString().c_str());
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, "GetGlobalScaledRect");
+}
+
+/** @note @window.layout */
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
@@ -2691,6 +2769,9 @@ WSRect Session::GetSessionGlobalRect() const
 void Session::SetSessionGlobalRect(const WSRect& rect)
 {
     std::lock_guard<std::mutex> lock(globalRectMutex_);
+    if (globalRect_ != rect) {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+    }
     globalRect_ = rect;
 }
 
@@ -2743,6 +2824,16 @@ void Session::SetClientRect(const WSRect& rect)
 WSRect Session::GetClientRect() const
 {
     return clientRect_;
+}
+
+void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)
+{
+    enableRemoveStartingWindow_ = enableRemoveStartingWindow;
+}
+
+bool Session::GetEnableRemoveStartingWindow() const
+{
+    return enableRemoveStartingWindow_;
 }
 
 WindowType Session::GetWindowType() const

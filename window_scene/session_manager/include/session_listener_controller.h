@@ -20,6 +20,10 @@
 #include <vector>
 #include <list>
 
+#include "pixel_map.h"
+#ifndef SUPPORT_SCREEN
+#define SUPPORT_SCREEN
+#endif
 #include "mission_listener_interface.h"
 #include "ws_common.h"
 

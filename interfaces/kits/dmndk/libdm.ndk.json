@@ -85,11 +85,11 @@
     },
     {
         "first_instroduced":"14",
-        "name":"OH_NativeDisplayManager_CreateDisplayInfoById"
+        "name":"OH_NativeDisplayManager_CreateDisplayById"
     },
     {
         "first_instroduced":"14",
-        "name":"OH_NativeDisplayManager_DestroyDisplayInfo"
+        "name":"OH_NativeDisplayManager_DestroyDisplay"
     },
     {
         "first_instroduced":"14",
@@ -101,6 +101,6 @@
     },
     {
         "first_instroduced":"14",
-        "name":"OH_NativeDisplayManager_CreateScreenCapture"
+        "name":"OH_NativeDisplayManager_CaptureScreenPixelmap"
     }
 ]

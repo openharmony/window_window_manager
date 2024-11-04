@@ -562,6 +562,38 @@ void JsSceneSessionManager::ProcessAbilityManagerCollaboratorRegistered()
     SceneSessionManager::GetInstance().SetAbilityManagerCollaboratorRegisteredFunc(func);
 }
 
+void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
+{
+    RegisterDumpRootSceneElementInfoListener();
+    RegisterVirtualPixelRatioChangeListener();
+    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc([this] {
+        TLOGND(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
+        this->OnRootSceneBackEvent();
+    });
+    SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc([] {
+        RootScene::staticRootScene_->OnFlushUIParams();
+    });
+    SceneSessionManager::GetInstance().SetIsRootSceneLastFrameLayoutFinishedFunc([] {
+        return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
+    });
+}
+
+void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
+{
+    rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
+        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
+    });
+    if (!Session::IsScbCoreEnabled()) {
+        rootScene_->SetFrameLayoutFinishCallback([] {
+            SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
+            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
+        });
+    }
+    RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
+        SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
+    });
+}
+
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
@@ -1463,31 +1495,14 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
         rootScene_ = sptr<RootScene>::MakeSptr();
     }
     RootScene::staticRootScene_ = rootScene_;
-    RegisterDumpRootSceneElementInfoListener();
-    RegisterVirtualPixelRatioChangeListener();
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, env, storage, context);
             ScenePersistentStorage::InitDir(context->GetPreferencesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
         });
-    rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
-        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
-    });
-    if (!Session::IsScbCoreEnabled()) {
-        rootScene_->SetFrameLayoutFinishCallback([]() {
-            SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
-            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
-        });
-    }
-    RootSceneProcessBackEventFunc processBackEventFunc = [this]() {
-        TLOGD(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
-        this->OnRootSceneBackEvent();
-    };
-    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc(processBackEventFunc);
-    RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
-        SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
-    });
+    RegisterRootSceneCallbacksOnSSManager();
+    RegisterSSManagerCallbacksOnRootScene();
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
     if (jsRootSceneSessionObj == nullptr) {
         WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
@@ -3374,10 +3389,10 @@ napi_value JsSceneSessionManager::OnGetWindowPid(napi_env env, napi_callback_inf
 
 void JsSceneSessionManager::OnCloseTargetFloatWindow(const std::string& bundleName)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]in");
-    auto task = [this, bundleName, jsCallBack = GetJSCallback(CLOSE_TARGET_FLOAT_WINDOW_CB), env = env_]() {
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]");
+    auto task = [this, bundleName, jsCallBack = GetJSCallback(CLOSE_TARGET_FLOAT_WINDOW_CB), env = env_] {
         if (jsCallBack == nullptr) {
-            TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsBundleNameObj = CreateJsValue(env, bundleName);
@@ -3390,7 +3405,7 @@ void JsSceneSessionManager::OnCloseTargetFloatWindow(const std::string& bundleNa
 void JsSceneSessionManager::ProcessCloseTargetFloatWindow()
 {
     ProcessCloseTargetFloatWindowFunc func = [this](const std::string& bundleName) {
-        TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "ProcessCloseTargetFloatWindow. bundleName:%{public}s", bundleName.c_str());
+        TLOGND(WmsLogTag::WMS_MULTI_WINDOW, "ProcessCloseTargetFloatWindow. bundleName:%{public}s", bundleName.c_str());
         this->OnCloseTargetFloatWindow(bundleName);
     };
     SceneSessionManager::GetInstance().SetCloseTargetFloatWindowFunc(func);

@@ -134,11 +134,11 @@ bool WaterMarkTest::FillColor(sptr<Window> window)
 
 namespace {
 /**
-* @tc.name: WindowVisibilityInfoTest01
-* @tc.desc: window show or hide
-* @tc.type: FUNC
-* @tc.require: issueI5FSQW
-*/
+ * @tc.name: WindowVisibilityInfoTest01
+ * @tc.desc: window show or hide
+ * @tc.type: FUNC
+ * @tc.require: issueI5FSQW
+ */
 HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, Function | MediumTest | Level1)
 {
     appInfo_.name = "window1";

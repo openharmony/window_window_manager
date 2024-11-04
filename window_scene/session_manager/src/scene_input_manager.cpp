@@ -195,11 +195,9 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         MMI::Direction displayRotation;
         if (screenSession && screenSession->GetDisplayNode()) {
             displayRotation = ConvertDegreeToMMIRotation(
-                screenSession->GetDisplayNode()->GetStagingProperties().GetRotation(),
-                static_cast<MMI::DisplayMode>(displayMode));
+                screenSession->GetDisplayNode()->GetStagingProperties().GetRotation());
         } else {
-            displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-                static_cast<MMI::DisplayMode>(displayMode));
+            displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation());
         }
         auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
         auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
@@ -218,11 +216,11 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,
             .name = "display" + std::to_string(screenId),
             .uniq = "default" + std::to_string(screenId),
-            .direction = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-                static_cast<MMI::DisplayMode>(displayMode)),
+            .direction = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation()),
             .displayDirection = displayRotation,
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
-            .transform = transformData};
+            .transform = transformData,
+            .ppi = screenProperty.GetXDpi()};
         displayInfos.emplace_back(displayInfo);
     }
 }

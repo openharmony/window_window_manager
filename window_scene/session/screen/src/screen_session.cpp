@@ -793,9 +793,9 @@ void ScreenSession::SetDensityInCurResolution(float densityInCurResolution)
     property_.SetDensityInCurResolution(densityInCurResolution);
 }
 
-void ScreenSession::SetDefaultDensity(float DefaultDensity)
+void ScreenSession::SetDefaultDensity(float defaultDensity)
 {
-    property_.SetDefaultDensity(DefaultDensity);
+    property_.SetDefaultDensity(defaultDensity);
 }
 
 void ScreenSession::UpdateVirtualPixelRatio(const RRect& bounds)
@@ -1480,6 +1480,16 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
             continue;
         }
         listener->OnScreenCaptureNotify(mainScreenId, uid, clientName);
+    }
+}
+
+void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnSuperFoldStatusChange(screenId, superFoldStatus);
     }
 }
 } // namespace OHOS::Rosen

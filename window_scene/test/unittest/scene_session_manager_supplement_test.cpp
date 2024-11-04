@@ -25,6 +25,7 @@
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "common_test_utils.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
@@ -221,7 +222,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, DestroyDialogWithMainWindow,
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, CreateAndConnectSpecificSession, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -244,6 +245,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CreateAndConnectSpecificSession, Fun
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
+    CommonTestUtils::GuaranteeFloatWindowPermission("ws_scene_session_manager_supplement_test");
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     property->SetFloatingWindowAppType(true);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
@@ -265,7 +267,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CreateAndConnectSpecificSession, Fun
  * @tc.name: ClosePipWindowIfExist
  * @tc.desc: ClosePipWindowIfExist
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, ClosePipWindowIfExist, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -298,7 +300,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, ClosePipWindowIfExist, Function | Sm
  * @tc.name: CheckSystemWindowPermission
  * @tc.desc: CheckSystemWindowPermission
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, CheckSystemWindowPermission, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -330,7 +332,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CheckSystemWindowPermission, Functio
  * @tc.name: RecoverAndConnectSpecificSession
  * @tc.desc: RecoverAndConnectSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level3)
 {
     sptr<ISessionStage> sessionStage;
@@ -353,7 +355,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndConnectSpecificSession, Fu
  * @tc.name: CacheSubSessionForRecovering
  * @tc.desc: CacheSubSessionForRecovering
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, CacheSubSessionForRecovering, Function | SmallTest | Level3)
 {
     sptr<SceneSession> sceneSession;
@@ -403,7 +405,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CacheSubSessionForRecovering, Functi
  * @tc.name: RecoverAndReconnectSceneSession
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -438,7 +440,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndReconnectSceneSession, Fun
  * @tc.name: NotifyCreateSpecificSession
  * @tc.desc: NotifyCreateSpecificSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, NotifyCreateSpecificSession, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -474,7 +476,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifyCreateSpecificSession, Functio
  * @tc.name: NotifyCreateSubSession
  * @tc.desc: NotifyCreateSubSession
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, NotifyCreateSubSession, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -515,7 +517,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifyCreateSubSession, Function | S
  * @tc.name: DestroyAndDisconnectSpecificSessionInner
  * @tc.desc: DestroyAndDisconnectSpecificSessionInner
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, DestroyAndDisconnectSpecificSessionInner, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -542,7 +544,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, DestroyAndDisconnectSpecificSessionI
  * @tc.name: GetFocusWindowInfo
  * @tc.desc: GetFocusWindowInfo
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, GetFocusWindowInfo, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -580,7 +582,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, GetFocusWindowInfo, Function | Small
  * @tc.name: NotifySessionForCallback
  * @tc.desc: NotifySessionForCallback
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, NotifySessionForCallback, Function | SmallTest | Level3)
 {
     int ret = 0;
@@ -620,7 +622,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifySessionForCallback, Function |
  * @tc.name: IsSessionVisible
  * @tc.desc: IsSessionVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(SceneSessionManagerSupplementTest, IsSessionVisible, Function | SmallTest | Level3)
 {
     int ret = 0;
