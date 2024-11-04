@@ -716,17 +716,17 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowManagerAgent, Func
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
-    data.WriteUint32(-100)
+    data.WriteUint32(-100);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
-    data.WriteUint32(100)
+    data.WriteUint32(100);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
-    data.WriteUint32(5)
+    data.WriteUint32(5);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_NONE, res);
@@ -745,17 +745,17 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Fu
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
-    data.WriteUint32(-100)
+    data.WriteUint32(-100);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
-    data.WriteUint32(100)
+    data.WriteUint32(100);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
-    data.WriteUint32(5)
+    data.WriteUint32(5);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_NONE, res);
