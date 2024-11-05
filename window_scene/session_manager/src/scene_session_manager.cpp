@@ -1785,8 +1785,8 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
             static_cast<int>(sessionProperty->GetDisplayId()));
     }
     abilitySessionInfo->instanceKey = sessionInfo.appInstanceKey_;
-    if (sessionInfo.callState_ >= static_cast<int32_t>(AAFwk::CallToState::UNKNOW) &&
-        sessionInfo.callState_ <= static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
+    if (sessionInfo.callState_ >= static_cast<uint32_t>(AAFwk::CallToState::UNKNOW) &&
+        sessionInfo.callState_ <= static_cast<uint32_t>(AAFwk::CallToState::BACKGROUND)) {
         abilitySessionInfo->state = static_cast<AAFwk::CallToState>(sessionInfo.callState_);
     } else {
         TLOGW(WmsLogTag::WMS_LIFE, "Invalid callState:%{public}d", sessionInfo.callState_);
@@ -2198,7 +2198,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     EraseSceneSessionAndMarkDirtyLockFree(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
-    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
+    if (sceneSession && MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
         MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
         MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     }
