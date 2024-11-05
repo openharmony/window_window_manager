@@ -2493,6 +2493,26 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+/** @note @window.layout */
+WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        WSRect scaledRect = session->GetSessionGlobalRect();
+        scaledRect.width_ *= session->scaleX_;
+        scaledRect.height_ *= session->scaleY_;
+        globalScaledRect = { scaledRect.posX_, scaledRect.posY_, scaledRect.width_, scaledRect.height_ };
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+            session->GetPersistentId(), globalScaledRect.ToString().c_str());
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, "GetGlobalScaledRect");
+}
+
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
