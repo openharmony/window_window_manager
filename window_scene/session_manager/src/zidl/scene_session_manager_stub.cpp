@@ -593,18 +593,18 @@ int SceneSessionManagerStub::HandleDumpSessionWithId(MessageParcel& data, Messag
     TLOGD(WmsLogTag::DEFAULT, "In!");
     int32_t persistentId;
     if (!data.ReadInt32(persistentId)) {
-        TLOGE(WmsLogTag::DEFAULT, "HandleDumpSessionWithId read persistentId failed.");
+        TLOGE(WmsLogTag::DEFAULT, "read persistentId failed.");
         return ERR_INVALID_DATA;
     }
     std::vector<std::string> infos;
     WSError errCode = DumpSessionWithId(persistentId, infos);
     if (!reply.WriteStringVector(infos)) {
-        TLOGE(WmsLogTag::DEFAULT, "HandleDumpSessionWithId write info failed.");
+        TLOGE(WmsLogTag::DEFAULT, "write info failed.");
         return ERR_TRANSACTION_FAILED;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::DEFAULT, "HandleDumpSessionWithId write errcode failed.");
+        TLOGE(WmsLogTag::DEFAULT, "write errcode failed.");
         return ERR_TRANSACTION_FAILED;
     }
     return ERR_NONE;
