@@ -2081,7 +2081,7 @@ public:
      *
      * @return Value of PixelRatio obtained from displayInfo.
      */
-    virtual float GetVirtualPixelRatio() { return 0.0f; }
+    virtual float GetVirtualPixelRatio() { return 1.0f; }
 
     /**
      * @brief Hide None Secure Windows.
