@@ -2049,7 +2049,7 @@ WSError SessionProxy::OnSessionModalTypeChange(SubWindowModalType subWindowModal
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::OnSetWindowRectAutoSave(bool enable)
+WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2058,7 +2058,7 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enable)
         TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(enable)) {
+    if (!data.WriteBool(enabled)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write enable failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

@@ -172,7 +172,7 @@ public:
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtFirstSubWindow() const override;
     bool GetIsUIExtAnySubWindow() const override;
-    WMError SetWindowRectAutoSave(bool enable) override;
+    WMError SetWindowRectAutoSave(bool enabled) override;
 
     /*
      * Gesture Back

@@ -291,12 +291,12 @@ public:
     virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
     /**
-     * @brief Callback for setting whether the window memory state is enabled.
+     * @brief Callback for setting to automatically save the window rect.
      *
-     * @param enable If true, enable window state memory, else disable.
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSetWindowRectAutoSave(bool enable) { return WSError::WS_OK; }
+    virtual WSError OnSetWindowRectAutoSave(bool enabled) { return WSError::WS_OK; }
 
     /**
      *  Gesture Back

@@ -412,7 +412,7 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
     session->onSetWindowRectAutoSaveFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
 
-    NotifySetWindowRectAutoSaveFunc func = [](bool enable) {
+    NotifySetWindowRectAutoSaveFunc func = [](bool enabled) {
         return;
     };
     session->onSetWindowRectAutoSaveFunc_ = func;

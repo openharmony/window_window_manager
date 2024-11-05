@@ -317,7 +317,7 @@ private:
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
-    void OnSetWindowRectAutoSave(bool enable);
+    void OnSetWindowRectAutoSave(bool enabled);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

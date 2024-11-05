@@ -757,37 +757,38 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
         TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool enable;
-    if (!ConvertFromJsValue(env, argv[0], enable)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "[NAPI]Failed to convert parameter to enable");
+    bool enabled;
+    if (!ConvertFromJsValue(env, argv[0], enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "[NAPI]Failed to convert parameter to enabled");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
 
     auto window = windowScene->GetMainWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Window is null");
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-    }
-
     const char* const where = __func__;
-
-    NapiAsyncTask::CompleteCallback complete =
-        [where, window, enable]
-            (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enable));
-            if (ret != WmErrorCode::WM_OK) {
-                TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s enable recover position failed!", where);
-                task.Reject(env, JsErrUtils::CreateJsError(env,
-                    ret, "Window recover position failed."));
-            } else {
-                task.Resolve(env, NapiGetUndefined(env));
-            }
-        };
-    napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowStage::OnSetWindowRectAutoSave",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [window, where, env, task = napiAsyncTask, enabled]() {
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s Window is nullptr", where);
+            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task.Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "Window is nullptr."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled));
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s enable recover position failed!", where);
+            task.Reject(env, JsErrUtils::CreateJsError(env,
+                ret, "Window recover position failed."));
+        } else {
+            task.Resolve(env, NapiGetUndefined(env));
+        }
+    };
+    if(napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 
