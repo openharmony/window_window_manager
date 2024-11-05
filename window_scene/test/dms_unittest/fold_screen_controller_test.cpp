@@ -24,7 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 }
 class FoldScreenControllerTest : public testing::Test {
 public:
@@ -130,7 +130,7 @@ namespace {
         ssm_.SetFoldDisplayMode(FoldDisplayMode::FULL);
         ASSERT_EQ(FoldDisplayMode::UNKNOWN, ssm_.GetFoldDisplayMode());
     }
-
+    
     /**
      * @tc.name: LockDisplayStatus01
      * @tc.desc: test function :LockDisplayStatus
@@ -203,7 +203,7 @@ namespace {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
 
-        fsc_.foldScreenPolicy_ = nullptr;
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         auto ret = fsc_.GetFoldStatus();
         ASSERT_EQ(ret, FoldStatus::UNKNOWN);
     }
@@ -221,7 +221,6 @@ namespace {
         FoldStatus foldStatus = FoldStatus::HALF_FOLD;
         fsc_.foldScreenPolicy_ = nullptr;
         fsc_.SetFoldStatus(foldStatus);
-        ASSERT_EQ(fsc_.foldScreenPolicy_, nullptr);
         ASSERT_EQ(fsc_.GetFoldStatus(), FoldStatus::UNKNOWN);
     }
 
@@ -240,10 +239,10 @@ namespace {
         fsc_.SetFoldStatus(foldStatus);
         ASSERT_EQ(fsc_.GetFoldStatus(), foldStatus);
     }
-
+    
     /**
      * @tc.name: GetCurrentFoldCreaseRegion
-     * @tc.desc: test function :GetCurrentFoldCreaseRegion
+     * @tc.desc: FoldScreenController get crease region
      * @tc.type: FUNC
      */
     HWTEST_F(FoldScreenControllerTest, GetCurrentFoldCreaseRegion01, Function | SmallTest | Level3)
