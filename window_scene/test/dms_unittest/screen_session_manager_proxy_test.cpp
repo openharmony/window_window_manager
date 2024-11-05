@@ -1568,10 +1568,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetFoldStatus, Function | SmallTest | Le
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
     screenSessionManagerProxy->GetFoldStatus();
-    EXPECT_EQ(resultValue, 0);
 }
 
 /**
@@ -1585,10 +1583,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCurrentFoldCreaseRegion, Function | S
 
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
 
-    int resultValue = 0;
     screenSessionManagerProxy->GetCurrentFoldCreaseRegion();
-    EXPECT_EQ(resultValue, 0);
 }
 
 /**
