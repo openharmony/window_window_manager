@@ -1214,7 +1214,9 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateRect01, Function | SmallTest | Level2)
     info.abilityName_ = "UpdateRect01";
     info.bundleName_ = "UpdateRect01";
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     SizeChangeReason reason = SizeChangeReason::DRAG_END;
 
     WSRect rect = { 400, 400, 400, 400 };
@@ -1241,9 +1243,13 @@ HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction01, Function | 
     info.abilityName_ = "ProcessUpdatePropertyByAction01";
     info.bundleName_ = "ProcessUpdatePropertyByAction01";
     info.moduleName_ = "ProcessUpdatePropertyByAction01";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON), WMError::WM_OK);
@@ -1260,9 +1266,12 @@ HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction02, Function | 
     info.abilityName_ = "ProcessUpdatePropertyByAction02";
     info.bundleName_ = "ProcessUpdatePropertyByAction02";
     info.moduleName_ = "ProcessUpdatePropertyByAction02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE), WMError::WM_OK);
@@ -1279,9 +1288,12 @@ HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction03, Function | 
     info.abilityName_ = "ProcessUpdatePropertyByAction03";
     info.bundleName_ = "ProcessUpdatePropertyByAction03";
     info.moduleName_ = "ProcessUpdatePropertyByAction03";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE), WMError::WM_OK);
@@ -1298,9 +1310,12 @@ HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction04, Function | 
     info.abilityName_ = "ProcessUpdatePropertyByAction04";
     info.bundleName_ = "ProcessUpdatePropertyByAction04";
     info.moduleName_ = "ProcessUpdatePropertyByAction04";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS), WMError::WM_OK);
@@ -1317,9 +1332,12 @@ HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction05, Function | 
     info.abilityName_ = "ProcessUpdatePropertyByAction05";
     info.bundleName_ = "ProcessUpdatePropertyByAction05";
     info.moduleName_ = "ProcessUpdatePropertyByAction05";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION), WMError::WM_OK);
@@ -1336,9 +1354,12 @@ HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction06, Function | 
     info.abilityName_ = "ProcessUpdatePropertyByAction06";
     info.bundleName_ = "ProcessUpdatePropertyByAction06";
     info.moduleName_ = "ProcessUpdatePropertyByAction06";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE), WMError::WM_OK);
@@ -1355,9 +1376,12 @@ HWTEST_F(SceneSessionLifecycleTest, HandleActionUpdateTextfieldAvoidInfo01, Func
     info.abilityName_ = "HandleActionUpdateTextfieldAvoidInfo01";
     info.bundleName_ = "HandleActionUpdateTextfieldAvoidInfo01";
     info.moduleName_ = "HandleActionUpdateTextfieldAvoidInfo01";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG;
     ASSERT_EQ(sceneSession->HandleActionUpdateTextfieldAvoidInfo(property, action),
