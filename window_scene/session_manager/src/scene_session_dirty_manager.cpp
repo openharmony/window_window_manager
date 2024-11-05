@@ -871,15 +871,15 @@ void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>
 void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,
     std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
-    bool updateSecSurfaceInfoFlag = false;
+    bool updateSecSurfaceInfoNeeded = false;
     {
         std::unique_lock<std::shared_mutex> lock(secSurfaceInfoMutex_);
-        if (secSurfaceInfoMap.size() != secSurfaceInfoMap_.size() || secSurfaceInfoMap_ != secSurfaceInfoMap) {
+        if (secSurfaceInfoMap_ != secSurfaceInfoMap) {
             secSurfaceInfoMap_ = secSurfaceInfoMap;
-            updateSecSurfaceInfoFlag = true;
+            updateSecSurfaceInfoNeeded = true;
         }
     }
-    if (updateSecSurfaceInfoFlag) {
+    if (updateSecSurfaceInfoNeeded) {
         ResetFlushWindowInfoTask();
         DumpSecSurfaceInfoMap(secSurfaceInfoMap);
     }
