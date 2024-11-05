@@ -2599,8 +2599,19 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
             return false;
         }
     }
+    if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+        int32_t parentId = property->GetParentPersistentId();
+        auto parentSession = GetSceneSession(parentId);
+        if (parentSession != nullptr && parentSession->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
+            SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check system subWindow permission success, parentId:%{public}d.", parentId);
+            return true;
+        } else {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "check system subWindow permission warning, parentId:%{public}d.", parentId);
+        }
+    }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
-        WLOGFD("check create permission success, create with system calling.");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "check create permission success, create with system calling.");
         return true;
     }
     WLOGFE("check system window permission failed.");
