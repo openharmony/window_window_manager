@@ -1263,17 +1263,17 @@ int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&da
 
 int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "In!");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In!");
     int32_t persistentId;
     if (!data.ReadInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "read persistentId failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read persistentId failed");
         return ERR_INVALID_DATA;
     }
     Rect rect = {0, 0, 0, 0};
     WMError ret = GetCallingWindowRect(persistentId, rect);
     reply.WriteInt32(static_cast<int32_t>(ret));
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to GetCallingWindowRect(%{public}d)", persistentId);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to GetCallingWindowRect(%{public}d)", persistentId);
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(rect.posX_);
