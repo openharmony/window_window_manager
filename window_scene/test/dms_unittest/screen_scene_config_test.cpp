@@ -379,13 +379,8 @@ HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSceneConfigTest, GetSubCutoutBoundaryRect, Function | SmallTest | Level3)
 {
-    bool isFoldableMachine = false;
-    if (ScreenSessionManager::GetInstance().IsFoldable() &&
-        ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED) {
-        isFoldableMachine = true;
-    }
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
-    if (isFoldableMachine) {
+    if (ScreenSessionManager::GetInstance().IsFoldable()) {
         ASSERT_TRUE(result.size() > 0);
     } else {
         ASSERT_TRUE(result.size() == 0);

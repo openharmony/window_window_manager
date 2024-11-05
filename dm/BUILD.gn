@@ -35,13 +35,13 @@ config("libdm_public_config") {
   ]
 }
 
+config("libdm_ndk_public_config") {
+  include_dirs = [ "../interfaces/kits/dmndk/dm" ]
+}
+
 config("for_libdm_public_config") {
   include_dirs =
       [ "../../../multimedia/image_framework/interfaces/innerkits/include" ]
-}
-
-config("libdm_ndk_public_config") {
-  include_dirs = [ "../interfaces/kits/dmndk/dm" ]
 }
 
 ## Build libdm_static.a
@@ -143,7 +143,6 @@ ohos_shared_library("libdm") {
     "samgr:samgr_proxy",
   ]
 
-  innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 
@@ -171,14 +170,14 @@ ohos_shared_library("libdm_ndk") {
     debug = false
   }
 
+  public_configs = [ ":libdm_ndk_public_config" ]
+
   include_dirs = [
     "${window_base_path}/interfaces/kits/dmndk/dm",
     "${window_base_path}/interfaces/inner_kits/dm",
   ]
 
   sources = [ "src/oh_display_manager.cpp" ]
-
-  public_configs = [ ":libdm_ndk_public_config" ]
 
   deps = [ ":libdm" ]
   innerapi_tags = [ "ndk" ]
