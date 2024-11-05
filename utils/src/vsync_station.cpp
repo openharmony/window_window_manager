@@ -222,10 +222,15 @@ FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
 void VsyncStation::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
     if (auto frameRateLinker = GetFrameRateLinker()) {
+        if (lastFrameRateRange_ == nullptr) {
+            lastFrameRateRange_ = std::make_shared<FrameRateRange>(0, RANGE_MAX_REFRESHRATE, rate, rateType);
+        } else {
+            lastFrameRateRange_->Set(0, RANGE_MAX_REFRESHRATE, rate, rateType);
+        }
+        lastAnimatorExpectedFrameRate_ = animatorExpectedFrameRate;
         if (frameRateLinker->IsEnable()) {
             TLOGD(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64, rate, frameRateLinker->GetId());
-            FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate, rateType};
-            frameRateLinker->UpdateFrameRateRange(range, animatorExpectedFrameRate);
+            frameRateLinker->UpdateFrameRateRange(*lastFrameRateRange_, lastAnimatorExpectedFrameRate_);
         }
     }
 }
@@ -239,6 +244,8 @@ void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
                 range.preferred_, frameRateLinker->GetId());
             frameRateLinker->UpdateFrameRateRange(range);
             frameRateLinker->UpdateFrameRateRangeImme(range);
+        } else if (lastFrameRateRange_) {
+            frameRateLinker->UpdateFrameRateRange(*lastFrameRateRange_, lastAnimatorExpectedFrameRate_);
         }
         frameRateLinker->SetEnable(enabled);
     }
