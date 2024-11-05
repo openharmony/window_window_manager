@@ -2109,8 +2109,8 @@ HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | Sm
 }
 
 /**
- * @tc.name: EnableWindowStateMemory
- * @tc.desc: EnableWindowStateMemory
+ * @tc.name: SetWindowRectAutoSave
+ * @tc.desc: SetWindowRectAutoSave
  * @tc.type: FUNC
  */
 
