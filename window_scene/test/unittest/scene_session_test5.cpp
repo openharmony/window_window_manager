@@ -402,7 +402,7 @@ HWTEST_F(SceneSessionTest5, OnLayoutFullScreenChange, Function | SmallTest | Lev
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
-    sessionChangeCallback->onLayoutFullScreenChangeFunc_ = func;
+    session->onLayoutFullScreenChangeFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
 }
 
@@ -411,7 +411,7 @@ HWTEST_F(SceneSessionTest5, OnLayoutFullScreenChange, Function | SmallTest | Lev
  * @tc.desc: test RegisterLayoutFullScreenChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, RegisterLayoutFullScreenChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, RegisterLayoutFullScreenChangeCallback, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "RegisterLayoutFullScreenChangeCallback";
