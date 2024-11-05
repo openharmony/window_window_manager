@@ -1333,6 +1333,23 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateTurnScreenOn, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetNotifyVisibleChangeFunc
+ * @tc.desc: SetNotifyVisibleChangeFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetNotifyVisibleChangeFunc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    session->SetNotifyVisibleChangeFunc([](int32_t persistentId) {});
+    EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
+}
+
+/**
  * @tc.name: UpdateClientRect01
  * @tc.desc: UpdateClientRect
  * @tc.type: FUNC
@@ -1385,23 +1402,6 @@ HWTEST_F(SceneSessionTest5, UpdateRect01, Function | SmallTest | Level2)
     rect.height_ = 800;
     session->winRect_ = rect;
     EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionTest5"), WSError::WS_OK);
-}
-
-/**
- * @tc.name: SetNotifyVisibleChangeFunc
- * @tc.desc: SetNotifyVisibleChangeFunc Test
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, SetNotifyVisibleChangeFunc, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "test";
-    info.bundleName_ = "test";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    session->SetNotifyVisibleChangeFunc([](int32_t persistentId) {});
-    EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
 }
 }
 }
