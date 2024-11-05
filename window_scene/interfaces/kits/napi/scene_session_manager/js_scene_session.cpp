@@ -731,12 +731,12 @@ void JsSceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
 
 void JsSceneSession::ProcessTitleAndDockHoverShowChangeRegister()
 {
-    const char* const funcName = __func__;
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
+    const char* const funcName = __func__;
     session->SetTitleAndDockHoverShowChangeCallback([weakThis = wptr(this), funcName](
         bool isTitleHoverShown, bool isDockHoverShown) {
         auto jsSceneSession = weakThis.promote();
@@ -775,12 +775,12 @@ void JsSceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool 
 
 void JsSceneSession::ProcessRestoreMainWindowRegister()
 {
-    const char* const funcName = __func__;
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
+    const char* const funcName = __func__;
     session->SetRestoreMainWindowCallback([weakThis = wptr(this), funcName] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
@@ -788,9 +788,7 @@ void JsSceneSession::ProcessRestoreMainWindowRegister()
             return;
         }
         jsSceneSession->RestoreMainWindow();
-    }
-        
-    );
+    });
     TLOGI(WmsLogTag::WMS_LIFE, "success");
 }
 
