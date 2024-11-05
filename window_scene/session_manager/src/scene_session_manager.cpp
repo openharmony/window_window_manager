@@ -3889,7 +3889,7 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     if (GetDisplayBrightness() != brightness &&
         GetFocusedSessionId() == sceneSession->GetPersistentId()) {
-            PostBrightnessTask(brightness);
+        PostBrightnessTask(brightness);
     }
 #else
     WLOGFD("Can not found the sub system of DisplayPowerMgr");
