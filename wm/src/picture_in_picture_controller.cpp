@@ -37,7 +37,6 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr int32_t PIP_DESTROY_TIMEOUT = 600;
     constexpr int32_t PIP_SUCCESS = 1;
     constexpr int32_t FAILED = 0;
     constexpr uint32_t PIP_LOW_PRIORITY = 0;
