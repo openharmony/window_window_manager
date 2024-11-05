@@ -969,6 +969,210 @@ HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession04, Function |
     ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
     ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
 }
+
+/**
+ * @tc.name: GetSceneSessionByIdentityInfo
+ * @tc.desc: GetSceneSessionByIdentityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetSceneSessionByIdentityInfo01, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "abilityName01";
+    info.bundleName_ = "bundleName01";
+    info.moduleName_ = "moduleName01";
+    info.appIndex_ = 11;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::string bundleName1 = "abilityName01";
+    std::string moduleName1 = "bundleName01";
+    std::string abilityName1 = "moduleName01";
+    int32_t appIndex1 = 11;
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    SessionIdentityInfo identityInfo = { bundleName1, moduleName1, abilityName1, appIndex1 };
+    auto sceneSession = ssm_->GetSceneSessionByIdentityInfo(identityInfo);
+
+    ASSERT_EQ(sceneSession->GetSessionInfo().abilityName_, "abilityName01");
+    ASSERT_EQ(sceneSession->GetSessionInfo().bundleName_, "bundleName01");
+    ASSERT_EQ(sceneSession->GetSessionInfo().moduleName_, "moduleName01");
+    ssm_->sceneSessionMap_.erase(1);
+}
+
+/**
+ * @tc.name: ForegroundAndDisconnect01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ForegroundAndDisconnect01";
+    info.bundleName_ = "ForegroundAndDisconnect01";
+    info.moduleName_ = "ForegroundAndDisconnect01";
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    int resultValue = 0;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->isActive_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    auto result = sceneSession->Foreground(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
+    result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ForegroundAndDisconnect02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ForegroundAndDisconnect02";
+    info.bundleName_ = "ForegroundAndDisconnect02";
+    info.moduleName_ = "ForegroundAndDisconnect02";
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->isActive_ = true;
+    sptr<WindowSessionProperty> property = nullptr;
+    auto result = sceneSession->Foreground(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    sceneSession->UpdateSessionState(SessionState::STATE_ACTIVE);
+    result = sceneSession->BackgroundTask(true);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ForegroundAndDisconnect03
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ForegroundAndDisconnect03";
+    info.bundleName_ = "ForegroundAndDisconnect03";
+    info.moduleName_ = "ForegroundAndDisconnect03";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->isActive_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    auto result = sceneSession->Foreground(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    sceneSession->UpdateSessionState(SessionState::STATE_ACTIVE);
+    result = sceneSession->BackgroundTask(true);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ForegroundAndDisconnect04
+ * @tc.desc: ForegroundAndDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect04, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ForegroundAndDisconnect04";
+    info.bundleName_ = "ForegroundAndDisconnect04";
+    info.moduleName_ = "ForegroundAndDisconnect04";
+    info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->isActive_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    auto result = sceneSession->Foreground(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    sceneSession->UpdateSessionState(SessionState::STATE_INACTIVE);
+    result = sceneSession->BackgroundTask(true);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ForegroundAndDisconnect05
+ * @tc.desc: ForegroundAndDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect05, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ForegroundAndDisconnect05";
+    info.bundleName_ = "ForegroundAndDisconnect05";
+    info.moduleName_ = "ForegroundAndDisconnect05";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->Session::SetSessionState(SessionState::STATE_CONNECT);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
+    auto result = sceneSession->Foreground(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    result = sceneSession->BackgroundTask(true);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ForegroundAndDisconnect06
+ * @tc.desc: ForegroundAndDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect06, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ForegroundAndDisconnect06";
+    info.bundleName_ = "ForegroundAndDisconnect06";
+    info.moduleName_ = "ForegroundAndDisconnect06";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->Session::SetSessionState(SessionState::STATE_CONNECT);
+
+    sceneSession->SetLeashWinSurfaceNode(nullptr);
+    auto result = sceneSession->Foreground(property);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    result = sceneSession->BackgroundTask(true);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    result = sceneSession->DisconnectTask(true, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
