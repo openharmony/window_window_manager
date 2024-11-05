@@ -2442,12 +2442,12 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enable)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
+        TLOGE(WmsLogTag::WMS_MAIN, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     if (!(windowSystemConfig_.IsPcWindow())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "This is not PC, not supported");
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
