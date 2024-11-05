@@ -159,6 +159,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyFrameLayoutFinish(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocus(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
+            return HandleSetGestureBackEnabled(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -891,6 +893,18 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     WSError ret = RequestFocus(isFocused);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "in");
+    bool isEnabled;
+    if (!data.ReadBool(isEnabled)) {
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = SetGestureBackEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

@@ -93,6 +93,11 @@ public:
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WSError RequestFocus(bool isFocused) override;
+    
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool isEnabled) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
