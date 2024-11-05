@@ -1318,7 +1318,7 @@ HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction04, Function | 
     ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS), WMError::WM_OK);
+        WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION), WMError::WM_OK);
 }
 
 /**
@@ -1332,28 +1332,6 @@ HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction05, Function | 
     info.abilityName_ = "ProcessUpdatePropertyByAction05";
     info.bundleName_ = "ProcessUpdatePropertyByAction05";
     info.moduleName_ = "ProcessUpdatePropertyByAction05";
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION), WMError::WM_OK);
-}
-
-/**
- * @tc.name: ProcessUpdatePropertyByAction06
- * @tc.desc: ProcessUpdatePropertyByAction
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, ProcessUpdatePropertyByAction06, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ProcessUpdatePropertyByAction06";
-    info.bundleName_ = "ProcessUpdatePropertyByAction06";
-    info.moduleName_ = "ProcessUpdatePropertyByAction06";
 
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
@@ -1388,6 +1366,44 @@ HWTEST_F(SceneSessionLifecycleTest, HandleActionUpdateTextfieldAvoidInfo01, Func
         WMError::WM_OK);
     ASSERT_EQ(sceneSession->HandleActionUpdateWindowMask(property, action),
         WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetBlankFlag
+ * @tc.desc: GetBlankFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, GetBlankFlag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetBlankFlag";
+    info.bundleName_ = "GetBlankFlag";
+    info.moduleName_ = "GetBlankFlag";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    bool isAddBlank = false;
+    sceneSession->SetBlankFlag(isAddBlank);
+    ASSERT_EQ(false, sceneSession->GetBlankFlag());
+}
+
+/**
+ * @tc.name: GetBufferAvailableCallbackEnable
+ * @tc.desc: GetBufferAvailableCallbackEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, GetBufferAvailableCallbackEnable, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetBufferAvailableCallbackEnable";
+    info.bundleName_ = "GetBufferAvailableCallbackEnable";
+    info.moduleName_ = "GetBufferAvailableCallbackEnable";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    bool enable = false;
+    sceneSession->SetBufferAvailableCallbackEnable(enable);
+    ASSERT_EQ(false, sceneSession->GetBufferAvailableCallbackEnable());
 }
 }
 }
