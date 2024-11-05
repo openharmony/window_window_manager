@@ -161,7 +161,7 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
     std::ostringstream infoStream("DisplayInfo: ");
     infoStream << " id: " << info.id << " x: " << info.x << " y: " << info.y
                << " width: " << info.width << " height: " << info.height << " dpi: " << info.dpi
-               << " name:" << info.name << " uniq: " << info.uniq
+               << " name: " << info.name << " uniq: " << info.uniq
                << " displayMode: " << static_cast<int>(info.displayMode)
                << " direction: " << static_cast<int>(info.direction)
                << " transform: " << DumpTransformInDisplayInfo(info.transform);
