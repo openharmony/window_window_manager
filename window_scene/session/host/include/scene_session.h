@@ -126,7 +126,6 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
         NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
@@ -381,6 +380,11 @@ public:
     void RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback);
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /**
+     * Window TouchOutside
+     */
+    void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
 
     /**
      * Window Rotation
@@ -788,6 +792,11 @@ private:
      * Window Visibility
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
+
+    /**
+     * Window TouchOutside
+     */
+    NotifyTouchOutsideFunc OnTouchOutside_;
 
     /*
      * Window Rotation
