@@ -101,7 +101,7 @@ Session::~Session()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
     if (mainHandler_) {
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() {
             // do nothing
         });
     }
