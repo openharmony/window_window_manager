@@ -856,7 +856,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
             curInfo = (infoPtr) ? std::string(infoPtr, curSize) : "";
         }
         info.emplace_back(curInfo);
-        TLOGD(WmsLogTag::DEFAULT, "HandleNotifyDumpInfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
+        TLOGD(WmsLogTag::DEFAULT, "InfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
     }
     NotifyDumpInfoResult(info);
     return ERR_NONE;
@@ -1206,7 +1206,7 @@ int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel& data, Mes
     }
     uint32_t extWindowActions;
     if (!data.ReadUint32(extWindowActions)) {
-        WLOGFE("read extWindowActions failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "read extWindowActions failed");
         return ERR_INVALID_DATA;
     }
     WSError ret = UpdateExtWindowFlags(token, extWindowFlags, extWindowActions);
