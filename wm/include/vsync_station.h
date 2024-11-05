@@ -28,6 +28,7 @@
 namespace OHOS {
 namespace Rosen {
 class RSFrameRateLinker;
+class FrameRateRange;
 
 class VsyncStation : public std::enable_shared_from_this<VsyncStation> {
 public:
@@ -51,6 +52,7 @@ private:
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiver();
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiverLocked();
     std::shared_ptr<RSFrameRateLinker> GetFrameRateLinker();
+    std::shared_ptr<RSFrameRateLinker> GetFrameRateLinkerLocked();
     void VsyncCallbackInner(int64_t nanoTimestamp, int64_t frameCount);
     void OnVsyncTimeOut();
 
@@ -67,6 +69,8 @@ private:
     std::shared_ptr<RSFrameRateLinker> frameRateLinker_ = nullptr;
     using Callbacks = std::unordered_set<std::shared_ptr<VsyncCallback>>;
     Callbacks vsyncCallbacks_;
+    std::shared_ptr<FrameRateRange> lastFrameRateRange_ = nullptr;
+    int32_t lastAnimatorExpectedFrameRate_ = 0;
     // Above guarded by mutex_
 };
 } // namespace Rosen
