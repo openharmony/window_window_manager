@@ -63,7 +63,6 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
     uint32_t windowId, napi_env env)
     : weakRef_(this), pipOption_(pipOption), mainWindow_(mainWindow), mainWindowId_(windowId), env_(env)
 {
-    this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
 }
 
@@ -340,7 +339,6 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
 WMError PictureInPictureController::DestroyPictureInPictureWindow()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    handler_->RemoveTask(DESTROY_TIMEOUT_TASK);
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when destroy pip");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
