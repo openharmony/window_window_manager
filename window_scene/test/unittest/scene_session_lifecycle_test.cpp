@@ -1429,7 +1429,7 @@ HWTEST_F(SceneSessionLifecycleTest, SetPrivacyMode01, Function | SmallTest | Lev
     sceneSession->SetSessionProperty(property);
 
     sceneSession->SetPrivacyMode(false);
-    EXPECT_EQ(false, session->GetSessionProperty()->GetPrivacyMode());
+    EXPECT_EQ(false, sceneSession->GetSessionProperty()->GetPrivacyMode());
 }
 }
 }
