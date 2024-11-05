@@ -121,6 +121,7 @@ const std::string ARG_DUMP_DETAIL = "-c";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
+constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
 
 constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
 
@@ -2397,7 +2398,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
- 
+
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
         WSError err = CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage);
         if (err != WSError::WS_OK) {
@@ -3860,8 +3861,8 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
             return;
         }
         bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession);
-        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]", 
-            sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(), 
+        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]",
+            sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(),
             sceneSession->IsVisible(), requireLock, shouldLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
@@ -3891,7 +3892,6 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
         return false;
     }
     HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
-    ProcessWindowModeType();
     return true;
 }
 
@@ -5827,7 +5827,6 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
         default:
             break;
     }
-    ProcessWindowModeType();
 }
 
 void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSession)
@@ -5885,10 +5884,10 @@ static bool IsSmallFoldProduct()
         TLOGE(WmsLogTag::DEFAULT, "foldScreenType is empty");
         return false;
     }
-    return foldScreenType[0] == '2';
+    return foldScreenType[0] == SMALL_FOLD_PRODUCT_TYPE;
 }
 
-bool SceneSessionManager::IsInSecondaryScreen(const sptr<SceneSession>& sceneSession)
+bool SceneSessionManager::IsInDefaultScreen(const sptr<SceneSession>& sceneSession)
 {
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty == nullptr) {
@@ -5896,7 +5895,21 @@ bool SceneSessionManager::IsInSecondaryScreen(const sptr<SceneSession>& sceneSes
         return false;
     }
     ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
-    return sessionProperty->GetDisplayId() != defaultScreenId;
+    return sessionProperty->GetDisplayId() == defaultScreenId;
+}
+
+bool SceneSessionManager::IsNeedSkipWindowModeTypeCheck(const sptr<SceneSession>& sceneSession, bool isSmallFold)
+{
+    if (sceneSession == nullptr ||
+        !WindowHelper::IsMainWindow(sceneSession->GetWindowType()) ||
+        !sceneSession->GetRSVisible() ||
+        !sceneSession->IsSessionForeground()) {
+        return true;
+    }
+    if (isSmallFold && !IsInDefaultScreen(sceneSession)) {
+        return true;
+    }
+    return false;
 }
 
 WindowModeType SceneSessionManager::CheckWindowModeType()
@@ -5908,12 +5921,7 @@ WindowModeType SceneSessionManager::CheckWindowModeType()
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& session : sceneSessionMap_) {
-            if (session.second == nullptr ||
-                !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
-                !Rosen::SceneSessionManager::GetInstance().IsSessionVisibleForeground(session.second)) {
-                continue;
-            }
-            if (isSmallFold && IsInSecondaryScreen(session.second)) {
+            if (IsNeedSkipWindowModeTypeCheck(session.second, isSmallFold)) {
                 continue;
             }
             auto mode = session.second->GetWindowMode();
@@ -7743,6 +7751,7 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
             visibilityInfo.c_str());
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
+    ProcessWindowModeType();
 #ifdef MEMMGR_WINDOW_ENABLE
     if (memMgrWindowInfos.size() != 0) {
         WLOGD("Notify memMgrWindowInfos changed start");
