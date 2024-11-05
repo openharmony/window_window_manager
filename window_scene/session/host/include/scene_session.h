@@ -185,7 +185,7 @@ public:
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
         bool isKeyboardShow, bool isRotating) {};
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
-+   void SetNeedSyncSessionRect(bool needSync);
+    void SetNeedSyncSessionRect(bool needSync);
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason,
