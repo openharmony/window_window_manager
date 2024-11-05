@@ -93,7 +93,7 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode);
     virtual MaximizeMode GetMaximizeMode();
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
-    virtual WMError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener);
+    virtual WMError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener);
     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
     virtual WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
     virtual WMError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener);
