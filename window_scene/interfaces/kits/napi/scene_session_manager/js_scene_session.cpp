@@ -5086,7 +5086,7 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enable)
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_RECT_AUTO_SAVE_CB);
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_MAIN, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_MAIN, "jsCallBack is nullptr");
             return;
         }
         napi_value paramsObj = CreateJsValue(env, enable);
