@@ -4987,6 +4987,7 @@ void SceneSession::RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
         }
         session->onBindDialogTarget_ = std::move(callback);
     };
