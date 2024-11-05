@@ -18,7 +18,6 @@
 
 #include "js_runtime_utils.h"
 #include "picture_in_picture_manager.h"
-#include <mutex>
 
 namespace OHOS {
 namespace Rosen {
@@ -35,7 +34,6 @@ private:
     napi_value OnCreatePipController(napi_env env, napi_callback_info info);
     napi_value NapiSendTask(napi_env env, PipOption& pipOption);
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(napi_env env, napi_value* result);
-    static std::mutex mutex_;
 };
 }
 }
