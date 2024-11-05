@@ -54,6 +54,8 @@ public:
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowToAsync(napi_env env, napi_callback_info info);
+    static napi_value MoveWindowToGlobal(napi_env env, napi_callback_info info);
+    static napi_value GetGlobalScaledRect(napi_env env, napi_callback_info info);
     static napi_value Resize(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value ResizeWindowAsync(napi_env env, napi_callback_info info);
@@ -187,6 +189,8 @@ private:
     napi_value OnMoveTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowToAsync(napi_env env, napi_callback_info info);
+    napi_value OnMoveWindowToGlobal(napi_env env, napi_callback_info info);
+    napi_value OnGetGlobalScaledRect(napi_env env, napi_callback_info info);
     napi_value OnResize(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
     napi_value OnResizeWindowAsync(napi_env env, napi_callback_info info);
