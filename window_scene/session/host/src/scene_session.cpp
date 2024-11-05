@@ -1090,32 +1090,32 @@ void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityC
     PostTask(task, "SetKeyboardGravityChangeCallback");
 }
 
-void SceneSession::SetTitleAndDockHoverShowChangeCallback(const NotifyTitleAndDockHoverShowChangeFunc&& func)
+void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func)
 {
     const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), func, funcName] {
+    auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_IMMS, "session or TitleAndDockHoverShowChangeFunc is null");
             return;
         }
-        session->onTitleAndDockHoverShowChangeFunc_ = func;
+        session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d",
             funcName, session->GetPersistentId());
     };
     PostTask(task, funcName);
 }
 
-void SceneSession::SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc&& func)
+void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
 {
     const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), func, funcName] {
+    auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session or RestoreMainWindowFunc is null");
             return;
         }
-        session->onRestoreMainWindowFunc_ = func;
+        session->onRestoreMainWindowFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d",
             funcName, session->GetPersistentId());
     };

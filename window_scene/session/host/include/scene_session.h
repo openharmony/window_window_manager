@@ -504,8 +504,8 @@ public:
     /**
      * PC Window
      */
-    void SetTitleAndDockHoverShowChangeCallback(const NotifyTitleAndDockHoverShowChangeFunc&& func);
-    void SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc&& func);
+    void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
