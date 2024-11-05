@@ -598,6 +598,10 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
     if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
         for (auto& child : screenGroup->GetChildren()) {
             WLOGD("AddAsSuccedentScreenLocked. defaultScreen rotation:%d", child->rotation_);
+            if (child->GetActiveScreenMode() == nullptr) {
+                WLOGE("active screen mode is nullptr");
+                continue;
+            }
             if (child->rotation_ == Rotation::ROTATION_90 || child->rotation_ == Rotation::ROTATION_270) {
                 point.posX_ += static_cast<int32_t>(child->GetActiveScreenMode()->height_);
             } else {

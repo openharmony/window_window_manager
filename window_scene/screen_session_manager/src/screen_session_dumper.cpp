@@ -695,6 +695,10 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
 {
     size_t commaPos = input.find_last_of(',');
     auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_HOVER_STATUS)) {
         std::string valueStr = input.substr(commaPos + 1);
         int32_t value = std::stoi(valueStr);
