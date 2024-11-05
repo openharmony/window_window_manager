@@ -21,7 +21,6 @@
 #include "window_manager_hilog.h"
 #include "window.h"
 #include "xcomponent_controller.h"
-#include <algorithm>
 
 namespace OHOS {
 namespace Rosen {
@@ -56,8 +55,6 @@ namespace {
         {PiPTemplateType::VIDEO_LIVE, VIDEO_LIVE_CONTROLS},
     };
 }
-
-std::mutex JsPipWindowManager::mutex_;
 
 static int32_t checkControlsRules(uint32_t pipTemplateType, std::vector<std::uint32_t> controlGroups)
 {
@@ -261,7 +258,6 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
 napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
-    std::lock_guard<std::mutex> lock(mutex_);
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
