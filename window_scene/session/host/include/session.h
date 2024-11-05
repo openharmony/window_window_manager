@@ -22,7 +22,6 @@
 
 #include <event_handler.h>
 
-#include "accessibility_element_info.h"
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
@@ -291,7 +290,7 @@ public:
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
     sptr<Session> GetParentSession() const;
-    sptr<Session> GetMainSession();
+    sptr<Session> GetMainSession() const;
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
     std::vector<sptr<Session>> GetDialogVector() const;

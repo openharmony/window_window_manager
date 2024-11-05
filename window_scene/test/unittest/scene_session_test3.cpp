@@ -765,6 +765,24 @@ HWTEST_F(SceneSessionTest3, CompatibleFullScreenRecover, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: SetIsMidScene
+ * @tc.desc: SetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetIsMidScene, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsMidScene";
+    info.bundleName_ = "SetIsMidScene";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetIsMidScene(true);
+    bool res = sceneSession->GetIsMidScene();
+    EXPECT_EQ(res, true);
+}
+
+/**
  * @tc.name: SetIsPcAppInPad
  * @tc.desc: SetIsPcAppInPad
  * @tc.type: FUNC
