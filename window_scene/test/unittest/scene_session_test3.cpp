@@ -825,7 +825,7 @@ HWTEST_F(SceneSessionTest3, SetWindowRectAutoSavCallback, Function | SmallTest |
     NotifySetWindowRectAutoSaveFunc func1 = [](bool enable) {
         return;
     };
-    sceneSession->SetWindowAutoRectSaveCallback(std::move(func1));
+    sceneSession->SetWindowRectAutoSaveCallback(std::move(func1));
     ASSERT_NE(nullptr, sceneSession->onSetWindowRectAutoSaveFunc_);
 }
 }
