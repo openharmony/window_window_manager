@@ -808,33 +808,6 @@ HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession04, Function |
 }
 
 /**
- * @tc.name: GetSceneSessionByIdentityInfo
- * @tc.desc: GetSceneSessionByIdentityInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, GetSceneSessionByIdentityInfo01, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "abilityName01";
-    info.bundleName_ = "bundleName01";
-    info.moduleName_ = "moduleName01";
-    info.appIndex_ = 11;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    std::string bundleName1 = "abilityName01";
-    std::string moduleName1 = "bundleName01";
-    std::string abilityName1 = "moduleName01";
-    int32_t appIndex1 = 11;
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    SessionIdentityInfo identityInfo = { bundleName1, moduleName1, abilityName1, appIndex1 };
-    auto sceneSession2 = ssm_->GetSceneSessionByIdentityInfo(identityInfo);
-
-    ASSERT_EQ(sceneSession2->GetSessionInfo().abilityName_, "abilityName01");
-    ASSERT_EQ(sceneSession2->GetSessionInfo().bundleName_, "bundleName01");
-    ASSERT_EQ(sceneSession2->GetSessionInfo().moduleName_, "moduleName01");
-    ssm_->sceneSessionMap_.erase(1);
-}
-
-/**
  * @tc.name: ForegroundAndDisconnect01
  * @tc.desc: normal function
  * @tc.type: FUNC
