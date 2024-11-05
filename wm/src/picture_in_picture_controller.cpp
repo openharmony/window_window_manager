@@ -15,7 +15,6 @@
 
 #include "picture_in_picture_controller.h"
 
-#include <event_handler.h>
 #include <refbase.h>
 #include <power_mgr_client.h>
 #include <transaction/rs_sync_transaction_controller.h>
