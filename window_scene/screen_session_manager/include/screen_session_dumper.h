@@ -37,6 +37,7 @@ public:
     ScreenSessionDumper(int fd, const std::vector<std::u16string>& args);
     ~ScreenSessionDumper() = default;
 
+    bool IsNumber(std::string str);
     void ExcuteDumpCmd();
     void DumpEventTracker(EventTracker& tracker);
     void DumpFreezedPidList(std::set<int32_t> pidList);
@@ -57,6 +58,7 @@ private:
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
     void ExcuteInjectCmd();
+    void ExcuteInjectCmd2();
 /*
     hidumper 命令注入隔离
  */
@@ -71,11 +73,21 @@ private:
     bool IsValidDisplayModeCommand(std::string command);
     int SetFoldDisplayMode();
     int SetFoldStatusLocked();
+    void SetHallAndPostureValue(std::string input);
+    void SetHallAndPostureStatus(std::string input);
 
 private:
     int fd_;
     std::vector<std::string> params_;
     std::string dumpInfo_;
+/*
+    依赖的外部定义
+*/
+private:
+    typedef struct EXTHALLData {
+        float flag = 0.0;
+        float hall = 0.0;
+    } ExtHallData;
 };
 } // Rosen
 } // OHOS
