@@ -418,6 +418,7 @@ protected:
      */
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
+    void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
 
 private:
