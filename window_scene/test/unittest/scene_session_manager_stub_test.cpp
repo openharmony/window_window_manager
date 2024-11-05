@@ -1282,7 +1282,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, Function | SmallTes
     std::string label = "TestLabel";
     data.WriteString(label);
     int result = stub_->HandleSetSessionLabel(data, reply);
-    EXPECT_EQ(result, 0);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
