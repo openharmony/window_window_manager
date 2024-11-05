@@ -432,6 +432,11 @@ void ScreenSessionManager::ConfigureScreenScene()
         TLOGD(WmsLogTag::DMS, "rotationPolicy = %{public}s.", rotationPolicy.c_str());
         deviceScreenConfig_.rotationPolicy_ = rotationPolicy;
     }
+    if (stringConfig.count("defaultRotationPolicy") != 0) {
+        std::string defaultRotationPolicy = stringConfig["defaultRotationPolicy"];
+        TLOGD(WmsLogTag::DMS, "defaultRotationPolicy = %{public}s.", defaultRotationPolicy.c_str());
+        deviceScreenConfig_.defaultRotationPolicy_ = defaultRotationPolicy;
+    }
     if (enableConfig.count("isRightPowerButton") != 0) {
         bool isRightPowerButton = static_cast<bool>(enableConfig["isRightPowerButton"]);
         TLOGD(WmsLogTag::DMS, "isRightPowerButton = %d", isRightPowerButton);
