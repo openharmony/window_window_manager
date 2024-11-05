@@ -3889,36 +3889,41 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     if (GetDisplayBrightness() != brightness &&
         GetFocusedSessionId() == sceneSession->GetPersistentId()) {
-        bool setBrightnessRet = false;
-        bool isPC = systemConfig_.IsPcWindow();
-        if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min() && !isPC) {
-            auto task = []() {                
-                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
-            };
-            setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
-            SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
-        } else {
-            auto task = [brightness]() {
-                if (isPC) {
-                    DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
-                        static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
-                } else {
-                    DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
-                        static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
-                }
-            };
-            setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:OverrideBrightness", 0);
-            SetDisplayBrightness(brightness);
-        }
-        if (!setBrightnessRet) {
-            WLOGFE("Report post listener callback task failed. the task name is SetBrightness");
-        }
+            PostBrightnessTask(brightness);
     }
 #else
     WLOGFD("Can not found the sub system of DisplayPowerMgr");
 #endif
     brightnessSessionId_ = sceneSession->GetPersistentId();
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::PostBrightnessTask(float brightness)
+{
+    bool setBrightnessRet = false;
+    bool isPC = systemConfig_.IsPcWindow();
+    if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min() && !isPC) {
+        auto task = []() {                
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+        };
+        setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
+        SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+    } else {
+        auto task = [brightness, isPC]() {
+            if (isPC) {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
+                        static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            } else {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            }
+        };
+        setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:OverrideBrightness", 0);
+        SetDisplayBrightness(brightness);
+        }
+        if (!setBrightnessRet) {
+            WLOGFE("Report post listener callback task failed. the task name is SetBrightness");
+        }
 }
 
 WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
