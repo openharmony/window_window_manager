@@ -754,7 +754,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc == 0 || argc > 1) { // 1: maximum params num
-        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool enable;
@@ -766,7 +766,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
 
     auto window = windowScene->GetMainWindow();
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        TLOGE(WmsLogTag::WMS_MAIN, "Window is null");
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
     }
 
