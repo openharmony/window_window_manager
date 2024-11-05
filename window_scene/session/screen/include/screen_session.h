@@ -233,6 +233,7 @@ public:
     bool UpdateAvailableArea(DMRect area);
     void SetFoldScreen(bool isFold);
     void UpdateRotationAfterBoot(bool foldToExpand);
+    void UpdateValidRotationToScb();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
     void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
 
@@ -258,6 +259,7 @@ private:
     std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
     bool isFold_ = false;
     float currentSensorRotation_ { -1.0f };
+    float currentValidSensorRotation_ { -1.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };

@@ -480,8 +480,9 @@ void ScreenSession::SensorRotationChange(Rotation sensorRotation)
 void ScreenSession::SensorRotationChange(float sensorRotation)
 {
     if (sensorRotation >= 0.0f) {
-        currentSensorRotation_ = sensorRotation;
+        currentValidSensorRotation_ = sensorRotation;
     }
+    currentSensorRotation_ = sensorRotation;
     for (auto& listener : screenChangeListenerList_) {
         listener->OnSensorRotationChange(sensorRotation, screenId_);
     }
@@ -675,6 +676,12 @@ void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
     if (foldToExpand) {
         SensorRotationChange(currentSensorRotation_);
     }
+}
+
+void ScreenSession::UpdateValidRotationToScb()
+{
+    TLOGI(WmsLogTag::DMS, "Rotation: %{public}f", currentValidSensorRotation_);
+    SensorRotationChange(currentValidSensorRotation_);
 }
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
