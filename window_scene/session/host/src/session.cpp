@@ -222,12 +222,6 @@ void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
     sessionInfo_.want = want;
 }
 
-void Session::SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions)
-{
-    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-    sessionInfo_.processOptions = processOptions;
-}
-
 void Session::ResetSessionInfoResultCode()
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
@@ -293,6 +287,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
+    sessionInfo_.processOptions = info.processOptions;
 }
 
 void Session::SetScreenId(uint64_t screenId)
