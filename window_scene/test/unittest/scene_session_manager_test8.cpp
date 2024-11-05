@@ -687,9 +687,11 @@ HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession01, Function |
     info.abilityName_ = "CreateAndBackgroundSceneSession01";
     info.bundleName_ = "CreateAndBackgroundSceneSession01";
     info.moduleName_ = "CreateAndBackgroundSceneSession01";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ssm_->CreateSceneSession(info, nullptr);
     info.isSystem_ = true;
@@ -717,9 +719,11 @@ HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession02, Function |
     info.abilityName_ = "CreateAndBackgroundSceneSession02";
     info.bundleName_ = "CreateAndBackgroundSceneSession02";
     info.moduleName_ = "CreateAndBackgroundSceneSession02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ssm_->CreateSceneSession(info, nullptr);
     info.isSystem_ = true;
@@ -751,9 +755,11 @@ HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession03, Function |
     info.abilityName_ = "CreateAndBackgroundSceneSession03";
     info.bundleName_ = "CreateAndBackgroundSceneSession03";
     info.moduleName_ = "CreateAndBackgroundSceneSession03";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ssm_->CreateSceneSession(info, nullptr);
     info.isSystem_ = true;
@@ -785,9 +791,11 @@ HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession04, Function |
     info.abilityName_ = "CreateAndBackgroundSceneSession04";
     info.bundleName_ = "CreateAndBackgroundSceneSession04";
     info.moduleName_ = "CreateAndBackgroundSceneSession04";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->SetSessionProperty(property);
     ssm_->CreateSceneSession(info, nullptr);
     info.isSystem_ = true;
@@ -819,13 +827,17 @@ HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect01, Function | SmallTe
     info.bundleName_ = "ForegroundAndDisconnect01";
     info.moduleName_ = "ForegroundAndDisconnect01";
 
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    ASSERT_NE(specificCallback_, nullptr);
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
     sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->specificCallback_ = specificCallback;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
 
     auto result = sceneSession->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -847,9 +859,12 @@ HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect02, Function | SmallTe
     info.bundleName_ = "ForegroundAndDisconnect02";
     info.moduleName_ = "ForegroundAndDisconnect02";
 
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    ASSERT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
     sceneSession->isActive_ = true;
     sptr<WindowSessionProperty> property = nullptr;
@@ -877,12 +892,16 @@ HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect03, Function | SmallTe
     info.moduleName_ = "ForegroundAndDisconnect03";
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
 
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    ASSERT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
     sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     auto result = sceneSession->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -908,12 +927,16 @@ HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect04, Function | SmallTe
     info.moduleName_ = "ForegroundAndDisconnect04";
     info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
 
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    ASSERT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
     sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     auto result = sceneSession->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -938,9 +961,12 @@ HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect05, Function | SmallTe
     info.bundleName_ = "ForegroundAndDisconnect05";
     info.moduleName_ = "ForegroundAndDisconnect05";
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sceneSession->specificCallback_ = specificCallback;
     sceneSession->Session::SetSessionState(SessionState::STATE_CONNECT);
 
     struct RSSurfaceNodeConfig config;
@@ -968,9 +994,11 @@ HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect06, Function | SmallTe
     info.bundleName_ = "ForegroundAndDisconnect06";
     info.moduleName_ = "ForegroundAndDisconnect06";
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     sceneSession->Session::SetSessionState(SessionState::STATE_CONNECT);
 
     sceneSession->SetLeashWinSurfaceNode(nullptr);
