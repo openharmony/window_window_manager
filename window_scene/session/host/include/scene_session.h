@@ -129,7 +129,6 @@ public:
         NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
-        NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
         NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
         NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     };
@@ -373,6 +372,7 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
+    void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
     /*
@@ -581,6 +581,11 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
+
+    /*
+     * Window Layout
+     */
+    NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
