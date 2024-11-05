@@ -4201,5 +4201,37 @@ bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
 {
     return property_->GetIsUIExtensionSubWindowFlag();
 }
+
+WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
+{
+    if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    gestureBackEnabled_ = enable;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->SetGestureBackEnabled(enable);
+}
+ 
+WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
+{
+    if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode()) || IsFreeMultiWindowMode()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    enable = gestureBackEnabled_;
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

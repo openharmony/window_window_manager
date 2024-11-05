@@ -86,6 +86,7 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
+using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 
 class SceneSession : public Session {
 public:
@@ -108,6 +109,7 @@ public:
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
         PiPStateChangeCallback onPiPStateChange_;
+        UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
     };
 
     // callback for notify SceneBoard
@@ -422,6 +424,12 @@ public:
     void PostProcessNotifyAvoidArea();
     bool IsImmersiveType() const;
 
+    /*
+     * Gesture Back
+     */
+    bool GetGestureBackEnabled();
+    bool GetEnableGestureBackHadSet();
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -447,6 +455,11 @@ protected:
     bool UpdateZOrderInner(uint32_t zOrder);
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
+
+    /*
+     * Gesture Back
+     */
+    void UpdateGestureBackEnabled() override;
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
@@ -475,6 +488,11 @@ private:
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
+
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool isEnabled) override;
 
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
@@ -617,6 +635,12 @@ private:
      * Window Visibility
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
+
+    /*
+     * Gesture Back
+     */
+    bool isEnableGestureBack_ { true };
+    bool isEnableGestureBackHadSet_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
