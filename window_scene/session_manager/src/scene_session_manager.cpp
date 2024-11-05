@@ -8073,7 +8073,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
 }
 
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
-    const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType& avoidAreaType)
+    const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
     if (sceneSession == nullptr) {
         TLOGI(WmsLogTag::WMS_IMMS, "scene session null no need update avoid area");
@@ -8085,7 +8085,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t persistentI
 
     bool needUpdate = true;
     if (auto iter = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
-        iter != lastUpdatedAvoidArea_[persistentId].end()） {
+        iter != lastUpdatedAvoidArea_[persistentId].end()) {
         needUpdate = iter->second != avoidArea;
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
