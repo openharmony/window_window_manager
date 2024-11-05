@@ -914,7 +914,7 @@ int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel& data, M
 
 int SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = 0;
+    int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "read persistentId failed");
         return ERR_INVALID_DATA;
