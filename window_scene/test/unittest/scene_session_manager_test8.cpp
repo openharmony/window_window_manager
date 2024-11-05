@@ -891,7 +891,7 @@ HWTEST_F(SceneSessionManagerTest8, CreateAndBackgroundSceneSession02, Function |
     sptr<SceneSession> getSceneSession2 = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(nullptr, getSceneSession2);
 
-    ASSERT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, getSceneSession3->GetWindowType());
+    ASSERT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, getSceneSession2->GetWindowType());
 
     ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
     ssm_->UpdateSceneSessionWant(info);
@@ -989,11 +989,11 @@ HWTEST_F(SceneSessionManagerTest8, GetSceneSessionByIdentityInfo01, Function | S
     int32_t appIndex1 = 11;
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     SessionIdentityInfo identityInfo = { bundleName1, moduleName1, abilityName1, appIndex1 };
-    auto sceneSession = ssm_->GetSceneSessionByIdentityInfo(identityInfo);
+    auto sceneSession2 = ssm_->GetSceneSessionByIdentityInfo(identityInfo);
 
-    ASSERT_EQ(sceneSession->GetSessionInfo().abilityName_, "abilityName01");
-    ASSERT_EQ(sceneSession->GetSessionInfo().bundleName_, "bundleName01");
-    ASSERT_EQ(sceneSession->GetSessionInfo().moduleName_, "moduleName01");
+    ASSERT_EQ(sceneSession2->GetSessionInfo().abilityName_, "abilityName01");
+    ASSERT_EQ(sceneSession2->GetSessionInfo().bundleName_, "bundleName01");
+    ASSERT_EQ(sceneSession2->GetSessionInfo().moduleName_, "moduleName01");
     ssm_->sceneSessionMap_.erase(1);
 }
 
@@ -1011,7 +1011,7 @@ HWTEST_F(SceneSessionManagerTest8, ForegroundAndDisconnect01, Function | SmallTe
 
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    int resultValue = 0;
+
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     sceneSession->isActive_ = true;
