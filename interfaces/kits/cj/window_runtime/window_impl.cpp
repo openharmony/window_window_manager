@@ -402,7 +402,7 @@ int32_t CJWindowImpl::GetWindowAvoidArea(uint32_t areaType, CAvoidArea* retPtr)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     AvoidAreaType avoidAreaType = static_cast<AvoidAreaType>(areaType);
-    if ((avoidAreaType >= AvoidAreaType::TYPE_END) || (avoidAreaType <= AvoidAreaType::TYPE_START)) {
+    if ((avoidAreaType > AvoidAreaType::TYPE_END) || (avoidAreaType < AvoidAreaType::TYPE_START)) {
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     AvoidArea avoidArea;

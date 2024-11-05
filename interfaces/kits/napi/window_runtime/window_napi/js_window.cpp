@@ -3145,7 +3145,7 @@ static void ParseAvoidAreaParam(napi_env env, napi_callback_info info, WMError& 
                 napi_get_value_uint32(env, nativeMode, &resultValue));
             avoidAreaType = static_cast<AvoidAreaType>(resultValue);
             errCode = ((avoidAreaType > AvoidAreaType::TYPE_KEYBOARD) ||
-                (avoidAreaType <= AvoidAreaType::TYPE_START)) ? WMError::WM_ERROR_INVALID_PARAM : WMError::WM_OK;
+                (avoidAreaType < AvoidAreaType::TYPE_START)) ? WMError::WM_ERROR_INVALID_PARAM : WMError::WM_OK;
         }
     }
 }
