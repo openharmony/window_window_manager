@@ -253,7 +253,7 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enable)
     auto task = [weakThis = wptr(this), enable] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return ;
         }
         if (session->onSetWindowRectAutoSaveFunc_) {
