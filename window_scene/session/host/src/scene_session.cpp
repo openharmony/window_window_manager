@@ -2293,7 +2293,7 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 void SceneSession::SetSurfaceBounds(const WSRect& rect)
 {
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction) {
+    if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
@@ -2317,8 +2317,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
-    if (rsTransaction) {
-        RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
 }
@@ -2549,12 +2548,18 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
         return;
     }
     property->SetSnapshotSkip(isSkip);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetSkipLayer(isSkip);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipLayer(isSkip);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
@@ -2575,12 +2580,18 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     }
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
     WLOGFI("SetAbilityBGAlpha alpha8bit=%{public}u.", alpha8bit);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetAbilityBGAlpha(alpha8bit);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetAbilityBGAlpha(alpha8bit);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
@@ -2592,8 +2603,7 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
         return;
     }
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction) {
-        RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
     if (leashWinSurfaceNode != nullptr) {
@@ -2605,7 +2615,7 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
             surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), forceUIFirst);
         surfaceNode_->SetForceUIFirst(forceUIFirst);
     }
-    if (rsTransaction) {
+    if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
 }
@@ -4298,12 +4308,18 @@ void SceneSession::SetSkipDraw(bool skip)
         WLOGFE("surfaceNode_ is null");
         return;
     }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetSkipDraw(skip);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipDraw(skip);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
