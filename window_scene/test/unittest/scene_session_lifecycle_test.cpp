@@ -1399,11 +1399,37 @@ HWTEST_F(SceneSessionLifecycleTest, GetBufferAvailableCallbackEnable, Function |
     info.bundleName_ = "GetBufferAvailableCallbackEnable";
     info.moduleName_ = "GetBufferAvailableCallbackEnable";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession);
 
     bool enable = false;
     sceneSession->SetBufferAvailableCallbackEnable(enable);
     ASSERT_EQ(false, sceneSession->GetBufferAvailableCallbackEnable());
+}
+
+/**
+ * @tc.name: SetPrivacyMode
+ * @tc.desc: SetPrivacyMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, SetPrivacyMode01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetPrivacyMode01";
+    info.bundleName_ = "SetPrivacyMode01";
+    info.moduleName_ = "SetPrivacyMode01";
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    sceneSession->SetSessionProperty(property);
+
+    sceneSession->SetPrivacyMode(false);
+    EXPECT_EQ(false, session->GetSessionProperty()->GetPrivacyMode());
 }
 }
 }
