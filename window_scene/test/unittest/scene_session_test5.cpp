@@ -432,14 +432,13 @@ HWTEST_F(SceneSessionTest5, OnDefaultDensityEnabled, Function | SmallTest | Leve
 
     sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
         sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->RegisterSessionChangeCallback(sessionChangeCallback);
-    sessionChangeCallback->onDefaultDensityEnabledFunc_ = nullptr;
+    session->onDefaultDensityEnabledFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
 
     NotifyDefaultDensityEnabledFunc func = [](bool isLDefaultDensityEnabled) {
         return;
     };
-    sessionChangeCallback->onDefaultDensityEnabledFunc_ = func;
+    session->onDefaultDensityEnabledFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
 }
 
