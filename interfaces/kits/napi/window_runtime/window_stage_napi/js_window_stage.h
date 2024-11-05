@@ -68,7 +68,7 @@ private:
     napi_value OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info);
     napi_value OnRemoveStartingWindow(napi_env env, napi_callback_info info);
     napi_value OnSetWindowRectAutoSave(napi_env env, napi_callback_info info);
-    
+
     std::weak_ptr<WindowScene> windowScene_;
 };
 }  // namespace Rosen

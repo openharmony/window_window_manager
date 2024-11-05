@@ -1230,13 +1230,13 @@ int SessionStub::HandleSessionModalTypeChange(MessageParcel& data, MessageParcel
 
 int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply)
 {
-    bool enable = true;
-    if (!data.ReadBool(enable)) {
+    bool enabled = true;
+    if (!data.ReadBool(enabled)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed. ");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_MAIN, "enable: %{public}d", enable);
-    WSError errCode = OnSetWindowRectAutoSave(enable);
+    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
+    WSError errCode = OnSetWindowRectAutoSave(enabled);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

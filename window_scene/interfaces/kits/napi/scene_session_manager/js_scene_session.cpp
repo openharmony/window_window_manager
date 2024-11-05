@@ -5063,34 +5063,35 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
         TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    
-    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this)](bool enable) {
+    const char* where = __func__;
+    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{pubilc}s: jsSceneSession is null", where);
             return ;
         }
-        jsSceneSession->OnSetWindowRectAutoSave(enable);
+        jsSceneSession->OnSetWindowRectAutoSave(enabled);
     });
     TLOGI(WmsLogTag::WMS_MAIN, "success");
 }
 
-void JsSceneSession::OnSetWindowRectAutoSave(bool enable)
+void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
 {
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, enable, env = env_] {
+    const char* where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, enable, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_RECT_AUTO_SAVE_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
-        napi_value paramsObj = CreateJsValue(env, enable);
-        napi_value argv[] = {paramsObj};
+        napi_value JsEnabled = CreateJsValue(env, enabled);
+        napi_value argv[] = {JsEnabled};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

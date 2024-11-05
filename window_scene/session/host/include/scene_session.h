@@ -92,7 +92,7 @@ using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
-using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enable)>;
+using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
 class SceneSession : public Session {
 public:
@@ -224,9 +224,8 @@ public:
     WSError RaiseAboveTarget(int32_t subWindowId) override;
 
     /*
-     * Window Lifecycle: main
+     * PC Window
      */
-    
     void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
 
     /**
@@ -590,7 +589,7 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
 
     /*
-     * Window Lifecycle: main
+     * PC Window
      */
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
 

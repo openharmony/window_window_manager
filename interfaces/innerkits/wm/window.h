@@ -2137,7 +2137,7 @@ public:
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Set whether the window memory state is enabled.
+     * @brief Set to automatically save the window rect.
      *
      * @param enabled bool.
      * @return WM_OK means set success, others means failed.

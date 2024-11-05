@@ -2438,7 +2438,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enable)
+WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
@@ -2453,7 +2453,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enable)
 
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    hostSession->OnSetWindowRectAutoSave(enable);
+    hostSession->OnSetWindowRectAutoSave(enabled);
     return WMError::WM_OK;
 }
 
