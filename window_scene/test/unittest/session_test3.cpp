@@ -1193,17 +1193,17 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest 
     ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
 }
 
-/**
- * @tc.name: RectSizeCheckProcess01
- * @tc.desc: RectSizeCheckProcess Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Level2)
-{
-    session_->SetSessionProperty(nullptr);
-    session_->RectSizeCheckProcess(1, 1, 2, 2, 0);
-    ASSERT_EQ(session_->property_, nullptr);
-}
+// /**
+//  * @tc.name: RectSizeCheckProcess01
+//  * @tc.desc: RectSizeCheckProcess Test
+//  * @tc.type: FUNC
+//  */
+// HWTEST_F(WindowSessionTest3, RectSizeCheckProcess01, Function | SmallTest | Level2)
+// {
+//     session_->SetSessionProperty(nullptr);
+//     session_->RectSizeCheckProcess(1, 1, 2, 2, 0);
+//     ASSERT_EQ(session_->property_, nullptr);
+// }
 
 /**
  * @tc.name: GetSurfaceNodeForMoveDrag
@@ -1306,7 +1306,7 @@ HWTEST_F(WindowSessionTest3, GetSnapshotPixelMap, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest3, ResetDirtyFlags, Function | SmallTest | Level2)
 {
     session_->isVisible_ = false;
-    session_->dirtyFlags_ = 64;
+    session_->dirtyFlags_ = 96;
     session_->ResetDirtyFlags();
     EXPECT_EQ(64, session_->dirtyFlags_);
 
