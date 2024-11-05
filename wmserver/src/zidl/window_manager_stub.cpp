@@ -103,8 +103,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             uint32_t windowId = data.ReadUint32();
             uint32_t avoidAreaTypeId = 0;
             if (!data.ReadUint32(avoidAreaTypeId) ||
-                avoidAreaTypeId <= static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
-                avoidAreaTypeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+                avoidAreaTypeId < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
+                avoidAreaTypeId > static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
                 return ERR_INVALID_DATA;
             }
             auto avoidAreaType = static_cast<AvoidAreaType>(avoidAreaTypeId);

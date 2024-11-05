@@ -8044,7 +8044,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
     return taskScheduler_->PostSyncTask(task, "GetFocusSessionElement");
 }
 
-WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool& haveListener)
+WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
 {
     const auto callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, haveListener, callingPid]() {
@@ -8072,7 +8072,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
     return taskScheduler_->PostSyncTask(task, "UpdateSessionAvoidAreaListener:PID:" + std::to_string(persistentId));
 }
 
-bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
+bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType& avoidAreaType)
 {
     if (sceneSession == nullptr) {
@@ -8085,9 +8085,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistent
 
     bool needUpdate = true;
     if (auto iter = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
-        iter != lastUpdatedAvoidArea_[persistentId].end() &&
-        iter != AvoidAreaType::TYPE_START &&
-        iter != AvoidAreaType::TYPE_END) {
+        iter != lastUpdatedAvoidArea_[persistentId].end() {
         needUpdate = iter->second != avoidArea;
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
@@ -8139,7 +8137,7 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
-    const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate)
+    const int32_t persistentId, sptr<SceneSession>& sceneSession, bool needUpdate)
 {
     bool ret = true;
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
@@ -8154,9 +8152,9 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         needUpdate = false;
         return;
     }
-    uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
+    uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_START);
     uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_END);
-    for (uint32_t avoidType = start; avoidType < end; avoidType++) {
+    for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
         if (avoidType == static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
             !CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,

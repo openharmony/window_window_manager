@@ -547,13 +547,13 @@ struct SystemBarProperty {
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
-    TYPE_START = -1,
-    TYPE_SYSTEM,               // area of SystemUI
+    TYPE_START,
+    TYPE_SYSTEM = 0,               // area of SystemUI
     TYPE_CUTOUT,               // cutout of screen
     TYPE_SYSTEM_GESTURE,       // area for system gesture
     TYPE_KEYBOARD,             // area for soft input keyboard
     TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
-    TYPE_END,
+    TYPE_END = 4,
 };
 
 /**
