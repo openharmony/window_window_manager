@@ -709,6 +709,19 @@ void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
     PostTask(task, __func__);
 }
 
+void SceneSession::RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->OnTouchOutside_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     auto task = [weakThis = wptr(this), mode]() {
@@ -3139,9 +3152,9 @@ void SceneSession::NotifyTouchOutside()
         WLOGFD("Notify sessionStage TouchOutside");
         sessionStage_->NotifyTouchOutside();
     }
-    if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {
+    if (OnTouchOutside_) {
         WLOGFD("Notify sessionChangeCallback TouchOutside");
-        sessionChangeCallback_->OnTouchOutside_();
+        OnTouchOutside_();
     }
 }
 
@@ -3156,7 +3169,7 @@ void SceneSession::NotifyWindowVisibility()
 
 bool SceneSession::CheckOutTouchOutsideRegister()
 {
-    if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {
+    if (OnTouchOutside_) {
         return true;
     }
     return false;
@@ -5320,7 +5333,7 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
-            session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+            session->OnTouchOutside_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
             session->sessionChangeCallback_->onRestoreMainWindowFunc_ = nullptr;

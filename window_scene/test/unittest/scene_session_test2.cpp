@@ -985,12 +985,12 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     auto func = [sceneSession]() {
         sceneSession->SaveUpdatedIcon(nullptr);
     };
-    sceneSession->sessionChangeCallback_->OnTouchOutside_ = func;
+    sceneSession->OnTouchOutside_ = func;
     EXPECT_NE(nullptr, &func);
     sceneSession->sessionStage_ = nullptr;
     sceneSession->NotifyTouchOutside();
 
-    sceneSession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+    sceneSession->OnTouchOutside_ = nullptr;
     sceneSession->sessionStage_ = nullptr;
     sceneSession->NotifyTouchOutside();
 }
@@ -1012,17 +1012,34 @@ HWTEST_F(SceneSessionTest2, CheckOutTouchOutsideRegister, Function | SmallTest |
     auto func = [sceneSession]() {
         sceneSession->NotifyWindowVisibility();
     };
-    sceneSession->sessionChangeCallback_->OnTouchOutside_ = func;
+    sceneSession->OnTouchOutside_ = func;
     bool result = sceneSession->CheckOutTouchOutsideRegister();
     EXPECT_EQ(true, result);
 
-    sceneSession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+    sceneSession->OnTouchOutside_ = nullptr;
     result = sceneSession->CheckOutTouchOutsideRegister();
     EXPECT_EQ(false, result);
 
     sceneSession->sessionChangeCallback_ = nullptr;
     result = sceneSession->CheckOutTouchOutsideRegister();
     EXPECT_EQ(false, result);
+}
+
+/**
+ * @tc.name: RegisterTouchOutsideCallback
+ * @tc.desc: test RegisterTouchOutsideCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, RegisterTouchOutsideCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterTouchOutsideCallback";
+    info.bundleName_ = "RegisterTouchOutsideCallback";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession->OnTouchOutside_ = nullptr;
+    NotifyTouchOutsideFunc func = []() {};
+    sceneSession-> RegisterTouchOutsideCallback(std::move(func));
+    ASSERT_NE(sceneSession->OnTouchOutside_, nullptr);
 }
 
 /**
