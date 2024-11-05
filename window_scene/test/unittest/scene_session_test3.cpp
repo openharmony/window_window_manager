@@ -813,7 +813,7 @@ HWTEST_F(SceneSessionTest3, CompatibleFullScreenClose, Function | SmallTest | Le
  * @tc.desc: SetWindowRectAutoSaveCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, SetWindowRectAutoSavCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, SetWindowRectAutoSaveCallback, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "SetWindowRectAutoSaveCallback";
