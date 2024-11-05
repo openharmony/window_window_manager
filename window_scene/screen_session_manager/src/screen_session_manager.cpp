@@ -5379,7 +5379,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
             TLOGE(WmsLogTag::DMS, "unsupport foldStatus: %{public}u", foldStatus);
         }
     } else {
-        screenSession->UpdateRotationAfterBoot(true);
+        screenSession->UpdateValidRotationToScb();
     }
     auto task = [=] {
         clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
