@@ -3884,7 +3884,7 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
     return true;
 }
 
-WSError SceneSessionManager::SetBrightnessTest(const sptr<SceneSession>& sceneSession, float brightness)
+WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSession, float brightness)
 {
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     if (GetDisplayBrightness() != brightness &&
