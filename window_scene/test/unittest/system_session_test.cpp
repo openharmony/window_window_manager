@@ -731,7 +731,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | L
     sysSession->specificCallback_->onUpdateAvoidArea_ = [](const int32_t& persistentId) {};
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(sysSession->dirtyFlags_, static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
+    EXPECT_EQ(sysSession->dirtyFlags_, static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
 }
 
 /**
