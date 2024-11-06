@@ -262,7 +262,7 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect &originalRec
 }
 
 void MoveDragController::SetAspectRatio(float ratio)
-{ 
+{
     aspectRatio_ = ratio;
 }
 
@@ -360,7 +360,7 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
 {
     if (isSendHotAreaMessage) {
         WLOGFI("ProcessWindowDragHotAreaFunc start, isSendHotAreaMessage: %{public}u, reason: %{public}d",
-               isSendHotAreaMessage, reason);
+            isSendHotAreaMessage, reason);
     }
     if (windowDragHotAreaFunc_ && isSendHotAreaMessage) {
         windowDragHotAreaFunc_(hotAreaDisplayId_, windowDragHotAreaType_, reason);
