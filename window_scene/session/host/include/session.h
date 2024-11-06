@@ -478,9 +478,9 @@ public:
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
     bool GetIsPendingToBackgroundState() const;
-    bool IsActivateAfterScreenLocked() const;
+    bool IsActivatedAfterScreenLocked() const;
     void SetIsPendingToBackgroundState(bool isPendingToBackgroundState);
-    void SetIsActivateAfterScreenLocked(bool state);
+    void SetIsActivatedAfterScreenLocked(bool state);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
@@ -775,7 +775,7 @@ private:
     std::atomic_bool foregroundInteractiveStatus_ { true };
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
-    std::atomic<bool> isActivateAfterScreenLocked_ { false };
+    std::atomic<bool> isActivatedAfterScreenLocked_ { false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;

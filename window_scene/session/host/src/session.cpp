@@ -1399,16 +1399,16 @@ void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
     return isPendingToBackgroundState_.store(isPendingToBackgroundState);
 }
 
-bool Session::IsActivateAfterScreenLocked() const
+bool Session::IsActivatedAfterScreenLocked() const
 {
-    return isActivateAfterScreenLocked_.load();
+    return isActivatedAfterScreenLocked_.load();
 }
 
-void Session::SetIsActivateAfterScreenLocked(bool state)
+void Session::SetIsActivatedAfterScreenLocked(bool state)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isActivateAfterScreenLocked:%{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isActivatedAfterScreenLocked:%{public}d",
         GetPersistentId(), state);
-    return isActivateAfterScreenLocked_.store(state);
+    return isActivatedAfterScreenLocked_.store(state);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)

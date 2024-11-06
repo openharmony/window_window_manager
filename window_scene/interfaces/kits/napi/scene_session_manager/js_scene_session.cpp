@@ -361,8 +361,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetNeedSyncSessionRect);
     BindNativeFunction(env, objValue, "setIsPendingToBackgroundState", moduleName,
         JsSceneSession::SetIsPendingToBackgroundState);
-    BindNativeFunction(env, objValue, "setIsActivateAfterScreenLocked", moduleName,
-        JsSceneSession::SetIsActivateAfterScreenLocked);
+    BindNativeFunction(env, objValue, "setIsActivatedAfterScreenLocked", moduleName,
+        JsSceneSession::SetIsActivatedAfterScreenLocked);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2093,11 +2093,11 @@ napi_value JsSceneSession::SetIsPendingToBackgroundState(napi_env env, napi_call
     return (me != nullptr) ? me->OnSetIsPendingToBackgroundState(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetIsActivateAfterScreenLocked(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetIsActivateAfterScreenLocked(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetIsActivatedAfterScreenLocked(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -5031,7 +5031,7 @@ napi_value JsSceneSession::OnSetIsPendingToBackgroundState(napi_env env, napi_ca
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnSetIsActivateAfterScreenLocked(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -5046,17 +5046,17 @@ napi_value JsSceneSession::OnSetIsActivateAfterScreenLocked(napi_env env, napi_c
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "InputInvalid"));
         return NapiGetUndefined(env);
     }
-    bool isActivateAfterScreenLocked = false;
+    bool isActivatedAfterScreenLocked = false;
     if (GetType(env, argv[0]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[0], isActivateAfterScreenLocked)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isActivateAfterScreenLocked");
+        if (!ConvertFromJsValue(env, argv[0], isActivatedAfterScreenLocked)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isActivatedAfterScreenLocked");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
             return NapiGetUndefined(env);
         }
-        TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isActivateAfterScreenLocked: %{public}u", isActivateAfterScreenLocked);
+        TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isActivatedAfterScreenLocked: %{public}u", isActivatedAfterScreenLocked);
     }
-    session->SetIsActivateAfterScreenLocked(isActivateAfterScreenLocked);
+    session->SetIsActivatedAfterScreenLocked(isActivatedAfterScreenLocked);
     return NapiGetUndefined(env);
 }
 
