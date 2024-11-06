@@ -83,16 +83,16 @@ void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
     }
 }
 
-bool MoveDragController::HasPointDown() 
+bool MoveDragController::HasPointDown()
 { 
-    return hasPointDown_; 
+    return hasPointDown_;
 }
 
 void MoveDragController::SetStartMoveFlag(bool flag)
 {
     if (flag && (!hasPointDown_ || isStartDrag_)) {
         WLOGFD("StartMove, but has not pointed down or is dragging, hasPointDown_: %{public}d, isStartFlag: %{public}d",
-               hasPointDown_, isStartDrag_);
+            hasPointDown_, isStartDrag_);
         return;
     }
     NotifyWindowInputPidChange(flag);
@@ -101,9 +101,9 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
 
-void MoveDragController::SetMovable(bool isMovable) 
+void MoveDragController::SetMovable(bool isMovable)
 {
-    isMovable_ = isMovable; 
+    isMovable_ = isMovable;
 }
 
 void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback &callback)
@@ -117,24 +117,24 @@ bool MoveDragController::GetStartMoveFlag() const
     return isStartMove_;
 }
 
-bool MoveDragController::GetStartDragFlag() const 
+bool MoveDragController::GetStartDragFlag() const
 {
-    return isStartDrag_; 
+    return isStartDrag_;
 }
 
-uint64_t MoveDragController::GetMoveDragStartDisplayId() const 
+uint64_t MoveDragController::GetMoveDragStartDisplayId() const
 {
-    return moveDragStartDisplayId_; 
+    return moveDragStartDisplayId_;
 }
 
-uint64_t MoveDragController::GetMoveDragEndDisplayId() const 
+uint64_t MoveDragController::GetMoveDragEndDisplayId() const
 {
-    return moveDragEndDisplayId_; 
+    return moveDragEndDisplayId_;
 }
 
-uint64_t MoveDragController::GetInitParentNodeId() const 
+uint64_t MoveDragController::GetInitParentNodeId() const
 {
-    return initParentNodeId_; 
+    return initParentNodeId_;
 }
 
 std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag()
@@ -143,9 +143,9 @@ std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag()
     return displayIdSetDuringMoveDrag_;
 }
 
-bool MoveDragController::GetMovable() const 
+bool MoveDragController::GetMovable() const
 {
-    return isMovable_; 
+    return isMovable_;
 }
 
 WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
@@ -178,9 +178,9 @@ WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
             moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_};
 }
 
-void MoveDragController::InitMoveDragProperty() 
+void MoveDragController::InitMoveDragProperty()
 {
-    moveDragProperty_ = {-1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}}; 
+    moveDragProperty_ = {-1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
 }
 
 void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t initParentNodeId)
@@ -261,7 +261,10 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect &originalRec
     return targetRect;
 }
 
-void MoveDragController::SetAspectRatio(float ratio) { aspectRatio_ = ratio; }
+void MoveDragController::SetAspectRatio(float ratio)
+{ 
+    aspectRatio_ = ratio;
+}
 
 bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent,
                                           const WSRect &originalRect)
@@ -1016,9 +1019,15 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
     windowDragHotAreaType_ = windowDragHotAreaType;
 }
 
-int32_t MoveDragController::GetOriginalPointerPosX() { return moveDragProperty_.originalPointerPosX_; }
+int32_t MoveDragController::GetOriginalPointerPosX()
+{ 
+    return moveDragProperty_.originalPointerPosX_;
+}
 
-int32_t MoveDragController::GetOriginalPointerPosY() { return moveDragProperty_.originalPointerPosY_; }
+int32_t MoveDragController::GetOriginalPointerPosY()
+{
+    return moveDragProperty_.originalPointerPosY_;
+}
 
 void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc &func)
 {
@@ -1040,7 +1049,10 @@ void MoveDragController::OnLostFocus()
     }
 }
 
-void MoveDragController::SetIsPcWindow(bool isPcWindow) { isPcWindow_ = isPcWindow; }
+void MoveDragController::SetIsPcWindow(bool isPcWindow)
+{ 
+    isPcWindow_ = isPcWindow;
+}
 
 std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
 {
