@@ -4492,7 +4492,7 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
 
 WSError SceneSession::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}d", isAutoStart, priority);
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}u", isAutoStart, priority);
     auto task = [weakThis = wptr(this), isAutoStart, priority] {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {

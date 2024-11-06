@@ -240,6 +240,7 @@ public:
      * @brief Update the auto start pip window status.
      *
      * @param isAutoStart Indicates the {@link bool}
+     * @param priority Indicates the {@link uint32_t} priority of pip window
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) { return WSError::WS_OK; }

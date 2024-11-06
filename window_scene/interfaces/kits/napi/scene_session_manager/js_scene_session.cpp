@@ -2854,7 +2854,7 @@ void JsSceneSession::OnSessionPiPControlStatusChange(WsPiPControlType controlTyp
 
 void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}d", isAutoStart, priority);
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}u", isAutoStart, priority);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, isAutoStart, priority, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
