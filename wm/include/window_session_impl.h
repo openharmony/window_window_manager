@@ -247,7 +247,7 @@ public:
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
-    void SetAutoStartPiP(bool isAutoStart) override;
+    void SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
 
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;

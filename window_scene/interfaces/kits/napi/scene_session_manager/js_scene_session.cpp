@@ -1067,13 +1067,13 @@ void JsSceneSession::ProcessAutoStartPiPStatusChangeRegister()
         TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    NotifyAutoStartPiPStatusChangeFunc func = [weakThis = wptr(this)](bool isAutoStart) {
+    NotifyAutoStartPiPStatusChangeFunc func = [weakThis = wptr(this)](bool isAutoStart, uint32_t priority) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnAutoStartPiPStatusChange(isAutoStart);
+        jsSceneSession->OnAutoStartPiPStatusChange(isAutoStart, priority);
     };
     session->SetAutoStartPiPStatusChangeCallback(func);
     TLOGI(WmsLogTag::WMS_PIP, "success");
@@ -2852,10 +2852,10 @@ void JsSceneSession::OnSessionPiPControlStatusChange(WsPiPControlType controlTyp
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
-void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart)
+void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAutoStart, env = env_] {
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}d", isAutoStart, priority);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAutoStart, priority, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been destroyed", persistentId);
@@ -2867,7 +2867,8 @@ void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart)
             return;
         }
         napi_value isAutoStartValue = CreateJsValue(env, isAutoStart);
-        napi_value argv[] = {isAutoStartValue};
+        napi_value priorityValue = CreateJsValue(env, priority);
+        napi_value argv[] = {isAutoStartValue, priorityValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

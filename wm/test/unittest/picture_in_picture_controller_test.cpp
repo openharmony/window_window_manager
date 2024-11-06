@@ -435,6 +435,10 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
     pipControl->mainWindow_ = mw;
+    pipControl->pipOption_ = nullptr;
+    pipControl->SetAutoStartEnabled(enable);
+    pipControl->pipOption_ = option;
+
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
@@ -452,10 +456,6 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     ASSERT_EQ(false, pipControl->IsTypeNodeEnabled());
     EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
-    pipControl->pipOption_ = nullptr;
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
-    pipControl->SetAutoStartEnabled(enable);
-    pipControl->pipOption_ = option;
     pipControl->pipOption_->SetNavigationId("");
     ASSERT_EQ("", pipControl->pipOption_->GetNavigationId());
     pipControl->SetAutoStartEnabled(enable);

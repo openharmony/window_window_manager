@@ -4490,10 +4490,10 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     return WSError::WS_OK;
 }
 
-WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
+WSError SceneSession::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
-    auto task = [weakThis = wptr(this), isAutoStart] {
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}d", isAutoStart, priority);
+    auto task = [weakThis = wptr(this), isAutoStart, priority] {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_PIP, "session is null or is terminating");
@@ -4501,7 +4501,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart)
         }
         if (session->autoStartPiPStatusChangeFunc_) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
-            session->autoStartPiPStatusChangeFunc_(isAutoStart);
+            session->autoStartPiPStatusChangeFunc_(isAutoStart, priority);
         }
     };
     PostTask(task, __func__);

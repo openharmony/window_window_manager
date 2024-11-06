@@ -1010,11 +1010,16 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
 {
     TLOGD(WmsLogTag::WMS_PIP, "in");
     bool isAutoStart = false;
+    uint32_t priority = 0;
     if (!data.ReadBool(isAutoStart)) {
         TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = SetAutoStartPiP(isAutoStart);
+    if (!data.ReadUint32(priority)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read priority error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetAutoStartPiP(isAutoStart, priority);
     reply.WriteInt32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
