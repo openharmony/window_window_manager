@@ -1413,7 +1413,7 @@ void Session::SetCanBeActivatedAfterScreenLocked(bool canBeActivated)
             return;
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "id:%{public}d, canBeActivatedAfterScreenLocked:%{public}d",
-            GetPersistentId(), canBeActivated);
+            session->GetPersistentId(), canBeActivated);
         return session->canBeActivatedAfterScreenLocked_.store(canBeActivated);
     };
     PostTask(task, "SetCanBeActivatedAfterScreenLocked");
