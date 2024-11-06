@@ -1730,6 +1730,11 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, Function | S
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionInfoPersistentId(0);
     ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+    
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**

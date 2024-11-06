@@ -219,6 +219,21 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
     rootScene.SetUiDvsyncSwitch(false);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
+
+/**
+ * @tc.name: GetSessionRectByType
+ * @tc.desc: GetSessionRectByType Test err
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, GetSessionRectByTypeErr, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
+    WSRect rect = WSRectT<int32_t>{0, 0, 0, 0};
+
+    auto ret = rootScene.GetSessionRectByType(type, rect);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
