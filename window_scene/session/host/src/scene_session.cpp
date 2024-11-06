@@ -2809,8 +2809,8 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
 {
     WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
     GetSessionProperty()->SetRequestedOrientation(orientation);
-    if (sessionChangeCallback_ && sessionChangeCallback_->OnRequestedOrientationChange_) {
-        sessionChangeCallback_->OnRequestedOrientationChange_(static_cast<uint32_t>(orientation));
+    if (onRequestedOrientationChange_) {
+        onRequestedOrientationChange_(static_cast<uint32_t>(orientation));
     }
 }
 
