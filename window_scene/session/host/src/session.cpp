@@ -1406,9 +1406,17 @@ bool Session::CanBeActivatedAfterScreenLocked() const
 
 void Session::SetCanBeActivatedAfterScreenLocked(bool canBeActivated)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, canBeActivatedAfterScreenLocked:%{public}d",
-        GetPersistentId(), canBeActivated);
-    return canBeActivatedAfterScreenLocked_.store(canBeActivated);
+    auto task = [weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "id:%{public}d, canBeActivatedAfterScreenLocked:%{public}d",
+            GetPersistentId(), canBeActivated);
+        return session->canBeActivatedAfterScreenLocked_.store(canBeActivated);
+    };
+    PostTask(task, "SetCanBeActivatedAfterScreenLocked");
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
