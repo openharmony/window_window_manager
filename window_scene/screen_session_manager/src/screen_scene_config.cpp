@@ -50,6 +50,7 @@ enum XmlNodeElement {
     HALL_SWITCH_APP,
     PACKAGE_NAME,
     ROTATION_POLICY,
+    DEFAULT_ROTATION_POLICY,
     SCREEN_SNAPSHOT_BUNDLE_NAME,
     SCREEN_SNAPSHOT_ABILITY_NAME,
     IS_RIGHT_POWER_BUTTON,
@@ -89,6 +90,7 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {HALL_SWITCH_APP, "hallSwitchApp"},
     {PACKAGE_NAME, "packageName"},
     {ROTATION_POLICY, "rotationPolicy"},
+    {DEFAULT_ROTATION_POLICY, "defaultRotationPolicy"},
     {SCREEN_SNAPSHOT_BUNDLE_NAME, "screenSnapshotBundleName"},
     {SCREEN_SNAPSHOT_ABILITY_NAME, "screenSnapshotAbilityName"},
     {IS_RIGHT_POWER_BUTTON, "isRightPowerButton"},
@@ -191,6 +193,7 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
     bool stringConfigCheck = (xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[ROTATION_POLICY] == nodeName) ||
+        (xmlNodeMap_[DEFAULT_ROTATION_POLICY] == nodeName) ||
         (xmlNodeMap_[SCREEN_SNAPSHOT_BUNDLE_NAME] == nodeName) ||
         (xmlNodeMap_[SCREEN_SNAPSHOT_ABILITY_NAME] == nodeName) ||
         (xmlNodeMap_[EXTERNAL_SCREEN_DEFAULT_MODE] == nodeName) ||

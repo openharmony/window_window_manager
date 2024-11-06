@@ -654,12 +654,12 @@ void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
 
 void JsSceneSession::ProcessLayoutFullScreenChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onLayoutFullScreenChangeFunc_ = [weakThis = wptr(this)](bool isLayoutFullScreen) {
+    auto layoutFullScreenChangeCallback = [weakThis = wptr(this)](bool isLayoutFullScreen) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessLayoutFullScreenChangeRegister jsSceneSession is null");
@@ -667,6 +667,7 @@ void JsSceneSession::ProcessLayoutFullScreenChangeRegister()
         }
         jsSceneSession->OnLayoutFullScreenChange(isLayoutFullScreen);
     };
+    session->RegisterLayoutFullScreenChangeCallback(layoutFullScreenChangeCallback);
     TLOGI(WmsLogTag::WMS_LAYOUT, "success");
 }
 
