@@ -1445,6 +1445,11 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
 
 WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window should not move, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
@@ -1458,6 +1463,62 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
             layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
+    return static_cast<WMError>(ret);
+}
+
+WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window should not move, winId:%{public}u, mode:%{public}u",
+            GetWindowId(), GetMode());
+        return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
+    }
+
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Unsupported operation for pip window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    const auto& windowRect = GetRect();
+    const auto& requestRect = GetRequestRect();
+    Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, state: %{public}d, type: %{public}d, mode: %{public}d, requestRect: "
+        "[%{public}d, %{public}d, %{public}d, %{public}d], windowRect: [%{public}d, %{public}d, "
+        "%{public}d, %{public}d], newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        property_->GetPersistentId(), state_, GetType(), GetMode(), requestRect.posX_, requestRect.posY_,
+        requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
+        windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
+        newRect.width_, newRect.height_);
+ 
+    property_->SetRequestRect(newRect);
+ 
+    WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true);
+    if (state_ == WindowState::STATE_SHOWN && property_) {
+        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
+        if (layoutCallback) {
+            layoutCallback->ResetLock();
+            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        }
+    }
+    return static_cast<WMError>(ret);
+}
+
+WMError WindowSceneSessionImpl::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    auto ret = hostSession->GetGlobalScaledRect(globalScaledRect);
     return static_cast<WMError>(ret);
 }
 
@@ -1613,6 +1674,11 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
@@ -1631,6 +1697,11 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::SetAspectRatio(float ratio)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto hostSession = GetHostSession();
     if (property_ == nullptr || hostSession == nullptr) {
         WLOGFE("SetAspectRatio failed, because of nullptr");
@@ -1656,6 +1727,11 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
 /** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseToAppTop()
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     WLOGFI("[WMSCom] id: %{public}d", GetPersistentId());
     auto parentId = GetParentId();
     if (parentId == INVALID_SESSION_ID) {
@@ -1681,6 +1757,11 @@ WMError WindowSceneSessionImpl::RaiseToAppTop()
 /** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     auto parentId = GetParentId();
     auto currentWindowId = GetWindowId();
 
@@ -4119,6 +4200,38 @@ bool WindowSceneSessionImpl::GetIsUIExtensionFlag() const
 bool WindowSceneSessionImpl::GetIsUIExtensionSubWindowFlag() const
 {
     return property_->GetIsUIExtensionSubWindowFlag();
+}
+
+WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
+{
+    if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    gestureBackEnabled_ = enable;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->SetGestureBackEnabled(enable);
+}
+ 
+WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
+{
+    if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode()) || IsFreeMultiWindowMode()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    enable = gestureBackEnabled_;
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

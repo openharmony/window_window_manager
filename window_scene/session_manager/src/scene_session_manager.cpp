@@ -1334,6 +1334,12 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onSetSkipSelfWhenShowOnVirtualScreen_ = [this](uint64_t surfaceNodeId, bool isSkip) {
         this->SetSkipSelfWhenShowOnVirtualScreen(surfaceNodeId, isSkip);
     };
+    specificCb->onPiPStateChange_ = [this](const std::string& bundleName, bool isForeground) {
+        this->UpdatePiPWindowStateChanged(bundleName, isForeground);
+    };
+    specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
+        this->UpdateGestureBackEnabled(persistentId);
+    };
     return specificCb;
 }
 
@@ -2402,7 +2408,7 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
         auto& session = iter.second;
         if (session && session->GetWindowMode() == WindowMode::WINDOW_MODE_PIP &&
             pipTemplateInfo.priority < session->GetPiPTemplateInfo().priority &&
-            IsSessionVisibleForeground(session)) {
+            session->IsSessionForeground()) {
             TLOGE(WmsLogTag::WMS_PIP, "create pip window failed, reason: low priority.");
             return false;
         }
@@ -2855,12 +2861,12 @@ sptr<SceneSession> SceneSessionManager::GetMainParentSceneSession(int32_t persis
         return nullptr;
     }
     bool isNoParentSystemSession = WindowHelper::IsSystemWindow(parentSession->GetWindowType()) &&
-        parentSession->GetParentPersistentId() == INVALID_SESSION_ID; 
-    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {  
+        parentSession->GetParentPersistentId() == INVALID_SESSION_ID;
+    if (WindowHelper::IsMainWindow(parentSession->GetWindowType()) || isNoParentSystemSession) {
         TLOGD(WmsLogTag::WMS_LIFE, "find main session, id:%{public}u", persistentId);
         return parentSession;
     }
-    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);     
+    return GetMainParentSceneSession(parentSession->GetParentPersistentId(), sessionMap);
 }
 
 void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session)
@@ -3763,7 +3769,7 @@ WMError SceneSessionManager::SetGestureNavigaionEnabled(bool enable)
             return WMError::WM_OK;
         }
         if (gestureNavigationEnabledChangeFunc_) {
-            gestureNavigationEnabledChangeFunc_(enable, bundleName);
+            gestureNavigationEnabledChangeFunc_(enable, bundleName, GestureBackType::GESTURE_ALL);
         }
         if (statusBarEnabledChangeFunc_) {
             statusBarEnabledChangeFunc_(enable, bundleName);
@@ -4532,7 +4538,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     needBlockNotifyFocusStatusUntilForeground_ = false;
 
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     }
 
     return ShiftFocus(nextSession, reason);
@@ -7808,6 +7814,8 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
 {
     bool ret = true;
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
+        TLOGI(WmsLogTag::WMS_IMMS, "id: %{public}u, isVisible: %{public}u, sessionState: %{public}u",
+            persistentId, sceneSession->IsVisible(), sceneSession->GetSessionState());
         needUpdate = false;
         return;
     }
@@ -7911,6 +7919,37 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
         UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, type);
     };
     taskScheduler_->PostAsyncTask(task, "UpdateAvoidAreaByType:PID:" + std::to_string(persistentId));
+}
+
+void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
+{
+    auto task = [this, persistentId] {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr || !sceneSession->GetEnableGestureBackHadSet()) {
+            TLOGNI(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable.");
+            return;
+        }
+        auto needEnableGestureBack = sceneSession->GetGestureBackEnabled();
+        if (needEnableGestureBack) {
+            gestureBackEnableWindowIdSet_.erase(persistentId);
+        } else {
+            gestureBackEnableWindowIdSet_.insert(persistentId);
+        }
+        if (sceneSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
+            sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN ||
+            (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
+             sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) ||
+            enterRecent_.load() || !sceneSession->IsFocused()) {
+            needEnableGestureBack = true;
+        }
+        if (gestureNavigationEnabledChangeFunc_ != nullptr) {
+            gestureNavigationEnabledChangeFunc_(needEnableGestureBack,
+                sceneSession->GetSessionInfo().bundleName_, GestureBackType::GESTURE_SIDE);
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "callback func is null");
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled: PID: " + std::to_string(persistentId));
 }
 
 void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)
@@ -9356,12 +9395,19 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
         }
-        TLOGI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid=%{public}d, persistentId=%{public}d, "
-            "parentId=%{public}d, Rect:[%{public}d %{public}d %{public}d %{public}d]",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid=%{public}d, persistentId=%{public}d, "
+            "parentId=%{public}d, rect:[%{public}d %{public}d %{public}d %{public}d]",
             pid, persistentId, parentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
         auto parentSession = GetSceneSession(parentId);
         if (parentSession) {
-            ExtensionWindowEventInfo extensionInfo {persistentId, pid, rect};
+            auto parentTransX = parentSession->GetSessionGlobalRect().posX_ - parentSession->GetSessionRect().posX_;
+            auto parentTransY = parentSession->GetSessionGlobalRect().posY_ - parentSession->GetSessionRect().posY_;
+            Rect globalRect = { rect.posX_ + parentTransX, rect.posY_ + parentTransY, rect.width_, rect.height_ };
+            ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect };
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateModalExtensionRect: pid: %{public}d, persistentId: %{public}d, "
+                "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
+                pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
+                parentSession->GetSessionGlobalRect().ToString().c_str());
             parentSession->UpdateModalUIExtension(extensionInfo);
         }
     };
@@ -10160,6 +10206,16 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
     enterRecent_.store(enterRecent);
     SetSystemAnimatedScenes(enterRecent ?
         SystemAnimatedSceneType::SCENE_ENTER_RECENTS : SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
+    auto task = [this] {
+        for (auto persistentId : gestureBackEnableWindowIdSet_) {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr || !IsSessionVisible(sceneSession)) {
+                continue;
+            }
+            UpdateGestureBackEnabled(persistentId);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabledTask");
     return WSError::WS_OK;
 }
 
@@ -10541,5 +10597,71 @@ WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
     TLOGD(WmsLogTag::DEFAULT, "Can not find the sub system of PowerMgr");
     return WMError::WM_OK;
 #endif
+}
+
+void SceneSessionManager::SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
+    auto task = [this, func] {
+        closeTargetFloatWindowFunc_ = func;
+    };
+    taskScheduler_->PostTask(task, __func__);
+}
+
+WMError SceneSessionManager::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    if (!SessionPermission::IsSystemServiceCalling(false)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "failed, not system service called.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto task = [this, bundleName] {
+        if (closeTargetFloatWindowFunc_) {
+            TLOGNI(WmsLogTag::WMS_MULTI_WINDOW, "bundleName:%{public}s", bundleName.c_str());
+            closeTargetFloatWindowFunc_(bundleName);
+        }
+    };
+    taskScheduler_->PostTask(task, __func__);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground)
+{
+    SessionManagerAgentController::GetInstance().UpdatePiPWindowStateChanged(bundleName, isForeground);
+}
+
+WMError SceneSessionManager::CloseTargetPiPWindow(const std::string& bundleName)
+{
+    if (!SessionPermission::IsSystemServiceCalling(false)) {
+        TLOGE(WmsLogTag::WMS_PIP, "failed, not system service called.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP &&
+            session->GetSessionInfo().bundleName_ == bundleName) {
+            session->NotifyCloseExistPipWindow();
+            break;
+        }
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
+{
+    if (!SessionPermission::IsSystemServiceCalling(false)) {
+        TLOGE(WmsLogTag::WMS_PIP, "failed, not system service called.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& iter : sceneSessionMap_) {
+        auto& session = iter.second;
+        if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+            bundleName = session->GetSessionInfo().bundleName_;
+            return WMError::WM_OK;
+        }
+    }
+    TLOGW(WmsLogTag::WMS_PIP, "no PiP window");
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen

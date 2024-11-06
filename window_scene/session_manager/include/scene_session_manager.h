@@ -89,7 +89,8 @@ using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& 
 using NotifyRecoverSceneSessionFunc =
     std::function<void(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)>;
 using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
-using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
+using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName,
+    GestureBackType type)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using ProcessShiftFocusFunc = std::function<void(int32_t persistentId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
@@ -107,6 +108,7 @@ using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, con
 using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
+using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -386,6 +388,12 @@ public:
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
 
     /*
+     * Multi Window
+     */
+    void SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func);
+    WMError CloseTargetFloatWindow(const std::string& bundleName);
+
+    /*
      * Fold Screen Status Change Report
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
@@ -402,6 +410,12 @@ public:
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
+
+    /*
+     * PiP Window
+     */
+    WMError CloseTargetPiPWindow(const std::string& bundleName);
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
 protected:
     SceneSessionManager();
@@ -592,6 +606,12 @@ private:
     void NotifyAllAccessibilityInfo();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
+
+    /**
+     * PiP Window
+     */
+    void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     mutable std::shared_mutex sceneSessionMapMutex_;
@@ -628,6 +648,12 @@ private:
     ProcessStartUIAbilityErrorFunc startUIAbilityErrorFunc_;
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
+
+    /**
+     * Multi Window
+     */
+    ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
+
     AppWindowSceneConfig appWindowSceneConfig_;
     RotateAnimationConfig rotateAnimationConfig_;
     SystemSessionConfig systemConfig_;
@@ -805,6 +831,12 @@ private:
      * Screen Manager
      */
     bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Gesture Back
+     */
+    void UpdateGestureBackEnabled(int32_t persistentId);
+    std::unordered_set<int32_t> gestureBackEnableWindowIdSet_; // ONLY Accessed on OS_sceneSession thread
 };
 } // namespace OHOS::Rosen
 

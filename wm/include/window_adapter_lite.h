@@ -54,6 +54,9 @@ public:
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
     virtual WMError TerminateSessionByPersistentId(int32_t persistentId);
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
+    virtual WMError CloseTargetFloatWindow(const std::string& bundleName);
+    virtual WMError CloseTargetPiPWindow(const std::string& bundleName);
+    virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;

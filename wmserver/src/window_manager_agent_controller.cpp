@@ -108,5 +108,14 @@ void WindowManagerAgentController::NotifyGestureNavigationEnabledResult(bool ena
         agent->NotifyGestureNavigationEnabledResult(enable);
     }
 }
+
+void WindowManagerAgentController::UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "bundleName:%{public}s, state:%{public}d", bundleName.c_str(), isForeground);
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PIP)) {
+        agent->UpdatePiPWindowStateChanged(bundleName, isForeground);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

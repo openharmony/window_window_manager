@@ -462,6 +462,9 @@ HWTEST_F(WindowSceneSessionImplTest3, SetAspectRatio01, Function | SmallTest | L
     ASSERT_NE(nullptr, session);
     windowSceneSessionImpl->hostSession_ = session;
     auto ret = windowSceneSessionImpl->SetAspectRatio(MathHelper::INF);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    ret = windowSceneSessionImpl->SetAspectRatio(MathHelper::INF);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     ret = windowSceneSessionImpl->SetAspectRatio(MathHelper::NAG_INF);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
@@ -471,9 +474,6 @@ HWTEST_F(WindowSceneSessionImplTest3, SetAspectRatio01, Function | SmallTest | L
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     ret = windowSceneSessionImpl->SetAspectRatio(1.0f);
     EXPECT_EQ(WMError::WM_OK, ret);
-    windowSceneSessionImpl->hostSession_ = nullptr;
-    ret = windowSceneSessionImpl->SetAspectRatio(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -521,16 +521,13 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, Function | SmallTest | Leve
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetParentPersistentId(0);
     auto ret = windowSceneSessionImpl->RaiseToAppTop();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetParentPersistentId(6);
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    windowSceneSessionImpl->hostSession_ = nullptr;
+    SessionInfo sessionInfo = {"CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
     ret = windowSceneSessionImpl->RaiseToAppTop();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARENT, ret);
 }
 
 /**

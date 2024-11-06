@@ -24,6 +24,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_US = 10000;
+}
 class SettingProviderTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -46,6 +49,7 @@ void SettingProviderTest::SetUp()
 
 void SettingProviderTest::TearDown()
 {
+    usleep(SLEEP_TIME_US);
 }
 
 namespace {

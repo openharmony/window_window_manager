@@ -40,6 +40,7 @@ enum class ListenerFunctionType : uint32_t {
     START_UI_ABILITY_ERROR,
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
+    CLOSE_TARGET_FLOAT_WINDOW_CB,
 };
 
 class JsSceneSessionManager final {
@@ -173,7 +174,7 @@ private:
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
-    void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName);
+    void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName, GestureBackType type);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession, const sptr<SceneSession>& panelSession);
     void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
@@ -195,6 +196,8 @@ private:
     void RegisterDumpRootSceneElementInfoListener();
     void RegisterVirtualPixelRatioChangeListener();
     void SetIsClearSession(napi_env env, napi_value jsSceneSessionObj, sptr<SceneSession>& sceneSession);
+    void OnCloseTargetFloatWindow(const std::string& bundleName);
+    void ProcessCloseTargetFloatWindow();
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
     void ProcessAbilityManagerCollaboratorRegistered();
     void OnAbilityManagerCollaboratorRegistered();
