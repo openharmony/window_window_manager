@@ -1020,7 +1020,7 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetAutoStartPiP(isAutoStart, priority);
-    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

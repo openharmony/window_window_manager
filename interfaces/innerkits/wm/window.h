@@ -1815,6 +1815,7 @@ public:
      * @brief set auto start status for window.
      *
      * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     * @param priority 1 means height priority, 0 means low priority.
      */
     virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority) {}
 
