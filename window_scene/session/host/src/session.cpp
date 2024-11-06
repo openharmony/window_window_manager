@@ -1406,7 +1406,7 @@ bool Session::CanBeActivatedAfterScreenLocked() const
 
 void Session::SetCanBeActivatedAfterScreenLocked(bool canBeActivated)
 {
-    auto task = [weakThis = wptr(this), func]() {
+    auto task = [weakThis = wptr(this), canBeActivated]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
