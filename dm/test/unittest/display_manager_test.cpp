@@ -924,7 +924,7 @@ HWTEST_F(DisplayManagerTest, GetAllDisplayPhysicalResolution, Function | SmallTe
 {
     std::vector<DisplayPhysicalResolution> allSize = DisplayManager::GetInstance().GetAllDisplayPhysicalResolution();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(allSize.empty());
+        ASSERT_TRUE(!allSize.empty());
     } else {
         ASSERT_TRUE(!allSize.empty());
     }

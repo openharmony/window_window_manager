@@ -58,7 +58,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest::ssm_ = nullptr;
 
 bool SceneSessionManagerTest::gestureNavigationEnabled_ = true;
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest::callbackFunc_ = [](bool enable,
-    const std::string& bundleName) {
+    const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
 
@@ -1649,6 +1649,97 @@ HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function |
 {
     auto result = ssm_->ReleaseForegroundSessionScreenLock();
     ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager SetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppForceLandscapeConfig, Function | SmallTest | Level3)
+{
+    std::string bundleName = "SetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = { 0, "MainPage" };
+    WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig
+ * @tc.desc: SceneSesionManager GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetAppForceLandscapeConfig, Function | SmallTest | Level3)
+{
+    std::string bundleName = "GetAppForceLandscapeConfig";
+    AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
+    ASSERT_EQ(config.mode_, 0);
+    ASSERT_EQ(config.homePage_, "");
+}
+
+/**
+ * @tc.name: CloseTargetFloatWindow
+ * @tc.desc: SceneSesionManager CloseTargetFloatWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, CloseTargetFloatWindow, Function | SmallTest | Level3)
+{
+    std::string bundleName = "testClose";
+    auto result = ssm_->CloseTargetFloatWindow(bundleName);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: CloseTargetPiPWindow
+ * @tc.desc: SceneSesionManager CloseTargetPiPWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, CloseTargetPiPWindow, Function | SmallTest | Level3)
+{
+    std::string bundleName = "CloseTargetPiPWindow";
+    auto result = ssm_->CloseTargetPiPWindow(bundleName);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetCurrentPiPWindowInfo01
+ * @tc.desc: SceneSesionManager GetCurrentPiPWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo01, Function | SmallTest | Level3)
+{
+    std::string bundleName;
+    auto result = ssm_->GetCurrentPiPWindowInfo(bundleName);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ("", bundleName);
+}
+
+/**
+ * @tc.name: GetCurrentPiPWindowInfo02
+ * @tc.desc: SceneSesionManager GetCurrentPiPWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo02, Function | SmallTest | Level3)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "test1";
+    info1.bundleName_ = "test1";
+    info1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    SessionInfo info2;
+    info2.abilityName_ = "test2";
+    info2.bundleName_ = "test2";
+    info2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    std::string bundleName;
+    auto result = ssm_->GetCurrentPiPWindowInfo(bundleName);
+    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(info1.abilityName_, bundleName);
 }
 }
 } // namespace Rosen

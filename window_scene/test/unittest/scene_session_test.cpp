@@ -1389,6 +1389,7 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->moveDragController_->hasPointDown_ = true;
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE), WSError::WS_OK);
@@ -1763,7 +1764,6 @@ HWTEST_F(SceneSessionTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
     auto result = sceneSession->GetAppForceLandscapeConfig(config);
     ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
 }
-}
 
 /**
  * @tc.name: HandleCompatibleModeMoveDrag
@@ -1777,7 +1777,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     info.bundleName_ = "HandleCompatibleModeMoveDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    
+
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
@@ -1835,7 +1835,7 @@ HWTEST_F(SceneSessionTest, SetMoveDragCallback, Function | SmallTest | Level2)
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    
+
     sceneSession->moveDragController_ = nullptr;
     sceneSession->SetMoveDragCallback();
 }
@@ -1893,5 +1893,22 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     sceneSession->SetDefaultDisplayIdIfNeed();
     EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
 }
+
+/**
+ * @tc.name: SetSessionGlobalRect/GetSessionGlobalRect
+ * @tc.desc: SetSessionGlobalRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSessionGlobalRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    WSRect test = { 100, 100, 100, 100 };
+    sceneSession->SetSessionGlobalRect(test);
+    sceneSession->SetScbCoreEnabled(true);
+    EXPECT_EQ(test, sceneSession->GetSessionGlobalRect());
 }
-}
+} // namespace
+} // Rosen
+} // OHOS

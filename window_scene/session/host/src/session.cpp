@@ -1042,6 +1042,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     NotifyForeground();
 
     isTerminating_ = false;
+    isNeedSyncSessionRect_ = true;
     return WSError::WS_OK;
 }
 
@@ -1133,6 +1134,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     isActive_ = false;
     isStarting_ = false;
     bufferAvailable_ = false;
+    isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -2232,6 +2234,7 @@ WSError Session::UpdateFocus(bool isFocused)
         return WSError::WS_DO_NOTHING;
     }
     isFocused_ = isFocused;
+    UpdateGestureBackEnabled();
     // notify scb arkui focus
     if (!isFocused) {
         NotifyUILostFocus();
@@ -2347,6 +2350,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         property->SetWindowMode(mode);
         property->SetIsNeedUpdateWindowMode(true);
+        UpdateGestureBackEnabled();
     } else {
         property->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -2357,6 +2361,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         } else {
             surfaceNode_->MarkUifirstNode(true);
         }
+        UpdateGestureBackEnabled();
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
@@ -2490,14 +2495,46 @@ WSRect Session::GetSessionRect() const
     return winRect_;
 }
 
+/** @note @window.layout */
+WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        WSRect scaledRect = session->GetSessionGlobalRect();
+        scaledRect.width_ *= session->scaleX_;
+        scaledRect.height_ *= session->scaleY_;
+        globalScaledRect = { scaledRect.posX_, scaledRect.posY_, scaledRect.width_, scaledRect.height_ };
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+            session->GetPersistentId(), globalScaledRect.ToString().c_str());
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, "GetGlobalScaledRect");
+}
+
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
+        std::lock_guard<std::mutex> lock(globalRectMutex_);
         return globalRect_;
     }
     return winRect_;
 }
 
+/** @note @window.layout */
+void Session::SetSessionGlobalRect(const WSRect& rect)
+{
+    std::lock_guard<std::mutex> lock(globalRectMutex_);
+    if (globalRect_ != rect) {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+    }
+    globalRect_ = rect;
+}
+
+/** @note @window.layout */
 WSRect Session::GetLastLayoutRect() const
 {
     return lastLayoutRect_;
