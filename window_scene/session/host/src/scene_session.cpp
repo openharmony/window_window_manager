@@ -4568,26 +4568,30 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
             GetPersistentId(), uiParam.rect_.ToString().c_str());
         return false;
     }
-    globalRect_ = uiParam.rect_;
-    if (!uiParam.needSync_) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, updateRect not sync rectAfter:%{public}s preRect:%{public}s",
-            GetPersistentId(), uiParam.rect_.ToString().c_str(), winRect_.ToString().c_str());
+    auto globalRect = GetSessionGlobalRect();
+    SetSessionGlobalRect(uiParam.rect_);
+    if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
+            "rectAfter:%{public}s preRect:%{public}s preGlobalRect:%{public}s", GetPersistentId(), uiParam.needSync_,
+            isNeedSyncSessionRect_, uiParam.rect_.ToString().c_str(), winRect_.ToString().c_str(),
+            globalRect.ToString().c_str());
         return false;
     }
     WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
         uiParam.rect_.width_, uiParam.rect_.height_ };
     if (winRect_ == rect) {
-        TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s!",
-            GetPersistentId(), rect.ToString().c_str());
+        TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s preGlobalRect:%{public}s!",
+            GetPersistentId(), rect.ToString().c_str(), globalRect.ToString().c_str());
         return false;
     }
     if (rect.IsInvalid()) {
-        TLOGE(WmsLogTag::WMS_PIPELINE, "id:%{public}d rect:%{public}s is invalid",
-            GetPersistentId(), rect.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_PIPELINE, "id:%{public}d rect:%{public}s is invalid, preGlobalRect:%{public}s",
+            GetPersistentId(), rect.ToString().c_str(), globalRect.ToString().c_str());
         return false;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, updateRect rectAfter:%{public}s preRect:%{public}s",
-        GetPersistentId(), rect.ToString().c_str(), winRect_.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, updateRect rectAfter:%{public}s preRect:%{public}s "
+        "preGlobalRect:%{public}s", GetPersistentId(), rect.ToString().c_str(),
+        winRect_.ToString().c_str(), globalRect.ToString().c_str());
     winRect_ = rect;
     RectCheckProcess();
     return true;
@@ -4727,5 +4731,21 @@ void SceneSession::UpdateGestureBackEnabled()
         specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
         specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
     }
+}
+
+void SceneSession::SetNeedSyncSessionRect(bool needSync)
+{
+    auto task = [weakThis = wptr(this), needSync]() -> void {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PIPELINE, "SetNeedSyncSessionRect session is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_PIPELINE,
+            "SetNeedSyncSessionRect: change isNeedSync from %{public}d to %{public}d, id:%{public}d",
+            session->isNeedSyncSessionRect_, needSync, session->GetPersistentId());
+        session->isNeedSyncSessionRect_ = needSync;
+    };
+    PostTask(task, __func__);
 }
 } // namespace OHOS::Rosen
