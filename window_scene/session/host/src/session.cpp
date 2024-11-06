@@ -1401,12 +1401,12 @@ void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
 
 bool Session::CanBeActivatedAfterScreenLocked() const
 {
-    return canBeActivatedAfterScreenLocked_.load();
+    return canBeActivatedAfterScreenLocked_;
 }
 
 void Session::SetCanBeActivatedAfterScreenLocked(bool canBeActivated)
 {
-    auto task = [weakThis = wptr(this), canBeActivated]() {
+    auto task = [weakThis = wptr(this), canBeActivated] {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -1414,9 +1414,10 @@ void Session::SetCanBeActivatedAfterScreenLocked(bool canBeActivated)
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "id:%{public}d, canBeActivatedAfterScreenLocked:%{public}d",
             session->GetPersistentId(), canBeActivated);
-        return session->canBeActivatedAfterScreenLocked_.store(canBeActivated);
+        session->canBeActivatedAfterScreenLocked_ = canBeActivated;
+        return;
     };
-    PostTask(task, "SetCanBeActivatedAfterScreenLocked");
+    PostTask(task, __func__);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
