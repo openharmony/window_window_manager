@@ -3816,12 +3816,11 @@ int32_t SceneSessionManager::GetFocusedSessionId() const
 void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     if (!SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "GetFocusWindowInfo permission denied!");
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return;
     }
-    auto task = [this, focusedSessionId = focusedSessionId_, &focusInfo]() {
-        auto sceneSession = GetSceneSession(focusedSessionId);
-        if (sceneSession) {
+    auto task = [this, &focusInfo] {
+        if (auto sceneSession = GetSceneSession(focusedSessionId_)) {
             TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             focusInfo.windowId_ = sceneSession->GetWindowId();
             focusInfo.displayId_ = static_cast<DisplayId>(0);
@@ -3833,7 +3832,7 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         }
         return WSError::WS_ERROR_DESTROYED_OBJECT;
     };
-    taskScheduler_->PostSyncTask(task, "GetFocusWindowInfo");
+    taskScheduler_->PostSyncTask(task, __func__);
 }
 
 static bool IsValidDigitString(const std::string& windowIdStr)
