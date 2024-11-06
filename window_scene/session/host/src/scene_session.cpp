@@ -2502,6 +2502,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
     }
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
+    bool isMainWindow = WindowHelper::IsMainWindow(property->GetWindowType());
     WSRect rect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
             MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
             MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
@@ -2522,7 +2523,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason reason)
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
         HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
-    } else if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()) {
+    } else if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode() && isMainWindow) {
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
     } else {
