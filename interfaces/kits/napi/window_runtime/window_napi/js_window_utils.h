@@ -344,6 +344,8 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
         std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback>&& execute,
         std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback>&& complete, napi_value* result);
     bool ParseSubWindowOptions(napi_env env, napi_value JsObject, const sptr<WindowOption>& WindowOption);
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
+        napi_env env, napi_value lastParam, napi_value* result);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {
