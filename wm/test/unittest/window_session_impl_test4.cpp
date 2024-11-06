@@ -1328,9 +1328,10 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     bool isAutoStart = true;
-    window->SetAutoStartPiP(isAutoStart);
+    uint32_t priority = 1;
+    window->SetAutoStartPiP(isAutoStart, priority);
     window->hostSession_ = nullptr;
-    window->SetAutoStartPiP(isAutoStart);
+    window->SetAutoStartPiP(isAutoStart, priority);
 }
 
 /**
