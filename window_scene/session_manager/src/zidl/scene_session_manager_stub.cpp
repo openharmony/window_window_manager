@@ -807,7 +807,7 @@ int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, M
 
 int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "Called");
+    TLOGD(WmsLogTag::DEFAULT, "In!");
     int32_t persistentId;
     if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to read persistentId");
@@ -936,16 +936,16 @@ int SceneSessionManagerStub::HandleMoveSessionsToBackground(MessageParcel& data,
 
 int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_DIALOG, "In!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     int32_t type;
     if (!data.ReadInt32(type)) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Failed to read type");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read type");
         return ERR_INVALID_DATA;
     }
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(data.ReadRemoteObject());
     if (collaborator == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "collaborator is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "collaborator is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
@@ -955,10 +955,10 @@ int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_DIALOG, "In!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     int32_t type;
     if (!data.ReadInt32(type)) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Failed to read type");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read type");
         return ERR_INVALID_DATA;
     }
     WSError ret = UnregisterIAbilityManagerCollaborator(type);

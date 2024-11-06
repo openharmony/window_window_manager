@@ -379,9 +379,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfo, Function | Small
 {
     MessageParcel data;
     MessageParcel reply;
-    int res;
 
-    res = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
@@ -408,8 +407,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfoByContinueSessionI
 {
     MessageParcel data;
     MessageParcel reply;
-    int res;
-    res = sceneSessionManagerLiteStub_->
+
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
@@ -471,10 +470,10 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Functio
 {
     MessageParcel data;
     MessageParcel reply;
-    int res;
+
     sptr <IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
-    res = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
@@ -504,9 +503,9 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState1, Functi
     MessageParcel reply;
     data.WriteRemoteObject(nullptr);
     data.WriteInt32(-2);
-    int32_t result = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -521,9 +520,9 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState2, Functi
     sptr<IRemoteObject> token = nullptr;
     data.WriteRemoteObject(token);
     data.WriteInt32(static_cast<int32_t>(ContinueState::CONTINUESTATE_MAX));
-    int32_t result = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
+    EXPECT_EQ(res, ERR_NONE);
     uint32_t writtenError;
     EXPECT_TRUE(reply.ReadUint32(writtenError));
     EXPECT_EQ(writtenError, static_cast<uint32_t>(ERR_NONE));
@@ -558,9 +557,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearSession, Function | SmallTe
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t res;
 
-    res = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleClearSession(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
@@ -594,9 +592,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSession, Function | SmallTes
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t res;
 
-    res = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleLockSession(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
@@ -616,9 +613,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSession, Function | SmallT
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t res;
 
-    res = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
@@ -638,9 +634,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMoveSessionsToForeground, Functi
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t res;
 
-    res = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
 
@@ -846,9 +841,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, 
 {
     MessageParcel data;
     MessageParcel reply;
-    int res;
 
-    res = sceneSessionManagerLiteStub_->
+    auto res = sceneSessionManagerLiteStub_->
     SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
