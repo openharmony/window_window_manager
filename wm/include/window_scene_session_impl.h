@@ -67,6 +67,8 @@ public:
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError MoveToAsync(int32_t x, int32_t y) override;
+    WMError MoveWindowToGlobal(int32_t x, int32_t y) override;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
     WMError RaiseToAppTop() override;
@@ -172,6 +174,12 @@ public:
     bool GetIsUIExtensionFlag() const override;
     bool GetIsUIExtensionSubWindowFlag() const override;
 
+    /*
+     * Gesture Back
+     */
+    WMError SetGestureBackEnabled(bool enable) override;
+    WMError GetGestureBackEnabled(bool& enable) override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -246,6 +254,11 @@ private:
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     bool enableImmersiveMode_ = false;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Gesture Back
+     */
+    bool gestureBackEnabled_ = true;
 
     /**
      * Sub Window

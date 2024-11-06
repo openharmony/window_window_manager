@@ -247,4 +247,19 @@ WMError SceneSessionManagerLite::GetAccessibilityWindowInfo(std::vector<sptr<Acc
 {
     return SceneSessionManager::GetInstance().GetAccessibilityWindowInfo(infos);
 }
+
+WMError SceneSessionManagerLite::CloseTargetFloatWindow(const std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().CloseTargetFloatWindow(bundleName);
+}
+
+WMError SceneSessionManagerLite::CloseTargetPiPWindow(const std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().CloseTargetPiPWindow(bundleName);
+}
+
+WMError SceneSessionManagerLite::GetCurrentPiPWindowInfo(std::string& bundleName)
+{
+    return SceneSessionManager::GetInstance().GetCurrentPiPWindowInfo(bundleName);
+}
 } // namespace OHOS::Rosen

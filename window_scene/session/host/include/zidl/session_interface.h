@@ -50,8 +50,12 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(
-        const WSRect& rect, const SizeChangeReason& reason, bool isGlobal = false) { return WSError::WS_OK; }
+        const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
@@ -157,6 +161,11 @@ public:
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
+
+    /*
+     *  Gesture Back
+     */
+    virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

@@ -168,6 +168,8 @@ public:
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) = 0;
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y) { return WMError::WM_OK; }
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
     virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) = 0;
@@ -370,6 +372,19 @@ public:
 
     virtual WMError GetWindowStatus(WindowStatus& windowStatus) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
+    /**
+     * @brief Set whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
 };
 }
 }

@@ -54,6 +54,8 @@ public:
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowToAsync(napi_env env, napi_callback_info info);
+    static napi_value MoveWindowToGlobal(napi_env env, napi_callback_info info);
+    static napi_value GetGlobalScaledRect(napi_env env, napi_callback_info info);
     static napi_value Resize(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value ResizeWindowAsync(napi_env env, napi_callback_info info);
@@ -166,6 +168,12 @@ public:
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
 
+    /*
+     * Gesture Back
+     */
+    static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
+
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -187,6 +195,8 @@ private:
     napi_value OnMoveTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowToAsync(napi_env env, napi_callback_info info);
+    napi_value OnMoveWindowToGlobal(napi_env env, napi_callback_info info);
+    napi_value OnGetGlobalScaledRect(napi_env env, napi_callback_info info);
     napi_value OnResize(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
     napi_value OnResizeWindowAsync(napi_env env, napi_callback_info info);
@@ -298,6 +308,12 @@ private:
      * Sub Window
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+
+    /*
+     * Gesture Back
+     */
+    napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);
+    napi_value OnGetGestureBackEnabled(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

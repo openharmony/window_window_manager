@@ -291,6 +291,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetCompatibleModeEnableInPad);
     BindNativeFunction(env, objValue, "setStartingWindowExitAnimationFlag", moduleName,
         JsSceneSession::SetStartingWindowExitAnimationFlag);
+    BindNativeFunction(env, objValue, "setNeedSyncSessionRect", moduleName,
+        JsSceneSession::SetNeedSyncSessionRect);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -1716,6 +1718,13 @@ napi_value JsSceneSession::UnSyncScenePanelGlobalPosition(napi_env env, napi_cal
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]in");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnUnSyncScenePanelGlobalPosition(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetNeedSyncSessionRect(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PIPELINE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetNeedSyncSessionRect(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3421,20 +3430,20 @@ napi_value JsSceneSession::OnSetWaterMarkFlag(napi_env env, napi_callback_info i
 
 void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onPrepareClosePiPSession_ = [weakThis = wptr(this)] {
+    session->RegisterProcessPrepareClosePiPCallback([weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnPrepareClosePiPSession jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnPrepareClosePiPSession jsSceneSession is null");
             return;
         }
         jsSceneSession->OnPrepareClosePiPSession();
-    };
-    TLOGD(WmsLogTag::WMS_PIP, "ProcessPrepareClosePiPSessionRegister success");
+    });
+    TLOGD(WmsLogTag::WMS_PIP, "success");
 }
 
 void JsSceneSession::OnPrepareClosePiPSession()
@@ -4239,4 +4248,33 @@ napi_value JsSceneSession::OnUnSyncScenePanelGlobalPosition(napi_env env, napi_c
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_PIPELINE, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool needSync = true;
+    if (!ConvertFromJsValue(env, argv[0], needSync)) {
+        TLOGE(WmsLogTag::WMS_PIPELINE, "[NAPI]Failed to convert parameter to needSync");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_PIPELINE, "[NAPI]needSync:%{public}u, id:%{public}d", needSync, persistentId_);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIPELINE, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetNeedSyncSessionRect(needSync);
+    return NapiGetUndefined(env);
+}
 } // namespace OHOS::Rosen
