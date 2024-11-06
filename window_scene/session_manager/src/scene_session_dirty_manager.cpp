@@ -871,20 +871,23 @@ void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>
 void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,
     std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
-    std::unique_lock<std::shared_mutex> lock(secSurfaceInfoMutex_);
-    if (secSurfaceInfoMap.size() != secSurfaceInfoMap_.size() || secSurfaceInfoMap_ != secSurfaceInfoMap) {
-        secSurfaceInfoMap_ = secSurfaceInfoMap;
+    bool updateSecSurfaceInfoNeeded = false;
+    {
+        std::unique_lock<std::shared_mutex> lock(secSurfaceInfoMutex_);
+        if (secSurfaceInfoMap_ != secSurfaceInfoMap) {
+            secSurfaceInfoMap_ = secSurfaceInfoMap;
+            updateSecSurfaceInfoNeeded = true;
+        }
+    }
+    if (updateSecSurfaceInfoNeeded) {
         ResetFlushWindowInfoTask();
-        DumpSecSurfaceInfoMap(secSurfaceInfoMap_);
+        DumpSecSurfaceInfoMap(secSurfaceInfoMap);
     }
 }
 
 std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoList(
     const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const
 {
-    if (secSurfaceInfoMap_.size() == 0) {
-        return {};
-    }
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return {};

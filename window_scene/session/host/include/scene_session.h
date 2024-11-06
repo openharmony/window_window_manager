@@ -129,6 +129,7 @@ public:
         NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
+        NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
         NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
         NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     };
@@ -391,6 +392,11 @@ public:
      * Window Animation
      */
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
+
+    /**
+     * Window layoutFullScreen
+     */
+    void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
 
     /**
      * Window Visibility
@@ -803,6 +809,11 @@ private:
      * Window Animation
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+
+    /**
+     * Window LayoutFullscreen
+     */
+    NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
 
     /**
      * Window Immersive

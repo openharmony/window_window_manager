@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_SUPER_FOLD_SENSOR_MANAGER_H
 #define OHOS_ROSEN_SUPER_FOLD_SENSOR_MANAGER_H
  
-#ifdef SENSOR_ENABLE
- 
 #include <deque>
 #include <memory>
 #include <mutex>
@@ -46,15 +44,11 @@ public:
  
     void RegisterHallCallback(); // 磁吸键盘
  
-    void RegisterSoftKeyboardCallback();
- 
     void UnregisterPostureCallback();
  
     void UnregisterHallCallback();
  
     void HandlePostureData(const SensorEvent * const event);
- 
-    void HandleSoftKeyboardData();
  
     void HandleHallData(const SensorEvent * const event);
 
@@ -66,17 +60,15 @@ private:
     
     std::recursive_mutex mutex_;
 
-    bool hasKeyboard_ = false;
-
     SuperFoldStatusChangeEvents events_ = SuperFoldStatusChangeEvents::UNDEFINED;
  
     SensorUser postureUser {};
  
     SensorUser hallUser {};
  
-    float globalAngle = 170.0F;
+    float curAngle_ = 170.0F;
 
-    uint16_t globalHall = USHRT_MAX;
+    uint16_t curHall_ = USHRT_MAX;
  
     void NotifyFoldAngleChanged(float foldAngle);
  
@@ -90,6 +82,5 @@ private:
 };
 }
 }
- 
-#endif // SENSOR_ENABLE
+
 #endif // OHOS_ROSEN_SUPER_FOLD_SENSOR_MANAGER_H
