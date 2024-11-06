@@ -2208,7 +2208,7 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 
 /** @note @window.layout */
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
-    SizeChangeReason reason, const DisplayId displayId)
+    SizeChangeReason reason, DisplayId displayId)
 {
     auto task = [weakThis = wptr(this), rect, reason, displayId] {
         auto session = weakThis.promote();

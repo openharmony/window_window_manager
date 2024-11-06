@@ -70,7 +70,7 @@ void MoveDragController::OnChange(ScreenId id)
     moveDragIsInterrupted_ = true;
 }
 
-void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback &callBack)
+void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback& callBack)
 {
     moveDragCallback_ = callBack;
 }
@@ -106,7 +106,7 @@ void MoveDragController::SetMovable(bool isMovable)
     isMovable_ = isMovable;
 }
 
-void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback &callback)
+void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback)
 {
     pidChangeCallback_ = callback;
 }
@@ -228,7 +228,7 @@ void MoveDragController::ResetCrossMoveDragProperty()
 }
 
 void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
-                                          int32_t pointerPosY, const WSRect &winRect)
+                                          int32_t pointerPosY, const WSRect& winRect)
 {
     moveDragProperty_.pointerId_ = pointerId;
     moveDragProperty_.pointerType_ = pointerType;
@@ -237,7 +237,7 @@ void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType
     moveDragProperty_.originalRect_ = winRect;
 }
 
-WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect &originalRect, const WSRect &windowRect)
+WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect)
 {
     if (moveTempProperty_.isEmpty()) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "move temporary property is empty");
@@ -266,8 +266,8 @@ void MoveDragController::SetAspectRatio(float ratio)
     aspectRatio_ = ratio;
 }
 
-bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent,
-                                          const WSRect &originalRect)
+bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                          const WSRect& originalRect)
 {
     if (pointerEvent == nullptr) {
         WLOGE("ConsumeMoveEvent stop because of nullptr");
@@ -367,8 +367,8 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
     }
 }
 
-void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent> &pointerEvent,
-                                               const std::shared_ptr<RSSurfaceNode> &surfaceNode)
+void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                               const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
         return;
@@ -402,7 +402,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     }
 }
 
-void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent> &pointerEvent,
+void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
                                             SizeChangeReason reason)
 {
     if (reason == SizeChangeReason::DRAG_START) {
@@ -422,9 +422,9 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
     TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
 }
 
-bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent> &pointerEvent,
-                                          const WSRect &originalRect, const sptr<WindowSessionProperty> property,
-                                          const SystemSessionConfig &sysConfig)
+bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                          const WSRect& originalRect, const sptr<WindowSessionProperty> property,
+                                          const SystemSessionConfig& sysConfig)
 {
     if (!CheckDragEventLegal(pointerEvent, property)) {
         return false;
@@ -520,7 +520,7 @@ WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
 }
 
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
-    const std::shared_ptr<MMI::PointerEvent> &pointerEvent)
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
@@ -541,8 +541,8 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
     return std::make_pair(tranX, tranY);
 }
 
-bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent> &pointerEvent,
-                                            const WSRect &originalRect)
+bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                            const WSRect& originalRect)
 {
     MMI::PointerEvent::PointerItem pointerItem;
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -573,11 +573,11 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
     return true;
 }
 
-bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent> &pointerEvent,
-                                       const WSRect &originalRect, const sptr<WindowSessionProperty> property,
-                                       const SystemSessionConfig &sysConfig)
+bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                       const WSRect& originalRect, const sptr<WindowSessionProperty> property,
+                                       const SystemSessionConfig& sysConfig)
 {
-    const auto &sourceType = pointerEvent->GetSourceType();
+    const auto& sourceType = pointerEvent->GetSourceType();
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
         return false;
@@ -774,7 +774,7 @@ void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type, Axis
     }
 }
 
-void MoveDragController::FixTranslateByLimits(int32_t &tranX, int32_t &tranY)
+void MoveDragController::FixTranslateByLimits(int32_t& tranX, int32_t& tranY)
 {
     if (tranX < minTranX_) {
         tranX = minTranX_;
@@ -803,7 +803,7 @@ bool MoveDragController::InitMainAxis(AreaType type, int32_t tranX, int32_t tran
     return true;
 }
 
-void MoveDragController::ConvertXYByAspectRatio(int32_t &tx, int32_t &ty, float aspectRatio)
+void MoveDragController::ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio)
 {
     if (mainMoveAxis_ == AxisType::X_AXIS) {
         ty = tx / aspectRatio;
@@ -814,7 +814,7 @@ void MoveDragController::ConvertXYByAspectRatio(int32_t &tx, int32_t &ty, float 
 }
 
 void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> property,
-                                        const SystemSessionConfig &sysConfig)
+                                        const SystemSessionConfig& sysConfig)
 {
     auto windowType = property->GetWindowType();
     bool isMainWindow = WindowHelper::IsMainWindow(windowType);
@@ -861,7 +861,7 @@ void MoveDragController::UpdateDragType(int32_t startPointPosX, int32_t startPoi
 }
 
 bool MoveDragController::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY, int32_t sourceType,
-                                              const WSRect &winRect)
+                                              const WSRect& winRect)
 {
     // calculate rect with hotzone
     Rect rectWithHotzone;
@@ -880,7 +880,7 @@ bool MoveDragController::IsPointInDragHotZone(int32_t startPointPosX, int32_t st
     return false;
 }
 
-void MoveDragController::CalculateStartRectExceptHotZone(float vpr, const WSRect &winRect)
+void MoveDragController::CalculateStartRectExceptHotZone(float vpr, const WSRect& winRect)
 {
     rectExceptFrame_.posX_ = winRect.posX_ + static_cast<int32_t>(WINDOW_FRAME_WIDTH * vpr);
     rectExceptFrame_.posY_ = winRect.posY_ + static_cast<int32_t>(WINDOW_FRAME_WIDTH * vpr);
@@ -895,7 +895,7 @@ void MoveDragController::CalculateStartRectExceptHotZone(float vpr, const WSRect
         winRect.height_ - static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * vpr);
 }
 
-WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent> &pointerEvent)
+WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t startPointerId = moveTempProperty_.pointerId_;
@@ -945,7 +945,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
     return WSError::WS_OK;
 }
 
-void MoveDragController::CalcFirstMoveTargetRect(const WSRect &windowRect, bool isFullToFloating)
+void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating)
 {
     if (!GetStartMoveFlag() || moveTempProperty_.isEmpty()) {
         return;
@@ -971,7 +971,7 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect &windowRect, bool 
     ProcessSessionRectChange(SizeChangeReason::MOVE);
 }
 
-bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent> &pointerEvent,
+bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
                                              const sptr<WindowSessionProperty> property)
 {
     if (pointerEvent == nullptr || property == nullptr) {
@@ -995,7 +995,7 @@ bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerE
     return true;
 }
 
-void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent> &pointerEvent)
+void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
@@ -1030,7 +1030,7 @@ int32_t MoveDragController::GetOriginalPointerPosY()
     return moveDragProperty_.originalPointerPosY_;
 }
 
-void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc &func)
+void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func)
 {
     windowDragHotAreaFunc_ = func;
 }
@@ -1062,7 +1062,7 @@ std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
     std::map<ScreenId, ScreenProperty> screenProperties =
         ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     std::lock_guard<std::mutex> lock(displayIdSetDuringMoveDragMutex_);
-    for (const auto &[screenId, screenProperty] : screenProperties) {
+    for (const auto& [screenId, screenProperty] : screenProperties) {
         if (displayIdSetDuringMoveDrag_.find(screenId) != displayIdSetDuringMoveDrag_.end()) {
             continue;
         }
