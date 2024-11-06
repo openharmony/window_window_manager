@@ -35,7 +35,7 @@ public:
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD0(Destroy, WMError());
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
-    MOCK_METHOD1(SetAutoStartPiP, void(bool isAutoStart));
+    MOCK_METHOD2(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
 };
 
@@ -435,27 +435,27 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
     pipControl->mainWindow_ = mw;
+    pipControl->pipOption_ = nullptr;
+    pipControl->SetAutoStartEnabled(enable);
+    pipControl->pipOption_ = option;
+
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     enable = false;
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_->SetTypeNodeEnabled(false);
     ASSERT_EQ(false, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
-    pipControl->pipOption_ = nullptr;
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
-    pipControl->SetAutoStartEnabled(enable);
-    pipControl->pipOption_ = option;
     pipControl->pipOption_->SetNavigationId("");
     ASSERT_EQ("", pipControl->pipOption_->GetNavigationId());
     pipControl->SetAutoStartEnabled(enable);
