@@ -361,8 +361,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetNeedSyncSessionRect);
     BindNativeFunction(env, objValue, "setIsPendingToBackgroundState", moduleName,
         JsSceneSession::SetIsPendingToBackgroundState);
-    BindNativeFunction(env, objValue, "setIsActivatedAfterScreenLocked", moduleName,
-        JsSceneSession::SetIsActivatedAfterScreenLocked);
+    BindNativeFunction(env, objValue, "setCanBeActivatedAfterScreenLocked", moduleName,
+        JsSceneSession::SetCanBeActivatedAfterScreenLocked);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2093,11 +2093,11 @@ napi_value JsSceneSession::SetIsPendingToBackgroundState(napi_env env, napi_call
     return (me != nullptr) ? me->OnSetIsPendingToBackgroundState(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::SetCanBeActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetIsActivatedAfterScreenLocked(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetCanBeActivatedAfterScreenLocked(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -5031,7 +5031,7 @@ napi_value JsSceneSession::OnSetIsPendingToBackgroundState(napi_env env, napi_ca
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnSetCanBeActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
