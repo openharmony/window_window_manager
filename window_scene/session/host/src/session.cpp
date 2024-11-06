@@ -1404,9 +1404,9 @@ bool Session::CanBeActivatedAfterScreenLocked() const
     return canBeActivatedAfterScreenLocked_.load();
 }
 
-void Session::SetIsActivatedAfterScreenLocked(bool canBeActivated)
+void Session::SetCanBeActivatedAfterScreenLocked(bool canBeActivated)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, canBeActivatedAfterScreenLocked:%{public}d",
         GetPersistentId(), canBeActivated);
     return canBeActivatedAfterScreenLocked_.store(canBeActivated);
 }
