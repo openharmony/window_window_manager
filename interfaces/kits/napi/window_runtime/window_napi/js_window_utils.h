@@ -86,6 +86,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_DIVIDER,
     TYPE_GLOBAL_SEARCH,
     TYPE_HANDWRITE,
+    TYPE_SCREEN_CONTROL,
     TYPE_END
 };
 
