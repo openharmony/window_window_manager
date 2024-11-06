@@ -1547,13 +1547,13 @@ HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, Function |
     sptr<SceneSession::SpecificSessionCallback> callback = ssm_->CreateSpecificSessionCallback();
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, callback);
     ssm_->sceneSessionMap_.insert({ parentSession->GetPersistentId(), parentSession });
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage), \
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
         WSError::WS_ERROR_NULLPTR);
     int64_t displayId = 1234;
     property->SetParentPersistentId(parentSession->GetPersistentId());
     parentSession->GetSessionProperty()->SetDisplayId(displayId);
     EXPECT_CALL(*sessionStage, UpdateDisplayId(displayId)).Times(1);
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage), \
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
         WSError::WS_OK);
     EXPECT_EQ(property->GetDisplayId(), displayId);
 }
