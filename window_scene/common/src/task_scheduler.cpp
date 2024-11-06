@@ -22,13 +22,6 @@ TaskScheduler::TaskScheduler(const std::string& threadName)
 {
     auto runner = AppExecFwk::EventRunner::Create(threadName);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    pid_t tid = 0;
-    auto task = [&tid]() mutable {
-        tid = gettid();
-        TLOGI(WmsLogTag::WMS_MAIN, "get WMSTid %{public}d", static_cast<int>(tid));
-    };
-    handler_->PostSyncTask(std::move(task), "wms:setTid", AppExecFwk::EventQueue::Priority::IMMEDIATE);
-    ssmTid_ = tid;
 }
 
 std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
@@ -43,12 +36,10 @@ void TaskScheduler::PostAsyncTask(Task&& task, const std::string& name, int64_t 
         task();
         return;
     }
-    auto localTask = [weak = weak_from_this(), task, name]() {
+    auto localTask = [this, task = std::move(task), name] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
-        if (auto self = weak.lock()) {
-            self->ExecuteExportTask();
-        }
+        ExecuteExportTask();
     };
     handler_->PostTask(std::move(localTask), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
@@ -60,31 +51,17 @@ void TaskScheduler::PostVoidSyncTask(Task&& task, const std::string& name)
         task();
         return;
     }
-    auto localTask = [weak = weak_from_this(), task, name]() {
+    auto localTask = [this, task = std::move(task), name] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
-        if (auto self = weak.lock()) {
-            self->ExecuteExportTask();
-        }
+        ExecuteExportTask();
     };
     handler_->PostSyncTask(std::move(localTask), "wms:" + name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delayTime)
 {
-    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
-        task();
-        return;
-    }
-    auto localTask = [weak = weak_from_this(), task, name]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
-        task();
-        if (auto self = weak.lock()) {
-            self->ExecuteExportTask();
-        }
-    };
-    handler_->PostTask(std::move(localTask), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    PostAsyncTask(std::move(task), name, delayTime);
 }
 
 void TaskScheduler::RemoveTask(const std::string& name)
@@ -92,12 +69,13 @@ void TaskScheduler::RemoveTask(const std::string& name)
     handler_->RemoveTask("wms:" + name);
 }
 
-void TaskScheduler::AddExportTask(std::string taskName, Task task)
+void TaskScheduler::AddExportTask(std::string taskName, Task&& task)
 {
-    if (ssmTid_ == 0 || gettid() != ssmTid_) {
-        return task();
+    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        exportFuncMap_[std::move(taskName)] = std::move(task);
+    } else {
+        task();
     }
-    exportFuncMap_[taskName] = task;
 }
 
 void TaskScheduler::SetExportHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler)
@@ -113,7 +91,7 @@ void TaskScheduler::ExecuteExportTask()
     if (!exportHandler_) {
         return;
     }
-    auto task = [funcMap = std::move(exportFuncMap_)]() {
+    auto task = [funcMap = std::move(exportFuncMap_)] {
         for (auto iter = funcMap.begin(); iter != funcMap.end(); iter++) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", iter->first.c_str());
             iter->second();
