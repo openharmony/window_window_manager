@@ -5018,24 +5018,21 @@ napi_value JsSceneSession::OnSetIsPendingToBackgroundState(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     bool isPendingToBackgroundState = false;
-    if (!ConvertFromJsValue(env, argv[0], isPendingToBackgroundState)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isPendingToBackgroundState");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
+    if (GetType(env, argv[0]) == napi_boolean) {
+        if (!ConvertFromJsValue(env, argv[0], isPendingToBackgroundState)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isPendingToBackgroundState");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+        TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isPendingToBackgroundState: %{public}u", isPendingToBackgroundState);
     }
-    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isPendingToBackgroundState: %{public}u", isPendingToBackgroundState);
     session->SetIsPendingToBackgroundState(isPendingToBackgroundState);
     return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSession::OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
 {
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]session is null, id: %{public}d", persistentId_);
-        return NapiGetUndefined(env);
-    }
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -5045,14 +5042,17 @@ napi_value JsSceneSession::OnSetIsActivatedAfterScreenLocked(napi_env env, napi_
         return NapiGetUndefined(env);
     }
     bool isActivatedAfterScreenLocked = false;
-    if (GetType(env, argv[0]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[0], isActivatedAfterScreenLocked)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isActivatedAfterScreenLocked");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
-        TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isActivatedAfterScreenLocked: %{public}u", isActivatedAfterScreenLocked);
+    if (!ConvertFromJsValue(env, argv[0], isActivatedAfterScreenLocked)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isActivatedAfterScreenLocked");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isActivatedAfterScreenLocked: %{public}u", isActivatedAfterScreenLocked);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]session is null, id: %{public}d", persistentId_);
+        return NapiGetUndefined(env);
     }
     session->SetIsActivatedAfterScreenLocked(isActivatedAfterScreenLocked);
     return NapiGetUndefined(env);
