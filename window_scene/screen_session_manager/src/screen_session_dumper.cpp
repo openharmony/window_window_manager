@@ -701,6 +701,14 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
     }
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_HOVER_STATUS)) {
         std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            dumpInfo_.append("[error]: the value is too long");
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            dumpInfo_.append("[error]: value is not a number");
+            return;
+        }
         int32_t value = std::stoi(valueStr);
         if ((value < static_cast<int32_t>(DeviceHoverStatus::INVALID)) ||
             (value > static_cast<int32_t>(DeviceHoverStatus::CAMERA_STATUS_CANCEL))) {

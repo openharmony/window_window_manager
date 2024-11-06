@@ -128,7 +128,6 @@ public:
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
-        NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
     };
 
     // func for change window scene pattern property
@@ -367,6 +366,7 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
+    void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
     /*
@@ -592,6 +592,11 @@ protected:
      */
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
+
+    /*
+     * Window Layout
+     */
+    NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
