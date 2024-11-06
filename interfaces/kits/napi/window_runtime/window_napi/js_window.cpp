@@ -3219,7 +3219,7 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
             napi_get_value_uint32(env, nativeMode, &resultValue));
         avoidAreaType = static_cast<AvoidAreaType>(resultValue);
         errCode = ((avoidAreaType >= AvoidAreaType::TYPE_END) ||
-                   (avoidAreaType <= AvoidAreaType::TYPE_START)) ?
+                   (avoidAreaType < AvoidAreaType::TYPE_START)) ?
             WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {

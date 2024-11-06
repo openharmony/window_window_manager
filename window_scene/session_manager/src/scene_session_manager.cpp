@@ -8073,7 +8073,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
 }
 
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
-    const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
+    const sptr<SceneSession> sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
     if (sceneSession == nullptr) {
         TLOGI(WmsLogTag::WMS_IMMS, "scene session null no need update avoid area");
@@ -8137,7 +8137,7 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
-    const int32_t persistentId, sptr<SceneSession>& sceneSession, bool needUpdate)
+    const int32_t persistentId, sptr<SceneSession> sceneSession, bool& needUpdate)
 {
     bool ret = true;
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
@@ -8154,7 +8154,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
     }
     uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_START);
     uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_END);
-    for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
+    for (uint32_t avoidType = start; avoidType < end; avoidType++) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
         if (avoidType == static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
             !CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,

@@ -807,7 +807,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     uint32_t typeId = 0;
     if (!data.ReadUint32(typeId) ||
         typeId < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
-        typeId > static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+        typeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
         return ERR_INVALID_DATA;
     }
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
