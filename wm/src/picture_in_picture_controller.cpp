@@ -71,6 +71,10 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 
 PictureInPictureController::~PictureInPictureController()
 {
+    TLOGI(WmsLogTag::WMS_PIP, "Destruction");
+    if (!isAutoStartEnabled_) {
+        return;
+    }
     PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
 }
 
