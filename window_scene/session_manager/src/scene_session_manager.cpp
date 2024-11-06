@@ -3734,6 +3734,9 @@ WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionPrope
 void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
+    if (systemConfig_.IsPcWindow()) {
+        return;
+    }
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "session property null");
