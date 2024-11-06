@@ -16,9 +16,7 @@
 #include "session/host/include/session.h"
 
 #include "ability_info.h"
-#include "ability_start_setting.h"
 #include "input_manager.h"
-#include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include <transaction/rs_interfaces.h>
@@ -29,15 +27,12 @@
 #include "common/include/session_permission.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
-#include "util.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
-#include "session/host/include/ws_ffrt_helper.h"
-#include "singleton_container.h"
 #include "perform_reporter.h"
 
 namespace OHOS::Rosen {
@@ -45,6 +40,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
+std::mutex g_persistentIdSetMutex;
 constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
@@ -106,7 +102,7 @@ Session::~Session()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
     if (mainHandler_) {
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() {
             // do nothing
         });
     }
@@ -423,6 +419,16 @@ void Session::NotifyLayoutFinished()
     }
 }
 
+void Session::NotifyRemoveBlank()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveBlank();
+        }
+    }
+}
+
 void Session::NotifyExtensionDied()
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -621,6 +627,16 @@ bool Session::IsFocusedOnShow() const
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "IsFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow_, GetPersistentId());
     return focusedOnShow_;
+}
+
+void Session::SetStartingBeforeVisible(bool isStartingBeforeVisible)
+{
+    isStartingBeforeVisible_ = isStartingBeforeVisible;
+}
+
+bool Session::GetStartingBeforeVisible() const
+{
+    return isStartingBeforeVisible_;
 }
 
 WSError Session::SetTouchable(bool touchable)
@@ -1216,6 +1232,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         isActive_ = false;
     }
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! id: %{public}d, state: %{public}u",
             GetPersistentId(), state);
@@ -1248,6 +1265,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     bufferAvailable_ = false;
     isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
@@ -1287,6 +1305,17 @@ WSError Session::DrawingCompleted()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnDrawingCompleted();
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError Session::RemoveStartingWindow()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnAppRemoveStartingWindow();
         }
     }
     return WSError::WS_OK;
@@ -1739,10 +1768,10 @@ sptr<Session> Session::GetParentSession() const
     return parentSession_;
 }
 
-sptr<Session> Session::GetMainSession()
+sptr<Session> Session::GetMainSession() const
 {
     if (SessionHelper::IsMainWindow(GetWindowType())) {
-        return this;
+        return const_cast<Session*>(this);
     } else if (parentSession_) {
         return parentSession_->GetMainSession();
     } else {
@@ -2793,6 +2822,16 @@ WSRect Session::GetClientRect() const
     return clientRect_;
 }
 
+void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)
+{
+    enableRemoveStartingWindow_ = enableRemoveStartingWindow;
+}
+
+bool Session::GetEnableRemoveStartingWindow() const
+{
+    return enableRemoveStartingWindow_;
+}
+
 WindowType Session::GetWindowType() const
 {
     auto property = GetSessionProperty();
@@ -2843,6 +2882,7 @@ WSError Session::ProcessBackEvent()
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
 {
+    std::lock_guard lock(g_persistentIdSetMutex);
     if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(persistentId)) {
         g_persistentIdSet.insert(persistentId);
         persistentId_ = persistentId;

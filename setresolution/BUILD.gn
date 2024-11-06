@@ -40,6 +40,7 @@ ohos_executable("setresolution_screen") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "graphic_surface:surface",
     "init:libbegetutil",
   ]

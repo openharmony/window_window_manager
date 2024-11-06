@@ -261,6 +261,44 @@ HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetWindowTitleMoveEnabled
+ * @tc.desc: SetWindowTitleMoveEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowTitleMoveEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowTitleMoveEnabledtest01 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowTitleMoveEnabled");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    WMError res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->SetWindowTitleMoveEnabled(true);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->SetWindowTitleMoveEnabled(false);
+    EXPECT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowTitleMoveEnabledtest01 end";
+}
+
+/**
  * @tc.name: SetSubWindowModal
  * @tc.desc: SetSubWindowModal and check the retCode
  * @tc.type: FUNC
@@ -1359,6 +1397,32 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest 
 }
 
 /**
+ * @tc.name: UpdateVirtualPixelRatio
+ * @tc.desc: test UpdateVirtualPixelRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UpdateVirtualPixelRatio, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateVirtualPixelRatio start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateVirtualPixelRatio");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    window->property_->SetDisplayId(-1);
+    sptr<Display> display = nullptr;
+    window->UpdateVirtualPixelRatio(display);
+    ASSERT_EQ(window->virtualPixelRatio_, 1.0f);
+
+    window->property_->SetDisplayId(0);
+    display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    window->UpdateVirtualPixelRatio(display);
+    ASSERT_NE(window->virtualPixelRatio_, 1.0f);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: UpdateVirtualPixelRatio end";
+}
+
+/**
  * @tc.name: NotifyMainWindowClose01
  * @tc.desc: NotifyMainWindowClose
  * @tc.type: FUNC
@@ -1603,31 +1667,6 @@ HWTEST_F(WindowSessionImplTest4, UpdateSubWindowStateAndNotify01, Function | Sma
     window->UpdateSubWindowStateAndNotify(1, WindowState::STATE_SHOWN);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
-}
-
-/**
- * @tc.name: GetVirtualPixelRatio
- * @tc.desc: test GetVirtualPixelRatio
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetVirtualPixelRatio");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-
-    float vpr = -1.0f;
-    window->property_->SetDisplayId(-1);
-    vpr = window->GetVirtualPixelRatio();
-    ASSERT_EQ(vpr, 0.0f);
-
-    window->property_->SetDisplayId(0);
-    vpr = window->GetVirtualPixelRatio();
-    ASSERT_NE(vpr, 0.0f);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetVirtualPixelRatio end";
 }
 
 /**

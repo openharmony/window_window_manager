@@ -432,6 +432,11 @@ void ScreenSessionManager::ConfigureScreenScene()
         TLOGD(WmsLogTag::DMS, "rotationPolicy = %{public}s.", rotationPolicy.c_str());
         deviceScreenConfig_.rotationPolicy_ = rotationPolicy;
     }
+    if (stringConfig.count("defaultRotationPolicy") != 0) {
+        std::string defaultRotationPolicy = stringConfig["defaultRotationPolicy"];
+        TLOGD(WmsLogTag::DMS, "defaultRotationPolicy = %{public}s.", defaultRotationPolicy.c_str());
+        deviceScreenConfig_.defaultRotationPolicy_ = defaultRotationPolicy;
+    }
     if (enableConfig.count("isRightPowerButton") != 0) {
         bool isRightPowerButton = static_cast<bool>(enableConfig["isRightPowerButton"]);
         TLOGD(WmsLogTag::DMS, "isRightPowerButton = %d", isRightPowerButton);
@@ -1508,6 +1513,7 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
     }
     float extendDensity = CalcDefaultExtendScreenDensity(property);
     TLOGI(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
+    extendDefaultDpi_ = static_cast<uint32_t>(extendDensity * BASELINE_DENSITY);
     session->SetVirtualPixelRatio(extendDensity);
     session->SetDefaultDensity(extendDensity);
     session->SetDensityInCurResolution(extendDensity);
@@ -2352,7 +2358,11 @@ void ScreenSessionManager::SetDpiFromSettingData(bool isInternal)
     }
     if (!ret) {
         TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi");
-        settingDpi = defaultDpi;
+        if (isInternal) {
+            settingDpi = defaultDpi;
+        } else {
+            settingDpi = extendDefaultDpi_;
+        }
     } else {
         TLOGI(WmsLogTag::DMS, "get setting dpi success,settingDpi: %{public}u", settingDpi);
     }
@@ -5374,7 +5384,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
             TLOGE(WmsLogTag::DMS, "unsupport foldStatus: %{public}u", foldStatus);
         }
     } else {
-        screenSession->UpdateRotationAfterBoot(true);
+        screenSession->UpdateValidRotationToScb();
     }
     auto task = [=] {
         clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);

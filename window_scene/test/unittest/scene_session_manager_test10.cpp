@@ -587,11 +587,11 @@ HWTEST_F(SceneSessionManagerTest10, NotifyVisibleChange, Function | SmallTest | 
 }
 
 /**
- * @tc.name: IsInSecondaryScreen
- * @tc.desc: test IsInSecondaryScreen
+ * @tc.name: IsInDefaultScreen
+ * @tc.desc: test IsInDefaultScreen
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, IsInDefaultScreen, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.abilityName_ = "test";
@@ -603,12 +603,12 @@ HWTEST_F(SceneSessionManagerTest10, IsInSecondaryScreen, Function | SmallTest | 
     DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     property->SetDisplayId(displayId);
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), false);
+    ASSERT_EQ(ssm_->IsInDefaultScreen(sceneSession), true);
 
     displayId = 5;
     property->SetDisplayId(displayId);
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(ssm_->IsInSecondaryScreen(sceneSession), true);
+    ASSERT_EQ(ssm_->IsInDefaultScreen(sceneSession), false);
 }
 
 /**
@@ -662,6 +662,102 @@ HWTEST_F(SceneSessionManagerTest10, EraseSceneSessionAndMarkDirtyLockFree, Funct
     ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
     ASSERT_EQ(ssm_->sessionMapDirty_, static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE));
     ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
+}
+
+/**
+ * @tc.name: UpdateAvoidAreaByType
+ * @tc.desc: test UpdateAvoidAreaByType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, UpdateAvoidAreaByType, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
+    ssm_->avoidAreaListenerSessionSet_.insert(sceneSession->GetPersistentId());
+    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
+    ssm_->avoidAreaListenerSessionSet_.erase(sceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: NotifyStatusBarShowStatus
+ * @tc.desc: test NotifyStatusBarShowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(WSError::WS_OK, ssm_->NotifyStatusBarShowStatus(sceneSession->GetPersistentId(), false));
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: ProcessUpdateLastFocusedAppId
+ * @tc.desc: test ProcessUpdateLastFocusedAppId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | SmallTest | Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    std::vector<uint32_t> zOrderList;
+    ssm_->lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "lastFocusedAppSession";
+    sessionInfo.abilityName_ = "lastFocusedAppSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    ssm_->lastFocusedAppSessionId_ = 1;
+    sceneSession->zOrder_ = 101;
+
+    ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
+    ASSERT_EQ(1, ssm_->lastFocusedAppSessionId_);
+
+    zOrderList.push_back(103);
+    ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
+    ASSERT_EQ(INVALID_SESSION_ID, ssm_->lastFocusedAppSessionId_);
+}
+
+/**
+ * @tc.name: IsNeedSkipWindowModeTypeCheck
+ * @tc.desc: IsNeedSkipWindowModeTypeCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, IsNeedSkipWindowModeTypeCheck, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "IsNeedSkipWindowModeTypeCheck";
+    sessionInfo.abilityName_ = "IsNeedSkipWindowModeTypeCheck";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetRSVisible(false);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ASSERT_TRUE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false));
+    sceneSession->SetRSVisible(true);
+    DisplayId displayId = 1001;
+    sceneSession->property_->SetDisplayId(displayId);
+    ASSERT_TRUE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, true));
+    ASSERT_FALSE(ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false));
 }
 }  // namespace
 }

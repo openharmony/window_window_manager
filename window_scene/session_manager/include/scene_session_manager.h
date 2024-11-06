@@ -21,6 +21,12 @@
 #include <mutex>
 #include <shared_mutex>
 
+#ifndef OHOS_BUILD_ENABLE_SECURITY_COMPONENT // pointer_envent.h
+#define OHOS_BUILD_ENABLE_SECURITY_COMPONENT
+#endif
+#ifndef SUPPORT_SCREEN
+#define SUPPORT_SCREEN
+#endif
 #include "mission_snapshot.h"
 #include "transaction/rs_interfaces.h"
 
@@ -461,12 +467,6 @@ public:
     void RefreshPcZOrderList(uint32_t startZOrder, std::vector<int32_t>&& persistentIds);
 
     /*
-     * PiP Window
-     */
-    WMError CloseTargetPiPWindow(const std::string& bundleName);
-    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
-
-    /*
      * Window Watermark
      */
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
@@ -490,6 +490,12 @@ public:
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
+
+    /*
+     * PiP Window
+     */
+    WMError CloseTargetPiPWindow(const std::string& bundleName);
+    WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
     /*
      * Window displayId
@@ -598,6 +604,7 @@ private:
     bool MissionChanged(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
@@ -624,6 +631,7 @@ private:
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
+    void UpdateDarkColorModeToRS();
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession);
@@ -981,7 +989,12 @@ private:
     /*
      * Screen Manager
      */
-    bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
+    bool IsInDefaultScreen(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Window Mode Type
+     */
+    bool IsNeedSkipWindowModeTypeCheck(const sptr<SceneSession>& sceneSession, bool isSmallFold);
 
     /**
      * Window Immersive

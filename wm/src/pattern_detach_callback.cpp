@@ -15,8 +15,6 @@
 
 #include "pattern_detach_callback.h"
 
-#include "window_manager_hilog.h"
-
 namespace OHOS {
 namespace Rosen {
 

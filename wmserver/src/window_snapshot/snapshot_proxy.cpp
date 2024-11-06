@@ -17,7 +17,6 @@
 #include "ipc_types.h"
 #include "pixel_map.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
