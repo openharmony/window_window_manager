@@ -1674,7 +1674,7 @@ napi_value JsSceneSession::SetBlankFlag(napi_env env, napi_callback_info info)
 napi_value JsSceneSession::RemoveBlank(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnRemoveBlank(env, info) : nullptr;
 }
 
