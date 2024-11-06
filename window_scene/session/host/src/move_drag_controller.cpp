@@ -171,8 +171,8 @@ WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
         return moveDragProperty_.targetRect_;
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    int32_t currentDisplayOffsetX = (int32_t)screenProperty.GetStartX();
-    int32_t currentDisplayOffsetY = (int32_t)screenProperty.GetStartY();
+    int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty.GetStartX());
+    int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty.GetStartY());
     return {moveDragProperty_.targetRect_.posX_ + originalDisplayOffsetX_ - currentDisplayOffsetX,
             moveDragProperty_.targetRect_.posY_ + originalDisplayOffsetY_ - currentDisplayOffsetY,
             moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_};
@@ -201,8 +201,8 @@ void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t 
         return;
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    originalDisplayOffsetX_ = (int32_t)screenProperty.GetStartX();
-    originalDisplayOffsetY_ = (int32_t)screenProperty.GetStartY();
+    originalDisplayOffsetX_ = static_cast<int32_t>(screenProperty.GetStartX());
+    originalDisplayOffsetY_ = static_cast<int32_t>(screenProperty.GetStartY());
     TLOGI(WmsLogTag::WMS_LAYOUT, "moveDragStartDisplayId: %{public}" PRIu64 ", "
         "originalDisplayOffsetX: %{public}d, originalDisplayOffsetY: %{public}d",
         moveDragStartDisplayId_, originalDisplayOffsetX_, originalDisplayOffsetY_);
@@ -415,9 +415,9 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
         std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
         moveDragProperty_.targetRect_ =
             MathHelper::GreatNotEqual(aspectRatio_, NEAR_ZERO)
-                ? CalcFixedAspectRatioTargetRect(type_, trans.first, trans.second, aspectRatio_,
-                                                 moveDragProperty_.originalRect_)
-                : CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
+            ? CalcFixedAspectRatioTargetRect(type_, trans.first, trans.second, aspectRatio_,
+            moveDragProperty_.originalRect_)
+            : CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
 }
@@ -532,8 +532,8 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     // calculate trans in unified coordinates
-    int32_t currentDisplayTranX = (int32_t)screenProperty.GetStartX();
-    int32_t currentDisplayTranY = (int32_t)screenProperty.GetStartY();
+    int32_t currentDisplayTranX = static_cast<int32_t>(screenProperty.GetStartX());
+    int32_t currentDisplayTranY = static_cast<int32_t>(screenProperty.GetStartY());
     int32_t tranX = (pointerItem.GetDisplayX() + currentDisplayTranX) -
                     (moveDragProperty_.originalPointerPosX_ + originalDisplayOffsetX_);
     int32_t tranY = (pointerItem.GetDisplayY() + currentDisplayTranY) -
