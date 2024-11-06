@@ -8170,6 +8170,10 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         WLOGFD("filter gesture window.");
         return false;
     }
+    if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
+        WLOGFD("filter DragScale window.");
+        continue;
+    }
     sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
     if (info == nullptr) {
         WLOGFE("null info.");
@@ -11162,6 +11166,9 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
         if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
             sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos ||
             sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
+            continue;
+        }
+        if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
             continue;
         }
         sceneSessionList.push_back(sceneSession);
