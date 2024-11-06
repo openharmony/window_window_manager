@@ -120,8 +120,9 @@ HWTEST_F(SessionStubLifecycleTest, HandlePendingSessionActivation011, Function |
     AAFwk::Want options;
     EXPECT_NE(data.WriteString("HandlePendingSessionActivation"), false);
     EXPECT_NE(data.WriteParcelable(&options), false);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    ASSERT_EQ(data.WriteUint64(2), true);
+    ASSERT_EQ(data.WriteBool(true), true);
+    ASSERT_EQ(data.WriteBool(true), true);
+    ASSERT_EQ(data.WriteBool(true), true);
     auto res = session_->HandlePendingSessionActivation(data, reply);
     ASSERT_EQ(0, res);
 }
