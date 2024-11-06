@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-#include "future_callback.h"
 #include "window_session_property.h"
 
 using namespace testing;

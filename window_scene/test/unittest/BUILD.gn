@@ -1194,32 +1194,6 @@ ohos_unittest("ws_window_event_channel_stub_mock_test") {
   ]
 }
 
-ohos_unittest("ws_future_callback_proxy_test") {
-  module_out_path = module_out_path
-
-  sources = [ "future_callback_proxy_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("ws_future_callback_stub_test") {
-  module_out_path = module_out_path
-
-  sources = [ "future_callback_stub_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
 ohos_unittest("ws_session_stub_test") {
   module_out_path = module_out_path
 
