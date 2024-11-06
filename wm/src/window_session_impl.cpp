@@ -194,7 +194,6 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
-    property_->SetLayoutCallback(layoutCallback);
     property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
@@ -704,7 +703,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
     layoutCallback_->OnUpdateSessionRect(rect);
-    
+
     return WSError::WS_OK;
 }
 
