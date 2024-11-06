@@ -478,17 +478,17 @@ public:
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
 
-    /**
-     * lifecycle func
+    /*
+     * Window Lifecycle
      */
     bool GetIsPendingToBackgroundState() const;
     void SetIsPendingToBackgroundState(bool isPendingToBackgroundState);
     bool CanBeActivatedAfterScreenLocked() const;
-    void SetIsActivatedAfterScreenLocked(bool canBeActivated);
-
+    void SetCanBeActivatedAfterScreenLocked(bool canBeActivated);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
     virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
@@ -778,8 +778,8 @@ private:
     bool systemTouchable_ { true };
     std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
-    /**
-     * lifecycle
+    /*
+     * Window Lifecycle
      */
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };

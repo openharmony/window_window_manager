@@ -5054,7 +5054,7 @@ napi_value JsSceneSession::OnSetIsActivatedAfterScreenLocked(napi_env env, napi_
         TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]session is null, id: %{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SetIsActivatedAfterScreenLocked(isActivatedAfterScreenLocked);
+    session->SetCanBeActivatedAfterScreenLocked(isActivatedAfterScreenLocked);
     return NapiGetUndefined(env);
 }
 
