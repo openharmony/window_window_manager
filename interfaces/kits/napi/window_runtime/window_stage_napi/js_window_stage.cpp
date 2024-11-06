@@ -773,16 +773,16 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s Window is nullptr", where);
             WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-            task.Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "Window is nullptr."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "Window is nullptr."));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s enable recover position failed!", where);
-            task.Reject(env, JsErrUtils::CreateJsError(env,
+            task->Reject(env, JsErrUtils::CreateJsError(env,
                 ret, "Window recover position failed."));
         } else {
-            task.Resolve(env, NapiGetUndefined(env));
+            task->Resolve(env, NapiGetUndefined(env));
         }
     };
     if(napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
