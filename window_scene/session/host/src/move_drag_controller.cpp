@@ -84,7 +84,7 @@ void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
 }
 
 bool MoveDragController::HasPointDown()
-{ 
+{
     return hasPointDown_;
 }
 
