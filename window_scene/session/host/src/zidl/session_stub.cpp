@@ -414,7 +414,7 @@ int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& 
 
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "Called!");
+    TLOGD(WmsLogTag::WMS_EVENT, "In!");
     uint32_t eventId = 0;
     if (!data.ReadUint32(eventId)) {
         TLOGE(WmsLogTag::WMS_EVENT, "read eventId failed");
