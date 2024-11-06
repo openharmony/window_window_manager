@@ -230,7 +230,7 @@ void MoveDragController::ResetCrossMoveDragProperty()
 }
 
 void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
-                                          int32_t pointerPosY, const WSRect& winRect)
+    int32_t pointerPosY, const WSRect& winRect)
 {
     moveDragProperty_.pointerId_ = pointerId;
     moveDragProperty_.pointerType_ = pointerType;
@@ -268,8 +268,8 @@ void MoveDragController::SetAspectRatio(float ratio)
     aspectRatio_ = ratio;
 }
 
-bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-                                          const WSRect& originalRect)
+bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, 
+    const WSRect& originalRect)
 {
     if (pointerEvent == nullptr) {
         WLOGE("ConsumeMoveEvent stop because of nullptr");
@@ -305,8 +305,8 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             WLOGFD("Move event hasPointDown");
             hasPointDown_ = true;
         } else if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
-                   action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-                   action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+                action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+                action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
             WLOGFD("Reset hasPointDown_ when point up or cancel");
             hasPointDown_ = false;
         }
@@ -370,7 +370,7 @@ void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage,
 }
 
 void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-                                               const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
         return;
@@ -815,7 +815,7 @@ void MoveDragController::ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float 
     return;
 }
 
-void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> property, 
+void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> property,
     const SystemSessionConfig& sysConfig)
 {
     auto windowType = property->GetWindowType();
@@ -981,7 +981,7 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
 }
 
 bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-                                             const sptr<WindowSessionProperty> property)
+    const sptr<WindowSessionProperty> property)
 {
     if (pointerEvent == nullptr || property == nullptr) {
         WLOGE("ConsumeDragEvent stop because of nullptr");
