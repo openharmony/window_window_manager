@@ -7047,14 +7047,14 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
     napi_value callback = (argc > 2 && argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ?
         argv[2] : nullptr;
     napi_value result = nullptr;
-    std::share_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
     const char* const where = __func__;
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), windowName = std::move(windowName),
         windowOption, env, task = napiAsyncTask, where]() mutable {
-        auto window = weakToken.promote();
+        auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s window is nullptr", where);
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "window is nullptr"));
             return;
         }
@@ -7081,7 +7081,7 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         TLOGNI(WmsLogTag::WMS_SUB, "%{public}s create sub window %{public}s end", where, windowName.c_str());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_vip)) {
-        napiAsyncTask->(env, CreateJsError(env,
+        napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
     return result;
