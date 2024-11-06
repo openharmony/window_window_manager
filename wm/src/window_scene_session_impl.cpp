@@ -434,7 +434,7 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
     if ((WindowHelper::IsAppFloatingWindow(type) || type == WindowType::WINDOW_TYPE_DIALOG) &&
         property_->GetDisplayId() != DISPLAY_ID_INVALID && property_->GetDisplayId() != displayId) {
         TLOGE(WmsLogTag::WMS_LIFE,
-            "window displayId is not same with parent, windowName: %{public}s,"
+            "window displayId is not same with parent, windowName: %{public}s, "
             "displayId: %{public}d, parent displayId: %{public}d",
             property_->GetWindowName().c_str(), static_cast<int>(property_->GetDisplayId()),
             static_cast<int>(displayId));

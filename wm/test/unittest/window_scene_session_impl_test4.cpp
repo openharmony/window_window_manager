@@ -1668,6 +1668,55 @@ HWTEST_F(WindowSceneSessionImplTest4, IsPcOrPadFreeMultiWindowMode, Function | S
     mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(false, mainWindow->IsPcOrPadFreeMultiWindowMode());
 }
+
+static sptr<WindowSceneSessionImpl> CreateWindowWithDisplayId(std::string windowName, WindowType type,
+    int64_t displayId = DISPLAY_ID_INVALID, uint32_t parentId = INVALID_WINDOW_ID)
+{
+    using SessionPair = std::pair<uint64_t, sptr<WindowSessionImpl>>;
+    static uint32_t windowPersistentId = 106;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName(windowName);
+    option->SetWindowType(type);
+    option->SetParentId(parentId);
+    option->SetDisplayId(displayId);
+    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(windowPersistentId++);
+    WindowSessionImpl::windowSessionMap_[std::move(windowName)] = SessionPair(window->GetPersistentId(), window);
+    return window;
+}
+
+/**
+ * @tc.name: SetSpecificDisplayId01
+ * @tc.desc: SetSpecificDisplayId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetSpecificDisplayId01, Function | SmallTest | Level2)
+{
+    // create main window
+    int64_t displayId = 12;
+    auto mainWindowContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    sptr<WindowSceneSessionImpl> mainWindow =
+        CreateWindowWithDisplayId("mainWindow", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, displayId);
+    mainWindow->context_ = mainWindowContext;
+    // create sub window
+    sptr<WindowSceneSessionImpl> subWindow = CreateWindowWithDisplayId("subWindow",
+        WindowType::WINDOW_TYPE_APP_SUB_WINDOW, DISPLAY_ID_INVALID, mainWindow->GetPersistentId());
+    
+    // create float window
+    sptr<WindowSceneSessionImpl> floatWindow = CreateWindowWithDisplayId("floatWindow", WindowType::WINDOW_TYPE_FLOAT);
+    floatWindow->context_ = mainWindow->context_;
+    // create other window
+    uint64_t globalSearchDisplayId = 5678;
+    sptr<WindowSceneSessionImpl> globalSearchWindow = CreateWindowWithDisplayId("globalWindow",
+        WindowType::WINDOW_TYPE_GLOBAL_SEARCH, globalSearchDisplayId);
+    // test display id
+    subWindow->CreateAndConnectSpecificSession();
+    ASSERT_EQ(subWindow->property_->GetDisplayId(), displayId);
+    floatWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_EQ(floatWindow->property_->GetDisplayId(), displayId);
+    globalSearchWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    ASSERT_EQ(globalSearchWindow->property_->GetDisplayId(), globalSearchDisplayId);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

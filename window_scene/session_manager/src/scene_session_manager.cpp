@@ -2393,7 +2393,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return err;
         }
     }
-
     // WINDOW_TYPE_SYSTEM_ALARM_WINDOW has been deprecated, will be deleted after 5 versions.
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW) {
         WLOGFE("The alarm window has been deprecated!");
@@ -2451,8 +2450,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     return taskScheduler_->PostSyncTask(task, "CreateAndConnectSpecificSession");
 }
 
-WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(sptr<IRemoteObject> token,
-    sptr<WindowSessionProperty> property, sptr<ISessionStage> sessionStage)
+WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(const sptr<IRemoteObject>& token,
+    const sptr<WindowSessionProperty>& property, const sptr<ISessionStage>& sessionStage)
 {
     sptr<SceneSession> extensionParentSession = GetSceneSession(property->GetParentPersistentId());
     if (extensionParentSession == nullptr) {
