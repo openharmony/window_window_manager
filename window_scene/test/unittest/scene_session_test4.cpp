@@ -997,7 +997,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP02, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag) {
+    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag, uint32_t status) {
         return;
     };
     sceneSession->autoStartPiPStatusChangeFunc_ = func;
