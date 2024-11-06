@@ -1412,7 +1412,7 @@ void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        TLOGNI(WmsLogTag::WMS_LIFE, "id:%{public}d, canBeActivatedAfterScreenLocked:%{public}d",
+        TLOGNI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
             session->GetPersistentId(), isActivatedAfterScreenLocked);
         session->isActivatedAfterScreenLocked_ = isActivatedAfterScreenLocked;
         return;
