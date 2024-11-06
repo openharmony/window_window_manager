@@ -53,14 +53,14 @@ MoveDragController::MoveDragController(int32_t persistentId, WindowType winType)
 void MoveDragController::OnConnect(ScreenId id)
 {
     TLOGW(WmsLogTag::WMS_LAYOUT, "Moving or dragging is interrupt due to new screen %{public}" PRIu64 " connection.",
-          id);
+        id);
     moveDragIsInterrupted_ = true;
 }
 
 void MoveDragController::OnDisconnect(ScreenId id)
 {
     TLOGW(WmsLogTag::WMS_LAYOUT, "Moving or dragging is interrupt due to screen %{public}" PRIu64 " disconnection.",
-          id);
+        id);
     moveDragIsInterrupted_ = true;
 }
 
@@ -70,7 +70,10 @@ void MoveDragController::OnChange(ScreenId id)
     moveDragIsInterrupted_ = true;
 }
 
-void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback &callBack) { moveDragCallback_ = callBack; }
+void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback &callBack) 
+{ 
+    moveDragCallback_ = callBack; 
+}
 
 void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
 {
