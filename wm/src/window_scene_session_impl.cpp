@@ -2223,7 +2223,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
         if (surfaceNode_ != nullptr && 
-            (windowSystemConfig_.uiType == UI_TYPE_PC || GetFreeMultiWindowModeEnabledState())) {
+            (windowSystemConfig_.uiType_ == UI_TYPE_PC || GetFreeMultiWindowModeEnabledState())) {
             surfaceNode_->SetFrameGravity(Gravity::RESIZE);
         }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
