@@ -80,7 +80,10 @@ void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
     }
 }
 
-bool MoveDragController::HasPointDown() { return hasPointDown_; }
+bool MoveDragController::HasPointDown() 
+{ 
+    return hasPointDown_; 
+}
 
 void MoveDragController::SetStartMoveFlag(bool flag)
 {
@@ -95,7 +98,10 @@ void MoveDragController::SetStartMoveFlag(bool flag)
     WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
 }
 
-void MoveDragController::SetMovable(bool isMovable) { isMovable_ = isMovable; }
+void MoveDragController::SetMovable(bool isMovable) 
+{
+    isMovable_ = isMovable; 
+}
 
 void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback &callback)
 {
@@ -108,13 +114,25 @@ bool MoveDragController::GetStartMoveFlag() const
     return isStartMove_;
 }
 
-bool MoveDragController::GetStartDragFlag() const { return isStartDrag_; }
+bool MoveDragController::GetStartDragFlag() const 
+{
+    return isStartDrag_; 
+}
 
-uint64_t MoveDragController::GetMoveDragStartDisplayId() const { return moveDragStartDisplayId_; }
+uint64_t MoveDragController::GetMoveDragStartDisplayId() const 
+{
+    return moveDragStartDisplayId_; 
+}
 
-uint64_t MoveDragController::GetMoveDragEndDisplayId() const { return moveDragEndDisplayId_; }
+uint64_t MoveDragController::GetMoveDragEndDisplayId() const 
+{
+    return moveDragEndDisplayId_; 
+}
 
-uint64_t MoveDragController::GetInitParentNodeId() const { return initParentNodeId_; }
+uint64_t MoveDragController::GetInitParentNodeId() const 
+{
+    return initParentNodeId_; 
+}
 
 std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag()
 {
@@ -122,7 +140,10 @@ std::set<uint64_t> MoveDragController::GetDisplayIdsDuringMoveDrag()
     return displayIdSetDuringMoveDrag_;
 }
 
-bool MoveDragController::GetMovable() const { return isMovable_; }
+bool MoveDragController::GetMovable() const 
+{
+    return isMovable_; 
+}
 
 WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
 {
@@ -154,7 +175,10 @@ WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
             moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_};
 }
 
-void MoveDragController::InitMoveDragProperty() { moveDragProperty_ = {-1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}}; }
+void MoveDragController::InitMoveDragProperty() 
+{
+    moveDragProperty_ = {-1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}}; 
+}
 
 void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t initParentNodeId)
 {
