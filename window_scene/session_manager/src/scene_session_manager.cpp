@@ -3834,7 +3834,6 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         return WSError::WS_ERROR_DESTROYED_OBJECT;
     };
     taskScheduler_->PostSyncTask(task, "GetFocusWindowInfo");
-    return;
 }
 
 static bool IsValidDigitString(const std::string& windowIdStr)
