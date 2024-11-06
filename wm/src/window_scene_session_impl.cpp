@@ -24,7 +24,6 @@
 #include <application_context.h>
 #include "anr_handler.h"
 #include "color_parser.h"
-#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "input_transfer_station.h"
 #include "singleton_container.h"
@@ -1445,22 +1444,23 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
 
 WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
 {
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window should not move, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = MoveTo(x, y);
-    if (state_ == WindowState::STATE_SHOWN && property_) {
-        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-        if (layoutCallback) {
-            layoutCallback->ResetLock();
-            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+    if (state_ == WindowState::STATE_SHOWN) {
+        layoutCallback_->ResetLock();
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
+            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
@@ -1501,7 +1501,6 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true);
     if (state_ == WindowState::STATE_SHOWN && property_) {
-        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
         if (layoutCallback) {
             layoutCallback->ResetLock();
             layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
@@ -1674,22 +1673,23 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 
 WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 {
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Fullscreen window should not resize, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = Resize(width, height);
-    if (state_ == WindowState::STATE_SHOWN && property_) {
-        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-        if (layoutCallback) {
-            layoutCallback->ResetLock();
-            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+    if (state_ == WindowState::STATE_SHOWN) {
+        layoutCallback_->ResetLock();
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
+            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
