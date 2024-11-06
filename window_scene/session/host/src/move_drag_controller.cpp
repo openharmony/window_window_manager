@@ -565,7 +565,8 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
         static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()) == moveDragStartDisplayId_) {
         std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
         moveDragProperty_.targetRect_ = {moveDragProperty_.originalRect_.posX_ + trans.first,
-                                         moveDragProperty_.originalRect_.posY_ + trans.second, originalRect.width_,
+                                         moveDragProperty_.originalRect_.posY_ + trans.second,
+                                         originalRect.width_,
                                          originalRect.height_};
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "move rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
