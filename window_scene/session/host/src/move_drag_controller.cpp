@@ -70,9 +70,9 @@ void MoveDragController::OnChange(ScreenId id)
     moveDragIsInterrupted_ = true;
 }
 
-void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback &callBack) 
-{ 
-    moveDragCallback_ = callBack; 
+void MoveDragController::RegisterMoveDragCallback(const MoveDragCallback &callBack)
+{
+    moveDragCallback_ = callBack;
 }
 
 void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
