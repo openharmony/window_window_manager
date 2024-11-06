@@ -371,7 +371,7 @@ namespace {
     HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar02, Function | SmallTest | Level3)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        std::string key = "test 2.0 ,";
+        std::string test_str = "test 2.0 ,";
         auto ret = screenSettingHelper.RemoveInvalidChar(test_str);
         ASSERT_EQ(ret, " 2.0 ,");
     }
@@ -386,7 +386,7 @@ namespace {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         std::vector<std::string> splitValues = {"split", "test"};
         std::string input = "";
-        char delimiter = ",";
+        char delimiter = ',';
         auto ret = screenSettingHelper.SplitString(splitValues, input, delimiter);
         ASSERT_FALSE(ret);
     }
@@ -401,7 +401,7 @@ namespace {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         std::vector<std::string> splitValues = {};
         std::string input = "test, str";
-        char delimiter = ",";
+        char delimiter = ',';
         auto ret = screenSettingHelper.SplitString(splitValues, input, delimiter);
         ASSERT_FALSE(ret);
     }
@@ -442,9 +442,9 @@ namespace {
     HWTEST_F(ScreenSettingHelperTest, GetSettingRelativePositionString, Function | SmallTest | Level3)
     {
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        std::vector<std::string> screenModeStrings = {};
+        std::vector<std::string> relativePositionStrings = {};
         std::string key = "test";
-        auto ret = screenSettingHelper.GetSettingRelativePositionString(screenModeStrings, key);
+        auto ret = screenSettingHelper.GetSettingRelativePositionString(relativePositionStrings, key);
         ASSERT_FALSE(ret);
     }
 }
