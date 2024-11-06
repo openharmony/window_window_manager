@@ -844,7 +844,7 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent1, Function | SmallTest | Level2
     MessageParcel reply;
 
     data.WriteUint32(static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE));
-    int result = session_->HandleSyncSessionEvent(data, reply);
+    auto result = session_->HandleSyncSessionEvent(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
 
@@ -859,7 +859,7 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent2, Function | SmallTest | Level2
     MessageParcel reply;
 
     data.WriteUint32(0xFFFFFFFF);
-    int result = session_->HandleSyncSessionEvent(data, reply);
+    auto result = session_->HandleSyncSessionEvent(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
 
     result = session_->HandleSyncSessionEvent(data, reply);
