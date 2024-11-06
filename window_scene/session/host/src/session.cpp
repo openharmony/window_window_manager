@@ -2825,6 +2825,16 @@ bool Session::GetEnableRemoveStartingWindow() const
     return enableRemoveStartingWindow_;
 }
 
+void Session::SetAppBufferReady(bool appBufferReady)
+{
+    appBufferReady_ = appBufferReady;
+}
+
+bool Session::GetAppBufferReady() const
+{
+    return appBufferReady_;
+}
+
 WindowType Session::GetWindowType() const
 {
     auto property = GetSessionProperty();
