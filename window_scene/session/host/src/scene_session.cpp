@@ -5325,7 +5325,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
             session->sessionChangeCallback_->onRestoreMainWindowFunc_ = nullptr;
         }
-        session->onSetWindowRectAutoSaveFunc_ = nullptr;
         session->Session::UnregisterSessionChangeListeners();
     };
     PostTask(task, "UnregisterSessionChangeListeners");
