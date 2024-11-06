@@ -5078,7 +5078,7 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
 void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
 {
     const char* where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, enable, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
