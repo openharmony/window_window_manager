@@ -22,6 +22,7 @@
 #include "screen_session_manager.h"
 #include "session_permission.h"
 #include "screen_rotation_property.h"
+#include "screen_sensor_connector.h"
 #include "parameters.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
 
@@ -55,6 +56,8 @@ const std::string ARG_SET_ON_TENT_MODE = "-ontent";
 const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
 const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
 const std::string ARG_SET_SUPER_FOLD_STATUS = "-supertrans";
+const std::string ARG_SET_POSTURE_HALL = "-posture";
+const std::string ARG_SET_POSTURE_HALL_STATUS = "-registerhall"; // 关闭开合sensor报值
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -85,6 +88,19 @@ ScreenSessionDumper::ScreenSessionDumper(int fd, const std::vector<std::u16strin
         info += arg;
     }
     TLOGI(WmsLogTag::DMS, "input args: [%{public}s]", info.c_str());
+}
+
+bool ScreenSessionDumper::IsNumber(std::string str)
+{
+    if (str.size() == 0) {
+        return false;
+    }
+    for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
+        if (str.at(i) < '0' || str.at(i) > '9') {
+            return false;
+        }
+    }
+    return true;
 }
 
 void ScreenSessionDumper::OutputDumpInfo()
@@ -142,30 +158,46 @@ void ScreenSessionDumper::ExcuteInjectCmd()
     }
     if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
         ShowNotifyFoldStatusChangedInfo();
+        return;
     } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
         SetMotionSensorvalue(params_[0]);
+        return;
     } else if (params_[0].find(ARG_SET_ROTATION_LOCK) != std::string::npos) {
         SetRotationLockedvalue(params_[0]);
+        return;
     } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
         MockSendCastPublishEvent(params_[0]);
+        return;
     } else if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
         int errCode = SetFoldDisplayMode();
         if (errCode != 0) {
             ShowIllegalArgsInfo();
         }
+        return;
     } else if (params_.size() == 1 && (params_[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
                 || params_[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
         int errCode = SetFoldStatusLocked();
         if (errCode != 0) {
             ShowIllegalArgsInfo();
         }
-    } else if (params_[0].find(ARG_SET_ON_TENT_MODE) != std::string::npos ||
+        return;
+    }
+    ExcuteInjectCmd2();
+}
+
+void ScreenSessionDumper::ExcuteInjectCmd2()
+{
+    if (params_[0].find(ARG_SET_ON_TENT_MODE) != std::string::npos ||
         params_[0].find(ARG_SET_OFF_TENT_MODE) != std::string::npos) {
         SetEnterOrExitTentMode(params_[0]);
     } else if (params_[0].find(ARG_SET_HOVER_STATUS) != std::string::npos) {
         SetHoverStatusChange(params_[0]);
     } else if (params_[0].find(ARG_SET_SUPER_FOLD_STATUS) != std::string::npos) {
         SetSuperFoldStatusChange(params_[0]);
+    } else if (params_[0].find(ARG_SET_POSTURE_HALL) != std::string::npos) {
+        SetHallAndPostureValue(params_[0]);
+    } else if (params_[0].find(ARG_SET_POSTURE_HALL_STATUS) != std::string::npos) {
+        SetHallAndPostureStatus(params_[0]);
     }
 }
 
@@ -663,8 +695,20 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
 {
     size_t commaPos = input.find_last_of(',');
     auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_HOVER_STATUS)) {
         std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            dumpInfo_.append("[error]: the value is too long");
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            dumpInfo_.append("[error]: value is not a number");
+            return;
+        }
         int32_t value = std::stoi(valueStr);
         if ((value < static_cast<int32_t>(DeviceHoverStatus::INVALID)) ||
             (value > static_cast<int32_t>(DeviceHoverStatus::CAMERA_STATUS_CANCEL))) {
@@ -673,6 +717,63 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
         }
         screenSession->HoverStatusChange(value);
         TLOGI(WmsLogTag::DMS, "SetHoverStatusChange: %{public}d", value);
+    }
+}
+
+void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
+{
+    std::string token;
+    std::istringstream ss(input);
+    std::vector<std::string> tokens;
+    while (std::getline(ss, token, ',')) {
+        tokens.push_back(token);
+    }
+    if (tokens.size() != DUMPER_PARAM_INDEX_THREE && tokens[0] != ARG_SET_POSTURE_HALL) {
+        TLOGE(WmsLogTag::DMS, "param error: %{public}s", input.c_str());
+        return;
+    }
+    if (!IsNumber(tokens[DUMPER_PARAM_INDEX_ONE]) || !IsNumber(tokens[DUMPER_PARAM_INDEX_TWO])) {
+        TLOGE(WmsLogTag::DMS, "param error: %{public}s", input.c_str());
+        return;
+    }
+    int hallVal = stoi(tokens[DUMPER_PARAM_INDEX_ONE]);
+    int postureVal = stoi(tokens[DUMPER_PARAM_INDEX_TWO]);
+    ExtHallData hallData = {(1 << 1), hallVal};
+    PostureData postureData = {
+        .angle = postureVal,
+    };
+    SensorEvent hallEvent = {
+        .dataLen = sizeof(ExtHallData),
+        .data = reinterpret_cast<uint8_t *>(&hallData),
+    };
+    SensorEvent postureEvent = {
+        .dataLen = sizeof(PostureData),
+        .data = reinterpret_cast<uint8_t *>(&postureData),
+    };
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
+    OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
+    TLOGI(WmsLogTag::DMS, "mock posture: %{public}d, hall: %{public}d ", postureVal, hallVal);
+}
+
+void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
+{
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_POSTURE_HALL_STATUS)) {
+        std::string valueStr = input.substr(commaPos + 1, DUMPER_PARAM_INDEX_ONE);
+        if (valueStr.size() != DUMPER_PARAM_INDEX_ONE && !std::isdigit(valueStr[0])) {
+            return;
+        }
+        int32_t value = std::stoi(valueStr);
+        if (value) {
+            OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+            OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            OHOS::Rosen::ScreenSensorConnector::SubscribeRotationSensor();
+        } else {
+            OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterHallCallback();
+            OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+            OHOS::Rosen::ScreenSensorConnector::UnsubscribeRotationSensor();
+        }
+        TLOGI(WmsLogTag::DMS, "hall and posture register status: %{public}d", value);
     }
 }
 
