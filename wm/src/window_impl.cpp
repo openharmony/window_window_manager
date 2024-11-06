@@ -686,7 +686,7 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
 
 float WindowImpl::GetVirtualPixelRatio()
 {
-    float vpr = 0.0f; // This is an abnormal value, which is used to identify abnormal scenarios.
+    float vpr = 1.0f; // This is an abnormal value, which is used to identify abnormal scenarios.
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
