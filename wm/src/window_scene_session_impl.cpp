@@ -2158,7 +2158,7 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
     }
 
     if (WindowHelper::IsMainWindow(GetType()) &&
-        (IsFreeMultiWindowMode() || windowSystemConfig_.IsPcWindow())) {
+        (IsFreeMultiWindowMode() || (!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()))) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3570,6 +3570,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     }
     NotifySwitchFreeMultiWindow(enable);
     // Switch process finish, update system config
+    windowSystemConfig_.freeMultiWindowEnable_ = enable;
     std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
