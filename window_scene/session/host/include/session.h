@@ -519,6 +519,8 @@ public:
     WSError RemoveStartingWindow() override;
     void SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow);
     bool GetEnableRemoveStartingWindow() const;
+    void SetAppBufferReady(bool appBufferReady);
+    bool GetAppBufferReady() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -784,6 +786,7 @@ private:
      * Starting Window
      */
     bool enableRemoveStartingWindow_ {false};
+    bool appBufferReady_ {false};
 };
 } // namespace OHOS::Rosen
 
