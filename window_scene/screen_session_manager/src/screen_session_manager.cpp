@@ -1988,6 +1988,10 @@ bool ScreenSessionManager::TryToCancelScreenOff()
 
 bool ScreenSessionManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen brightness permission denied!");
+        return false;
+    }
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
