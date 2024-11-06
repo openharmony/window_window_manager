@@ -137,6 +137,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent0, Function | MediumTest | Level
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     sceneSession1->SetSessionProperty(property);
     inputEventListener_->OnInputEvent(pointerEvent);
+    EXPECT_EQ(200010, pointerEvent->GetPointerId());
 }
 
 /**
@@ -181,7 +182,9 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent1, Function | MediumTest | Level
     SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(2, sceneSession1));
     SceneSessionManager::GetInstance().SetFocusedSessionId(2);
     EXPECT_EQ(2, SceneSessionManager::GetInstance().GetFocusedSessionId());
+    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(2);
     inputEventListener_->OnInputEvent(keyEvent);
+    EXPECT_NE(nullptr, focusedSceneSession);
 }
 
 /**
@@ -214,7 +217,9 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent2, Function | MediumTest | Level
     sceneSession->SetNotifySystemSessionKeyEventFunc(nullptr);
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_FN);
     EXPECT_EQ(MMI::KeyEvent::KEYCODE_FN, keyEvent->GetKeyCode());
+    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(1);
     inputEventListener_->OnInputEvent(keyEvent);
+    EXPECT_NE(nullptr, focusedSceneSession);
 }
 
 /**
@@ -246,7 +251,9 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent3, Function | MediumTest | Level
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_UNKNOWN);
     EXPECT_EQ(MMI::KeyEvent::KEYCODE_UNKNOWN, keyEvent->GetKeyCode());
     inputEventListener->OnInputEvent(keyEvent);
+    auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(1);
     inputEventListener_->OnInputEvent(keyEvent);
+    EXPECT_NE(nullptr, focusedSceneSession);
 }
 
 /**

@@ -1252,6 +1252,31 @@ HWTEST_F(SceneSessionManagerTest3, QueryAbilityInfoFromBMS, Function | SmallTest
 }
 
 /**
+ * @tc.name: NotifyStartAbility
+ * @tc.desc: SceneSesionManager NotifyStartAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, NotifyStartAbility, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "SceneSessionManagerTest";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest3";
+    sessionInfo.abilityName_ = "NotifyStartAbility";
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
+    ssm_->collaboratorMap_.clear();
+    ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
+    int32_t collaboratorType = 1;
+    auto ret1 = ssm_->NotifyStartAbility(collaboratorType, sessionInfo);
+    ASSERT_EQ(ret1, BrokerStates::BROKER_UNKOWN);
+
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
+    auto ret2 = ssm_->NotifyStartAbility(collaboratorType, sessionInfo);
+    ASSERT_EQ(ret2, BrokerStates::BROKER_UNKOWN);
+    ssm_->collaboratorMap_.clear();
+}
+
+/**
  * @tc.name: IsSessionClearable
  * @tc.desc: SceneSesionManager is session clearable
  * @tc.type: FUNC

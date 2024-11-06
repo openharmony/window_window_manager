@@ -498,6 +498,25 @@ HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot02, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: UpdateValidRotationToScb
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateValidRotationToScb, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "UpdateValidRotationToScb start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    screenSession->UpdateValidRotationToScb();
+    GTEST_LOG_(INFO) << "UpdateValidRotationToScb end";
+}
+
+/**
  * @tc.name: SetScreenSceneDpiChangeListener
  * @tc.desc: normal function
  * @tc.type: FUNC

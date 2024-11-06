@@ -231,7 +231,7 @@ public:
     void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
 
     /**
-     * @brief Set whether this window is the first sub window of UIExtension.
+     * @brief Set whether this window is the first level sub window of UIExtension.
      *
      * @param isUIExtFirstSubWindow whether is the first sub window of UIExtension.
      */
@@ -427,7 +427,7 @@ public:
     bool GetOnlySupportSceneBoard() const;
 
     /**
-     * @brief Get isUIExtFirstSubWindow flag
+     * @brief Get whether this window is the first level sub window of UIExtension.
      *
      * @return true - is the first sub window of UIExtension, false - is not the first sub window of UIExtension
      */

@@ -62,6 +62,7 @@ ohos_shared_library("libwindow_extension_client") {
     "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",

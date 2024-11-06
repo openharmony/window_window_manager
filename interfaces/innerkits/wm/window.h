@@ -883,6 +883,12 @@ public:
      */
     virtual WMError NotifyDrawingCompleted() { return WMError::WM_OK; }
     /**
+     * @brief notify window remove starting window.
+     *
+     * @return WMError
+     */
+    virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief move the window to (x, y)
      *
      * @param x
@@ -1963,6 +1969,14 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Enable or disable move window by title bar.
+     *
+     * @param enable The value true means to enable window moving, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set window container color.
      *
      * @param activeColor Background active color.
@@ -2067,7 +2081,7 @@ public:
      *
      * @return Value of PixelRatio obtained from displayInfo.
      */
-    virtual float GetVirtualPixelRatio() { return 0.0f; }
+    virtual float GetVirtualPixelRatio() { return 1.0f; }
 
     /**
      * @brief Hide None Secure Windows.
@@ -2404,7 +2418,7 @@ public:
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
-     * @brief Get isUIExtFirstSubWindow flag
+     * @brief Get whether this window is the first level sub window of UIExtension.
      *
      * @return true - is the first sub window of UIExtension, false - is not the first sub window of UIExtension
      */

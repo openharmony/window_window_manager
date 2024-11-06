@@ -47,7 +47,7 @@ extern "C" {
 #endif
 
 /**
- * @brief Creates a screen capture of the specified display.
+ * @brief Capture a screen pixelmap of the specified display.
  *
  * @param displayId The ID of the display to be captured.
  * @param pixelMap The output pixel map of the captured display.
@@ -59,7 +59,7 @@ extern "C" {
  * @syscap SystemCapability.Window.SessionManager.Core
  * @since 14
  */
-NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateScreenCapture(uint32_t displayId,
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CaptureScreenPixelmap(uint32_t displayId,
     OH_PixelmapNative **pixelMap);
 
 #ifdef __cplusplus

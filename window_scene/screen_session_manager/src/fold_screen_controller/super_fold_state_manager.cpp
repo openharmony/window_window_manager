@@ -24,111 +24,117 @@ namespace Rosen {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
-void SuperFoldStateManager::DoAngleChangeFolded()
+void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeFolded()");
 }
 
-void SuperFoldStateManager::DoAngleChangeHalfFolded()
+void SuperFoldStateManager::DoAngleChangeHalfFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeHalfFolded())");
 }
 
-void SuperFoldStateManager::DoAngleChangeExpanded()
+void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeExpanded()");
 }
 
-void SuperFoldStateManager::DoKeyboardOn()
+void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOn()");
 }
 
-void SuperFoldStateManager::DoKeyboardOff()
+void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOff()");
 }
 
-void SuperFoldStateManager::DoSoftKeyboardOn()
+void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoSoftKeyboardOn()");
+    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoFoldedToHalfFolded()");
 }
 
-void SuperFoldStateManager::DoSoftKeyboardOff()
-{
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoSoftKeyboardOff()");
-}
-
-void SuperFoldStateManager::DoExpandedToKeyboard()
+void SuperFoldStateManager::DoExpandedToKeyboard(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoExpandedToKeyboard()");
 }
 
 SuperFoldStateManager::SuperFoldStateManager()
 {
-    initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
+    AddStateManagerMap(SuperFoldStatus::HALF_FOLDED,
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED,
         SuperFoldStatus::EXPANDED,
         &SuperFoldStateManager::DoAngleChangeExpanded);
+    
+    AddStateManagerMap(SuperFoldStatus::FOLDED,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED,
+        SuperFoldStatus::HALF_FOLDED,
+        &SuperFoldStateManager::DoFoldedToHalfFolded);
 
-    initStateManagerMap(SuperFoldStatus::EXPANDED,
+    AddStateManagerMap(SuperFoldStatus::EXPANDED,
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED,
         SuperFoldStatus::HALF_FOLDED,
         &SuperFoldStateManager::DoAngleChangeHalfFolded);
 
-    initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
+    AddStateManagerMap(SuperFoldStatus::HALF_FOLDED,
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED,
         SuperFoldStatus::FOLDED,
         &SuperFoldStateManager::DoAngleChangeFolded);
 
-    initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
+    AddStateManagerMap(SuperFoldStatus::HALF_FOLDED,
         SuperFoldStatusChangeEvents::KEYBOARD_ON,
         SuperFoldStatus::KEYBOARD,
         &SuperFoldStateManager::DoKeyboardOn);
 
-    initStateManagerMap(SuperFoldStatus::EXPANDED,
+    AddStateManagerMap(SuperFoldStatus::EXPANDED,
         SuperFoldStatusChangeEvents::KEYBOARD_ON,
         SuperFoldStatus::KEYBOARD,
         &SuperFoldStateManager::DoExpandedToKeyboard);
 
-    initStateManagerMap(SuperFoldStatus::KEYBOARD,
+    AddStateManagerMap(SuperFoldStatus::KEYBOARD,
         SuperFoldStatusChangeEvents::KEYBOARD_OFF,
         SuperFoldStatus::HALF_FOLDED,
         &SuperFoldStateManager::DoKeyboardOff);
-
-    initStateManagerMap(SuperFoldStatus::HALF_FOLDED,
-        SuperFoldStatusChangeEvents::SOFT_KEYBOARD_ON,
-        SuperFoldStatus::SOFT_KEYBOARD,
-        &SuperFoldStateManager::DoSoftKeyboardOn);
-
-    initStateManagerMap(SuperFoldStatus::SOFT_KEYBOARD,
-        SuperFoldStatusChangeEvents::SOFT_KEYBOARD_OFF,
-        SuperFoldStatus::HALF_FOLDED,
-        &SuperFoldStateManager::DoSoftKeyboardOff);
 }
 
 SuperFoldStateManager::~SuperFoldStateManager() = default;
 
-void SuperFoldStateManager::initStateManagerMap(SuperFoldStatus curState,
+void SuperFoldStateManager::AddStateManagerMap(SuperFoldStatus curState,
     SuperFoldStatusChangeEvents event,
     SuperFoldStatus nextState,
-    std::function<void ()> action)
+    std::function<void (SuperFoldStatusChangeEvents)> action)
 {
     stateManagerMap_[{curState, event}] = {nextState, action};
 }
 
-void SuperFoldStateManager::transferState(SuperFoldStatus nextState)
+void SuperFoldStateManager::TransferState(SuperFoldStatus nextState)
 {
-    TLOGI(WmsLogTag::DMS, "transferState from %{public}d to %{public}d", curState_, nextState);
-    curState_ = nextState;
+    TLOGI(WmsLogTag::DMS, "TransferState from %{public}d to %{public}d", curState_.load(), nextState);
+    curState_ .store(nextState);
+}
+
+FoldStatus SuperFoldStateManager::MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus)
+{
+    switch (superFoldStatus) {
+        case SuperFoldStatus::EXPANDED:
+            return FoldStatus::EXPAND;
+        case SuperFoldStatus::HALF_FOLDED:
+            return FoldStatus::HALF_FOLD;
+        case SuperFoldStatus::FOLDED:
+            return FoldStatus::FOLDED;
+        case SuperFoldStatus::KEYBOARD:
+            return FoldStatus::HALF_FOLD;
+        default:
+            return FoldStatus::UNKNOWN;
+    }
 }
 
 void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents event)
 {
-    SuperFoldStatus curState = curState_;
+    SuperFoldStatus curState = curState_.load();
     SuperFoldStatus nextState = SuperFoldStatus::UNKNOWN;
     bool isTransfer = false;
-    std::function<void ()> action;
+    std::function<void (SuperFoldStatusChangeEvents)> action;
 
     auto item = stateManagerMap_.find({curState, event});
     if (item != stateManagerMap_.end()) {
@@ -138,8 +144,8 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
     }
 
     if (isTransfer && action) {
-        action();
-        transferState(nextState);
+        action(event);
+        TransferState(nextState);
         // notify
         auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
         if (screenSession == nullptr) {
@@ -148,17 +154,19 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         }
         ScreenId screenId = screenSession->GetScreenId();
         ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_);
+        ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(
+            MatchSuperFoldStatusToFoldStatus(curState_.load()));
     }
 }
 
 SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 {
-    return curState_;
+    return curState_.load();
 }
 
 void SuperFoldStateManager::SetCurrentStatus(SuperFoldStatus curState)
 {
-    curState_ = curState;
+    curState_.store(curState);
 }
 
 } // Rosen
