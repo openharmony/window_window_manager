@@ -369,6 +369,7 @@ protected:
     /*
      * Window Layout
      */
+    sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
 
 private:
