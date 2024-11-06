@@ -1448,7 +1448,7 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    
+
     if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "FullScreen window should not move, winId:%{public}u, mode:%{public}u",
             GetWindowId(), GetMode());
@@ -1506,9 +1506,9 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true);
     if (state_ == WindowState::STATE_SHOWN && property_) {
-        if (layoutCallback) {
-            layoutCallback->ResetLock();
-            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        if (layoutCallback_) {
+            layoutCallback_->ResetLock();
+            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
