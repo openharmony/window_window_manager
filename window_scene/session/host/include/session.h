@@ -91,6 +91,7 @@ public:
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
     virtual void OnLayoutFinished() {}
+    virtual void OnRemoveBlank() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnExtensionDied() {}
     virtual void OnExtensionTimeout(int32_t errorCode) {}
@@ -151,6 +152,7 @@ public:
     void NotifyBackground();
     void NotifyDisconnect();
     void NotifyLayoutFinished();
+    void NotifyRemoveBlank();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -336,6 +338,12 @@ public:
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
+
+    /*
+     * Multi Window
+     */
+    void SetIsMidScene(bool isMidScene);
+    bool GetIsMidScene() const;
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -673,6 +681,11 @@ private:
     bool focusedOnShow_ = true;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
+
+    /*
+     * Multi Window
+     */
+    bool isMidScene_ = false;
 
     WSRect preRect_;
     int32_t callingPid_ = -1;
