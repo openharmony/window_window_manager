@@ -216,10 +216,10 @@ private:
     NotifyWindowPidChangeCallback pidChangeCallback_;
 
     const std::map<AreaType, Gravity> GRAVITY_MAP = {
-        {AreaType::LEFT,          Gravity::RIGHT},
-        {AreaType::TOP,           Gravity::BOTTOM},
-        {AreaType::RIGHT,         Gravity::LEFT},
-        {AreaType::BOTTOM,        Gravity::TOP},
+        {AreaType::LEFT,          Gravity::TOP_RIGHT},
+        {AreaType::TOP,           Gravity::BOTTOM_LEFT},
+        {AreaType::RIGHT,         Gravity::TOP_LEFT},
+        {AreaType::BOTTOM,        Gravity::TOP_LEFT},
         {AreaType::LEFT_TOP,      Gravity::BOTTOM_RIGHT},
         {AreaType::RIGHT_TOP,     Gravity::BOTTOM_LEFT},
         {AreaType::RIGHT_BOTTOM,  Gravity::TOP_LEFT},

@@ -40,6 +40,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
+std::mutex g_persistentIdSetMutex;
 constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
@@ -101,7 +102,7 @@ Session::~Session()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
     if (mainHandler_) {
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() {
             // do nothing
         });
     }
@@ -2613,7 +2614,6 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "set property dragEnable: %{public}d", property->GetDragEnabled());
     {
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;
@@ -2881,6 +2881,7 @@ WSError Session::ProcessBackEvent()
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
 {
+    std::lock_guard lock(g_persistentIdSetMutex);
     if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(persistentId)) {
         g_persistentIdSet.insert(persistentId);
         persistentId_ = persistentId;

@@ -418,6 +418,7 @@ protected:
      */
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
+    void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
 
 private:
@@ -551,7 +552,7 @@ private:
     /*
      * Window Layout
      */
-    std::atomic_bool windowSizeChanged_ = true;
+    WSRect layoutRect_;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
