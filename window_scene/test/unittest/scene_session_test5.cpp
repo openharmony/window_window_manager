@@ -1403,6 +1403,42 @@ HWTEST_F(SceneSessionTest5, UpdateRect01, Function | SmallTest | Level2)
     session->winRect_ = rect;
     EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionTest5"), WSError::WS_OK);
 }
+
+/**
+ * @tc.name: NotifyServerToUpdateRect01
+ * @tc.desc: NotifyServerToUpdateRect01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyServerToUpdateRect01";
+    info.bundleName_ = "NotifyServerToUpdateRect01";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    session->foregroundInteractiveStatus_.store(true);
+    EXPECT_EQ(session->GetForegroundInteractiveStatus(), true);
+
+    SessionUIParam uiParam;
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false);
+
+    uiParam.rect_ = { 100, 100, 200, 200 };
+    session->SetNeedSyncSessionRect(false);
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // not sync
+    EXPECT_NE(session->GetSessionRect(), uiParam.rect_);
+
+    uiParam.needSync_ = false;
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // not sync
+    EXPECT_NE(session->GetSessionRect(), uiParam.rect_);
+
+    uiParam.needSync_ = true;
+    session->SetNeedSyncSessionRect(true); // sync first
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), true);
+    EXPECT_EQ(session->GetSessionRect(), uiParam.rect_);
+
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // skip same rect
+}
 }
 }
 }
