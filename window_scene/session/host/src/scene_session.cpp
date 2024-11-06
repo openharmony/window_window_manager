@@ -4485,7 +4485,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
             session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
-            session->sessionChangeCallback_->OnRequestedOrientationChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
             session->sessionChangeCallback_->OnForceHideChange_ = nullptr;
             session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
