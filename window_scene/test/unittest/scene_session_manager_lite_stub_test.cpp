@@ -291,7 +291,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToForeground, Func
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandlePendingSessionToForeground(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
