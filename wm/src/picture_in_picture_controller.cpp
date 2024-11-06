@@ -407,7 +407,12 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
     if (mainWindow_ == nullptr) {
         return;
     }
-    mainWindow_->SetAutoStartPiP(enable);
+    if (!pipOption_) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null");
+        return;
+    }
+    uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
+    mainWindow_->SetAutoStartPiP(enable, priority);
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
         if (!IsPullPiPAndHandleNavigation()) {
@@ -419,10 +424,6 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
         PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
         if (IsTypeNodeEnabled()) {
             TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled");
-            return;
-        }
-        if (!pipOption_) {
-            TLOGE(WmsLogTag::WMS_PIP, "pipOption is null");
             return;
         }
         std::string navId = pipOption_->GetNavigationId();
