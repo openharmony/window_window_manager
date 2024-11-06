@@ -100,6 +100,64 @@ HWTEST_F(DisplayManagerAdapterLiteTest, Clear01, Function | SmallTest | Level2)
     SingletonContainer::Get<DisplayManagerAdapterLite>().Clear();
     ASSERT_FALSE(SingletonContainer::Get<DisplayManagerAdapterLite>().isProxyValid_);
 }
+
+/**
+ * @tc.name: WakeUpBegin
+ * @tc.desc: test WakeUpBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpBegin, Function | SmallTest | Level2)
+{
+    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpBegin(reason);
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: WakeUpEnd
+ * @tc.desc: test WakeUpEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEnd, Function | SmallTest | Level2)
+{
+    bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpEnd();
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SuspendBegin
+ * @tc.desc: test SuspendBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SuspendBegin, Function | SmallTest | Level2)
+{
+    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendBegin(reason);
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SuspendEnd
+ * @tc.desc: test SuspendEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SuspendEnd, Function | SmallTest | Level2)
+{
+    bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendEnd();
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SetDisplayState
+ * @tc.desc: test SetDisplayState
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetDisplayState, Function | SmallTest | Level2)
+{
+    DisplayState state = DisplayState{1};
+    bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetDisplayState(state);
+    ASSERT_FALSE(ret);
+}
 }
 }
 }
