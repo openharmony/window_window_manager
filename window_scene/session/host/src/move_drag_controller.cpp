@@ -1021,7 +1021,7 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
 }
 
 int32_t MoveDragController::GetOriginalPointerPosX()
-{ 
+{
     return moveDragProperty_.originalPointerPosX_;
 }
 
@@ -1051,7 +1051,7 @@ void MoveDragController::OnLostFocus()
 }
 
 void MoveDragController::SetIsPcWindow(bool isPcWindow)
-{ 
+{
     isPcWindow_ = isPcWindow;
 }
 
