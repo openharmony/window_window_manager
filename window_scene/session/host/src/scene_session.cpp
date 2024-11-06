@@ -2200,7 +2200,8 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     if (isCompatibleModeInPc) {
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
-        if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode()) {
+        bool isMainWindow = WindowHelper::IsMainWindow(property->GetWindowType());
+        if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode() && isMainWindow) {
             OnSessionEvent(SessionEvent::EVENT_DRAG);
             return;
         }
