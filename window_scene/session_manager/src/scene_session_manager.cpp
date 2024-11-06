@@ -8172,7 +8172,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
         WLOGFD("filter DragScale window.");
-        continue;
+        return false;
     }
     sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
     if (info == nullptr) {
