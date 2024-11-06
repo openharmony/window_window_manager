@@ -483,7 +483,7 @@ public:
      */
     bool GetIsPendingToBackgroundState() const;
     void SetIsPendingToBackgroundState(bool isPendingToBackgroundState);
-    bool CanBeActivatedAfterScreenLocked () const;
+    bool CanBeActivatedAfterScreenLocked() const;
     void SetIsActivatedAfterScreenLocked(bool canBeActivated);
 
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);

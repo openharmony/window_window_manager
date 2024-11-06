@@ -1399,7 +1399,7 @@ void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
     return isPendingToBackgroundState_.store(isPendingToBackgroundState);
 }
 
-bool Session::CanBeActivatedAfterScreenLocked () const
+bool Session::CanBeActivatedAfterScreenLocked() const
 {
     return canBeActivatedAfterScreenLocked_.load();
 }
