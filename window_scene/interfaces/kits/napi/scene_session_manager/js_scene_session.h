@@ -151,6 +151,7 @@ private:
     static napi_value CompatibleFullScreenClose(napi_env env, napi_callback_info info);
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
+    static napi_value SetIsActivateAfterScreenLocked(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -207,6 +208,7 @@ private:
     napi_value OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info);
     napi_value OnSetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
+    napi_value OnSetIsActivateAfterScreenLocked(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();

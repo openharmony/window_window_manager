@@ -209,6 +209,7 @@ WSError SceneSession::Foreground(
     ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
     auto sessionProperty = GetSessionProperty();
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        IsActivateAfterScreenLocked() &&
         GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED) &&
         (sessionProperty != nullptr && defaultScreenId == sessionProperty->GetDisplayId()) &&
         !IsShowWhenLocked()) {
