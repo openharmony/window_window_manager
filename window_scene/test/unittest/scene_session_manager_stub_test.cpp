@@ -2189,9 +2189,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | Sma
 {
     MessageParcel data;
     MessageParcel reply;
-    int res;
 
-    res = stub_->HandleRegisterCollaborator(data, reply);
+    auto res = stub_->HandleRegisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     int32_t type = CollaboratorType::RESERVE_TYPE;
