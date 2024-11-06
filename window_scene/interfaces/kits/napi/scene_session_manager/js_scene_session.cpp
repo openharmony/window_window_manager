@@ -5018,15 +5018,13 @@ napi_value JsSceneSession::OnSetIsPendingToBackgroundState(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     bool isPendingToBackgroundState = false;
-    if (GetType(env, argv[0]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[0], isPendingToBackgroundState)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isPendingToBackgroundState");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
-        TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isPendingToBackgroundState: %{public}u", isPendingToBackgroundState);
+    if (!ConvertFromJsValue(env, argv[0], isPendingToBackgroundState)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isPendingToBackgroundState");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
     }
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isPendingToBackgroundState: %{public}u", isPendingToBackgroundState);
     session->SetIsPendingToBackgroundState(isPendingToBackgroundState);
     return NapiGetUndefined(env);
 }
