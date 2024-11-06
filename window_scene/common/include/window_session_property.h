@@ -100,7 +100,6 @@ public:
     const std::string& GetWindowName() const;
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();
-    sptr<IFutureCallback> GetLayoutCallback() const;
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;

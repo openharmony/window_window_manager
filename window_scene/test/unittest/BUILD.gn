@@ -28,8 +28,6 @@ group("unittest") {
     ":ws_extension_session_manager_test",
     ":ws_extension_session_test",
     ":ws_ffrt_helper_test",
-    ":ws_future_callback_proxy_test",
-    ":ws_future_callback_stub_test",
     ":ws_intention_event_manager_test",
     ":ws_keyboard_session_test",
     ":ws_main_session_lifecycle_test",
