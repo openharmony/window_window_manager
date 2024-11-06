@@ -778,6 +778,7 @@ private:
     bool systemTouchable_ { true };
     std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
+
     /*
      * Window Lifecycle
      */
