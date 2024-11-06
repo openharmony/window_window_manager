@@ -873,14 +873,14 @@ HWTEST_F(WindowSessionImplTest, SetBrightness01, Function | SmallTest | Level2)
 
     float brightness = -1.0; // brightness < 0
     WMError res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     brightness = 2.0; // brightness > 1
     res = window->SetBrightness(brightness);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     brightness = 0.5;
     res = window->SetBrightness(brightness);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBrightness01 end";
 }

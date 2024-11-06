@@ -49,21 +49,23 @@ group("unittest") {
     ":wm_window_option_test",
     ":wm_window_scene_effect_test",
     ":wm_window_scene_session_impl_test",
-    ":wm_window_scene_session_impl_test2",
     ":wm_window_scene_session_impl_test3",
     ":wm_window_scene_session_impl_test4",
     ":wm_window_scene_test",
     ":wm_window_session_impl_test",
     ":wm_window_session_impl_test4",
-    ":wm_window_session_impl_two_test",
-    ":wm_window_stub_test",
-    ":wm_window_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [ ":wm_window_proxy_test" ]
   }
   if (window_manager_use_sceneboard) {
-    deps += [ ":wm_window_manager_lite_test" ]
+    deps += [
+      ":wm_window_manager_lite_test",
+      ":wm_window_scene_session_impl_test2",
+      ":wm_window_session_impl_two_test",
+      ":wm_window_stub_test",
+      ":wm_window_test",
+    ]
   }
 }
 
