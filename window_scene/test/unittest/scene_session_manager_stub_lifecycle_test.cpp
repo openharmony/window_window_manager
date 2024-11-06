@@ -154,7 +154,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleTerminateSessionNew, Functi
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
-    data.WriteParcelable(abilitySessionInfo)
+    data.WriteParcelable(abilitySessionInfo);
     data.WriteBool(false);
     data.WriteBool(false);
 
