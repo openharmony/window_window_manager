@@ -21,6 +21,7 @@
 #include <functional>
 #include <map>
 #include <utility>
+#include <atomic>
 
 #include "dm_common.h"
 #include "wm_single_instance.h"
@@ -38,42 +39,41 @@ public:
     void AddStateManagerMap(SuperFoldStatus curState,
     SuperFoldStatusChangeEvents event,
     SuperFoldStatus nextState,
-    std::function<void ()> action);
+    std::function<void (SuperFoldStatusChangeEvents)> action);
 
     void TransferState(SuperFoldStatus nextState);
 
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
     SuperFoldStatus GetCurrentStatus();
-
+    
+    FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 private:
-    SuperFoldStatus curState_ = SuperFoldStatus::HALF_FOLDED;
+    std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::HALF_FOLDED;
 
     struct Transition {
         SuperFoldStatus nextState;
-        std::function<void ()> action;
+        std::function<void (SuperFoldStatusChangeEvents)> action;
     };
 
     using transEvent = std::pair<SuperFoldStatus, SuperFoldStatusChangeEvents>;
     std::map<transEvent, Transition> stateManagerMap_;
 
-    static void DoAngleChangeFolded();
+    static void DoAngleChangeFolded(SuperFoldStatusChangeEvents event);
 
-    static void DoAngleChangeHalfFolded();
+    static void DoAngleChangeHalfFolded(SuperFoldStatusChangeEvents event);
 
-    static void DoAngleChangeExpanded();
+    static void DoAngleChangeExpanded(SuperFoldStatusChangeEvents event);
 
-    static void DoKeyboardOn();
+    static void DoKeyboardOn(SuperFoldStatusChangeEvents event);
 
-    static void DoKeyboardOff();
+    static void DoKeyboardOff(SuperFoldStatusChangeEvents event);
 
-    static void DoFoldedToHalfFolded();
+    static void DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event);
 
-    static void DoExpandedToKeyboard();
+    static void DoExpandedToKeyboard(SuperFoldStatusChangeEvents event);
 
     void SetCurrentStatus(SuperFoldStatus curState);
-
-    FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 };
 } // Rosen
 } // OHOS

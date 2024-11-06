@@ -351,7 +351,11 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, Messa
         TLOGE(WmsLogTag::WMS_FOCUS, "read persistentId failed");
         return ERR_INVALID_DATA;
     }
-    bool isFocused = data.ReadBool();
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        return ERR_INVALID_DATA;
+    }
     WMError ret = RequestFocusStatus(persistentId, isFocused, true, FocusChangeReason::CLIENT_REQUEST);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;

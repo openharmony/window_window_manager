@@ -405,6 +405,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType, Function | SmallTest | L
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->isVisible_ = false;
+    sceneSession->isRSVisible_ = false;
     sceneSession->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->CheckWindowModeType();
@@ -430,6 +431,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest |
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
+    sceneSession->isRSVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
@@ -444,6 +446,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType01, Function | SmallTest |
     sceneSession1->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sceneSession1->property_->SetDisplayId(displayId);
     sceneSession1->isVisible_ = true;
+    sceneSession1->isRSVisible_ = true;
     sceneSession1->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession1));
@@ -477,6 +480,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType02, Function | SmallTest |
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
+    sceneSession->isRSVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
@@ -512,6 +516,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest |
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->property_->SetDisplayId(displayId);
     sceneSession->isVisible_ = true;
+    sceneSession->isRSVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
@@ -519,6 +524,7 @@ HWTEST_F(SceneSessionManagerTest6, CheckWindowModeType03, Function | SmallTest |
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     sceneSession->isVisible_ = true;
+    sceneSession->isRSVisible_ = true;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ASSERT_NE(nullptr, ssm_);
     auto ret = ssm_->CheckWindowModeType();
@@ -1663,7 +1669,7 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, Function | S
     sptr<Session> session = new Session(info);
     session->property_ = nullptr;
     ssm_->RequestInputMethodCloseKeyboard(persistentId);
-    
+
     bool enable = true;
     auto result = ssm_->GetFreeMultiWindowEnableState(enable);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -1868,7 +1874,7 @@ HWTEST_F(SceneSessionManagerTest6, GetProcessSurfaceNodeIdByPersistentId, Functi
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
-    
+
     ASSERT_EQ(WMError::WM_OK, ssm_->GetProcessSurfaceNodeIdByPersistentId(pid, persistentIds, surfaceNodeIds));
     ASSERT_EQ(0, surfaceNodeIds.size());
 }
