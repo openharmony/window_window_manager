@@ -335,6 +335,20 @@ namespace {
         auto result = ScreenSettingHelper::GetSettingRotation(screenId, key);
         ASSERT_EQ(result, false);
     }
+
+    /**
+     * @tc.name: GetSettingValue
+     * @tc.desc: GetSettingValue
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingValue, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        uint32_t value = 0;
+        std::string key = "test";
+        bool ret = screenSettingHelper.GetSettingValue(value, key);
+        ASSERT_FALSE(ret);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
