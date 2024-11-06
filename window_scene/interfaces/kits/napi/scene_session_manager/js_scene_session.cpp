@@ -3431,20 +3431,20 @@ napi_value JsSceneSession::OnSetWaterMarkFlag(napi_env env, napi_callback_info i
 
 void JsSceneSession::ProcessPrepareClosePiPSessionRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onPrepareClosePiPSession_ = [weakThis = wptr(this)] {
+    session->RegisterProcessPrepareClosePiPCallback([weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnPrepareClosePiPSession jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnPrepareClosePiPSession jsSceneSession is null");
             return;
         }
         jsSceneSession->OnPrepareClosePiPSession();
-    };
-    TLOGD(WmsLogTag::WMS_PIP, "ProcessPrepareClosePiPSessionRegister success");
+    });
+    TLOGD(WmsLogTag::WMS_PIP, "success");
 }
 
 void JsSceneSession::OnPrepareClosePiPSession()
