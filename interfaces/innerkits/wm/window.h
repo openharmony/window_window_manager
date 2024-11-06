@@ -857,6 +857,21 @@ public:
      */
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
+     * @brief move the window to global (x, y)
+     *
+     * @param x
+     * @param y
+     * @return WMError
+     */
+    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
+     * @brief Get window global scaled rect.
+     *
+     * @param Rect
+     * @return WMError
+     */
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief resize the window instance (w,h)
      *
      * @param width
@@ -2248,6 +2263,20 @@ public:
      * @return true - is UIExtension sub window, false - is not UIExtension sub window.
      */
     virtual bool GetIsUIExtensionSubWindowFlag() const { return false; }
+
+    /**
+     * @brief Set whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+ 
+    /**
+     * @brief Get whether to enable gesture back.
+     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
 };
 }
 }

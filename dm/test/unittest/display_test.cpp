@@ -185,13 +185,11 @@ HWTEST_F(DisplayTest, GetDpi01, Function | SmallTest | Level1)
  */
 HWTEST_F(DisplayTest, HasImmersiveWindow, Function | SmallTest | Level1)
 {
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), HasImmersiveWindow(_)).Times(1).WillOnce(Return(DMError::DM_OK));
     bool immersive = false;
     DMError ret = defaultDisplay_->HasImmersiveWindow(immersive);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(ret, DMError::DM_OK);
-    } else {
-        ASSERT_NE(ret, DMError::DM_OK);
-    }
+    ASSERT_EQ(ret, DMError::DM_OK);
 }
 
 /**

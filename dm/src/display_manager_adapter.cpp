@@ -435,6 +435,10 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     }
     WLOGFI("dms OnRemoteDied");
     adapter_.Clear();
+    if (SingletonContainer::IsDestroyed()) {
+        WLOGFE("SingletonContainer is destroyed");
+        return;
+    }
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
     SingletonContainer::Get<ScreenManager>().OnRemoteDied();
     return;

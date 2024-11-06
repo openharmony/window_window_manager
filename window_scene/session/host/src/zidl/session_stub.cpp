@@ -71,6 +71,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
             return HandleUpdateSessionRect(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_GLOBAL_SCALED_RECT):
+            return HandleGetGlobalScaledRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_TO_APP_TOP):
             return HandleRaiseToAppTop(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED):
@@ -157,6 +159,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyFrameLayoutFinish(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocus(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
+            return HandleSetGestureBackEnabled(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -471,8 +475,27 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         posX, posY, width, height);
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
     bool isGlobal = data.ReadBool();
-    WSError errCode = UpdateSessionRect(rect, reason);
+    auto isFromMoveToGlobal = false;
+    if (!data.ReadBool(isFromMoveToGlobal)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read isFromMoveToGlobal failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+/** @note @window.layout */
+int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    Rect tempRect;
+    WMError errorCode = GetGlobalScaledRect(tempRect);
+    reply.WriteInt32(tempRect.posX_);
+    reply.WriteInt32(tempRect.posY_);
+    reply.WriteUint32(tempRect.width_);
+    reply.WriteUint32(tempRect.height_);
+    reply.WriteInt32(static_cast<int32_t>(errorCode));
     return ERR_NONE;
 }
 
@@ -870,6 +893,18 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
         return ERR_INVALID_DATA;
     }
     WSError ret = RequestFocus(isFocused);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "in");
+    bool isEnabled;
+    if (!data.ReadBool(isEnabled)) {
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = SetGestureBackEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

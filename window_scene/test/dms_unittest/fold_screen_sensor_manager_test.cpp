@@ -21,6 +21,7 @@
 #include "fold_screen_state_internel.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -65,7 +66,7 @@ namespace {
      */
     HWTEST_F(FoldScreenSensorManagerTest, RegisterPostureCallback, Function | SmallTest | Level3)
     {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        FoldScreenSensorManager mgr;
         mgr.RegisterPostureCallback();
         ASSERT_NE(mgr.postureUser.callback, nullptr);
     }
@@ -77,7 +78,7 @@ namespace {
      */
     HWTEST_F(FoldScreenSensorManagerTest, UnRegisterPostureCallback, Function | SmallTest | Level3)
     {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        FoldScreenSensorManager mgr;
         mgr.UnRegisterPostureCallback();
         ASSERT_EQ(mgr.postureUser.callback, nullptr);
     }
@@ -89,7 +90,7 @@ namespace {
      */
     HWTEST_F(FoldScreenSensorManagerTest, RegisterHallCallback, Function | SmallTest | Level3)
     {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        FoldScreenSensorManager mgr;
         mgr.RegisterHallCallback();
         ASSERT_NE(mgr.hallUser.callback, nullptr);
     }
@@ -101,7 +102,7 @@ namespace {
      */
     HWTEST_F(FoldScreenSensorManagerTest, UnRegisterHallCallback, Function | SmallTest | Level3)
     {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        FoldScreenSensorManager mgr;
         mgr.UnRegisterHallCallback();
         ASSERT_EQ(mgr.hallUser.callback, nullptr);
     }
@@ -113,7 +114,7 @@ namespace {
      */
     HWTEST_F(FoldScreenSensorManagerTest, HandlePostureData, Function | SmallTest | Level3)
     {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        FoldScreenSensorManager mgr;
         mgr.HandlePostureData(nullptr);
         EXPECT_EQ(mgr.globalAngle, -1.0F);
 
@@ -140,7 +141,7 @@ namespace {
      */
     HWTEST_F(FoldScreenSensorManagerTest, notifyFoldAngleChanged, Function | SmallTest | Level3)
     {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        FoldScreenSensorManager mgr;
         float foldAngle = 0.0F;
         mgr.notifyFoldAngleChanged(foldAngle);
         EXPECT_EQ(foldAngle, 0.0F);
@@ -148,6 +149,7 @@ namespace {
         foldAngle = 30.0F;
         mgr.notifyFoldAngleChanged(foldAngle);
         EXPECT_EQ(foldAngle, 30.0F);
+        usleep(SLEEP_TIME_US);
     }
 
     /**
@@ -157,7 +159,7 @@ namespace {
      */
     HWTEST_F(FoldScreenSensorManagerTest, HandleHallData, Function | SmallTest | Level3)
     {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        FoldScreenSensorManager mgr;
         mgr.HandleHallData(nullptr);
         EXPECT_EQ(mgr.globalHall, USHRT_MAX);
 
@@ -190,7 +192,7 @@ namespace {
      */
     HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, Function | SmallTest | Level3)
     {
-        FoldScreenSensorManager mgr = FoldScreenSensorManager();
+        FoldScreenSensorManager mgr;
         mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
         mgr.registerPosture_ = false;
         mgr.TriggerDisplaySwitch();

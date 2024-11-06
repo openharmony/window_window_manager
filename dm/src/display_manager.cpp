@@ -33,7 +33,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Displa
 const static uint32_t MAX_RETRY_NUM = 6;
 const static uint32_t RETRY_WAIT_MS = 500;
 const static uint32_t MAX_DISPLAY_SIZE = 32;
-const static uint32_t MAX_INTERVAL_US = 15000;
+const static uint32_t MAX_INTERVAL_US = 25000;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
 }

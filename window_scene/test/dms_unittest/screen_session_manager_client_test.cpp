@@ -28,7 +28,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
 }
 class DmPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
 public:
@@ -181,7 +181,7 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedCennectScreen02, Function | 
 }
 
 /**
- * @tc.name: CheckIfNeedCennectScreen0403
+ * @tc.name: CheckIfNeedCennectScreen03
  * @tc.desc: CheckIfNeedCennectScreen test
  * @tc.type: FUNC
  */
@@ -366,8 +366,13 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList, Function | 
 HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode01, Function | SmallTest | Level2)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
-    EXPECT_NE(FoldDisplayMode::FULL, screenSessionManagerClient_->GetFoldDisplayMode());
-    EXPECT_NE(FoldStatus::FOLDED, screenSessionManagerClient_->GetFoldStatus());
+    if (screenSessionManagerClient_->IsFoldable()) {
+        EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+        EXPECT_NE(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
+    } else {
+        EXPECT_NE(FoldDisplayMode::FULL, screenSessionManagerClient_->GetFoldDisplayMode());
+        EXPECT_EQ(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
+    }
     EXPECT_EQ(0, screenSessionManagerClient_->GetCurvedCompressionArea());
 }
 
@@ -385,7 +390,11 @@ HWTEST_F(ScreenSessionManagerClientTest, GetFoldDisplayMode02, Function | SmallT
     screenSessionManagerClient_->GetPhyScreenProperty(screenId);
     screenSessionManagerClient_->UpdateAvailableArea(screenId, area);
     screenSessionManagerClient_->NotifyFoldToExpandCompletion(foldToExpand);
-    EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    if (screenSessionManagerClient_->IsFoldable()) {
+        EXPECT_NE(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    } else {
+        EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerClient_->GetFoldDisplayMode());
+    }
     EXPECT_EQ(FoldStatus::UNKNOWN, screenSessionManagerClient_->GetFoldStatus());
     EXPECT_EQ(0, screenSessionManagerClient_->GetCurvedCompressionArea());
 }

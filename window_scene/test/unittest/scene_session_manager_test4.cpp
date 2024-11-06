@@ -59,7 +59,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest4::ssm_ = nullptr;
 bool SceneSessionManagerTest4::gestureNavigationEnabled_ = true;
 
 ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest4::callbackFunc_ = [](bool enable,
-    const std::string& bundleName) {
+    const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
 
