@@ -24,37 +24,37 @@ namespace Rosen {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
-void SuperFoldStateManager::DoAngleChangeFolded()
+void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeFolded()");
 }
 
-void SuperFoldStateManager::DoAngleChangeHalfFolded()
+void SuperFoldStateManager::DoAngleChangeHalfFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeHalfFolded())");
 }
 
-void SuperFoldStateManager::DoAngleChangeExpanded()
+void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeExpanded()");
 }
 
-void SuperFoldStateManager::DoKeyboardOn()
+void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOn()");
 }
 
-void SuperFoldStateManager::DoKeyboardOff()
+void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOff()");
 }
 
-void SuperFoldStateManager::DoFoldedToHalfFolded()
+void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoFoldedToHalfFolded()");
 }
 
-void SuperFoldStateManager::DoExpandedToKeyboard()
+void SuperFoldStateManager::DoExpandedToKeyboard(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoExpandedToKeyboard()");
 }
@@ -102,15 +102,15 @@ SuperFoldStateManager::~SuperFoldStateManager() = default;
 void SuperFoldStateManager::AddStateManagerMap(SuperFoldStatus curState,
     SuperFoldStatusChangeEvents event,
     SuperFoldStatus nextState,
-    std::function<void ()> action)
+    std::function<void (SuperFoldStatusChangeEvents)> action)
 {
     stateManagerMap_[{curState, event}] = {nextState, action};
 }
 
 void SuperFoldStateManager::TransferState(SuperFoldStatus nextState)
 {
-    TLOGI(WmsLogTag::DMS, "TransferState from %{public}d to %{public}d", curState_, nextState);
-    curState_ = nextState;
+    TLOGI(WmsLogTag::DMS, "TransferState from %{public}d to %{public}d", curState_.load(), nextState);
+    curState_ .store(nextState);
 }
 
 FoldStatus SuperFoldStateManager::MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus)
@@ -131,10 +131,10 @@ FoldStatus SuperFoldStateManager::MatchSuperFoldStatusToFoldStatus(SuperFoldStat
 
 void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents event)
 {
-    SuperFoldStatus curState = curState_;
+    SuperFoldStatus curState = curState_.load();
     SuperFoldStatus nextState = SuperFoldStatus::UNKNOWN;
     bool isTransfer = false;
-    std::function<void ()> action;
+    std::function<void (SuperFoldStatusChangeEvents)> action;
 
     auto item = stateManagerMap_.find({curState, event});
     if (item != stateManagerMap_.end()) {
@@ -144,7 +144,7 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
     }
 
     if (isTransfer && action) {
-        action();
+        action(event);
         TransferState(nextState);
         // notify
         auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
@@ -155,18 +155,18 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         ScreenId screenId = screenSession->GetScreenId();
         ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_);
         ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(
-                MatchSuperFoldStatusToFoldStatus(nextState));
+            MatchSuperFoldStatusToFoldStatus(curState_.load()));
     }
 }
 
 SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 {
-    return curState_;
+    return curState_.load();
 }
 
 void SuperFoldStateManager::SetCurrentStatus(SuperFoldStatus curState)
 {
-    curState_ = curState;
+    curState_.store(curState);
 }
 
 } // Rosen

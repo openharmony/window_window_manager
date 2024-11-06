@@ -129,8 +129,6 @@ public:
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
-        NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
-        NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
         NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
         NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     };
@@ -379,6 +377,7 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
+    void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
     /*
@@ -397,6 +396,11 @@ public:
      * Window Animation
      */
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
+
+    /**
+     * Window layoutFullScreen
+     */
+    void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
 
     /**
      * Window Visibility
@@ -592,6 +596,11 @@ protected:
      * PC Window
      */
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
+    
+    /*
+     * Window Layout
+     */
+    NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -809,6 +818,11 @@ private:
      * Window Animation
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+
+    /**
+     * Window LayoutFullscreen
+     */
+    NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
 
     /**
      * Window Immersive

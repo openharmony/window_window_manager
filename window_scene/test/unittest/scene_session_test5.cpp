@@ -401,19 +401,27 @@ HWTEST_F(SceneSessionTest5, OnLayoutFullScreenChange, Function | SmallTest | Lev
     info.bundleName_ = "OnLayoutFullScreenChange";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
+    session->onLayoutFullScreenChangeFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+}
 
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->RegisterSessionChangeCallback(sessionChangeCallback);
-    sessionChangeCallback->onLayoutFullScreenChangeFunc_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+/**
+ * @tc.name: RegisterLayoutFullScreenChangeCallback
+ * @tc.desc: test RegisterLayoutFullScreenChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, RegisterLayoutFullScreenChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterLayoutFullScreenChangeCallback";
+    info.bundleName_ = "RegisterLayoutFullScreenChangeCallback";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sceneSession->onLayoutFullScreenChangeFunc_ = nullptr;
+    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
 
-    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {
-        return;
-    };
-    sessionChangeCallback->onLayoutFullScreenChangeFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+    sceneSession->RegisterLayoutFullScreenChangeCallback(std::move(func));
+    ASSERT_NE(sceneSession->onLayoutFullScreenChangeFunc_, nullptr);
 }
 
 /**
@@ -432,14 +440,13 @@ HWTEST_F(SceneSessionTest5, OnDefaultDensityEnabled, Function | SmallTest | Leve
 
     sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
         sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->RegisterSessionChangeCallback(sessionChangeCallback);
-    sessionChangeCallback->onDefaultDensityEnabledFunc_ = nullptr;
+    session->onDefaultDensityEnabledFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
 
     NotifyDefaultDensityEnabledFunc func = [](bool isLDefaultDensityEnabled) {
         return;
     };
-    sessionChangeCallback->onDefaultDensityEnabledFunc_ = func;
+    session->onDefaultDensityEnabledFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
 }
 

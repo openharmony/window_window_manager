@@ -631,6 +631,7 @@ private:
     void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
+    void UpdateDarkColorModeToRS();
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession);
@@ -988,7 +989,12 @@ private:
     /*
      * Screen Manager
      */
-    bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
+    bool IsInDefaultScreen(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Window Mode Type
+     */
+    bool IsNeedSkipWindowModeTypeCheck(const sptr<SceneSession>& sceneSession, bool isSmallFold);
 
     /**
      * Window Immersive

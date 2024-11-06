@@ -447,7 +447,11 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
 
 int SessionStub::HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply)
 {
-    bool isDefaultDensityEnabled = data.ReadBool();
+    bool isDefaultDensityEnabled = false;
+    if (!data.ReadBool(isDefaultDensityEnabled)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isDefaultDensityEnabled failed");
+        return ERR_INVALID_DATA;
+    }
     TLOGD(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled: %{public}d", isDefaultDensityEnabled);
     WSError errCode = OnDefaultDensityEnabled(isDefaultDensityEnabled);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

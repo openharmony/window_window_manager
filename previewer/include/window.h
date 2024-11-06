@@ -297,7 +297,7 @@ public:
     virtual void SetDensity(float density) = 0;
     virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetDefaultDensityEnabled() { return false; }
-    virtual float GetVirtualPixelRatio() { return 0.0f; }
+    virtual float GetVirtualPixelRatio() { return 1.0f; }
     virtual void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;

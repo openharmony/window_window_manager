@@ -15,10 +15,9 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
-#include <securec.h>
-
 #include <ability_context.h>
 #include <ability_manager_client.h>
+#include <application_context.h>
 #include <bundlemgr/launcher_service.h>
 #include <hisysevent.h>
 #include <parameters.h>
@@ -120,6 +119,7 @@ const std::string ARG_DUMP_DETAIL = "-c";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
+constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
 
 constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
 
@@ -163,16 +163,6 @@ bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
         return true;
     }
     return false;
-}
-
-int ConfigFfrtWorkerNum()
-{
-    ffrt_worker_num_param qosConfig;
-    (void)memset_s(&qosConfig, sizeof(qosConfig), -1, sizeof(qosConfig));
-    qosConfig.effectLen = 1;
-    qosConfig.qosConfigArray[0].qos = ffrt_qos_user_interactive;
-    qosConfig.qosConfigArray[0].hardLimit = FFRT_USER_INTERACTIVE_MAX_THREAD_NUM;
-    return ffrt_set_qos_worker_num(&qosConfig);
 }
 
 int32_t GetPid()
@@ -279,7 +269,7 @@ void SceneSessionManager::Init()
     }
     taskScheduler_->SetExportHandler(eventHandler_);
 
-    ret = ConfigFfrtWorkerNum();
+    ret = ffrt_set_cpu_worker_max_num(ffrt_qos_user_interactive, FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
     TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max thread number: %{public}d, retcode: %{public}d",
         FFRT_USER_INTERACTIVE_MAX_THREAD_NUM, ret);
 
@@ -308,6 +298,7 @@ void SceneSessionManager::Init()
         MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
     }
     InitVsyncStation();
+    UpdateDarkColorModeToRS();
 }
 
 void SceneSessionManager::InitVsyncStation()
@@ -1785,8 +1776,8 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
             static_cast<int>(sessionProperty->GetDisplayId()));
     }
     abilitySessionInfo->instanceKey = sessionInfo.appInstanceKey_;
-    if (sessionInfo.callState_ >= static_cast<int32_t>(AAFwk::CallToState::UNKNOW) &&
-        sessionInfo.callState_ <= static_cast<int32_t>(AAFwk::CallToState::BACKGROUND)) {
+    if (sessionInfo.callState_ >= static_cast<uint32_t>(AAFwk::CallToState::UNKNOW) &&
+        sessionInfo.callState_ <= static_cast<uint32_t>(AAFwk::CallToState::BACKGROUND)) {
         abilitySessionInfo->state = static_cast<AAFwk::CallToState>(sessionInfo.callState_);
     } else {
         TLOGW(WmsLogTag::WMS_LIFE, "Invalid callState:%{public}d", sessionInfo.callState_);
@@ -2198,7 +2189,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     EraseSceneSessionAndMarkDirtyLockFree(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
-    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
+    if (sceneSession && MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
         MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
         MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
     }
@@ -2395,7 +2386,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
- 
+
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
         WSError err = CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage);
         if (err != WSError::WS_OK) {
@@ -2597,8 +2588,19 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
             return false;
         }
     }
+    if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+        int32_t parentId = property->GetParentPersistentId();
+        auto parentSession = GetSceneSession(parentId);
+        if (parentSession != nullptr && parentSession->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
+            SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check system subWindow permission success, parentId:%{public}d.", parentId);
+            return true;
+        } else {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "check system subWindow permission warning, parentId:%{public}d.", parentId);
+        }
+    }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
-        WLOGFD("check create permission success, create with system calling.");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "check create permission success, create with system calling.");
         return true;
     }
     WLOGFE("check system window permission failed.");
@@ -3847,8 +3849,8 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
             return;
         }
         bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession);
-        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]", 
-            sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(), 
+        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]",
+            sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(),
             sceneSession->IsVisible(), requireLock, shouldLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
@@ -3878,7 +3880,6 @@ bool SceneSessionManager::NotifyVisibleChange(int32_t persistentId)
         return false;
     }
     HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn());
-    ProcessWindowModeType();
     return true;
 }
 
@@ -5814,7 +5815,6 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
         default:
             break;
     }
-    ProcessWindowModeType();
 }
 
 void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSession)
@@ -5872,10 +5872,10 @@ static bool IsSmallFoldProduct()
         TLOGE(WmsLogTag::DEFAULT, "foldScreenType is empty");
         return false;
     }
-    return foldScreenType[0] == '2';
+    return foldScreenType[0] == SMALL_FOLD_PRODUCT_TYPE;
 }
 
-bool SceneSessionManager::IsInSecondaryScreen(const sptr<SceneSession>& sceneSession)
+bool SceneSessionManager::IsInDefaultScreen(const sptr<SceneSession>& sceneSession)
 {
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty == nullptr) {
@@ -5883,7 +5883,21 @@ bool SceneSessionManager::IsInSecondaryScreen(const sptr<SceneSession>& sceneSes
         return false;
     }
     ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
-    return sessionProperty->GetDisplayId() != defaultScreenId;
+    return sessionProperty->GetDisplayId() == defaultScreenId;
+}
+
+bool SceneSessionManager::IsNeedSkipWindowModeTypeCheck(const sptr<SceneSession>& sceneSession, bool isSmallFold)
+{
+    if (sceneSession == nullptr ||
+        !WindowHelper::IsMainWindow(sceneSession->GetWindowType()) ||
+        !sceneSession->GetRSVisible() ||
+        !sceneSession->IsSessionForeground()) {
+        return true;
+    }
+    if (isSmallFold && !IsInDefaultScreen(sceneSession)) {
+        return true;
+    }
+    return false;
 }
 
 WindowModeType SceneSessionManager::CheckWindowModeType()
@@ -5895,12 +5909,7 @@ WindowModeType SceneSessionManager::CheckWindowModeType()
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& session : sceneSessionMap_) {
-            if (session.second == nullptr ||
-                !WindowHelper::IsMainWindow(session.second->GetWindowType()) ||
-                !Rosen::SceneSessionManager::GetInstance().IsSessionVisibleForeground(session.second)) {
-                continue;
-            }
-            if (isSmallFold && IsInSecondaryScreen(session.second)) {
+            if (IsNeedSkipWindowModeTypeCheck(session.second, isSmallFold)) {
                 continue;
             }
             auto mode = session.second->GetWindowMode();
@@ -7730,6 +7739,7 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
             visibilityInfo.c_str());
         SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
+    ProcessWindowModeType();
 #ifdef MEMMGR_WINDOW_ENABLE
     if (memMgrWindowInfos.size() != 0) {
         WLOGD("Notify memMgrWindowInfos changed start");
@@ -8428,6 +8438,25 @@ WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persi
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, "UpdateSessionWindowVisibilityListener");
+}
+
+void SceneSessionManager::UpdateDarkColorModeToRS()
+{
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "app context is nullptr");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "app configuration is nullptr");
+        return;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
+    TLOGI(WmsLogTag::DEFAULT, "SetGlobalDarkColorMode with colorMode: %{public}s, ret: %{public}d",
+        colorMode.c_str(), ret);
 }
 
 void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
