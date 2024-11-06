@@ -106,7 +106,7 @@ private:
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
     
-    //main session
+    //PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
