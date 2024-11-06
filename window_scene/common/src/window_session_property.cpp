@@ -1079,7 +1079,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
-    UnmarshallingFutureCallback(parcel, property);
     return property;
 }
 
