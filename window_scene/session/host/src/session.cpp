@@ -2383,7 +2383,7 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 
 void Session::UpdateGravityWhenUpdateWindowMode(WindowMode mode)
 {
-    if ((systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode_ != nullptr) {
+    if ((systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode_ != nullptr) {
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
             surfaceNode_->SetFrameGravity(Gravity::LEFT);
         } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
