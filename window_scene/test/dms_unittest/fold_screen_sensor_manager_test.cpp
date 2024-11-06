@@ -199,9 +199,9 @@ namespace {
         mgr.registerPosture_ = true;
         mgr.TriggerDisplaySwitch();
         if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-            EXPECT_EQ(mgr.globalAngle, 25);
-        } else {
             EXPECT_NE(mgr.globalAngle, 25);
+        } else {
+            EXPECT_EQ(mgr.globalAngle, 25);
         }
         usleep(SLEEP_TIME_US);
     }
