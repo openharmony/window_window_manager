@@ -3627,8 +3627,8 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set brightness failed"));
             }
-            WLOGI("Window [%{public}u, %{public}s] set brightness end",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+            TLOGI(WmsLogTag::DEFAULT, "Window [%{public}u, %{public}s] set brightness end, state: %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     napi_value lastParam = (argc <= 1) ? nullptr :
