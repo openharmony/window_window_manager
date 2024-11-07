@@ -1764,7 +1764,6 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback01, Function | SmallTest | Level2)
     sceneSession->SetSystemSceneOcclusionAlpha(alpha);
     sceneSession->IsNeedDefaultAnimation();
     bool isPlaying = true;
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->NotifyIsCustomAnimationPlaying(isPlaying);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
