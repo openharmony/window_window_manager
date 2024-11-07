@@ -1046,6 +1046,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         UpdateViewportConfig(requestRect, WindowSizeChangeReason::RESIZE, nullptr, info);
         if (auto hostSession = GetHostSession()) {
             WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
+            property_->SetWindowRect(requestRect);
             hostSession->UpdateClientRect(wsRect);
         } else {
             TLOGE(WmsLogTag::DEFAULT, "hostSession is null");
