@@ -3308,7 +3308,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             abilitySessionInfo, isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "start failed! errCode: %{public}d", errCode);
-            sceneSession->NotifySessionExceptionInner(abilitySessionInfo, true);
+            sceneSession->NotifySessionExceptionInner(abilitySessionInfo, true, false, true);
             if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
                 startUIAbilityErrorFunc_(
                     static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
