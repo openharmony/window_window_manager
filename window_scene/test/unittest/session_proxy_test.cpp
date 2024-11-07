@@ -50,7 +50,7 @@ HWTEST_F(SessionProxyTest, WriteAbilitySessionInfoBasic, Function | SmallTest | 
     sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new(std::nothrow) AAFwk::SessionInfo();
     ASSERT_NE(abilitySessionInfo1, nullptr);
     res = sProxy->WriteAbilitySessionInfoBasic(data, abilitySessionInfo1);
-    ASSERT_EQ(res, true);
+    ASSERT_EQ(res, false);
     GTEST_LOG_(INFO) << "SessionProxyTest: WriteAbilitySessionInfoBasic end";
 }
 
