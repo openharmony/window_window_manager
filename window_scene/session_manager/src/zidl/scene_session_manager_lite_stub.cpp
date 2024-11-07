@@ -313,13 +313,13 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
 int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
-    SessionInfoBean info;
     std::string continueSessionId;
     if (!data.ReadString(continueSessionId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "read continueSessionId fail");
         return ERR_INVALID_DATA;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
+    SessionInfoBean info;
     WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
     if (!reply.WriteParcelable(&info)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo by continueSessionId error");
