@@ -5381,6 +5381,10 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
     }
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert to TransitionController Object");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
     auto name = GetWindowName();
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(name);
     if (jsWindowObj == nullptr || jsWindowObj->GetNapiValue() == nullptr) {
@@ -5389,14 +5393,7 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
     }
     sptr<JsTransitionController> nativeController = new JsTransitionController(
         env, jsWindowObj, windowToken_);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert to TransitionController Object");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    }
     auto nativeControllerVal = new wptr<JsTransitionController>(nativeController);
-    if (nativeControllerVal == nullptr) {
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    }
     auto finalizer = [](napi_env, void* data, void*) {
         TLOGNI(WmsLogTag::WMS_SYSTEM, "Finalizer for wptr JsTransitionController called");
         delete static_cast<wptr<JsTransitionController>*>(data);
