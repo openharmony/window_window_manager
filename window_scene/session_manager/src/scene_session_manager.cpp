@@ -4050,7 +4050,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         return;
     }
     NotifySessionExceptionFunc sessionExceptionFunc = [this](
-        const SessionInfo& info, bool needRemoveSession = false, bool startFail) {
+        const SessionInfo& info, bool needRemoveSession, bool startFail) {
         auto task = [this, info] {
             auto session = GetSceneSession(info.persistentId_);
             if (session == nullptr) {
