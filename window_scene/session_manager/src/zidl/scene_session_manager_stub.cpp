@@ -507,7 +507,7 @@ int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageP
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
     std::string deviceId = Str16ToStr8(data.ReadString16());
-    int numMax;
+    int32_t numMax = 0;;
     if (!data.ReadInt32(numMax)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read numMax failed");
         return ERR_INVALID_DATA;
@@ -517,12 +517,12 @@ int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageP
     reply.WriteInt32(missionInfos.size());
     for (auto& it : missionInfos) {
         if (!reply.WriteParcelable(&it)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfos error");
+            TLOGE(WmsLogTag::WMS_LIFE, "Write missionInfos error");
             return ERR_INVALID_DATA;
         }
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write GetSessionInfos result error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -540,12 +540,12 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
     }
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "GetSessionInfo error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo error");
         return ERR_INVALID_DATA;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LIFE, "write GetSessionInfo result error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
