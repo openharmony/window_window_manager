@@ -1077,6 +1077,27 @@ std::unique_ptr<NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastPara
     }
 }
 
+std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,
+    napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred,
+            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef,
+            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    }
+}
+
 napi_value ModalityTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
@@ -1149,6 +1170,5 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     return ParseModalityParam(env, jsObject, windowOption);
 }
-
 } // namespace Rosen
 } // namespace OHOS

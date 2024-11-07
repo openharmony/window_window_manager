@@ -2393,7 +2393,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return err;
         }
     }
-
     // WINDOW_TYPE_SYSTEM_ALARM_WINDOW has been deprecated, will be deleted after 5 versions.
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW) {
         WLOGFE("The alarm window has been deprecated!");
@@ -2451,8 +2450,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     return taskScheduler_->PostSyncTask(task, "CreateAndConnectSpecificSession");
 }
 
-WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(sptr<IRemoteObject> token,
-    sptr<WindowSessionProperty> property, sptr<ISessionStage> sessionStage)
+WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(const sptr<IRemoteObject>& token,
+    const sptr<WindowSessionProperty>& property, const sptr<ISessionStage>& sessionStage)
 {
     sptr<SceneSession> extensionParentSession = GetSceneSession(property->GetParentPersistentId());
     if (extensionParentSession == nullptr) {
@@ -4006,20 +4005,23 @@ int32_t SceneSessionManager::GetFocusedSessionId() const
 void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     if (!SessionPermission::IsSACalling()) {
-        WLOGFE("GetFocusWindowInfo permission denied!");
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return;
     }
-    auto sceneSession = GetSceneSession(focusedSessionId_);
-    if (sceneSession) {
-        WLOGFD("Get focus session info success");
-        focusInfo.windowId_ = sceneSession->GetWindowId();
-        focusInfo.displayId_ = static_cast<DisplayId>(0);
-        focusInfo.pid_ = sceneSession->GetCallingPid();
-        focusInfo.uid_ = sceneSession->GetCallingUid();
-        focusInfo.windowType_ = sceneSession->GetWindowType();
-        focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
-    }
-    return;
+    auto task = [this, &focusInfo] {
+        if (auto sceneSession = GetSceneSession(focusedSessionId_)) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
+            focusInfo.windowId_ = sceneSession->GetWindowId();
+            focusInfo.displayId_ = static_cast<DisplayId>(0);
+            focusInfo.pid_ = sceneSession->GetCallingPid();
+            focusInfo.uid_ = sceneSession->GetCallingUid();
+            focusInfo.windowType_ = sceneSession->GetWindowType();
+            focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
+            return WSError::WS_OK;
+        }
+        return WSError::WS_ERROR_DESTROYED_OBJECT;
+    };
+    taskScheduler_->PostSyncTask(task, __func__);
 }
 
 static bool IsValidDigitString(const std::string& windowIdStr)
@@ -7423,13 +7425,17 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFW("null scene session.");
+        TLOGW(WmsLogTag::DEFAULT, "null scene session.");
         return false;
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
         sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos ||
         sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
-        WLOGFD("filter gesture window.");
+        TLOGD(WmsLogTag::DEFAULT, "filter gesture window.");
+        return false;
+    }
+    if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
+        TLOGD(WmsLogTag::DEFAULT, "filter DragScale window.");
         return false;
     }
     sptr<AccessibilityWindowInfo> info = sptr<AccessibilityWindowInfo>::MakeSptr();
@@ -10345,6 +10351,9 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
         if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
             sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos ||
             sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
+            continue;
+        }
+        if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
             continue;
         }
         sceneSessionList.push_back(sceneSession);

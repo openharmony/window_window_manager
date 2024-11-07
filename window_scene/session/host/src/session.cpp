@@ -1159,12 +1159,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
     isStarting_ = false;
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && GetParentSession() &&
-        !GetParentSession()->IsSessionForeground()) {
-        TLOGD(WmsLogTag::WMS_DIALOG, "parent is not foreground");
-        SetSessionState(SessionState::STATE_BACKGROUND);
-    }
-
     NotifyForeground();
 
     isTerminating_ = false;
@@ -1397,6 +1391,27 @@ void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isPendingToBackgroundState:%{public}d",
         GetPersistentId(), isPendingToBackgroundState);
     return isPendingToBackgroundState_.store(isPendingToBackgroundState);
+}
+
+bool Session::IsActivatedAfterScreenLocked() const
+{
+    return isActivatedAfterScreenLocked_;
+}
+
+void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
+{
+    auto task = [weakThis = wptr(this), isActivatedAfterScreenLocked] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
+            session->GetPersistentId(), isActivatedAfterScreenLocked);
+        session->isActivatedAfterScreenLocked_ = isActivatedAfterScreenLocked;
+        return;
+    };
+    PostTask(task, __func__);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
@@ -2614,7 +2629,6 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "set property dragEnable: %{public}d", property->GetDragEnabled());
     {
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;

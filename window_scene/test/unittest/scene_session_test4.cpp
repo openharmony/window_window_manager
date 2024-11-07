@@ -561,7 +561,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
         WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
 
     property->SetSystemCalling(false);
-    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
     property->SetSystemCalling(true);
@@ -973,7 +973,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP01, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = false;
-    auto result = sceneSession->SetAutoStartPiP(true);
+    auto result = sceneSession->SetAutoStartPiP(true, 0);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -993,11 +993,11 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP02, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag) {
+    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag, uint32_t status) {
         return;
     };
     sceneSession->autoStartPiPStatusChangeFunc_ = func;
-    auto result = sceneSession->SetAutoStartPiP(true);
+    auto result = sceneSession->SetAutoStartPiP(true, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1017,7 +1017,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP03, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    auto result = sceneSession->SetAutoStartPiP(true);
+    auto result = sceneSession->SetAutoStartPiP(true, 0);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 

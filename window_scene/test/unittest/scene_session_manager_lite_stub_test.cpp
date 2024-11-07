@@ -707,6 +707,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowManagerAgent, Func
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint32(static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS));
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
@@ -736,6 +737,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Fu
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint32(static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS));
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);

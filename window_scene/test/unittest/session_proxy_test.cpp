@@ -466,7 +466,8 @@ HWTEST_F(SessionProxyTest, SetAutoStartPiP, Function | SmallTest | Level2)
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     bool isAutoStartValid = true;
-    ASSERT_EQ(WSError::WS_OK, sProxy->SetAutoStartPiP(isAutoStartValid));
+    uint32_t priority = 0;
+    ASSERT_EQ(WSError::WS_OK, sProxy->SetAutoStartPiP(isAutoStartValid, priority));
     GTEST_LOG_(INFO) << "SetAutoStartPiP: SetAutoStartPiP end";
 }
 
