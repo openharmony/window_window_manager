@@ -3945,7 +3945,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (GetDisplayBrightness() != brightness) {
-            WLOGI("adjust brightness with default value");
+            TLOGI(WmsLogTag::DEFAULT, "adjust brightness with default value");
             if (!isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             }
@@ -3954,7 +3954,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         brightnessSessionId_ = INVALID_WINDOW_ID;
     } else {
         if (GetDisplayBrightness() != brightness) {
-            WLOGI("adjust brightness with value");
+            TLOGI(WmsLogTag::DEFAULT, "adjust brightness with value");
             if (isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
                     static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
