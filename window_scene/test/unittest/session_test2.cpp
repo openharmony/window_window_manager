@@ -2067,7 +2067,7 @@ HWTEST_F(WindowSessionTest2, SetSessionExceptionListener, Function | SmallTest |
 {
     session_->SetSessionExceptionListener(nullptr, true);
 
-    NotifySessionExceptionFunc func = [](const SessionInfo& info, bool needRemoveSession) {};
+    NotifySessionExceptionFunc func = [](const SessionInfo& info, bool needRemoveSession, bool startFail) {};
     session_->SetSessionExceptionListener(func, true);
 
     ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);
