@@ -122,7 +122,6 @@ public:
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyShowWhenLockedFunc OnShowWhenLocked_;
-        NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
@@ -343,6 +342,11 @@ public:
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /*
+     * Window Rotation
+     */
+    void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
 
     /*
      * Window Visibility
@@ -652,6 +656,11 @@ private:
      */
     bool isEnableGestureBack_ { true };
     bool isEnableGestureBackHadSet_ { false };
+
+    /*
+     * Window Rotation
+     */
+    NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
