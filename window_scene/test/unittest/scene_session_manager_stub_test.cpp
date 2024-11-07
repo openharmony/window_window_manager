@@ -1403,7 +1403,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionWithId, Function | SmallT
     MessageParcel data;
     MessageParcel reply;
 
-    res = stub_->HandleDumpSessionWithId(data, reply);
+    int res = stub_->HandleDumpSessionWithId(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     int32_t x = 1;
