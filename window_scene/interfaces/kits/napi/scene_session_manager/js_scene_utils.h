@@ -202,6 +202,7 @@ public:
 private:
     void GetMainEventHandler();
     napi_env env_;
+    std::shared_ptr<int> envChecker_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::Rosen
