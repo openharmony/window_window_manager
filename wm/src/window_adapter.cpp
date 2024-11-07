@@ -687,7 +687,7 @@ void WindowAdapter::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
     wmsProxy->GetFocusWindowInfo(focusInfo);
 }
 
-WMError WindowAdapter::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
+WMError WindowAdapter::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
 
