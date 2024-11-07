@@ -30,6 +30,7 @@
 
 #include "common/include/window_session_property.h"
 #include "display_info.h"
+#include "future_callback.h"
 #include "interfaces/include/ws_common.h"
 #include "interfaces/include/ws_common_inner.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -368,6 +369,7 @@ protected:
     /*
      * Window Layout
      */
+    sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
 
 private:
