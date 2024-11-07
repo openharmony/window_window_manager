@@ -152,6 +152,7 @@ private:
     static napi_value CompatibleFullScreenClose(napi_env env, napi_callback_info info);
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
+    static napi_value SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -208,6 +209,7 @@ private:
     napi_value OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info);
     napi_value OnSetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
+    napi_value OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -256,8 +258,8 @@ private:
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
     void ProcessDefaultDensityEnabledRegister();
-    void ProcessRestoreMainWindowRegister();
     void ProcessTitleAndDockHoverShowChangeRegister();
+    void ProcessRestoreMainWindowRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
@@ -275,7 +277,7 @@ private:
     void OnSessionRectChange(const WSRect& rect,
         const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
-    void OnAutoStartPiPStatusChange(bool isAutoStart);
+    void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
     void OnClickModalSpecificWindowOutside();
@@ -312,8 +314,8 @@ private:
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
-    void RestoreMainWindow();
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
+    void RestoreMainWindow();
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);

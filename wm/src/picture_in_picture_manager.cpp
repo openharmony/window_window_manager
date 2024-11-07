@@ -199,7 +199,7 @@ void PictureInPictureManager::DoLocateSource()
 
 void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "in");
+    TLOGI(WmsLogTag::WMS_PIP, "doClose. destroyWindow:%{public}d, byPriority:%{public}d", destroyWindow, byPriority);
     if (!HasActiveController()) {
         return;
     }

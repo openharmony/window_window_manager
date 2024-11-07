@@ -223,12 +223,6 @@ void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
     sessionInfo_.want = want;
 }
 
-void Session::SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions)
-{
-    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-    sessionInfo_.processOptions = processOptions;
-}
-
 void Session::ResetSessionInfoResultCode()
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
@@ -294,6 +288,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
+    sessionInfo_.processOptions = info.processOptions;
 }
 
 void Session::SetScreenId(uint64_t screenId)
@@ -1159,12 +1154,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
     isStarting_ = false;
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && GetParentSession() &&
-        !GetParentSession()->IsSessionForeground()) {
-        TLOGD(WmsLogTag::WMS_DIALOG, "parent is not foreground");
-        SetSessionState(SessionState::STATE_BACKGROUND);
-    }
-
     NotifyForeground();
 
     isTerminating_ = false;
@@ -1397,6 +1386,18 @@ void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isPendingToBackgroundState:%{public}d",
         GetPersistentId(), isPendingToBackgroundState);
     return isPendingToBackgroundState_.store(isPendingToBackgroundState);
+}
+
+bool Session::IsActivatedAfterScreenLocked() const
+{
+    return isActivatedAfterScreenLocked_.load();
+}
+
+void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
+        GetPersistentId(), isActivatedAfterScreenLocked);
+    isActivatedAfterScreenLocked_.store(isActivatedAfterScreenLocked);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
@@ -2831,6 +2832,16 @@ bool Session::GetEnableRemoveStartingWindow() const
     return enableRemoveStartingWindow_;
 }
 
+void Session::SetAppBufferReady(bool appBufferReady)
+{
+    appBufferReady_ = appBufferReady;
+}
+
+bool Session::GetAppBufferReady() const
+{
+    return appBufferReady_;
+}
+
 WindowType Session::GetWindowType() const
 {
     auto property = GetSessionProperty();
@@ -2908,7 +2919,8 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
         persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     }
     g_persistentIdSet.insert(g_persistentId);
-    WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const

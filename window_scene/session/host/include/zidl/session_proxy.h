@@ -49,9 +49,9 @@ public:
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
-    WSError OnRestoreMainWindow() override;
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
+    WSError OnRestoreMainWindow() override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false) override;
@@ -84,7 +84,8 @@ public:
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
-    WSError SetAutoStartPiP(bool isAutoStart) override;
+    WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
+
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WSError GetStartMoveFlag(bool& isMoving) override;

@@ -2393,7 +2393,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return err;
         }
     }
-
     // WINDOW_TYPE_SYSTEM_ALARM_WINDOW has been deprecated, will be deleted after 5 versions.
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW) {
         WLOGFE("The alarm window has been deprecated!");
@@ -2451,8 +2450,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     return taskScheduler_->PostSyncTask(task, "CreateAndConnectSpecificSession");
 }
 
-WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(sptr<IRemoteObject> token,
-    sptr<WindowSessionProperty> property, sptr<ISessionStage> sessionStage)
+WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(const sptr<IRemoteObject>& token,
+    const sptr<WindowSessionProperty>& property, const sptr<ISessionStage>& sessionStage)
 {
     sptr<SceneSession> extensionParentSession = GetSceneSession(property->GetParentPersistentId());
     if (extensionParentSession == nullptr) {
@@ -3761,6 +3760,10 @@ void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSe
 void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, bool add)
 {
+    if (systemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::DEFAULT, "IsPcWindow, ineffective");
+        return;
+    }
     if (property == nullptr) {
         WLOGFD("property is null");
         return;
@@ -3791,7 +3794,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
     }
     if (notifyAll) {
         bool forceHideFloatNew = !systemTopSceneSessionMap_.empty();
-        for (const auto &item : nonSystemFloatSceneSessionMap_) {
+        for (const auto& item : nonSystemFloatSceneSessionMap_) {
             auto forceHideSceneSession = item.second;
             auto forceHideProperty = forceHideSceneSession->GetSessionProperty();
             if (forceHideProperty && forceHideFloatNew != forceHideProperty->GetForceHide()) {
@@ -4006,20 +4009,23 @@ int32_t SceneSessionManager::GetFocusedSessionId() const
 void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     if (!SessionPermission::IsSACalling()) {
-        WLOGFE("GetFocusWindowInfo permission denied!");
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return;
     }
-    auto sceneSession = GetSceneSession(focusedSessionId_);
-    if (sceneSession) {
-        WLOGFD("Get focus session info success");
-        focusInfo.windowId_ = sceneSession->GetWindowId();
-        focusInfo.displayId_ = static_cast<DisplayId>(0);
-        focusInfo.pid_ = sceneSession->GetCallingPid();
-        focusInfo.uid_ = sceneSession->GetCallingUid();
-        focusInfo.windowType_ = sceneSession->GetWindowType();
-        focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
-    }
-    return;
+    auto task = [this, &focusInfo] {
+        if (auto sceneSession = GetSceneSession(focusedSessionId_)) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
+            focusInfo.windowId_ = sceneSession->GetWindowId();
+            focusInfo.displayId_ = static_cast<DisplayId>(0);
+            focusInfo.pid_ = sceneSession->GetCallingPid();
+            focusInfo.uid_ = sceneSession->GetCallingUid();
+            focusInfo.windowType_ = sceneSession->GetWindowType();
+            focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
+            return WSError::WS_OK;
+        }
+        return WSError::WS_ERROR_DESTROYED_OBJECT;
+    };
+    taskScheduler_->PostSyncTask(task, __func__);
 }
 
 static bool IsValidDigitString(const std::string& windowIdStr)
@@ -7423,13 +7429,17 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFW("null scene session.");
+        TLOGW(WmsLogTag::DEFAULT, "null scene session.");
         return false;
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
         sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos ||
         sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
-        WLOGFD("filter gesture window.");
+        TLOGD(WmsLogTag::DEFAULT, "filter gesture window.");
+        return false;
+    }
+    if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
+        TLOGD(WmsLogTag::DEFAULT, "filter DragScale window.");
         return false;
     }
     sptr<AccessibilityWindowInfo> info = sptr<AccessibilityWindowInfo>::MakeSptr();
@@ -7677,9 +7687,10 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         if (lastVisibleData_[i].first < currVisibleData[j].first) {
             visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
             i++;
-        } else if (lastVisibleData_[i].first > currVisibleData[j].first &&
-                currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-            visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+        } else if (lastVisibleData_[i].first > currVisibleData[j].first) {
+            if (currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+                visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);    
+            }
             j++;
         } else {
             if (lastVisibleData_[i].second != currVisibleData[j].second) {
@@ -8054,7 +8065,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
     return taskScheduler_->PostSyncTask(task, "GetFocusSessionElement");
 }
 
-WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
+WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
 {
     const auto callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, haveListener, callingPid]() {
@@ -8082,7 +8093,7 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t& persistentI
     return taskScheduler_->PostSyncTask(task, "UpdateSessionAvoidAreaListener:PID:" + std::to_string(persistentId));
 }
 
-bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
+bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
     if (sceneSession == nullptr) {
@@ -8147,7 +8158,7 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
-    const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate)
+    const int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate)
 {
     bool ret = true;
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
@@ -8162,11 +8173,11 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         needUpdate = false;
         return;
     }
-    uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-    uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    for (uint32_t avoidType = start; avoidType <= end; avoidType++) {
+    using T = std::underlying_type_t<AvoidAreaType>;
+    for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
+        avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-        if (avoidType == static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
+        if (avoidType == static_cast<T>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR) &&
             !CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
                 sceneSession->GetSessionRect().height_)) {
             continue;
@@ -10347,6 +10358,9 @@ void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<Sc
             sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
             continue;
         }
+        if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
+            continue;
+        }
         sceneSessionList.push_back(sceneSession);
     }
 }
@@ -10752,7 +10766,7 @@ WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& 
         } else if (abilityInfo != nullptr) {
             info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType);
             infos.push_back(info);
-            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d,"
+            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d, "
                 "bundleName:%{public}s, bundleType:%{public}d", session->GetPersistentId(),
                 info.bundleName_.c_str(), info.bundleType_);
         }

@@ -702,29 +702,6 @@ WSError SessionProxy::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::OnRestoreMainWindow()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_MAIN_WINDOW),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
-}
-
 WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
 {
     MessageParcel data;
@@ -735,7 +712,7 @@ WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isTitleHoverShown) || !data.WriteBool(isDockHoverShown)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Write isTitleAndDockHoverShow failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "Write isTitleHoverShown or isDockHoverShown failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -748,7 +725,30 @@ WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool
         TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
+    uint32_t ret = reply.ReadUint32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::OnRestoreMainWindow()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_MAIN_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    uint32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
 
@@ -1575,9 +1575,9 @@ WSError SessionProxy::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::SetAutoStartPiP(bool isAutoStart)
+WSError SessionProxy::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
+    TLOGD(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}u", isAutoStart, priority);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1587,6 +1587,10 @@ WSError SessionProxy::SetAutoStartPiP(bool isAutoStart)
     }
     if (!data.WriteBool(isAutoStart)) {
         TLOGE(WmsLogTag::WMS_PIP, "write isAutoStart failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(priority)) {
+        TLOGE(WmsLogTag::WMS_PIP, "write priority failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
