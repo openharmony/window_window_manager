@@ -2373,12 +2373,26 @@ WSError Session::UpdateWindowMode(WindowMode mode)
             surfaceNode_->MarkUifirstNode(true);
         }
         UpdateGestureBackEnabled();
+        UpdateGravityWhenUpdateWindowMode(mode);
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
     return WSError::WS_OK;
+}
+
+void Session::UpdateGravityWhenUpdateWindowMode(WindowMode mode)
+{
+    if ((systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode_ != nullptr) {
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            surfaceNode_->SetFrameGravity(Gravity::LEFT);
+        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
+        } else if (mode == WindowMode::WINDOW_MODE_FLOATING || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        }
+    }
 }
 
 WSError Session::SetSystemSceneBlockingFocus(bool blocking)
