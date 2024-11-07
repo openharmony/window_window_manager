@@ -1473,6 +1473,7 @@ MainThreadScheduler::MainThreadScheduler(napi_env env)
     : env_(env)
 {
     GetMainEventHandler();
+    envChecker_ = std::make_shared<int>(0);
 }
 
 inline void MainThreadScheduler::GetMainEventHandler()
@@ -1490,8 +1491,12 @@ inline void MainThreadScheduler::GetMainEventHandler()
 void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string traceInfo, int64_t delayTime)
 {
     GetMainEventHandler();
-    auto task = [env = env_, localTask, traceInfo] () {
+    auto task = [env = env_, localTask, traceInfo, envChecker = std::weak_ptr<int>(envChecker_)] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SCBCb:%s", traceInfo.c_str());
+        if (envChecker.expired()) {
+            TLOGE(WmsLogTag::WMS_MAIN, "post task expired because of invalid scheduler");
+            return;
+        }
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         localTask();
