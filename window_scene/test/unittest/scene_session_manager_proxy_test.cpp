@@ -1101,6 +1101,21 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, Function | 
 }
 
 /**
+ * @tc.name: OnIsWindowRectAutoSave
+ * @tc.desc: OnIsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, OnIsWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    bool enabled = false;
+    std::string key = "com.example.recposentryEntryAbility";
+    ASSERT_EQ(sceneSessionManagerProxy->OnIsWindowRectAutoSave(key, enabled), WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: GetDisplayIdByWindowId
  * @tc.desc: GetDisplayIdByWindowId
  * @tc.type: FUNC

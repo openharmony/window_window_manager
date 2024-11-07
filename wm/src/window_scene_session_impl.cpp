@@ -273,6 +273,33 @@ bool WindowSceneSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     return parentWindow->WindowSessionImpl::IsPcOrPadFreeMultiWindowMode();
 }
 
+WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (!windowSystemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    auto info = property_->GetSessionInfo();
+    if (abilityContext && abilityContext->GetAbilityInfo()) {
+        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
+        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+    } else if (context_) {
+        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        info.bundleName_ = context_->GetBundleName();
+    }
+    std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
+    auto ret = SingletonContainer::Get<WindowAdapter>().OnIsWindowRectAutoSave(key, enabled);
+    return ret;
+}
+
 void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
 {
     // update subWindowSessionMap_

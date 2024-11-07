@@ -137,6 +137,13 @@ napi_value JsWindowStage::DisableWindowDecor(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnDisableWindowDecor(env, info) : nullptr;
 }
 
+napi_value JsWindowStage::IsWindowRectAutoSave(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnIsWindowRectAutoSave(env, info) : nullptr;
+}
+
 napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "SetDefaultDensityEnabled");
@@ -745,6 +752,8 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
 
     const char* moduleName = "JsWindowStage";
     BindNativeFunction(env,
+        objValue, "isWindowRectAutoSave", moduleName, JsWindowStage::IsWindowRectAutoSave);
+    BindNativeFunction(env,
         objValue, "setUIContent", moduleName, JsWindowStage::SetUIContent);
     BindNativeFunction(env,
         objValue, "loadContent", moduleName, JsWindowStage::LoadContent);
@@ -773,6 +782,45 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
     BindNativeFunction(env,
         objValue, "removeStartingWindow", moduleName, JsWindowStage::RemoveStartingWindow);
     return objValue;
+}
+
+napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+
+    auto window = windowScene->GetMainWindow();
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask]() {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s Window is nullptr", where);
+            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "Window is nullptr."));
+            return;
+        }
+        bool enabled;
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->IsWindowRectAutoSave(enabled));
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s enable recover position failed!", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                ret, "Window recover position failed."));
+        } else {
+            napi_value jsEnabled = CreateJsValue(env, enabled);
+            task->Resolve(env, jsEnabled);
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
 }
 }  // namespace Rosen
 }  // namespace OHOS
