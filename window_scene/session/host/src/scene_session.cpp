@@ -5429,4 +5429,16 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
     };
     PostTask(task, "SetNeedSyncSessionRect");
 }
+
+bool SceneSession::SetFrameGravity(WsGravity gravity)
+{
+    if (surfaceNode_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "fail id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
+        return false;
+    }
+    Gravity frameGravity = GRAVITY_MAP.at(gravity);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d gravity:%{public}d", GetPersistentId(), frameGravity);
+    surfaceNode_->SetFrameGravity(frameGravity);
+    return true;
+}
 } // namespace OHOS::Rosen

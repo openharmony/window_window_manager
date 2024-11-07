@@ -502,6 +502,7 @@ public:
      * Window Layout
      */
     void ResetSizeChangeReasonIfDirty();
+    bool SetFrameGravity(WsGravity gravity);
 
     /**
      * Gesture Back
@@ -826,6 +827,28 @@ private:
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
+
+    /*
+     * Window Layout
+     */
+    const std::map<WsGravity, Gravity> GRAVITY_MAP = {
+        {WsGravity::CENTER,                             Gravity::CENTER},
+        {WsGravity::TOP,                                Gravity::TOP},
+        {WsGravity::BOTTOM,                             Gravity::BOTTOM},
+        {WsGravity::LEFT,                               Gravity::LEFT},
+        {WsGravity::RIGHT,                              Gravity::RIGHT},
+        {WsGravity::TOP_LEFT,                           Gravity::TOP_LEFT},
+        {WsGravity::TOP_RIGHT,                          Gravity::TOP_RIGHT},
+        {WsGravity::BOTTOM_LEFT,                        Gravity::BOTTOM_LEFT},
+        {WsGravity::BOTTOM_RIGHT,                       Gravity::BOTTOM_RIGHT},
+        {WsGravity::RESIZE,                             Gravity::RESIZE},
+        {WsGravity::RESIZE_ASPECT,                      Gravity::RESIZE_ASPECT},
+        {WsGravity::RESIZE_ASPECT_TOP_LEFT,             Gravity::RESIZE_ASPECT_TOP_LEFT},
+        {WsGravity::RESIZE_ASPECT_BOTTOM_RIGHT,         Gravity::RESIZE_ASPECT_BOTTOM_RIGHT},
+        {WsGravity::RESIZE_ASPECT_FILL,                 Gravity::RESIZE_ASPECT_FILL},
+        {WsGravity::RESIZE_ASPECT_FILL_TOP_LEFT,        Gravity::RESIZE_ASPECT_FILL_TOP_LEFT},
+        {WsGravity::RESIZE_ASPECT_FILL_BOTTOM_RIGHT,    Gravity::RESIZE_ASPECT_FILL_BOTTOM_RIGHT},
+    };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

@@ -710,5 +710,27 @@ struct PostProcessFocusState {
         reason_ = FocusChangeReason::DEFAULT;
     }
 };
+
+/**
+ * @brief Enumerates gravity.
+ */
+enum class WsGravity : uint32_t {
+    CENTER = 0,
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+    RESIZE,
+    RESIZE_ASPECT,
+    RESIZE_ASPECT_TOP_LEFT,
+    RESIZE_ASPECT_BOTTOM_RIGHT,
+    RESIZE_ASPECT_FILL,
+    RESIZE_ASPECT_FILL_TOP_LEFT,
+    RESIZE_ASPECT_FILL_BOTTOM_RIGHT,
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
