@@ -231,20 +231,38 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
+WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", funcName);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d", funcName,
+            isTitleHoverShown, isDockHoverShown);
+        if (session->onTitleAndDockHoverShowChangeFunc_) {
+            session->onTitleAndDockHoverShowChangeFunc_(isTitleHoverShown, isDockHoverShown);
+        }
+    };
+    PostTask(task, funcName);
+    return WSError::WS_OK;
+}
+
 WSError MainSession::OnRestoreMainWindow()
 {
-    auto task = [weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRestoreMainWindowFunc_) {
-            session->sessionChangeCallback_->onRestoreMainWindowFunc_();
+        if (session->onRestoreMainWindowFunc_) {
+            session->onRestoreMainWindowFunc_();
         }
-        return WSError::WS_OK;
     };
-    PostTask(task, "OnRestoreMainWindow");
+    PostTask(task, __func__);
     return WSError::WS_OK;
 }
 

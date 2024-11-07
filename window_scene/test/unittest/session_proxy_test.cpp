@@ -73,8 +73,10 @@ HWTEST_F(SessionProxyTest, UpdateSessionRect, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, OnRestoreMainWindow, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: OnRestoreMainWindow start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
     WSError res = sProxy->OnRestoreMainWindow();
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnRestoreMainWindow end";
@@ -424,8 +426,10 @@ HWTEST_F(SessionProxyTest, TransferAccessibilityEvent, Function | SmallTest | Le
 HWTEST_F(SessionProxyTest, OnTitleAndDockHoverShowChange, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: OnTitleAndDockHoverShowChange start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
     bool isTitleHoverShown = true;
     bool isDockHoverShown = true;
     WSError res = sProxy->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);

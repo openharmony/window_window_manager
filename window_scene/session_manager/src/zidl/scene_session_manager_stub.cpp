@@ -972,8 +972,16 @@ int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel& data, M
 
 int SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = data.ReadInt32();
-    bool haveAvoidAreaListener = data.ReadBool();
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool haveAvoidAreaListener = false;
+    if (!data.ReadBool(haveAvoidAreaListener)) {
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "read haveAvoidAreaListener fail");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = UpdateSessionTouchOutsideListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

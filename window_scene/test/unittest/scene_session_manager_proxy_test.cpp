@@ -1097,7 +1097,9 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, Function | 
         new SceneSessionManagerProxy(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
     bool isPcOrPadFreeMultiWindowMode = false;
-    ASSERT_EQ(sceneSessionManagerProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode), WMError::WM_OK);
+    ASSERT_EQ(sceneSessionManagerProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode),
+        WMError::WM_ERROR_IPC_FAILED);
+    ASSERT_EQ(isPcOrPadFreeMultiWindowMode, false);
 }
 
 /**

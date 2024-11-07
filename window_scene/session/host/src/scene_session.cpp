@@ -1105,22 +1105,36 @@ void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityC
     PostTask(task, "SetKeyboardGravityChangeCallback");
 }
 
-void SceneSession::SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc& func)
+void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func)
 {
-    auto task = [weakThis = wptr(this), func]() {
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session or TitleAndDockHoverShowChangeFunc is null");
+            return;
+        }
+        session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d",
+            funcName, session->GetPersistentId());
+    };
+    PostTask(task, funcName);
+}
+
+void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session or RestoreMainWindowFunc is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
-        if (session->sessionChangeCallback_) {
-            session->sessionChangeCallback_->onRestoreMainWindowFunc_ = func;
-        }
-        TLOGNI(WmsLogTag::WMS_LIFE, "RestoreMainWindow id: %{public}d",
-            session->GetPersistentId());
-        return WSError::WS_OK;
+        session->onRestoreMainWindowFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d",
+            funcName, session->GetPersistentId());
     };
-    PostTask(task, "SetRestoreMainWindowCallback");
+    PostTask(task, funcName);
 }
 
 void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func)
@@ -4772,27 +4786,6 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
-{
-    const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName]() {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", funcName);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d", funcName,
-            isTitleHoverShown, isDockHoverShown);
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onTitleAndDockHoverShowChangeFunc_) {
-            session->sessionChangeCallback_->onTitleAndDockHoverShowChangeFunc_(
-                isTitleHoverShown, isDockHoverShown);
-        }
-        return WSError::WS_OK;
-    };
-    PostTask(task, "OnTitleAndDockHoverShowChange");
-    return WSError::WS_OK;
-}
-
 void SceneSession::SetForceHideState(ForceHideState forceHideState)
 {
     forceHideState_ = forceHideState;
@@ -5348,7 +5341,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
             session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
-            session->sessionChangeCallback_->onRestoreMainWindowFunc_ = nullptr;
         }
         session->Session::UnregisterSessionChangeListeners();
     };

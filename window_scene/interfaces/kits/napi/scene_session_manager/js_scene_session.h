@@ -257,8 +257,8 @@ private:
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
     void ProcessDefaultDensityEnabledRegister();
-    void ProcessRestoreMainWindowRegister();
     void ProcessTitleAndDockHoverShowChangeRegister();
+    void ProcessRestoreMainWindowRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
 
@@ -312,8 +312,8 @@ private:
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
-    void RestoreMainWindow();
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
+    void RestoreMainWindow();
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);

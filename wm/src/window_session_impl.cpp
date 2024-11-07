@@ -1776,6 +1776,7 @@ std::string WindowSessionImpl::GetRestoredRouterStack()
 
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
 {
+    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
     return uiContent_.get();
 }
 
