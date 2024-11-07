@@ -61,6 +61,7 @@ public:
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
+    virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
     /*
      * used by powermgr
      */
