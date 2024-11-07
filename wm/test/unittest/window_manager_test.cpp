@@ -1304,14 +1304,14 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Le
 
 /**
  * @tc.name: NotifyDisplayInfoChange02
- * @tc.desc: check NotifyDisplayInfoChange, Token is nullptr
+ * @tc.desc: check NotifyDisplayInfoChange, token is not nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange02, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> Token = new (std::nothrow) IRemoteObjectMocker();
-    ASSERT_NE(Token, nullptr);
-    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(Token, 1, 2, DisplayOrientation::PORTRAIT);
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(token, nullptr);
+    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(token, 1, 2, DisplayOrientation::PORTRAIT);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
