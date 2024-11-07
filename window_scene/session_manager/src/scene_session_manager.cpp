@@ -1984,7 +1984,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
 
     if (errCode != ERR_OK) {
         TLOGI(WmsLogTag::WMS_MAIN, "failed! errCode: %{public}d", errCode);
-        sceneSession->NotifySessionExceptionInner(sceneSessionInfo, true);
+        sceneSession->NotifySessionExceptionInner(sceneSessionInfo, true, false, true);
         if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
             startUIAbilityErrorFunc_(
                 static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
@@ -4049,7 +4049,8 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         WLOGFE("session is nullptr");
         return;
     }
-    NotifySessionExceptionFunc sessionExceptionFunc = [this](const SessionInfo& info, bool needRemoveSession = false) {
+    NotifySessionExceptionFunc sessionExceptionFunc = [this](
+        const SessionInfo& info, bool needRemoveSession = false, bool startFail) {
         auto task = [this, info] {
             auto session = GetSceneSession(info.persistentId_);
             if (session == nullptr) {
