@@ -2695,29 +2695,26 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
-        return NapiGetUndefined(env);
-    }
-    wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, isLayoutFullScreen](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
+        [weakToken = wptr<Window>(windowToken_), isLayoutFullScreen](napi_env env,
+            NapiAsyncTask& task, int32_t status) {
+            auto window = weakToken.promote();
+            if (window == nullptr) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                     "Invalidate params."));
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetLayoutFullScreen(isLayoutFullScreen));
+            if (window->IsPcOrPadFreeMultiWindowMode()) {
+                TLOGNE(WmsLogTag::WMS_IMMS, "device not support");
+                task.Resolve(env, NapiGetUndefined(env));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetLayoutFullScreen(isLayoutFullScreen));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGE(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen failed, ret = %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen failed, ret = %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window OnSetLayoutFullScreen failed."));
             }
         };
@@ -7003,44 +7000,6 @@ napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info in
     return CreateJsValue(env, enable);
 }
 
-static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::string& windowName,
-    sptr<WindowOption>& windowOption, napi_env env, NapiAsyncTask& task)
-{
-    if (windowToken == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "window is null");
-        task.Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "window is null"));
-        return;
-    }
-    if (windowOption == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "windowOption is null");
-        task.Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "windowOption is null"));
-        return;
-    }
-    if (!WindowHelper::IsSubWindow(windowToken->GetType()) &&
-        !WindowHelper::IsMainWindow(windowToken->GetType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "This is not subWindow or mainWindow.");
-        task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "This is not subWindow or mainWindow"));
-        return;
-    }
-    windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    windowOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    windowOption->SetOnlySupportSceneBoard(true);
-    windowOption->SetParentId(windowToken->GetWindowId());
-    windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
-    auto window = Window::Create(windowName, windowOption, windowToken->GetContext());
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "create sub window failed");
-        task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "create sub window failed"));
-        return;
-    }
-    task.Resolve(env, CreateJsWindowObject(env, window));
-    TLOGI(WmsLogTag::WMS_SUB, "create sub window %{public}s end", windowName.c_str());
-}
-
 napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -7052,8 +7011,8 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return NapiGetUndefined(env);
     }
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: minimum params num
         TLOGE(WmsLogTag::WMS_SUB, "Argc is invalid: %{public}zu", argc);
@@ -7082,16 +7041,46 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));
         return NapiGetUndefined(env);
     }
-    NapiAsyncTask::CompleteCallback complete =
-        [windowToken = windowToken_, windowName = std::move(windowName), windowOption](napi_env env,
-            NapiAsyncTask& task, int32_t status) mutable {
-        CreateNewSubWindowTask(windowToken, windowName, windowOption, env, task);
-    };
     napi_value callback = (argc > 2 && argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ?
         argv[2] : nullptr;
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnCreateSubWindowWithOptions",
-        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    const char* const where = __func__;
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), windowName = std::move(windowName),
+        windowOption, env, task = napiAsyncTask, where]() mutable {
+        auto window = windowToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "window is nullptr"));
+            return;
+        }
+        if (!WindowHelper::IsSubWindow(window->GetType()) &&
+            !WindowHelper::IsMainWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s this is not subWindow or mainWindow.", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+                "This is not subWindow or mainWindow"));
+            return;
+        }
+        windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+        windowOption->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        windowOption->SetOnlySupportSceneBoard(true);
+        windowOption->SetParentId(windowToken->GetWindowId());
+        windowOption->SetWindowTag(WindowTag::SUB_WINDOW);
+        auto subWindow = Window::Create(windowName, windowOption, window->GetContext());
+        if (subWindow == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s create sub window failed.", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "create sub window failed"));
+            return;
+        }
+        task->Resolve(env, CreateJsWindowObject(env, subWindow));
+        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s create sub window %{public}s end", where, windowName.c_str());
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_vip)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 

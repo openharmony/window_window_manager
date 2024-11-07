@@ -456,7 +456,11 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
 
 int SessionStub::HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply)
 {
-    bool isDefaultDensityEnabled = data.ReadBool();
+    bool isDefaultDensityEnabled = false;
+    if (!data.ReadBool(isDefaultDensityEnabled)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isDefaultDensityEnabled failed");
+        return ERR_INVALID_DATA;
+    }
     TLOGD(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled: %{public}d", isDefaultDensityEnabled);
     WSError errCode = OnDefaultDensityEnabled(isDefaultDensityEnabled);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -1035,8 +1039,13 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = SetAutoStartPiP(isAutoStart);
-    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    uint32_t priority = 0;
+    if (!data.ReadUint32(priority)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read priority error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetAutoStartPiP(isAutoStart, priority);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
