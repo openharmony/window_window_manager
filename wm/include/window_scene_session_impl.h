@@ -157,6 +157,7 @@ public:
     WMError Restore() override;
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
+    WMError SetWindowRectAutoSave(bool enabled) override;
 
     /*
      * Free Multi Window
@@ -172,7 +173,6 @@ public:
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtFirstSubWindow() const override;
     bool GetIsUIExtAnySubWindow() const override;
-    WMError SetWindowRectAutoSave(bool enabled) override;
 
     /*
      * Gesture Back

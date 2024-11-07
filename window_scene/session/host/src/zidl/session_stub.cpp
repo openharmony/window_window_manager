@@ -1240,7 +1240,7 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
 {
     bool enabled = true;
     if (!data.ReadBool(enabled)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed. ");
+        TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed.");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);

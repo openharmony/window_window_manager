@@ -5103,7 +5103,7 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
         TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    const char* where = __func__;
+    const char* const where = __func__;
     session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
@@ -5117,7 +5117,7 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
 
 void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
 {
-    const char* where = __func__;
+    const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -5130,8 +5130,8 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
-        napi_value JsEnabled = CreateJsValue(env, enabled);
-        napi_value argv[] = {JsEnabled};
+        napi_value jsEnabled = CreateJsValue(env, enabled);
+        napi_value argv[] = {jsEnabled};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

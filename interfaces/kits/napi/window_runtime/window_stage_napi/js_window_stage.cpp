@@ -753,7 +753,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc == 0 || argc > 1) { // 1: maximum params num
+    if (argc != 1) { // 1: maximum params num
         TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
@@ -767,22 +767,21 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
 
     auto window = windowScene->GetMainWindow();
     const char* const where = __func__;
-    
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakToken = wptr(window), where, env, task = napiAsyncTask, enabled] {
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s weakWindow is nullptr", where);
+    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask, enabled] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s window is nullptr", where);
             WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "weakWindow is nullptr."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowRectAutoSave(enabled));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s enable recover position failed!", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
-                ret, "weakWindow recover position failed."));
+                ret, "window recover position failed."));
         } else {
             task->Resolve(env, NapiGetUndefined(env));
         }
