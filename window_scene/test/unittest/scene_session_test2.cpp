@@ -2024,6 +2024,23 @@ HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
     auto result = sceneSession->IsFullScreenMovable();
     ASSERT_EQ(false, result);
 }
+
+/**
+ * @tc.name: SetTitleAndDockHoverShowChangeCallback
+ * @tc.desc: SetTitleAndDockHoverShowChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTitleAndDockHoverShowChangeCallback";
+    info.bundleName_ = "SetTitleAndDockHoverShowChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetTitleAndDockHoverShowChangeCallback([](bool isTitleHoverShown, bool isDockHoverShown) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
+}
 }
 }
 }

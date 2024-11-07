@@ -86,13 +86,6 @@ public:
     virtual WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) { return WSError::WS_OK; }
 
     /**
-     * @brief Callback for processing restore main window.
-     *
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
-    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
-
-    /**
      * @brief Callback for processing title and dock hover show changes.
      *
      * @param isTitleHoverShown Indicates the {@link bool}
@@ -104,6 +97,13 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Callback for processing restore main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
 
     /**
      * @brief Raise the application subwindow to the top layer of the application.

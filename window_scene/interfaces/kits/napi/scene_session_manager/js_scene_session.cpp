@@ -70,8 +70,8 @@ const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
-const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
 const std::string TITLE_DOCK_HOVER_SHOW_CB = "titleAndDockHoverShowChange";
+const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 const std::string SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
@@ -733,6 +733,50 @@ void JsSceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     taskScheduler_->PostMainThreadTask(task, "OnDefaultDensityEnabled");
 }
 
+void JsSceneSession::ProcessTitleAndDockHoverShowChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const funcName = __func__;
+    session->SetTitleAndDockHoverShowChangeCallback([weakThis = wptr(this), funcName](
+        bool isTitleHoverShown, bool isDockHoverShown) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsSceneSession is null", funcName);
+            return;
+        }
+        jsSceneSession->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
+    });
+    TLOGI(WmsLogTag::WMS_IMMS, "Register success, persistent id %{public}d", persistentId_);
+}
+
+void JsSceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTitleHoverShown, isDockHoverShown,
+        env = env_, funcName] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                funcName, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(TITLE_DOCK_HOVER_SHOW_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsCallBack is nullptr", funcName);
+            return;
+        }
+        napi_value jsObjTitle = CreateJsValue(env, isTitleHoverShown);
+        napi_value jsObjDock = CreateJsValue(env, isDockHoverShown);
+        napi_value argv[] = {jsObjTitle, jsObjDock};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, funcName);
+}
+
 void JsSceneSession::ProcessRestoreMainWindowRegister()
 {
     auto session = weakSession_.promote();
@@ -740,77 +784,36 @@ void JsSceneSession::ProcessRestoreMainWindowRegister()
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    NotifyRestoreMainWindowFunc func = [weakThis = wptr(this)]() {
+    const char* const funcName = __func__;
+    session->SetRestoreMainWindowCallback([weakThis = wptr(this), funcName] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessRestoreMainWindowRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", funcName);
             return;
         }
         jsSceneSession->RestoreMainWindow();
-    };
-    session->SetRestoreMainWindowCallback(func);
+    });
     TLOGI(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::RestoreMainWindow()
 {
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, funcName] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "RestoreMainWindow jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                funcName, persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(RESTORE_MAIN_WINDOW_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "RestoreMainWindow jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsCallBack is nullptr", funcName);
             return;
         }
-        napi_value argv[] = {};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnRestoreMainWindow");
-}
-
-void JsSceneSession::ProcessTitleAndDockHoverShowChangeRegister()
-{
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "sessionchangeCallback is nullptr");
-        return;
-    }
-    sessionchangeCallback->onTitleAndDockHoverShowChangeFunc_ = [weakThis = wptr(this)](
-        bool isTitleHoverShown, bool isDockHoverShown) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
-    };
-    TLOGI(WmsLogTag::WMS_IMMS, "Register success, persistent id %{public}d", persistentId_);
-}
-
-void JsSceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
-{
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTitleHoverShown, isDockHoverShown, env = env_] {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
-            return;
-        }
-        auto jsCallBack = jsSceneSession->GetJSCallback(TITLE_DOCK_HOVER_SHOW_CB);
-        if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "jsCallBack is nullptr");
-            return;
-        }
-        napi_value paramsObjTitle = CreateJsValue(env, isTitleHoverShown);
-        napi_value paramsObjDock = CreateJsValue(env, isDockHoverShown);
-        napi_value argv[] = {paramsObjTitle, paramsObjDock};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, "OnTitleAndDockHoverShowChange");
+    taskScheduler_->PostMainThreadTask(task, funcName);
 }
 
 void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)
