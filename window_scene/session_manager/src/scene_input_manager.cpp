@@ -188,6 +188,10 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
 {
     std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.empty()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "screensProperties is empty");
+        return;
+    }
     auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     for (auto& iter: screensProperties) {
         auto screenId = iter.first;
