@@ -115,7 +115,7 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         return WSError::WS_OK;
     }
     if (isModal) {
-        Session::ProcessClickModalSpecificWindowOutside(posX, posY);
+        Session::ProcessClickModalWindowOutside(posX, posY);
     }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
@@ -201,6 +201,16 @@ bool SubSession::IsModal() const
         isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
     }
     return isModal;
+}
+
+bool SubSession::IsApplicationModal() const
+{
+    bool isAppModal = false;
+    auto property = GetSessionProperty();
+    if (property != nullptr) {
+        isAppModal = WindowHelper::IsApplicationModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
+    }
+    return isAppModal;
 }
 
 bool SubSession::IsVisibleForeground() const

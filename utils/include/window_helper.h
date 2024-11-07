@@ -38,6 +38,11 @@ public:
         return (IsMainWindow(type) && state != WindowState::STATE_SHOWN);
     }
 
+    static inline bool IsModalMainWindow(WindowType type, uint32_t windowFlags)
+    {
+        return IsMainWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    }
+
     static inline bool IsSubWindow(WindowType type)
     {
         return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
