@@ -17,6 +17,7 @@
 
 #include <hitrace_meter.h>
 #include <js_runtime_utils.h>
+#include <ui_content.h>
 
 #include "interfaces/include/ws_common.h"
 #include "js_screen_utils.h"
@@ -68,6 +69,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "setTouchEnabled", moduleName,
         JsScreenSession::SetTouchEnabled);
     BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
+    BindNativeFunction(env, objValue, "getScreenUIContext", moduleName,
+        JsScreenSession::GetScreenUIContext);
     return objValue;
 }
 
@@ -320,6 +323,45 @@ napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info 
     RegisterScreenChangeListener();
 
     return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSession::GetScreenUIContext(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnGetScreenUIContext(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnGetScreenUIContext(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]OnGetScreenUIContext");
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 0) { // 0: params num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+
+    if (screenScene_ == nullptr) {
+        WLOGFE("screenScene_ is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    const auto& uiContent = screenScene_->GetUIContent();
+    if (uiContent == nullptr) {
+        WLOGFE("uiContent is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    napi_value uiContext = uiContent->GetUINapiContext();
+    if (uiContext == nullptr) {
+        WLOGFE("uiContext obtained from jsEngine is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    WLOGI("success");
+    return uiContext;
 }
 
 void JsScreenSession::CallJsCallback(const std::string& callbackType)

@@ -201,5 +201,16 @@ void ScreenScene::SetDisplayOrientation(int32_t orientation)
     }
     orientation_ = orientation;
 }
+
+Ace::UIContent* ScreenScene::GetUIContent() const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (uiContent_) {
+        return uiContent_.get();
+    } else {
+        TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
+        return nullptr;
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
