@@ -1892,8 +1892,8 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         }
 
         using T = std::underlying_type_t<AvoidAreaType>;
-        for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_SYSTEM);
-            avoidType <= static_cast<T>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR); avoidType++) {
+        for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
+            avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
             auto type = static_cast<AvoidAreaType>(avoidType);
             avoidAreas[type] = session->GetAvoidAreaByTypeInner(type);
         }
