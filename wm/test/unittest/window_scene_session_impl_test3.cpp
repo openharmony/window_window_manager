@@ -193,7 +193,7 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateTitleInTargetPos, Function | SmallTe
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
     ret = windowSceneSessionImpl->UpdateTitleInTargetPos(false, 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-    windowSceneSessionImpl->windowSessionMap_.clear();
+    windowSceneSessionImpl->windowSessionMap_.erase(windowSceneSessionImpl->GetWindowName());
 }
 
 /**
