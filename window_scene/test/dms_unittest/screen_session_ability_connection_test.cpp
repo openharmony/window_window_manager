@@ -129,6 +129,54 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityDisconnectDone, Function |
 }
 
 /**
+ * @tc.name: AddObjectDeathRecipient
+ * @tc.desc: AddObjectDeathRecipient func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, AddObjectDeathRecipient, Function | SmallTest | Level1)
+{
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
+    EXPECT_EQ(abilityConnectionStub->AddObjectDeathRecipient(), false);
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
+}
+
+/**
+ * @tc.name: SendMessage
+ * @tc.desc: SendMessage func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage, Function | SmallTest | Level1)
+{
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
+    int32_t transCode = 0;
+    MessageParcel data = new MessageParcel();
+    MessageParcel reply = new MessageParcel();
+    EXPECT_EQ(abilityConnectionStub->SendMessage(transCode, data, reply), RES_FAILURE);
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
+}
+
+/**
+ * @tc.name: IsConnected
+ * @tc.desc: IsConnected func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, IsConnected, Function | SmallTest | Level1)
+{
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
+    EXPECT_EQ(abilityConnectionStub->IsConnected(), false);
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
+}
+
+/**
  * @tc.name: IsAbilityConnected
  * @tc.desc: IsAbilityConnected func
  * @tc.type: FUNC
