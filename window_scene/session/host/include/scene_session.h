@@ -80,9 +80,9 @@ using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<Sce
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 using NotifyDefaultDensityEnabledFunc = std::function<void(bool isDefaultDensityEnabled)>;
-using NotifyRestoreMainWindowFunc = std::function<void()>;
 using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHoverShown,
     bool isDockHoverShown)>;
+using NotifyRestoreMainWindowFunc = std::function<void()>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
@@ -128,8 +128,6 @@ public:
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
-        NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
-        NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     };
 
     // func for change window scene pattern property
@@ -181,8 +179,6 @@ public:
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
-    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
-        bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     virtual void OpenKeyboardSyncTransaction() {};
@@ -296,7 +292,6 @@ public:
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     void SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func);
-    void SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
@@ -514,6 +509,12 @@ public:
     bool GetGestureBackEnabled();
     bool GetEnableGestureBackHadSet();
 
+    /**
+     * PC Window
+     */
+    void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect,
         const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
@@ -585,6 +586,12 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
+
+    /**
+     * PC Window
+     */
+    NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
+    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
     /*
      * Window Layout
