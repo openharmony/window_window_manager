@@ -534,7 +534,7 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
     SessionInfoBean info;
     std::string deviceId = Str16ToStr8(data.ReadString16());
     int32_t persistentId;
-    if (!data.ReadInt32(persistentId)) {
+    if (!data.ReadInt32(persistentId)) {    
         TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
         return ERR_INVALID_DATA;
     }
@@ -841,7 +841,6 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel& data, Message
 int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::DEFAULT, "In!");
-    std::vector<std::string> info;
     uint32_t vectorSize;
     if (!data.ReadUint32(vectorSize)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to read vectorSize");
@@ -859,6 +858,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
             infoPtr = reinterpret_cast<const char*>(data.ReadRawData(curSize));
             curInfo = (infoPtr) ? std::string(infoPtr, curSize) : "";
         }
+        std::vector<std::string> info;
         info.emplace_back(curInfo);
         TLOGD(WmsLogTag::DEFAULT, "InfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
     }
