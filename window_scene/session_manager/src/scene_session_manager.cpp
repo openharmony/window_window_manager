@@ -3902,11 +3902,13 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
 {
     bool setBrightnessRet = false;
     bool isPC = systemConfig_.IsPcWindow();
-    if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min() && !isPC) {
-        auto task = []() {                
-            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
-        };
-        setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
+    if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
+        if (!isPC) {
+            auto task = []() {                
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            };
+            setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
+        }
         SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
     } else {
         auto task = [brightness, isPC]() {
@@ -3920,30 +3922,30 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
         };
         setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:OverrideBrightness", 0);
         SetDisplayBrightness(brightness);
-        }
-        if (!setBrightnessRet) {
-            WLOGFE("Report post listener callback task failed. the task name is SetBrightness");
-        }
+    }
+    if (!setBrightnessRet) {
+        TLOGI(WmsLogTag::DEFAULT, "Report post listener callback task failed. the task name is SetBrightness");
+    }
 }
 
 WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
     if (!(sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
             sceneSession->GetSessionInfo().isSystem_)) {
-        WLOGW("only app main window can set brightness");
+        TLOGW(WmsLogTag::DEFAULT, "only app main window can set brightness");
         return WSError::WS_DO_NOTHING;
     }
     auto brightness = sceneSession->GetBrightness();
-    WLOGFI("Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    TLOGI(WmsLogTag::DEFAULT, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (GetDisplayBrightness() != brightness) {
-            WLOGI("adjust brightness with default value");
+            TLOGI(WmsLogTag::DEFAULT, "adjust brightness with default value");
             if (!isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             }
@@ -3952,7 +3954,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         brightnessSessionId_ = INVALID_WINDOW_ID;
     } else {
         if (GetDisplayBrightness() != brightness) {
-            WLOGI("adjust brightness with value");
+            TLOGI(WmsLogTag::DEFAULT, "adjust brightness with value");
             if (isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
                     static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
