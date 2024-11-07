@@ -3555,7 +3555,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
-        napi_value argv[] = {jsSessionInfo, jsNeedRemoveSession, startFail};
+        napi_value argv[] = {jsSessionInfo, jsNeedRemoveSession, jsStartFail};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionException, name" + info.bundleName_);
