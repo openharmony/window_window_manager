@@ -543,7 +543,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         return NapiGetUndefined(env);
     }
     auto window = windowScene->GetMainWindow();
-    if (window ==nullptr) {
+    if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
         return NapiGetUndefined(env);
