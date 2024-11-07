@@ -784,7 +784,7 @@ private:
      */
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
-    bool isActivatedAfterScreenLocked_ { true };
+    std::atomic<bool> isActivatedAfterScreenLocked_ { true };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
