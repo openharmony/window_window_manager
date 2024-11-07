@@ -153,6 +153,9 @@ ScreenSessionManager::ScreenSessionManager()
     sessionDisplayPowerController_ = new SessionDisplayPowerController(mutex_,
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        g_foldScreenFlag = false;
+    }
     if (g_foldScreenFlag) {
         HandleFoldScreenPowerInit();
     } else {
