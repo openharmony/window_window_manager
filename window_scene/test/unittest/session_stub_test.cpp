@@ -318,6 +318,8 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    ASSERT_EQ(data.WriteInt32(1), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
@@ -728,6 +730,7 @@ HWTEST_F(SessionStubTest, HandleUpdateSessionRect, Function | SmallTest | Level2
     data.WriteUint32(30);
     data.WriteUint32(40);
     data.WriteUint32(0);
+    data.WriteBool(true);
     data.WriteBool(true);
     auto res = session_->HandleUpdateSessionRect(data, reply);
     ASSERT_EQ(ERR_NONE, res);
