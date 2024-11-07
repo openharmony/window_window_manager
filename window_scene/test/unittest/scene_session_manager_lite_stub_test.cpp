@@ -379,7 +379,21 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfo, Function | Small
 {
     MessageParcel data;
     MessageParcel reply;
+
     auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    std::u16string deviceIdU16 = u"testDeviceId";
+    data.WriteString16(deviceIdU16);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t persistentId = 0;
+    data.WriteString16(deviceIdU16);
+    data.WriteInt32(persistentId);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
@@ -393,7 +407,14 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetSessionInfoByContinueSessionI
 {
     MessageParcel data;
     MessageParcel reply;
+
     auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    std::string continueSessionId = "testSessionId";
+    data.WriteString(continueSessionId);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
@@ -449,9 +470,62 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState, Functio
 {
     MessageParcel data;
     MessageParcel reply;
+
+    sptr <IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t continueStateValue = -3;
+    data.WriteRemoteObject(token);
+    data.WriteInt32(continueStateValue);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    continueStateValue = 1;
+    data.WriteRemoteObject(token);
+    data.WriteInt32(continueStateValue);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionContinueState1
+ * @tc.desc: test function : HandleSetSessionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState1, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteRemoteObject(nullptr);
+    data.WriteInt32(-2);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleSetSessionContinueState2
+ * @tc.desc: test function : HandleSetSessionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetSessionContinueState2, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    data.WriteInt32(static_cast<int32_t>(ContinueState::CONTINUESTATE_MAX));
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSetSessionContinueState(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+    uint32_t writtenError;
+    EXPECT_TRUE(reply.ReadUint32(writtenError));
+    EXPECT_EQ(writtenError, static_cast<uint32_t>(ERR_NONE));
 }
 
 /**
@@ -483,7 +557,14 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleClearSession, Function | SmallTe
 {
     MessageParcel data;
     MessageParcel reply;
+
     auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleClearSession(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t persistentId = 0;
+    data.WriteInt32(persistentId);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleClearSession(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
@@ -511,7 +592,14 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSession, Function | SmallTes
 {
     MessageParcel data;
     MessageParcel reply;
+
     auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleLockSession(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t persistentId = 0;
+    data.WriteInt32(persistentId);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleLockSession(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
@@ -525,7 +613,14 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSession, Function | SmallT
 {
     MessageParcel data;
     MessageParcel reply;
+
     auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t sessionId = 0;
+    data.WriteInt32(sessionId);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleUnlockSession(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
@@ -539,7 +634,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMoveSessionsToForeground, Functi
 {
     MessageParcel data;
     MessageParcel reply;
+
     auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    std::vector<int32_t> sessionIds;
+    sessionIds.push_back(0);
+    data.WriteInt32Vector(sessionIds);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, res);
+
+    int32_t topSessionId = 0;
+    data.WriteInt32Vector(sessionIds);
+    data.WriteInt32(topSessionId);
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
@@ -600,6 +710,21 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowManagerAgent, Func
     data.WriteUint32(static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS));
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteUint32(-100);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteUint32(100);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteUint32(5);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -614,7 +739,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Fu
     MessageParcel reply;
     data.WriteUint32(static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS));
     auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(data, reply);
+        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteUint32(-100);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteUint32(100);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteUint32(5);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -703,9 +843,14 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleTerminateSessionByPersistentId, 
 {
     MessageParcel data;
     MessageParcel reply;
+
+    auto res = sceneSessionManagerLiteStub_->
+    SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
     int32_t persistentId = 1;
     data.WriteInt32(persistentId);
-    auto res = sceneSessionManagerLiteStub_->
+    res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
