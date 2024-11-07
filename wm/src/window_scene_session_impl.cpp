@@ -2445,7 +2445,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (!(windowSystemConfig_.IsPcWindow())) {
+    if (!windowSystemConfig_.IsPcWindow()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

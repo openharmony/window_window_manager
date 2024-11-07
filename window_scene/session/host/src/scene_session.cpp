@@ -5432,7 +5432,7 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
 
 void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func)
 {
-    const char* where = __func__;
+    const char* const where = __func__;
     auto task = [weakThis = wptr(this), where, func = std::move(func)] {
         auto session = weakThis.promote();
         if (!session || !func) {
