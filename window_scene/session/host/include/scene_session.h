@@ -268,7 +268,7 @@ public:
 
     virtual bool IsModal() const { return false; }
     virtual bool IsApplicationModal() const { return false; }
-    bool IsDialogWindow() const { return false; }
+    bool IsDialogWindow() const;
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     void SetSessionModalTypeChangeCallback(const NotifySessionModalTypeChangeFunc& func);
     NotifyMainSessionModalTypeChangeFunc onMainSessionModalTypeChange_;

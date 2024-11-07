@@ -355,7 +355,7 @@ public:
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     /**
-     * @brief Set the modality of main window.
+     * @brief Set the application modality of main window.
      *
      * @param isModal bool.
      * @return WMError
