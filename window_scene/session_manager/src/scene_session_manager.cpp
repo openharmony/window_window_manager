@@ -3760,6 +3760,10 @@ void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSe
 void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, bool add)
 {
+    if (systemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::DEFAULT, "IsPcWindow, ineffective");
+        return;
+    }
     if (property == nullptr) {
         WLOGFD("property is null");
         return;
@@ -3790,7 +3794,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
     }
     if (notifyAll) {
         bool forceHideFloatNew = !systemTopSceneSessionMap_.empty();
-        for (const auto &item : nonSystemFloatSceneSessionMap_) {
+        for (const auto& item : nonSystemFloatSceneSessionMap_) {
             auto forceHideSceneSession = item.second;
             auto forceHideProperty = forceHideSceneSession->GetSessionProperty();
             if (forceHideProperty && forceHideFloatNew != forceHideProperty->GetForceHide()) {
