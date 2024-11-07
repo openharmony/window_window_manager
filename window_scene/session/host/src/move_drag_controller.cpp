@@ -268,7 +268,7 @@ void MoveDragController::SetAspectRatio(float ratio)
     aspectRatio_ = ratio;
 }
 
-bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, 
+bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const WSRect& originalRect)
 {
     if (pointerEvent == nullptr) {
@@ -305,8 +305,8 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             WLOGFD("Move event hasPointDown");
             hasPointDown_ = true;
         } else if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
-                action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-                action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+            action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
             WLOGFD("Reset hasPointDown_ when point up or cancel");
             hasPointDown_ = false;
         }
