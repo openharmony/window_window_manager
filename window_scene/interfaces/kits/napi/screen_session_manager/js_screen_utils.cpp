@@ -162,6 +162,28 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeType(napi_env env)
     return objValue;
 }
 
+napi_value JsScreenUtils::CreateJsSuperFoldStatus(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_UNKNOWN", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::UNKNOWN)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_EXPANDED", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::EXPANDED)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_FOLDED", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::FOLDED)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_HALF_FOLDED", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::HALF_FOLDED)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_KEYBOARD", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::KEYBOARD)));
+    return objValue;
+}
+
 bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 {
     napi_value jsLeft = nullptr, jsTop = nullptr, jsWidth = nullptr, jsHeight = nullptr, jsRadius = nullptr;
