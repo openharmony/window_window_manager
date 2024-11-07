@@ -163,6 +163,9 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
         case WindowType::WINDOW_TYPE_APP_MAIN_WINDOW:
             rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
             break;
+        case WindowType::WINDOW_TYPE_PIP:
+            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
+            break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
