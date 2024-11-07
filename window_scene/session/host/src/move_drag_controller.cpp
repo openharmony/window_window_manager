@@ -416,7 +416,7 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
         static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()) == moveDragStartDisplayId_) {
         std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
         moveDragProperty_.targetRect_ =
-            MathHelper::GreatNotEqual(aspectRatio_, NEAR_ZERO) ? CalcFixedAspectRatioTargetRect(type_, trans.first, 
+            MathHelper::GreatNotEqual(aspectRatio_, NEAR_ZERO) ? CalcFixedAspectRatioTargetRect(type_, trans.first,
             trans.second, aspectRatio_, moveDragProperty_.originalRect_):
             CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
     }
