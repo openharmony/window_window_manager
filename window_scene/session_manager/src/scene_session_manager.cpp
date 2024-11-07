@@ -6748,26 +6748,26 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
         TLOGE(WmsLogTag::DEFAULT, "bundleMgr_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto flag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+    auto flags = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
     AppExecFwk::BundleInfo bundleInfo;
-    if (bundleMgr_->GetBundleInfoV9(bundleName, flag, bundleInfo, userId)) {
+    if (bundleMgr_->GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
         TLOGE(WmsLogTag::DEFAULT, "Query ability info from BMS failed, ability:%{public}s", abilityName.c_str());
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    auto hapModulesList = bundleInfo.hapModuleInfos;
+    auto& hapModulesList = bundleInfo.hapModuleInfos;
     if (hapModulesList.empty()) {
         TLOGD(WmsLogTag::DEFAULT, "hapModulesList is empty, ability:%{public}s", abilityName.c_str());
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    auto sdkVersion = bundleInfo.targetVersion % 100; // %100 to get the real version
-    for (auto hapModule: hapModulesList) {
-        auto abilityInfoList = hapModule.abilityInfos;
-        for (auto abilityInfo : abilityInfoList) {
+    auto sdkVersion = bundleInfo.targetVersion % 100; // % 100 to get the real version
+    for (auto& hapModule : hapModulesList) {
+        auto& abilityInfoList = hapModule.abilityInfos;
+        for (auto& abilityInfo : abilityInfoList) {
             if (abilityInfo.moduleName == moduleName && abilityInfo.name == abilityName) {
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
@@ -6781,15 +6781,15 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
     return WSError::WS_ERROR_INVALID_PARAM;
 }
 
-WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo>& bundleInfos,
+WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
     std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
     if (bundleInfos.empty()) {
         WLOGFE("bundleInfos is empty");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    for (auto bundleInfo: bundleInfos) {
-        auto hapModulesList = bundleInfo.hapModuleInfos;
+    for (auto& bundleInfo : bundleInfos) {
+        auto& hapModulesList = bundleInfo.hapModuleInfos;
         auto sdkVersion = bundleInfo.targetVersion % 100; // %100 to get the real version
         if (hapModulesList.empty()) {
             WLOGFD("hapModulesList is empty");
@@ -6798,10 +6798,10 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
         if (bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
             bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
             auto iter = std::find_if(hapModulesList.begin(), hapModulesList.end(),
-                [](AppExecFwk::HapModuleInfo hapModule) { return !hapModule.abilityInfos.empty(); });
+                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); });
             if (iter != hapModulesList.end()) {
                 SCBAbilityInfo scbAbilityInfo;
-                scbAbilityInfo.abilityInfo_ = hapModulesList[0].abilityInfos[0];
+                scbAbilityInfo.abilityInfo_ = iter->abilityInfos[0];
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
                 scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
@@ -6809,9 +6809,9 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
                 continue;
             }
         }
-        for (auto hapModule: hapModulesList) {
-            auto abilityInfoList = hapModule.abilityInfos;
-            for (auto abilityInfo : abilityInfoList) {
+        for (auto& hapModule : hapModulesList) {
+            auto& abilityInfoList = hapModule.abilityInfos;
+            for (auto& abilityInfo : abilityInfoList) {
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;

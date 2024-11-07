@@ -694,7 +694,7 @@ private:
     void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
     void EraseSceneSessionMapById(int32_t persistentId);
     void EraseSceneSessionAndMarkDirtyLockFree(int32_t persistentId);
-    WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo>& bundleInfos,
+    WSError GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
     void UpdatePrivateStateAndNotifyForAllScreens();
