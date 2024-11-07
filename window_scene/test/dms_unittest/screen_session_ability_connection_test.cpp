@@ -155,7 +155,7 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage02, Function | SmallTest
     int32_t transCode = 0;
     MessageParcel data;
     MessageParcel reply;
-    auto ret = screenSessionAbilityConnection.SendMessage(ransCode, data, reply);
+    auto ret = screenSessionAbilityConnection.SendMessage(transCode, data, reply);
     EXPECT_EQ(ret, RES_FAILURE);
 }
 
