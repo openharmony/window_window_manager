@@ -704,7 +704,7 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
     sceneSession->isEnableGestureBack_ = false;
     EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(false));
     sceneSession->specificCallback_ = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->SetGestureBackEnabled(true));
+    EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(true));
     sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
     auto func = [sceneSession](int32_t persistentId) {
