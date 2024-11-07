@@ -3144,8 +3144,8 @@ static void ParseAvoidAreaParam(napi_env env, napi_callback_info info, WMError& 
             CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
                 napi_get_value_uint32(env, nativeMode, &resultValue));
             avoidAreaType = static_cast<AvoidAreaType>(resultValue);
-            errCode = ((avoidAreaType > AvoidAreaType::TYPE_KEYBOARD) ||
-                (avoidAreaType < AvoidAreaType::TYPE_START)) ? WMError::WM_ERROR_INVALID_PARAM : WMError::WM_OK;
+            errCode = avoidAreaType > AvoidAreaType::TYPE_KEYBOARD ?
+                WMError::WM_ERROR_INVALID_PARAM : WMError::WM_OK;
         }
     }
 }
@@ -3218,8 +3218,7 @@ napi_value JsWindow::OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info i
         CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
             napi_get_value_uint32(env, nativeMode, &resultValue));
         avoidAreaType = static_cast<AvoidAreaType>(resultValue);
-        errCode = ((avoidAreaType >= AvoidAreaType::TYPE_END) ||
-                   (avoidAreaType < AvoidAreaType::TYPE_START)) ?
+        errCode = avoidAreaType >= AvoidAreaType::TYPE_END ?
             WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
