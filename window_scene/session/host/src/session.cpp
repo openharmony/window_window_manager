@@ -2914,7 +2914,7 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
         persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     }
     g_persistentIdSet.insert(g_persistentId);
-    TLOGW(WmsLogTag::WMS_LIFE,
+    TLOGI(WmsLogTag::WMS_LIFE,
         "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
