@@ -32,6 +32,7 @@ namespace Rosen {
 constexpr int32_t DEFAULT_VALUE = -1;
 constexpr uint32_t EXTENSION_CONNECT_OUT_TIME = 300; // ms
 constexpr uint32_t TRANS_CMD_SEND_SNAPSHOT_RECT = 2;
+constexpr int32_t RES_FAILURE = -1;
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
 }
@@ -145,20 +146,17 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, AddObjectDeathRecipient, Function |
 
 /**
  * @tc.name: SendMessage
- * @tc.desc: SendMessage func
+ * @tc.desc: SendMessage func test02
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage02, Function | SmallTest | Level1)
 {
-    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
-        new (std::nothrow) ScreenSessionAbilityConnectionStub());
-    ASSERT_NE(abilityConnectionStub, nullptr);
+    ScreenSessionAbilityConnection screenSessionAbilityConnection;
     int32_t transCode = 0;
-    MessageParcel data = new MessageParcel();
-    MessageParcel reply = new MessageParcel();
-    EXPECT_EQ(abilityConnectionStub->SendMessage(transCode, data, reply), RES_FAILURE);
-    abilityConnectionStub.clear();
-    abilityConnectionStub = nullptr;
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = screenSessionAbilityConnection.SendMessage(ransCode, data, reply);
+    EXPECT_EQ(ret, RES_FAILURE);
 }
 
 /**
@@ -168,12 +166,9 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionAbilityConnectionTest, IsConnected, Function | SmallTest | Level1)
 {
-    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
-        new (std::nothrow) ScreenSessionAbilityConnectionStub());
-    ASSERT_NE(abilityConnectionStub, nullptr);
-    EXPECT_EQ(abilityConnectionStub->IsConnected(), false);
-    abilityConnectionStub.clear();
-    abilityConnectionStub = nullptr;
+    ScreenSessionAbilityConnection screenSessionAbilityConnection;
+    auto ret = screenSessionAbilityConnection.IsConnected();
+    EXPECT_EQ(ret, false);
 }
 
 /**
