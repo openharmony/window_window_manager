@@ -201,6 +201,20 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, Function | SmallTest |
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, WindowManager::GetInstance().GetAccessibilityWindowInfo(infos));
 }
 
+/*
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: GetUnreliableWindowInfo ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    EXPECT_CALL(mocker->Mock(), GetUnreliableWindowInfo(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetUnreliableWindowInfo(windowId, infos));
+}
+
 /**
  * @tc.name: GetSnapshotByWindowId01
  * @tc.desc: Check GetSnapshotByWindowId01
@@ -217,20 +231,6 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Leve
     } else {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     }
-}
-
-/*
- * @tc.name: GetUnreliableWindowInfo
- * @tc.desc: GetUnreliableWindowInfo ok
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
-    int32_t windowId = 0;
-    std::vector<sptr<UnreliableWindowInfo>> infos;
-    EXPECT_CALL(mocker->Mock(), GetUnreliableWindowInfo(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetUnreliableWindowInfo(windowId, infos));
 }
 
 /**
