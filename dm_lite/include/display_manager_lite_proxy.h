@@ -55,6 +55,7 @@ public:
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo();
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
+    virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
     /*
      * used by powermgr
      */

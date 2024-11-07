@@ -220,6 +220,12 @@ enum class EventStatus : uint32_t {
     END,
 };
 
+enum class VirtualScreenFlag : uint32_t {
+    DEFAULT = 0,
+    CAST = 1,
+    MAX = 2,
+};
+
 class IDisplayPowerEventListener : public RefBase {
 public:
     /**

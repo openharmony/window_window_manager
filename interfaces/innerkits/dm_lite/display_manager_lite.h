@@ -247,6 +247,14 @@ public:
      * @return All display IDs.
      */
     std::vector<DisplayId> GetAllDisplayIds();
+
+    /**
+     * @brief Get virtual screen flag.
+     *
+     * @param screenId virtual screen id.
+     * @return virtual screen flag
+     */
+    VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();
