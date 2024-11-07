@@ -395,7 +395,6 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
 WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
 {
-    uint64_t displayId = DISPLAY_ID_INVALID;
     if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
         type == WindowType::WINDOW_TYPE_TOAST) {
         property_->SetParentPersistentId(GetFloatingWindowParentId());
@@ -404,14 +403,19 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
         auto mainWindow = FindMainWindowWithContext();
         property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
         if (mainWindow != nullptr) {
-            displayId = mainWindow->GetDisplayId();
+            if (property_->GetDisplayId() != DISPLAY_ID_INVALID &&
+                property_->GetDisplayId() != mainWindow->GetDisplayId()) {
+                TLOGE(WmsLogTag::WMS_LIFE, "window has parent and display not same");
+                return WMError::WM_ERROR_INVALID_DISPLAY;
+            }
+            property_->SetDisplayId(mainWindow->GetDisplayId());
             property_->SetSubWindowLevel(mainWindow->GetProperty()->GetSubWindowLevel() + 1);
         }
     } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
         if (auto mainWindow = FindMainWindowWithContext()) {
             property_->SetParentPersistentId(mainWindow->GetPersistentId());
             property_->SetSubWindowLevel(mainWindow->GetProperty()->GetSubWindowLevel() + 1);
-            displayId = mainWindow->GetDisplayId();
+            property_->SetDisplayId(mainWindow->GetDisplayId());
             TLOGI(WmsLogTag::WMS_DIALOG, "The parentId: %{public}d", mainWindow->GetPersistentId());
         }
     } else if (WindowHelper::IsSystemSubWindow(type)) {
@@ -428,19 +432,8 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
-        displayId = parentSession->GetDisplayId();
+        property_->SetDisplayId(parentSession->GetDisplayId());
         property_->SetSubWindowLevel(parentSession->GetProperty()->GetSubWindowLevel() + 1);
-    }
-    if ((WindowHelper::IsAppFloatingWindow(type) || type == WindowType::WINDOW_TYPE_DIALOG) &&
-        property_->GetDisplayId() != DISPLAY_ID_INVALID && property_->GetDisplayId() != displayId) {
-        TLOGE(WmsLogTag::WMS_LIFE,
-            "window displayId is not same with parent, windowName: %{public}s, "
-            "displayId: %{public}d, parent displayId: %{public}d",
-            property_->GetWindowName().c_str(), static_cast<int>(property_->GetDisplayId()),
-            static_cast<int>(displayId));
-        return WMError::WM_ERROR_INVALID_DISPLAY;
-    } else if (property_->GetDisplayId() == DISPLAY_ID_INVALID) {
-        property_->SetDisplayId(displayId);
     }
     SetDefaultDisplayIdIfNeed();
     return WMError::WM_OK;
