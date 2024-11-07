@@ -23,8 +23,8 @@
 
 #include "common/include/window_session_property.h"
 #include "property/rs_properties_def.h"
-#include "window.h"
 #include "screen_manager.h"
+#include "window.h"
 #include "ws_common_inner.h"
 
 namespace OHOS::MMI {
@@ -36,7 +36,7 @@ namespace OHOS::Rosen {
 using MoveDragCallback = std::function<void(const SizeChangeReason)>;
 
 using NotifyWindowDragHotAreaFunc = std::function<void(DisplayId displayId, uint32_t type,
-    const SizeChangeReason reason)>;
+    SizeChangeReason reason)>;
 
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 
@@ -44,7 +44,7 @@ const uint32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = 0;
 
 class MoveDragController : public ScreenManager::IScreenListener {
 public:
-    MoveDragController(int32_t persistentId, bool isSystemWindow = false);
+    MoveDragController(int32_t persistentId, WindowType winType);
     ~MoveDragController() = default;
 
     /**
@@ -60,13 +60,11 @@ public:
     void SetStartMoveFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
-    void SetAsSystemWindow(bool isSystemWindow);
-    bool IsSystemWindow() const;
     bool HasPointDown();
     void SetMovable(bool movable);
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
-    WSRect GetTargetRect(TargetRectCoordinate coordinate = TargetRectCoordinate::RELATED_TO_START_DISPLAY) const;
+    WSRect GetTargetRect(TargetRectCoordinate coordinate) const;
     void InitMoveDragProperty();
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
@@ -94,8 +92,8 @@ public:
     std::set<uint64_t> GetNewAddedDisplayIdsDuringMoveDrag();
     void InitCrossDisplayProperty(DisplayId displayId, uint64_t parentNodeId);
     WSRect GetScreenRectById(DisplayId displayId);
-    void MoveDragInterrupt();
     void ResetCrossMoveDragProperty();
+    void MoveDragInterrupted();
 
     /**
      * Monitor screen connection status
@@ -139,7 +137,7 @@ private:
     constexpr static float NEAR_ZERO = 0.001f;
 
     bool CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
-    void CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SizeChangeReason reason);
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY, int32_t sourceType, const WSRect& rect);
@@ -151,7 +149,7 @@ private:
     void FixTranslateByLimits(int32_t& tranX, int32_t& tranY);
     bool InitMainAxis(AreaType type, int32_t tranX, int32_t tranY);
     void ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio);
-    void ProcessSessionRectChange(const SizeChangeReason reason);
+    void ProcessSessionRectChange(SizeChangeReason reason);
     void InitDecorValue(const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
 
     float GetVirtualPixelRatio() const;
@@ -187,6 +185,7 @@ private:
     MoveDragProperty moveDragProperty_;
     MoveDragCallback moveDragCallback_;
     int32_t persistentId_;
+    WindowType winType_;
     bool isPcWindow_ = false;
 
     enum class DragType : uint32_t {
@@ -210,7 +209,7 @@ private:
     MoveTempProperty moveTempProperty_;
 
     void UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason reason);
+    void ProcessWindowDragHotAreaFunc(bool flag, SizeChangeReason reason);
     uint32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
     NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
     NotifyWindowPidChangeCallback pidChangeCallback_;
@@ -229,7 +228,6 @@ private:
     /**
      * Cross Display Move Drag
      */
-    bool isSystemWindow_ = false;
     bool moveDragIsInterrupted_ = false;
     DisplayId moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     DisplayId moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
