@@ -3760,6 +3760,7 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
     const sptr<WindowSessionProperty>& property, bool add)
 {
     if (systemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::DEFAULT, "IsPcWindow, UpdateForceHideState is ineffective");
         return;
     }
     if (property == nullptr) {
