@@ -437,7 +437,7 @@ namespace {
     /**
      * @tc.name: GetSettingRelativePositionString
      * @tc.desc: GetSettingRelativePositionString Test
-     * @tc.type: FUNC 
+     * @tc.type: FUNC
      */
     HWTEST_F(ScreenSettingHelperTest, GetSettingRelativePositionString, Function | SmallTest | Level3)
     {
