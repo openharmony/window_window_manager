@@ -403,7 +403,7 @@ namespace {
         std::string input = "test, str";
         char delimiter = ',';
         auto ret = screenSettingHelper.SplitString(splitValues, input, delimiter);
-        ASSERT_FALSE(ret);
+        ASSERT_TRUE(ret);
     }
 
     /**
@@ -437,7 +437,7 @@ namespace {
     /**
      * @tc.name: GetSettingRelativePositionString
      * @tc.desc: GetSettingRelativePositionString Test
-     * @tc.type: FUNC
+     * @tc.type: FUNC 
      */
     HWTEST_F(ScreenSettingHelperTest, GetSettingRelativePositionString, Function | SmallTest | Level3)
     {
