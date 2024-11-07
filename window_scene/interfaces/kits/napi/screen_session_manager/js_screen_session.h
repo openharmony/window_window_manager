@@ -43,6 +43,8 @@ private:
     napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info);
     static napi_value SetTouchEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetTouchEnabled(napi_env env, napi_callback_info info);
+    static napi_value GetScreenUIContext(napi_env env, napi_callback_info info);
+    napi_value OnGetScreenUIContext(napi_env env, napi_callback_info info);
     void CallJsCallback(const std::string& callbackType);
     void RegisterScreenChangeListener();
 
