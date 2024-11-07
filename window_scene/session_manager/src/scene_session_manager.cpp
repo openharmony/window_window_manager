@@ -6741,6 +6741,46 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetBatchAbility
     return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
 }
 
+WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const std::string& moduleName,
+    const std::string& abilityName, int32_t userId, SCBAbilityInfo& scbAbilityInfo)
+{
+    if (bundleMgr_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "bundleMgr_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto flag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
+    AppExecFwk::BundleInfo bundleInfo;
+    if (bundleMgr_->GetBundleInfoV9(bundleName, flag, bundleInfo, userId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Query ability info from BMS failed, ability:%{public}s", abilityName.c_str());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto hapModulesList = bundleInfo.hapModuleInfos;
+    if (hapModulesList.empty()) {
+        TLOGD(WmsLogTag::DEFAULT, "hapModulesList is empty, ability:%{public}s", abilityName.c_str());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto sdkVersion = bundleInfo.targetVersion % 100; // %100 to get the real version
+    for (auto hapModule: hapModulesList) {
+        auto abilityInfoList = hapModule.abilityInfos;
+        for (auto abilityInfo : abilityInfoList) {
+            if (abilityInfo.moduleName == moduleName && abilityInfo.name == abilityName) {
+                scbAbilityInfo.abilityInfo_ = abilityInfo;
+                scbAbilityInfo.sdkVersion_ = sdkVersion;
+                scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
+                GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
+                return WSError::WS_OK;
+            }
+        }
+    }
+    TLOGW(WmsLogTag::DEFAULT, "Ability info not found, ability:%{public}s", abilityName.c_str());
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
 WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo>& bundleInfos,
     std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
@@ -6755,13 +6795,26 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFw
             WLOGFD("hapModulesList is empty");
             continue;
         }
+        if (bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
+            bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
+            auto iter = std::find_if(hapModulesList.begin(), hapModulesList.end(),
+                [](AppExecFwk::HapModuleInfo hapModule) { return !hapModule.abilityInfos.empty(); });
+            if (iter != hapModulesList.end()) {
+                SCBAbilityInfo scbAbilityInfo;
+                scbAbilityInfo.abilityInfo_ = hapModulesList[0].abilityInfos[0];
+                scbAbilityInfo.sdkVersion_ = sdkVersion;
+                scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
+                GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
+                scbAbilityInfos.push_back(scbAbilityInfo);
+                continue;
+            }
+        }
         for (auto hapModule: hapModulesList) {
             auto abilityInfoList = hapModule.abilityInfos;
             for (auto abilityInfo : abilityInfoList) {
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
-                scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
             }
