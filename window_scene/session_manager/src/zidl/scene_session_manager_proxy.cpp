@@ -2493,4 +2493,39 @@ WMError SceneSessionManagerProxy::GetDisplayIdByWindowId(const std::vector<uint6
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError SceneSessionManagerProxy::OnIsWindowRectAutoSave(std::string key, bool& enabled)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(key)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write key failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadBool(enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t ret = 0;
+    if (!reply.ReadUint32(ret)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
 } // namespace OHOS::Rosen

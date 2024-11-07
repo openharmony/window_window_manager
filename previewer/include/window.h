@@ -155,6 +155,7 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
+    virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;

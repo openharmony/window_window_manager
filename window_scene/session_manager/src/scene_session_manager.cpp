@@ -11408,4 +11408,42 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
     isLayoutFinished = isRootSceneLastFrameLayoutFinishedFunc_();
     return WSError::WS_OK;
 }
+
+WMError SceneSessionManager::OnIsWindowRectAutoSave(std::string key, bool& enabled)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), key, &enabled, where] {
+        auto sessionManager = weakThis.promote();
+        if (sessionManager == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s sessionManager is null", where);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_)
+        auto item = sessionManager->isWindowRectAutoSaveMap_.find(key);
+        if (item != sessionManager->isWindowRectAutoSaveMap_.end()) {
+            enabled = item->second;
+        } else {
+            enabled = false;
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, where);
+}
+
+void SceneSessionManager::SetIsWindowRectAutoSaveMap(std::string key, bool enabled)
+{
+    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
+    auto item = isWindowRectAutoSaveMap_.find(key);
+    if (item != isWindowRectAutoSaveMap_.end()) {
+        if (!enabled) {
+            isWindowRectAutoSaveMap_.erase(key);
+        } else {
+            item->second = enabled;
+        }
+    } else {
+        if (enabled) {
+            isWindowRectAutoSaveMap_.insert({key, enabled});
+        }
+    }
+}
 } // namespace OHOS::Rosen

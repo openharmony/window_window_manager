@@ -155,6 +155,7 @@ public:
     /*
      * PC Window
      */
+    WMError IsWindowRectAutoSave(bool& enabled) override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
 

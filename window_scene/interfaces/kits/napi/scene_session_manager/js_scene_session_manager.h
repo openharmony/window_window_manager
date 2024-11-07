@@ -112,6 +112,7 @@ public:
     static napi_value IsScbCoreEnabled(napi_env env, napi_callback_info info);
     static napi_value RefreshPcZOrder(napi_env env, napi_callback_info info);
     static napi_value GetWindowPid(napi_env env, napi_callback_info info);
+    static napi_value SetIsWindowRectAutoSaveFromJs(napi_env env, napi_callback_info info);
 
     /*
      * Multi instance
@@ -183,6 +184,7 @@ private:
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
     napi_value OnRefreshPcZOrder(napi_env env, napi_callback_info info);
     napi_value OnGetWindowPid(napi_env env, napi_callback_info info);
+    napi_value OnSetIsWindowRectAutoSaveFromJs(napi_env env, napi_callback_info info);
 
     /*
      * multi instance

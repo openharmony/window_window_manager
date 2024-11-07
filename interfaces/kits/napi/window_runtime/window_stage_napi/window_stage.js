@@ -74,6 +74,10 @@ class WindowStage {
     return this.__window_stage__.setDefaultDensityEnabled(enabled);
   }
 
+  isWindowRectAutoSave() {
+    return this.__window_stage__.isWindowRectAutoSave();
+  }
+
   removeStartingWindow() {
     return this.__window_stage__.removeStartingWindow();
   }

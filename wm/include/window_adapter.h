@@ -143,6 +143,7 @@ public:
      * PC Window
      */
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
+    virtual WMError OnIsWindowRectAutoSave(std::string key, bool& enabled);
 
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
