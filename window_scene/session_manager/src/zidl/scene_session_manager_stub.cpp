@@ -507,7 +507,7 @@ int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageP
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
     std::string deviceId = Str16ToStr8(data.ReadString16());
-    int32_t numMax = 0;;
+    int32_t numMax = 0;
     if (!data.ReadInt32(numMax)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read numMax failed");
         return ERR_INVALID_DATA;
