@@ -8137,7 +8137,7 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
-    const int32_t persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate)
+    const int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate)
 {
     bool ret = true;
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {

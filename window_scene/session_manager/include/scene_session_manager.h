@@ -628,7 +628,7 @@ private:
     bool UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
-    void UpdateNormalSessionAvoidArea(const int32_t persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
+    void UpdateNormalSessionAvoidArea(const int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
