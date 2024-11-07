@@ -132,7 +132,7 @@ ScreenSessionManager::ScreenSessionManager()
     if (!screenCutoutController_) {
         TLOGE(WmsLogTag::DMS, "screenCutoutController_ is nullptr");
     }
-    sessionDisplayPowerController_ = new SessionDisplayPowerController(mutex_,
+    sessionDisplayPowerController_ = new SessionDisplayPowerController(
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     if (g_foldScreenFlag) {
