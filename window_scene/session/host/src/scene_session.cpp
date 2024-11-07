@@ -548,6 +548,19 @@ void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimat
     PostTask(task, "RegisterDefaultAnimationFlagChangeCallback");
 }
 
+void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            return;
+        }
+        session->onNeedAvoid_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     auto task = [weakThis = wptr(this), mode]() {
@@ -1297,8 +1310,8 @@ WSError SceneSession::OnNeedAvoid(bool status)
         }
         TLOGI(WmsLogTag::WMS_IMMS, "SceneSession OnNeedAvoid status:%{public}d, id:%{public}d",
             static_cast<int32_t>(status), session->GetPersistentId());
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnNeedAvoid_) {
-            session->sessionChangeCallback_->OnNeedAvoid_(status);
+        if (session->onNeedAvoid_) {
+            session->onNeedAvoid_(status);
         }
         return WSError::WS_OK;
     };
@@ -4468,7 +4481,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
-            session->sessionChangeCallback_->OnNeedAvoid_ = nullptr;
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
             session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
