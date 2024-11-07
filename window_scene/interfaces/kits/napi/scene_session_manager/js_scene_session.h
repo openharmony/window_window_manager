@@ -273,7 +273,7 @@ private:
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect,
-        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority);
     void OnRaiseToTop();
@@ -302,7 +302,7 @@ private:
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation);
     void OnForceHideChange(bool hide);
-    void OnWindowDragHotArea(DisplayId displayId, uint32_t type, const SizeChangeReason reason);
+    void OnWindowDragHotArea(DisplayId displayId, uint32_t type, SizeChangeReason reason);
     void OnTouchOutside();
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
