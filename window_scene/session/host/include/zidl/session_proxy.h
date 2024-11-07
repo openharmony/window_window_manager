@@ -49,9 +49,9 @@ public:
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
-    WSError OnRestoreMainWindow() override;
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
+    WSError OnRestoreMainWindow() override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false) override;
