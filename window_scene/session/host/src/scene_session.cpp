@@ -631,6 +631,32 @@ void SceneSession::SetSessionModalTypeChangeCallback(const NotifySessionModalTyp
     PostTask(task, "SetSessionModalTypeChangeCallback");
 }
 
+void SceneSession::SetMainSessionModalTypeChangeCallback(const NotifyMainSessionModalTypeChangeFunc& func)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), func, where]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session or func is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->onMainSessionModalTypeChange_ = func;
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where, session->GetPersistentId());
+        return WSError::WS_OK;
+    };
+    PostTask(task, "SetMainSessionModalTypeChangeCallback");
+}
+
+bool SceneSession::IsDialogWindow() const
+{
+    bool isDialogWindow = false;
+    auto property = GetSessionProperty();
+    if (property != nullptr) {
+        isDialogWindow = WindowHelper::IsDialogWindow(property->GetWindowType());
+    }
+    return isDialogWindow;
+}
+
 SubWindowModalType SceneSession::GetSubWindowModalType() const
 {
     SubWindowModalType modalType = SubWindowModalType::TYPE_UNDEFINED;

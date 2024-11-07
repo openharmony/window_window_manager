@@ -1346,16 +1346,16 @@ WSError Session::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-void Session::ProcessClickModalSpecificWindowOutside(int32_t posX, int32_t posY)
+void Session::ProcessClickModalWindowOutside(int32_t posX, int32_t posY)
 {
-    if (clickModalSpecificWindowOutsideFunc_ && !winRect_.IsInRegion(posX, posY)) {
-        clickModalSpecificWindowOutsideFunc_();
+    if (clickModalWindowOutsideFunc_ && !winRect_.IsInRegion(posX, posY)) {
+        clickModalWindowOutsideFunc_();
     }
 }
 
-void Session::SetClickModalSpecificWindowOutsideListener(const NotifyClickModalSpecificWindowOutsideFunc& func)
+void Session::SetClickModalWindowOutsideListener(const NotifyClickModalWindowOutsideFunc& func)
 {
-    clickModalSpecificWindowOutsideFunc_ = func;
+    clickModalWindowOutsideFunc_ = func;
 }
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
