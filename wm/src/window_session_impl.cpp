@@ -1776,6 +1776,7 @@ std::string WindowSessionImpl::GetRestoredRouterStack()
 
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
 {
+    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
     return uiContent_.get();
 }
 
@@ -3890,14 +3891,14 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
         static_cast<WsPiPControlStatus>(status));
 }
 
-void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart)
+void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
         return;
     }
     if (auto hostSession = GetHostSession()) {
-        hostSession->SetAutoStartPiP(isAutoStart);
+        hostSession->SetAutoStartPiP(isAutoStart, priority);
     }
 }
 

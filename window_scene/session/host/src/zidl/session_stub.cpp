@@ -458,28 +458,28 @@ int SessionStub::HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
-int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
-{
-    WSError errCode = OnRestoreMainWindow();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply)
 {
     bool isTitleHoverShown = true;
     if (!data.ReadBool(isTitleHoverShown)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read isTitleHoverShown failed.");
+        TLOGE(WmsLogTag::WMS_IMMS, "Read isTitleHoverShown failed.");
         return ERR_INVALID_DATA;
     }
     bool isDockHoverShown = true;
     if (!data.ReadBool(isDockHoverShown)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read isDockHoverShown failed.");
+        TLOGE(WmsLogTag::WMS_IMMS, "Read isDockHoverShown failed.");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d",
         isTitleHoverShown, isDockHoverShown);
     WSError errCode = OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
+{
+    WSError errCode = OnRestoreMainWindow();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -812,8 +812,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
 {
     uint32_t typeId = 0;
     if (!data.ReadUint32(typeId) ||
-        typeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
-        typeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+        typeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
         return ERR_INVALID_DATA;
     }
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
@@ -1030,8 +1029,13 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = SetAutoStartPiP(isAutoStart);
-    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    uint32_t priority = 0;
+    if (!data.ReadUint32(priority)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read priority error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetAutoStartPiP(isAutoStart, priority);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

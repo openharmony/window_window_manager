@@ -371,7 +371,7 @@ public:
      * Window Immersive
      */
     WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
-    WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
+    WSError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener) override;
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
@@ -625,10 +625,10 @@ private:
     /**
      * Window Immersive
      */
-    bool UpdateSessionAvoidAreaIfNeed(const int32_t& persistentId,
+    bool UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
-    void UpdateNormalSessionAvoidArea(const int32_t& persistentId, sptr<SceneSession>& sceneSession, bool& needUpdate);
+    void UpdateNormalSessionAvoidArea(const int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
     void UpdateDarkColorModeToRS();
@@ -715,8 +715,8 @@ private:
      * UIExtension
      */
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
-    WSError CheckSubSessionStartedByExtensionAndSetDisplayId(sptr<IRemoteObject> token,
-        sptr<WindowSessionProperty> property, sptr<ISessionStage> sessionStage);
+    WSError CheckSubSessionStartedByExtensionAndSetDisplayId(const sptr<IRemoteObject>& token,
+        const sptr<WindowSessionProperty>& property, const sptr<ISessionStage>& sessionStage);
 
     /*
      * Multi User

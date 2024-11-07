@@ -668,8 +668,7 @@ napi_value JsExtensionWindow::OnGetWindowAvoidArea(napi_env env, napi_callback_i
         uint32_t resultValue = 0;
         napi_get_value_uint32(env, nativeMode, &resultValue);
         avoidAreaType = static_cast<AvoidAreaType>(resultValue);
-        errCode = ((avoidAreaType > AvoidAreaType::TYPE_NAVIGATION_INDICATOR) ||
-                   (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ?
+        errCode = avoidAreaType >= AvoidAreaType::TYPE_END ?
                   WmErrorCode::WM_ERROR_INVALID_PARAM : WmErrorCode::WM_OK;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
