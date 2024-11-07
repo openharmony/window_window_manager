@@ -531,13 +531,13 @@ int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageP
 int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
-    SessionInfoBean info;
     std::string deviceId = Str16ToStr8(data.ReadString16());
     int32_t persistentId;
-    if (!data.ReadInt32(persistentId)) {    
+    if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
         return ERR_INVALID_DATA;
     }
+    SessionInfoBean info;
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo error");
@@ -850,6 +850,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
         TLOGE(WmsLogTag::DEFAULT, "Vector is too big!");
         return ERR_INVALID_DATA;
     }
+    std::vector<std::string> info;
     for (uint32_t i = 0; i < vectorSize; i++) {
         uint32_t curSize = data.ReadUint32();
         std::string curInfo = "";
@@ -858,7 +859,6 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
             infoPtr = reinterpret_cast<const char*>(data.ReadRawData(curSize));
             curInfo = (infoPtr) ? std::string(infoPtr, curSize) : "";
         }
-        std::vector<std::string> info;
         info.emplace_back(curInfo);
         TLOGD(WmsLogTag::DEFAULT, "InfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
     }
