@@ -408,11 +408,11 @@ int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "In");
+    TLOGD(WmsLogTag::DEFAULT, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::string label;
     if (!data.ReadString(label)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "read label failed");
+        TLOGE(WmsLogTag::DEFAULT, "read label failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetSessionLabel(token, label);
@@ -422,11 +422,11 @@ int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageP
 
 int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "In");
+    TLOGD(WmsLogTag::DEFAULT, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     if (icon == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "icon is null");
+        TLOGE(WmsLogTag::DEFAULT, "icon is null");
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetSessionIcon(token, icon);
@@ -1267,17 +1267,17 @@ int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&da
 
 int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "In!");
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In!");
     int32_t persistentId;
     if (!data.ReadInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read persistentId failed");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read persistentId failed");
         return ERR_INVALID_DATA;
     }
     Rect rect = {0, 0, 0, 0};
     WMError ret = GetCallingWindowRect(persistentId, rect);
     reply.WriteInt32(static_cast<int32_t>(ret));
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to GetCallingWindowRect(%{public}d)", persistentId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to GetCallingWindowRect(%{public}d)", persistentId);
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(rect.posX_);

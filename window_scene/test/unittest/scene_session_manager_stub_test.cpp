@@ -873,9 +873,8 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | Sm
     auto res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    uint32_t vectorSize = 0;
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    vectorSize = 90;
+    uint32_t vectorSize = 90;
     data.WriteUint32(vectorSize);
     res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_NONE);

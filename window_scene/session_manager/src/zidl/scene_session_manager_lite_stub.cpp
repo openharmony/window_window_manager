@@ -299,12 +299,12 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
     }
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo fail");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo fail");
         return ERR_INVALID_DATA;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo result fail");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo result fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
