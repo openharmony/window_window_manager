@@ -2280,14 +2280,18 @@ void Session::NotifySessionStateChange(const SessionState& state)
             WLOGFE("session is null");
             return;
         }
-        TLOGD(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
+        TLOGND(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
+        } else {
+            TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeFunc is null");
         }
 
         if (session->sessionStateChangeNotifyManagerFunc_) {
             session->sessionStateChangeNotifyManagerFunc_(session->GetPersistentId(), state);
+        } else {
+            TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeNotifyManagerFunc is null");
         }
     };
     PostTask(task, "NotifySessionStateChange");
