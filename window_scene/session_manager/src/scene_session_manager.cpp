@@ -7664,6 +7664,9 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSubSceneSession(int32_t 
         if (sceneSession == nullptr) {
             continue;
         }
+        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            continue;
+        }
         const auto& mainSession = sceneSession->GetMainSession();
         if (mainSession != nullptr && mainSession->GetWindowId() == parentWindowId) {
             subSessions.push_back(sceneSession);
