@@ -410,6 +410,29 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 }
 
+/**
+ * @tc.name: OnSetWindowRectAutoSave
+ * @tc.desc: OnSetWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnSetWindowRectAutoSave";
+    info.bundleName_ = "OnSetWindowRectAutoSave";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+
+    session->onSetWindowRectAutoSaveFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+
+    NotifySetWindowRectAutoSaveFunc func = [](bool enabled) {
+        return;
+    };
+    session->onSetWindowRectAutoSaveFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+}
 }
 }
 }

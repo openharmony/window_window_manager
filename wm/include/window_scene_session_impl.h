@@ -157,6 +157,7 @@ public:
     WMError Restore() override;
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
+    WMError SetWindowRectAutoSave(bool enabled) override;
 
     /*
      * Free Multi Window
