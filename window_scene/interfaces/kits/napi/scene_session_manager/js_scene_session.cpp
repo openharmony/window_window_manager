@@ -332,15 +332,15 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     if (sessionchangeCallback != nullptr) {
         if (session != nullptr) {
             session->RegisterSessionChangeCallback(sessionchangeCallback);
+            session->RegisterClearCallbackMapCallback([weakThis = wptr(this)](bool needRemove, int32_t persistentId) {
+                auto jsSceneSession = weakThis.promote();
+                if (!jsSceneSession) {
+                    TLOGNE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
+                    return;
+                }
+                jsSceneSession->ClearCbMap(needRemove, persistentId);
+            });
         }
-        sessionchangeCallback->clearCallbackFunc_ = [weakThis = wptr(this)](bool needRemove, int32_t persistentId) {
-            auto jsSceneSession = weakThis.promote();
-            if (!jsSceneSession) {
-                TLOGE(WmsLogTag::WMS_LIFE, "clearCallbackFunc jsSceneSession is null");
-                return;
-            }
-            jsSceneSession->ClearCbMap(needRemove, persistentId);
-        };
         sessionchangeCallback_ = sessionchangeCallback;
         WLOGFD("RegisterSessionChangeCallback success");
     }
@@ -1275,26 +1275,21 @@ void JsSceneSession::ProcessIsCustomAnimationPlaying()
 
 void JsSceneSession::ProcessShowWhenLockedRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnShowWhenLocked_ = [weakThis = wptr(this)](bool showWhenLocked) {
+    const char* const where = __func__;
+    session->RegisterShowWhenLockedCallback([weakThis = wptr(this), where](bool showWhenLocked) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessShowWhenLockedRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnShowWhenLocked(showWhenLocked);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    sessionchangeCallback->OnShowWhenLocked_(session->GetShowWhenLockedFlagValue());
-    WLOGFD("ProcessShowWhenLockedRegister success");
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessRequestedOrientationChange()
@@ -1316,20 +1311,21 @@ void JsSceneSession::ProcessRequestedOrientationChange()
 
 void JsSceneSession::ProcessForceHideChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnForceHideChange_ = [weakThis = wptr(this)](bool hide) {
+    const char* const where = __func__;
+    session->RegisterForceHideChangeCallback([weakThis = wptr(this), where](bool hide) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessForceHideChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnForceHideChange(hide);
-    };
-    WLOGFD("ProcessForceHideChangeRegister success");
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::OnForceHideChange(bool hide)
