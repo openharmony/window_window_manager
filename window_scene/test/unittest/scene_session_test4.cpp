@@ -1298,9 +1298,9 @@ HWTEST_F(SceneSessionTest4, SetFrameGravity, Function | SmallTest | Level2)
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;
-    ASSERT_EQ(true, session->SetFrameGravity(WsGravity::RESIZE));
+    ASSERT_EQ(true, session->SetFrameGravity(Gravity::RESIZE));
     session->surfaceNode_ = nullptr;
-    ASSERT_EQ(false, session->SetFrameGravity(WsGravity::TOP_LEFT));
+    ASSERT_EQ(false, session->SetFrameGravity(Gravity::TOP_LEFT));
 }
 }
 }
