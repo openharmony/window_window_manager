@@ -271,7 +271,8 @@ WSError MainSession::OnRestoreMainWindow()
     return WSError::WS_OK;
 }
 
-WSError MainSession::OnMainSessionModalTypeChange(bool isModal){
+WSError MainSession::OnMainSessionModalTypeChange(bool isModal)
+{
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), isModal, where] {
         auto session = weakThis.promote();
@@ -283,7 +284,7 @@ WSError MainSession::OnMainSessionModalTypeChange(bool isModal){
         if (session->onMainSessionModalTypeChange_) {
             session->onMainSessionModalTypeChange_(isModal);
         }
-        return WSError::WS_OK;
+        return;
     };
     PostTask(task, __func__);
     return WSError::WS_OK;
