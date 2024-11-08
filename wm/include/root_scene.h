@@ -35,7 +35,7 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
-using GetSessionRectCallback = std::function<WSRect(AvoidAreaType)>;
+using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 
 class RootScene : public Window {
 public:
@@ -57,16 +57,16 @@ public:
      */
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    void SetGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback)
+    {
+        getSessionAvoidAreaByTypeCallback_ = std::move(callback);
+    }
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
-
-    void SetGetSessionRectCallback(GetSessionRectCallback&& callback)
-    {
-        getSessionRectCallback_ = std::move(callback);
-    }
 
     void SetDisplayDensity(float density)
     {
@@ -107,8 +107,6 @@ public:
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
-    WMError GetSessionRectByType(AvoidAreaType type, WSRect& rect);
-
     static sptr<RootScene> staticRootScene_;
 
 private:
@@ -126,7 +124,7 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
-    GetSessionRectCallback getSessionRectCallback_ = nullptr;
+    GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
