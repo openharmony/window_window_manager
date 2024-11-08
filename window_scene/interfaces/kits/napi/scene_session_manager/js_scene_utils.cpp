@@ -20,6 +20,7 @@
 #include <event_handler.h>
 #include <js_runtime_utils.h>
 
+#include "property/rs_properties_def.h"
 #include "root_scene.h"
 #include "window_manager_hilog.h"
 #include "window_visibility_info.h"
@@ -1228,6 +1229,50 @@ napi_value CreateJsSessionPiPControlStatus(napi_env env)
         static_cast<int32_t>(PiPControlStatus::ENABLED)));
     napi_set_named_property(env, objValue, "DISABLED", CreateJsValue(env,
         static_cast<int32_t>(PiPControlStatus::DISABLED)));
+    return objValue;
+}
+
+napi_value CreateJsSessionGravity(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+    using T = std::underlying_type_t<Gravity>;
+    napi_set_named_property(env, objValue, "CENTER", CreateJsValue(env,
+        static_cast<T>(Gravity::CENTER)));
+    napi_set_named_property(env, objValue, "TOP", CreateJsValue(env,
+        static_cast<T>(Gravity::TOP)));
+    napi_set_named_property(env, objValue, "BOTTOM", CreateJsValue(env,
+        static_cast<T>(Gravity::BOTTOM)));
+    napi_set_named_property(env, objValue, "LEFT", CreateJsValue(env,
+        static_cast<T>(Gravity::LEFT)));
+    napi_set_named_property(env, objValue, "RIGHT", CreateJsValue(env,
+        static_cast<T>(Gravity::RIGHT)));
+    napi_set_named_property(env, objValue, "TOP_LEFT", CreateJsValue(env,
+        static_cast<T>(Gravity::TOP_LEFT)));
+    napi_set_named_property(env, objValue, "TOP_RIGHT", CreateJsValue(env,
+        static_cast<T>(Gravity::TOP_RIGHT)));
+    napi_set_named_property(env, objValue, "BOTTOM_LEFT", CreateJsValue(env,
+        static_cast<T>(Gravity::BOTTOM_LEFT)));
+    napi_set_named_property(env, objValue, "BOTTOM_RIGHT", CreateJsValue(env,
+        static_cast<T>(Gravity::BOTTOM_RIGHT)));
+    napi_set_named_property(env, objValue, "RESIZE", CreateJsValue(env,
+        static_cast<T>(Gravity::RESIZE)));
+    napi_set_named_property(env, objValue, "RESIZE_ASPECT", CreateJsValue(env,
+        static_cast<T>(Gravity::RESIZE_ASPECT)));
+    napi_set_named_property(env, objValue, "RESIZE_ASPECT_TOP_LEFT", CreateJsValue(env,
+        static_cast<T>(Gravity::RESIZE_ASPECT_TOP_LEFT)));
+    napi_set_named_property(env, objValue, "RESIZE_ASPECT_BOTTOM_RIGHT", CreateJsValue(env,
+        static_cast<T>(Gravity::RESIZE_ASPECT_BOTTOM_RIGHT)));
+    napi_set_named_property(env, objValue, "RESIZE_ASPECT_FILL", CreateJsValue(env,
+        static_cast<T>(Gravity::RESIZE_ASPECT_FILL)));
+    napi_set_named_property(env, objValue, "RESIZE_ASPECT_FILL_TOP_LEFT", CreateJsValue(env,
+        static_cast<T>(Gravity::RESIZE_ASPECT_FILL_TOP_LEFT)));
+    napi_set_named_property(env, objValue, "RESIZE_ASPECT_FILL_BOTTOM_RIGHT", CreateJsValue(env,
+        static_cast<T>(Gravity::RESIZE_ASPECT_FILL_BOTTOM_RIGHT)));
     return objValue;
 }
 
