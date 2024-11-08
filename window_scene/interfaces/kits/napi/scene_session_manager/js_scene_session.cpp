@@ -1410,13 +1410,13 @@ void JsSceneSession::ProcessSessionTouchableChangeRegister()
 
 void JsSceneSession::ProcessClickRegister()
 {
-    NotifyClickFunc func = [weakThis = wptr(this)](bool requestFocus) {
+    NotifyClickFunc func = [weakThis = wptr(this)](bool requestFocus, bool isClick) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessClickRegister jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnClick(requestFocus);
+        jsSceneSession->OnClick(requestFocus, isClick);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -3092,10 +3092,11 @@ void JsSceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModalT
         "OnSessionModalTypeChange: " + std::to_string(static_cast<uint32_t>(subWindowModalType)));
 }
 
-void JsSceneSession::OnClick(bool requestFocus)
+void JsSceneSession::OnClick(bool requestFocus, bool isClick)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI] id: %{public}d, requestFocus: %{public}u", persistentId_, requestFocus);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, requestFocus, env = env_] {
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI] id: %{public}d, requestFocus: %{public}u, isClick: %{public}u",
+        persistentId_, requestFocus, isClick);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, requestFocus, isClick, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnClick jsSceneSession id:%{public}d has been destroyed",
@@ -3108,7 +3109,8 @@ void JsSceneSession::OnClick(bool requestFocus)
             return;
         }
         napi_value jsRequestFocusObj = CreateJsValue(env, requestFocus);
-        napi_value argv[] = {jsRequestFocusObj};
+        napi_value jsIsClickObj = CreateJsValue(env, isClick);
+        napi_value argv[] = {jsRequestFocusObj, jsIsClickObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnClick: requestFocus" + std::to_string(requestFocus));
