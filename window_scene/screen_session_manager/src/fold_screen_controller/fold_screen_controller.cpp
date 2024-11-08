@@ -110,7 +110,7 @@ void FoldScreenController::RecoverDisplayMode()
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}d -> %{public}d", currentDisplayMode, displayMode);
-    foldScreenPolicy_->ChangeScreenDisplayMode(displayMode, DisplayModeChangeReason::DEFAULT);
+    foldScreenPolicy_->ChangeScreenDisplayMode(displayMode, DisplayModeChangeReason::RECOVER);
 }
 
 void FoldScreenController::LockDisplayStatus(bool locked)
