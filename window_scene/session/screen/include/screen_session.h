@@ -94,7 +94,7 @@ public:
     ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId);
     ScreenSession(ScreenId screenId, const ScreenProperty& property, NodeId nodeId, ScreenId defaultScreenId);
     ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId);
-    virtual ~ScreenSession() = default;
+    virtual ~ScreenSession();
 
     void CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config);
     void SetDisplayNodeScreenId(ScreenId screenId);
