@@ -314,6 +314,8 @@ public:
     WSError SetFocusable(bool isFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
+    void SetStartingBeforeVisible(bool isStartingBeforeVisible);
+    bool GetStartingBeforeVisible() const;
     bool GetFocusable() const;
     bool IsFocused() const;
     WSError SetTouchable(bool touchable);
@@ -685,6 +687,7 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
 
     bool focusedOnShow_ = true;
+    bool isStartingBeforeVisible_ = false;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 

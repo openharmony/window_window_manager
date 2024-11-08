@@ -571,6 +571,16 @@ bool Session::IsFocusedOnShow() const
     return focusedOnShow_;
 }
 
+void Session::SetStartingBeforeVisible(bool isStartingBeforeVisible)
+{
+    isStartingBeforeVisible_ = isStartingBeforeVisible;
+}
+
+bool Session::GetStartingBeforeVisible() const
+{
+    return isStartingBeforeVisible_;
+}
+
 WSError Session::SetTouchable(bool touchable)
 {
     SetSystemTouchable(touchable);
@@ -1129,6 +1139,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         isActive_ = false;
     }
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! id: %{public}d, state: %{public}u",
             GetPersistentId(), state);
@@ -1154,6 +1165,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     bufferAvailable_ = false;
     isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
