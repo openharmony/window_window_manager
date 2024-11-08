@@ -2158,6 +2158,18 @@ void ScreenSessionManager::ExitCoordination(const std::string& reason)
     }
 }
 
+void ScreenSessionManager::TryToRecoverFoldDisplayMode(ScreenPowerStatus status)
+{
+    if (foldScreenController_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenController_ is null");
+        return;
+    }
+    if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED ||
+        status == ScreenPowerStatus::POWER_STATUS_OFF_FAKE || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
+        foldScreenController_->RecoverDisplayMode();
+    }
+}
+
 bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
     TLOGI(WmsLogTag::DMS, "[UL_POWER] enter status:%{public}u", status);
@@ -2182,10 +2194,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
     if (foldScreenController_ != nullptr) {
         CallRsSetScreenPowerStatusSync(foldScreenController_->GetCurrentScreenId(), status);
-        if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED ||
-            status == ScreenPowerStatus::POWER_STATUS_OFF_FAKE || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
-            foldScreenController_->RecoverDisplayMode();
-        }
+        TryToRecoverFoldDisplayMode(status);
     } else {
         for (auto screenId : screenIds) {
             CallRsSetScreenPowerStatusSync(screenId, status);
