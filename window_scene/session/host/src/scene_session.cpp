@@ -5252,6 +5252,10 @@ bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, fl
         NearEqual(pivotX_, pivotX) && NearEqual(pivotY_, pivotY)) {
         return false;
     }
+    if (!IsSessionForeground()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground!", GetPersistentId());
+        return false;
+    }
     Session::SetScale(scaleX, scaleY, pivotX, pivotY);
     if (sessionStage_ != nullptr) {
         Transform transform;
