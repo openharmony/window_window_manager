@@ -233,7 +233,7 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
     auto func = PIP_ACTION_MAP.find(actionName);
     if (func == PIP_ACTION_MAP.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "through pass");
-        if (aoto controller = GetActiveController()) {
+        if (auto controller = GetActiveController()) {
             controller->DoActionEvent(actionName, status);
         }
         return;
@@ -244,7 +244,7 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
 void PictureInPictureManager::DoControlEvent(PiPControlType controlType, PiPControlStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, enabled:%{public}d", controlType, status);
-    if (aoto controller = GetActiveController()) {
+    if (auto controller = GetActiveController()) {
         controller->DoControlEvent(controlType, status);
     }
 }
