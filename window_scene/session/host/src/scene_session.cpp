@@ -2559,7 +2559,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
  * move with init velocity
  * @return true: rect change notified when move
  */
-bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, const SizeChangeReason reason)
+bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason)
 {
     if (pcFoldScreenController_ == nullptr) {
         return false;
