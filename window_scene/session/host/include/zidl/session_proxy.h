@@ -102,6 +102,7 @@ public:
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError OnMainSessionModalTypeChange(bool isModal) override;
     

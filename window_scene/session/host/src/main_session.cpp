@@ -284,7 +284,6 @@ WSError MainSession::OnMainSessionModalTypeChange(bool isModal)
         if (session->onMainSessionModalTypeChange_) {
             session->onMainSessionModalTypeChange_(isModal);
         }
-        return;
     };
     PostTask(task, __func__);
     return WSError::WS_OK;
@@ -302,6 +301,6 @@ bool MainSession::IsModal() const
 
 bool MainSession::IsApplicationModal() const
 {
-    return MainSession::IsModal();
+    return IsModal();
 }
 } // namespace OHOS::Rosen

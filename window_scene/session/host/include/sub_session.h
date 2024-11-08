@@ -35,6 +35,10 @@ public:
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
+
+    /*
+     * Window Hierarchy
+     */
     bool IsTopmost() const override;
     bool IsModal() const override;
     bool IsApplicationModal() const override;
