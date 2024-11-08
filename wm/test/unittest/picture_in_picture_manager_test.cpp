@@ -167,6 +167,25 @@ HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest
 }
 
 /**
+ * @tc.name: GetActiveController
+ * @tc.desc: GetActiveController
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, GetActiveController, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipController =
+        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::SetActiveController(pipController);
+    ASSERT_EQ(pipController, PictureInPictureManager::GetActiveController());
+
+    PictureInPictureManager::SetActiveController(nullptr);
+    ASSERT_EQ(nullptr, PictureInPictureManager::GetActiveController());
+}
+
+/**
  * @tc.name: AttachAutoStartController
  * @tc.desc: AttachAutoStartController
  * @tc.type: FUNC
