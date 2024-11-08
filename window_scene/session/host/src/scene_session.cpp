@@ -5226,7 +5226,7 @@ bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, fl
         return false;
     }
     if (!IsSessionForeground()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, session is not foreground!", GetPersistentId());
+        TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground!", GetPersistentId());
         return false;
     }
     Session::SetScale(scaleX, scaleY, pivotX, pivotY);
