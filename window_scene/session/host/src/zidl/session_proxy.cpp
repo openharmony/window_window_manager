@@ -2062,7 +2062,7 @@ WSError SessionProxy::OnMainSessionModalTypeChange(bool isModal)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(isModal) {
+    if (!data.WriteBool(isModal)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Write isModal failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

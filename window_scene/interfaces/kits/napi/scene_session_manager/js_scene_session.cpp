@@ -1127,21 +1127,20 @@ void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
 
 void JsSceneSession::ProcessClickModalWindowOutsideRegister()
 {
-    const char* const where == __func__;
-    NotifyClickModalWindowOutsideFunc func = [where, weakThis = wptr(this)] {
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetClickModalWindowOutsideListener([where, weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnClickModalWindowOutside();
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr, id:%{public}d", where, persistentId_);
-        return;
-    }
-    session->SetClickModalWindowOutsideListener(func);
+    });
     TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
@@ -1353,43 +1352,39 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
 
 void JsSceneSession::ProcessSessionModalTypeChangeRegister()
 {
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, persistent id:%{public}d", persistentId_);
+        return;
+    }
     const char* const where = __func__;
-    NotifySessionModalTypeChangeFunc func =
-        [weakThis = wptr(this), where](SubWindowModalType subWindowModalType) {
+    session->SetSessionModalTypeChangeCallback([weakThis = wptr(this), where](SubWindowModalType subWindowModalType) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnSessionModalTypeChange(subWindowModalType);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, persistent id:%{public}d", persistentId_);
-        return;
-    }
-    session->SetSessionModalTypeChangeCallback(func);
+    });
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistent id:%{public}d", persistentId_);
 }
 
 void JsSceneSession::ProcessMainSessionModalTypeChangeRegister()
 {
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, persistent id:%{public}d", persistentId_);
+        return;
+    }
     const char* const where = __func__;
-    NotifyMainSessionModalTypeChangeFunc func =
-        [weakThis = wptr(this), where](bool isModal) {
+    session->SetMainSessionModalTypeChangeCallback([weakThis = wptr(this), where](bool isModal) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnMainSessionModalTypeChange(isModal);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, persistent id:%{public}d", persistentId_);
-        return;
-    }
-    session->SetMainSessionModalTypeChangeCallback(func);
+    });
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistent id:%{public}d", persistentId_);
 }
 
@@ -3134,12 +3129,11 @@ void JsSceneSession::OnMainSessionModalTypeChange(bool isModal)
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s jsCallBack is nullptr", where);
             return;
         }
-        napi_value jsMainSessionModalTypeObj = CreateJsValue(env, isModal);
-        napi_value argv[] = {jsMainSessionModalTypeObj};
+        napi_value jsMainSessionModalType = CreateJsValue(env, isModal);
+        napi_value argv[] = {jsMainSessionModalType};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task,
-        "OnMainSessionModalTypeChange: " + std::to_string(static_cast<uint32_t>(isModal)));
+    taskScheduler_->PostMainThreadTask(task, "OnMainSessionModalTypeChange: " + std::to_string(isModal));
 }
 
 void JsSceneSession::OnClick(bool requestFocus, bool isClick)

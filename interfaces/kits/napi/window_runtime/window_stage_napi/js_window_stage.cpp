@@ -567,12 +567,16 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
-    napi_value lastParam = nullptr;
     napi_value result = nullptr;
-    std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
     auto asyncTask = [where, weakWindow = wptr(window), isModal, env, task = napiAsyncTask]() {
         auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, window is null", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
         WMError ret = window->SetWindowModal(isModal);
         if (ret == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));

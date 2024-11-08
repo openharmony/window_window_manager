@@ -1348,9 +1348,19 @@ void Session::ProcessClickModalWindowOutside(int32_t posX, int32_t posY)
     }
 }
 
-void Session::SetClickModalWindowOutsideListener(const NotifyClickModalWindowOutsideFunc& func)
+void Session::SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFunc&& func)
 {
-    clickModalWindowOutsideFunc_ = func;
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or func is null", where);
+            return;
+        }
+        session->onMainSessionModalTypeChange_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_DIALOG, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    };
+    PostTask(task, __func__);
 }
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)

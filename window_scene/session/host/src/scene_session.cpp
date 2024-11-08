@@ -600,50 +600,45 @@ WSError SceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModal
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s subWindowModalType: %{public}u",
             where, static_cast<uint32_t>(subWindowModalType));
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onSessionModalTypeChange_) {
-            session->sessionChangeCallback_->onSessionModalTypeChange_(subWindowModalType);
+        if (session->onSessionModalTypeChange_) {
+            session->onSessionModalTypeChange_(subWindowModalType);
         }
-        return WSError::WS_OK;
     };
-    PostTask(task, "OnSessionModalTypeChange");
+    PostTask(task, __func__);
     return WSError::WS_OK;
 }
 
-void SceneSession::SetSessionModalTypeChangeCallback(const NotifySessionModalTypeChangeFunc& func)
+void SceneSession::SetSessionModalTypeChangeCallback(NotifySessionModalTypeChangeFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func, where]() {
+    auto task = [weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or SessionModalTypeChangeFunc is null", where);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->sessionChangeCallback_) {
-            session->sessionChangeCallback_->onSessionModalTypeChange_ = func;
-        }
-        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s SessionModalTypeChange id: %{public}d",
+        session->onSessionModalTypeChange_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s id: %{public}d",
             where, session->GetPersistentId());
         return WSError::WS_OK;
     };
-    PostTask(task, "SetSessionModalTypeChangeCallback");
+    PostTask(task, __func__);
 }
 
-void SceneSession::SetMainSessionModalTypeChangeCallback(const NotifyMainSessionModalTypeChangeFunc& func)
+void SceneSession::SetMainSessionModalTypeChangeCallback(NotifyMainSessionModalTypeChangeFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func, where] {
+    auto task = [weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session or func is null", where);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
-        session->onMainSessionModalTypeChange_ = func;
+        session->onMainSessionModalTypeChange_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where, session->GetPersistentId());
-        return WSError::WS_OK;
     };
     PostTask(task, __func__);
 }
@@ -5372,7 +5367,6 @@ void SceneSession::UnregisterSessionChangeListeners()
         }
         if (session->sessionChangeCallback_) {
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
-            session->sessionChangeCallback_->onSessionModalTypeChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
