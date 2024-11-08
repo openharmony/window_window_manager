@@ -36,7 +36,7 @@ const int32_t ADD_DISPLAY_NODE = 1;
 
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
-const int32_t TP_TYPE_MAIN = 18;
+const int32_t TP_TYPE_POWER_CTRL = 18;
 const std::string FULL_TP = "0";
 const std::string MAIN_TP = "1";
 const std::string MAIN_TP_OFF = "1,1";
@@ -83,7 +83,8 @@ void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status)
     }
 }
 
-void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
+void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode,
+    DisplayModeChangeReason reason)
 {
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
@@ -295,7 +296,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, Change ScreenId to Main.");
         screenId_ = SCREEN_ID_MAIN;
 #ifdef TP_FEATURE_ENABLE
-        RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_MAIN, MAIN_TP_OFF.c_str());
+        RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_POWER_CTRL, MAIN_TP_OFF.c_str());
 #endif
         if (ifTentMode) {
             PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
@@ -306,7 +307,8 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
 }
 
 
-void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession)
+void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
+    DisplayModeChangeReason reason)
 {
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
@@ -323,7 +325,8 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
     }
 }
 
-void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession)
+void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
+    DisplayModeChangeReason reason)
 {
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {

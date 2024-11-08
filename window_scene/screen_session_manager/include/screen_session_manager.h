@@ -232,6 +232,7 @@ public:
     void SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status);
     void TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode);
     void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status);
+    void TryToRecoverFoldDisplayMode(ScreenPowerStatus status);
 
     void SetKeyguardDrawnDoneFlag(bool flag);
 
