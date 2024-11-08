@@ -634,7 +634,7 @@ void SceneSession::SetSessionModalTypeChangeCallback(const NotifySessionModalTyp
 void SceneSession::SetMainSessionModalTypeChangeCallback(const NotifyMainSessionModalTypeChangeFunc& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func, where]() {
+    auto task = [weakThis = wptr(this), func, where] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session or func is null", where);
@@ -644,7 +644,7 @@ void SceneSession::SetMainSessionModalTypeChangeCallback(const NotifyMainSession
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where, session->GetPersistentId());
         return WSError::WS_OK;
     };
-    PostTask(task, "SetMainSessionModalTypeChangeCallback");
+    PostTask(task, __func__);
 }
 
 bool SceneSession::IsDialogWindow() const
