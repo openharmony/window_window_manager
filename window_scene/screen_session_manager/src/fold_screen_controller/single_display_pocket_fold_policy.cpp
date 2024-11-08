@@ -108,7 +108,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
     }
     ReportFoldDisplayModeChange(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
-    RSInterfaces::GetInstance().isScreenSwitching();
+    RSInterfaces::GetInstance().isScreenSwitching(true);
     ChangeScreenDisplayModeProc(screenSession, displayMode);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);

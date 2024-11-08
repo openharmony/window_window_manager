@@ -107,7 +107,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     SetdisplayModeChangeStatus(true);
     ReportFoldDisplayModeChange(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
-    RSInterfaces::GetInstance().isScreenSwitching();
+    RSInterfaces::GetInstance().isScreenSwitching(true);
     switch (displayMode) {
         case FoldDisplayMode::MAIN: {
             ChangeScreenDisplayModeToMain(screenSession);
