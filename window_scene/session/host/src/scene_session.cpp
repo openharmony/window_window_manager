@@ -4765,7 +4765,7 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+        TLOGN(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
         if (session->onLayoutFullScreenChangeFunc_) {
             session->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
         }
