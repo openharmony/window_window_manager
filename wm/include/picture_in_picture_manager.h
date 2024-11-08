@@ -56,7 +56,7 @@ public:
     static std::shared_ptr<NativeReference> innerCallbackRef_;
 
 private:
-    static sptr<PictureInPictureController> GetActiveController() const { return activeController_; }
+    static sptr<PictureInPictureController> GetActiveController() { return activeController_; }
     
     // controller in use
     static sptr<PictureInPictureController> activeController_;
