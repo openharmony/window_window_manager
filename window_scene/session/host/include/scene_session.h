@@ -648,7 +648,7 @@ private:
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
         bool isGlobal, bool needFlush);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
-    bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, const SizeChangeReason reason);
+    bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
 
     /**
      * Gesture Back

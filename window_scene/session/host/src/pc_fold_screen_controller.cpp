@@ -33,10 +33,10 @@ const RSAnimationTimingCurve MOVING_CURVE =
     RSAnimationTimingCurve::CreateSpring(static_cast<float>(MOVING_RESPONSE / 1000.0f), MOVING_DAMPING_RATIO, 0.0f);
 
 // throw-slip
-constexpr float TAN_25_DEG = 0.4663;
+constexpr float TAN_25_DEG = 0.4663; // throw slip angle = 25 deg
 constexpr float VEL_THRESHOLD = 0.13445; // 134.45 dp/s
 constexpr float THROW_SLIP_TIME = 416.0f;
-constexpr float THROW_SLIP_DAMPING_RATIO = 0.9934f;
+constexpr float THROW_SLIP_DAMPING_RATIO = 0.9934f; // stiffness = 228, damping = 30
 const RSAnimationTimingProtocol THROW_SLIP_TIMING_PROTOCOL(std::round(THROW_SLIP_TIME)); // animation time
 const RSAnimationTimingCurve THROW_SLIP_CURVE =
     RSAnimationTimingCurve::CreateSpring(THROW_SLIP_TIME / 1000.0f, THROW_SLIP_DAMPING_RATIO, 0.0f);
@@ -176,7 +176,7 @@ WSRectF PcFoldScreenController::CalculateMovingVelocity()
         return velocity;
     }
 
-    if (records_size >= 2) {   // temp use 2 points
+    if (records_size >= 2) { // temp use 2 points
         auto rect0 = movingRectRecords_[0].second;
         auto rect1 = movingRectRecords_[records_size - 1].second;
         int32_t duration = TimeHelper::GetDuration(movingRectRecords_[0].first,
@@ -201,10 +201,10 @@ void PcFoldScreenController::RemoveMoveRects()
 
 ScreenSide PcFoldScreenController::CalculateScreenSide(const WSRect& rect)
 {
-    int32_t mid_session = std::round(0.5 * rect.height_ + rect.posY_);
+    int32_t midPosY = std::round(0.5 * rect.height_ + rect.posY_);
     WSRect defaultDisplayRect = PcFoldScreenController::GetDefaultDisplayRect();
     WSRect virtualDisplayRect = PcFoldScreenController::GetVirtualDisplayRect();
-    return mid_session <= (defaultDisplayRect.posY_ + defaultDisplayRect.height_) ?
+    return midPosY <= (defaultDisplayRect.posY_ + defaultDisplayRect.height_) ?
         ScreenSide::FOLD_B : ScreenSide::FOLD_C;
 }
 

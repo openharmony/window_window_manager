@@ -1102,13 +1102,13 @@ napi_value JsSceneSessionManager::GetWindowPid(napi_env env, napi_callback_info 
 
 napi_value JsSceneSessionManager::UpdatePcFoldScreenStatus(napi_env env, napi_callback_info info)
 {
-    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdatePcFoldScreenStatus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info)
 {
-    JsSceneSessionManager *me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnResetPcFoldScreenArrangeRule(env, info) : nullptr;
 }
 
@@ -3530,7 +3530,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
         return NapiGetUndefined(env);
     }
 
-    int64_t displayId;
+    int64_t displayId { INVALID_SCREEN_ID };
     if (!ConvertFromJsValue(env, argv[0], displayId)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to displayId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
