@@ -388,11 +388,6 @@ public:
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
 
     /**
-     * Window layoutFullScreen
-     */
-    void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
-
-    /**
      * Window Visibility
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
@@ -503,6 +498,7 @@ public:
      * Window Layout
      */
     void ResetSizeChangeReasonIfDirty();
+    void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
 
     /**
      * Gesture Back
@@ -817,7 +813,7 @@ private:
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
 
     /**
-     * Window LayoutFullscreen
+     * Window Layout
      */
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
 
