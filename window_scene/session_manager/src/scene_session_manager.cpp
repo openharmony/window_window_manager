@@ -1347,7 +1347,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateAvoidAreaByType_ = [this](int32_t persistentId, AvoidAreaType type) {
         this->UpdateAvoidAreaByType(persistentId, type);
     };
-    specificCb->onUpdateOccupiedAreaIfNeed_ = [this](const int32_t& persistentId) {
+    specificCb->onUpdateOccupiedAreaIfNeed_ = [this](int32_t persistentId) {
         this->UpdateOccupiedAreaIfNeed(persistentId);
     };
     specificCb->onWindowInfoUpdate_ = [this](int32_t persistentId, WindowUpdateType type) {
@@ -8306,10 +8306,8 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
         if (needUpdate) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
         }
-        return;
     };
     taskScheduler_->PostAsyncTask(task, "UpdateAvoidArea:PID:" + std::to_string(persistentId));
-    return;
 }
 
 void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type)
@@ -8369,7 +8367,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
     taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled: PID: " + std::to_string(persistentId));
 }
 
-void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)
+void SceneSessionManager::UpdateOccupiedAreaIfNeed(int32_t persistentId)
 {
     auto task = [this, persistentId]() {
         sptr<SceneSession> keyboardSession = nullptr;
@@ -8383,7 +8381,7 @@ void SceneSessionManager::UpdateOccupiedAreaIfNeed(const int32_t& persistentId)
             }
         }
         if (keyboardSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr.");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr.");
             return;
         }
         if (keyboardSession->GetCallingSessionId() != static_cast<uint32_t>(persistentId)) {
