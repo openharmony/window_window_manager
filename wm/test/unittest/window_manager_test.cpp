@@ -1354,17 +1354,6 @@ HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTes
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: check ReleaseForegroundSessionScreenLock
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
-{
-    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
-    ASSERT_EQ(ret, WMError::WM_OK);
-}
-
-/**
  * @tc.name: NotifyVisibleWindowNumChanged01
  * @tc.desc: check NotifyVisibleWindowNumChanged
  * @tc.type: FUNC
@@ -1381,6 +1370,17 @@ HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, Function | SmallTes
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(listener);
     WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: check ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 }
 } // namespace Rosen
