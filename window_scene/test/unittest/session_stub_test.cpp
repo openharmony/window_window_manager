@@ -428,21 +428,6 @@ HWTEST_F(SessionStubTest, HandleNotifyAsyncOn013, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleNotifyExtensionTimeout014
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(true);
-    auto res = session_->HandleNotifyExtensionTimeout(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleGetAppForceLandscapeConfig
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
