@@ -132,7 +132,7 @@ DMError AbstractScreen::RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfac
     if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
         WLOGFE("Node is nullptr");
         return DMError::DM_ERROR_NULLPTR;
-    };
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find_if(nativeSurfaceNodes_.begin(), nativeSurfaceNodes_.end(), [surfaceNode]
         (std::shared_ptr<RSSurfaceNode> node) {
