@@ -33,7 +33,6 @@ public:
     static void AttachActivePipController(sptr<PictureInPictureController> pipController);
     static void DetachActivePipController(sptr<PictureInPictureController> pipController);
     static sptr<PictureInPictureController> GetPipControllerInfo(int32_t windowId);
-    static sptr<PictureInPictureController> GetActiveController();
 
     static bool HasActiveController();
     static bool IsActiveController(wptr<PictureInPictureController> pipController);
@@ -55,7 +54,9 @@ public:
     static void AutoStartPipWindow();
     static void DoDestroy();
     static std::shared_ptr<NativeReference> innerCallbackRef_;
+
 private:
+    sptr<PictureInPictureController> GetActiveController() const { return activeController_; };
     // controller in use
     static sptr<PictureInPictureController> activeController_;
     static wptr<PictureInPictureController> autoStartController_;

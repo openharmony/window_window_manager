@@ -88,11 +88,6 @@ sptr<PictureInPictureController> PictureInPictureManager::GetPipControllerInfo(i
     return windowToControllerMap_[windowId];
 }
 
-sptr<PictureInPictureController> PictureInPictureManager::GetActiveController()
-{
-    return activeController_;
-}
-
 bool PictureInPictureManager::HasActiveController()
 {
     return activeController_ != nullptr;
