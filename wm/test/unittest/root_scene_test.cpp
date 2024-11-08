@@ -221,6 +221,69 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: IsLastFrameLayoutFinished
+ * @tc.desc: IsLastFrameLayoutFinished Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, IsLastFrameLayoutFinished, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    auto ret = rootScene.IsLastFrameLayoutFinished();
+    ASSERT_EQ(ret,false);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: OnFlushUIParams
+ * @tc.desc: OnFlushUIParams Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, OnFlushUIParams, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    rootScene.OnFlushUIParams();
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: OnBundleUpdated
+ * @tc.desc: OnBundleUpdated Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    rootScene.OnBundleUpdated();
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetDisplayOrientation
+ * @tc.desc: SetDisplayOrientation Test01
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, SetDisplayOrientationTest01, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    int32_t orientation = 0;
+    rootScene.SetDisplayOrientation(orientation);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetDisplayOrientation
+ * @tc.desc: SetDisplayOrientation Test02
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    int32_t orientation = 100;
+    rootScene.SetDisplayOrientation(orientation);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
  * @tc.name: GetSessionRectByType
  * @tc.desc: GetSessionRectByType Test err
  * @tc.type: FUNC
