@@ -267,6 +267,9 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
                 rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_COMMON_NODE;
             }
             break;
+        case WindowType::WINDOW_TYPE_PIP:
+            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
+            break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
@@ -1603,7 +1606,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    
+
     WLOGFD("%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
