@@ -443,6 +443,22 @@ HWTEST_F(SessionStubTest, HandleNotifyExtensionTimeout014, Function | SmallTest 
 }
 
 /**
+ * @tc.name: HandleRequestFocus
+ * @tc.desc: sessionStub HandleRequestFocusTest
+ * @tc.type: FUNC
+ * @tc.require: #IAPLFA
+ */
+HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(false);
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleRequestFocus(data, reply);
+    ASSERT_EQ(0, res);
+}
+
+/**
  * @tc.name: HandleGetAppForceLandscapeConfig
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -476,22 +492,6 @@ HWTEST_F(SessionStubTest, HandleUpdateClientRect01, Function | SmallTest | Level
     data.WriteUint32(800);
     res = session_->HandleUpdateClientRect(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleRequestFocus
- * @tc.desc: sessionStub HandleRequestFocusTest
- * @tc.type: FUNC
- * @tc.require: #IAPLFA
- */
-HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(false);
-    ASSERT_NE(session_, nullptr);
-    auto res = session_->HandleRequestFocus(data, reply);
-    ASSERT_EQ(0, res);
 }
 }
 } // namespace Rosen
