@@ -445,10 +445,9 @@ HWTEST_F(MainSessionTest, OnMainSessionModalTypeChange, Function | SmallTest | L
     info.bundleName_ = "OnMainSessionModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    NotifyMainSessionModalTypeChangeFunc func = [](bool isModal) {
-        return WSError::WS_OK;
-    };
-    sceneSession->SetMainSessionModalTypeChangeCallback(func);
+    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+        return;
+    });
     EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
     EXPECT_EQ(WSError::WS_OK, sceneSession->OnMainSessionModalTypeChange(true));
 }
@@ -463,7 +462,7 @@ HWTEST_F(MainSessionTest, IsModal, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "IsModal";
     info.bundleName_ = "IsModal";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<MainSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     EXPECT_EQ(sceneSession->IsModal(), false);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -483,7 +482,7 @@ HWTEST_F(MainSessionTest, IsApplicationModal, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "IsApplicationModal";
     info.bundleName_ = "IsApplicationModal";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<MainSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     EXPECT_EQ(sceneSession->IsApplicationModal(), false);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();

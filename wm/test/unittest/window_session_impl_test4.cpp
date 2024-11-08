@@ -388,12 +388,12 @@ HWTEST_F(WindowSessionImplTest4, SetWindowModal, Function | SmallTest | Level2)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     WMError res = window->SetWindowModal(true);
     ASSERT_EQ(res, WMError::WM_OK);
-    res = window->SetSubWindowModal(false);
+    res = window->SetWindowModal(false);
     ASSERT_EQ(res, WMError::WM_OK);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     res = window->SetWindowModal(true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetSubWindowModal(false);
+    res = window->SetWindowModal(false);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowModal end";
 }

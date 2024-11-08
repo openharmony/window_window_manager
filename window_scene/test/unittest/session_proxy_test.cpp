@@ -688,7 +688,7 @@ HWTEST_F(SessionProxyTest, OnSetWindowRectAutoSave, Function | SmallTest | Level
 HWTEST_F(SessionProxyTest, OnMainSessionModalTypeChange, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: OnMainSessionModalTypeChange start";
-    auto sProxy = sptr<SessionProxy>::MakeSptr();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     ASSERT_EQ(sProxy->OnMainSessionModalTypeChange(true), WSError::WS_ERROR_IPC_FAILED);
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
