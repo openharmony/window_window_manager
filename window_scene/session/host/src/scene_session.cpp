@@ -340,14 +340,57 @@ void SceneSession::ClearSpecificSessionCbMap()
             TLOGE(WmsLogTag::WMS_SYSTEM, "session is null");
             return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->clearCallbackFunc_) {
-            session->sessionChangeCallback_->clearCallbackFunc_(true, session->GetPersistentId());
+        if (session->clearCallbackMapFunc_) {
+            session->clearCallbackMapFunc_(true, session->GetPersistentId());
             TLOGD(WmsLogTag::WMS_SYSTEM, "ClearCallbackMap, id: %{public}d", session->GetPersistentId());
         } else {
             TLOGE(WmsLogTag::WMS_SYSTEM, "get callback failed, id: %{public}d", session->GetPersistentId());
         }
     };
     PostTask(task, "ClearSpecificSessionCbMap");
+}
+
+void SceneSession::RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), callback = std::move(callback), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->onShowWhenLockedFunc_ = std::move(callback);
+        session->onShowWhenLockedFunc_(session->GetShowWhenLockedFlagValue());
+    };
+    PostTask(task, where);
+}
+
+void SceneSession::RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), callback = std::move(callback), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->onForceHideChangeFunc_ = std::move(callback);
+    };
+    PostTask(task, where);
+}
+
+void SceneSession::RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), callback = std::move(callback), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->clearCallbackMapFunc_ = std::move(callback);
+    };
+    PostTask(task, where);
 }
 
 WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityToken)
@@ -1322,8 +1365,8 @@ WSError SceneSession::OnNeedAvoid(bool status)
 WSError SceneSession::OnShowWhenLocked(bool showWhenLocked)
 {
     WLOGFD("SceneSession ShowWhenLocked status:%{public}d", static_cast<int32_t>(showWhenLocked));
-    if (sessionChangeCallback_ != nullptr && sessionChangeCallback_->OnShowWhenLocked_) {
-        sessionChangeCallback_->OnShowWhenLocked_(showWhenLocked);
+    if (onShowWhenLockedFunc_) {
+        onShowWhenLockedFunc_(showWhenLocked);
     }
     return WSError::WS_OK;
 }
@@ -2334,7 +2377,7 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 void SceneSession::SetSurfaceBounds(const WSRect& rect)
 {
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction) {
+    if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
@@ -2358,8 +2401,7 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect)
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
-    if (rsTransaction) {
-        RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
 }
@@ -2590,12 +2632,18 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
         return;
     }
     property->SetSnapshotSkip(isSkip);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetSkipLayer(isSkip);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipLayer(isSkip);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
@@ -2616,12 +2664,18 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     }
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
     WLOGFI("SetAbilityBGAlpha alpha8bit=%{public}u.", alpha8bit);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetAbilityBGAlpha(alpha8bit);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetAbilityBGAlpha(alpha8bit);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
@@ -2633,8 +2687,7 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
         return;
     }
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction) {
-        RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
     if (leashWinSurfaceNode != nullptr) {
@@ -2646,7 +2699,7 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
             surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), forceUIFirst);
         surfaceNode_->SetForceUIFirst(forceUIFirst);
     }
-    if (rsTransaction) {
+    if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
 }
@@ -2836,8 +2889,8 @@ void SceneSession::NotifyForceHideChange(bool hide)
         return;
     }
     property->SetForceHide(hide);
-    if (sessionChangeCallback_ && sessionChangeCallback_->OnForceHideChange_) {
-        sessionChangeCallback_->OnForceHideChange_(hide);
+    if (onForceHideChangeFunc_) {
+        onForceHideChangeFunc_(hide);
     }
     SetForceTouchable(!hide);
     if (hide) {
@@ -4371,12 +4424,18 @@ void SceneSession::SetSkipDraw(bool skip)
         WLOGFE("surfaceNode_ is null");
         return;
     }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
     surfaceNode_->SetSkipDraw(skip);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipDraw(skip);
     }
-    RSTransaction::FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 
 void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
@@ -4496,11 +4555,8 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->OnSystemBarPropertyChange_ = nullptr;
             session->sessionChangeCallback_->onIsCustomAnimationPlaying_ = nullptr;
             session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
-            session->sessionChangeCallback_->OnShowWhenLocked_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
-            session->sessionChangeCallback_->OnForceHideChange_ = nullptr;
             session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
-            session->sessionChangeCallback_->clearCallbackFunc_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
         }

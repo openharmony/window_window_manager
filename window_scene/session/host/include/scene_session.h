@@ -121,11 +121,8 @@ public:
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
-        NotifyShowWhenLockedFunc OnShowWhenLocked_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
-        ClearCallbackMapFunc clearCallbackFunc_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     };
@@ -354,6 +351,10 @@ public:
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
     void ClearSpecificSessionCbMap();
+    void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
+    void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
+    void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
+
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
     bool IsStartMoving() const;
@@ -483,6 +484,13 @@ protected:
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
+
+    /*
+     * Window Lifecycle
+     */
+    NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
+    NotifyForceHideChangeFunc onForceHideChangeFunc_;
+    ClearCallbackMapFunc clearCallbackMapFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();

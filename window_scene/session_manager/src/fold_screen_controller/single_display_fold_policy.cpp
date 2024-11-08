@@ -123,12 +123,12 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             break;
         }
     }
-    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
     }
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
 
 void SingleDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
