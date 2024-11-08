@@ -814,6 +814,27 @@ HWTEST_F(SceneSessionTest3, CompatibleFullScreenClose, Function | SmallTest | Le
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
     ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
 }
+
+/**
+ * @tc.name: SetWindowRectAutoSaveCallback
+ * @tc.desc: SetWindowRectAutoSaveCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetWindowRectAutoSaveCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowRectAutoSaveCallback";
+    info.bundleName_ = "SetWindowRectAutoSaveCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled) {
+        return;
+    };
+    sceneSession->SetWindowRectAutoSaveCallback(std::move(func1));
+    ASSERT_NE(nullptr, sceneSession->onSetWindowRectAutoSaveFunc_);
+}
 }
 }
 }
