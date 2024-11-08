@@ -56,6 +56,8 @@
 #include "publish/screen_session_publish.h"
 #include "dms_xcollie.h"
 #include "screen_sensor_plugin.h"
+#include "fold_screen_controller/super_fold_sensor_manager.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -324,6 +326,11 @@ void ScreenSessionManager::Init()
         // 多屏设备只要有屏幕亮,GetScreenPower获取的任意一块屏幕状态均是ON
         SetSensorSubscriptionEnabled();
         screenEventTracker_.RecordEvent("Dms subscribed to sensor successfully.");
+    }
+
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
+        SuperFoldSensorManager::GetInstance().RegisterHallCallback();
     }
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
