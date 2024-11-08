@@ -1464,7 +1464,7 @@ WSError SceneSession::RaiseAppMainWindowToTop()
         if (session->IsFocusedOnShow()) {
             FocusChangeReason reason = FocusChangeReason::MOVE_UP;
             session->NotifyRequestFocusStatusNotifyManager(true, true, reason);
-            session->NotifyClick();
+            session->NotifyClick(true, false);
         } else {
             session->SetFocusedOnShow(true);
         }
