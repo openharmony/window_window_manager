@@ -2182,6 +2182,10 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
     if (foldScreenController_ != nullptr) {
         CallRsSetScreenPowerStatusSync(foldScreenController_->GetCurrentScreenId(), status);
+        if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED ||
+            status == ScreenPowerStatus::POWER_STATUS_OFF_FAKE || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
+            foldScreenController_->RecoverDisplayMode();
+        }
     } else {
         for (auto screenId : screenIds) {
             CallRsSetScreenPowerStatusSync(screenId, status);
