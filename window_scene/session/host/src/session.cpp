@@ -274,6 +274,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.startSetting = info.startSetting;
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
+    sessionInfo_.callState_ = info.callState_;
 }
 
 void Session::SetScreenId(uint64_t screenId)
@@ -390,6 +391,16 @@ void Session::NotifyLayoutFinished()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnLayoutFinished();
+        }
+    }
+}
+
+void Session::NotifyRemoveBlank()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveBlank();
         }
     }
 }
@@ -1042,6 +1053,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     NotifyForeground();
 
     isTerminating_ = false;
+    isNeedSyncSessionRect_ = true;
     return WSError::WS_OK;
 }
 
@@ -1133,6 +1145,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     isActive_ = false;
     isStarting_ = false;
     bufferAvailable_ = false;
+    isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -2360,12 +2373,26 @@ WSError Session::UpdateWindowMode(WindowMode mode)
             surfaceNode_->MarkUifirstNode(true);
         }
         UpdateGestureBackEnabled();
+        UpdateGravityWhenUpdateWindowMode(mode);
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
     return WSError::WS_OK;
+}
+
+void Session::UpdateGravityWhenUpdateWindowMode(WindowMode mode)
+{
+    if ((systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode_ != nullptr) {
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            surfaceNode_->SetFrameGravity(Gravity::LEFT);
+        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
+        } else if (mode == WindowMode::WINDOW_MODE_FLOATING || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        }
+    }
 }
 
 WSError Session::SetSystemSceneBlockingFocus(bool blocking)
@@ -2516,11 +2543,23 @@ WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
+        std::lock_guard<std::mutex> lock(globalRectMutex_);
         return globalRect_;
     }
     return winRect_;
 }
 
+/** @note @window.layout */
+void Session::SetSessionGlobalRect(const WSRect& rect)
+{
+    std::lock_guard<std::mutex> lock(globalRectMutex_);
+    if (globalRect_ != rect) {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+    }
+    globalRect_ = rect;
+}
+
+/** @note @window.layout */
 WSRect Session::GetLastLayoutRect() const
 {
     return lastLayoutRect_;
@@ -3121,6 +3160,28 @@ void Session::NotifyContextTransparent()
 bool Session::IsSystemInput()
 {
     return sessionInfo_.sceneType_ == SceneType::INPUT_SCENE;
+}
+
+void Session::SetIsMidScene(bool isMidScene)
+{
+    auto task = [weakThis = wptr(this), isMidScene] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
+            return;
+        }
+        if (session->isMidScene_ != isMidScene) {
+            TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "persistentId:%{public}d, isMidScene:%{public}d",
+                session->GetPersistentId(), isMidScene);
+            session->isMidScene_ = isMidScene;
+        }
+    };
+    PostTask(task, "SetIsMidScene");
+}
+
+bool Session::GetIsMidScene() const
+{
+    return isMidScene_;
 }
 
 void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)

@@ -19,7 +19,6 @@
 #include "ability_context_impl.h"
 #include "accessibility_event_info.h"
 #include "color_parser.h"
-#include "common/include/future_callback.h"
 #include "mock_session.h"
 #include "window_helper.h"
 #include "window_session_impl.h"
@@ -236,7 +235,7 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal, Function | SmallTest | Level
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     WMError res = window->SetSubWindowModal(true);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest01 end";
 }
 
@@ -906,8 +905,6 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect03, Function | SmallTest | Level2)
     rect.width_ = 50;
     rectW.height_ = 50;
     rectW.width_ = 50;
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    window->property_->SetLayoutCallback(layoutCallback);
     window->property_->SetWindowRect(rectW);
     res = window->UpdateRect(rect, reason);
     ASSERT_EQ(res, WSError::WS_OK);

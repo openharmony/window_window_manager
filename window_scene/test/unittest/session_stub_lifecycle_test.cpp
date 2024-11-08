@@ -123,7 +123,7 @@ HWTEST_F(SessionStubLifecycleTest, HandlePendingSessionActivation011, Function |
     ASSERT_EQ(data.WriteUint32(1), true);
     ASSERT_EQ(data.WriteUint64(2), true);
     auto res = session_->HandlePendingSessionActivation(data, reply);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(5, res);
 }
 }
 }

@@ -32,12 +32,16 @@ group("unittest") {
     ":wmserver_window_manager_config_test",
     ":wmserver_window_manager_proxy_test",
     ":wmserver_window_manager_service_utils_test",
-    ":wmserver_window_manager_stub_test",
     ":wmserver_window_node_container_test",
     ":wmserver_window_snapshot_test",
-    ":wmserver_window_system_effect_test",
     ":wmserver_window_zorder_policy_test",
   ]
+  if (window_manager_use_sceneboard) {
+    deps += [
+      ":wmserver_window_manager_stub_test",
+      ":wmserver_window_system_effect_test",
+    ]
+  }
 }
 
 test_external_deps = [
