@@ -56,13 +56,15 @@
 #include "publish/screen_session_publish.h"
 #include "dms_xcollie.h"
 #include "screen_sensor_plugin.h"
+#include "fold_screen_controller/super_fold_sensor_manager.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
 const std::string SCREEN_SESSION_MANAGER_THREAD = "OS_ScreenSessionManager";
 const std::string SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD = "OS_ScreenSessionManager_ScreenPower";
 const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
-const std::string CUSTOM_SCREEN_CAPTURE_PERMISSION = "ohos.permission.CUSTOM_CAPTURE_SCREEN";
+const std::string CUSTOM_SCREEN_CAPTURE_PERMISSION = "ohos.permission.CUSTOM_SCREEN_CAPTURE";
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
@@ -153,6 +155,9 @@ ScreenSessionManager::ScreenSessionManager()
     sessionDisplayPowerController_ = new SessionDisplayPowerController(mutex_,
         std::bind(&ScreenSessionManager::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        g_foldScreenFlag = false;
+    }
     if (g_foldScreenFlag) {
         HandleFoldScreenPowerInit();
     } else {
@@ -321,6 +326,11 @@ void ScreenSessionManager::Init()
         // 多屏设备只要有屏幕亮,GetScreenPower获取的任意一块屏幕状态均是ON
         SetSensorSubscriptionEnabled();
         screenEventTracker_.RecordEvent("Dms subscribed to sensor successfully.");
+    }
+
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
+        SuperFoldSensorManager::GetInstance().RegisterHallCallback();
     }
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();

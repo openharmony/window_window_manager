@@ -312,8 +312,9 @@ int SessionStageStub::HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& 
     if (!avoidArea) {
         return ERR_INVALID_VALUE;
     }
-    uint32_t type;
-    if (!data.ReadUint32(type)) {
+    uint32_t type = 0;
+    if (!data.ReadUint32(type) ||
+        type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
         return ERR_INVALID_VALUE;
     }
     UpdateAvoidArea(avoidArea, static_cast<AvoidAreaType>(type));

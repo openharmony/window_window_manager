@@ -107,7 +107,7 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     EXPECT_EQ(session->reason_, SizeChangeReason::RECOVER);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     session->moveDragController_->isStartDrag_ = true;
     session->moveDragController_->isStartMove_ = true;
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
@@ -330,7 +330,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     session->property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
     session->ClearDialogVector();
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     SystemSessionConfig systemConfig;
     systemConfig.isSystemDecorEnable_ = false;
     systemConfig.decorModeSupportInfo_ = 2;
@@ -383,9 +383,9 @@ HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, Function | SmallTest | Level2)
     session->SetSessionRect(preRect);
 
     session->property_->SetDragEnabled(true);
-    session->SetSurfaceBounds(rect);
+    session->SetSurfaceBounds(rect, false);
     session->property_->SetDragEnabled(false);
-    session->SetSurfaceBounds(rect);
+    session->SetSurfaceBounds(rect, false);
     EXPECT_EQ(preRect, session->GetSessionRect());
 }
 
@@ -483,7 +483,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -511,7 +511,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -818,7 +818,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     session->moveDragController_ = nullptr;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     session->OnMoveDragCallback(reason);
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     session->OnMoveDragCallback(reason);
 
     reason = SizeChangeReason::DRAG_END;
@@ -831,7 +831,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     session->OnMoveDragCallback(reason);
     EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
     session->SetSessionProperty(nullptr);
     session->OnMoveDragCallback(reason);
@@ -1628,7 +1628,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, Function | SmallTest | Le
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
 
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);

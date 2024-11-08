@@ -284,7 +284,7 @@ int SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(MessageParcel& d
 
 int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetSessionInfo!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     SessionInfoBean info;
     std::u16string deviceIdU16;
     if (!data.ReadString16(deviceIdU16)) {
@@ -299,12 +299,12 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
     }
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
-        WLOGFE("GetSessionInfo error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo fail");
         return ERR_INVALID_DATA;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        WLOGFE("GetSessionInfo result error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo result fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -312,9 +312,14 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
 
 int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
 {
-    SessionInfoBean info;
-    std::string continueSessionId = data.ReadString();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    std::string continueSessionId;
+    if (!data.ReadString(continueSessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read continueSessionId fail");
+        return ERR_INVALID_DATA;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
+    SessionInfoBean info;
     WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
     if (!reply.WriteParcelable(&info)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo by continueSessionId error");
@@ -712,7 +717,12 @@ int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, M
 
 int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WMError errCode = TerminateSessionByPersistentId(persistentId);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;

@@ -41,11 +41,13 @@ void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents ev
 
 void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
+    ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(true);
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOn()");
 }
 
 void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
+    ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(false);
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOff()");
 }
 
@@ -153,7 +155,7 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
             return;
         }
         ScreenId screenId = screenSession->GetScreenId();
-        ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_);
+        ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_.load());
         ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(
             MatchSuperFoldStatusToFoldStatus(curState_.load()));
     }

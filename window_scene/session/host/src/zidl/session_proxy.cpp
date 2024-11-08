@@ -753,7 +753,7 @@ WSError SessionProxy::OnRestoreMainWindow()
 }
 
 /** @note @window.layout */
-WSError SessionProxy::UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason,
+WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
     bool isGlobal, bool isFromMoveToGlobal)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",

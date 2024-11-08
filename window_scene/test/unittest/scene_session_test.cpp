@@ -865,8 +865,8 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsFloatingWindowAppType";
+    info.abilityName_ = "NotifySessionRectChange";
+    info.bundleName_ = "NotifySessionRectChangebundle";
     info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
@@ -878,8 +878,7 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
     WSRect overlapRect = { 0, 0, 0, 0 };
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
-    sceneSession->sessionRectChangeFunc_ = [](const WSRect& rect,
-        const SizeChangeReason reason, DisplayId displayId) {
+    sceneSession->sessionRectChangeFunc_ = [](const WSRect& rect, SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
@@ -1133,13 +1132,14 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest
 {
     SessionInfo info;
     info.abilityName_ = "TransferPointerEventDecorDialog";
-    info.bundleName_ = "TransferPointerEventDecorDialogBundle";
-    info.windowType_ = 2122;
+    info.bundleName_ = "TransferPointerEventDecorDialogbundle";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     sptr<SceneSession> sceneSession =
         new (std::nothrow) SceneSession(info, specificCallback_);
-    sceneSession->moveDragController_ = new MoveDragController(12);
+    sceneSession->moveDragController_ = new MoveDragController(12, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
@@ -1162,13 +1162,14 @@ HWTEST_F(SceneSessionTest, TransferPointerEventSystemDialog, Function | SmallTes
 {
     SessionInfo info;
     info.abilityName_ = "TransferPointerEventSystemDialog";
-    info.bundleName_ = "TransferPointerEventSystemDialogBundle";
-    info.windowType_ = 2123;
+    info.bundleName_ = "TransferPointerEventSystemDialogbundle";
+    info.windowType_ = 1;
+    sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     sptr<SceneSession> sceneSession =
         new (std::nothrow) SceneSession(info, specificCallback_);
-    sceneSession->moveDragController_ = new MoveDragController(12);
+    sceneSession->moveDragController_ = new MoveDragController(12, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
@@ -1413,7 +1414,7 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     info.bundleName_ = "OnSessionEvent";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     sceneSession->moveDragController_->isStartDrag_ = true;
@@ -1915,42 +1916,42 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 2000, 1};
     rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 2000, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 500, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 500, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
 }
 
