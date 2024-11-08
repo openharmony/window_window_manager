@@ -46,7 +46,7 @@ enum class ScreenSide {
 class PcFoldScreenController : public RefBase {
 public:
     explicit PcFoldScreenController(wptr<SceneSession> weak);
-    static bool IsHalfFolded()  { return screenFoldStatus_.load() ==  ScreenFoldStatus::HALF_FOLDED; }
+    static bool IsHalfFolded()  { return screenFoldStatus_.load() == ScreenFoldStatus::HALF_FOLDED; }
 
     // screen property
     static WSError UpdateFoldScreenStatus(DisplayId displayId, ScreenFoldStatus status);
