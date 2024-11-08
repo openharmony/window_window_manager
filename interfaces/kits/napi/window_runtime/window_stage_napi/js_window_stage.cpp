@@ -124,7 +124,7 @@ napi_value JsWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindowStage::SetWindowModal(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag:WMS_MAIN, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetWindowModal(env, info) : nullptr;
 }
@@ -570,7 +570,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    const char* const where == __func__;
+    const char* const where = __func__;
     auto asyncTask = [where, weakWindow = wptr(window), isModal, env, task = napiAsyncTask]() {
         auto window = weakWindow.promote();
         WMError ret = window->SetWindowModal(isModal);
