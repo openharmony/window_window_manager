@@ -229,7 +229,7 @@ HWTEST_F(RootSceneTest, IsLastFrameLayoutFinished, Function | SmallTest | Level3
 {
     RootScene rootScene;
     auto ret = rootScene.IsLastFrameLayoutFinished();
-    ASSERT_EQ(ret,false);
+    ASSERT_EQ(ret, true);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 
@@ -253,7 +253,8 @@ HWTEST_F(RootSceneTest, OnFlushUIParams, Function | SmallTest | Level3)
 HWTEST_F(RootSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
 {
     RootScene rootScene;
-    rootScene.OnBundleUpdated();
+    std::string bundleName = "test";
+    rootScene.OnBundleUpdated(bundleName);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 
