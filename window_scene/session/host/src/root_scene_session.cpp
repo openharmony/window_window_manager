@@ -161,6 +161,9 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 GetCutoutAvoidArea(rect, avoidArea);
                 return avoidArea;
             }
+            case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
+                return avoidArea;
+            }
             case AvoidAreaType::TYPE_KEYBOARD: {
                 GetKeyboardAvoidArea(rect, avoidArea);
                 return avoidArea;
