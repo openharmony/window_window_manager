@@ -815,6 +815,9 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    RequestVsyncFunc requestVsyncFunc = [](std::shared_ptr<VsyncCallback>& callback){};
+    session->SetRequestNextVsyncFunc(requestVsyncFunc);
+    EXPECT_NE(nullptr, session->requestNextVsyncFunc_);
     session->moveDragController_ = nullptr;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     session->OnMoveDragCallback(reason);
@@ -1676,7 +1679,6 @@ HWTEST_F(SceneSessionTest5, SetRequestNextVsyncFunc01, Function | SmallTest | Le
         info1.bundleName_ = "test2";
     };
     session->SetRequestNextVsyncFunc(requestVsyncFunc1);
-    EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
     ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
 }
 
