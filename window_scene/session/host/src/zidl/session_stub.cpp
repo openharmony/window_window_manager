@@ -474,7 +474,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
         posX, posY, width, height);
     const SizeChangeReason& reason = static_cast<SizeChangeReason>(data.ReadUint32());
-    bool isGlobal = data.ReadBool();
+    auto isGlobal = data.ReadBool();
     auto isFromMoveToGlobal = false;
     if (!data.ReadBool(isFromMoveToGlobal)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isFromMoveToGlobal failed");
@@ -482,20 +482,6 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     }
     WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-/** @note @window.layout */
-int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    Rect tempRect;
-    WMError errorCode = GetGlobalScaledRect(tempRect);
-    reply.WriteInt32(tempRect.posX_);
-    reply.WriteInt32(tempRect.posY_);
-    reply.WriteUint32(tempRect.width_);
-    reply.WriteUint32(tempRect.height_);
-    reply.WriteInt32(static_cast<int32_t>(errorCode));
     return ERR_NONE;
 }
 
@@ -514,6 +500,20 @@ int SessionStub::HandleUpdateClientRect(MessageParcel& data, MessageParcel& repl
     WSRect rect = { posX, posY, width, height };
     WSError errCode = UpdateClientRect(rect);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+/** @note @window.layout */
+int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    Rect tempRect;
+    WMError errorCode = GetGlobalScaledRect(tempRect);
+    reply.WriteInt32(tempRect.posX_);
+    reply.WriteInt32(tempRect.posY_);
+    reply.WriteUint32(tempRect.width_);
+    reply.WriteUint32(tempRect.height_);
+    reply.WriteInt32(static_cast<int32_t>(errorCode));
     return ERR_NONE;
 }
 

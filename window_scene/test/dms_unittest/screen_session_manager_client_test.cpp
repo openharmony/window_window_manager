@@ -28,7 +28,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
 }
 class DmPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
 public:
@@ -181,7 +181,7 @@ HWTEST_F(ScreenSessionManagerClientTest, CheckIfNeedCennectScreen02, Function | 
 }
 
 /**
- * @tc.name: CheckIfNeedCennectScreen0403
+ * @tc.name: CheckIfNeedCennectScreen03
  * @tc.desc: CheckIfNeedCennectScreen test
  * @tc.type: FUNC
  */

@@ -597,7 +597,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HidePrivacyContentForHost, Function | S
     SessionInfo sessionInfo;
     window_->hostSession_ = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
-    ASSERT_NE(WMError::WM_OK, window_->HidePrivacyContentForHost(true));
+    ASSERT_EQ(WMError::WM_OK, window_->HidePrivacyContentForHost(true));
 }
 
 /**

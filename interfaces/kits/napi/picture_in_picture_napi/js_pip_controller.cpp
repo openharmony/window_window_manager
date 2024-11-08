@@ -16,13 +16,8 @@
 #include "js_pip_controller.h"
 
 #include "js_pip_utils.h"
-#include "js_pip_window_listener.h"
-#include "js_runtime_utils.h"
-#include "picture_in_picture_controller.h"
-#include "picture_in_picture_interface.h"
 #include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
