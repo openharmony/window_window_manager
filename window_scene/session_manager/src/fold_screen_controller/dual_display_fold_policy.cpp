@@ -144,14 +144,12 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
             break;
         }
     }
-    if (currentDisplayMode_ != displayMode) {
-        ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
-    }
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
     }
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     SetdisplayModeChangeStatus(false);
 }
 
