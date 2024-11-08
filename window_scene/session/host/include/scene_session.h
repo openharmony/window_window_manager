@@ -499,6 +499,7 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
+    bool SetFrameGravity(Gravity gravity);
 
     /**
      * Gesture Back
