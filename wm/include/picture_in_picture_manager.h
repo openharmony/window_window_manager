@@ -33,7 +33,6 @@ public:
     static void AttachActivePipController(sptr<PictureInPictureController> pipController);
     static void DetachActivePipController(sptr<PictureInPictureController> pipController);
     static sptr<PictureInPictureController> GetPipControllerInfo(int32_t windowId);
-    static sptr<PictureInPictureController> GetActiveController();
 
     static bool HasActiveController();
     static bool IsActiveController(wptr<PictureInPictureController> pipController);
