@@ -1938,6 +1938,25 @@ HWTEST_F(SceneSessionTest2, OnSessionModalTypeChange, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetMainSessionModalTypeChangeCallback
+ * @tc.desc: SetMainSessionModalTypeChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetMainSessionModalTypeChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMainSessionModalTypeChangeCallback";
+    info.bundleName_ = "SetMainSessionModalTypeChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    NotifyMainSessionModalTypeChangeFunc func = [](bool isModal) {
+        return WSError::WS_OK;
+    };
+    sceneSession->SetMainSessionModalTypeChangeCallback(func);
+    EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
+}
+
+/**
  * @tc.name: GetSubWindowModalType
  * @tc.desc: GetSubWindowModalType
  * @tc.type: FUNC

@@ -367,6 +367,39 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal02, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetWindowModal
+ * @tc.desc: SetWindowModal and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowModal, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowModal start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowModal");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WMError res = window->SetWindowModal(true);
+    ASSERT_EQ(res, WMError::WM_OK);
+    res = window->SetSubWindowModal(false);
+    ASSERT_EQ(res, WMError::WM_OK);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    res = window->SetWindowModal(true);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetSubWindowModal(false);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowModal end";
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
