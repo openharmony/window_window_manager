@@ -224,13 +224,13 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-WMError RootScene::GetSessionRectByType(AvoidAreaType type, WSRect& rect)
+WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
-    if (getSessionRectCallback_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "getSessionRectCallback is nullptr");
+    if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    rect = getSessionRectCallback_(type);
+    avoidArea = getSessionAvoidAreaByTypeCallback_(type);
     return WMError::WM_OK;
 }
 } // namespace Rosen
