@@ -1357,7 +1357,7 @@ void Session::SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFu
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or func is null", where);
             return;
         }
-        session->onMainSessionModalTypeChange_ = std::move(func);
+        session->clickModalWindowOutsideFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_DIALOG, "%{public}s id: %{public}d", where, session->GetPersistentId());
     };
     PostTask(task, __func__);

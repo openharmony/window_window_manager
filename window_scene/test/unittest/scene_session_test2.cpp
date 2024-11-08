@@ -1906,13 +1906,10 @@ HWTEST_F(SceneSessionTest2, SetSessionModalTypeChangeCallback, Function | SmallT
     info.bundleName_ = "SetSessionModalTypeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    NotifySessionModalTypeChangeFunc func = [](SubWindowModalType subWindowModalType) {
-        return WSError::WS_OK;
-    };
-    sceneSession->SetSessionModalTypeChangeCallback(func);
-    EXPECT_NE(sceneSession->sessionChangeCallback_->onSessionModalTypeChange_, nullptr);
+    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
 }
 
 /**
@@ -1927,13 +1924,10 @@ HWTEST_F(SceneSessionTest2, OnSessionModalTypeChange, Function | SmallTest | Lev
     info.bundleName_ = "OnSessionModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    NotifySessionModalTypeChangeFunc func = [](SubWindowModalType subWindowModalType) {
-        return WSError::WS_OK;
-    };
-    sceneSession->SetSessionModalTypeChangeCallback(func);
-    EXPECT_NE(sceneSession->sessionChangeCallback_->onSessionModalTypeChange_, nullptr);
+    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
     EXPECT_EQ(sceneSession->OnSessionModalTypeChange(SubWindowModalType::TYPE_WINDOW_MODALITY), WSError::WS_OK);
 }
 
@@ -1949,10 +1943,9 @@ HWTEST_F(SceneSessionTest2, SetMainSessionModalTypeChangeCallback, Function | Sm
     info.bundleName_ = "SetMainSessionModalTypeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    NotifyMainSessionModalTypeChangeFunc func = [](bool isModal) {
-        return WSError::WS_OK;
-    };
-    sceneSession->SetMainSessionModalTypeChangeCallback(func);
+    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+        return;
+    });
     EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
 }
 

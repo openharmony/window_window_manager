@@ -335,13 +335,13 @@ HWTEST_F(SubSessionTest, RectCheck, Function | SmallTest | Level1)
  * @tc.desc: IsModal function01
  * @tc.type: FUNC
  */
-HWTEST_F(SubSessionTest, IsModal, Function | SmallTest | Level2)
+HWTEST_F(SubSessionTest, IsModal01, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
     EXPECT_EQ(subSession_->IsModal(), false);
-    sceneSession->SetSessionProperty(property);
+    subSession_->SetSessionProperty(property);
     EXPECT_EQ(subSession_->IsModal(), true);
 }
 
@@ -357,7 +357,7 @@ HWTEST_F(SubSessionTest, IsApplicationModal, Function | SmallTest | Level2)
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
     EXPECT_EQ(subSession_->IsApplicationModal(), false);
-    sceneSession->SetSessionProperty(property);
+    subSession_->SetSessionProperty(property);
     EXPECT_EQ(subSession_->IsApplicationModal(), true);
 }
 }
