@@ -42,7 +42,7 @@ using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<Scene
     WindowType type, DisplayId displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
 using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
-using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
+using UpdateOccupiedAreaIfNeedCallback = std::function<void(int32_t persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;

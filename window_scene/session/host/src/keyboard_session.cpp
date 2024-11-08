@@ -193,7 +193,6 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 
 void KeyboardSession::OnCallingSessionUpdated()
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
     if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
@@ -212,7 +211,8 @@ void KeyboardSession::OnCallingSessionUpdated()
     WSRect callingSessionRect = callingSession->GetSessionRect();
     NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, panelRect);
 
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "callSession Rect: %{public}s", callingSessionRect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, callSession Rect: %{public}s",
+        GetPersistentId(), callingSessionRect.ToString().c_str());
 }
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity)
