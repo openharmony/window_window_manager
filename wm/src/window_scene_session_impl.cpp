@@ -1377,10 +1377,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
 
     DestroySubWindow();
-	{
+    {
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
-	}
+    }
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = nullptr;
@@ -1499,9 +1499,9 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
         requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
         windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
         newRect.width_, newRect.height_);
- 
+
     property_->SetRequestRect(newRect);
- 
+
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
@@ -4210,7 +4210,7 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode()) || IsFreeMultiWindowMode()) {
         TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -4220,7 +4220,7 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->SetGestureBackEnabled(enable);
 }
- 
+
 WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
 {
     if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
