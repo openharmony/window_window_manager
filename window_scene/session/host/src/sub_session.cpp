@@ -14,12 +14,7 @@
  */
 
 #include "session/host/include/sub_session.h"
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
-
-#include "common/include/session_permission.h"
-#include "key_event.h"
 #include "window_helper.h"
-#include "parameters.h"
 #include "pointer_event.h"
 #include "window_manager_hilog.h"
 
