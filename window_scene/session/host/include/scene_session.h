@@ -669,7 +669,7 @@ private:
     WSError RaiseAppMainWindowToTop() override;
     void SetSurfaceBoundsWithAnimation(
         std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve> animationParam,
-        const WSRect& rect, std::function<void()> finishCallback = nullptr,
+        const WSRect& rect, std::function<void()>&& finishCallback = nullptr,
         bool isGlobal = false, bool needFlush = true
     );
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);

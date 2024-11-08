@@ -568,7 +568,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, SessionEventParam param
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s invalid callback", where);
             return WSError::WS_DO_NOTHING;
         }
-        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
+        TLOGNI(WmsLogTag::WMS_MAIN,
+            "%{public}s event: %{public}d, param:[%{public}d,%{public}d,%{public}d,%{public}d]",
+            where, static_cast<int32_t>(event),
+            param.pointerX_, param.pointerY_, param.sessionWidth_, param.sessionHeight_);
         session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), param);
         return WSError::WS_OK;
     };
@@ -2496,8 +2499,10 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     const char* const funcName = __func__;
     if (pcFoldScreenController_ && pcFoldScreenController_->IsHalfFolded()) {
         SetSurfaceBoundsWithAnimation(
-            std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
-                            pcFoldScreenController_->GetMovingTimingCurve()),
+            std::make_pair(
+                pcFoldScreenController_->GetMovingTimingProtocol(),
+                pcFoldScreenController_->GetMovingTimingCurve()
+            ),
             globalRect, nullptr, isGlobal, needFlush);
         if (reason == SizeChangeReason::MOVE) {
             pcFoldScreenController_->RecordMoveRects(rect);
@@ -2550,7 +2555,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         } else {
             NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
         }
-     }
+    }
     moveDragController_->ResetCrossMoveDragProperty();
     OnSessionEvent(SessionEvent::EVENT_END_MOVE);
 }
@@ -2568,7 +2573,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "no throw slip");
         return false;
-     }
+    }
 
     WSRect endRect = rect;
     std::function<void()> finishCallback = nullptr;
@@ -2579,7 +2584,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         finishCallback = [weakThis = wptr(this), rect]() {
             auto session = weakThis.promote();
             if (session == nullptr) {
-                TLOGW(WmsLogTag::WMS_EVENT, "session is nullptr");
+                TLOGW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
                 return;
             }
             session->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_WITHOUT_ANIMATION,
@@ -2587,9 +2592,11 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         };
     }
     SetSurfaceBoundsWithAnimation(
-        std::make_pair(pcFoldScreenController_->GetThrowSlipTimingProtocol(),
-                        pcFoldScreenController_->GetThrowSlipTimingCurve()),
-        endRect, finishCallback);
+        std::make_pair(
+            pcFoldScreenController_->GetThrowSlipTimingProtocol(),
+            pcFoldScreenController_->GetThrowSlipTimingCurve()
+        ),
+        endRect, std::move(finishCallback));
     return needSetFullScreen;
 }
 
@@ -2722,7 +2729,7 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 
 void SceneSession::SetSurfaceBoundsWithAnimation(
     std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve> animationParam,
-    const WSRect& rect, std::function<void()> finishCallback, bool isGlobal, bool needFlush)
+    const WSRect& rect, std::function<void()>&& finishCallback, bool isGlobal, bool needFlush)
 {
     auto weakThis = wptr(this);
     auto interiaFunc = [weakThis, rect, isGlobal, needFlush]() {
@@ -2733,7 +2740,7 @@ void SceneSession::SetSurfaceBoundsWithAnimation(
         }
         session->SetSurfaceBounds(rect, isGlobal, needFlush);
     };
-    RSNode::Animate(animationParam.first, animationParam.second, interiaFunc, finishCallback);
+    RSNode::Animate(animationParam.first, animationParam.second, interiaFunc, std::move(finishCallback));
 }
 
 void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)

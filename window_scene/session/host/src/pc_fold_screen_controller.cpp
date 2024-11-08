@@ -14,11 +14,11 @@
  */
 
 #include "session/host/include/pc_fold_screen_controller.h"
-#include "session/host/include/scene_session.h"
-#include "wm_common_inner.h"
-#include "window_manager_hilog.h"
-#include "wm_math.h"
 #include "display_manager.h"
+#include "session/host/include/scene_session.h"
+#include "window_manager_hilog.h"
+#include "wm_common_inner.h"
+#include "wm_math.h"
 
 namespace OHOS::Rosen {
 
@@ -71,7 +71,7 @@ WSError PcFoldScreenController::UpdateFoldScreenStatus(DisplayId displayId, Scre
     displayId_.store(displayId);
     auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get display");
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to get display");
         return WSError::WS_OK;
     }
     vpr_.store(display->GetVirtualPixelRatio());
@@ -101,7 +101,8 @@ RSAnimationTimingCurve PcFoldScreenController::GetThrowSlipTimingCurve()
 
 void PcFoldScreenController::RecordStartRect(const WSRect& rect, bool isStartFullScreen)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "rect: %{public}s", rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "rect: %{public}s, isStartFullScreen: %{public}d",
+        rect.ToString().c_str(), isStartFullScreen);
     startRect_ = rect;
     isStartFullScreen_ = isStartFullScreen;
 }
@@ -115,12 +116,14 @@ void PcFoldScreenController::RecordMoveRects(const WSRect& rect)
 {
     auto time = std::chrono::high_resolution_clock::now();
     movingRectRecords_.push_back(std::make_pair(time, rect));
-    TLOGD(WmsLogTag::WMS_LAYOUT, "rect: %{public}s", rect.ToString().c_str());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rect: %{public}s", GetPersistentId(), rect.ToString().c_str());
     // pop useless record
     while (movingRectRecords_.size() > MOVING_RECORDS_SIZE_LIMIT ||
         TimeHelper::GetDuration(movingRectRecords_[0].first, time) > MOVING_RECORDS_TIME_LIMIT) {
         movingRectRecords_.erase(movingRectRecords_.begin());
     }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "records size: %{public}d, duration: %{public}d", movingRectRecords_.size(),
+        TimeHelper::GetDuration(movingRectRecords_[0].first, movingRectRecords_[movingRectRecords_.size() - 1].first));
 }
 
 bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
@@ -171,16 +174,16 @@ int32_t PcFoldScreenController::GetTitleHeight() const
 WSRectF PcFoldScreenController::CalculateMovingVelocity()
 {
     WSRectF velocity = { 0.0f, 0.0f, 0.0f, 0.0f };
-    int32_t records_size = movingRectRecords_.size();
-    if (records_size <= 1) {
+    int32_t recordsSize = movingRectRecords_.size();
+    if (recordsSize <= 1) {
         return velocity;
     }
 
-    if (records_size >= 2) { // temp use 2 points
+    if (recordsSize >= 2) { // temp use 2 points
         auto rect0 = movingRectRecords_[0].second;
-        auto rect1 = movingRectRecords_[records_size - 1].second;
+        auto rect1 = movingRectRecords_[recordsSize - 1].second;
         int32_t duration = TimeHelper::GetDuration(movingRectRecords_[0].first,
-            movingRectRecords_[records_size - 1].first);
+            movingRectRecords_[recordsSize - 1].first);
         if (duration <= 1) {
             return velocity;
         }
@@ -201,7 +204,7 @@ void PcFoldScreenController::RemoveMoveRects()
 
 ScreenSide PcFoldScreenController::CalculateScreenSide(const WSRect& rect)
 {
-    int32_t midPosY = std::round(0.5 * rect.height_ + rect.posY_);
+    int32_t midPosY = rect.height_ / 2 + rect.posY_; // 2: center
     WSRect defaultDisplayRect = PcFoldScreenController::GetDefaultDisplayRect();
     WSRect virtualDisplayRect = PcFoldScreenController::GetVirtualDisplayRect();
     return midPosY <= (defaultDisplayRect.posY_ + defaultDisplayRect.height_) ?
@@ -289,6 +292,7 @@ void PcFoldScreenController::ResizeToFullScreen(WSRect& rect, int32_t topAvoidHe
         return;
     }
 
+    ResetArrangeRule(side);
     // calculate limit rect
     WSRect defaultDisplayRect = PcFoldScreenController::GetDefaultDisplayRect();
     WSRect virtualDisplayRect = PcFoldScreenController::GetVirtualDisplayRect();
@@ -357,8 +361,8 @@ void PcFoldScreenController::MappingRectInScreenSideWithArrangeRule(ScreenSide s
 void PcFoldScreenController::ApplyInitArrangeRule(WSRect& rect, std::atomic<WSRect>& lastArrangedRect,
     const WSRect& limitRect, int32_t titleHeight)
 {
-    rect.posX_ = std::max(limitRect.posX_, limitRect.posX_ + (limitRect.width_ - rect.width_) / 2); // center align
-    rect.posY_ = std::max(limitRect.posY_, limitRect.posY_ + (limitRect.height_ - rect.height_) / 2); // center align
+    rect.posX_ = std::max(limitRect.posX_, limitRect.posX_ + (limitRect.width_ - rect.width_) / 2); // 2: center align
+    rect.posY_ = std::max(limitRect.posY_, limitRect.posY_ + (limitRect.height_ - rect.height_) / 2); // 2: center align
     lastArrangedRect.store({ rect.posX_, rect.posY_,
         RULE_TRANS_X * vpr_.load(), titleHeight * vpr_.load()});
 }
