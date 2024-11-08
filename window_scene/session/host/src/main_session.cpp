@@ -273,19 +273,19 @@ WSError MainSession::OnRestoreMainWindow()
 
 WSError MainSession::OnMainSessionModalTypeChange(bool isModal){
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), isModal, where]() {
+    auto task = [weakThis = wptr(this), isModal, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
-        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s main window isModal:%{public}d", where, isModal);
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s main window isModal:%{public}d", where, isModal);
         if (session->onMainSessionModalTypeChange_) {
             session->onMainSessionModalTypeChange_(isModal);
         }
         return WSError::WS_OK;
     };
-    PostTask(task, "OnMainSessionModalTypeChange");
+    PostTask(task, __func__);
     return WSError::WS_OK;
 }
 

@@ -124,7 +124,7 @@ napi_value JsWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
 
 napi_value JsWindowStage::SetWindowModal(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]SetWindowModal");
+    TLOGD(WmsLogTag:WMS_MAIN, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetWindowModal(env, info) : nullptr;
 }
@@ -559,19 +559,20 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
     }
     bool isModal = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isModal)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to boolean");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
     }
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     const char* const where == __func__;
-    auto asyncTask = [where, window, isModal, env, task = napiAsyncTask]() {
+    auto asyncTask = [where, weakWindow = wptr(window), isModal, env, task = napiAsyncTask]() {
+        auto window = weakWindow.promote();
         WMError ret = window->SetWindowModal(isModal);
         if (ret == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));

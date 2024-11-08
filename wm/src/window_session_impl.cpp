@@ -2011,7 +2011,6 @@ WMError WindowSessionImpl::SetWindowModal(bool isModal)
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    SubWindowModalType subWindowModalType = SubWindowModalType::TYPE_NORMAL;
     hostSession->OnMainSessionModalTypeChange(isModal);
     return modalRet;
 }
