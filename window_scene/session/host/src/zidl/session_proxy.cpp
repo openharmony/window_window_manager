@@ -2076,7 +2076,7 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadUint32();
+    uint32_t ret = reply.ReadUint32();
     return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

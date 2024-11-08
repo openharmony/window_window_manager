@@ -2073,7 +2073,6 @@ HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | Sm
  * @tc.desc: SetWindowRectAutoSave
  * @tc.type: FUNC
  */
-
 HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
