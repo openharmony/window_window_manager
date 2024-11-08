@@ -5108,7 +5108,7 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{pubilc}s: jsSceneSession is null", where);
-            return ;
+            return;
         }
         jsSceneSession->OnSetWindowRectAutoSave(enabled);
     });
