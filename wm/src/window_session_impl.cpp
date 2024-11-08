@@ -2028,7 +2028,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     height = uiContent->GetContainerModalTitleHeight();
     if (height == -1) {
         height = 0;
-        TLOGE(WmsLogTag::DEFAULT, "Get app window decor height failed");
+        TLOGW(WmsLogTag::DEFAULT, "Get app window decor height failed");
         return WMError::WM_OK;
     }
     float vpr = 0.f;
