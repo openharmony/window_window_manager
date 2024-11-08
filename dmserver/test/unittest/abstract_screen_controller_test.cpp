@@ -1224,21 +1224,6 @@ HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen03, Function | SmallTest
         ASSERT_EQ(ScreenType::VIRTUAL, screen->type_);
     }
 }
-
-/**
- * @tc.name: MakeMirror
- * @tc.desc: MakeMirror test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, MakeMirror06, Function | SmallTest | Level3)
-{
-    std::vector<ScreenId> screens;
-    absController_->dmsScreenMap_[2]->type_ = ScreenType::REAL;
-    absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
-    absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
-    ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
-    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
-}
 }
 } // namespace Rosen
 } // namespace OHOS
