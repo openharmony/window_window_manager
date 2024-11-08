@@ -2149,6 +2149,14 @@ public:
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Set to automatically save the window rect.
+     *
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the rect of host window.
      *
      * @param hostWindowId window Id of the host window.

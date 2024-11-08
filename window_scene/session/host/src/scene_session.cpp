@@ -4786,7 +4786,7 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
         if (session->onLayoutFullScreenChangeFunc_) {
             session->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
         }
@@ -5460,5 +5460,21 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
         session->isNeedSyncSessionRect_ = needSync;
     };
     PostTask(task, "SetNeedSyncSessionRect");
+}
+
+void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session or onSetWindowRectAutoSaveFunc is null");
+            return ;
+        }
+        session->onSetWindowRectAutoSaveFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where,
+            session->GetPersistentId());
+    };
+    PostTask(task, __func__);
 }
 } // namespace OHOS::Rosen

@@ -2437,6 +2437,25 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (!windowSystemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->OnSetWindowRectAutoSave(enabled);
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::StartMove()
 {
     WLOGFI("id: %{public}d", GetPersistentId());

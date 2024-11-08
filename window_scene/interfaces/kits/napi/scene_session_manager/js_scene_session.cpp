@@ -76,6 +76,7 @@ const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 const std::string SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
+const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -138,6 +139,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
     {PRIVACY_MODE_CHANGE_CB,           ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
     {SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB, ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB},
+    {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -665,7 +667,7 @@ void JsSceneSession::ProcessLayoutFullScreenChangeRegister()
     auto layoutFullScreenChangeCallback = [weakThis = wptr(this)](bool isLayoutFullScreen) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLayoutFullScreenChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessLayoutFullScreenChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnLayoutFullScreenChange(isLayoutFullScreen);
@@ -2345,6 +2347,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::PRIVACY_MODE_CHANGE_CB):
             ProcessPrivacyModeChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB):
+            ProcessSetWindowRectAutoSaveRegister();
             break;
         default:
             break;
@@ -5138,5 +5143,46 @@ napi_value JsSceneSession::OnSetNeedSyncSessionRect(napi_env env, napi_callback_
     }
     session->SetNeedSyncSessionRect(needSync);
     return NapiGetUndefined(env);
+}
+
+void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{pubilc}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSetWindowRectAutoSave(enabled);
+    });
+    TLOGI(WmsLogTag::WMS_MAIN, "success");
+}
+
+void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_RECT_AUTO_SAVE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsEnabled = CreateJsValue(env, enabled);
+        napi_value argv[] = {jsEnabled};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 } // namespace OHOS::Rosen

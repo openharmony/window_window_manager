@@ -93,6 +93,7 @@ using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
 class SceneSession : public Session {
 public:
@@ -216,6 +217,11 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+
+    /*
+     * PC Window
+     */
+    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
 
     /**
      * PiP Window
@@ -390,11 +396,6 @@ public:
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
 
     /**
-     * Window layoutFullScreen
-     */
-    void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
-
-    /**
      * Window Visibility
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
@@ -505,6 +506,7 @@ public:
      * Window Layout
      */
     void ResetSizeChangeReasonIfDirty();
+    void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
 
     /**
      * Gesture Back
@@ -598,6 +600,11 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
+    /*
+     * PC Window
+     */
+    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
+    
     /*
      * Window Layout
      */
@@ -821,7 +828,7 @@ private:
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
 
     /**
-     * Window LayoutFullscreen
+     * Window Layout
      */
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
 

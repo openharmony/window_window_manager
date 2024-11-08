@@ -220,6 +220,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSessionModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_SESSION_MODAL_TYPE_CHANGE):
             return HandleMainSessionModalTypeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE):
+            return HandleSetWindowRectAutoSave(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1256,6 +1258,19 @@ int SessionStub::HandleMainSessionModalTypeChange(MessageParcel& data, MessagePa
     TLOGD(WmsLogTag::WMS_MAIN, "isModal: %{public}d", isModal);
     WSError errCode = OnMainSessionModalTypeChange(isModal);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply)
+{
+    bool enabled = true;
+    if (!data.ReadBool(enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
+    WSError errCode = OnSetWindowRectAutoSave(enabled);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
