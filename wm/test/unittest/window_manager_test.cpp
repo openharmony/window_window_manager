@@ -936,7 +936,7 @@ HWTEST_F(WindowManagerTest, RegisterAndOnVisibleWindowNumChanged, Function | Sma
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibleWindowNumChangedListener(listener));
     ASSERT_EQ(1, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
- 
+
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     VisibleWindowNumInfo newInfo;
     newInfo.displayId = 0;
@@ -1173,18 +1173,6 @@ HWTEST_F(WindowManagerTest, GetWindowStyleType, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: check ReleaseForegroundSessionScreenLock
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
-{
-    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
-    ASSERT_EQ(ret, WMError::WM_OK);
-}
-
-
-/**
  * @tc.name: ShiftAppWindowFocus01
  * @tc.desc: check ShiftAppWindowFocus
  * @tc.type: FUNC
@@ -1382,6 +1370,17 @@ HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, Function | SmallTes
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(listener);
     WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
+}
+
+/**
+ * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.desc: check ReleaseForegroundSessionScreenLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+{
+    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 }
 } // namespace Rosen
