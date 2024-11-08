@@ -416,12 +416,18 @@ int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& 
 
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_EVENT, "In!");
     uint32_t eventId = 0;
     if (!data.ReadUint32(eventId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
+    TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
+    if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
+        eventId > static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Invalid eventId: %{public}d", eventId);
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -429,8 +435,13 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 
 int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t eventId = data.ReadUint32();
-    WLOGFD("HandleSyncSessionEvent eventId: %{public}d", eventId);
+    TLOGD(WmsLogTag::WMS_EVENT, "In!");
+    uint32_t eventId;
+    if (!data.ReadUint32(eventId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
     WSError errCode = SyncSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -812,8 +823,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
 {
     uint32_t typeId = 0;
     if (!data.ReadUint32(typeId) ||
-        typeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
-        typeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+        typeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
         return ERR_INVALID_DATA;
     }
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);

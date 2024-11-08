@@ -467,7 +467,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
 {
     WLOGFI("[NAPI]");
     NotifyWindowDragHotAreaFunc func = [weakThis = wptr(this)](
-        DisplayId displayId, uint32_t type, const SizeChangeReason reason) {
+        DisplayId displayId, uint32_t type, SizeChangeReason reason) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessWindowDragHotAreaRegister jsSceneSession is null");
@@ -483,7 +483,7 @@ void JsSceneSession::ProcessWindowDragHotAreaRegister()
     session->SetWindowDragHotAreaListener(func);
 }
 
-void JsSceneSession::OnWindowDragHotArea(DisplayId displayId, uint32_t type, const SizeChangeReason reason)
+void JsSceneSession::OnWindowDragHotArea(DisplayId displayId, uint32_t type, SizeChangeReason reason)
 {
     WLOGFI("[NAPI]");
 
@@ -1030,7 +1030,7 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
     NotifySessionRectChangeFunc func = [weakThis = wptr(this)](const WSRect& rect,
-        const SizeChangeReason reason, const DisplayId displayId = DISPLAY_ID_INVALID) {
+        SizeChangeReason reason, DisplayId displayId = DISPLAY_ID_INVALID) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionRectChangeRegister jsSceneSession is null");
@@ -1288,13 +1288,14 @@ void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
 void JsSceneSession::ProcessSessionExceptionRegister()
 {
     WLOGFD("in");
-    NotifySessionExceptionFunc func = [weakThis = wptr(this)](const SessionInfo& info, bool needRemoveSession) {
+    NotifySessionExceptionFunc func = [weakThis = wptr(this)](
+        const SessionInfo& info, bool needRemoveSession, bool startFail) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionExceptionRegister jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnSessionException(info, needRemoveSession);
+        jsSceneSession->OnSessionException(info, needRemoveSession, startFail);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -1432,13 +1433,13 @@ void JsSceneSession::ProcessSessionTouchableChangeRegister()
 
 void JsSceneSession::ProcessClickRegister()
 {
-    NotifyClickFunc func = [weakThis = wptr(this)](bool requestFocus) {
+    NotifyClickFunc func = [weakThis = wptr(this)](bool requestFocus, bool isClick) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessClickRegister jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnClick(requestFocus);
+        jsSceneSession->OnClick(requestFocus, isClick);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -2838,7 +2839,7 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
 }
 
 /** @note @window.layout */
-void JsSceneSession::OnSessionRectChange(const WSRect& rect, const SizeChangeReason reason, const DisplayId displayId)
+void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId)
 {
     if (reason != SizeChangeReason::MOVE && reason != SizeChangeReason::PIP_RESTORE && rect.IsEmpty()) {
         WLOGFD("Rect is empty, there is no need to notify");
@@ -3141,10 +3142,11 @@ void JsSceneSession::OnMainSessionModalTypeChange(bool isModal)
         "OnMainSessionModalTypeChange: " + std::to_string(static_cast<uint32_t>(isModal)));
 }
 
-void JsSceneSession::OnClick(bool requestFocus)
+void JsSceneSession::OnClick(bool requestFocus, bool isClick)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI] id: %{public}d, requestFocus: %{public}u", persistentId_, requestFocus);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, requestFocus, env = env_] {
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI] id: %{public}d, requestFocus: %{public}u, isClick: %{public}u",
+        persistentId_, requestFocus, isClick);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, requestFocus, isClick, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnClick jsSceneSession id:%{public}d has been destroyed",
@@ -3157,7 +3159,8 @@ void JsSceneSession::OnClick(bool requestFocus)
             return;
         }
         napi_value jsRequestFocusObj = CreateJsValue(env, requestFocus);
-        napi_value argv[] = {jsRequestFocusObj};
+        napi_value jsIsClickObj = CreateJsValue(env, isClick);
+        napi_value argv[] = {jsRequestFocusObj, jsIsClickObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnClick: requestFocus" + std::to_string(requestFocus));
@@ -3276,7 +3279,6 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->SetSessionInfo(info);
         }
     }
-    sceneSession->SetSessionInfoProcessOptions(info.processOptions);
     return sceneSession;
 }
 
@@ -3575,13 +3577,14 @@ void JsSceneSession::UpdateSessionIcon(const std::string& iconPath)
     taskScheduler_->PostMainThreadTask(task, "UpdateSessionIcon");
 }
 
-void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemoveSession)
+void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemoveSession, bool startFail)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s",
-        info.bundleName_.c_str(), info.abilityName_.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName = %{public}s, abilityName = %{public}s, startFail = %{public}d",
+        info.bundleName_.c_str(), info.abilityName_.c_str(), startFail);
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, needRemoveSession, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_,
+        sessionInfo, needRemoveSession, startFail, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnSessionException jsSceneSession id:%{public}d has been destroyed",
@@ -3599,11 +3602,12 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         napi_value jsNeedRemoveSession = CreateJsValue(env, needRemoveSession);
+        napi_value jsStartFail = CreateJsValue(env, startFail);
         if (jsSessionInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]target session info is nullptr");
             return;
         }
-        napi_value argv[] = {jsSessionInfo, jsNeedRemoveSession};
+        napi_value argv[] = {jsSessionInfo, jsNeedRemoveSession, jsStartFail};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionException, name" + info.bundleName_);

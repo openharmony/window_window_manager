@@ -497,9 +497,9 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()
     // on main screen
     auto taskScreenOnMainOn = [=] {
         TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination: screenIdMain ON.");
+        NotifyRefreshRateEvent(true);
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
         PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
-        NotifyRefreshRateEvent(true);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMainOn, "ScreenToCoordinationTask");
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, ADD_DISPLAY_NODE);
@@ -539,7 +539,7 @@ void SingleDisplayPocketFoldPolicy::ExitCoordination()
 void SingleDisplayPocketFoldPolicy::NotifyRefreshRateEvent(bool isEventStatus)
 {
     EventInfo eventInfo = {
-        .eventName = "VOTER_VIRTUALDISPLAY",
+        .eventName = "VOTER_MULTISELFOWNEDSCREEN",
         .eventStatus = isEventStatus,
         .minRefreshRate = 60,
         .maxRefreshRate = 60,

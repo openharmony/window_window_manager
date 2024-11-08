@@ -42,7 +42,7 @@ using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<Scene
     WindowType type, DisplayId displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
 using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
-using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
+using UpdateOccupiedAreaIfNeedCallback = std::function<void(int32_t persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
@@ -187,7 +187,7 @@ public:
         bool isKeyboardShow, bool isRotating) {};
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason,
+    WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
         bool isGlobal = false, bool isFromMoveToGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
@@ -198,7 +198,8 @@ public:
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
     WSError NotifySessionExceptionInner(
-        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false, bool isFromClient = false);
+        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false,
+        bool isFromClient = false, bool startFail = false);
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
 
@@ -522,7 +523,7 @@ public:
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
-        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -630,12 +631,12 @@ private:
     /**
      * Move Drag
      */
-    void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
-    void OnMoveDragCallback(const SizeChangeReason reason);
+    void HandleMoveDragSurfaceNode(SizeChangeReason reason);
+    void OnMoveDragCallback(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
-    void HandleMoveDrag(WSRect& rect, WSRect& globalRect, const SizeChangeReason reason,
+    void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
         bool isGlobal, bool needFlush);
-    void HandleMoveDragEnd(WSRect& rect, const SizeChangeReason reason);
+    void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
 
     /**
      * Gesture Back
@@ -645,23 +646,23 @@ private:
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
-    void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
-        bool isSupportDragInPcCompatibleMode, bool isGlobal = false, bool needFlush = true);
-    void HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason,
+    void HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason,
+        bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush = true);
+    void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
-    void SetSurfaceBounds(const WSRect& rect, bool isGlobal = false, bool needFlush = true);
+    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason);
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason);
     void UpdateRectForDrag(WSRect& rect);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);

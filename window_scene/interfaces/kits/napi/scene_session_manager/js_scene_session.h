@@ -275,7 +275,7 @@ private:
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect,
-        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority);
     void OnRaiseToTop();
@@ -289,13 +289,13 @@ private:
     void OnMainWindowTopmostChange(bool isTopmost);
     void OnSessionModalTypeChange(SubWindowModalType subWindowModalType);
     void OnMainSessionModalTypeChange(bool isModal);
-    void OnClick(bool requestFocus);
+    void OnClick(bool requestFocus, bool isClick);
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void UpdateSessionLabel(const std::string& label);
     void UpdateSessionIcon(const std::string& iconPath);
-    void OnSessionException(const SessionInfo& info, bool needRemoveSession);
+    void OnSessionException(const SessionInfo& info, bool needRemoveSession, bool startFail);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);
     void PendingSessionToForeground(const SessionInfo& info);
@@ -305,7 +305,7 @@ private:
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation);
     void OnForceHideChange(bool hide);
-    void OnWindowDragHotArea(DisplayId displayId, uint32_t type, const SizeChangeReason reason);
+    void OnWindowDragHotArea(DisplayId displayId, uint32_t type, SizeChangeReason reason);
     void OnTouchOutside();
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();

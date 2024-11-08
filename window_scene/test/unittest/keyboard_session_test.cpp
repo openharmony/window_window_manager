@@ -1073,7 +1073,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession01, Function | SmallTest | Leve
     sptr<KSSceneSessionMocker> callingSession = GetSceneSessionMocker("callingSession", "callingSession");
     ASSERT_NE(callingSession, nullptr);
 
-    callingSession->updateRectCallback_ = [&resultRect](const WSRect& rect, const SizeChangeReason reason) {
+    callingSession->updateRectCallback_ = [&resultRect](const WSRect& rect, SizeChangeReason reason) {
         resultRect.posX_ = rect.posX_;
         resultRect.posY_ = rect.posY_;
         resultRect.width_ = rect.width_;
@@ -1161,7 +1161,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession03, Function | SmallTest | Leve
     ASSERT_NE(callingSession, nullptr);
     callingSession->winRect_ = { 1, 1, 1, 1 };
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 0;
-    callingSession->updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason reason) {};
+    callingSession->updateRectCallback_ = [](const WSRect& rect, SizeChangeReason reason) {};
     keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
         return callingSession;
     };
@@ -1203,7 +1203,7 @@ HWTEST_F(KeyboardSessionTest, IsCallingSessionSplitMode01, Function | SmallTest 
     ASSERT_NE(callingSession, nullptr);
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 0;
     callingSession->winRect_ = { 0, 0, 0, 0 };
-    callingSession->updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason reason) {};
+    callingSession->updateRectCallback_ = [](const WSRect& rect, SizeChangeReason reason) {};
     keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
         return callingSession;
     };
