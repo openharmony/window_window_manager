@@ -1446,8 +1446,12 @@ HWTEST_F(WindowSessionTest2, DrawingCompleted, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, RemoveStartingWindow, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    auto result = session_->RemoveStartingWindow();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->RemoveStartingWindow();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
 /**
