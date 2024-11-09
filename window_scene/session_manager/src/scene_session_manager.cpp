@@ -2860,9 +2860,9 @@ void SceneSessionManager::SetCreateKeyboardSessionListener(const NotifyCreateKey
     createKeyboardSessionFunc_ = func;
 }
 
-void SceneSessionManager::SetStartPiPFailedListener(const NotifyStartPiPFailedFunc& func)
+void SceneSessionManager::SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func)
 {
-    startPiPFailedFunc_ = func;
+    startPiPFailedFunc_ = std::move(func);
 }
 
 void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,

@@ -207,7 +207,6 @@ public:
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
-    void SetStartPiPFailedListener(const NotifyStartPiPFailedFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
     /*
@@ -500,6 +499,7 @@ public:
      */
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
+    void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
 
     /*
      * Window displayId
