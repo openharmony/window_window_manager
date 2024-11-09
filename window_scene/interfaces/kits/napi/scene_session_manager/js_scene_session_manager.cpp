@@ -607,12 +607,8 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
 {
     rootScene_->RegisterUpdateRootSceneRectCallback([](const Rect& rect) {
         if (auto rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession()) {
-            rootSceneSession->SetLastUpdateRect(WSRect {
-                rect.posX_,
-                rect.posY_,
-                rect.width_,
-                rect.height_
-            });
+            WSRect rootSceneRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+            rootSceneSession->SetLastUpdateRect(rootSceneRect);
         }
     });
     rootScene_->RegisterGetSessionAvoidAreaByTypeCallback([](AvoidAreaType type) {
