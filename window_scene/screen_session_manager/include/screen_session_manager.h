@@ -207,6 +207,8 @@ public:
     void ScreenOffCVNotify(void);
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
+    sptr<ScreenSession> GetOrCreateFakeScreenSession(sptr<ScreenSession> screenSession);
+    void InitFakeScreenSession(sptr<ScreenSession> screenSession);
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
