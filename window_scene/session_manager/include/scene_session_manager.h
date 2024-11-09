@@ -125,6 +125,7 @@ using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& 
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
+using NotifyStartPiPFailedFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -206,6 +207,7 @@ public:
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
+    void SetStartPiPFailedListener(const NotifyStartPiPFailedFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
     /*
@@ -779,6 +781,11 @@ private:
      * Window Rotate Animation
      */
     RotateAnimationConfig rotateAnimationConfig_;
+
+    /*
+     * pip window
+     */
+    NotifyStartPiPFailedFunc startPiPFailedFunc_;
 
     SystemSessionConfig systemConfig_;
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
