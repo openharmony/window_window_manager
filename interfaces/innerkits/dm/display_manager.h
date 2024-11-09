@@ -742,6 +742,28 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
 
+    /**
+     * @brief Get screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param rect Rect of screenshot.
+     * @param size Size of screenshot.
+     * @param rotation Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
+        const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
 private:
     DisplayManager();
     ~DisplayManager();

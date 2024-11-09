@@ -4274,6 +4274,40 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
     return nullptr;
 }
 
+std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOption(const CaptureOption& option,
+    DmErrorCode* errorCode)
+{
+    TLOGD(WmsLogTag::DMS, "enter!");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() && errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        return nullptr;
+    }
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        TLOGI(WmsLogTag::DMS, "display snapshot was disabled by edm!");
+        return nullptr;
+    }
+    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
+        SessionPermission::IsShellCall()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", option.displayId_);
+        auto res = GetScreenSnapshot(option.displayId_);
+        if (res != nullptr) {
+            NotifyScreenshot(option.displayId_);
+            if (SessionPermission::IsBetaVersion()) {
+                CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
+            }
+            TLOGI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
+            if (option.isNeedNotify_) {
+                isScreenShot_ = true;
+                NotifyCaptureStatusChanged();
+            }
+        }
+        return res;
+    } else if (errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    }
+    return nullptr;
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
 {
     TLOGD(WmsLogTag::DMS, "ENTER!");

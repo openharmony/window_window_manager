@@ -873,6 +873,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(info);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT_WITH_OPTION: {
+            ProcGetDisplaySnapshotWithOption(data, reply);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -982,6 +986,18 @@ void ScreenSessionManagerStub::ProcGetScreenCapture(MessageParcel& data, Message
     option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetScreenCapture(option, &errCode);
+    reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
+    static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
+}
+
+void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& data, MessageParcel& reply)
+{
+    CaptureOption option;
+    option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
+    option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
+    option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
     static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
 }
