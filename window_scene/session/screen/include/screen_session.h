@@ -135,6 +135,8 @@ public:
     ScreenId GetScreenId();
     ScreenId GetRSScreenId();
     ScreenProperty GetScreenProperty() const;
+    void SetFakeScreenSession(sptr<ScreenSession> screenSession);
+    sptr<ScreenSession> GetFakeScreenSession() const;
     void UpdatePropertyByActiveMode();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
@@ -176,11 +178,13 @@ public:
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
+    void UpdatePropertyByFakeBounds(uint32_t width, uint32_t height);
     void SetName(std::string name);
     void Resize(uint32_t width, uint32_t height);
 
@@ -201,6 +205,8 @@ public:
     bool GetIsInternal() const;
     void SetIsCurrentInUse(bool isInUse);
     bool GetIsCurrentInUse() const;
+    void SetIsFakeInUse(bool isFakeInUse);
+    bool GetIsFakeInUse() const;
 
     bool isPrimary_ { false };
     bool isInternal_ { false };
@@ -253,6 +259,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
+    bool isFakeInUse_ = false;
     mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
@@ -266,6 +273,7 @@ private:
     SetScreenSceneDpiFunc setScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
+    sptr<ScreenSession> fakeScreenSession_ = nullptr;
 };
 
 class ScreenSessionGroup : public ScreenSession {
