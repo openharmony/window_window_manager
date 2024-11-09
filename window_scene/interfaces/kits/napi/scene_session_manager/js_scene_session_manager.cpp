@@ -3551,7 +3551,7 @@ napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSaveFromJs(napi_env env, 
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    bool enabled;
+    bool enabled = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], enabled)) {
         TLOGE(WmsLogTag::WMS_MAIN, "[NAPI]Failed to convert enabled to %{public}d", enabled);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
