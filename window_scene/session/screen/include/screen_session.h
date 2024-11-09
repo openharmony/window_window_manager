@@ -174,6 +174,8 @@ public:
     bool IsScreenRotationLocked();
     void SetTouchEnabledFromJs(bool isTouchEnabled);
     bool IsTouchEnabled();
+    void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
+    bool GetIsPhysicalMirrorSwitch();
 
     void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
@@ -248,6 +250,8 @@ public:
     Rotation ConvertIntToRotation(int rotation);
     void SetPhysicalRotation(int rotation, FoldStatus foldStatus);
     void SetStartPosition(uint32_t startX, uint32_t startY);
+    void SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion);
+    std::pair<ScreenId, DMRect> GetMirrorScreenRegion();
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
     void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
 
@@ -260,6 +264,7 @@ private:
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
     bool isFakeInUse_ = false;
+    bool isPhysicalMirrorSwitch_ = false;
     mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };
     std::function<void(float)> updateToInputManagerCallback_ = nullptr;
@@ -270,10 +275,12 @@ private:
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
+    std::pair<ScreenId, DMRect> mirrorScreenRegion_ = std::make_pair(INVALID_SCREEN_ID, DMRect::NONE());
     SetScreenSceneDpiFunc setScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
     sptr<ScreenSession> fakeScreenSession_ = nullptr;
+    void EnableMirrorScreenRegion();
 };
 
 class ScreenSessionGroup : public ScreenSession {

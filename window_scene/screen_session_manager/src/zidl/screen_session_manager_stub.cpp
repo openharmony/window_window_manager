@@ -269,6 +269,20 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_WITH_REGION: {
+            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenId mirrorScreenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t posX = data.ReadInt32();
+            int32_t posY = data.ReadInt32();
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMRect mainScreenRegion = { posX, posY, width, height };
+            ScreenId screenGroupId = INVALID_SCREEN_ID;
+            DMError ret = MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion, screenGroupId);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_MULTI_SCREEN_MODE_SWITCH: {
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenId secondaryScreenId = static_cast<ScreenId>(data.ReadUint64());

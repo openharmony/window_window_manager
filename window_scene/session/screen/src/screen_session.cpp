@@ -96,6 +96,9 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
                 property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
             displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
                 property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+            if (config.isMirrored) {
+                EnableMirrorScreenRegion();
+            }
         } else {
             TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
         }
@@ -212,6 +215,41 @@ void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screen
         std::remove_if(screenChangeListenerList_.begin(), screenChangeListenerList_.end(),
             [screenChangeListener](IScreenChangeListener* listener) { return screenChangeListener == listener; }),
         screenChangeListenerList_.end());
+}
+
+void ScreenSession::SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion)
+{
+    mirrorScreenRegion_ = std::make_pair(screenId, screenRegion);
+}
+
+std::pair<ScreenId, DMRect> ScreenSession::GetMirrorScreenRegion()
+{
+    return mirrorScreenRegion_;
+}
+
+void ScreenSession::EnableMirrorScreenRegion()
+{
+    auto& rect = mirrorScreenRegion_.second;
+    if (rect == DMRect::NONE()) {
+        return;
+    }
+    ScreenId screenId = INVALID_SCREEN_ID;
+    if (isPhysicalMirrorSwitch_) {
+        screenId = screenId_;
+    } else {
+        screenId = rsId_;
+    }
+    auto ret = RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(screenId,
+        { rect.posX_, rect.posY_, rect.width_, rect.height_ });
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("ScreenSession::EnableMirrorScreenRegion fail! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else {
+        WLOGE("ScreenSession::EnableMirrorScreenRegion success! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
 }
 
 sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
@@ -1239,6 +1277,9 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         screenId_, width, height);
     displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
     displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
+    if (config.isMirrored) {
+        EnableMirrorScreenRegion();
+    }
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
@@ -1540,5 +1581,15 @@ void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus sup
         }
         listener->OnSuperFoldStatusChange(screenId, superFoldStatus);
     }
+}
+
+void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
+{
+    isPhysicalMirrorSwitch_ = isPhysicalMirrorSwitch;
+}
+
+bool ScreenSession::GetIsPhysicalMirrorSwitch()
+{
+    return isPhysicalMirrorSwitch_;
 }
 } // namespace OHOS::Rosen

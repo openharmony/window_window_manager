@@ -85,6 +85,8 @@ public:
 
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+        DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode) override;
     virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
