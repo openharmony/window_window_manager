@@ -615,7 +615,7 @@ void JsSceneSessionManager::ProcessStartPiPFailedRegister()
     SceneSessionManager::GetInstance().SetStartPiPFailedListener([this] {
         TLOGNI(WmsLogTag::WMS_PIP, "NotifyStartPiPFailedFunc");
         this->OnStartPiPFailed();
-    };);
+    });
 }
 
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
