@@ -5942,39 +5942,33 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    wptr<Window> weakToken(windowToken_);
-    if (!WindowHelper::IsMainWindow(weakToken->GetType())) {
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] maximize interface only support main Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
-    if (argc == 1) {
-        int32_t nativeValue;
-        CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            napi_get_value_int32(env, argv[0], &nativeValue));
-        presentation = static_cast<MaximizePresentation>(nativeValue);
+    int32_t presentationValue = 2; // 2: default ENTER_IMMERSIVE
+    if (argc == 1 && !ConvertFromJsValue(env, argv[INDEX_ZERO], presentationValue)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to presentationValue");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (errCode != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, errCode);
-    }
+    MaximizePresentation presentation = static_cast<MaximizePresentation>(presentationValue);
     // 1: params num; 1: index of callback
     napi_value lastParam = (argc <= 1) ? nullptr :
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [weakToken, presentation, env, task = napiAsyncTask] {
-        auto window = weakToken.promote();
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), presentation, env, task = napiAsyncTask] {
+        auto window = windowToken.promote();
         if (window == nullptr) {
             task->Reject(env,
-                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "OnMaximize failed."));
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullprt"));
             return;
         }
         WMError ret = window->Maximize(presentation);
