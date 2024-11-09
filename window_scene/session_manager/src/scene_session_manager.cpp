@@ -11498,7 +11498,7 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
 
 WMError SceneSessionManager::OnIsWindowRectAutoSave(const std::string& key, bool& enabled)
 {
-    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_)
+    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
     auto iter = isWindowRectAutoSaveMap_.find(key);
     if (iter != isWindowRectAutoSaveMap_.end()) {
         enabled = item->second;
