@@ -367,6 +367,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetIsActivatedAfterScreenLocked);
     BindNativeFunction(env, objValue, "setFrameGravity", moduleName,
         JsSceneSession::SetFrameGravity);
+    BindNativeFunction(env, objValue, "setUsingStartingWindowAboveLocked", moduleName,
+        JsSceneSession::SetUsingStartingWindowAboveLocked);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2113,6 +2115,13 @@ napi_value JsSceneSession::SetFrameGravity(napi_env env, napi_callback_info info
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetFrameGravity(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetUsingStartingWindowAboveLocked(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetUsingStartingWindowAboveLocked(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -5175,6 +5184,34 @@ napi_value JsSceneSession::OnSetFrameGravity(napi_env env, napi_callback_info in
         return NapiGetUndefined(env);
     }
     session->SetFrameGravity(gravity);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetUsingStartingWindowAboveLocked(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool usingStartingWindowAboveLocked = false;
+    if (!ConvertFromJsValue(env, argv[0], usingStartingWindowAboveLocked)) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to usingStartingWindowAboveLocked");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetUsingStartingWindowAboveLocked(usingStartingWindowAboveLocked);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
