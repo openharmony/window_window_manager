@@ -151,7 +151,7 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
         }
 
         AvoidArea avoidArea;
-        WSRect rect = GetSessionRect();
+        WSRect rect = GetLastUpdateRect();
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
                 GetSystemAvoidArea(rect, avoidArea);
