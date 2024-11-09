@@ -11501,7 +11501,7 @@ WMError SceneSessionManager::OnIsWindowRectAutoSave(const std::string& key, bool
     std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
     auto iter = isWindowRectAutoSaveMap_.find(key);
     if (iter != isWindowRectAutoSaveMap_.end()) {
-        enabled = item->second;
+        enabled = iter->second;
     } else {
         enabled = false;
     }
