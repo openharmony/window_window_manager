@@ -1600,7 +1600,7 @@ WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
     }
 
     if (!WindowHelper::IsSubWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "Must be app sub window window!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Must be app sub window!");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
