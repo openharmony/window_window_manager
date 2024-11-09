@@ -7346,7 +7346,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
             i++;
         } else if (lastVisibleData_[i].first > currVisibleData[j].first) {
             if (currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-                visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);    
+                visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             }
             j++;
         } else {
