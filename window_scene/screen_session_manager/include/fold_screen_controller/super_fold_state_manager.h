@@ -22,6 +22,7 @@
 #include <map>
 #include <utility>
 #include <atomic>
+#include "session/screen/include/screen_session.h"
 
 #include "dm_common.h"
 #include "wm_single_instance.h"
@@ -74,6 +75,12 @@ private:
     static void DoExpandedToKeyboard(SuperFoldStatusChangeEvents event);
 
     void SetCurrentStatus(SuperFoldStatus curState);
+
+    void HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent);
+    void HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSession> screenSession);
+    void HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession);
+    void HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession);
+    void HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession);
 };
 } // Rosen
 } // OHOS

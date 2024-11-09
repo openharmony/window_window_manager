@@ -60,6 +60,8 @@ napi_value JsScreenUtils::CreateJsScreenProperty(napi_env env, const ScreenPrope
         CreateJsValue(env, screenProperty.GetPropertyChangeReason()));
     napi_set_named_property(env, objValue, "rotation", CreateJsValue(env, screenProperty.GetRotation()));
     napi_set_named_property(env, objValue, "bounds", CreateJsRRect(env, screenProperty.GetBounds()));
+    napi_set_named_property(env, objValue, "fakeBounds", CreateJsRRect(env, screenProperty.GetFakeBounds()));
+    napi_set_named_property(env, objValue, "isFakeInUse", CreateJsValue(env, screenProperty.GetIsFakeInUse()));
     return objValue;
 }
 
@@ -119,6 +121,10 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeReason(napi_env env)
         static_cast<int32_t>(ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING)));
     napi_set_named_property(env, objValue, "VIRTUAL_SCREEN_RESIZE", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::VIRTUAL_SCREEN_RESIZE)));
+    napi_set_named_property(env, objValue, "RELATIVE_POSITION_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE)));
     return objValue;
 }
 

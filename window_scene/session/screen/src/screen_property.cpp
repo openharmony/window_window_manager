@@ -59,6 +59,26 @@ RRect ScreenProperty::GetBounds() const
     return bounds_;
 }
 
+void ScreenProperty::SetFakeBounds(const RRect& fakeBounds)
+{
+    fakeBounds_ = fakeBounds;
+}
+
+RRect ScreenProperty::GetFakeBounds() const
+{
+    return fakeBounds_;
+}
+
+void ScreenProperty::SetIsFakeInUse(bool isFakeInUse)
+{
+    isFakeInUse_ = isFakeInUse;
+}
+
+bool ScreenProperty::GetIsFakeInUse() const
+{
+    return isFakeInUse_;
+}
+
 void ScreenProperty::SetScaleX(float scaleX)
 {
     scaleX_ = scaleX;
