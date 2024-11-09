@@ -130,7 +130,7 @@ public:
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
-    WMError OnIsWindowRectAutoSave(std::string key, bool& enabled) override;
+    WMError OnIsWindowRectAutoSave(const std::string& key, bool& enabled) override;
 
 private:
     template<typename T>
