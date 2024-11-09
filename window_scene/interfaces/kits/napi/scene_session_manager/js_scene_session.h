@@ -136,6 +136,7 @@ private:
     static napi_value IsDeviceWakeupByApplication(napi_env env, napi_callback_info info);
     static napi_value SetIsPcAppInPad(napi_env env, napi_callback_info info);
     static napi_value SetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
+    static napi_value SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -180,7 +181,7 @@ private:
     napi_value OnSetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
     napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
-    napi_value OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info);
+    napi_value OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();

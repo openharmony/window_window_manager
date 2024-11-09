@@ -440,9 +440,16 @@ public:
     // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
+
+    /*
+     * Window Lifecycle
+     */
+    bool IsActivatedAfterScreenLocked() const;
+    void SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked);
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
     virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
@@ -710,7 +717,12 @@ private:
     bool forceTouchable_ { true };
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
-    std::atomic<bool> isAttach_{ false };
+
+    /*
+     * Window Lifecycle
+     */
+    std::atomic<bool> isAttach_ { false };
+    std::atomic<bool> isActivatedAfterScreenLocked_ { true };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
