@@ -47,6 +47,16 @@ float ScreenProperty::GetPhysicalRotation() const
     return physicalRotation_;
 }
 
+void ScreenProperty::SetScreenComponentRotation(float rotation)
+{
+    screenComponentRotation_ = rotation;
+}
+
+float ScreenProperty::GetScreenComponentRotation() const
+{
+    return screenComponentRotation_;
+}
+
 void ScreenProperty::SetBounds(const RRect& bounds)
 {
     bounds_ = bounds;

@@ -2569,6 +2569,20 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     IPCSkeleton::SetCallingIdentity(identity);
 }
 
+void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"",
+            screenId);
+        return;
+    }
+    screenSession->SetPhysicalRotation(rotation, GetFoldStatus());
+    screenSession->SetScreenComponentRotation(screenComponentRotation);
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", rotation: %{public}f, screenComponentRotation: %{public}f",
+        screenId, rotation, screenComponentRotation);
+}
+
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
     ScreenPropertyChangeType screenPropertyChangeType)
 {
@@ -2612,7 +2626,6 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     }
     {
         std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-        screenSession->SetPhysicalRotation(rotation, GetFoldStatus());
         screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
     }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();

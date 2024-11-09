@@ -236,6 +236,39 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
     return true;
 }
 
+bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenDirectionInfo& directionInfo)
+{
+    napi_value jsNotifyRotation = nullptr, jsScreenRotation = nullptr, jsRotation = nullptr;
+    napi_get_named_property(env, jsObject, "notifyRotation", &jsNotifyRotation);
+    napi_get_named_property(env, jsObject, "screenRotation", &jsScreenRotation);
+    napi_get_named_property(env, jsObject, "rotation", &jsRotation);
+
+    if (GetType(env, jsNotifyRotation) != napi_undefined) {
+        int32_t notifyRotation;
+        if (!ConvertFromJsValue(env, jsNotifyRotation, notifyRotation)) {
+            WLOGFE("[NAPI]Failed to convert parameter to notifyRotation");
+            return false;
+        }
+        directionInfo.notifyRotation_ = notifyRotation;
+    }
+    if (GetType(env, jsScreenRotation) != napi_undefined) {
+        int32_t screenRotation;
+        if (!ConvertFromJsValue(env, jsScreenRotation, screenRotation)) {
+            WLOGFE("[NAPI]Failed to convert parameter to screenRotation");
+            return false;
+        }
+        directionInfo.screenRotation_ = screenRotation;
+    }
+    if (GetType(env, jsRotation) != napi_undefined) {
+        int32_t rotation;
+        if (!ConvertFromJsValue(env, jsRotation, rotation)) {
+            WLOGFE("[NAPI]Failed to convert parameter to rotation");
+            return false;
+        }
+        directionInfo.rotation_ = rotation;
+    }
+    return true;
+}
 
 bool ConvertDMRectFromJs(napi_env env, napi_value jsObject, DMRect& rect)
 {

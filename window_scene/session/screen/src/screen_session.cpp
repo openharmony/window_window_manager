@@ -606,6 +606,12 @@ void ScreenSession::SetPhysicalRotation(int rotation, FoldStatus foldStatus)
         property_.GetPhysicalRotation(), rotation, offsetRotation);
 }
 
+void ScreenSession::SetScreenComponentRotation(int rotation)
+{
+    property_.SetScreenComponentRotation(static_cast<float>(rotation));
+    WLOGFI("screenComponentRotation :%{public}f ", property_.GetScreenComponentRotation());
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
