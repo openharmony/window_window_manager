@@ -2452,7 +2452,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
 
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is not main window, not supported");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     auto hostSession = GetHostSession();
@@ -2475,20 +2475,26 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
 
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is not main window, not supported");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    auto info = property_->GetSessionInfo();
-    if (abilityContext && abilityContext->GetAbilityInfo()) {
-        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
-        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-    } else if (context_) {
-        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
-        info.bundleName_ = context_->GetBundleName();
+    if (context_ != nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "context_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
     }
-    std::string key = info.bundleName_ + info.moduleName_ + info.abilityName_;
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    std::string bundleName = property_->GetSessionInfo().bundleName_;
+    std::string moduleName = property_->GetSessionInfo().moduleName_;
+    std::string abilityName = property_->GetSessionInfo().abilityName_;
+    if (abilityContext && abilityContext->GetAbilityInfo()) {
+        abilityName_ = abilityContext->GetAbilityInfo()->name;
+        moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+    } else if (context_) {
+        moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        bundleName_ = context_->GetBundleName();
+    }
+    std::string key = bundleName_ + moduleName_ + abilityName_;
     auto ret = SingletonContainer::Get<WindowAdapter>().OnIsWindowRectAutoSave(key, enabled);
     return ret;
 }

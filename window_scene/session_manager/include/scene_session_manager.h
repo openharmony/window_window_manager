@@ -312,7 +312,7 @@ public:
      * PC Window
      */
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
-    WMError OnIsWindowRectAutoSave(const std::string& key, bool& enabled) override;
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
     void SetIsWindowRectAutoSaveMap(const std::string& key, bool enabled);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
@@ -1030,6 +1030,10 @@ private:
         }
     };
     std::unordered_map<SessionInfoList, std::shared_ptr<AppExecFwk::AbilityInfo>, SessionHasher> abilityInfoMap_;
+
+    /**
+     * PC Window
+     */
     std::mutex isWindowRectAutoSaveMapMutex_;
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
 };

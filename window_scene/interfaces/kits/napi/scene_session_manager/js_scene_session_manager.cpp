@@ -1104,11 +1104,11 @@ napi_value JsSceneSessionManager::RefreshPcZOrder(napi_env env, napi_callback_in
     return (me != nullptr) ? me->OnRefreshPcZOrder(env, info) : nullptr;
 }
 
-napi_value JsSceneSessionManager::SetIsWindowRectAutoSaveFromJs(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::SetIsWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnSetIsWindowRectAutoSaveFromJs(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetIsWindowRectAutoSave(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3533,7 +3533,7 @@ void JsSceneSessionManager::ProcessCloseTargetFloatWindow()
     SceneSessionManager::GetInstance().SetCloseTargetFloatWindowFunc(func);
 }
 
-napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSaveFromJs(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
     size_t argc = DEFAULT_ARG_COUNT;
     napi_value argv[DEFAULT_ARG_COUNT] = {nullptr};

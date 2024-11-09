@@ -2494,7 +2494,7 @@ WMError SceneSessionManagerProxy::GetDisplayIdByWindowId(const std::vector<uint6
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::OnIsWindowRectAutoSave(std::string key, bool& enabled)
+WMError SceneSessionManagerProxy::IsWindowRectAutoSave(std::string key, bool& enabled)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -1486,13 +1486,13 @@ int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, M
 
 int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply)
 {
-    bool enabled = false;
     std::string key;
     if (!data.ReadString(key)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Read key failed. ");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = OnIsWindowRectAutoSave(key, enabled);
+    bool enabled = false;
+    WMError errCode = IsWindowRectAutoSave(key, enabled);
     if (!reply.WriteBool(enabled)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write enabled failed. ");
         return ERR_INVALID_DATA;

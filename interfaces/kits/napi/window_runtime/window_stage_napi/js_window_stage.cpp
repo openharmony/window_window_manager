@@ -137,13 +137,6 @@ napi_value JsWindowStage::DisableWindowDecor(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnDisableWindowDecor(env, info) : nullptr;
 }
 
-napi_value JsWindowStage::IsWindowRectAutoSave(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_MAIN, "[NAPI]");
-    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
-    return (me != nullptr) ? me->OnIsWindowRectAutoSave(env, info) : nullptr;
-}
-
 napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "SetDefaultDensityEnabled");
@@ -163,6 +156,13 @@ napi_value JsWindowStage::SetWindowRectAutoSave(napi_env env, napi_callback_info
     TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetWindowRectAutoSave(env, info) : nullptr;
+}
+
+napi_value JsWindowStage::IsWindowRectAutoSave(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnIsWindowRectAutoSave(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::OnSetUIContent(napi_env env, napi_callback_info info)
@@ -814,7 +814,7 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask]() {
+    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s Window is nullptr", where);

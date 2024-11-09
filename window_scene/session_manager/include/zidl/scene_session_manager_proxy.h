@@ -128,9 +128,9 @@ public:
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) override;
     WMError ReleaseForegroundSessionScreenLock() override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
+    WMError IsWindowRectAutoSave(std::string key, bool& enabled) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
-    WMError OnIsWindowRectAutoSave(std::string key, bool& enabled) override;
 
 private:
     template<typename T>
