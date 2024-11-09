@@ -743,7 +743,7 @@ HWTEST_F(SceneSessionTest5, SetWindowEnableDragBySystem, Function | SmallTest | 
     info.bundleName_ = "SetWindowEnableDrag";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto ret = session->SetWindowEnableDragBySystem(true);
-     EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
  }
 
 /**
