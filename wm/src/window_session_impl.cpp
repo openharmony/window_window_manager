@@ -3970,7 +3970,7 @@ void WindowSessionImpl::NotifySetUIContentComplete()
 
 WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
 {
-    TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag:%{publlic}d", enableDrag);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag:%{publlic}d", enableDrag);
     property_->SetDragEnabled(enableDrag);
     return WSError::WS_OK;
 }

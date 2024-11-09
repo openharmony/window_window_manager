@@ -2486,6 +2486,32 @@ bool SceneSession::IsTurnScreenOn() const
     return GetSessionProperty()->IsTurnScreenOn();
 }
 
+WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
+
+    auto task = [weakThis = wptr(this), enableDrag]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "task id: %{public}d, enableDrag: %{public}d",
+            session->GetPersistentId(), enableDrag);
+        auto sessionProperty = session->GetSessionProperty();
+        if (!sessionProperty) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+            return;
+        }
+        sessionProperty->SetDragEnabled(enableDrag);
+        if (session->sessionStage_) {
+            session->sessionStage_->SetEnableDragBySystem(enableDrag);
+        }
+    };
+    PostTask(task, "SetWindowEnableDragBySystem");
+    return WMError::WM_OK;
+}
+
 WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
 {
     GetSessionProperty()->SetKeepScreenOn(keepScreenOn);
@@ -4462,21 +4488,6 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
         return WMError::WM_ERROR_NULLPTR;
     }
     sessionStage_->SetUniqueVirtualPixelRatio(useUnique, density);
-    return WMError::WM_OK;
-}
-
-WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
-    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
-{
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property modeSupportInfo permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
-    auto sessionProperty = sceneSession->GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());
-    }
     return WMError::WM_OK;
 }
 
