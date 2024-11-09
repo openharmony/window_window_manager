@@ -467,7 +467,7 @@ void JsSceneSessionManager::OnStartPiPFailed()
         }
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnStartPiPFailed");
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
@@ -612,11 +612,10 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
 
 void JsSceneSessionManager::ProcessStartPiPFailedRegister()
 {
-    NotifyStartPiPFailedFunc func = [this]() {
+    SceneSessionManager::GetInstance().SetStartPiPFailedListener([this] {
         TLOGNI(WmsLogTag::WMS_PIP, "NotifyStartPiPFailedFunc");
         this->OnStartPiPFailed();
-    };
-    SceneSessionManager::GetInstance().SetStartPiPFailedListener(func);
+    };);
 }
 
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)

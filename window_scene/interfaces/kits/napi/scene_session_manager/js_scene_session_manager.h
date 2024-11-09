@@ -205,7 +205,6 @@ private:
     void OnStartUIAbilityError(const uint32_t errorCode);
     void OnShiftFocus(int32_t persistentId);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
-    void OnStartPiPFailed();
     void ProcessCreateSystemSessionRegister();
     void ProcessCreateKeyboardSessionRegister();
     void ProcessRecoverSceneSessionRegister();
@@ -227,6 +226,11 @@ private:
     void OnAbilityManagerCollaboratorRegistered();
     void RegisterRootSceneCallbacksOnSSManager();
     void RegisterSSManagerCallbacksOnRootScene();
+
+    /*
+     * PiP Window
+     */
+    void OnStartPiPFailed();
     void ProcessStartPiPFailedRegister();
 
     napi_env env_;
