@@ -383,6 +383,47 @@ HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetPhysicalRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetPhysicalRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetPhysicalRotation start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    int rotation = 0;
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    screenSession->SetPhysicalRotation(rotation, foldStatus);
+    GTEST_LOG_(INFO) << "SetPhysicalRotation end";
+}
+
+/**
+ * @tc.name: SetScreenComponentRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenComponentRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetScreenComponentRotation start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    int rotation = 0;
+    screenSession->SetScreenComponentRotation(rotation);
+    GTEST_LOG_(INFO) << "SetScreenComponentRotation end";
+}
+
+/**
  * @tc.name: UpdateToInputManager
  * @tc.desc: normal function
  * @tc.type: FUNC

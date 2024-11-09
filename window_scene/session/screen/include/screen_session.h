@@ -241,6 +241,7 @@ public:
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
     void SetPhysicalRotation(int rotation, FoldStatus foldStatus);
+    void SetScreenComponentRotation(int rotation);
     void SetStartPosition(uint32_t startX, uint32_t startY);
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
     void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
