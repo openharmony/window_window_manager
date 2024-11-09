@@ -64,7 +64,7 @@ const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
 const std::string CLOSE_TARGET_FLOAT_WINDOW_CB = "closeTargetFloatWindow";
 const std::string ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB = "abilityManagerCollaboratorRegistered";
-const std::string START_PIP_FAILED_CB = "StartPiPFailed";
+const std::string START_PIP_FAILED_CB = "startPiPFailed";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
