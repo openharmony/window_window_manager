@@ -412,6 +412,7 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_SECONDARY,
     EVENT_DRAG_START,
     EVENT_DRAG,
+    EVENT_MAXIMIZE_WITHOUT_ANIMATION,
 };
 
 enum class BrokerStates: uint32_t {
