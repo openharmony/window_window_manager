@@ -103,6 +103,11 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
     RSTransaction::FlushImplicitTransaction();
 }
 
+ScreenSession::~ScreenSession()
+{
+    WLOGI("~ScreenSession");
+}
+
 ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
     const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode)
     : name_(name), screenId_(screenId), rsId_(rsId), property_(property), displayNode_(displayNode)
