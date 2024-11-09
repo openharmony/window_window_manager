@@ -2498,7 +2498,7 @@ WMError SceneSessionManagerProxy::OnIsWindowRectAutoSave(const std::string& key,
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
