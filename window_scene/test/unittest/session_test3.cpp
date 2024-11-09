@@ -1076,6 +1076,23 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest 
     enable = false;
     ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
 }
+
+/**
+ * @tc.name: SetStartingBeforeVisible
+ * @tc.desc: test SetStartingBeforeVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetStartingBeforeVisible, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetStartingBeforeVisible(true);
+    ASSERT_EQ(true, session_->isStartingBeforeVisible_);
+    ASSERT_EQ(true, session_->GetStartingBeforeVisible());
+
+    session_->SetStartingBeforeVisible(false);
+    ASSERT_EQ(false, session_->isStartingBeforeVisible_);
+    ASSERT_EQ(false, session_->GetStartingBeforeVisible());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

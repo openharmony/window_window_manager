@@ -492,7 +492,7 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo
     napi_get_named_property(env, jsObject, "rotation", &jsRotation);
     napi_value jsEnableHookRotation = nullptr;
     napi_get_named_property(env, jsObject, "enableHookRotation", &jsEnableHookRotation);
-    
+
     uint32_t width = 0;
     if (!ConvertFromJsValue(env, jsWidth, width)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
@@ -955,6 +955,8 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         auto params = sessionInfo.want->GetParams();
         napi_set_named_property(env, objValue, "fileManagerMode",
             CreateJsValue(env, params.GetStringParam("fileManagerMode")));
+        napi_set_named_property(env, objValue, "floatingDisplayMode",
+            CreateJsValue(env, params.GetIntParam("floatingDisplayMode", INVALID_VAL)));
         auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
         napi_set_named_property(env, objValue, "extraFormIdentity",
             CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
@@ -1410,6 +1412,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_HANDWRITE", JsSessionType::TYPE_HANDWRITE);
     SetTypeProperty(objValue, env, "TYPE_KEYBOARD_PANEL", JsSessionType::TYPE_KEYBOARD_PANEL);
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
+    SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
     return objValue;
 }
 

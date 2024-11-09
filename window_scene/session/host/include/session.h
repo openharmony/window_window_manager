@@ -119,7 +119,7 @@ class Session : public SessionStub {
 public:
     using Task = std::function<void()>;
     explicit Session(const SessionInfo& info);
-    virtual ~Session() = default;
+    virtual ~Session();
     bool isKeyboardPanelEnabled_ = false;
     void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
         const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler = nullptr);
@@ -314,6 +314,8 @@ public:
     WSError SetFocusable(bool isFocusable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
+    void SetStartingBeforeVisible(bool isStartingBeforeVisible);
+    bool GetStartingBeforeVisible() const;
     bool GetFocusable() const;
     bool IsFocused() const;
     WSError SetTouchable(bool touchable);
@@ -651,6 +653,12 @@ private:
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
     int32_t GetRotateAnimationDuration();
+
+    /*
+     * Window Layout
+     */
+    void UpdateGravityWhenUpdateWindowMode(WindowMode mode);
+
     template<typename T1, typename T2, typename Ret>
     using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
     template<typename T>
@@ -679,6 +687,7 @@ private:
     mutable std::shared_mutex uiLostFocusMutex_;
 
     bool focusedOnShow_ = true;
+    bool isStartingBeforeVisible_ = false;
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 

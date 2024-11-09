@@ -28,8 +28,6 @@
 #include "xcomponent_controller.h"
 #include "pip_report.h"
 #include "navigation_controller.h"
-#include "display_manager.h"
-#include "errors.h"
 
 namespace OHOS {
 namespace Rosen {

@@ -119,15 +119,9 @@ public:
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
         NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
-        NotifyNeedAvoidFunc OnNeedAvoid_;
-        NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
-        NotifyShowWhenLockedFunc OnShowWhenLocked_;
-        NotifyReqOrientationChangeFunc OnRequestedOrientationChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyForceHideChangeFunc OnForceHideChange_;
         NotifyTouchOutsideFunc OnTouchOutside_;
-        ClearCallbackMapFunc clearCallbackFunc_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
         NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     };
@@ -268,6 +262,7 @@ public:
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
+    void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
@@ -345,11 +340,25 @@ public:
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
     /*
+     * Window Rotation
+     */
+    void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
+
+    /**
+     * Window Animation
+     */
+    void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
+
+    /*
      * Window Visibility
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
     void ClearSpecificSessionCbMap();
+    void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
+    void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
+    void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
+
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
     bool IsStartMoving() const;
@@ -471,9 +480,21 @@ protected:
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
 
     /*
+     * Window Immersive
+     */
+    NotifyNeedAvoidFunc onNeedAvoid_;
+
+    /*
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
+
+    /*
+     * Window Lifecycle
+     */
+    NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
+    NotifyForceHideChangeFunc onForceHideChangeFunc_;
+    ClearCallbackMapFunc clearCallbackMapFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -647,6 +668,16 @@ private:
      */
     bool isEnableGestureBack_ { true };
     bool isEnableGestureBackHadSet_ { false };
+
+    /*
+     * Window Rotation
+     */
+    NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
+    
+    /**
+     * Window Animation
+     */
+    NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

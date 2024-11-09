@@ -1132,14 +1132,14 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession01, Function | SmallTest | Leve
     Rosen::WSRect keyboardPanelRect{ 0, 0, 0, 0 };
     Rosen::WSRect emptyRect{ 0, 0, 0, 0 };
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, rsTransaction);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, rsTransaction);
     ASSERT_EQ(resultRect, emptyRect);
 
     // for cover GetSceneSession
     keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
         return callingSession;
     };
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, rsTransaction);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, rsTransaction);
     // for cover CheckIfNeedRaiseCallingSession
     keyboardSession->property_->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, 0);
 
@@ -1173,18 +1173,18 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession02, Function | SmallTest | Leve
         return callingSession;
     };
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 0;
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->winRect_.posY_, 1);
 
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 10;
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->winRect_.posY_, 1);
 
     keyboardPanelRect = { 0, 0, 0, 0 };
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 10;
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->winRect_.posY_, 1);
 }
 
@@ -1212,20 +1212,20 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession03, Function | SmallTest | Leve
     auto callingOriPosY = 0;
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
     ASSERT_EQ(callingOriPosY, 0);
 
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     callingSession->winRect_.posY_ = 200;
     keyboardPanelRect.posY_ = 200;
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
     ASSERT_EQ(callingOriPosY, 0);
 
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 10;
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
     ASSERT_EQ(callingOriPosY, 10);
 }
@@ -1256,29 +1256,29 @@ HWTEST_F(KeyboardSessionTest, IsCallingSessionSplitMode01, Function | SmallTest 
 
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingSession->parentSession_ = callingParentSession;
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     callingParentSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 
     callingParentSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    keyboardSession->RaiseCallingSession(keyboardPanelRect, nullptr);
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 0);
 }
 

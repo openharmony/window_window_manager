@@ -24,7 +24,6 @@
 #include <application_context.h>
 #include "anr_handler.h"
 #include "color_parser.h"
-#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "input_transfer_station.h"
 #include "singleton_container.h"
@@ -1047,6 +1046,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         UpdateViewportConfig(requestRect, WindowSizeChangeReason::RESIZE, nullptr, info);
         if (auto hostSession = GetHostSession()) {
             WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
+            property_->SetWindowRect(requestRect);
             hostSession->UpdateClientRect(wsRect);
         } else {
             TLOGE(WmsLogTag::DEFAULT, "hostSession is null");
@@ -1377,10 +1377,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
 
     DestroySubWindow();
-	{
+    {
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
-	}
+    }
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = nullptr;
@@ -1456,11 +1456,17 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = MoveTo(x, y);
-    if (state_ == WindowState::STATE_SHOWN && property_) {
-        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-        if (layoutCallback) {
-            layoutCallback->ResetLock();
-            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+    if (state_ == WindowState::STATE_SHOWN) {
+        layoutCallback_->ResetLock();
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
+            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
@@ -1493,18 +1499,17 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
         requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
         windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
         newRect.width_, newRect.height_);
- 
+
     property_->SetRequestRect(newRect);
- 
+
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true);
     if (state_ == WindowState::STATE_SHOWN && property_) {
-        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-        if (layoutCallback) {
-            layoutCallback->ResetLock();
-            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        if (layoutCallback_) {
+            layoutCallback_->ResetLock();
+            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
@@ -1685,11 +1690,17 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
         return WMError::WM_ERROR_OPER_FULLSCREEN_FAILED;
     }
     auto ret = Resize(width, height);
-    if (state_ == WindowState::STATE_SHOWN && property_) {
-        sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-        if (layoutCallback) {
-            layoutCallback->ResetLock();
-            layoutCallback->GetResult(WINDOW_LAYOUT_TIMEOUT);
+    if (state_ == WindowState::STATE_SHOWN) {
+        layoutCallback_->ResetLock();
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
+            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
@@ -2222,10 +2233,6 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetGlobalMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-        if (surfaceNode_ != nullptr && 
-            (windowSystemConfig_.uiType_ == UI_TYPE_PC || GetFreeMultiWindowModeEnabledState())) {
-            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
-        }
         hostSession_->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         UpdateDecorEnable(true);
@@ -3335,13 +3342,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     WMError ret = UpdateWindowModeImmediately(mode);
 
     if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {
-        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-            surfaceNode_->SetFrameGravity(Gravity::LEFT);
-        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
-        } else if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-            surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
-        } else if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
             ret = SetLayoutFullScreenByApiVersion(true);
             if (ret != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion errCode:%{public}d winId:%{public}u",
@@ -4209,7 +4210,7 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
         TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
+    if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode()) || IsFreeMultiWindowMode()) {
         TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -4219,7 +4220,7 @@ WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->SetGestureBackEnabled(enable);
 }
- 
+
 WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
 {
     if (windowSystemConfig_.uiType_ == UI_TYPE_PC) {

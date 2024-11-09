@@ -1140,7 +1140,7 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     auto func = [scensession](bool hide) {
         scensession->SetPrivacyMode(hide);
     };
-    scensession->sessionChangeCallback_->OnForceHideChange_ = func;
+    scensession->onForceHideChangeFunc_ = func;
     EXPECT_NE(nullptr, &func);
     scensession->NotifyForceHideChange(true);
 
@@ -1764,7 +1764,6 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback01, Function | SmallTest | Level2)
     sceneSession->SetSystemSceneOcclusionAlpha(alpha);
     sceneSession->IsNeedDefaultAnimation();
     bool isPlaying = true;
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->NotifyIsCustomAnimationPlaying(isPlaying);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;

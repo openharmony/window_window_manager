@@ -32,7 +32,6 @@
 
 #include "anr_handler.h"
 #include "color_parser.h"
-#include "common/include/future_callback.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
@@ -194,8 +193,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
-    auto layoutCallback = sptr<FutureCallback>::MakeSptr();
-    property_->SetLayoutCallback(layoutCallback);
+    layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
@@ -704,10 +702,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     } else {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
-    sptr<IFutureCallback> layoutCallback = property_->GetLayoutCallback();
-    if (layoutCallback) {
-        layoutCallback->OnUpdateSessionRect(rect);
-    }
+    layoutCallback_->OnUpdateSessionRect(rect);
+
     return WSError::WS_OK;
 }
 
@@ -774,7 +770,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
 }
 
-void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
+void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
@@ -782,9 +778,16 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         lastSizeChangeReason_ = wmReason;
         postTaskDone_ = true;
     }
+    UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+    UpdateFrameLayoutCallbackIfNeeded(wmReason);
+}
+
+void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+
     if (handler_ == nullptr) {
-        UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-        UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         return;
     }
 
@@ -799,8 +802,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             RSTransaction::FlushImplicitTransaction();
             rsTransaction->Begin();
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-        window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        window->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
