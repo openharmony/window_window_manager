@@ -459,9 +459,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
 HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 {
     Utils::TestWindowInfo info = {
-        .name = "mainTile1", .rect = {0, 0, 0, 0}, .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true, .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
+        .name = "mainTile1", .rect = {0, 0, 0, 0}, .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, .parentLimit = false,
+        .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true, .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
