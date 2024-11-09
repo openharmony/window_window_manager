@@ -218,6 +218,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetGestureBackEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MODAL_TYPE_CHANGE):
             return HandleSessionModalTypeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_SESSION_MODAL_TYPE_CHANGE):
+            return HandleMainSessionModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE):
             return HandleSetWindowRectAutoSave(data, reply);
         default:
@@ -1243,6 +1245,18 @@ int SessionStub::HandleSessionModalTypeChange(MessageParcel& data, MessageParcel
     }
     TLOGD(WmsLogTag::WMS_HIERARCHY, "subWindowModalType: %{public}u", subWindowModalType);
     WSError errCode = OnSessionModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleMainSessionModalTypeChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isModal = false;
+    if (!data.ReadBool(isModal)) {
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "isModal: %{public}d", isModal);
+    WSError errCode = OnMainSessionModalTypeChange(isModal);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

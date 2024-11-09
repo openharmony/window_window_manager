@@ -40,12 +40,13 @@ enum class ListenerFuncType : uint32_t {
     BIND_DIALOG_TARGET_CB,
     RAISE_TO_TOP_CB,
     RAISE_TO_TOP_POINT_DOWN_CB,
-    CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB,
+    CLICK_MODAL_WINDOW_OUTSIDE_CB,
     BACK_PRESSED_CB,
     SESSION_FOCUSABLE_CHANGE_CB,
     SESSION_TOUCHABLE_CHANGE_CB,
     SESSION_TOP_MOST_CHANGE_CB,
     SESSION_MODAL_TYPE_CHANGE_CB,
+    MAIN_SESSION_MODAL_TYPE_CHANGE_CB,
     CLICK_CB,
     TERMINATE_SESSION_CB,
     TERMINATE_SESSION_CB_NEW,
@@ -226,13 +227,14 @@ private:
     void ProcessAutoStartPiPStatusChangeRegister();
     void ProcessRaiseToTopRegister();
     void ProcessRaiseToTopForPointDownRegister();
-    void ProcessClickModalSpecificWindowOutsideRegister();
+    void ProcessClickModalWindowOutsideRegister();
     void ProcessBackPressedRegister();
     void ProcessSessionFocusableChangeRegister();
     void ProcessSessionTouchableChangeRegister();
     void ProcessSessionTopmostChangeRegister();
     void ProcessMainWindowTopmostChangeRegister();
     void ProcessSessionModalTypeChangeRegister();
+    void ProcessMainSessionModalTypeChangeRegister();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -282,7 +284,7 @@ private:
     void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
-    void OnClickModalSpecificWindowOutside();
+    void OnClickModalWindowOutside();
     void OnRaiseAboveTarget(int32_t subWindowId);
     void OnBackPressed(bool needMoveToBackground);
     void OnSessionFocusableChange(bool isFocusable);
@@ -290,6 +292,7 @@ private:
     void OnSessionTopmostChange(bool topmost);
     void OnMainWindowTopmostChange(bool isTopmost);
     void OnSessionModalTypeChange(SubWindowModalType subWindowModalType);
+    void OnMainSessionModalTypeChange(bool isModal);
     void OnClick(bool requestFocus, bool isClick);
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);

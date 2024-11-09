@@ -16,6 +16,7 @@
 #include "session/host/include/main_session.h"
 
 #include "session_helper.h"
+#include "window_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
 
 namespace OHOS::Rosen {
@@ -88,9 +89,13 @@ WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
-    if (CheckDialogOnForeground()) {
+    auto isModal = IsModal();
+    if (!isModal && CheckDialogOnForeground()) {
         HandlePointDownDialog();
         return WSError::WS_OK;
+    }
+    if (isModal) {
+        Session::ProcessClickModalWindowOutside(posX, posY);
     }
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
@@ -283,4 +288,36 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
     return WSError::WS_OK;
 }
 
+WSError MainSession::OnMainSessionModalTypeChange(bool isModal)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), isModal, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s main window isModal:%{public}d", where, isModal);
+        if (session->onMainSessionModalTypeChange_) {
+            session->onMainSessionModalTypeChange_(isModal);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsModal() const
+{
+    bool isModal = false;
+    auto property = GetSessionProperty();
+    if (property != nullptr) {
+        isModal = WindowHelper::IsModalMainWindow(property->GetWindowType(), property->GetWindowFlags());
+    }
+    return isModal;
+}
+
+bool MainSession::IsApplicationModal() const
+{
+    return IsModal();
+}
 } // namespace OHOS::Rosen

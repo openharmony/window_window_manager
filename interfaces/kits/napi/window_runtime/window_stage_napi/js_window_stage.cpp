@@ -122,6 +122,13 @@ napi_value JsWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetSubWindow(env, info) : nullptr;
 }
 
+napi_value JsWindowStage::SetWindowModal(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnSetWindowModal(env, info) : nullptr;
+}
+
 /** @note @window.hierarchy */
 napi_value JsWindowStage::SetShowOnLockScreen(napi_env env, napi_callback_info info)
 {
@@ -534,6 +541,67 @@ napi_value JsWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+    if (!window->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
+        return NapiGetUndefined(env);
+    }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE];
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    bool isModal = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isModal)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to bool");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    const char* const where = __func__;
+    auto asyncTask = [where, weakWindow = wptr(window), isModal, env, task = napiAsyncTask] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, window is null", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        WMError ret = window->SetWindowModal(isModal);
+        if (ret == WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, ret is %{public}d", where, wmErrorCode);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set main window modal failed"));
+        }
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d",
+            where, window->GetWindowId(), window->GetWindowName().c_str(), isModal);
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowStage::OnSetShowOnLockScreen(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -821,6 +889,7 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "createSubWindowWithOptions", moduleName, JsWindowStage::CreateSubWindowWithOptions);
     BindNativeFunction(env,
         objValue, "getSubWindow", moduleName, JsWindowStage::GetSubWindow);
+    BindNativeFunction(env, objValue, "setWindowModal", moduleName, JsWindowStage::SetWindowModal);
     BindNativeFunction(env, objValue, "on", moduleName, JsWindowStage::On);
     BindNativeFunction(env, objValue, "off", moduleName, JsWindowStage::Off);
     BindNativeFunction(env,

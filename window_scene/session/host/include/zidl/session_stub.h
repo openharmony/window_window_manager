@@ -86,6 +86,7 @@ private:
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleMainSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
