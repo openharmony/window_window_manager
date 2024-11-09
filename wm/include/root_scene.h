@@ -36,6 +36,7 @@ class UIContent;
 namespace OHOS {
 namespace Rosen {
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
+using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 
 class RootScene : public Window {
 public:
@@ -58,9 +59,13 @@ public:
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
-    void SetGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback)
+    void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback)
     {
         getSessionAvoidAreaByTypeCallback_ = std::move(callback);
+    }
+    void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback)
+    {
+        updateRootSceneRectCallback_ = callback;
     }
 
     void OnBundleUpdated(const std::string& bundleName);
@@ -125,6 +130,7 @@ private:
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
+    UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

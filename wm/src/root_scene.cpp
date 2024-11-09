@@ -108,6 +108,10 @@ void RootScene::SetDisplayOrientation(int32_t orientation)
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
+    if (updateRootSceneRectCallback_ != nullptr) {
+        updateRootSceneRectCallback_(rect);
+    }
+
     if (uiContent_ == nullptr) {
         WLOGFE("uiContent_ is nullptr!");
         return;
