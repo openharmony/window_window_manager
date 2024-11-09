@@ -589,7 +589,7 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Level3)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::SetWindowLimitsDataRoute begin ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::SetWindowLimitsDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowLimitsDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -616,7 +616,7 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
     EXPECT_EQ(windowLimits1.maxHeight_, windowLimits2.maxHeight_);
     EXPECT_EQ(windowLimits1.minWidth_, windowLimits2.minWidth_);
     EXPECT_EQ(windowLimits1.minHeight_, windowLimits2.minHeight_);
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::SetWindowLimitsDataRoute end ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::SetWindowLimitsDataRoute end ###");
 }
 
 /**
@@ -626,7 +626,7 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
  */
 HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Level3)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::SetAspectRatioDataRoute begin ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::SetAspectRatioDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAspectRatioDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -649,7 +649,7 @@ HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Leve
 
     ret = windowSceneSessionImpl->SetAspectRatio(ratio);
     EXPECT_EQ(WMError::WM_OK, ret);
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::SetAspectRatioDataRoute end ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::SetAspectRatioDataRoute end ###");
 }
 
 /**
@@ -659,7 +659,7 @@ HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Leve
  */
 HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::moveToDataRoute begin ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::moveToDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveToDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -681,7 +681,7 @@ HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
     Rect rect = windowSceneSessionImpl->property_->GetRequestRect();
     EXPECT_EQ(500, rect.posX_);
     EXPECT_EQ(500, rect.posY_);
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::moveToDataRoute end ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::moveToDataRoute end ###");
 }
 
 /**
@@ -691,7 +691,7 @@ HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::ResizeDataRoute begin ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::ResizeDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ResizeDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -723,7 +723,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
     Rect rect2 = session->property_->GetRequestRect();
     EXPECT_EQ(500, rect2.width_);
     EXPECT_EQ(500, rect2.height_);
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::ResizeDataRoute end ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::ResizeDataRoute end ###");
 }
 
 /**
@@ -733,7 +733,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level0)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::FixRectByAspectRatio begin ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::FixRectByAspectRatio begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("FixRectByAspectRatio");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
@@ -761,24 +761,25 @@ HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level0)
 
     float ratio = 0.8;
     WMError wmRet3 = windowSceneSessionImpl->SetAspectRatio(ratio);
-    EXPECT_EQ(WMError::WM_OK, wmRet3);    
+    EXPECT_EQ(WMError::WM_OK, wmRet3);
 
     // 服务端执行相同的逻辑
-    WMError wsRet1 = session->UpdateSessionPropertyByAction(windowSceneSessionImpl->property_,WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
-    EXPECT_EQ(WMError::WM_OK, wsRet1);  
+    auto property = windowSceneSessionImpl->property_
+    WMError wsRet1 = session->UpdateSessionPropertyByAction(property,WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    EXPECT_EQ(WMError::WM_OK, wsRet1);
 
     Rect rect = windowSceneSessionImpl->property_->GetRequestRect();
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     // 异步接口加一个延迟
     WSError wsRet2 = session->UpdateSessionRect(wsRect,SizeChangeReason::RESIZE,false);
-    EXPECT_EQ(WMError::WM_OK, wsRet2);
+    EXPECT_EQ(WSError::WS_OK, wsRet2);
     usleep(WAIT_SERVERAL_FRAMES);
     WSError wsRet3 = session->UpdateRect(wsRect,SizeChangeReason::RESIZE,"FixRectByAspectRatio",nullptr);
-    EXPECT_EQ(WMError::WM_OK, wsRet3);
+    EXPECT_EQ(WSError::WS_OK, wsRet3);
     usleep(WAIT_SERVERAL_FRAMES);
     WSError wsRet4 = session->SetAspectRatio(ratio);
-    EXPECT_EQ(WMError::WM_OK, wsRet4);
-    TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::FixRectByAspectRatio end ###");
+    EXPECT_EQ(WSError::WS_OK, wsRet4);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::FixRectByAspectRatio end ###");
 }
 
 }

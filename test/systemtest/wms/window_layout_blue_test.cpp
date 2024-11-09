@@ -35,8 +35,8 @@ class WindowLayoutTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
     DisplayId displayId_ = 0;
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
@@ -44,7 +44,7 @@ public:
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
     static constexpr uint32_t WAIT_SERVERAL_FRAMES = 36000;
-    static constexpr uint32_t WAIT_SYANC_S = 1; // second;
+    static constexpr uint32_t WAIT_SYANC_S = 2; // second;
     static void InitAvoidArea();
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
@@ -54,7 +54,7 @@ vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
 void WindowLayoutTest::SetUpTestCase()
 {
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(0);
-    sleep(2);
+    sleep(WAIT_SYANC_S);
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_NE(display, nullptr);
     ASSERT_TRUE((display != nullptr));
@@ -86,7 +86,7 @@ void WindowLayoutTest::SetUpTestCase()
     };
     fullScreenExpecteds_.push_back(expected);
     InitAvoidArea();
-    sleep(2);
+    sleep(WAIT_SYANC_S);
 }
 
 void WindowLayoutTest::InitAvoidArea()
@@ -463,10 +463,8 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true, .parentLimit = false,
         .parentId = INVALID_WINDOW_ID,
     };
-
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
-
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -477,7 +475,6 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     if (maxTileNum < 1) {
         return;
     }
-
     usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
