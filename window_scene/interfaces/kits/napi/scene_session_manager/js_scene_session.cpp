@@ -37,12 +37,13 @@ const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
 const std::string BIND_DIALOG_TARGET_CB = "bindDialogTarget";
 const std::string RAISE_TO_TOP_CB = "raiseToTop";
 const std::string RAISE_TO_TOP_POINT_DOWN_CB = "raiseToTopForPointDown";
-const std::string CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB = "clickModalSpecificWindowOutside";
+const std::string CLICK_MODAL_WINDOW_OUTSIDE_CB = "clickModalWindowOutside";
 const std::string BACK_PRESSED_CB = "backPressed";
 const std::string SESSION_FOCUSABLE_CHANGE_CB = "sessionFocusableChange";
 const std::string SESSION_TOUCHABLE_CHANGE_CB = "sessionTouchableChange";
 const std::string SESSION_TOP_MOST_CHANGE_CB = "sessionTopmostChange";
 const std::string SESSION_MODAL_TYPE_CHANGE_CB = "sessionModalTypeChange";
+const std::string MAIN_SESSION_MODAL_TYPE_CHANGE_CB = "mainSessionModalTypeChange";
 const std::string CLICK_CB = "click";
 const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string TERMINATE_SESSION_CB_NEW = "terminateSessionNew";
@@ -97,13 +98,13 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {BIND_DIALOG_TARGET_CB,                 ListenerFuncType::BIND_DIALOG_TARGET_CB},
     {RAISE_TO_TOP_CB,                       ListenerFuncType::RAISE_TO_TOP_CB},
     {RAISE_TO_TOP_POINT_DOWN_CB,            ListenerFuncType::RAISE_TO_TOP_POINT_DOWN_CB},
-    {CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB,
-        ListenerFuncType::CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB},
+    {CLICK_MODAL_WINDOW_OUTSIDE_CB,         ListenerFuncType::CLICK_MODAL_WINDOW_OUTSIDE_CB},
     {BACK_PRESSED_CB,                       ListenerFuncType::BACK_PRESSED_CB},
     {SESSION_FOCUSABLE_CHANGE_CB,           ListenerFuncType::SESSION_FOCUSABLE_CHANGE_CB},
     {SESSION_TOUCHABLE_CHANGE_CB,           ListenerFuncType::SESSION_TOUCHABLE_CHANGE_CB},
     {SESSION_TOP_MOST_CHANGE_CB,            ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB},
     {SESSION_MODAL_TYPE_CHANGE_CB,          ListenerFuncType::SESSION_MODAL_TYPE_CHANGE_CB},
+    {MAIN_SESSION_MODAL_TYPE_CHANGE_CB,     ListenerFuncType::MAIN_SESSION_MODAL_TYPE_CHANGE_CB},
     {CLICK_CB,                              ListenerFuncType::CLICK_CB},
     {TERMINATE_SESSION_CB,                  ListenerFuncType::TERMINATE_SESSION_CB},
     {TERMINATE_SESSION_CB_NEW,              ListenerFuncType::TERMINATE_SESSION_CB_NEW},
@@ -1128,22 +1129,22 @@ void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
     WLOGFD("success");
 }
 
-void JsSceneSession::ProcessClickModalSpecificWindowOutsideRegister()
+void JsSceneSession::ProcessClickModalWindowOutsideRegister()
 {
-    NotifyClickModalSpecificWindowOutsideFunc func = [weakThis = wptr(this)] {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessClickModalSpecificWindowOutsideRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnClickModalSpecificWindowOutside();
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetClickModalSpecificWindowOutsideListener(func);
+    const char* const where = __func__;
+    session->SetClickModalWindowOutsideListener([where, weakThis = wptr(this)] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnClickModalWindowOutside();
+    });
     TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
@@ -1355,22 +1356,39 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
 
 void JsSceneSession::ProcessSessionModalTypeChangeRegister()
 {
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, persistent id:%{public}d", persistentId_);
+        return;
+    }
     const char* const where = __func__;
-    NotifySessionModalTypeChangeFunc func =
-        [weakThis = wptr(this), where](SubWindowModalType subWindowModalType) {
+    session->SetSessionModalTypeChangeCallback([weakThis = wptr(this), where](SubWindowModalType subWindowModalType) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnSessionModalTypeChange(subWindowModalType);
-    };
+    });
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistent id:%{public}d", persistentId_);
+}
+
+void JsSceneSession::ProcessMainSessionModalTypeChangeRegister()
+{
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, persistent id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, persistent id:%{public}d", persistentId_);
         return;
     }
-    session->SetSessionModalTypeChangeCallback(func);
+    const char* const where = __func__;
+    session->SetMainSessionModalTypeChangeCallback([weakThis = wptr(this), where](bool isModal) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnMainSessionModalTypeChange(isModal);
+    });
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistent id:%{public}d", persistentId_);
 }
 
@@ -2225,8 +2243,8 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::RAISE_TO_TOP_POINT_DOWN_CB):
             ProcessRaiseToTopForPointDownRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB):
-            ProcessClickModalSpecificWindowOutsideRegister();
+        case static_cast<uint32_t>(ListenerFuncType::CLICK_MODAL_WINDOW_OUTSIDE_CB):
+            ProcessClickModalWindowOutsideRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::BACK_PRESSED_CB):
             ProcessBackPressedRegister();
@@ -2245,6 +2263,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_MODAL_TYPE_CHANGE_CB):
             ProcessSessionModalTypeChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::MAIN_SESSION_MODAL_TYPE_CHANGE_CB):
+            ProcessMainSessionModalTypeChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::CLICK_CB):
             ProcessClickRegister();
@@ -2946,25 +2967,26 @@ void JsSceneSession::OnRaiseToTopForPointDown()
     taskScheduler_->PostMainThreadTask(task, "OnRaiseToTopForPointDown");
 }
 
-void JsSceneSession::OnClickModalSpecificWindowOutside()
+void JsSceneSession::OnClickModalWindowOutside()
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnClickModalSpecificWindowOutside jsSceneSession id:%{public}d has been"
-                " destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
             return;
         }
-        auto jsCallBack = jsSceneSession->GetJSCallback(CLICK_MODAL_SPECIFIC_WINDOW_OUTSIDE_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(CLICK_MODAL_WINDOW_OUTSIDE_CB);
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s [NAPI]jsCallBack is nullptr", where);
             return;
         }
         napi_value argv[] = {};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnClickModalSpecificWindowOutside");
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)
@@ -3104,6 +3126,28 @@ void JsSceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModalT
     };
     taskScheduler_->PostMainThreadTask(task,
         "OnSessionModalTypeChange: " + std::to_string(static_cast<uint32_t>(subWindowModalType)));
+}
+
+void JsSceneSession::OnMainSessionModalTypeChange(bool isModal)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isModal, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(MAIN_SESSION_MODAL_TYPE_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsMainSessionModalType = CreateJsValue(env, isModal);
+        napi_value argv[] = {jsMainSessionModalType};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnMainSessionModalTypeChange: " + std::to_string(isModal));
 }
 
 void JsSceneSession::OnClick(bool requestFocus, bool isClick)
