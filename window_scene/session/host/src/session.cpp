@@ -101,6 +101,16 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
     }
 }
 
+Session::~Session()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+            // do nothing
+        });
+    }
+}
+
 void Session::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
     const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
 {
@@ -274,6 +284,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.startSetting = info.startSetting;
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
+    sessionInfo_.callState_ = info.callState_;
 }
 
 void Session::SetScreenId(uint64_t screenId)
@@ -558,6 +569,16 @@ bool Session::IsFocusedOnShow() const
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "IsFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow_, GetPersistentId());
     return focusedOnShow_;
+}
+
+void Session::SetStartingBeforeVisible(bool isStartingBeforeVisible)
+{
+    isStartingBeforeVisible_ = isStartingBeforeVisible;
+}
+
+bool Session::GetStartingBeforeVisible() const
+{
+    return isStartingBeforeVisible_;
 }
 
 WSError Session::SetTouchable(bool touchable)
@@ -1118,6 +1139,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         isActive_ = false;
     }
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! id: %{public}d, state: %{public}u",
             GetPersistentId(), state);
@@ -1143,6 +1165,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     bufferAvailable_ = false;
     isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
@@ -2372,12 +2395,26 @@ WSError Session::UpdateWindowMode(WindowMode mode)
             surfaceNode_->MarkUifirstNode(true);
         }
         UpdateGestureBackEnabled();
+        UpdateGravityWhenUpdateWindowMode(mode);
         if (!sessionStage_) {
             return WSError::WS_ERROR_NULLPTR;
         }
         return sessionStage_->UpdateWindowMode(mode);
     }
     return WSError::WS_OK;
+}
+
+void Session::UpdateGravityWhenUpdateWindowMode(WindowMode mode)
+{
+    if ((systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode_ != nullptr) {
+        if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            surfaceNode_->SetFrameGravity(Gravity::LEFT);
+        } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
+        } else if (mode == WindowMode::WINDOW_MODE_FLOATING || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        }
+    }
 }
 
 WSError Session::SetSystemSceneBlockingFocus(bool blocking)

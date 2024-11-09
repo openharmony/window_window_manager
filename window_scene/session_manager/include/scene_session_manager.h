@@ -512,6 +512,7 @@ private:
     bool MissionChanged(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
 
@@ -611,6 +612,12 @@ private:
      * PiP Window
      */
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
+
+    /*
+     * Gesture Back
+     */
+    void UpdateGestureBackEnabled(int32_t persistentId);
+    std::unordered_set<int32_t> gestureBackEnableWindowIdSet_; // ONLY Accessed on OS_sceneSession thread
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
@@ -831,12 +838,6 @@ private:
      * Screen Manager
      */
     bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
-
-    /*
-     * Gesture Back
-     */
-    void UpdateGestureBackEnabled(int32_t persistentId);
-    std::unordered_set<int32_t> gestureBackEnableWindowIdSet_; // ONLY Accessed on OS_sceneSession thread
 };
 } // namespace OHOS::Rosen
 

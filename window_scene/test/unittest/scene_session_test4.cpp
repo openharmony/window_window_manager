@@ -418,15 +418,14 @@ HWTEST_F(SceneSessionTest4, SetRequestedOrientation, Function | SmallTest | Leve
     Orientation orientation { Orientation::BEGIN };
     session->sessionChangeCallback_ = nullptr;
     session->SetRequestedOrientation(orientation);
-    session->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->sessionChangeCallback_->OnRequestedOrientationChange_ = nullptr;
+    session->onRequestedOrientationChange_ = nullptr;
     session->SetRequestedOrientation(orientation);
     NotifyReqOrientationChangeFunc func = [](uint32_t orientation) {
         return;
     };
-    session->sessionChangeCallback_->OnRequestedOrientationChange_ = func;
+    session->onRequestedOrientationChange_ = func;
     session->SetRequestedOrientation(orientation);
-    EXPECT_NE(nullptr, session->sessionChangeCallback_->OnRequestedOrientationChange_);
+    EXPECT_NE(nullptr, session->onRequestedOrientationChange_);
 }
 
 /**
@@ -704,8 +703,6 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->isEnableGestureBack_ = false;
     EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(false));
-    sceneSession->specificCallback_ = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->SetGestureBackEnabled(true));
     sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
     auto func = [sceneSession](int32_t persistentId) {

@@ -178,7 +178,7 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 
 void KeyboardSession::UpdateKeyboardAvoidArea()
 {
-    if (!IsSessionForeground() || !IsVisibleForeground()) {
+    if (!IsSessionForeground() || (Session::IsScbCoreEnabled() && !IsVisibleForeground())) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
         return;
     }
@@ -196,14 +196,14 @@ void KeyboardSession::OnKeyboardPanelUpdated()
     TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
     WSRect panelRect = { 0, 0, 0, 0 };
     panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
-    RaiseCallingSession(panelRect);
+    RaiseCallingSession(panelRect, true);
     UpdateKeyboardAvoidArea();
 }
 
 void KeyboardSession::OnCallingSessionUpdated()
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
-    if (!IsSessionForeground() || !IsVisibleForeground()) {
+    if (!IsSessionForeground() || (Session::IsScbCoreEnabled() && !IsVisibleForeground())) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
     }
@@ -436,10 +436,10 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
     return true;
 }
 
-void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect,
+void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    if (!IsSessionForeground() || !IsVisibleForeground()) {
+    if (!IsSessionForeground() || (Session::IsScbCoreEnabled() && needCheckVisible && !IsVisibleForeground())) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
     }
@@ -540,7 +540,7 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t newCallingSessi
     sessionProperty->SetCallingSessionId(newCallingSessionId);
     WSRect panelRect = { 0, 0, 0, 0 };
     panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
-    RaiseCallingSession(panelRect);
+    RaiseCallingSession(panelRect, true);
 }
 
 void KeyboardSession::RelayoutKeyBoard()
@@ -612,7 +612,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             rsTransaction = session->GetRSTransaction();
         }
         if (isKeyboardShow) {
-            session->RaiseCallingSession(keyboardPanelRect, rsTransaction);
+            // notify calling session when keyboard is not visible
+            session->RaiseCallingSession(keyboardPanelRect, false, rsTransaction);
             session->UpdateKeyboardAvoidArea();
         } else {
             session->RestoreCallingSession(rsTransaction);

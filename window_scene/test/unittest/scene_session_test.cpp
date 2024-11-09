@@ -817,14 +817,13 @@ HWTEST_F(SceneSessionTest, NotifyIsCustomAnimationPlaying, Function | SmallTest 
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    scensession->NotifyIsCustomAnimationPlaying(false);
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->NotifyIsCustomAnimationPlaying(false);
 
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    scensession->sessionChangeCallback_->onIsCustomAnimationPlaying_ = [](bool status){};
-    scensession->NotifyIsCustomAnimationPlaying(false);
+    sceneSession->onIsCustomAnimationPlaying_ = [](bool status) {};
+    sceneSession->NotifyIsCustomAnimationPlaying(false);
 }
 
 /**
