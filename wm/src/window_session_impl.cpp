@@ -1595,7 +1595,7 @@ WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
     WLOGFD("%{public}d", raiseEnabled);
     auto parentId = GetParentId();
     if (parentId == INVALID_SESSION_ID) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "Only the children of the main window can be raised!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Parent id is invalid!");
         return WMError::WM_ERROR_INVALID_PARENT;
     }
 
