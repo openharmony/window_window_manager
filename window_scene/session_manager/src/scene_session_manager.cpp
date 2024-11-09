@@ -9793,7 +9793,8 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                                                 session->GetSessionProperty());
             infos.emplace_back(sptr<WindowVisibilityInfo>::MakeSptr(session->GetWindowId(), session->GetCallingPid(),
                 session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType(), windowStatus, rect,
-                session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_));
+                session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_,
+                session->IsFocused()));
         }
         return WMError::WM_OK;
     };

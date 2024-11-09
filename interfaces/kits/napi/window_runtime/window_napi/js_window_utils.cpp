@@ -563,6 +563,7 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
     napi_set_named_property(env, objValue, "windowStatusType",
         CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    napi_set_named_property(env, objValue, "isFocused", CreateJsValue(env, info->IsFocused()));
     return objValue;
 }
 
