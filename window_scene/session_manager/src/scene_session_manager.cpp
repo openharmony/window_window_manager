@@ -2500,6 +2500,9 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
         if (session && session->GetWindowMode() == WindowMode::WINDOW_MODE_PIP &&
             pipTemplateInfo.priority < session->GetPiPTemplateInfo().priority &&
             session->IsSessionForeground()) {
+            if (startPiPFailedFunc_) {
+                startPiPFailedFunc_();
+            }
             TLOGE(WmsLogTag::WMS_PIP, "create pip window failed, reason: low priority.");
             return false;
         }
@@ -2855,6 +2858,11 @@ void SceneSessionManager::SetCreateSystemSessionListener(const NotifyCreateSyste
 void SceneSessionManager::SetCreateKeyboardSessionListener(const NotifyCreateKeyboardSessionFunc& func)
 {
     createKeyboardSessionFunc_ = func;
+}
+
+void SceneSessionManager::SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func)
+{
+    startPiPFailedFunc_ = std::move(func);
 }
 
 void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
