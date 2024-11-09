@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "display_manager.h"
 #include "session/host/include/root_scene_session.h"
 
 namespace OHOS::Rosen {
@@ -151,30 +152,30 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
         }
 
         AvoidArea avoidArea;
-        WSRect rect = GetLastUpdateRect();
+        WSRect rect = session->GetLastUpdateRect();
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
-                GetSystemAvoidArea(rect, avoidArea);
+                session->GetSystemAvoidArea(rect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_CUTOUT: {
-                GetCutoutAvoidArea(rect, avoidArea);
+                session->GetCutoutAvoidArea(rect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_KEYBOARD: {
-                GetKeyboardAvoidArea(rect, avoidArea);
+                session->GetKeyboardAvoidArea(rect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-                GetAINavigationBarArea(rect, avoidArea);
+                session->GetAINavigationBarArea(rect, avoidArea);
                 return avoidArea;
             }
             default: {
                 TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
-                    type, GetPersistentId());
+                    type, session->GetPersistentId());
                 return avoidArea;
             }
         }

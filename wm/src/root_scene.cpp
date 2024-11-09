@@ -235,6 +235,7 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
         return WMError::WM_ERROR_NULLPTR;
     }
     avoidArea = getSessionAvoidAreaByTypeCallback_(type);
+    TLOGI(WmsLogTag::WMS_IMMS, "root scene type ${public}u area ${public}s", type, avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
 } // namespace Rosen
