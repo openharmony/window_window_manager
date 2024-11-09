@@ -1373,7 +1373,7 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = (argc == 0) ? nullptr :
-        (argv[0] != nullptr && GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
+        (GetType(env, argv[INDEX_ZERO]) == napi_function ? argv[INDEX_ZERO] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     const char* const where = __func__;
@@ -1406,7 +1406,7 @@ napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = (argc == 0) ? nullptr :
-        (argv[0] != nullptr && GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
+        (GetType(env, argv[INDEX_ZERO]) == napi_function ? argv[INDEX_ZERO] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     const char* const where = __func__;
@@ -5991,7 +5991,6 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
     }
     return result;
 }
-  
 
 std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName)
 {
