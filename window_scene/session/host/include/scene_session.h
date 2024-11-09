@@ -18,6 +18,7 @@
 
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
+#include "session/host/include/pc_fold_screen_controller.h"
 #include "vsync_station.h"
 #include "wm_common.h"
 
@@ -177,6 +178,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnSessionEvent(SessionEvent event, SessionEventParam param);
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
@@ -458,6 +460,7 @@ public:
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
     int32_t GetStatusBarHeight() override;
+    int32_t GetDockHeight();
     bool IsFreeMultiWindowMode() const
     {
         return systemConfig_.IsFreeMultiWindowMode();
@@ -591,6 +594,11 @@ protected:
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
 
+    /*
+     * pc fold screen
+     */
+    sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
+
     /**
      * PC Window
      */
@@ -640,6 +648,7 @@ private:
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
         bool isGlobal, bool needFlush);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
+    bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
 
     /**
      * Gesture Back
@@ -658,6 +667,11 @@ private:
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
+    void SetSurfaceBoundsWithAnimation(
+        std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve> animationParam,
+        const WSRect& rect, std::function<void()>&& finishCallback = nullptr,
+        bool isGlobal = false, bool needFlush = true
+    );
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
