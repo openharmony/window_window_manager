@@ -3290,8 +3290,8 @@ void ScreenSessionManager::MirrorSwitchNotify(ScreenId screenId)
     }
 }
 
-DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-                                         ScreenId& screenGroupId)
+DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+    DMRect mainScreenRegion, ScreenId& screenGroupId)
 {
     TLOGI(WmsLogTag::DMS, "enter!");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -3319,7 +3319,7 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
         OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     }
     DMError makeResult = MultiScreenManager::GetInstance().MirrorSwitch(mainScreenId,
-        allMirrorScreenIds, screenGroupId);
+        allMirrorScreenIds, mainScreenRegion, screenGroupId);
     for (ScreenId screenId : allMirrorScreenIds) {
         MirrorSwitchNotify(screenId);
     }
@@ -3327,6 +3327,20 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     TLOGI(WmsLogTag::DMS, "make mirror notify scb end makeResult=%{public}d", makeResult);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror end");
     return makeResult;
+}
+
+DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+    ScreenId& screenGroupId)
+{
+    return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId);
+}
+
+DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+                                         DMRect mainScreenRegion, ScreenId& screenGroupId)
+{
+    std::vector<ScreenId> screenIds;
+    screenIds.emplace_back(mirrorScreenId);
+    return DoMakeMirror(mainScreenId, screenIds, mainScreenRegion, screenGroupId);
 }
 
 void ScreenSessionManager::RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds)
@@ -4020,7 +4034,7 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
     return true;
 }
 
-DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens)
+DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion)
 {
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64"", screenId);
     sptr<ScreenSession> screen = GetScreenSession(screenId);
@@ -4044,7 +4058,8 @@ DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId>
     bool filterMirroredScreen =
         group->combination_ == ScreenCombination::SCREEN_MIRROR && group->mirrorScreenId_ == screen->screenId_;
     group->mirrorScreenId_ = screen->screenId_;
-    ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR);
+    ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR,
+        mainScreenRegion);
     TLOGI(WmsLogTag::DMS, "success");
     return DMError::DM_OK;
 }
@@ -4078,7 +4093,7 @@ bool ScreenSessionManager::CheckScreenInScreenGroup(sptr<ScreenSession> screen) 
 }
 
 void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
-    const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination)
+    const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination, DMRect mainScreenRegion)
 {
     std::map<ScreenId, bool> removeChildResMap;
     std::vector<ScreenId> addScreens;
@@ -4094,7 +4109,16 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         TLOGI(WmsLogTag::DMS, "Screen->groupSmsId_: %{public}" PRIu64"", screen->groupSmsId_);
         screen->groupSmsId_ = 1;
         if (filterScreen && screen->groupSmsId_ == group->screenId_ && group->HasChild(screen->screenId_)) {
-            continue;
+            //该screen已经在该分组中了
+            if (combination != ScreenCombination::SCREEN_MIRROR ||
+                screen->GetMirrorScreenRegion().second == mainScreenRegion) {
+                continue;
+            }
+            //镜像模式且镜像区域变化，需要重新创建镜像
+            TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64
+                ", apply new region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
+                screenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
+                mainScreenRegion.width_, mainScreenRegion.height_);
         }
         if (CheckScreenInScreenGroup(screen)) {
             NotifyDisplayDestroy(screenId);
@@ -4103,6 +4127,20 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         addChildPos.emplace_back(startPoints[i]);
         removeChildResMap[screenId] = originGroup != nullptr;
         addScreens.emplace_back(screenId);
+        if (combination == ScreenCombination::SCREEN_MIRROR) {
+            auto mirrorScreenId = group->mirrorScreenId_;
+            ScreenId rsScreenId = SCREEN_ID_INVALID;
+            if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+                TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", mirrorScreenId);
+            } else {
+                screen->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
+                screen->SetIsPhysicalMirrorSwitch(false);
+                TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64" mirror to %{public}"
+                    PRIu64" with region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
+                    screenId, mirrorScreenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
+                    mainScreenRegion.width_, mainScreenRegion.height_);
+            }
+        }
     }
     group->combination_ = combination;
     AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
