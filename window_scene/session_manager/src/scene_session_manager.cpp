@@ -10318,7 +10318,7 @@ WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& 
         } else if (abilityInfo != nullptr) {
             info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType);
             infos.push_back(info);
-            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d,"
+            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d, "
                 "bundleName:%{public}s, bundleType:%{public}d", session->GetPersistentId(),
                 info.bundleName_.c_str(), info.bundleType_);
         }

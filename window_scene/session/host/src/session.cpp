@@ -1262,6 +1262,18 @@ bool Session::GetForegroundInteractiveStatus() const
     return foregroundInteractiveStatus_.load();
 }
 
+bool Session::IsActivatedAfterScreenLocked() const
+{
+    return isActivatedAfterScreenLocked_.load();
+}
+
+void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
+        GetPersistentId(), isActivatedAfterScreenLocked);
+    isActivatedAfterScreenLocked_.store(isActivatedAfterScreenLocked);
+}
+
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
 {
     isAttach_ = isAttach;
@@ -2715,7 +2727,8 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
         persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     }
     g_persistentIdSet.insert(g_persistentId);
-    WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const
