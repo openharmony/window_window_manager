@@ -555,6 +555,8 @@ protected:
     void CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea) const;
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
+    NotifyNeedAvoidFunc onNeedAvoid_;
 
     /**
      * Gesture Back
@@ -573,12 +575,6 @@ protected:
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardGravityChangeFunc keyboardGravityChangeFunc_;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
-
-    /**
-     * Window Immersive
-     */
-    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
-    NotifyNeedAvoidFunc onNeedAvoid_;
 
     /**
      * Window Hierarchy
