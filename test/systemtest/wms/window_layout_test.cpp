@@ -600,7 +600,7 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
     windowSceneSessionImpl->property_->SetDisplayId(0);
 
     SessionInfo sessionInfo = { "CeateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> sceneSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
@@ -628,7 +628,7 @@ HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Leve
 {
     TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::SetAspectRatioDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowLimitsDataRoute");
+    option->SetWindowName("SetAspectRatioDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
@@ -661,7 +661,7 @@ HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::moveToDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowLimitsDataRoute");
+    option->SetWindowName("moveToDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -669,7 +669,7 @@ HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
     windowSceneSessionImpl->property_->SetDisplayId(0);
 
     SessionInfo sessionInfo = { "CeateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> sceneSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
@@ -693,7 +693,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::ResizeDataRoute begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowLimitsDataRoute");
+    option->SetWindowName("ResizeDataRoute");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -702,7 +702,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
 
     SessionInfo sessionInfo = { "CeateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo,nullptr);
-    session->isActive = true;
+    session->isActive_ = true;
     session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     session->SetSessionState(SessionState::STATE_FOREGROUND);
     windowSceneSessionImpl->hostSession_ = session;
@@ -717,7 +717,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
 
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     WSError ret2 = session->UpdateSessionRect(wsRect,SizeChangeReason::RESIZE,false);
-    EXPECT_EQ(WSError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret2);
 
     usleep(WAIT_SERVERAL_FRAMES);
     Rect rect2 = session->property_->GetRequestRect();
@@ -731,7 +731,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
  * @tc.desc: test FixRectByAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level3)
+HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level0)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::FixRectByAspectRatio begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -744,7 +744,7 @@ HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level3)
 
     SessionInfo sessionInfo = { "CeateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo,nullptr);
-    session->isActive = true;
+    session->isActive_ = true;
     session->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -770,14 +770,14 @@ HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level3)
     Rect rect = windowSceneSessionImpl->property_->GetRequestRect();
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     // 异步接口加一个延迟
-    WSError wsRect2 = session->UpdateSessionRect(wsRect,SizeChangeReason::RESIZE,false);
-    EXPECT_EQ(WSError::WM_OK, wsRect2);
+    WSError wsRet2 = session->UpdateSessionRect(wsRect,SizeChangeReason::RESIZE,false);
+    EXPECT_EQ(WMError::WM_OK, wsRet2);
     usleep(WAIT_SERVERAL_FRAMES);
-    WSError wsRect3 = session->UpdateRect(wsRect,SizeChangeReason::RESIZE,"FixRectByAspectRatio",nullptr);
-    EXPECT_EQ(WSError::WM_OK, wsRect3);
+    WSError wsRet3 = session->UpdateRect(wsRect,SizeChangeReason::RESIZE,"FixRectByAspectRatio",nullptr);
+    EXPECT_EQ(WMError::WM_OK, wsRet3);
     usleep(WAIT_SERVERAL_FRAMES);
-    WSError wsRect4 = session->SetAspectRatio(ratio);
-    EXPECT_EQ(WSError::WM_OK, wsRect4);
+    WSError wsRet4 = session->SetAspectRatio(ratio);
+    EXPECT_EQ(WMError::WM_OK, wsRet4);
     TLOGI(WmsLogTag::WMS_LAYOUT,"### WindowLayoutTest::FixRectByAspectRatio end ###");
 }
 
