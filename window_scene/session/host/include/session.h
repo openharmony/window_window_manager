@@ -384,6 +384,8 @@ public:
     void SetIsMidScene(bool isMidScene);
     bool GetIsMidScene() const;
 
+    bool CheckIfNeedKeyboardAvoidAreaEmpty() const;
+
     bool IsSessionValid() const;
     bool IsActive() const;
     bool IsSystemActive() const;
