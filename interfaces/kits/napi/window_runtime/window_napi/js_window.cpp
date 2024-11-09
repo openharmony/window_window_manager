@@ -1377,7 +1377,7 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     const char* const where = __func__;
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where]() {
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr or get invalid param", where);
@@ -1410,7 +1410,7 @@ napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     const char* const where = __func__;
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where]() {
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr or get invalid param", where);
@@ -5970,7 +5970,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [weakToken, presentation, env, task = napiAsyncTask]() mutable {
+    auto asyncTask = [weakToken, presentation, env, task = napiAsyncTask] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             task->Reject(env,
