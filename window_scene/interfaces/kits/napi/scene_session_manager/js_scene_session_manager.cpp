@@ -459,7 +459,7 @@ void JsSceneSessionManager::OnAbilityManagerCollaboratorRegistered()
 
 void JsSceneSessionManager::OnStartPiPFailed()
 {
-    TLOGD(WmsLogTag::WMS_PIP, "[NAPI] OnStartPiPFailed");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     auto task = [jsCallBack = GetJSCallback(START_PIP_FAILED_CB), env = env_] {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
