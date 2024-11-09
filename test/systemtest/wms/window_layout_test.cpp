@@ -609,7 +609,7 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
     WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1);
     EXPECT_EQ(WMError::WM_OK, ret);
     auto windowProperty = windowSceneSessionImpl->GetProperty();
-    ASSERT_NE(nullptr,windowProperty);
+    ASSERT_NE(nullptr, windowProperty);
 
     WindowLimits windowLimits2 = windowProperty->GetWindowLimits();
     EXPECT_EQ(windowLimits1.maxWidth_, windowLimits2.maxWidth_);
@@ -642,7 +642,7 @@ HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Leve
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    WindowLimits windowLimits1 = {4000,4000,2000,2000,0.0f,0.0f};
+    WindowLimits windowLimits1 = {4000, 4000, 2000, 2000, 0.0f, 0.0f};
     WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1);
     EXPECT_EQ(WMError::WM_OK, ret);
     const float ratio = 1.5;
@@ -674,7 +674,7 @@ HWTEST_F(WindowLayoutTest, moveToDataRoute, Function | MediumTest | Level3)
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    WMError ret = windowSceneSessionImpl->MoveTo(500,500);
+    WMError ret = windowSceneSessionImpl->MoveTo(500, 500);
     usleep(WAIT_SERVERAL_FRAMES);
     EXPECT_EQ(WMError::WM_OK, ret);
     
@@ -708,7 +708,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    WMError ret = windowSceneSessionImpl->Resize(500,500);
+    WMError ret = windowSceneSessionImpl->Resize(500, 500);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     Rect rect = windowSceneSessionImpl->property_->GetRequestRect();
@@ -716,7 +716,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
     EXPECT_EQ(500, rect.height_);
 
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
-    WSError ret2 = session->UpdateSessionRect(wsRect,SizeChangeReason::RESIZE,false);
+    WSError ret2 = session->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE, false);
     EXPECT_EQ(WMError::WM_OK, ret2);
 
     usleep(WAIT_SERVERAL_FRAMES);
@@ -743,7 +743,7 @@ HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level0)
     windowSceneSessionImpl->property_->SetDisplayId(0);
 
     SessionInfo sessionInfo = { "CeateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo,nullptr);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     session->isActive_ = true;
     session->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -752,11 +752,11 @@ HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level0)
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    WindowLimits windowLimits1 = {3000,3000,1200,1200,0.0f,0.0f};
+    WindowLimits windowLimits1 = {3000, 3000, 1200, 1200, 0.0f, 0.0f};
     WMError wmRet1 = windowSceneSessionImpl->SetWindowLimits(windowLimits1);
     EXPECT_EQ(WMError::WM_OK, wmRet1);
 
-    WMError wmRet2 = windowSceneSessionImpl->Resize(1600,1600);
+    WMError wmRet2 = windowSceneSessionImpl->Resize(1600, 1600);
     EXPECT_EQ(WMError::WM_OK, wmRet2);
 
     float ratio = 0.8;
@@ -764,17 +764,18 @@ HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level0)
     EXPECT_EQ(WMError::WM_OK, wmRet3);
 
     // 服务端执行相同的逻辑
-    auto property = windowSceneSessionImpl->property_
-    WMError wsRet1 = session->UpdateSessionPropertyByAction(property,WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    auto property = windowSceneSessionImpl->property_;
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
+    WMError wsRet1 = session->UpdateSessionPropertyByAction(property, action);
     EXPECT_EQ(WMError::WM_OK, wsRet1);
 
     Rect rect = windowSceneSessionImpl->property_->GetRequestRect();
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     // 异步接口加一个延迟
-    WSError wsRet2 = session->UpdateSessionRect(wsRect,SizeChangeReason::RESIZE,false);
+    WSError wsRet2 = session->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE, false);
     EXPECT_EQ(WSError::WS_OK, wsRet2);
     usleep(WAIT_SERVERAL_FRAMES);
-    WSError wsRet3 = session->UpdateRect(wsRect,SizeChangeReason::RESIZE,"FixRectByAspectRatio",nullptr);
+    WSError wsRet3 = session->UpdateRect(wsRect, SizeChangeReason::RESIZE, "FixRectByAspectRatio", nullptr);
     EXPECT_EQ(WSError::WS_OK, wsRet3);
     usleep(WAIT_SERVERAL_FRAMES);
     WSError wsRet4 = session->SetAspectRatio(ratio);
