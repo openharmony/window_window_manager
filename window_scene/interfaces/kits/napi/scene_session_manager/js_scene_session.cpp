@@ -2977,7 +2977,7 @@ void JsSceneSession::OnClickModalWindowOutside()
         napi_value argv[] = {};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnClickModalWindowOutside");
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::OnRaiseAboveTarget(int32_t subWindowId)

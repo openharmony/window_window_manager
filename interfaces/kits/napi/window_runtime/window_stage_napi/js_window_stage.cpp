@@ -570,14 +570,14 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     }
     bool isModal = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isModal)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to boolean");
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to bool");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
     std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
-    auto asyncTask = [where, weakWindow = wptr(window), isModal, env, task = napiAsyncTask]() {
+    auto asyncTask = [where, weakWindow = wptr(window), isModal, env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, window is null", where);
@@ -601,7 +601,6 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
     }
     return result;
 }
-
 
 napi_value JsWindowStage::OnSetShowOnLockScreen(napi_env env, napi_callback_info info)
 {

@@ -619,11 +619,11 @@ void SceneSession::SetSessionModalTypeChangeCallback(NotifySessionModalTypeChang
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or SessionModalTypeChangeFunc is null", where);
+            return;
         }
         session->onSessionModalTypeChange_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s id: %{public}d",
             where, session->GetPersistentId());
-        return WSError::WS_OK;
     };
     PostTask(task, __func__);
 }

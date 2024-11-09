@@ -433,6 +433,7 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
     session->onSetWindowRectAutoSaveFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
 }
+
 /**
  * @tc.name: OnMainSessionModalTypeChange
  * @tc.desc: OnMainSessionModalTypeChange function01

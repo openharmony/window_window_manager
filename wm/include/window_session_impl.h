@@ -101,8 +101,8 @@ public:
     bool IsTopmost() const override;
     WMError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
-    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
-    virtual WMError SetWindowModal(bool isModal) override;
+    WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
+    WMError SetWindowModal(bool isModal) override;
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
