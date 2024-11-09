@@ -783,7 +783,7 @@ private:
     RotateAnimationConfig rotateAnimationConfig_;
 
     /*
-     * pip window
+     * PiP Window
      */
     NotifyStartPiPFailedFunc startPiPFailedFunc_;
 
