@@ -732,6 +732,21 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetWindowEnableDragBySystem
+ * @tc.desc: SetWindowEnableDragBySystem function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetWindowEnableDragBySystem, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowEnableDrag";
+    info.bundleName_ = "SetWindowEnableDrag";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = session->SetWindowEnableDragBySystem(true);
+     EXPECT_EQ(WMError::WM_OK, ret);
+ }
+
+/**
  * @tc.name: UpdateWinRectForSystemBar
  * @tc.desc: UpdateWinRectForSystemBar function01
  * @tc.type: FUNC

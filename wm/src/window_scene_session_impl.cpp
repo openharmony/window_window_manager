@@ -2215,7 +2215,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
 {
     WLOGFI("WindowSceneSessionImpl::MaximizeFloating id: %{public}d", GetPersistentId());
 
-    if (property_->GetCompatibleModeInPc()) {
+    if (property_->GetCompatibleModeInPc() && !IsFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not MaximizeFloating");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }

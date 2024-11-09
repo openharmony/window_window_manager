@@ -4480,6 +4480,21 @@ WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSession
     return WMError::WM_OK;
 }
 
+WMError SceneSession::HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
+    const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
+{
+    if (!property->GetSystemCalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Update property modeSupportInfo permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        sessionProperty->SetModeSupportInfo(property->GetModeSupportInfo());
+    }
+    return WMError::WM_OK;
+}
+
 void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
 {
     forceSplitFunc_ = func;

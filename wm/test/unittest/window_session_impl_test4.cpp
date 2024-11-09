@@ -1201,6 +1201,24 @@ HWTEST_F(WindowSessionImplTest4, UpdateSubWindowStateAndNotify01, Function | Sma
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
+
+/**
+ * @tc.name: SetEnableDragBySystem
+ * @tc.desc: test SetEnableDragBySystem
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetEnableDragBySystem, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetSubWindow start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetSubWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetDragEnabled(true);
+    window->SetEnableDragBySystem(false);
+    ASSERT_FALSE(window->property_->GetDragEnabled());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
