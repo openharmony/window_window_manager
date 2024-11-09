@@ -3781,16 +3781,6 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
         if (listener != nullptr) {
-            if (((property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-                  WindowHelper::IsMainWindow(GetType())) ||
-                 (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
-                  FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.IsPhoneWindow() ||
-                 (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
-                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
-                listener->OnSizeChange(occupiedAreaChangeInfo);
-                continue;
-            }
             listener->OnSizeChange(info);
         }
     }
