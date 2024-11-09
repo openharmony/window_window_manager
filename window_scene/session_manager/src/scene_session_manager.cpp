@@ -2501,7 +2501,6 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
             pipTemplateInfo.priority < session->GetPiPTemplateInfo().priority &&
             session->IsSessionForeground()) {
             if (startPiPFailedFunc_) {
-                TLOGE(WmsLogTag::WMS_PIP, "start pip failed because of low priority");
                 startPiPFailedFunc_();
             }
             TLOGE(WmsLogTag::WMS_PIP, "create pip window failed, reason: low priority.");
