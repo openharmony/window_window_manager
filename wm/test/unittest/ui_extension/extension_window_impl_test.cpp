@@ -48,7 +48,7 @@ HWTEST_F(ExtensionWindowImplTest, GetAvoidAreaByType, Function | SmallTest | Lev
  */
 HWTEST_F(ExtensionWindowImplTest, GetWindow, Function | SmallTest | Level2)
 {
-    sptr<Window> window = new(std::nothrow) Window();
+    sptr<Window> window = new (std::nothrow) Window();
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
 
@@ -62,9 +62,9 @@ HWTEST_F(ExtensionWindowImplTest, GetWindow, Function | SmallTest | Level2)
  */
 HWTEST_F(ExtensionWindowImplTest, HideNonSecureWindows, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> window = new(std::nothrow) MockWindowExtensionSessionImpl(option);
+    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
    
@@ -82,9 +82,9 @@ HWTEST_F(ExtensionWindowImplTest, HideNonSecureWindows, Function | SmallTest | L
  */
 HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> window = new(std::nothrow) MockWindowExtensionSessionImpl(option);
+    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
    
@@ -102,9 +102,9 @@ HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, Function | SmallTest | Level
  */
 HWTEST_F(ExtensionWindowImplTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> window = new(std::nothrow) MockWindowExtensionSessionImpl(option);
+    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
    
@@ -118,9 +118,9 @@ HWTEST_F(ExtensionWindowImplTest, IsPcOrPadFreeMultiWindowMode, Function | Small
  */
 HWTEST_F(ExtensionWindowImplTest, HidePrivacyContentForHost, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new(std::nothrow) WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> window = new(std::nothrow) MockWindowExtensionSessionImpl(option);
+    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
     ASSERT_NE(nullptr, window);
     ExtensionWindowImpl extensionWindowImpl(window);
    
