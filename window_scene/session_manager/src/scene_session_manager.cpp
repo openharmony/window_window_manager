@@ -11496,36 +11496,27 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
     return WSError::WS_OK;
 }
 
-WMError SceneSessionManager::OnIsWindowRectAutoSave(std::string key, bool& enabled)
+WMError SceneSessionManager::OnIsWindowRectAutoSave(const std::string& key, bool& enabled)
 {
-    const char* const where = __func__;
-    auto task = [weakThis = wptr(this), key, &enabled, where] {
-        auto sessionManager = weakThis.promote();
-        if (sessionManager == nullptr) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s sessionManager is null", where);
-            return WMError::WM_ERROR_NULLPTR;
-        }
-        std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_)
-        auto item = sessionManager->isWindowRectAutoSaveMap_.find(key);
-        if (item != sessionManager->isWindowRectAutoSaveMap_.end()) {
-            enabled = item->second;
-        } else {
-            enabled = false;
-        }
-        return WMError::WM_OK;
-    };
-    return taskScheduler_->PostSyncTask(task, where);
+    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_)
+    auto iter = isWindowRectAutoSaveMap_.find(key);
+    if (iter != isWindowRectAutoSaveMap_.end()) {
+        enabled = item->second;
+    } else {
+        enabled = false;
+    }
+    return WMError::WM_OK;
 }
 
-void SceneSessionManager::SetIsWindowRectAutoSaveMap(std::string key, bool enabled)
+void SceneSessionManager::SetIsWindowRectAutoSaveMap(const std::string& key, bool enabled)
 {
     std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
-    auto item = isWindowRectAutoSaveMap_.find(key);
-    if (item != isWindowRectAutoSaveMap_.end()) {
+    auto iter = isWindowRectAutoSaveMap_.find(key);
+    if (iter != isWindowRectAutoSaveMap_.end()) {
         if (!enabled) {
             isWindowRectAutoSaveMap_.erase(key);
         } else {
-            item->second = enabled;
+            iter->second = enabled;
         }
     } else {
         if (enabled) {

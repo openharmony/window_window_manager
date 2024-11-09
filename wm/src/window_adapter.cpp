@@ -993,7 +993,7 @@ WMError WindowAdapter::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWind
     return wmsProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
 }
 
-WMError WindowAdapter::OnIsWindowRectAutoSave(std::string key, bool& enabled)
+WMError WindowAdapter::OnIsWindowRectAutoSave(const std::string& key, bool& enabled)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();

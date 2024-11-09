@@ -218,11 +218,6 @@ public:
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
 
-    /*
-     * PC Window
-     */
-    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
-
     /**
      * PiP Window
      */
@@ -518,6 +513,7 @@ public:
      */
     void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
     void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
+    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
@@ -596,10 +592,6 @@ protected:
      */
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
-
-    /*
-     * PC Window
-     */
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     
     /*
