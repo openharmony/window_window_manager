@@ -1427,12 +1427,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
-    if (((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-          WindowHelper::IsMainWindow(Session::GetWindowType())) ||
-         (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
-          GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (systemConfig_.uiType_ == UI_TYPE_PHONE ||
-         (systemConfig_.uiType_ == UI_TYPE_PAD && !IsFreeMultiWindowMode()))) {
+    if (Session::CheckEmptyKeyboardAvoidAreaIfNeeded()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "Keyboard avoid area needs to be empty when in floating mode");
         return;
     }
     auto sessionProperty = GetSessionProperty();

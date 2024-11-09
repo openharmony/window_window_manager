@@ -345,6 +345,11 @@ public:
     void SetIsMidScene(bool isMidScene);
     bool GetIsMidScene() const;
 
+    /*
+     * Keyboard Window
+     */
+    bool CheckEmptyKeyboardAvoidAreaIfNeeded() const;
+
     bool IsSessionValid() const;
     bool IsActive() const;
     bool IsSystemActive() const;
