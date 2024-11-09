@@ -233,6 +233,14 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo03, Function | S
         std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
     visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
     ASSERT_EQ(visibilityChangeInfos.size(), 1);
+    currVisibleData.clear();
+    ssm_->lastVisibleData_.clear();
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    ssm_->lastVisibleData_.push_back(
+        std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 1);
+    ASSERT_EQ(visibilityChangeInfos[0].first, 2);
 }
 
 /**

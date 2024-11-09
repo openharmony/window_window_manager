@@ -26,7 +26,6 @@
 #include "window_scene_session_impl.h"
 #include "singleton_mocker.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 

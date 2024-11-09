@@ -14,12 +14,8 @@
  */
 
 #include "session/host/include/keyboard_session.h"
-#include "session/host/include/session.h"
-#include "common/include/session_permission.h"
-#include "display_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
-#include <parameters.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -193,7 +189,6 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 
 void KeyboardSession::OnCallingSessionUpdated()
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
     if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
@@ -212,7 +207,8 @@ void KeyboardSession::OnCallingSessionUpdated()
     WSRect callingSessionRect = callingSession->GetSessionRect();
     NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, panelRect);
 
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "callSession Rect: %{public}s", callingSessionRect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, callSession Rect: %{public}s",
+        GetPersistentId(), callingSessionRect.ToString().c_str());
 }
 
 WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity)

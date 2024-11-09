@@ -223,12 +223,6 @@ void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
     sessionInfo_.want = want;
 }
 
-void Session::SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions)
-{
-    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-    sessionInfo_.processOptions = processOptions;
-}
-
 void Session::ResetSessionInfoResultCode()
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
@@ -294,6 +288,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
+    sessionInfo_.processOptions = info.processOptions;
 }
 
 void Session::SetScreenId(uint64_t screenId)
@@ -1159,12 +1154,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
     isStarting_ = false;
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && GetParentSession() &&
-        !GetParentSession()->IsSessionForeground()) {
-        TLOGD(WmsLogTag::WMS_DIALOG, "parent is not foreground");
-        SetSessionState(SessionState::STATE_BACKGROUND);
-    }
-
     NotifyForeground();
 
     isTerminating_ = false;
@@ -1397,6 +1386,18 @@ void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isPendingToBackgroundState:%{public}d",
         GetPersistentId(), isPendingToBackgroundState);
     return isPendingToBackgroundState_.store(isPendingToBackgroundState);
+}
+
+bool Session::IsActivatedAfterScreenLocked() const
+{
+    return isActivatedAfterScreenLocked_.load();
+}
+
+void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
+        GetPersistentId(), isActivatedAfterScreenLocked);
+    isActivatedAfterScreenLocked_.store(isActivatedAfterScreenLocked);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
@@ -2279,14 +2280,18 @@ void Session::NotifySessionStateChange(const SessionState& state)
             WLOGFE("session is null");
             return;
         }
-        TLOGD(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
+        TLOGND(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
+        } else {
+            TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeFunc is null");
         }
 
         if (session->sessionStateChangeNotifyManagerFunc_) {
             session->sessionStateChangeNotifyManagerFunc_(session->GetPersistentId(), state);
+        } else {
+            TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeNotifyManagerFunc is null");
         }
     };
     PostTask(task, "NotifySessionStateChange");
@@ -2325,11 +2330,11 @@ void Session::NotifySessionTouchableChange(bool touchable)
     }
 }
 
-void Session::NotifyClick(bool requestFocus)
+void Session::NotifyClick(bool requestFocus, bool isClick)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "requestFocus: %{public}u", requestFocus);
+    TLOGD(WmsLogTag::WMS_FOCUS, "requestFocus: %{public}u, isClick: %{public}u", requestFocus, isClick);
     if (clickFunc_) {
-        clickFunc_(requestFocus);
+        clickFunc_(requestFocus, isClick);
     }
 }
 
@@ -2614,7 +2619,6 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "set property dragEnable: %{public}d", property->GetDragEnabled());
     {
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;
@@ -2832,6 +2836,16 @@ bool Session::GetEnableRemoveStartingWindow() const
     return enableRemoveStartingWindow_;
 }
 
+void Session::SetAppBufferReady(bool appBufferReady)
+{
+    appBufferReady_ = appBufferReady;
+}
+
+bool Session::GetAppBufferReady() const
+{
+    return appBufferReady_;
+}
+
 WindowType Session::GetWindowType() const
 {
     auto property = GetSessionProperty();
@@ -2909,7 +2923,8 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
         persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     }
     g_persistentIdSet.insert(g_persistentId);
-    WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const

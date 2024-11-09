@@ -76,6 +76,7 @@ public:
     static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     static napi_value GetAllAbilityInfos(napi_env env, napi_callback_info info);
     static napi_value GetBatchAbilityInfos(napi_env env, napi_callback_info info);
+    static napi_value GetAbilityInfo(napi_env env, napi_callback_info info);
     static napi_value PrepareTerminate(napi_env env, napi_callback_info info);
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
     static napi_value UpdateWindowMode(napi_env env, napi_callback_info info);
@@ -100,6 +101,7 @@ public:
     static napi_value NotifySwitchingUser(napi_env env, napi_callback_info info);
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
+    static napi_value GetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
     static napi_value GetCustomDecorHeight(napi_env env, napi_callback_info info);
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
@@ -148,6 +150,7 @@ private:
     napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAllAbilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
+    napi_value OnGetAbilityInfo(napi_env env, napi_callback_info info);
     napi_value OnPrepareTerminate(napi_env env, napi_callback_info info);
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
     napi_value OnUpdateWindowMode(napi_env env, napi_callback_info info);
@@ -172,6 +175,7 @@ private:
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
+    napi_value OnGetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
     napi_value OnGetCustomDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnSwitchFreeMultiWindow(napi_env env, napi_callback_info info);
     napi_value OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info);

@@ -343,9 +343,9 @@ HWTEST_F(SceneSessionTest4, SetSurfaceBounds, Function | SmallTest | Level2)
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;
-    session->SetSurfaceBounds(rect);
+    session->SetSurfaceBounds(rect, false);
     session->SetLeashWinSurfaceNode(surfaceNode);
-    session->SetSurfaceBounds(rect);
+    session->SetSurfaceBounds(rect, false);
     EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
 }
 
@@ -561,7 +561,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
         WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
 
     property->SetSystemCalling(false);
-    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
     property->SetSystemCalling(true);
@@ -973,7 +973,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP01, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = false;
-    auto result = sceneSession->SetAutoStartPiP(true);
+    auto result = sceneSession->SetAutoStartPiP(true, 0);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -993,11 +993,11 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP02, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag) {
+    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag, uint32_t status) {
         return;
     };
     sceneSession->autoStartPiPStatusChangeFunc_ = func;
-    auto result = sceneSession->SetAutoStartPiP(true);
+    auto result = sceneSession->SetAutoStartPiP(true, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1017,7 +1017,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP03, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    auto result = sceneSession->SetAutoStartPiP(true);
+    auto result = sceneSession->SetAutoStartPiP(true, 0);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1108,7 +1108,7 @@ HWTEST_F(SceneSessionTest4, SetMovable01, Function | SmallTest | Level2)
     sceneSession->SetMovable(true);
     sceneSession->leashWinSurfaceNode_ = nullptr;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetMovable(true);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(event);
@@ -1258,7 +1258,7 @@ HWTEST_F(SceneSessionTest4, IsMovable02, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    sceneSession->moveDragController_ = new MoveDragController(2024, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_EQ(WSError::WS_DO_NOTHING, sceneSession->UpdateFocus(false));
     ASSERT_EQ(false, sceneSession->IsMovable());
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
@@ -1277,9 +1277,30 @@ HWTEST_F(SceneSessionTest4, IsMovable03, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(nullptr);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    sceneSession->moveDragController_ = new MoveDragController(2024, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
     ASSERT_EQ(false, sceneSession->IsMovable());
+}
+
+/**
+ * @tc.name: SetFrameGravity
+ * @tc.desc: SetFrameGravity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetFrameGravity, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetFrameGravity";
+    info.bundleName_ = "SetFrameGravity";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    ASSERT_EQ(true, session->SetFrameGravity(Gravity::RESIZE));
+    session->surfaceNode_ = nullptr;
+    ASSERT_EQ(false, session->SetFrameGravity(Gravity::TOP_LEFT));
 }
 }
 }

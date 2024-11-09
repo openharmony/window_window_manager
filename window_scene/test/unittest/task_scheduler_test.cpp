@@ -95,7 +95,6 @@ HWTEST_F(TaskSchedulerTest, AddExportTask1, Function | SmallTest | Level2)
     };
     ASSERT_NE(taskScheduler, nullptr);
     ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
-    ASSERT_NE(taskScheduler->ssmTid_, 0);
     taskScheduler->AddExportTask(funcName, taskFunc);
     ASSERT_EQ(taskTid, gettid());
     ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
@@ -114,9 +113,11 @@ HWTEST_F(TaskSchedulerTest, AddExportTask2, Function | SmallTest | Level2)
     };
     ASSERT_NE(taskScheduler, nullptr);
     ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
-    ASSERT_NE(taskScheduler->ssmTid_, 0);
-    taskScheduler->ssmTid_ = gettid();
-    taskScheduler->AddExportTask(funcName, taskFunc);
+    auto testTask = [taskScheduler, funcName, taskFunc] {
+        taskScheduler->AddExportTask(funcName, taskFunc);
+        return 0;
+    };
+    taskScheduler->PostSyncTask(testTask);
     ASSERT_EQ(taskTid, 0);
     ASSERT_NE(taskScheduler->exportFuncMap_.size(), 0);
 }

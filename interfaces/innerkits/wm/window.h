@@ -1821,8 +1821,9 @@ public:
      * @brief set auto start status for window.
      *
      * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     * @param priority 1 means height priority, 0 means low priority.
      */
-    virtual void SetAutoStartPiP(bool isAutoStart) {}
+    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
@@ -2135,6 +2136,14 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set to automatically save the window rect.
+     *
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the rect of host window.

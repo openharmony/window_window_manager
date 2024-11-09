@@ -169,6 +169,7 @@ napi_value CreateJsSessionState(napi_env env);
 napi_value CreateJsSessionSizeChangeReason(napi_env env);
 napi_value CreateJsSessionPiPControlType(napi_env env);
 napi_value CreateJsSessionPiPControlStatus(napi_env env);
+napi_value CreateJsSessionGravity(napi_env env);
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect);
@@ -202,6 +203,7 @@ public:
 private:
     void GetMainEventHandler();
     napi_env env_;
+    std::shared_ptr<int> envChecker_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::Rosen

@@ -417,7 +417,7 @@ WSError SceneSessionManagerProxy::BindDialogSessionTarget(uint64_t persistentId,
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
+WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
 {
     MessageParcel data;
     MessageParcel reply;
