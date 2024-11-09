@@ -64,6 +64,7 @@ const std::string SHIFT_FOCUS_CB = "shiftFocus";
 const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
 const std::string CLOSE_TARGET_FLOAT_WINDOW_CB = "closeTargetFloatWindow";
 const std::string ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB = "abilityManagerCollaboratorRegistered";
+const std::string START_PIP_FAILED_CB = "StartPiPFailed";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -78,6 +79,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
         ListenerFunctionType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
     {CLOSE_TARGET_FLOAT_WINDOW_CB, ListenerFunctionType::CLOSE_TARGET_FLOAT_WINDOW_CB},
     {ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB, ListenerFunctionType::ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB},
+    {START_PIP_FAILED_CB,          ListenerFunctionType::START_PIP_FAILED_CB},
 };
 } // namespace
 
@@ -455,6 +457,18 @@ void JsSceneSessionManager::OnAbilityManagerCollaboratorRegistered()
     taskScheduler_->PostMainThreadTask(task, where);
 }
 
+void JsSceneSessionManager::OnStartPiPFailed()
+{
+    auto task = [jsCallBack = GetJSCallback(START_PIP_FAILED_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PIP, "jsCallBack is nullptr");
+            return;
+        }
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnStartPiPFailed");
+}
+
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
     NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
@@ -593,6 +607,15 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
     RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
         SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
     });
+}
+
+void JsSceneSessionManager::ProcessStartPiPFailedRegister()
+{
+    NotifyStartPiPFailedFunc func = [this]() {
+        TLOGNI(WmsLogTag::WMS_PIP, "NotifyStartPiPFailedFunc");
+        this->OnStartPiPFailed();
+    };
+    SceneSessionManager::GetInstance().SetStartPiPFailedListener(func);
 }
 
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
@@ -1195,6 +1218,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB:
             ProcessAbilityManagerCollaboratorRegistered();
+            break;
+        case ListenerFunctionType::START_PIP_FAILED_CB:
+            ProcessStartPiPFailedRegister();
             break;
         default:
             break;
