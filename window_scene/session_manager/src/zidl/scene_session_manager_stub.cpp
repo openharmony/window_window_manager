@@ -410,9 +410,13 @@ int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleSetSessionLabel!");
+    TLOGD(WmsLogTag::DEFAULT, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    std::string label = data.ReadString();
+    std::string label;
+    if (!data.ReadString(label)) {
+        TLOGE(WmsLogTag::DEFAULT, "read label failed");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = SetSessionLabel(token, label);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -420,11 +424,11 @@ int SceneSessionManagerStub::HandleSetSessionLabel(MessageParcel& data, MessageP
 
 int SceneSessionManagerStub::HandleSetSessionIcon(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleSetSessionIcon!");
+    TLOGD(WmsLogTag::DEFAULT, "In");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     if (icon == nullptr) {
-        WLOGFE("icon is null");
+        TLOGE(WmsLogTag::DEFAULT, "icon is null");
         return ERR_INVALID_DATA;
     }
     WSError errCode = SetSessionIcon(token, icon);
@@ -503,19 +507,24 @@ int SceneSessionManagerStub::HandleUnRegisterSessionListener(MessageParcel& data
 
 int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetSessionInfos!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     std::string deviceId = Str16ToStr8(data.ReadString16());
-    int numMax = data.ReadInt32();
+    int32_t numMax = 0;
+    if (!data.ReadInt32(numMax)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read numMax failed");
+        return ERR_INVALID_DATA;
+    }
     std::vector<SessionInfoBean> missionInfos;
     WSError errCode = GetSessionInfos(deviceId, numMax, missionInfos);
     reply.WriteInt32(missionInfos.size());
     for (auto& it : missionInfos) {
         if (!reply.WriteParcelable(&it)) {
-            WLOGFE("GetSessionInfos error");
+            TLOGE(WmsLogTag::WMS_LIFE, "Write missionInfos error");
             return ERR_INVALID_DATA;
         }
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -523,18 +532,22 @@ int SceneSessionManagerStub::HandleGetSessionInfos(MessageParcel& data, MessageP
 
 int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleGetSessionInfo!");
-    SessionInfoBean info;
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     std::string deviceId = Str16ToStr8(data.ReadString16());
-    int32_t persistentId = data.ReadInt32();
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    SessionInfoBean info;
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
-        WLOGFE("GetSessionInfo error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo error");
         return ERR_INVALID_DATA;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        WLOGFE("GetSessionInfo result error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write result error");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -543,8 +556,13 @@ int SceneSessionManagerStub::HandleGetSessionInfo(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     SessionInfoBean info;
-    std::string continueSessionId = data.ReadString();
+    std::string continueSessionId;
+    if (!data.ReadString(continueSessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read continueSessionId failed");
+        return ERR_INVALID_DATA;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
     WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
     if (!reply.WriteParcelable(&info)) {
@@ -578,17 +596,21 @@ int SceneSessionManagerStub::HandleDumpSessionAll(MessageParcel& data, MessagePa
 
 int SceneSessionManagerStub::HandleDumpSessionWithId(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleDumpSessionWithId!");
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::DEFAULT, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "read persistentId failed.");
+        return ERR_INVALID_DATA;
+    }
     std::vector<std::string> infos;
     WSError errCode = DumpSessionWithId(persistentId, infos);
     if (!reply.WriteStringVector(infos)) {
-        WLOGFE("HandleDumpSessionWithId write info failed.");
+        TLOGE(WmsLogTag::DEFAULT, "write info failed.");
         return ERR_TRANSACTION_FAILED;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        WLOGFE("HandleDumpSessionWithId write errcode failed.");
+        TLOGE(WmsLogTag::DEFAULT, "write errcode failed.");
         return ERR_TRANSACTION_FAILED;
     }
     return ERR_NONE;
@@ -791,8 +813,12 @@ int SceneSessionManagerStub::HandleGetSessionSnapshotById(MessageParcel& data, M
 
 int SceneSessionManagerStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "Called");
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::DEFAULT, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read persistentId");
+        return ERR_INVALID_DATA;
+    }
     sptr<IRemoteObject> uiContentRemoteObj;
     WSError ret = GetUIContentRemoteObj(persistentId, uiContentRemoteObj);
     reply.WriteRemoteObject(uiContentRemoteObj);
@@ -816,13 +842,17 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel& data, Message
 
 int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("HandleNotifyDumpInfoResult");
-    std::vector<std::string> info;
-    uint32_t vectorSize = data.ReadUint32();
-    if (vectorSize > MAX_VECTOR_SIZE) {
-        WLOGFI("Vector is too big!");
+    TLOGD(WmsLogTag::DEFAULT, "In!");
+    uint32_t vectorSize;
+    if (!data.ReadUint32(vectorSize)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to read vectorSize");
         return ERR_INVALID_DATA;
     }
+    if (vectorSize > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::DEFAULT, "Vector is too big!");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<std::string> info;
     for (uint32_t i = 0; i < vectorSize; i++) {
         uint32_t curSize = data.ReadUint32();
         std::string curInfo = "";
@@ -832,7 +862,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
             curInfo = (infoPtr) ? std::string(infoPtr, curSize) : "";
         }
         info.emplace_back(curInfo);
-        WLOGFD("HandleNotifyDumpInfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
+        TLOGD(WmsLogTag::DEFAULT, "InfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
     }
     NotifyDumpInfoResult(info);
     return ERR_NONE;
@@ -840,8 +870,12 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleClearSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleClearSession!");
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read persistentId");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = ClearSession(persistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -857,26 +891,38 @@ int SceneSessionManagerStub::HandleClearAllSessions(MessageParcel& data, Message
 
 int SceneSessionManagerStub::HandleLockSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleLockSession!");
-    int32_t sessionId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t sessionId;
+    if (!data.ReadInt32(sessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read sessionId");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = LockSession(sessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 int SceneSessionManagerStub::HandleUnlockSession(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleUnlockSession!");
-    int32_t sessionId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t sessionId;
+    if (!data.ReadInt32(sessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read sessionId");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = UnlockSession(sessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
 }
 int SceneSessionManagerStub::HandleMoveSessionsToForeground(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleMoveSessionsToForeground!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     std::vector<int32_t> sessionIds;
     data.ReadInt32Vector(&sessionIds);
-    int32_t topSessionId = data.ReadInt32();
+    int32_t topSessionId;
+    if (!data.ReadInt32(topSessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read topSessionId");
+        return ERR_INVALID_DATA;
+    }
     const WSError &ret = MoveSessionsToForeground(sessionIds, topSessionId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -896,12 +942,16 @@ int SceneSessionManagerStub::HandleMoveSessionsToBackground(MessageParcel& data,
 
 int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleRegisterCollaborator!");
-    int32_t type = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t type;
+    if (!data.ReadInt32(type)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read type");
+        return ERR_INVALID_DATA;
+    }
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(data.ReadRemoteObject());
     if (collaborator == nullptr) {
-        WLOGFE("collaborator is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "collaborator is nullptr");
         return ERR_INVALID_DATA;
     }
     WSError ret = RegisterIAbilityManagerCollaborator(type, collaborator);
@@ -911,8 +961,12 @@ int SceneSessionManagerStub::HandleRegisterCollaborator(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleUnregisterCollaborator!");
-    int32_t type = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t type;
+    if (!data.ReadInt32(type)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read type");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = UnregisterIAbilityManagerCollaborator(type);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -920,8 +974,16 @@ int SceneSessionManagerStub::HandleUnregisterCollaborator(MessageParcel& data, M
 
 int SceneSessionManagerStub::HandleUpdateSessionTouchOutsideListener(MessageParcel& data, MessageParcel& reply)
 {
-    auto persistentId = data.ReadInt32();
-    bool haveAvoidAreaListener = data.ReadBool();
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool haveAvoidAreaListener = false;
+    if (!data.ReadBool(haveAvoidAreaListener)) {
+        TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "read haveAvoidAreaListener fail");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = UpdateSessionTouchOutsideListener(persistentId, haveAvoidAreaListener);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -941,9 +1003,23 @@ int SceneSessionManagerStub::HandleRaiseWindowToTop(MessageParcel& data, Message
 
 int SceneSessionManagerStub::HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply)
 {
-    auto pid = data.ReadInt32();
-    auto uid = data.ReadInt32();
-    bool visible = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
+    int32_t pid;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read pid failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t uid;
+    if (!data.ReadInt32(uid)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read uid failed");
+        return ERR_INVALID_DATA;
+    }
+    bool visible;
+    if (!data.ReadBool(visible)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read visible failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_UIEXT, "pid:%{public}d, uid:%{public}d, visible:%{public}d", pid, uid, visible);
     WSError ret = NotifyWindowExtensionVisibilityChange(pid, uid, visible);
     reply.WriteUint32(static_cast<uint32_t>(ret));
     return ERR_NONE;
@@ -1026,14 +1102,19 @@ int SceneSessionManagerStub::HandleGetVisibilityWindowInfo(MessageParcel& data, 
 
 int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     sptr<IRemoteObject> sessionStageObject = data.ReadRemoteObject();
     sptr<ISessionStage> sessionStage = iface_cast<ISessionStage>(sessionStageObject);
     if (sessionStage == nullptr) {
-        WLOGFE("sessionStage is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "sessionStage is nullptr");
         return ERR_INVALID_DATA;
     }
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    uint64_t surfaceNodeId = data.ReadUint64();
+    uint64_t surfaceNodeId;
+    if (!data.ReadUint64(surfaceNodeId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read surfaceNodeId failed");
+        return ERR_INVALID_DATA;
+    }
     AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId);
     return ERR_NONE;
 }
@@ -1053,15 +1134,32 @@ int SceneSessionManagerStub::HandleRemoveExtensionWindowStageFromSCB(MessageParc
 
 int SceneSessionManagerStub::HandleUpdateModalExtensionRect(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    int32_t rectX = data.ReadInt32();
-    int32_t rectY = data.ReadInt32();
-    int32_t rectWidth = data.ReadInt32();
-    int32_t rectHeight = data.ReadInt32();
+    int32_t rectX;
+    if (!data.ReadInt32(rectX)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read rectX failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t rectY;
+    if (!data.ReadInt32(rectY)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read rectY failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t rectWidth;
+    if (!data.ReadInt32(rectWidth)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read rectWidth failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t rectHeight;
+    if (!data.ReadInt32(rectHeight)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read rectHeight failed");
+        return ERR_INVALID_DATA;
+    }
     Rect windowRect{rectX, rectY, rectWidth, rectHeight};
     UpdateModalExtensionRect(token, windowRect);
     return ERR_NONE;
@@ -1069,21 +1167,39 @@ int SceneSessionManagerStub::HandleUpdateModalExtensionRect(MessageParcel& data,
 
 int SceneSessionManagerStub::HandleProcessModalExtensionPointDown(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    int32_t posX = data.ReadInt32();
-    int32_t posY = data.ReadInt32();
+    int32_t posX;
+    if (!data.ReadInt32(posX)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read posX failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t posY;
+    if (!data.ReadInt32(posY)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read posY failed");
+        return ERR_INVALID_DATA;
+    }
     ProcessModalExtensionPointDown(token, posX, posY);
     return ERR_NONE;
 }
 
 int SceneSessionManagerStub::HandleAddOrRemoveSecureSession(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistentId = data.ReadInt32();
-    bool shouldHide = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool shouldHide;
+    if (!data.ReadBool(shouldHide)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read shouldHide failed");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = AddOrRemoveSecureSession(persistentId, shouldHide);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
@@ -1091,13 +1207,22 @@ int SceneSessionManagerStub::HandleAddOrRemoveSecureSession(MessageParcel& data,
 
 int SceneSessionManagerStub::HandleUpdateExtWindowFlags(MessageParcel& data, MessageParcel& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "In!");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
-        WLOGFE("token is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
         return ERR_INVALID_DATA;
     }
-    uint32_t extWindowFlags = data.ReadUint32();
-    uint32_t extWindowActions = data.ReadUint32();
+    uint32_t extWindowFlags;
+    if (!data.ReadUint32(extWindowFlags)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read extWindowFlags failed");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t extWindowActions;
+    if (!data.ReadUint32(extWindowActions)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read extWindowActions failed");
+        return ERR_INVALID_DATA;
+    }
     WSError ret = UpdateExtWindowFlags(token, extWindowFlags, extWindowActions);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
@@ -1133,7 +1258,12 @@ int SceneSessionManagerStub::HandleGetFreeMultiWindowEnableState(MessageParcel& 
 
 int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&data, MessageParcel&reply)
 {
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     WMError ret = GetCallingWindowWindowStatus(persistentId, windowStatus);
     reply.WriteUint32(static_cast<int32_t>(ret));
@@ -1147,7 +1277,12 @@ int SceneSessionManagerStub::HandleGetCallingWindowWindowStatus(MessageParcel&da
 
 int SceneSessionManagerStub::HandleGetCallingWindowRect(MessageParcel&data, MessageParcel& reply)
 {
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     Rect rect = {0, 0, 0, 0};
     WMError ret = GetCallingWindowRect(persistentId, rect);
     reply.WriteInt32(static_cast<int32_t>(ret));

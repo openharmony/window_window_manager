@@ -31,7 +31,7 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
     }
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId());
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
@@ -231,20 +231,54 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
+WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", funcName);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d", funcName,
+            isTitleHoverShown, isDockHoverShown);
+        if (session->onTitleAndDockHoverShowChangeFunc_) {
+            session->onTitleAndDockHoverShowChangeFunc_(isTitleHoverShown, isDockHoverShown);
+        }
+    };
+    PostTask(task, funcName);
+    return WSError::WS_OK;
+}
+
 WSError MainSession::OnRestoreMainWindow()
 {
-    auto task = [weakThis = wptr(this)]() {
+    auto task = [weakThis = wptr(this)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRestoreMainWindowFunc_) {
-            session->sessionChangeCallback_->onRestoreMainWindowFunc_();
+        if (session->onRestoreMainWindowFunc_) {
+            session->onRestoreMainWindowFunc_();
         }
-        return WSError::WS_OK;
     };
-    PostTask(task, "OnRestoreMainWindow");
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
+WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
+{
+    auto task = [weakThis = wptr(this), enabled] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return ;
+        }
+        if (session->onSetWindowRectAutoSaveFunc_) {
+            session->onSetWindowRectAutoSaveFunc_(enabled);
+        }
+    };
+    PostTask(task, __func__);
     return WSError::WS_OK;
 }
 

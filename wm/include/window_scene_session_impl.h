@@ -43,7 +43,6 @@ public:
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
-    WMError Restore() override;
     void StartMove() override;
     bool GetStartMoveFlag() override;
     WmErrorCode StartMoveWindow() override;
@@ -66,8 +65,6 @@ public:
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
-    WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
-        bool isDockHoverShown = true) override;
     WMError SetFullScreen(bool status) override;
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
@@ -158,6 +155,10 @@ public:
     WMError IsWindowRectAutoSave(bool& enabled) override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError Restore() override;
+    WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
+    WMError SetWindowRectAutoSave(bool enabled) override;
 
     /*
      * Free Multi Window

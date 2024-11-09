@@ -93,6 +93,26 @@ void FoldScreenController::SetDisplayMode(const FoldDisplayMode displayMode)
     foldScreenPolicy_->ChangeScreenDisplayMode(displayMode);
 }
 
+void FoldScreenController::RecoverDisplayMode()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    FoldDisplayMode displayMode = foldScreenPolicy_->GetModeMatchStatus();
+    FoldDisplayMode currentDisplayMode = foldScreenPolicy_->GetScreenDisplayMode();
+    if (displayMode == currentDisplayMode) {
+        TLOGI(WmsLogTag::DMS, "current displayMode is correct, skip");
+        return;
+    }
+    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+        TLOGI(WmsLogTag::DMS, "not single display fold device, skip");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "%{public}d -> %{public}d", currentDisplayMode, displayMode);
+    foldScreenPolicy_->ChangeScreenDisplayMode(displayMode, DisplayModeChangeReason::RECOVER);
+}
+
 void FoldScreenController::LockDisplayStatus(bool locked)
 {
     if (foldScreenPolicy_ == nullptr) {

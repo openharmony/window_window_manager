@@ -269,7 +269,7 @@ bool ScreenSettingHelper::SplitString(std::vector<std::string>& splitValues, con
 int32_t ScreenSettingHelper::GetDataFromString(std::vector<uint64_t>& datas, const std::string& inputString)
 {
     TLOGI(WmsLogTag::DMS, "begin to resolve string, value: %{public}s", inputString.c_str());
-    int32_t strLength = inputString.size();
+    int32_t strLength = static_cast<int32_t>(inputString.size());
     int32_t beginIdx = 0;
     for (int32_t currentIdx = 0; currentIdx < strLength; currentIdx++) {
         if (inputString[currentIdx] != ' ') {
@@ -376,7 +376,7 @@ bool ScreenSettingHelper::GetSettingScreenModeMap(std::map<uint64_t, uint32_t>& 
             continue;
         }
         uint64_t screenId = screenModeData[RESOLVED_DATA_INDEX_ZERO];
-        uint32_t mode = static_cast<int32_t>(screenModeData[RESOLVED_DATA_INDEX_ONE]);
+        uint32_t mode = static_cast<uint32_t>(screenModeData[RESOLVED_DATA_INDEX_ONE]);
         TLOGI(WmsLogTag::DMS, "get data success, screenId: %{public}d, mode: %{public}d",
             static_cast<uint32_t>(screenId), mode);
         screenMode[screenId] = mode;

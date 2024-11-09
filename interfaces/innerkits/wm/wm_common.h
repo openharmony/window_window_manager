@@ -796,11 +796,13 @@ struct KeyboardPanelInfo : public Parcelable {
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
-    TYPE_SYSTEM,           // area of SystemUI
-    TYPE_CUTOUT,           // cutout of screen
-    TYPE_SYSTEM_GESTURE,   // area for system gesture
-    TYPE_KEYBOARD,         // area for soft input keyboard
-    TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
+    TYPE_START = 0,
+    TYPE_SYSTEM = TYPE_START,           // area of SystemUI
+    TYPE_CUTOUT,                        // cutout of screen
+    TYPE_SYSTEM_GESTURE,                // area for system gesture
+    TYPE_KEYBOARD,                      // area for soft input keyboard
+    TYPE_NAVIGATION_INDICATOR,          // area for navigation indicator
+    TYPE_END,
 };
 
 /**
@@ -1198,10 +1200,10 @@ enum class CaseType {
 };
 
 enum class MaximizePresentation {
-    FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set imersiveStateEnable
-    EXIT_IMMERSIVE = 1,       // imersiveStateEnable will be set as false
-    ENTER_IMMERSIVE = 2,       // imersiveStateEnable will be set as true
-    // imersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
+    FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set immersiveStateEnable
+    EXIT_IMMERSIVE = 1,       // immersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,       // immersiveStateEnable will be set as true
+    // immersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
 

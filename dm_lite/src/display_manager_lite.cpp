@@ -706,4 +706,9 @@ std::vector<DisplayId> DisplayManagerLite::GetAllDisplayIds()
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetAllDisplayIds();
 }
 
+VirtualScreenFlag DisplayManagerLite::GetVirtualScreenFlag(ScreenId screenId)
+{
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().GetVirtualScreenFlag(screenId);
+}
+
 } // namespace OHOS::Rosen

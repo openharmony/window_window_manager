@@ -50,6 +50,7 @@ public:
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
     static napi_value SetDefaultDensityEnabled(napi_env env, napi_callback_info info);
     static napi_value RemoveStartingWindow(napi_env env, napi_callback_info info);
+    static napi_value SetWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value IsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
 private:
@@ -67,6 +68,7 @@ private:
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
     napi_value OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info);
     napi_value OnRemoveStartingWindow(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnIsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
     std::weak_ptr<WindowScene> windowScene_;

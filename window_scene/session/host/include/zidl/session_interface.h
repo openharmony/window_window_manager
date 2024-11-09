@@ -86,13 +86,6 @@ public:
     virtual WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) { return WSError::WS_OK; }
 
     /**
-     * @brief Callback for processing restore main window.
-     *
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
-    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
-
-    /**
      * @brief Callback for processing title and dock hover show changes.
      *
      * @param isTitleHoverShown Indicates the {@link bool}
@@ -104,6 +97,13 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Callback for processing restore main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
 
     /**
      * @brief Raise the application subwindow to the top layer of the application.
@@ -122,7 +122,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
-        const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
+        const WSRect &rect, SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
     {
         return WSError::WS_OK;
     }
@@ -241,9 +241,10 @@ public:
      * @brief Update the auto start pip window status.
      *
      * @param isAutoStart Indicates the {@link bool}
+     * @param priority Indicates the {@link uint32_t} priority of pip window
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError SetAutoStartPiP(bool isAutoStart) { return WSError::WS_OK; }
+    virtual WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) { return WSError::WS_OK; }
 
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -289,6 +290,14 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for setting to automatically save the window rect.
+     *
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetWindowRectAutoSave(bool enabled) { return WSError::WS_OK; }
 
     /**
      *  Gesture Back

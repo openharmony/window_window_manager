@@ -21,7 +21,7 @@ const uint32_t MODE_CHANGE_TIMEOUT_MS = 2000;
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
-void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
+void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason) {}
 
 void FoldScreenPolicy::LockDisplayStatus(bool locked)
 {
