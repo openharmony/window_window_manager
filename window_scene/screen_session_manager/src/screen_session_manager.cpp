@@ -1466,6 +1466,9 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
     screenSession->SetIsInternal(true);
     screenSession->SetIsCurrentInUse(true);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        InitFakeScreenSession(screenSession);
+    }
     return screenSession;
 }
 
@@ -4274,6 +4277,40 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
     return nullptr;
 }
 
+std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOption(const CaptureOption& option,
+    DmErrorCode* errorCode)
+{
+    TLOGD(WmsLogTag::DMS, "enter!");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() && errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        return nullptr;
+    }
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        TLOGI(WmsLogTag::DMS, "display snapshot was disabled by edm!");
+        return nullptr;
+    }
+    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
+        SessionPermission::IsShellCall()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", option.displayId_);
+        auto res = GetScreenSnapshot(option.displayId_);
+        if (res != nullptr) {
+            NotifyScreenshot(option.displayId_);
+            if (SessionPermission::IsBetaVersion()) {
+                CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
+            }
+            TLOGI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
+            if (option.isNeedNotify_) {
+                isScreenShot_ = true;
+                NotifyCaptureStatusChanged();
+            }
+        }
+        return res;
+    } else if (errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    }
+    return nullptr;
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
 {
     TLOGD(WmsLogTag::DMS, "ENTER!");
@@ -5924,6 +5961,38 @@ bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScre
     }
 
     return rsInterface_.SetVirtualScreenStatus(rsScreenId, screenStatus);
+}
+
+sptr<ScreenSession> ScreenSessionManager::GetOrCreateFakeScreenSession(sptr<ScreenSession> screenSession)
+{
+    sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
+    if (fakeScreenSession != nullptr) {
+        TLOGI(WmsLogTag::DMS, "fake screen session has exist");
+        return fakeScreenSession;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    fakeScreenSession = new ScreenSession(SCREEN_ID_FAKE, screenProperty, SCREEN_ID_INVALID);
+    return fakeScreenSession;
+}
+
+void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSession)
+{
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null");
+        return;
+    }
+    sptr<ScreenSession> fakeScreenSession = GetOrCreateFakeScreenSession(screenSession);
+    if (fakeScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "get or create fake screen session failed");
+        return;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    uint32_t screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    uint32_t screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    screenSession->UpdatePropertyByFakeBounds(screenWidth, screenHeight / HALF_SCREEN_PARAM);
+    screenSession->UpdatePropertyByFakeInUse(true);
+    screenSession->SetFakeScreenSession(fakeScreenSession);
+    screenSession->SetIsFakeInUse(true);
 }
 
 DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

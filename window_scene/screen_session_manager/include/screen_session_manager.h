@@ -207,6 +207,8 @@ public:
     void ScreenOffCVNotify(void);
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
+    sptr<ScreenSession> GetOrCreateFakeScreenSession(sptr<ScreenSession> screenSession);
+    void InitFakeScreenSession(sptr<ScreenSession> screenSession);
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -323,6 +325,8 @@ public:
         DmErrorCode* errorCode = nullptr) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode) override;
 
 protected:
     ScreenSessionManager();

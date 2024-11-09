@@ -103,6 +103,11 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
     RSTransaction::FlushImplicitTransaction();
 }
 
+ScreenSession::~ScreenSession()
+{
+    WLOGI("~ScreenSession");
+}
+
 ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
     const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode)
     : name_(name), screenId_(screenId), rsId_(rsId), property_(property), displayNode_(displayNode)
@@ -295,6 +300,26 @@ bool ScreenSession::GetIsCurrentInUse() const
     return isInUse_;
 }
 
+void ScreenSession::SetIsFakeInUse(bool isFakeInUse)
+{
+    isFakeInUse_ = isFakeInUse;
+}
+
+bool ScreenSession::GetIsFakeInUse() const
+{
+    return isFakeInUse_;
+}
+
+void ScreenSession::SetFakeScreenSession(sptr<ScreenSession> fakeScreenSession)
+{
+    fakeScreenSession_ = fakeScreenSession;
+}
+
+sptr<ScreenSession> ScreenSession::GetFakeScreenSession() const
+{
+    return fakeScreenSession_;
+}
+
 std::string ScreenSession::GetName()
 {
     return name_;
@@ -387,6 +412,14 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
     screenBounds.rect_.width_ = width;
     screenBounds.rect_.height_ = height;
     property_.SetBounds(screenBounds);
+}
+
+void ScreenSession::UpdatePropertyByFakeBounds(uint32_t width, uint32_t height)
+{
+    auto screenFakeBounds = property_.GetFakeBounds();
+    screenFakeBounds.rect_.width_ = width;
+    screenFakeBounds.rect_.height_ = height;
+    property_.SetFakeBounds(screenFakeBounds);
 }
 
 std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
@@ -650,6 +683,11 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+}
+
+void ScreenSession::UpdatePropertyByFakeInUse(bool isFakeInUse)
+{
+    property_.SetIsFakeInUse(isFakeInUse);
 }
 
 void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation)
