@@ -253,6 +253,7 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
+    WSError SetEnableDragBySystem(bool enableDrag) override;
 
 protected:
     WMError Connect();
