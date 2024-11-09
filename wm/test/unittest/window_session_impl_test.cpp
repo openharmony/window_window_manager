@@ -1923,26 +1923,33 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
+
     WMError retCode = window->SetRaiseByClickEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_PARENT);
+
     option->SetWindowName("SetRaiseByClickForFloatWindow");
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     sptr<WindowSessionImpl> floatWindow = new(std::nothrow) WindowSessionImpl(option);
     floatWindow->property_->SetParentPersistentId(1);
     ASSERT_NE(nullptr, floatWindow);
+
     retCode = floatWindow->SetRaiseByClickEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_CALLING);
+
     option->SetWindowName("SetRaiseByClickForSubWindow");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> subWindow = new(std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, subWindow);
+
     subWindow->property_->SetParentPersistentId(1);
     subWindow->Hide();
     retCode = subWindow->SetRaiseByClickEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+
     subWindow->state_ = WindowState::STATE_SHOWN;
     retCode = subWindow->SetRaiseByClickEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    
     subWindow->property_->SetParentPersistentId(2);
     subWindow->SetRaiseByClickEnabled(true);
     ASSERT_EQ(subWindow->property_->GetRaiseEnabled(), true);
