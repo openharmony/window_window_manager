@@ -527,6 +527,8 @@ public:
     bool GetEnableRemoveStartingWindow() const;
     void SetAppBufferReady(bool appBufferReady);
     bool GetAppBufferReady() const;
+    void SetUsingStartingWindowAboveLocked(bool usingStartingWindowAboveLocked);
+    bool GetUsingStartingWindowAboveLocked() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -796,8 +798,9 @@ private:
     /*
      * Starting Window
      */
-    bool enableRemoveStartingWindow_ {false};
-    bool appBufferReady_ {false};
+    bool enableRemoveStartingWindow_ { false };
+    bool appBufferReady_ { false };
+    bool usingStartingWindowAboveLocked_ { false };
 };
 } // namespace OHOS::Rosen
 

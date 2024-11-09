@@ -154,6 +154,7 @@ private:
     static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     static napi_value SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
+    static napi_value SetUsingStartingWindowAboveLocked(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -212,6 +213,7 @@ private:
     napi_value OnSetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     napi_value OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
+    napi_value OnSetUsingStartingWindowAboveLocked(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
