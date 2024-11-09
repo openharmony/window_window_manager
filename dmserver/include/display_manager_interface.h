@@ -244,6 +244,12 @@ public:
     {
         return nullptr;
     }
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr)
+    {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return nullptr;
+    }
 };
 } // namespace OHOS::Rosen
 

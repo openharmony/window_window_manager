@@ -146,6 +146,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.erase(screenId);
         }
+        screenSession->Disconnect();
     }
 }
 void ScreenSessionManagerClient::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)

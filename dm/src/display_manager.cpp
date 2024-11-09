@@ -2234,5 +2234,56 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureO
     }
     return screenCapture;
 }
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    if (captureOption.displayId_ == DISPLAY_ID_INVALID) {
+        WLOGFE("displayId invalid!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        WLOGFE("get snapshot with option failed!");
+        return nullptr;
+    }
+    return screenShot;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
+    const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode)
+{
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        WLOGFE("set snapshot with option failed!");
+        return nullptr;
+    }
+    // check parameters
+    int32_t oriHeight = screenShot->GetHeight();
+    int32_t oriWidth = screenShot->GetWidth();
+    if (!pImpl_->CheckRectValid(rect, oriHeight, oriWidth)) {
+        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+            rect.left, rect.top, rect.width, rect.height);
+        return nullptr;
+    }
+    if (!pImpl_->CheckSizeValid(size, oriHeight, oriWidth)) {
+        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        return nullptr;
+    }
+    // create crop dest pixelmap
+    Media::InitializationOptions opt;
+    opt.size.width = size.width;
+    opt.size.height = size.height;
+    opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    opt.editable = false;
+    auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
+    if (pixelMap == nullptr) {
+        WLOGFE("Media::PixelMap::Create failed!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
+    return dstScreenshot;
+}
 } // namespace OHOS::Rosen
 

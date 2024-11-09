@@ -31,6 +31,7 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
     }
+    pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this));
     moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {

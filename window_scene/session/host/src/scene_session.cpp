@@ -52,6 +52,7 @@
 #include "screen.h"
 #include "fold_screen_state_internel.h"
 #include "session/host/include/multi_instance_manager.h"
+#include "session/host/include/pc_fold_screen_controller.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -523,6 +524,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
             session->InitializeCrossMoveDrag();
             session->moveDragController_->InitMoveDragProperty();
+            if (session->pcFoldScreenController_) {
+                session->pcFoldScreenController_->RecordStartRect(session->GetSessionRect(),
+                    session->IsFullScreenMovable());
+            }
             if (session->IsFullScreenMovable()) {
                 WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->GetSessionRequestRect());
@@ -544,6 +549,30 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
             session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
         }
+        return WSError::WS_OK;
+    };
+    PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<uint32_t>(event)));
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::OnSessionEvent(SessionEvent event, SessionEventParam param)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), event, param, where]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (!(session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_)) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s invalid callback", where);
+            return WSError::WS_DO_NOTHING;
+        }
+        TLOGNI(WmsLogTag::WMS_MAIN,
+            "%{public}s event: %{public}d, param:[%{public}d,%{public}d,%{public}d,%{public}d]",
+            where, static_cast<int32_t>(event),
+            param.pointerX_, param.pointerY_, param.sessionWidth_, param.sessionHeight_);
+        session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), param);
         return WSError::WS_OK;
     };
     PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<uint32_t>(event)));
@@ -1597,12 +1626,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
-    if (((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-          WindowHelper::IsMainWindow(Session::GetWindowType())) ||
-         (WindowHelper::IsSubWindow(Session::GetWindowType()) && GetParentSession() != nullptr &&
-          GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-        (systemConfig_.IsPhoneWindow() ||
-         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
+    if (Session::CheckIfNeedKeyboardAvoidAreaEmpty()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "Keyboard avoid area need to empty when in floating mode");
         return;
     }
     auto sessionProperty = GetSessionProperty();
@@ -2468,7 +2493,19 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     bool isGlobal, bool needFlush)
 {
     const char* const funcName = __func__;
-    SetSurfaceBounds(globalRect, isGlobal, needFlush);
+    if (pcFoldScreenController_ && pcFoldScreenController_->IsHalfFolded()) {
+        SetSurfaceBoundsWithAnimation(
+            std::make_pair(
+                pcFoldScreenController_->GetMovingTimingProtocol(),
+                pcFoldScreenController_->GetMovingTimingCurve()
+            ),
+            globalRect, nullptr, isGlobal, needFlush);
+        if (reason == SizeChangeReason::MOVE) {
+            pcFoldScreenController_->RecordMoveRects(rect);
+        }
+    } else {
+        SetSurfaceBounds(globalRect, isGlobal, needFlush);
+    }
     UpdateSizeChangeReason(reason);
     if (reason != SizeChangeReason::MOVE) {
         UpdateRectForDrag(rect);
@@ -2507,14 +2544,56 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedByKeyboard");
         SetOriPosYBeforeRaisedByKeyboard(0);
     }
-    if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-        WindowHelper::IsSystemWindow(GetWindowType())) {
-        NotifySessionRectChange(rect, reason);
-    } else {
-        NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
+    if (!MoveUnderInteriaAndNotifyRectChange(rect, reason)) {
+        if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
+            WindowHelper::IsSystemWindow(GetWindowType())) {
+            NotifySessionRectChange(rect, reason);
+        } else {
+            NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
+        }
     }
     moveDragController_->ResetCrossMoveDragProperty();
     OnSessionEvent(SessionEvent::EVENT_END_MOVE);
+}
+
+/*
+ * move with init velocity
+ * @return true: rect change notified when move
+ */
+bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason)
+{
+    if (pcFoldScreenController_ == nullptr) {
+        return false;
+    }
+    bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
+    if (!ret) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "no throw slip");
+        return false;
+    }
+
+    WSRect endRect = rect;
+    std::function<void()> finishCallback = nullptr;
+    bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();
+    if (needSetFullScreen) {
+        // maximize end rect and notify last rect
+        PcFoldScreenController::ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
+        finishCallback = [weakThis = wptr(this), rect]() {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+                return;
+            }
+            session->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_WITHOUT_ANIMATION,
+                SessionEventParam {rect.posX_, rect.posY_, rect.width_, rect.height_});
+        };
+    }
+    SetSurfaceBoundsWithAnimation(
+        std::make_pair(
+            pcFoldScreenController_->GetThrowSlipTimingProtocol(),
+            pcFoldScreenController_->GetThrowSlipTimingCurve()
+        ),
+        endRect, std::move(finishCallback));
+    return needSetFullScreen;
 }
 
 void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
@@ -2642,6 +2721,22 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
     }
     WLOGFD("after UpdateWinRectForSystemBar rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
+}
+
+void SceneSession::SetSurfaceBoundsWithAnimation(
+    std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve> animationParam,
+    const WSRect& rect, std::function<void()>&& finishCallback, bool isGlobal, bool needFlush)
+{
+    auto weakThis = wptr(this);
+    auto interiaFunc = [weakThis, rect, isGlobal, needFlush]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGW(WmsLogTag::WMS_EVENT, "session is nullptr");
+            return;
+        }
+        session->SetSurfaceBounds(rect, isGlobal, needFlush);
+    };
+    RSNode::Animate(animationParam.first, animationParam.second, interiaFunc, std::move(finishCallback));
 }
 
 void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)
@@ -5073,6 +5168,25 @@ int32_t SceneSession::GetStatusBarHeight()
         }
     }
     TLOGD(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
+    return height;
+}
+
+int32_t SceneSession::GetDockHeight()
+{
+    int32_t height = 0;
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
+        GetSessionProperty() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "specificCallback_ or session property is null");
+        return height;
+    }
+    std::vector<sptr<SceneSession>> dockVector = specificCallback_->onGetSceneSessionVectorByType_(
+        WindowType::WINDOW_TYPE_LAUNCHER_DOCK, GetSessionProperty()->GetDisplayId());
+    for (auto& dock : dockVector) {
+        if (dock != nullptr && dock->IsVisible() && dock->GetSessionRect().height_ > height &&
+            dock->GetWindowName().find("SCBSmartDock") != std::string::npos) {
+            height = dock->GetSessionRect().height_;
+        }
+    }
     return height;
 }
 
