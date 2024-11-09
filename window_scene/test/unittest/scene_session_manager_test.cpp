@@ -2149,15 +2149,15 @@ HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, Function | Small
 }
 
 /**
- * @tc.name: OnIsWindowRectAutoSave
- * @tc.desc: OnIsWindowRectAutoSave
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: IsWindowRectAutoSave
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, OnIsWindowRectAutoSave, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | Level3)
 {
     std::string key = "com.example.recposentryEntryAbilityabc";
     bool enabled = false;
-    auto result = ssm_->OnIsWindowRectAutoSave(key, enabled);
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
     ASSERT_EQ(result, WMError::WM_OK);
 }
 
