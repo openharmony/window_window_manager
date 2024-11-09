@@ -129,6 +129,82 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, Function | Sm
     ASSERT_EQ(resultValue, 1);
 }
 
+
+/**
+ * @tc.name: ProxyForFreeze
+ * @tc.desc: ProxyForFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, ProxyForFreeze, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    const std::set<int32_t>& pidList = {1, 2, 3};
+    bool isProxy = true;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->ProxyForFreeze(pidList, isProxy));
+    } else {
+        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->ProxyForFreeze(pidList, isProxy));
+    }
+
+//hwt
+}
+
+/**
+ * @tc.name: SetVirtualScreenStatus
+ * @tc.desc: SetVirtualScreenStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenStatus, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenId id = 1001;
+    VirtualScreenStatus screenStatus = VirtualScreenStatus::VIRTUAL_SCREEN_PAUSE;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    bool expectation = true;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
+    } else {
+        EXPECT_NE(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
+    }
+
+//hwt
+}
+
+/**
+ * @tc.name: SetVirtualScreenSecurityExemption
+ * @tc.desc: SetVirtualScreenSecurityExemption
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenSecurityExemption, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenId id = 1001;
+    uint32_t pid = 1;
+    std::vector<uint64_t> windowIdList{10, 20, 30};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->SetVirtualScreenSecurityExemption(id, pid, windowIdList));
+    } else {
+        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->SetVirtualScreenSecurityExemption(id, pid, windowIdList));
+    }
+
+//hwt
+}
+
 /**
  * @tc.name: GetAllDisplayPhysicalResolution
  * @tc.desc: GetAllDisplayPhysicalResolution
@@ -684,6 +760,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpEnd, Function | SmallTest | Level1
 }
 
 /**
+ * @tc.name: SuspendBegin
+ * @tc.desc: SuspendBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SuspendBegin, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    PowerStateChangeReason reason {0};
+    bool expectation = true;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(expectation, screenSessionManagerProxy->SuspendBegin(reason));
+    } else {
+        EXPECT_NE(expectation, screenSessionManagerProxy->SuspendBegin(reason));
+    }
+}
+
+/**
  * @tc.name: SuspendEnd
  * @tc.desc: SuspendEnd
  * @tc.type: FUNC
@@ -700,6 +796,31 @@ HWTEST_F(ScreenSessionManagerProxyTest, SuspendEnd, Function | SmallTest | Level
     } else {
         EXPECT_NE(expectation, screenSessionManagerProxy->SuspendEnd());
     }
+}
+
+/**
+ * @tc.name: SetScreenPowerById
+ * @tc.desc: SetScreenPowerById
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenPowerState state {0};
+    ScreenId id = 1001;
+    PowerStateChangeReason reason {1};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    bool expectation = true;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(expectation, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
+    } else {
+        EXPECT_NE(expectation, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
+    }
+//hwt
+
 }
 
 /**
@@ -779,6 +900,27 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayState, Function | SmallTest | 
     } else {
         EXPECT_EQ(DisplayState::UNKNOWN, screenSessionManagerProxy->GetDisplayState(displayId));
     }
+}
+
+/**
+ * @tc.name: TryToCancelScreenOff
+ * @tc.desc: TryToCancelScreenOff
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    bool expectation = true;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
+    } else {
+        EXPECT_NE(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
+    }
+
+    //hwt
 }
 
 /**
@@ -904,6 +1046,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, DestroyVirtualScreen, Function | SmallTe
                 screenSessionManagerProxy->DestroyVirtualScreen(ScreenId));
     }
 }
+
 
 /**
  * @tc.name: MakeMirror
@@ -1565,6 +1708,31 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetFoldDisplayModeFromJs
+ * @tc.desc: SetFoldDisplayModeFromJs
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    const FoldDisplayMode displayMode {0};
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
+    } else {
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
+    }
+
+//hwt
+}
+
+
+/**
  * @tc.name: SetFoldStatusLocked
  * @tc.desc: SetFoldStatusLocked
  * @tc.type: FUNC
@@ -1580,6 +1748,28 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, Function | SmallTes
     std::function<void()> func = [&]()
     {
         screenSessionManagerProxy->SetFoldStatusLocked(locked);
+        resultValue = 1;
+    };
+    func();
+    EXPECT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: SetFoldStatusLockedFromJs
+ * @tc.desc: SetFoldStatusLockedFromJs
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLockedFromJs, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    int resultValue = 0;
+    bool locked = true;
+    std::function<void()> func = [&]()
+    {
+        screenSessionManagerProxy->SetFoldStatusLockedFromJs(locked);
         resultValue = 1;
     };
     func();
@@ -1780,6 +1970,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayNode, Function | SmallTest | L
     func();
     EXPECT_EQ(resultValue, 1);
 }
+
 
 /**
  * @tc.name: GetCurvedCompressionArea
