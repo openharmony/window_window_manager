@@ -1488,17 +1488,17 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
 {
     std::string key;
     if (!data.ReadString(key)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read key failed. ");
+        TLOGE(WmsLogTag::WMS_MAIN, "Read key failed.");
         return ERR_INVALID_DATA;
     }
     bool enabled = false;
     WMError errCode = IsWindowRectAutoSave(key, enabled);
     if (!reply.WriteBool(enabled)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write enabled failed. ");
+        TLOGE(WmsLogTag::WMS_MAIN, "Write enabled failed.");
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write errCode failed. ");
+        TLOGE(WmsLogTag::WMS_MAIN, "Write errCode failed.");
         return ERR_INVALID_DATA;
     };
     return ERR_NONE;
