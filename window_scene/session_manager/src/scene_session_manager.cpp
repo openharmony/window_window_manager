@@ -3097,7 +3097,7 @@ void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistent
         if (windowDeath_ == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "death recipient is null");
         } else {
-            if (!iter->first->RemoveDeathRecipient(windowDeath_)) {
+            if (iter->first == nullptr || !iter->first->RemoveDeathRecipient(windowDeath_)) {
                 TLOGE(WmsLogTag::WMS_LIFE, "failed to remove death recipient");
             }
         }
