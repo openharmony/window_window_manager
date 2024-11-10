@@ -5955,7 +5955,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     using T = std::underlying_type_t<MaximizePresentation>;
     T presentationValue = static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE);
-    if (argc == 1){
+    if (argc == 1) {
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], presentationValue) ||
             presentationValue < static_cast<T>(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING) ||
             presentationValue > static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER)) {
