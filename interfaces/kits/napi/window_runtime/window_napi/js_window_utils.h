@@ -293,8 +293,8 @@ enum class MaximizePresentationType : uint32_t {
 
 inline const std::map<MaximizePresentationType, MaximizePresentation> JS_TO_NATIVE_MAXIMIZE_PRESENTATION_TYPE_MAP {
     { MaximizePresentationType::FOLLOW_APP_IMMERSIVE_SETTING, MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING },
-    { MaximizePresentationType::EXIT_IMMERSIVE,     MaximizePresentation::APPLICATION_MODALITY },
-    { MaximizePresentationType::ENTER_IMMERSIVE,    MaximizePresentation::APPLICATION_MODALITY },
+    { MaximizePresentationType::EXIT_IMMERSIVE,     MaximizePresentation::EXIT_IMMERSIVE },
+    { MaximizePresentationType::ENTER_IMMERSIVE,    MaximizePresentation::ENTER_IMMERSIVE },
     { MaximizePresentationType::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER,
       MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER},
 };
