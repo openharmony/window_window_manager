@@ -2488,8 +2488,8 @@ bool SceneSession::IsTurnScreenOn() const
 
 WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
-    auto task = [weakThis = wptr(this), enableDrag]() {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
+    auto task = [weakThis = wptr(this), enableDrag] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
