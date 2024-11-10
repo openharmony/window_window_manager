@@ -1425,9 +1425,9 @@ WSError SessionProxy::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::SetAutoStartPiP(bool isAutoStart)
+WSError SessionProxy::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
+    TLOGD(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}u", isAutoStart, priority);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1437,6 +1437,10 @@ WSError SessionProxy::SetAutoStartPiP(bool isAutoStart)
     }
     if (!data.WriteBool(isAutoStart)) {
         TLOGE(WmsLogTag::WMS_PIP, "write isAutoStart failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(priority)) {
+        TLOGE(WmsLogTag::WMS_PIP, "write priority failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
