@@ -109,6 +109,8 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+        DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode) override;
     virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
@@ -164,7 +166,8 @@ public:
     bool HandleFoldScreenSessionCreate(ScreenId screenId);
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
-        const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination);
+             const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination,
+             DMRect mainScreenRegion = DMRect::NONE());
 
     bool RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup);
 
@@ -173,7 +176,7 @@ public:
         std::map<ScreenId, bool>& removeChildResMap);
     bool CheckScreenInScreenGroup(sptr<ScreenSession> screen) const;
 
-    DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens);
+    DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
 
     void NotifyScreenConnected(sptr<ScreenInfo> screenInfo);
@@ -372,6 +375,8 @@ private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void NotifyCaptureStatusChanged();
+    DMError DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        DMRect mainScreenRegion, ScreenId& screenGroupId);
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;

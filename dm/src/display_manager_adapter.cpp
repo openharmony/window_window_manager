@@ -478,11 +478,19 @@ void BaseAdapter::Clear()
 }
 
 DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-                                         ScreenId& screenGroupId)
+    ScreenId& screenGroupId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+}
+
+DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+    DMRect mainScreenRegion, ScreenId& screenGroupId)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion, screenGroupId);
 }
 
 DMError ScreenManagerAdapter::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
