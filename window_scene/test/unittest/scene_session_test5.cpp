@@ -744,7 +744,7 @@ HWTEST_F(SceneSessionTest5, SetWindowEnableDragBySystem, Function | SmallTest | 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto ret = session->SetWindowEnableDragBySystem(true);
     EXPECT_EQ(WMError::WM_OK, ret);
- }
+}
 
 /**
  * @tc.name: UpdateWinRectForSystemBar
