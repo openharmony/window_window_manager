@@ -2353,7 +2353,6 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
             return;
         }
         DestroyAndDisconnectSpecificSessionInner(iter->second);
-        remoteObjectMap_.erase(iter);
     };
     taskScheduler_->PostAsyncTask(task, "DestroySpecificSession");
 }
@@ -3089,6 +3088,24 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
     outsideDownEventFunc_ = func;
 }
 
+void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistentId)
+{
+    for (auto iter = remoteObjectMap_.begin(); iter != remoteObjectMap_.end(); ++iter) {
+        if (iter->second != persistentId) {
+            continue;
+        }
+        if (windowDeath_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "death recipient is null");
+        } else {
+            if (iter->first == nullptr || !iter->first->RemoveDeathRecipient(windowDeath_)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "failed to remove death recipient");
+            }
+        }
+        remoteObjectMap_.erase(iter);
+        break;
+    }
+}
+
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
@@ -3134,6 +3151,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         nonSystemFloatSceneSessionMap_.erase(persistentId);
         UnregisterCreateSubSessionListener(persistentId);
     }
+    ClearSpecificSessionRemoteObjectMap(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy specific session end, id: %{public}d", persistentId);
     return ret;
 }
