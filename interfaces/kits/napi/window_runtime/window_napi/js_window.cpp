@@ -5953,16 +5953,17 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    using T = std::underlying_type_t<MaximizePresentationType>;
-    T presentationValue = static_cast<T>(MaximizePresentationType::ENTER_IMMERSIVE);
-    if (argc == 1 && !ConvertFromJsValue(env, argv[INDEX_ZERO], presentationValue) &&
-        (presentationValue < static_cast<T>(MaximizePresentationType::BEGIN) ||
-         presentationValue > static_cast<T>(MaximizePresentationType::END))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to presentationValue");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    using T = std::underlying_type_t<MaximizePresentation>;
+    T presentationValue = static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE);
+    if (argc == 1){
+        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], presentationValue) ||
+            presentationValue < static_cast<T>(MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING) ||
+            presentationValue > static_cast<T>(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to presentationValue");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
     }
-    auto presentation = JS_TO_NATIVE_MAXIMIZE_PRESENTATION_TYPE_MAP.at(
-        static_cast<MaximizePresentationType>(presentationValue));
+    MaximizePresentation presentation = static_cast<MaximizePresentation>(presentationValue);
     // 1: params num; 1: index of callback
     napi_value lastParam = (argc <= 1) ? nullptr :
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);

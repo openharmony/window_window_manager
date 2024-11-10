@@ -282,23 +282,6 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
 };
 
-enum class MaximizePresentationType : uint32_t {
-    BEGIN = 0,
-    FOLLOW_APP_IMMERSIVE_SETTING = BEGIN,
-    EXIT_IMMERSIVE,
-    ENTER_IMMERSIVE,
-    ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER,
-    END = ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER,
-};
-
-inline const std::map<MaximizePresentationType, MaximizePresentation> JS_TO_NATIVE_MAXIMIZE_PRESENTATION_TYPE_MAP {
-    { MaximizePresentationType::FOLLOW_APP_IMMERSIVE_SETTING, MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING },
-    { MaximizePresentationType::EXIT_IMMERSIVE,     MaximizePresentation::EXIT_IMMERSIVE },
-    { MaximizePresentationType::ENTER_IMMERSIVE,    MaximizePresentation::ENTER_IMMERSIVE },
-    { MaximizePresentationType::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER,
-      MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER},
-};
-
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
