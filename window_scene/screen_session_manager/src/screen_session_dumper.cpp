@@ -25,6 +25,8 @@
 #include "screen_sensor_connector.h"
 #include "parameters.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_controller/super_fold_sensor_manager.h"
+#include "fold_screen_state_internel.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -765,13 +767,23 @@ void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
         }
         int32_t value = std::stoi(valueStr);
         if (value) {
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterHallCallback();
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-            OHOS::Rosen::ScreenSensorConnector::SubscribeRotationSensor();
+            if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+                OHOS::Rosen::SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
+                OHOS::Rosen::SuperFoldSensorManager::GetInstance().RegisterHallCallback();
+            } else {
+                OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+                OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+                OHOS::Rosen::ScreenSensorConnector::SubscribeRotationSensor();
+            }
         } else {
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterHallCallback();
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
-            OHOS::Rosen::ScreenSensorConnector::UnsubscribeRotationSensor();
+            if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+                OHOS::Rosen::SuperFoldSensorManager::GetInstance().UnregisterPostureCallback();
+                OHOS::Rosen::SuperFoldSensorManager::GetInstance().UnregisterHallCallback();
+            } else {
+                OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterHallCallback();
+                OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+                OHOS::Rosen::ScreenSensorConnector::UnsubscribeRotationSensor();
+            }
         }
         TLOGI(WmsLogTag::DMS, "hall and posture register status: %{public}d", value);
     }
