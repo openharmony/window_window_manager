@@ -387,6 +387,7 @@ private:
         const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type);
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession);
+    DisplayId GetFakeDisplayId(sptr<ScreenSession> screenSession);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
     void GetInternalAndExternalSession(sptr<ScreenSession>& internalSession, sptr<ScreenSession>& externalSession);
