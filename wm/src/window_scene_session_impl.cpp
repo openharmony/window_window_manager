@@ -2478,7 +2478,7 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    if (context_ != nullptr) {
+    if (context_ == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "context_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }

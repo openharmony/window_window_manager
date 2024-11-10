@@ -222,8 +222,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdatePcFoldScreenStatus);
     BindNativeFunction(env, exportObj, "resetPcFoldScreenArrangeRule", moduleName,
         JsSceneSessionManager::ResetPcFoldScreenArrangeRule);
-    BindNativeFunction(env, exportObj, "setIsWindowRectAutoSaveFromJs", moduleName,
-        JsSceneSessionManager::SetIsWindowRectAutoSaveFromJs);
+    BindNativeFunction(env, exportObj, "setIsWindowRectAutoSave", moduleName,
+        JsSceneSessionManager::SetIsWindowRectAutoSave);
     return NapiGetUndefined(env);
 }
 
