@@ -331,6 +331,7 @@ void ScreenSessionManager::Init()
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
         SuperFoldSensorManager::GetInstance().RegisterHallCallback();
+        SetSensorSubscriptionEnabled();
     }
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
@@ -1026,6 +1027,27 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             displayInfo = HookDisplayInfoByUid(displayInfo, screenSession);
             return displayInfo;
         }
+        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            continue;
+        }
+        if (!screenSession->GetScreenProperty().GetIsFakeInUse()) {
+            continue;
+        }
+        sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
+        if (fakeScreenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "error, fakeScreenSession is nullptr.");
+            continue;
+        }
+        sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
+        if (fakeDisplayInfo == nullptr) {
+            TLOGE(WmsLogTag::DMS, "error, fakeDisplayInfo is nullptr.");
+            continue;
+        }
+        DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
+        if (displayId == fakeDisplayId) {
+            TLOGD(WmsLogTag::DMS, "find fake success");
+            return fakeDisplayInfo;
+        }
     }
     TLOGE(WmsLogTag::DMS, "GetDisplayInfoById failed. displayId: %{public}" PRIu64" ", displayId);
     return nullptr;
@@ -1055,6 +1077,22 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId
     return nullptr;
 }
 
+DisplayId ScreenSessionManager::GetFakeDisplayId(sptr<ScreenSession> screenSession)
+{
+    sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
+    if (fakeScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "error, fakeScreenSession is nullptr.");
+        return DISPLAY_ID_INVALID;
+    }
+    sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
+    if (fakeDisplayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "error, fakeDisplayInfo is nullptr.");
+        return DISPLAY_ID_INVALID;
+    }
+    DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
+    return fakeDisplayId;
+}
+
 std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 {
     TLOGI(WmsLogTag::DMS, "enter");
@@ -1074,6 +1112,17 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
         }
         DisplayId displayId = displayInfo->GetDisplayId();
         res.push_back(displayId);
+        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            continue;
+        }
+        if (!screenSession->GetScreenProperty().GetIsFakeInUse()) {
+            continue;
+        }
+        DisplayId fakeDisplayId = GetFakeDisplayId(screenSession);
+        if (fakeDisplayId == DISPLAY_ID_FAKE) {
+            res.push_back(fakeDisplayId);
+            TLOGI(WmsLogTag::DMS, "add fakeDisplayId: %{public}" PRIu64 "", fakeDisplayId);
+        }
     }
     return res;
 }
@@ -6027,6 +6076,7 @@ void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSessi
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     uint32_t screenWidth = screenProperty.GetBounds().rect_.GetWidth();
     uint32_t screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    fakeScreenSession->UpdatePropertyByResolution(screenWidth, screenHeight / HALF_SCREEN_PARAM);
     screenSession->UpdatePropertyByFakeBounds(screenWidth, screenHeight / HALF_SCREEN_PARAM);
     screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetFakeScreenSession(fakeScreenSession);
