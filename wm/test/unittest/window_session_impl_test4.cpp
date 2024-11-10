@@ -1214,7 +1214,6 @@ HWTEST_F(WindowSessionImplTest4, SetEnableDragBySystem, Function | SmallTest | L
     option->SetWindowName("GetSubWindow");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
-    ASSERT_NE(nullptr, window->property_);
     window->property_->SetDragEnabled(true);
     window->SetEnableDragBySystem(false);
     ASSERT_FALSE(window->property_->GetDragEnabled());
