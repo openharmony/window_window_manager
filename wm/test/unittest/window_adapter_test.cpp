@@ -793,8 +793,8 @@ HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest |
 }
 
 /**
- * @tc.name: OnIsWindowRectAutoSave
- * @tc.desc: WindowAdapter/OnIsWindowRectAutoSave
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: WindowAdapter/IsWindowRectAutoSave
  * @tc.type: FUNC
  */
 HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
