@@ -1380,7 +1380,7 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
         auto window = windowToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr or get invalid param", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -1413,7 +1413,7 @@ napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
         auto window = windowToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr or get invalid param", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -5953,12 +5953,16 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    int32_t presentationValue = 2; // 2: default ENTER_IMMERSIVE
-    if (argc == 1 && !ConvertFromJsValue(env, argv[INDEX_ZERO], presentationValue)) {
+    using T = std::underlying_type_t<MaximizePresentationType>;
+    T presentationValue = static_cast<T>(MaximizePresentationType::ENTER_IMMERSIVE);
+    if (argc == 1 && !ConvertFromJsValue(env, argv[INDEX_ZERO], presentationValue) &&
+        (presentationValue < static_cast<T>(MaximizePresentationType::BEGIN) ||
+         presentationValue > static_cast<T>(MaximizePresentationType::END))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to presentationValue");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    MaximizePresentation presentation = static_cast<MaximizePresentation>(presentationValue);
+    auto presentation = JS_TO_NATIVE_MAXIMIZE_PRESENTATION_TYPE_MAP.at(
+        static_cast<MaximizePresentationType>(presentationValue));
     // 1: params num; 1: index of callback
     napi_value lastParam = (argc <= 1) ? nullptr :
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
@@ -5968,7 +5972,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         auto window = windowToken.promote();
         if (window == nullptr) {
             task->Reject(env,
-                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullprt"));
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr"));
             return;
         }
         WMError ret = window->Maximize(presentation);
