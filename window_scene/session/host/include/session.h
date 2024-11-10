@@ -721,8 +721,8 @@ private:
     /*
      * Window Lifecycle
      */
-    std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
+    std::atomic<bool> isAttach_{ false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;

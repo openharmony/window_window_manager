@@ -15,8 +15,6 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
-#include <securec.h>
-
 #include <ability_context.h>
 #include <ability_manager_client.h>
 #include <bundlemgr/launcher_service.h>
@@ -63,9 +61,6 @@
 #include "dms_reporter.h"
 #include "res_sched_client.h"
 #include "anomaly_detection.h"
-#include "hidump_controller.h"
-#include "session/host/include/multi_instance_manager.h"
-
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
