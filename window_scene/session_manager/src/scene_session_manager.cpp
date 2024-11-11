@@ -8976,7 +8976,7 @@ void SceneSessionManager::ProcessUpdateLastFocusedAppId(const std::vector<uint32
     }
 }
 
-void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) 
+void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty)
 {
     if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
         return;
@@ -10694,5 +10694,32 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
     }
     TLOGW(WmsLogTag::WMS_PIP, "no PiP window");
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    auto task = [this, windowIds, &windowDisplayIdMap]() {
+        for (const uint64_t windowId : windowIds) {
+            sptr<SceneSession> session = GetSceneSession(static_cast<int32_t>(windowId));
+            if (session == nullptr) {
+                continue;
+            }
+            sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+            if (sessionProperty == nullptr) {
+                continue;
+            }
+            TLOGI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64", displayId:%{public}" PRIu64"",
+                windowId, sessionProperty->GetDisplayId());
+            windowDisplayIdMap.insert({windowId, sessionProperty->GetDisplayId()});
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "GetDisplayIdByWindowId");
 }
 } // namespace OHOS::Rosen

@@ -1349,7 +1349,7 @@ HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTes
 {
     WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
     ASSERT_NE(WMError::WM_OK, ret);
-    
+
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
 
@@ -1385,6 +1385,19 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
 {
     auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
     ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetProcessWatermark
+ * @tc.desc: check SetProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+{
+    const std::vector<uint64_t> windowIds = {1, 2};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
 } // namespace Rosen
