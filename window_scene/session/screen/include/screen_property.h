@@ -163,7 +163,7 @@ private:
     RRect bounds_;
     RRect phyBounds_;
     RRect fakeBounds_;
-    bool isFakeInUse_ = false;
+    bool isFakeInUse_ = false;  // is fake bounds in use
 
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };
