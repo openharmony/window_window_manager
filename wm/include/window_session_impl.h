@@ -101,6 +101,8 @@ public:
     bool IsTopmost() const override;
     WMError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
+    WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
+    WMError SetWindowModal(bool isModal) override;
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
@@ -247,13 +249,12 @@ public:
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
-    void SetAutoStartPiP(bool isAutoStart) override;
+    void SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
 
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
-    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
     virtual WMError SetDecorVisible(bool isVisible) override;
     virtual WMError SetWindowTitleMoveEnabled(bool enable) override;
     virtual WMError SetDecorHeight(int32_t decorHeight) override;

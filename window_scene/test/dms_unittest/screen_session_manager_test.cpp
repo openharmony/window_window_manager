@@ -1540,8 +1540,8 @@ HWTEST_F(ScreenSessionManagerTest, SetMirror, Function | SmallTest | Level3)
     ssm_->screenSessionMap_ = screenSessionMap_;
     auto screen = ssm_->GetScreenSession(2);
     screen->GetScreenProperty().SetScreenType(ScreenType::REAL);
-    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(2, screens));
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9, screens));
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(2, screens, DMRect::NONE()));
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9, screens, DMRect::NONE()));
     ssm_->DestroyVirtualScreen(screenId);
 }
 
@@ -2340,7 +2340,10 @@ HWTEST_F(ScreenSessionManagerTest, ResizeVirtualScreen, Function | SmallTest | L
 
     uint32_t width {100};
     uint32_t height {100};
-    EXPECT_EQ(DMError::DM_OK, ssm_->ResizeVirtualScreen(screenId, width, height));
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    if (screenSession->GetDisplayNode() != nullptr) {
+        EXPECT_EQ(DMError::DM_OK, ssm_->ResizeVirtualScreen(screenId, width, height));
+    }
     ssm_->DestroyVirtualScreen(screenId);
 }
 

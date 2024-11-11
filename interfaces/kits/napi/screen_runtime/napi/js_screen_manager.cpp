@@ -81,6 +81,12 @@ static napi_value MakeMirror(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMakeMirror(env, info) : nullptr;
 }
 
+static napi_value MakeMirrorWithRegion(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnMakeMirrorWithRegion(env, info) : nullptr;
+}
+
 static napi_value SetMultiScreenMode(napi_env env, napi_callback_info info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
@@ -447,6 +453,53 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value OnMakeMirrorWithRegion(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnMakeMirrorWithRegion is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_THREE) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need 3 args at least!");
+    }
+
+    int64_t mainScreenId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], mainScreenId)) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to mainScreenId");
+    }
+
+    int64_t mirrorScreenId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], mirrorScreenId)) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            "Failed to convert parameter to mirrorScreenId");
+    }
+
+    DMRect mainScreenRegion;
+    if (GetRectFromJs(env, argv[INDEX_TWO], mainScreenRegion) == -1) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            "Failed to convert parameter to mainScreenRegion");
+    }
+
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [mainScreenId, mirrorScreenId, mainScreenRegion, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeMirrorWithRegion");
+        ScreenId screenGroupId = INVALID_SCREEN_ID;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion,
+                screenGroupId));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, CreateJsValue(env, static_cast<uint32_t>(screenGroupId)));
+        } else {
+            task->Reject(env,
+                CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeMirrorWithRegion failed."));
+        }
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
 napi_value OnSetMultiScreenMode(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -738,6 +791,40 @@ static int32_t GetMultiScreenPositionOptionsFromJs(napi_env env, napi_value opti
         return -1;
     }
     option = {screenId, startX, startY};
+    return 0;
+}
+
+static int32_t GetRectFromJs(napi_env env, napi_value optionObject, DMRect& rect)
+{
+    napi_value leftValue = nullptr;
+    napi_value topValue = nullptr;
+    napi_value widthValue = nullptr;
+    napi_value heightValue = nullptr;
+    int32_t left;
+    int32_t top;
+    uint32_t width;
+    uint32_t height;
+    napi_get_named_property(env, optionObject, "left", &leftValue);
+    napi_get_named_property(env, optionObject, "top", &topValue);
+    napi_get_named_property(env, optionObject, "width", &widthValue);
+    napi_get_named_property(env, optionObject, "height", &heightValue);
+    if (!ConvertFromJsValue(env, leftValue, left)) {
+        WLOGFE("Failed to convert leftValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, topValue, top)) {
+        WLOGFE("Failed to convert topValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, widthValue, width)) {
+        WLOGFE("Failed to convert widthValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, heightValue, height)) {
+        WLOGFE("Failed to convert heightValue to callbackType");
+        return -1;
+    }
+    rect = {left, top, width, height};
     return 0;
 }
 
@@ -1233,6 +1320,7 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenManager::RegisterScreenManagerCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsScreenManager::UnregisterScreenMangerCallback);
     BindNativeFunction(env, exportObj, "makeMirror", moduleName, JsScreenManager::MakeMirror);
+    BindNativeFunction(env, exportObj, "makeMirrorWithRegion", moduleName, JsScreenManager::MakeMirrorWithRegion);
     BindNativeFunction(env, exportObj, "setMultiScreenMode", moduleName, JsScreenManager::SetMultiScreenMode);
     BindNativeFunction(env, exportObj, "setMultiScreenRelativePosition", moduleName,
         JsScreenManager::SetMultiScreenRelativePosition);

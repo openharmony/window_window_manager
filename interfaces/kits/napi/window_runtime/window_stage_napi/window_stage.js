@@ -54,6 +54,10 @@ class WindowStage {
     return this.__window_stage__.getSubWindow(asyncCallback);
   }
 
+  setWindowModal(isModal) {
+    return this.__window_stage__.setWindowModal(isModal);
+  }
+
   on(type, callback) {
     return this.__window_stage__.on(type, callback);
   }
@@ -76,6 +80,14 @@ class WindowStage {
 
   removeStartingWindow() {
     return this.__window_stage__.removeStartingWindow();
+  }
+
+  setWindowRectAutoSave(enabled) {
+    return this.__window_stage__.setWindowRectAutoSave(enabled);
+  }
+
+  isWindowRectAutoSave() {
+    return this.__window_stage__.isWindowRectAutoSave();
   }
 }
 

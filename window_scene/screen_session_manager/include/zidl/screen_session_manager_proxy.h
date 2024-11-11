@@ -85,6 +85,8 @@ public:
 
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+        DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode) override;
     virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
@@ -182,6 +184,8 @@ public:
         uint32_t& actualRefreshRate) override;
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
 
 private:
