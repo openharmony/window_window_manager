@@ -194,9 +194,9 @@ public:
         bool isGlobal = false, bool isFromMoveToGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
 
-    virtual void OpenKeyboardSyncTransaction() {};
+    virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
-        bool isKeyboardShow, bool isRotating) {};
+        bool isKeyboardShow, bool isRotating) {}
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
