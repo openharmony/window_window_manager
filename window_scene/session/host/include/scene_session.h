@@ -87,6 +87,7 @@ using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
+using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 
 class SceneSession : public Session {
 public:
@@ -262,11 +263,13 @@ public:
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
+    WSError SetIsStatusBarVisibleInner(bool isVisible);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
     bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
+    void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
@@ -468,6 +471,10 @@ protected:
     bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
+
+    /**
+     * Window Immersive
+     */
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
 
@@ -503,14 +510,18 @@ protected:
 
 private:
     void NotifyAccessibilityVisibilityChange();
+    void CalculateCombinedExtWindowFlags();
+    void HandleStyleEvent(MMI::WindowArea area) override;
+    WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
+
+    /**
+     * Window Immersive
+     */
     void CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea) const;
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
-    void CalculateCombinedExtWindowFlags();
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
-    void HandleStyleEvent(MMI::WindowArea area) override;
-    WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
 
     /*
      * Window Lifecycle
@@ -631,7 +642,6 @@ private:
     SessionEventParam sessionEventParam_ = { 0, 0, 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
-    std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isSystemSpecificSession_ { false };
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::shared_mutex combinedExtWindowFlagsMutex_;
@@ -654,7 +664,6 @@ private:
     bool isScreenAngleMismatch_ = false;
     uint32_t targetScreenWidth_ = 0;
     uint32_t targetScreenHeight_ = 0;
-    bool isStatusBarVisible_ = true;
 
     // Session recover
     bool isRecovered_ = false;
@@ -683,6 +692,13 @@ private:
      * Window Animation
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+
+    /**
+     * Window Immersive
+     */
+    std::atomic_bool isDisplayStatusBarTemporarily_ { false };
+    bool isStatusBarVisible_ = true;
+    IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
