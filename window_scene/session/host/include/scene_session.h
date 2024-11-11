@@ -381,8 +381,8 @@ public:
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
-    /**
-     * Window TouchOutside
+    /*
+     * Window Input Event
      */
     void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
 
@@ -793,10 +793,10 @@ private:
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 
-    /**
-     * Window TouchOutside
+    /*
+     * Window Input Event
      */
-    NotifyTouchOutsideFunc OnTouchOutside_;
+    NotifyTouchOutsideFunc onTouchOutside_;
 
     /*
      * Window Rotation
