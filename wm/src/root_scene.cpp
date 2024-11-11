@@ -238,5 +238,15 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
     TLOGI(WmsLogTag::WMS_IMMS, "root scene type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
+
+void RootScene::RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback)
+{
+    getSessionAvoidAreaByTypeCallback_ = std::move(callback);
+}
+
+void RootScene::RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback)
+{
+    updateRootSceneRectCallback_ = std::move(callback);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -59,14 +59,8 @@ public:
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
-    void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback)
-    {
-        getSessionAvoidAreaByTypeCallback_ = std::move(callback);
-    }
-    void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback)
-    {
-        updateRootSceneRectCallback_ = std::move(callback);
-    }
+    void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
+    void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
@@ -129,6 +123,9 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
+    /**
+     * Window Immersive
+     */
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
 };

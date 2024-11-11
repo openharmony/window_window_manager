@@ -37,7 +37,7 @@ public:
     void LoadContent(
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
 
-    void SetSessionRect(const WSRect& rect) { winRect_ = rect; }
+    void SetRootSessionRect(const WSRect& rect) { winRect_ = rect; }
 
     /**
      * Window Immersive
@@ -50,10 +50,10 @@ private:
     /**
      * Window Immersive
      */
-    void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
-    void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
-    void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
-    void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea);
+    void GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
+    void GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
+    void GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
 };
 } // namespace OHOS::Rosen
 
