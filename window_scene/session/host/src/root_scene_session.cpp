@@ -30,7 +30,7 @@ void RootSceneSession::LoadContent(
     }
 }
 
-void RootSceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
+void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty == nullptr) {
@@ -53,7 +53,7 @@ void RootSceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
 }
 
-void RootSceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
+void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty == nullptr) {
@@ -90,7 +90,7 @@ void RootSceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
 }
 
-void RootSceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
+void RootSceneSession::GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty == nullptr) {
@@ -114,18 +114,16 @@ void RootSceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     for (auto& cutoutArea : cutoutAreas) {
         WSRect cutoutAreaRect = {
-            cutoutArea.posX_,
-            cutoutArea.posY_,
-            cutoutArea.width_,
-            cutoutArea.height_
+            cutoutArea.posX_, cutoutArea.posY_,
+            cutoutArea.width_, cutoutArea.height_
         };
         CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
-        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s cutout %{public}s area %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s cutout %{public}s area %{public}s",
               rect.ToString().c_str(), cutoutAreaRect.ToString().c_str(), avoidArea.ToString().c_str());
     }
 }
 
-void RootSceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
+void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty == nullptr) {
@@ -137,13 +135,13 @@ void RootSceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
         barArea = specificCallback_->onGetAINavigationBarArea_(sessionProperty->GetDisplayId());
     }
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
-    TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s AI bar %{public}s area %{public}s",
+    TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s AI bar %{public}s area %{public}s",
           rect.ToString().c_str(), barArea.ToString().c_str(), avoidArea.ToString().c_str());
 }
 
 AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
-    auto task = [weakThis = wptr(this), type] -> AvoidArea {
+    auto task = [weakThis = wptr(this), type]() -> AvoidArea {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
@@ -154,22 +152,22 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
         WSRect rect = session->GetSessionRect();
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
-                session->GetSystemAvoidArea(rect, avoidArea);
+                session->GetSystemAvoidAreaForRoot(rect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_CUTOUT: {
-                session->GetCutoutAvoidArea(rect, avoidArea);
+                session->GetCutoutAvoidAreaForRoot(rect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_KEYBOARD: {
-                session->GetKeyboardAvoidArea(rect, avoidArea);
+                session->GetKeyboardAvoidAreaForRoot(rect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-                session->GetAINavigationBarArea(rect, avoidArea);
+                session->GetAINavigationBarAreaForRoot(rect, avoidArea);
                 return avoidArea;
             }
             default: {
