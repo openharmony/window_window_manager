@@ -440,7 +440,7 @@ public:
     // ForegroundInteractiveStatus interface only for event use
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
-
+    
     /*
      * Window Lifecycle
      */
@@ -717,7 +717,7 @@ private:
     bool forceTouchable_ { true };
     bool systemTouchable_ { true };
     std::atomic_bool foregroundInteractiveStatus_ { true };
-
+    
     /*
      * Window Lifecycle
      */
