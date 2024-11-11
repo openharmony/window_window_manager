@@ -1466,7 +1466,7 @@ int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, M
     }
     for (auto it = windowDisplayIdMap.begin(); it != windowDisplayIdMap.end(); ++it) {
         if (!reply.WriteUint64(it->first)) {
-            TLOGE(WmsLogTag::DEFAULT, "Write windowID failed");
+            TLOGE(WmsLogTag::DEFAULT, "Write windowId failed");
             return ERR_INVALID_DATA;
         }
         if (!reply.WriteUint64(it->second)) {
