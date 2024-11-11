@@ -261,8 +261,14 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     RRect bounds = property_.GetBounds();
     RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
-    displayInfo->SetWidth(bounds.rect_.GetWidth());
-    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    if (isBScreenHalf_) {
+        displayInfo->SetWidth(bounds.rect_.GetWidth());
+        displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
+    } else {
+        displayInfo->SetWidth(bounds.rect_.GetWidth());
+        displayInfo->SetHeight(bounds.rect_.GetHeight());
+    }
+    
     displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
     displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
@@ -346,6 +352,16 @@ void ScreenSession::SetIsFakeInUse(bool isFakeInUse)
 bool ScreenSession::GetIsFakeInUse() const
 {
     return isFakeInUse_;
+}
+
+void ScreenSession::SetIsBScreenHalf(bool isBScreenHalf)
+{
+    isBScreenHalf_ = isBScreenHalf;
+}
+
+bool ScreenSession::GetIsBScreenHalf() const
+{
+    return isBScreenHalf_;
 }
 
 void ScreenSession::SetFakeScreenSession(sptr<ScreenSession> fakeScreenSession)
