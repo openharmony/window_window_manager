@@ -417,6 +417,12 @@ public:
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
 
+    /*
+     * Window displayId
+     */
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
