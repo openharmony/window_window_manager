@@ -504,7 +504,7 @@ public:
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
 
     /*
-     * Window displayId
+     * Screen Manager
      */
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
