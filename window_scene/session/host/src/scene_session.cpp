@@ -428,7 +428,9 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
         session->isTerminating_ = false;
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
+            session->isEnableGestureBack_ = true;
             session->UpdateGestureBackEnabled();
+            session->isEnableGestureBackHadSet_ = false;
         }
         return WSError::WS_OK;
     },
@@ -2484,6 +2486,31 @@ WSError SceneSession::SetTurnScreenOn(bool turnScreenOn)
 bool SceneSession::IsTurnScreenOn() const
 {
     return GetSessionProperty()->IsTurnScreenOn();
+}
+
+WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
+    auto task = [weakThis = wptr(this), enableDrag] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enableDrag: %{public}d",
+            session->GetPersistentId(), enableDrag);
+        auto sessionProperty = session->GetSessionProperty();
+        if (!sessionProperty) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+            return;
+        }
+        sessionProperty->SetDragEnabled(enableDrag);
+        if (session->sessionStage_) {
+            session->sessionStage_->SetEnableDragBySystem(enableDrag);
+        }
+    };
+    PostTask(task, __func__);
+    return WMError::WM_OK;
 }
 
 WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
@@ -4806,6 +4833,14 @@ void SceneSession::SetDefaultDisplayIdIfNeed()
     }
 }
 
+void SceneSession::UpdateGestureBackEnabled()
+{
+    if (specificCallback_ != nullptr &&
+        specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
+        specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
+    }
+}
+
 bool SceneSession::CheckIdentityTokenIfMatched(const std::string& identityToken)
 {
     if (!identityToken.empty() && !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
@@ -4827,14 +4862,6 @@ bool SceneSession::CheckPidIfMatched()
         return false;
     }
     return true;
-}
-
-void SceneSession::UpdateGestureBackEnabled()
-{
-    if (specificCallback_ != nullptr &&
-        specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
-        specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
-    }
 }
 
 void SceneSession::SetNeedSyncSessionRect(bool needSync)

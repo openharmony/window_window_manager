@@ -30,6 +30,26 @@ public:
         DisplayManagerAgentType type));
     MOCK_METHOD0(GetDefaultDisplayInfo, sptr<DisplayInfo>());
     MOCK_METHOD1(GetDisplayInfo, sptr<DisplayInfo>(DisplayId displayId));
+
+    MOCK_METHOD1(WakeUpBegin, bool(PowerStateChangeReason reason));
+    MOCK_METHOD0(WakeUpEnd, bool());
+    MOCK_METHOD1(SuspendBegin, bool(PowerStateChangeReason reason));
+    MOCK_METHOD0(SuspendEnd, bool());
+    MOCK_METHOD1(SetDisplayState, bool(DisplayState state));
+    MOCK_METHOD1(GetDisplayState, DisplayState(DisplayId displayId));
+};
+
+class MockScreenManagerAdapterLite : public ScreenManagerAdapterLite {
+public:
+    MOCK_METHOD0(Clear, void());
+    MOCK_METHOD2(RegisterDisplayManagerAgent, DMError(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type));
+    MOCK_METHOD2(UnregisterDisplayManagerAgent, DMError(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type));
+    MOCK_METHOD3(SetSpecifiedScreenPower, bool(ScreenId screenId, ScreenPowerState state,
+        PowerStateChangeReason reason));
+    MOCK_METHOD2(SetScreenPowerForAll, bool(ScreenPowerState state, PowerStateChangeReason reason));
+    MOCK_METHOD1(GetScreenPower, ScreenPowerState(ScreenId dmsScreenId));
 };
 }
 } // namespace OHOS
