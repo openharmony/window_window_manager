@@ -2861,6 +2861,16 @@ bool Session::GetAppBufferReady() const
     return appBufferReady_;
 }
 
+void Session::SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked)
+{
+    useStartingWindowAboveLocked_ = useStartingWindowAboveLocked;
+}
+
+bool Session::UseStartingWindowAboveLocked() const
+{
+    return useStartingWindowAboveLocked_;
+}
+
 WindowType Session::GetWindowType() const
 {
     auto property = GetSessionProperty();
