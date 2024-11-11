@@ -5199,6 +5199,10 @@ bool ScreenSessionManager::IsMultiScreenCollaboration()
 FoldStatus ScreenSessionManager::GetFoldStatus()
 {
     DmsXcollie dmsXcollie("DMS:GetFoldStatus", XCOLLIE_TIMEOUT_10S);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+        return SuperFoldStateManager::GetInstance().MatchSuperFoldStatusToFoldStatus(status);
+    }
     if (!g_foldScreenFlag) {
         return FoldStatus::UNKNOWN;
     }
