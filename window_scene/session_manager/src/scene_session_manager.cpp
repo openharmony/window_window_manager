@@ -10704,7 +10704,7 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 
-    auto task = [this, windowIds, &windowDisplayIdMap]() {
+    auto task = [this, windowIds, &windowDisplayIdMap] {
         for (const uint64_t windowId : windowIds) {
             sptr<SceneSession> session = GetSceneSession(static_cast<int32_t>(windowId));
             if (session == nullptr) {
@@ -10714,9 +10714,10 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
             if (sessionProperty == nullptr) {
                 continue;
             }
-            TLOGI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64", displayId:%{public}" PRIu64"",
-                windowId, sessionProperty->GetDisplayId());
-            windowDisplayIdMap.insert({windowId, sessionProperty->GetDisplayId()});
+			DisplayId displayId = sessionProperty->GetDisplayId();
+            TLOGI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64 ", displayId:%{public}" PRIu64,
+                windowId, displayId);
+            windowDisplayIdMap.insert({windowId, displayId});
         }
         return WMError::WM_OK;
     };
