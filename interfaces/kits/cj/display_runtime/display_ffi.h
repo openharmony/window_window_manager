@@ -28,6 +28,11 @@ FFI_EXPORT void FfiOHOSSetFoldDisplayMode(uint32_t mode);
 FFI_EXPORT uint32_t FfiOHOSGetFoldStatus();
 FFI_EXPORT uint32_t FfiOHOSGetFoldDisplayMode();
 FFI_EXPORT RetStruct FfiOHOSGetCurrentFoldCreaseRegion();
+FFI_EXPORT bool FfiOHOSIsCaptured();
+FFI_EXPORT RetStruct FfiOHOSGetAllDisplayPhysicalResolution();
+FFI_EXPORT int32_t FfiOHOSUnRegisterAllDisplayManagerCallback(const char* type);
+FFI_EXPORT int32_t FfiOHOSRegisterDisplayManagerCallback(const char* type, int64_t callbackId);
+FFI_EXPORT int32_t FfiOHOSUnRegisterDisplayManagerCallback(const char* type, int64_t callbackId);
 
 FFI_EXPORT uint32_t FfiOHOSDisplayGetId(int64_t id);
 FFI_EXPORT char* FfiOHOSGetDisplayName(int64_t id);
@@ -43,6 +48,10 @@ FFI_EXPORT float FfiOHOSDisplayGetVirtualPixelRatio(int64_t id);
 FFI_EXPORT float FfiOHOSDisplayGetXDPI(int64_t id);
 FFI_EXPORT float FfiOHOSDisplayGetYDPI(int64_t id);
 FFI_EXPORT RetStruct FfiOHOSDisplayGetCutoutInfo(int64_t id);
+FFI_EXPORT RetStruct FfiOHOSDisplayGetAvailableArea(int64_t id);
+FFI_EXPORT int32_t FfiOHOSDisplayUnRegisterAllDisplayManagerCallback(const char* type, int64_t id);
+FFI_EXPORT int32_t FfiOHOSDisplayRegisterDisplayManagerCallback(const char* type, int64_t id, int64_t callbackId);
+FFI_EXPORT int32_t FfiOHOSDisplayUnRegisterDisplayManagerCallback(const char* type, int64_t id, int64_t callbackId);
 }
 
 #endif // DISPLAY_FFI_H

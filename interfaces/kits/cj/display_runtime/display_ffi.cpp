@@ -14,13 +14,14 @@
  */
 
 #include "display_ffi.h"
+
 #include "cj_display_impl.h"
 #include "cj_display_manager.h"
 #include "ffi_remote_data.h"
 #include "window_manager_hilog.h"
 
 using namespace OHOS::FFI;
- 
+
 namespace OHOS {
 namespace Rosen {
 extern "C" {
@@ -72,6 +73,36 @@ RetStruct FfiOHOSGetCurrentFoldCreaseRegion()
 {
     TLOGI(WmsLogTag::DMS, "FfiOHOSGetCurrentFoldCreaseRegion start");
     return CJDisplayManager::GetCurrentFoldCreaseRegion();
+}
+
+bool FfiOHOSIsCaptured()
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSIsCaptured start");
+    return CJDisplayManager::IsCaptured();
+}
+
+RetStruct FfiOHOSGetAllDisplayPhysicalResolution()
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSGetAllDisplayPhysicalResolution start");
+    return CJDisplayManager::GetAllDisplayPhysicalResolution();
+}
+
+int32_t FfiOHOSUnRegisterAllDisplayManagerCallback(const char* type)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSUnRegisterAllDisplayManagerCallback start");
+    return CJDisplayManager::OnUnregisterAllDisplayListenerWithType(type);
+}
+
+int32_t FfiOHOSRegisterDisplayManagerCallback(const char* type, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSRegisterDisplayManagerCallback start");
+    return CJDisplayManager::OnRegisterDisplayListenerWithType(type, callbackId);
+}
+
+int32_t FfiOHOSUnRegisterDisplayManagerCallback(const char* type, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::DMS, "FFiOHOSUnRegisterDisplayManagerCallback start");
+    return CJDisplayManager::OnUnRegisterDisplayListenerWithType(type, callbackId);
 }
 
 uint32_t FfiOHOSDisplayGetId(int64_t id)
@@ -236,11 +267,59 @@ RetStruct FfiOHOSDisplayGetCutoutInfo(int64_t id)
     auto instance = FFIData::GetData<DisplayImpl>(id);
     if (!instance) {
         TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
-        return {DM_ERROR_SYSTEM_INNORMAL, 0, nullptr};
+        return { DM_ERROR_SYSTEM_INNORMAL, 0, nullptr };
     }
     auto ret = instance->GetCutoutInfo();
     return ret;
 }
+
+RetStruct FfiOHOSDisplayGetAvailableArea(int64_t id)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetAvailableArea start");
+    auto instance = FFIData::GetData<DisplayImpl>(id);
+    if (!instance) {
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        return { DM_ERROR_SYSTEM_INNORMAL, 0, nullptr };
+    }
+    auto ret = instance->GetAvailableArea();
+    return ret;
+}
+
+int32_t FfiOHOSDisplayUnRegisterAllDisplayManagerCallback(const char* type, int64_t id)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayUnRegisterDisplayManagerCallbackWithType start");
+    auto instance = FFIData::GetData<DisplayImpl>(id);
+    if (!instance) {
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        return DM_ERROR_SYSTEM_INNORMAL;
+    }
+    auto ret = instance->OnUnRegisterAllDisplayManagerCallback(type);
+    return ret;
+}
+
+int32_t FfiOHOSDisplayRegisterDisplayManagerCallback(const char* type, int64_t id, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayRegisterDisplayManagerCallback start");
+    auto instance = FFIData::GetData<DisplayImpl>(id);
+    if (!instance) {
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        return DM_ERROR_SYSTEM_INNORMAL;
+    }
+    auto ret = instance->OnRegisterDisplayManagerCallback(type, callbackId);
+    return ret;
+}
+
+int32_t FfiOHOSDisplayUnRegisterDisplayManagerCallback(const char* type, int64_t id, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayUnRegisterDisplayManagerCallback start");
+    auto instance = FFIData::GetData<DisplayImpl>(id);
+    if (!instance) {
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        return DM_ERROR_SYSTEM_INNORMAL;
+    }
+    auto ret = instance->OnUnRegisterDisplayManagerCallback(type, callbackId);
+    return ret;
 }
 }
-}
+} // namespace Rosen
+} // namespace OHOS
