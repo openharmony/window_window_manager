@@ -2157,6 +2157,14 @@ public:
     virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Get whether the auto-save the window rect is enabled or not.
+     *
+     * @param enabled True means the window rect auto-save is enabled, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the rect of host window.
      *
      * @param hostWindowId window Id of the host window.
