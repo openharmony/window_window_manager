@@ -10699,7 +10699,7 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
 WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
     std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
-    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+    if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
@@ -10721,6 +10721,6 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
         }
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task, "GetDisplayIdByWindowId");
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 } // namespace OHOS::Rosen
