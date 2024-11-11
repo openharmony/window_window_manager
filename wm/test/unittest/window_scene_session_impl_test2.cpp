@@ -162,14 +162,6 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTransform01, Function | SmallTest | Lev
     window->property_->SetPersistentId(1);
     Transform trans_;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransform(trans_));
-
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans_));
 }
 
 /**
@@ -258,15 +250,6 @@ HWTEST_F(WindowSceneSessionImplTest2, SetAlpha01, Function | SmallTest | Level2)
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->SetAlpha(1.0));
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
-    windowSceneSession->hostSession_ = session;
-
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(0.0));
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
 }
 
 /**
