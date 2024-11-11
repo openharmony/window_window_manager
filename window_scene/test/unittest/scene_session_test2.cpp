@@ -974,7 +974,7 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "NotifyTouchOutside";
     info.bundleName_ = "NotifyTouchOutside";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
     sceneSession->sessionStage_ = new SessionStageMocker();
     EXPECT_NE(nullptr, sceneSession->sessionStage_);
@@ -1005,7 +1005,7 @@ HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | Smal
     SessionInfo info;
     info.abilityName_ = "CheckTouchOutsideCallbackRegistered";
     info.bundleName_ = "CheckTouchOutsideCallbackRegistered";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
