@@ -8935,6 +8935,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 if (sceneSession == nullptr) {
                     continue;
                 }
+                sceneSession->ResetSizeChangeReasonIfDirty();
                 sceneSession->ResetDirtyFlags();
                 if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
                     sceneSession->SetUIStateDirty(false);

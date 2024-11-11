@@ -1377,6 +1377,33 @@ HWTEST_F(SceneSessionTest5, UpdateClientRect01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: ResetSizeChangeReasonIfDirty
+ * @tc.desc: ResetSizeChangeReasonIfDirty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ResetSizeChangeReasonIfDirty, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ResetSizeChangeReasonIfDirty";
+    info.bundleName_ = "ResetSizeChangeReasonIfDirty";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    session->UpdateSizeChangeReason(SizeChangeReason::DRAG);
+    session->ResetDirtyFlags();
+    session->ResetSizeChangeReasonIfDirty();
+    EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::DRAG);
+
+    session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    session->ResetSizeChangeReasonIfDirty();
+    EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::DRAG);
+
+    session->UpdateSizeChangeReason(SizeChangeReason::MOVE);
+    session->ResetSizeChangeReasonIfDirty();
+    EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::UNDEFINED);
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
