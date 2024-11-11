@@ -608,8 +608,14 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
 
 void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
 {
-    rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
-        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
+    rootScene_->RegisterUpdateRootSceneRectCallback([](const Rect& rect) {
+        if (auto rootSceneSession = SceneSessionManager::GetInstance().GetRootSceneSession()) {
+            WSRect rootSceneRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+            rootSceneSession->SetRootSessionRect(rootSceneRect);
+        }
+    });
+    rootScene_->RegisterGetSessionAvoidAreaByTypeCallback([](AvoidAreaType type) {
+        return SceneSessionManager::GetInstance().GetRootSessionAvoidAreaByType(type);
     });
     if (!Session::IsScbCoreEnabled()) {
         rootScene_->SetFrameLayoutFinishCallback([] {
