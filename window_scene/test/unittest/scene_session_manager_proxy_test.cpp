@@ -852,12 +852,10 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionDumpInfo, Function | SmallTest 
 HWTEST_F(sceneSessionManagerProxyTest, LockSession, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-
-    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->LockSession(0));
-    sceneSessionManagerProxy_ = nullptr;
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy = new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->LockSession(0));
+    sceneSessionManagerProxy = nullptr;
 }
 
 /**
