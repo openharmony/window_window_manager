@@ -151,8 +151,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, ProxyForFreeze, Function | SmallTest | L
         ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
                 screenSessionManagerProxy->ProxyForFreeze(pidList, isProxy));
     }
-
-//hwt
 }
 
 /**
@@ -175,8 +173,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenStatus, Function | Small
     } else {
         EXPECT_NE(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
     }
-
-//hwt
 }
 
 /**
@@ -201,8 +197,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenSecurityExemption, Funct
         ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
                 screenSessionManagerProxy->SetVirtualScreenSecurityExemption(id, pid, windowIdList));
     }
-
-//hwt
 }
 
 /**
@@ -819,8 +813,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, Function | SmallTest
     } else {
         EXPECT_NE(expectation, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
     }
-//hwt
-
 }
 
 /**
@@ -919,8 +911,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, Function | SmallTe
     } else {
         EXPECT_NE(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
     }
-
-    //hwt
 }
 
 /**
@@ -1727,8 +1717,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, Function | Sma
         EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
                 screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
     }
-
-//hwt
 }
 
 
