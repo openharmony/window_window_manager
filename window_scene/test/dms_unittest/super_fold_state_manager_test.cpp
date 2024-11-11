@@ -108,7 +108,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, Function | Sm
     };
 
     func();
-    SuperFoldStatus SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
 
     EXPECT_NE(curState, expState);
