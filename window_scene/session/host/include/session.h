@@ -692,7 +692,6 @@ protected:
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
-    // only accessed on SSM thread
 
     /*
      * Window Hierarchy
@@ -702,7 +701,7 @@ protected:
     /*
      * Window Pipeline
      */
-    uint32_t dirtyFlags_ = 0;
+    uint32_t dirtyFlags_ = 0; // only accessed on SSM thread
     bool isNeedSyncSessionRect_ { true }; // where need sync to session rect,  currently use in split drag
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
