@@ -11524,4 +11524,31 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
     isLayoutFinished = isRootSceneLastFrameLayoutFinishedFunc_();
     return WSError::WS_OK;
 }
+
+WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled)
+{
+    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
+    if (auto iter = isWindowRectAutoSaveMap_.find(key); iter != isWindowRectAutoSaveMap_.end()) {
+        enabled = iter->second;
+    } else {
+        enabled = false;
+    }
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool enabled)
+{
+    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
+    if (auto iter = isWindowRectAutoSaveMap_.find(key); iter != isWindowRectAutoSaveMap_.end()) {
+        if (!enabled) {
+            isWindowRectAutoSaveMap_.erase(key);
+        } else {
+            iter->second = enabled;
+        }
+    } else {
+        if (enabled) {
+            isWindowRectAutoSaveMap_.insert({key, enabled});
+        }
+    }
+}
 } // namespace OHOS::Rosen

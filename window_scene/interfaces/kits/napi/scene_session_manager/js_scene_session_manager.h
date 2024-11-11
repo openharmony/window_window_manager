@@ -117,6 +117,7 @@ public:
     static napi_value GetWindowPid(napi_env env, napi_callback_info info);
     static napi_value UpdatePcFoldScreenStatus(napi_env env, napi_callback_info info);
     static napi_value ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
+    static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
     /*
      * Multi instance
@@ -192,6 +193,7 @@ private:
     napi_value OnGetWindowPid(napi_env env, napi_callback_info info);
     napi_value OnUpdatePcFoldScreenStatus(napi_env env, napi_callback_info info);
     napi_value OnResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
+    napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
     /*
      * multi instance

@@ -313,6 +313,8 @@ public:
      * PC Window
      */
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
+    void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -1036,6 +1038,12 @@ private:
         }
     };
     std::unordered_map<SessionInfoList, std::shared_ptr<AppExecFwk::AbilityInfo>, SessionHasher> abilityInfoMap_;
+
+    /**
+     * PC Window
+     */
+    std::mutex isWindowRectAutoSaveMapMutex_;
+    std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
 };
 } // namespace OHOS::Rosen
 

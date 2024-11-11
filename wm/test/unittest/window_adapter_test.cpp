@@ -793,6 +793,22 @@ HWTEST_F(WindowAdapterTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest |
 }
 
 /**
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: WindowAdapter/IsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    std::string key = "com.example.recposentryEntryAbility";
+    bool enabled = false;
+    auto err = windowAdapter.IsWindowRectAutoSave(key, enabled);
+    ASSERT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
+
+/**
  * @tc.name: GetDisplayIdByWindowId
  * @tc.desc: WindowAdapter/GetDisplayIdByWindowId
  * @tc.type: FUNC

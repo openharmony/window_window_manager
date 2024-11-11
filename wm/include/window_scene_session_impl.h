@@ -158,6 +158,7 @@ public:
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError IsWindowRectAutoSave(bool& enabled) override;
 
     /*
      * Free Multi Window

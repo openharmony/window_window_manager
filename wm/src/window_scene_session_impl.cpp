@@ -2443,10 +2443,53 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not main window, not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
     hostSession->OnSetWindowRectAutoSave(enabled);
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (!windowSystemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not main window, not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (context_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "context_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    std::string bundleName = property_->GetSessionInfo().bundleName_;
+    std::string moduleName = property_->GetSessionInfo().moduleName_;
+    std::string abilityName = property_->GetSessionInfo().abilityName_;
+    if (abilityContext && abilityContext->GetAbilityInfo()) {
+        abilityName = abilityContext->GetAbilityInfo()->name;
+        moduleName = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        bundleName = abilityContext->GetAbilityInfo()->bundleName;
+    } else if (context_) {
+        moduleName = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        bundleName = context_->GetBundleName();
+    }
+    std::string key = bundleName + moduleName + abilityName;
+    auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled);
+    return ret;
 }
 
 void WindowSceneSessionImpl::StartMove()
