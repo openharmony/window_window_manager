@@ -1523,6 +1523,24 @@ bool ScreenSessionManager::TryToCancelScreenOff()
     return false;
 }
 
+bool ScreenSessionManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen brightness permission denied!");
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
+    return true;
+}
+
+uint32_t ScreenSessionManager::GetScreenBrightness(uint64_t screenId)
+{
+    uint32_t level = static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
+    TLOGI(WmsLogTag::DMS, "GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    return level;
+}
+
 int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
 {
     DmsXcollie dmsXcollie("DMS:SetScreenOffDelayTime", XCOLLIE_TIMEOUT_10S);
