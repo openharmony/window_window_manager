@@ -683,6 +683,13 @@ private:
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 
+    /**
+     * Window Immersive
+     */
+    std::atomic_bool isDisplayStatusBarTemporarily_ { false };
+    bool isStatusBarVisible_ = true;
+    IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
+
     /*
      * Window Rotation
      */
@@ -692,13 +699,6 @@ private:
      * Window Animation
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
-
-    /**
-     * Window Immersive
-     */
-    std::atomic_bool isDisplayStatusBarTemporarily_ { false };
-    bool isStatusBarVisible_ = true;
-    IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
