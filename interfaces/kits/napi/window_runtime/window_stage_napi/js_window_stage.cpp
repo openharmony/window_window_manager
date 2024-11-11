@@ -800,7 +800,6 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     return result;
 }
 
-
 napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
     auto windowScene = windowScene_.lock();

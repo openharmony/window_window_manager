@@ -1500,7 +1500,7 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write errCode failed.");
         return ERR_INVALID_DATA;
-    };
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
