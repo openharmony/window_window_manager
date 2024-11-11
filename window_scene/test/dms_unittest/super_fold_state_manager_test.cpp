@@ -17,7 +17,7 @@
 
 #include <system_ability_definition.h>
 
-#include "super_fold_state_manager.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
