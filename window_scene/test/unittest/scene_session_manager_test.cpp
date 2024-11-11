@@ -1753,10 +1753,10 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
     info.abilityName_ = "test";
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
-	ASSERT_NE(nullptr, sceneSession1);
+    ASSERT_NE(nullptr, sceneSession1);
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, nullptr);
-	ASSERT_NE(nullptr, sceneSession2);
+    ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
