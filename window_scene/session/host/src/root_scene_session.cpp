@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "display_manager.h"
 #include "session/host/include/root_scene_session.h"
+
+#include "display_manager.h"
 
 namespace OHOS::Rosen {
 void RootSceneSession::SetLoadContentFunc(const LoadContentFunc& loadContentFunc)
