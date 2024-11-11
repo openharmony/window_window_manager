@@ -528,6 +528,8 @@ public:
     bool GetEnableRemoveStartingWindow() const;
     void SetAppBufferReady(bool appBufferReady);
     bool GetAppBufferReady() const;
+    void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
+    bool UseStartingWindowAboveLocked() const;
 
     /*
      * Window Hierarchy
@@ -807,8 +809,9 @@ private:
     /*
      * Starting Window
      */
-    bool enableRemoveStartingWindow_ {false};
-    bool appBufferReady_ {false};
+    bool enableRemoveStartingWindow_ { false };
+    bool appBufferReady_ { false };
+    bool useStartingWindowAboveLocked_ { false };
 };
 } // namespace OHOS::Rosen
 
