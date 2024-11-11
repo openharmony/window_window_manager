@@ -670,7 +670,7 @@ private:
         std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
         std::vector<std::pair<uint64_t, bool>> currDrawingContentData);
-    void GetDrawingDataElement(uint64_t surfaceId, int32_t& pid, int32_t& uid);
+    void GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid);
     void GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionData> occlusionData,
         std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData,
         std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
