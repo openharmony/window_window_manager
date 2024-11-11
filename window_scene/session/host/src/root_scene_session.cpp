@@ -143,10 +143,10 @@ void RootSceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
 
 AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
 {
-    auto task = [weakThis = wptr(this), type]() -> AvoidArea {
+    auto task = [weakThis = wptr(this), type] -> AvoidArea {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_IMMS, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
             return {};
         }
 
