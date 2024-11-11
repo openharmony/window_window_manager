@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <regex>
+#include <application_context.h>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 
@@ -628,6 +629,27 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionWindowVisibilityListener02, Func
     int32_t persistentId = 1;
     auto result = ssm_->UpdateSessionWindowVisibilityListener(persistentId, true);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: UpdateDarkColorModeToRS
+ * @tc.desc: UpdateDarkColorModeToRS
+ * @tc.type: FUNC
+ * @tc.require: issueIB1N43
+ */
+HWTEST_F(SceneSessionManagerTest4, UpdateDarkColorModeToRS, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    AbilityRuntime::ApplicationContext::applicationContext_ =
+        std::make_shared<AbilityRuntime::ApplicationContext>();
+    ASSERT_NE(nullptr, AbilityRuntime::ApplicationContext::applicationContext_);
+    AbilityRuntime::ApplicationContext::applicationContext_->contextImpl_ =
+        std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(nullptr, AbilityRuntime::ApplicationContext::applicationContext_->contextImpl_);
+    AbilityRuntime::ApplicationContext::applicationContext_->contextImpl_->config_ =
+        std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, AbilityRuntime::ApplicationContext::applicationContext_->GetConfiguration());
+    ssm_->UpdateDarkColorModeToRS();
 }
 
 /**

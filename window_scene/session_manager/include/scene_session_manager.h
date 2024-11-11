@@ -842,6 +842,11 @@ private:
      */
     bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
 
+    /*
+     * Window Property
+     */
+    void UpdateDarkColorModeToRS();
+
     /**
      * Window Immersive
      */
