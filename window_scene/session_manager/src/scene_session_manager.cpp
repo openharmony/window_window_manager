@@ -1183,17 +1183,13 @@ sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
         }
         system::SetParameter("bootevent.wms.fullscreen.ready", "true");
         auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-        if (specificCb != nullptr) {
-            specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
-                return this->GetSceneSessionVectorByType(type, displayId);
-            };
-            specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
-                return this->GetAINavigationBarArea(displayId);
-            };
-            rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
-        } else {
-            rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
-        }
+        specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
+            return this->GetSceneSessionVectorByType(type, displayId);
+        };
+        specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
+            return this->GetAINavigationBarArea(displayId);
+        };
+        rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
         rootSceneSession_->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
         rootSceneSession_->SetEventHandler(taskScheduler_->GetEventHandler());
         AAFwk::AbilityManagerClient::GetInstance()->SetRootSceneSession(rootSceneSession_->AsObject());
