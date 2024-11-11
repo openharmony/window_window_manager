@@ -32,7 +32,7 @@ group("systemtest") {
     ":wms_window_immersive_test",
     ":wms_window_input_method_test",
     ":wms_window_input_test",
-    ":wms_window_layout_test",
+    ":window_layout_integration_test",
     ":wms_window_mode_support_info_test",
     ":wms_window_multi_ability_test",
     ":wms_window_nointeraction_listener_test",
@@ -53,7 +53,7 @@ group("systemtest") {
     deps += [ ":wms_window_move_drag_test" ]
   }
   if (!window_manager_use_sceneboard) {
-    deps += [ ":wms_window_layout_blue_test" ]
+    deps += [ ":wms_window_layout_test" ]
   }
 }
 
@@ -82,10 +82,10 @@ ohos_systemtest("wms_window_layout_test") {
   ]
 }
 
-ohos_systemtest("wms_window_layout_blue_test") {
+ohos_systemtest("window_layout_integration_test") {
   module_out_path = module_out_path
 
-  sources = [ "window_layout_blue_test.cpp" ]
+  sources = [ "window_layout_integration_test" ]
 
   include_dirs = [
     "${window_base_path}/window_scene/test/mock",
