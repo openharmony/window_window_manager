@@ -4833,6 +4833,14 @@ void SceneSession::SetDefaultDisplayIdIfNeed()
     }
 }
 
+void SceneSession::UpdateGestureBackEnabled()
+{
+    if (specificCallback_ != nullptr &&
+        specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
+        specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
+    }
+}
+
 bool SceneSession::CheckIdentityTokenIfMatched(const std::string& identityToken)
 {
     if (!identityToken.empty() && !clientIdentityToken_.empty() && identityToken != clientIdentityToken_) {
@@ -4854,14 +4862,6 @@ bool SceneSession::CheckPidIfMatched()
         return false;
     }
     return true;
-}
-
-void SceneSession::UpdateGestureBackEnabled()
-{
-    if (specificCallback_ != nullptr &&
-        specificCallback_->onUpdateGestureBackEnabled_ != nullptr) {
-        specificCallback_->onUpdateGestureBackEnabled_(GetPersistentId());
-    }
 }
 
 void SceneSession::SetNeedSyncSessionRect(bool needSync)
