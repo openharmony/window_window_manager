@@ -663,16 +663,16 @@ private:
     PostProcessFocusState postProcessFocusState_;
     bool postProcessProperty_ { false };
 
-    /*
-     * Window Visibility
-     */
-    NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
-
-    /*
+    /**
      * Gesture Back
      */
     bool isEnableGestureBack_ { true };
     bool isEnableGestureBackHadSet_ { false };
+
+    /**
+     * Window Visibility
+     */
+    NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 
     /*
      * Window Rotation

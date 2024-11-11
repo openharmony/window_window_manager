@@ -17,6 +17,7 @@
 
 #include <ability_context.h>
 #include <ability_manager_client.h>
+#include <application_context.h>
 #include <bundlemgr/launcher_service.h>
 #include <hisysevent.h>
 #include <parameters.h>
@@ -60,7 +61,6 @@
 #include "anr_manager.h"
 #include "dms_reporter.h"
 #include "res_sched_client.h"
-#include "res_type.h"
 #include "anomaly_detection.h"
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -245,6 +245,7 @@ void SceneSessionManager::Init()
         this->NotifyWindowStateErrorFromMMI(pid, persistentId);
     });
     TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
+    UpdateDarkColorModeToRS();
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -2495,8 +2496,19 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
             return true;
         }
     }
+    if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+        int32_t parentId = property->GetParentPersistentId();
+        auto parentSession = GetSceneSession(parentId);
+        if (parentSession != nullptr && parentSession->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
+            SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check system subWindow permission success, parentId:%{public}d.", parentId);
+            return true;
+        } else {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "check system subWindow permission warning, parentId:%{public}d.", parentId);
+        }
+    }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
-        WLOGFD("check create permission success, create with system calling.");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "check create permission success, create with system calling.");
         return true;
     }
     WLOGFE("check system window permission failed.");
@@ -3096,19 +3108,19 @@ WSError SceneSessionManager::ProcessBackEvent()
     auto task = [this]() {
         auto session = GetSceneSession(focusedSessionId_);
         if (!session) {
-            WLOGFE("session is nullptr: %{public}d", focusedSessionId_);
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is nullptr: %{public}d", focusedSessionId_);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        WLOGFI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
+        TLOGNI(WmsLogTag::WMS_MAIN, "ProcessBackEvent session persistentId:%{public}d needBlock:%{public}d",
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
-            WLOGFD("RequestSessionBack when start session");
+            TLOGND(WmsLogTag::WMS_MAIN, "RequestSessionBack when start session");
             if (session->GetSessionInfo().abilityInfo != nullptr &&
                 session->GetSessionInfo().abilityInfo->unclearableMission) {
-                TLOGI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
+                TLOGNI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
                 return WSError::WS_OK;
             }
-            session->RequestSessionBack(false);
+            session->RequestSessionBack(true);
             return WSError::WS_OK;
         }
         if (session->GetSessionInfo().isSystem_ && rootSceneProcessBackEventFunc_) {
@@ -3119,7 +3131,7 @@ WSError SceneSessionManager::ProcessBackEvent()
         return WSError::WS_OK;
     };
 
-    taskScheduler_->PostAsyncTask(task, "ProcessBackEvent");
+    taskScheduler_->PostAsyncTask(task, __func__);
     return WSError::WS_OK;
 }
 
@@ -7344,9 +7356,10 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         if (lastVisibleData_[i].first < currVisibleData[j].first) {
             visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
             i++;
-        } else if (lastVisibleData_[i].first > currVisibleData[j].first &&
-                currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-            visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+        } else if (lastVisibleData_[i].first > currVisibleData[j].first) {
+            if (currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+                visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+            }
             j++;
         } else {
             if (lastVisibleData_[i].second != currVisibleData[j].second) {
@@ -10318,7 +10331,7 @@ WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& 
         } else if (abilityInfo != nullptr) {
             info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType);
             infos.push_back(info);
-            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d,"
+            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d, "
                 "bundleName:%{public}s, bundleType:%{public}d", session->GetPersistentId(),
                 info.bundleName_.c_str(), info.bundleType_);
         }
@@ -10694,5 +10707,24 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
     }
     TLOGW(WmsLogTag::WMS_PIP, "no PiP window");
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdateDarkColorModeToRS()
+{
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "app context is nullptr");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "app configuration is nullptr");
+        return;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
+    TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d",
+        colorMode.c_str(), ret);
 }
 } // namespace OHOS::Rosen
