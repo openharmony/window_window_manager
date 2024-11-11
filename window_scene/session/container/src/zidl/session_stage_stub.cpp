@@ -106,6 +106,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
             return HandleNotifySessionFullScreen(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM):
+            return HandleSetEnableDragBySystem(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -483,6 +485,18 @@ int SessionStageStub::HandleNotifyCompatibleModeEnableInPad(MessageParcel& data,
     bool enable = data.ReadBool();
     WSError errCode = NotifyCompatibleModeEnableInPad(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool enableDrag = true;
+    if (!data.ReadBool(enableDrag)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read enableDrag failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetEnableDragBySystem(enableDrag);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

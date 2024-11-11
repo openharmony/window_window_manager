@@ -146,6 +146,8 @@ public:
     }
 
     virtual void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) {}
+
+    virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

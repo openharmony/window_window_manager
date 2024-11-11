@@ -69,6 +69,7 @@ public:
     WSError NotifyCompatibleModeEnableInPad(bool enable) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
+    WSError SetEnableDragBySystem(bool dragEnable) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
