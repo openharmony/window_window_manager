@@ -35,8 +35,8 @@ class WindowLayoutTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 private:
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     static constexpr uint32_t WAIT_SERVERAL_FRAMES = 70000;
