@@ -295,6 +295,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetStartingWindowExitAnimationFlag);
     BindNativeFunction(env, objValue, "setNeedSyncSessionRect", moduleName,
         JsSceneSession::SetNeedSyncSessionRect);
+    BindNativeFunction(env, objValue, "setIsActivatedAfterScreenLocked", moduleName,
+        JsSceneSession::SetIsActivatedAfterScreenLocked);
     BindNativeFunction(env, objValue, "setWindowEnableDragBySystem", moduleName,
         JsSceneSession::SetWindowEnableDragBySystem);
 }
@@ -1737,6 +1739,13 @@ napi_value JsSceneSession::SetNeedSyncSessionRect(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_PIPELINE, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetNeedSyncSessionRect(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetIsActivatedAfterScreenLocked(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetWindowEnableDragBySystem(napi_env env, napi_callback_info info)
@@ -4305,6 +4314,33 @@ napi_value JsSceneSession::OnUnSyncScenePanelGlobalPosition(napi_env env, napi_c
         return NapiGetUndefined(env);
     }
     session->SyncScenePanelGlobalPosition(false);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "InputInvalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isActivatedAfterScreenLocked = false;
+    if (!ConvertFromJsValue(env, argv[0], isActivatedAfterScreenLocked)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isActivatedAfterScreenLocked");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isActivatedAfterScreenLocked: %{public}u", isActivatedAfterScreenLocked);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]session is null, id: %{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetIsActivatedAfterScreenLocked(isActivatedAfterScreenLocked);
     return NapiGetUndefined(env);
 }
 
