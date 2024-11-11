@@ -633,7 +633,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RequestFocusStatus01, Function | SmallTes
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->RequestFocusStatus(persistendId, isFocused, byForeground));
     sceneSessionManagerProxy_ = nullptr;
 }
- 
+
 /**
  * @tc.name: RaiseWindowToTop
  * @tc.desc: normal function
@@ -650,7 +650,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RaiseWindowToTop, Function | SmallTest | 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy_->RaiseWindowToTop(persistendId));
     sceneSessionManagerProxy_ = nullptr;
 }
- 
+
 /**
  * @tc.name: BindDialogSessionTarget
  * @tc.desc: normal function
@@ -703,7 +703,7 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionAvoidAreaListener, Function 
         haveListener));
     sceneSessionManagerProxy_ = nullptr;
 }
- 
+
 /**
  * @tc.name: SetSessionLabel
  * @tc.desc: normal function
