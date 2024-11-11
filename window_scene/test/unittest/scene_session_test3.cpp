@@ -281,6 +281,45 @@ HWTEST_F(SceneSessionTest3, FixKeyboardPositionByKeyboardPanel1, Function | Smal
 }
 
 /**
+ * @tc.name: NotifyClientToUpdateRectTask
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyClientToUpdateRectTask";
+    info.bundleName_ = "NotifyClientToUpdateRectTask";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+
+    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+
+    sceneSession->SetSessionProperty(property);
+    auto result = sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr);
+    ASSERT_NE(result, WSError::WS_OK);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isKeyboardPanelEnabled_ = true;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->isKeyboardPanelEnabled_ = true;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
+
+    std::shared_ptr<RSTransaction> rs;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", rs));
+}
+
+/**
  * @tc.name: BindDialogSessionTarget1
  * @tc.desc: normal function
  * @tc.type: FUNC
