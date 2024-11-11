@@ -383,7 +383,7 @@ public:
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
     const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
-    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingChangeInfos);
+    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     void NotifyUpdateRectAfterLayout();
     void FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams);
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
@@ -670,6 +670,7 @@ private:
         std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
         std::vector<std::pair<uint64_t, bool>> currDrawingContentData);
+    void GetDrawingDataElement(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionData> occlusionData,
         std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData,
         std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
@@ -831,6 +832,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     bool isReportTaskStart_ = false;
     std::vector<std::pair<uint64_t, WindowVisibilityState> > lastVisibleData_;
+    std::vector<std::tuple<uint64_t, int32_t, int32_t> > lastDrawingData_;
     RSInterfaces& rsInterface_;
     void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
@@ -911,6 +913,7 @@ private:
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
+    void RemoveDuplicateDrawingData(uint64_t windowId);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
