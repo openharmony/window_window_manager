@@ -135,6 +135,8 @@ public:
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
     virtual WMError ReleaseForegroundSessionScreenLock();
+    virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

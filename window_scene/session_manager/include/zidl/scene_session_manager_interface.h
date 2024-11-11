@@ -113,6 +113,7 @@ public:
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
         TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID,
         TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
+        TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -270,6 +271,9 @@ public:
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0;
 
     WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
+
+    WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
