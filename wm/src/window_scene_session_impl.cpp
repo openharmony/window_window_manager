@@ -305,12 +305,14 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     }
     const WindowType& type = GetType();
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    if (property_ && abilityContext && abilityContext->GetAbilityInfo()) {
-        auto info = property_->GetSessionInfo();
+    auto& info = property_->EditSessionInfo();
+    if (abilityContext && abilityContext->GetAbilityInfo()) {
         info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo()->moduleName;
+        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
         info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-        property_->SetSessionInfo(info);
+    } else if (context_) {
+        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        info.bundleName_ = context_->GetBundleName();
     }
 
     bool isToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
@@ -2213,9 +2215,8 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
 
 WMError WindowSceneSessionImpl::MaximizeFloating()
 {
-    WLOGFI("WindowSceneSessionImpl::MaximizeFloating id: %{public}d", GetPersistentId());
-
-    if (property_->GetCompatibleModeInPc()) {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d", GetPersistentId());
+    if (property_->GetCompatibleModeInPc() && !IsFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not MaximizeFloating");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }

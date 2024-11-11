@@ -1011,6 +1011,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
+        property->SetDragEnabled(sessionProperty->GetDragEnabled());
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());

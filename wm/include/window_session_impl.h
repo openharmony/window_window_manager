@@ -224,7 +224,7 @@ public:
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
-    void SetAutoStartPiP(bool isAutoStart) override;
+    void SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
 
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -253,6 +253,11 @@ public:
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
+
+    /**
+     * Window Layout
+     */
+    WSError SetEnableDragBySystem(bool enableDrag) override;
 
 protected:
     WMError Connect();

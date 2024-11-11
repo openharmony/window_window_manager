@@ -2494,8 +2494,19 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
             return true;
         }
     }
+    if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
+        int32_t parentId = property->GetParentPersistentId();
+        auto parentSession = GetSceneSession(parentId);
+        if (parentSession != nullptr && parentSession->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
+            SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check system subWindow permission success, parentId:%{public}d.", parentId);
+            return true;
+        } else {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "check system subWindow permission warning, parentId:%{public}d.", parentId);
+        }
+    }
     if (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd()) {
-        WLOGFD("check create permission success, create with system calling.");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "check create permission success, create with system calling.");
         return true;
     }
     WLOGFE("check system window permission failed.");
@@ -7343,9 +7354,10 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         if (lastVisibleData_[i].first < currVisibleData[j].first) {
             visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
             i++;
-        } else if (lastVisibleData_[i].first > currVisibleData[j].first &&
-                currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-            visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+        } else if (lastVisibleData_[i].first > currVisibleData[j].first) {
+            if (currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+                visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
+            }
             j++;
         } else {
             if (lastVisibleData_[i].second != currVisibleData[j].second) {
