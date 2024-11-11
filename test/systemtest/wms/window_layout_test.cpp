@@ -605,7 +605,7 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
-    WindowLimits windowLimits1 = {4000,4000,2000,2000,0.0f,0.0f};
+    WindowLimits windowLimits1 = {4000, 4000, 2000, 2000, 0.0f, 0.0f};
     WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1);
     EXPECT_EQ(WMError::WM_OK, ret);
     auto windowProperty = windowSceneSessionImpl->GetProperty();
@@ -701,7 +701,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
     windowSceneSessionImpl->property_->SetDisplayId(0);
 
     SessionInfo sessionInfo = { "CeateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo,nullptr);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     session->isActive_ = true;
     session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     session->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -717,7 +717,7 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
 
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     WSError ret2 = session->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE, false);
-    EXPECT_EQ(WMError::WM_OK, ret2);
+    EXPECT_EQ(WSError::WS_OK, ret2);
 
     usleep(WAIT_SERVERAL_FRAMES);
     Rect rect2 = session->property_->GetRequestRect();
