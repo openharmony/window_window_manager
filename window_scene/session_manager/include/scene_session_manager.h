@@ -844,6 +844,11 @@ private:
      * Screen Manager
      */
     bool IsInSecondaryScreen(const sptr<SceneSession>& sceneSession);
+
+    /*
+     * Window Property
+     */
+    void UpdateDarkColorModeToRS();
 };
 } // namespace OHOS::Rosen
 

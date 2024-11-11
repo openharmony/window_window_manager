@@ -232,6 +232,11 @@ public:
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
 
+    /*
+     * Window Layout
+     */
+    WMError SetWindowEnableDragBySystem(bool enableDrag);
+
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
@@ -658,16 +663,16 @@ private:
     PostProcessFocusState postProcessFocusState_;
     bool postProcessProperty_ { false };
 
-    /*
-     * Window Visibility
-     */
-    NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
-
-    /*
+    /**
      * Gesture Back
      */
     bool isEnableGestureBack_ { true };
     bool isEnableGestureBackHadSet_ { false };
+
+    /**
+     * Window Visibility
+     */
+    NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 
     /*
      * Window Rotation

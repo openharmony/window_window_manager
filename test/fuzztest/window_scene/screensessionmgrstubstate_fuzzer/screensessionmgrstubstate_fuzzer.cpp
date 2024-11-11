@@ -49,7 +49,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     std::shared_ptr<ScreenSessionManagerStub> screenStub = std::make_shared<ScreenSessionManagerStub>();
     screenStub->OnRemoteRequest(
-        static_cast<uint32_t>(Rosen::IDisplayManager::DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
         parcel, reply, option);
     return true;
 }
