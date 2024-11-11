@@ -570,6 +570,7 @@ namespace {
         if (ssm_.IsFoldable()) {
             bool isTentMode = false;
             ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
+            
             ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), false);
         }
     }
