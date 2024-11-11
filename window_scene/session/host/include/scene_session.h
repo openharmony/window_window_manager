@@ -356,7 +356,7 @@ public:
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void NotifyTouchOutside();
-    bool CheckOutTouchOutsideRegister();
+    bool CheckTouchOutsideCallbackRegistered();
     void UpdateNativeVisibility(bool visible);
     void DumpSessionElementInfo(const std::vector<std::string>& params);
     void NotifyForceHideChange(bool hide);

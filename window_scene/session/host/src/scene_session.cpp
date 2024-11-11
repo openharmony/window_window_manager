@@ -3319,7 +3319,7 @@ void SceneSession::NotifyWindowVisibility()
 
 bool SceneSession::CheckTouchOutsideCallbackRegistered()
 {
-    return onTouchOutside_ != nulllptr;
+    return onTouchOutside_ != nullptr;
 }
 
 void SceneSession::SetRequestedOrientation(Orientation orientation)
