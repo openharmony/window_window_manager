@@ -1338,18 +1338,14 @@ WMError WindowManager::ReleaseForegroundSessionScreenLock()
     return ret;
 }
 
-/**
- * @tc.name: GetDisplayIdByWindowId
- * @tc.desc: WindowAdapter/GetDisplayIdByWindowId
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+WMError WindowManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
-    WindowAdapter windowAdapter;
-    const std::vector<uint64_t> windowIds = {1, 2};
-    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
-    auto err = windowAdapter.GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
-    ASSERT_EQ(err, WMError::WM_OK);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS
