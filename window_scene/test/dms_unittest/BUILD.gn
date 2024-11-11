@@ -697,5 +697,3 @@ ohos_static_library("ws_unittest_common") {
   subsystem_name = "window"
 }
 ## Build ws_unittest_common.a }}}
-
-
