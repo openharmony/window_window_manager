@@ -3924,7 +3924,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
         SetDisplayBrightness(brightness);
     }
     if (!postTaskRet) {
-        TLOGI(WmsLogTag::DEFAULT, "Report post listener callback task failed. the task name is SetBrightness");
+        TLOGE(WmsLogTag::DEFAULT, "Report post listener callback task failed. the task name is SetBrightness");
     }
 }
 
