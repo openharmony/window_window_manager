@@ -10727,4 +10727,32 @@ void SceneSessionManager::UpdateDarkColorModeToRS()
     TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d",
         colorMode.c_str(), ret);
 }
+
+WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    auto task = [this, windowIds, &windowDisplayIdMap] {
+        for (const uint64_t windowId : windowIds) {
+            sptr<SceneSession> session = GetSceneSession(static_cast<int32_t>(windowId));
+            if (session == nullptr) {
+                continue;
+            }
+            sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+            if (sessionProperty == nullptr) {
+                continue;
+            }
+			DisplayId displayId = sessionProperty->GetDisplayId();
+            TLOGNI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64 ", displayId:%{public}" PRIu64,
+                windowId, displayId);
+            windowDisplayIdMap.insert({windowId, displayId});
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+}
 } // namespace OHOS::Rosen

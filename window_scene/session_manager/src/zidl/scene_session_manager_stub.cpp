@@ -172,6 +172,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
             return HandleReleaseForegroundSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID):
+            return HandleGetDisplayIdByWindowId(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1095,6 +1097,36 @@ int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessagePar
 {
     WMError errCode = ReleaseForegroundSessionScreenLock();
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<uint64_t> windowIds;
+    if (!data.ReadUInt64Vector(&windowIds)) {
+        TLOGE(WmsLogTag::DEFAULT, "Read windowIds Failed");
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    WMError errCode = GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    if (!reply.WriteInt32(static_cast<int32_t>(windowDisplayIdMap.size()))) {
+        TLOGE(WmsLogTag::DEFAULT, "Write windowDisplayIdMap size faild");
+        return ERR_INVALID_DATA;
+    }
+    for (auto it = windowDisplayIdMap.begin(); it != windowDisplayIdMap.end(); ++it) {
+        if (!reply.WriteUint64(it->first)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write windowId failed");
+            return ERR_INVALID_DATA;
+        }
+        if (!reply.WriteUint64(it->second)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write displayId failed");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::DEFAULT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
