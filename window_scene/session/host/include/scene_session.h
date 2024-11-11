@@ -439,7 +439,7 @@ public:
      * Window Layout
      */
     void ResetSizeChangeReasonIfDirty();
-    
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
