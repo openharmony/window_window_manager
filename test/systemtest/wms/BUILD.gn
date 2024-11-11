@@ -85,7 +85,7 @@ ohos_systemtest("wms_window_layout_test") {
 ohos_systemtest("window_layout_integration_test") {
   module_out_path = module_out_path
 
-  sources = [ "window_layout_integration_test" ]
+  sources = [ "window_layout_integration_test.cpp" ]
 
   include_dirs = [
     "${window_base_path}/window_scene/test/mock",
