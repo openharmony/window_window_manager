@@ -664,6 +664,15 @@ protected:
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
     /**
+     * Window Layout
+     */
+    float clientScaleX_ = 1.0f;
+    float clientScaleY_ = 1.0f;
+    float clientPivotX_ = 0.0f;
+    float clientPivotY_ = 0.0f;
+    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
+
+    /**
      * Window ZOrder
      */
     uint32_t zOrder_ = 0;
