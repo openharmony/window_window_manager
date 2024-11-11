@@ -1272,7 +1272,7 @@ bool Session::IsActivatedAfterScreenLocked() const
 void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
-        GetPersistentId(), isActivatedAfterScreenLocked);
+          GetPersistentId(), isActivatedAfterScreenLocked);
     isActivatedAfterScreenLocked_.store(isActivatedAfterScreenLocked);
 }
 
@@ -2731,7 +2731,7 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
     }
     g_persistentIdSet.insert(g_persistentId);
     TLOGI(WmsLogTag::WMS_LIFE,
-        "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
+          "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const
