@@ -155,8 +155,6 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
-    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
-    void SetNeedSyncSessionRect(bool needSync);
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
@@ -183,15 +181,22 @@ public:
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
     WSError RaiseToAppTop() override;
+
+    /*
+     * Window Layout
+     */
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
-    virtual void OpenKeyboardSyncTransaction() {};
-    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
-        bool isKeyboardShow, bool isRotating) {};
+    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
+    void SetNeedSyncSessionRect(bool needSync);
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
         bool isGlobal = false, bool isFromMoveToGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+
+    virtual void OpenKeyboardSyncTransaction() {};
+    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
+        bool isKeyboardShow, bool isRotating) {};
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
