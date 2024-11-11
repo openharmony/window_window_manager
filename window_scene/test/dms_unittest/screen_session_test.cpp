@@ -458,6 +458,35 @@ HWTEST_F(ScreenSessionTest, ReportNotifyModeChange, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SuperFoldStatusChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SuperFoldStatusChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SuperFoldStatusChange start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    ScreenId screenId = 0;
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::EXPANDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::FOLDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::KEYBOARD;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::HALF_FOLDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    GTEST_LOG_(INFO) << "SuperFoldStatusChange end";
+}
+
+/**
  * @tc.name: UpdateRotationAfterBoot01
  * @tc.desc: normal function
  * @tc.type: FUNC
