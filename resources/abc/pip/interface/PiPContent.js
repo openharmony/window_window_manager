@@ -40,7 +40,7 @@ class XCNodeController extends NodeController {
     }
 }
 
-export class PiPContent extends ViewPU {
+class PiPContent extends ViewPU {
     constructor(b2, c2, d2, e2 = -1, f2 = undefined, g2) {
         super(b2, d2, e2, g2);
         if (typeof f2 === 'function') {
