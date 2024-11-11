@@ -59,7 +59,7 @@ namespace {
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
-    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
@@ -80,7 +80,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
-    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::FOLDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::FOLDED);
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
@@ -101,7 +101,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
-    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
@@ -122,7 +122,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
-    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
@@ -143,7 +143,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
-    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED);
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
@@ -164,7 +164,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
-    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
@@ -185,7 +185,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange07, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
-    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::KEYBOARD)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::KEYBOARD);
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
