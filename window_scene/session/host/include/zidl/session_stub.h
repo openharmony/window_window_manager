@@ -75,8 +75,8 @@ private:
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
     int HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply);
-    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
@@ -86,6 +86,7 @@ private:
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleMainSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -103,6 +104,9 @@ private:
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
+
+    // PC Window
+    int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

@@ -81,7 +81,7 @@ public:
         const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) override;
     WSError GetSessionDumpInfo(const std::vector<std::string>& params, std::string& info) override;
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
-    WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
+    WSError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener) override;
     WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener) override;
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
     WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
@@ -128,6 +128,7 @@ public:
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) override;
     WMError ReleaseForegroundSessionScreenLock() override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 

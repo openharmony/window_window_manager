@@ -214,16 +214,26 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
         param->errMessage = "Get Screenshot Failed: Invalid input param";
         return;
     }
-    if (param->useInputOption) {
-        GNAPI_LOG("Get Screenshot by input option");
-        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
-            param->option.rect, param->option.size, param->option.rotation, &param->wret);
-    } else if (param->isPick) {
-        GNAPI_LOG("Get Screenshot by picker");
-        param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
+    CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer};
+    if (!param->isPick && (!option.isNeedNotify_ || !option.isNeedPointer_)) {
+        if (param->useInputOption) {
+            param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option,
+                param->option.rect, param->option.size, param->option.rotation, &param->wret);
+        } else {
+            param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option, &param->wret);
+        }
     } else {
-        GNAPI_LOG("Get Screenshot by default option");
-        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
+        if (param->useInputOption) {
+            GNAPI_LOG("Get Screenshot by input option");
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
+                param->option.rect, param->option.size, param->option.rotation, &param->wret);
+        } else if (param->isPick) {
+            GNAPI_LOG("Get Screenshot by picker");
+            param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
+        } else {
+            GNAPI_LOG("Get Screenshot by default option");
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
+        }
     }
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
         GNAPI_LOG("Get Screenshot failed!");

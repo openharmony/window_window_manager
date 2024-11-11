@@ -81,21 +81,6 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
 }
 
 /**
- * @tc.name: SetDecorHeight
- * @tc.desc: SetDecorHeight01
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetDecorHeight01, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetDecorHeight01 start";
-    window_ = GetTestWindowImpl("SetDecorHeight01");
-    ASSERT_NE(window_, nullptr);
-    WMError res = window_->SetDecorHeight(100);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetDecorHeight01 end";
-}
-
-/**
  * @tc.name: SetInputEventConsumer
  * @tc.desc: SetInputEventConsumer01
  * @tc.type: FUNC

@@ -325,9 +325,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
 void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     bool boolVal = false;
@@ -388,9 +385,6 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
 
 void CheckWindowImplFunctionsPart2(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     int32_t posX;
@@ -434,9 +428,6 @@ void CheckWindowImplFunctionsPart2(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart3(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
     float floatVal;
     startPos += GetObject(floatVal, data + startPos, size - startPos);
@@ -492,9 +483,6 @@ void CheckWindowImplFunctionsPart3(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart4(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     bool boolVal;
@@ -536,9 +524,6 @@ void CheckWindowImplFunctionsPart4(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart5(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     OHOS::Rosen::Rect rect;
@@ -598,9 +583,6 @@ void CheckWindowImplFunctionsPart5(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     TransitionReason reason;
@@ -655,9 +637,6 @@ void CheckShadowColor(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 
 void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
     NotifyNativeWinDestroyFunc func = [](std::string) {};
     window->RegisterWindowDestroyedListener(func);
@@ -707,9 +686,6 @@ void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart8(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
     std::vector<std::string> params{"-h"};
     std::vector<std::string> info{""};
@@ -747,9 +723,6 @@ void CheckWindowImplFunctionsPart8(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     std::shared_ptr<IInputEventConsumer> iInputEventConsumer = std::make_shared<IInputEventConsumer>();
     window->SetInputEventConsumer(iInputEventConsumer);
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();

@@ -395,7 +395,6 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
 WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
 {
-    uint64_t displayId = DISPLAY_ID_INVALID;
     if (WindowHelper::IsAppFloatingWindow(type) || WindowHelper::IsPipWindow(type) ||
         type == WindowType::WINDOW_TYPE_TOAST) {
         property_->SetParentPersistentId(GetFloatingWindowParentId());
@@ -404,14 +403,19 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
         auto mainWindow = FindMainWindowWithContext();
         property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
         if (mainWindow != nullptr) {
-            displayId = mainWindow->GetDisplayId();
+            if (property_->GetDisplayId() != DISPLAY_ID_INVALID &&
+                property_->GetDisplayId() != mainWindow->GetDisplayId()) {
+                TLOGE(WmsLogTag::WMS_LIFE, "window has parent and display not same");
+                return WMError::WM_ERROR_INVALID_DISPLAY;
+            }
+            property_->SetDisplayId(mainWindow->GetDisplayId());
             property_->SetSubWindowLevel(mainWindow->GetProperty()->GetSubWindowLevel() + 1);
         }
     } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
         if (auto mainWindow = FindMainWindowWithContext()) {
             property_->SetParentPersistentId(mainWindow->GetPersistentId());
             property_->SetSubWindowLevel(mainWindow->GetProperty()->GetSubWindowLevel() + 1);
-            displayId = mainWindow->GetDisplayId();
+            property_->SetDisplayId(mainWindow->GetDisplayId());
             TLOGI(WmsLogTag::WMS_DIALOG, "The parentId: %{public}d", mainWindow->GetPersistentId());
         }
     } else if (WindowHelper::IsSystemSubWindow(type)) {
@@ -428,19 +432,8 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
         }
         // set parent persistentId
         property_->SetParentPersistentId(parentSession->GetPersistentId());
-        displayId = parentSession->GetDisplayId();
+        property_->SetDisplayId(parentSession->GetDisplayId());
         property_->SetSubWindowLevel(parentSession->GetProperty()->GetSubWindowLevel() + 1);
-    }
-    if ((WindowHelper::IsAppFloatingWindow(type) || type == WindowType::WINDOW_TYPE_DIALOG) &&
-        property_->GetDisplayId() != DISPLAY_ID_INVALID && property_->GetDisplayId() != displayId) {
-        TLOGE(WmsLogTag::WMS_LIFE,
-            "window displayId is not same with parent, windowName: %{public}s,"
-            "displayId: %{public}d, parent displayId: %{public}d",
-            property_->GetWindowName().c_str(), static_cast<int>(property_->GetDisplayId()),
-            static_cast<int>(displayId));
-        return WMError::WM_ERROR_INVALID_DISPLAY;
-    } else if (property_->GetDisplayId() == DISPLAY_ID_INVALID) {
-        property_->SetDisplayId(displayId);
     }
     SetDefaultDisplayIdIfNeed();
     return WMError::WM_OK;
@@ -1332,6 +1325,12 @@ void WindowSceneSessionImpl::SetDefaultProperty()
             property_->SetFocusable(false);
             break;
         }
+        case WindowType::WINDOW_TYPE_SCREEN_CONTROL: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+            property_->SetTouchable(false);
+            property_->SetFocusable(false);
+            break;
+        }
         default:
             break;
     }
@@ -1995,8 +1994,7 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "winId:%{public}u %{public}s isTitleHoverShown:%{public}d, "
-        "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(),
-        static_cast<int32_t>(isTitleHoverShown), static_cast<int32_t>(isDockHoverShown));
+        "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(), isTitleHoverShown, isDockHoverShown);
     if (WindowHelper::IsSystemWindow(GetType())) {
         TLOGI(WmsLogTag::WMS_IMMS, "system window is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -2010,13 +2008,12 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
     WindowType winType = property_->GetWindowType();
     if (!WindowHelper::IsMainWindow(winType)) {
         TLOGE(WmsLogTag::WMS_IMMS, "window is not main window");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     titleHoverShowEnabled_ = isTitleHoverShown;
     dockHoverShowEnabled_ = isDockHoverShown;
-    auto hostSession = GetHostSession();
-    if (hostSession != nullptr) {
-        hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
+    if (auto hostSession = GetHostSession()) {
+        hostSession->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     }
     return WMError::WM_OK;
 }
@@ -2382,11 +2379,11 @@ WMError WindowSceneSessionImpl::Restore()
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!(windowSystemConfig_.IsPcWindow() || property_->GetIsPcAppInPad())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "This is not PC or PcAppInPad,The device is not supported");
+        TLOGE(WmsLogTag::WMS_LIFE, "This is not PC or PcAppInPad, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (property_->GetIsAppSupportPhoneInPc()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "This is PhoneAppSupportOnPc,The device is not supported");
+        TLOGE(WmsLogTag::WMS_LIFE, "This is PhoneAppSupportOnPc, not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto hostSession = GetHostSession();
@@ -2437,6 +2434,68 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (!windowSystemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not main window, not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->OnSetWindowRectAutoSave(enabled);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (!windowSystemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not main window, not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (context_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "context_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    std::string bundleName = property_->GetSessionInfo().bundleName_;
+    std::string moduleName = property_->GetSessionInfo().moduleName_;
+    std::string abilityName = property_->GetSessionInfo().abilityName_;
+    if (abilityContext && abilityContext->GetAbilityInfo()) {
+        abilityName = abilityContext->GetAbilityInfo()->name;
+        moduleName = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        bundleName = abilityContext->GetAbilityInfo()->bundleName;
+    } else if (context_) {
+        moduleName = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
+        bundleName = context_->GetBundleName();
+    }
+    std::string key = bundleName + moduleName + abilityName;
+    auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled);
+    return ret;
 }
 
 void WindowSceneSessionImpl::StartMove()

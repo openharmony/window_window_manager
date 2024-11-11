@@ -86,6 +86,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_KEYBOARD_PANEL,
     WINDOW_TYPE_SCB_DEFAULT,
     WINDOW_TYPE_TRANSPARENT_VIEW,
+    WINDOW_TYPE_SCREEN_CONTROL,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -305,9 +306,9 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
-    WINDOW_FLAG_HANDWRITING = 1 << 7,
-    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
     WINDOW_FLAG_END = 1 << 9,
 };
 
@@ -796,11 +797,13 @@ struct KeyboardPanelInfo : public Parcelable {
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
-    TYPE_SYSTEM,           // area of SystemUI
-    TYPE_CUTOUT,           // cutout of screen
-    TYPE_SYSTEM_GESTURE,   // area for system gesture
-    TYPE_KEYBOARD,         // area for soft input keyboard
-    TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
+    TYPE_START = 0,
+    TYPE_SYSTEM = TYPE_START,           // area of SystemUI
+    TYPE_CUTOUT,                        // cutout of screen
+    TYPE_SYSTEM_GESTURE,                // area for system gesture
+    TYPE_KEYBOARD,                      // area for soft input keyboard
+    TYPE_NAVIGATION_INDICATOR,          // area for navigation indicator
+    TYPE_END,
 };
 
 /**
@@ -1198,10 +1201,10 @@ enum class CaseType {
 };
 
 enum class MaximizePresentation {
-    FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set imersiveStateEnable
-    EXIT_IMMERSIVE = 1,       // imersiveStateEnable will be set as false
-    ENTER_IMMERSIVE = 2,       // imersiveStateEnable will be set as true
-    // imersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
+    FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set immersiveStateEnable
+    EXIT_IMMERSIVE = 1,       // immersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,       // immersiveStateEnable will be set as true
+    // immersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
 

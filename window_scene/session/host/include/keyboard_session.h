@@ -17,8 +17,6 @@
 #define OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
 
 #include "session/host/include/system_session.h"
-#include <transaction/rs_interfaces.h>
-#include <transaction/rs_transaction.h>
 #include "transaction/rs_sync_transaction_controller.h"
 
 namespace OHOS::Rosen {

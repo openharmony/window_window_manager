@@ -28,6 +28,7 @@ namespace OHOS {
 namespace Rosen {
 class RSFrameRateLinker;
 class VSyncReceiver;
+class FrameRateRange;
 
 using FrameRateLinkerId = uint64_t;
 using NodeId = uint64_t;
@@ -63,6 +64,9 @@ private:
     NodeId nodeId_ = 0;
     std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
     std::string vsyncTimeoutTaskName_;
+
+    std::shared_ptr<FrameRateRange> lastFrameRateRange_ = nullptr;
+    int32_t lastAnimatorExpectedFrameRate_ = 0;
 
     std::mutex mutex_;
     bool isFirstVsyncRequest_ = true;

@@ -494,6 +494,10 @@ bool DisplayManagerService::TryToCancelScreenOff()
 
 bool DisplayManagerService::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
+    if (!Permission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::DMS, "set screen brightness permission denied!");
+        return false;
+    }
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }

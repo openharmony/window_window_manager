@@ -39,6 +39,7 @@ public:
 
     void BootAnimationFinishPowerInit();
     void SetDisplayMode(const FoldDisplayMode displayMode);
+    void RecoverDisplayMode();
     FoldDisplayMode GetDisplayMode();
     bool IsFoldable();
     FoldStatus GetFoldStatus();

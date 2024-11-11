@@ -870,28 +870,14 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, Function | Sm
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    uint32_t vectorSize = 128;
+    auto res = stub_->HandleNotifyDumpInfoResult(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t vectorSize = 90;
     data.WriteUint32(vectorSize);
-    stub_->HandleNotifyDumpInfoResult(data, reply);
-
-    std::vector<std::string> info = {"-a", "-b123", "-c3456789", ""};
-    vectorSize = static_cast<uint32_t>(info.size());
-    data.WriteUint32(vectorSize);
-    uint32_t curSize;
-    for (const auto &elem : info) {
-        const char *curInfo = elem.c_str();
-        curSize = static_cast<uint32_t>(strlen(curInfo));
-        data.WriteUint32(curSize);
-        if (curSize != 0) {
-            data.WriteRawData(curInfo, curSize);
-        }
-    }
-
-    uint32_t code =
-        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT);
-
-    int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+    res = stub_->HandleNotifyDumpInfoResult(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 
 /**
@@ -1289,12 +1275,12 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, Function | SmallTes
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteString(static_cast<string>("123"));
-    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
-    data.WriteRemoteObject(windowManagerAgent->AsObject());
-
-    int res = stub_->HandleSetSessionLabel(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    std::string label = "TestLabel";
+    data.WriteString(label);
+    int result = stub_->HandleSetSessionLabel(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
@@ -1349,11 +1335,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, Function | SmallTes
     MessageParcel reply;
 
     data.WriteString16(static_cast<std::u16string>(u"123"));
-    int32_t numMax = 100;
-    data.WriteInt32(numMax);
-
     int res = stub_->HandleGetSessionInfos(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1371,11 +1354,29 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo, Function | SmallTest
     MessageParcel reply;
 
     data.WriteString16(static_cast<std::u16string>(u"123"));
-    int32_t persistentId = 65535;
-    data.WriteInt32(persistentId);
-
     int res = stub_->HandleGetSessionInfo(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString16(static_cast<std::u16string>(u"123"));
+    data.WriteInt32(123);
+    res = stub_->HandleGetSessionInfo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetSessionInfo2
+ * @tc.desc: test HandleGetSessionInfo2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo2, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString16(static_cast<std::u16string>(u"TestDeviceId"));
+    data.WriteInt32(123456789);
+    int result = stub_->HandleGetSessionInfo(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
@@ -1402,10 +1403,12 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDumpSessionWithId, Function | SmallT
     MessageParcel data;
     MessageParcel reply;
 
+    int res = stub_->HandleDumpSessionWithId(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     int32_t x = 1;
     data.WriteInt32(x);
-
-    int res = stub_->HandleDumpSessionWithId(data, reply);
+    res = stub_->HandleDumpSessionWithId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1669,7 +1672,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
     }
 
     int res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1686,10 +1689,12 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterCollaborator, Function | S
     MessageParcel data;
     MessageParcel reply;
 
+    int res = stub_->HandleUnregisterCollaborator(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     int32_t type = CollaboratorType::RESERVE_TYPE;
     data.WriteInt32(type);
-
-    int res = stub_->HandleUnregisterCollaborator(data, reply);
+    res = stub_->HandleUnregisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1751,14 +1756,25 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyWindowExtensionVisibilityChang
     MessageParcel data;
     MessageParcel reply;
 
-    int32_t pid = 65535;
-    data.WriteInt32(pid);
-    int32_t uid = 12345;
-    data.WriteInt32(uid);
-    bool visible = true;
-    data.WriteBool(visible);
-
     int res = stub_->HandleNotifyWindowExtensionVisibilityChange(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    int32_t pid = 123;
+    data.WriteInt32(pid);
+    res = stub_->HandleNotifyWindowExtensionVisibilityChange(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    int32_t uid = 1231;
+    data.WriteInt32(pid);
+    data.WriteInt32(uid);
+    res = stub_->HandleNotifyWindowExtensionVisibilityChange(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    bool visible = true;
+    data.WriteInt32(pid);
+    data.WriteInt32(uid);
+    data.WriteBool(visible);
+    res = stub_->HandleNotifyWindowExtensionVisibilityChange(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1818,15 +1834,27 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
     MessageParcel data;
     MessageParcel reply;
 
-    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(sessionStage, nullptr);
+    int res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    sptr<ISessionStage> sessionStage = new SessionStageMocker();
+    ASSERT_NE(nullptr, sessionStage);
     data.WriteRemoteObject(sessionStage->AsObject());
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);
-    data.WriteUint64(12345);
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    int res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    ASSERT_NE(nullptr, sessionStage);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+    data.WriteUint64(12345);
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1910,10 +1938,16 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddOrRemoveSecureSession, Function |
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteInt32(12345);
-    data.WriteBool(true);
-
     int res = stub_->HandleAddOrRemoveSecureSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(15);
+    res = stub_->HandleAddOrRemoveSecureSession(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(15);
+    data.WriteBool(true);
+    res = stub_->HandleAddOrRemoveSecureSession(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1926,8 +1960,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, Function | Sm
 {
     MessageParcel data;
     MessageParcel reply;
-    data.WriteInt32(1);
+
     int res = stub_->HandleGetUIContentRemoteObj(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    data.WriteInt32(1);
+    res = stub_->HandleGetUIContentRemoteObj(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -2004,9 +2041,10 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfoByContinueSessionId, F
     MessageParcel data;
     MessageParcel reply;
 
-    data.WriteString("test_01");
-
     int res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    data.WriteString("test_01");
+    res = stub_->HandleGetSessionInfoByContinueSessionId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -2126,6 +2164,21 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, Functi
 }
 
 /**
+ * @tc.name: HandleIsWindowRectAutoSave
+ * @tc.desc: test HandleIsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string key = "com.example.recposentryEntryAbility";
+    data.WriteString(key);
+    int res = stub_->HandleIsWindowRectAutoSave(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetDisplayIdByWindowId
  * @tc.desc: test HandleGetDisplayIdByWindowId
  * @tc.type: FUNC
@@ -2139,6 +2192,25 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetDisplayIdByWindowId, Function | S
 
     int res = stub_->HandleGetDisplayIdByWindowId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRegisterCollaborator
+ * @tc.desc: test HandleRegisterCollaborator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto res = stub_->HandleRegisterCollaborator(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    int32_t type = CollaboratorType::RESERVE_TYPE;
+    data.WriteInt32(type);
+    res = stub_->HandleRegisterCollaborator(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 }
 }

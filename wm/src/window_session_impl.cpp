@@ -267,6 +267,9 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
                 rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_COMMON_NODE;
             }
             break;
+        case WindowType::WINDOW_TYPE_PIP:
+            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
+            break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
@@ -945,7 +948,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
             return win;
         }
     }
-    WLOGFW("Can not find main window, not app type");
+    TLOGD(WmsLogTag::DEFAULT, "Can not find main window, not app type");
     return nullptr;
 }
 
@@ -1603,7 +1606,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    
+
     WLOGFD("%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1776,6 +1779,7 @@ std::string WindowSessionImpl::GetRestoredRouterStack()
 
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
 {
+    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
     return uiContent_.get();
 }
 
@@ -1990,6 +1994,31 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
     return modalRet;
 }
 
+WMError WindowSessionImpl::SetWindowModal(bool isModal)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "called by invalid window type, type:%{public}d", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    WMError modalRet = isModal ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    if (modalRet != WMError::WM_OK) {
+        return modalRet;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->OnMainSessionModalTypeChange(isModal);
+    return modalRet;
+}
+
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
 {
     if (IsWindowSessionInvalid()) {
@@ -2028,7 +2057,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     height = uiContent->GetContainerModalTitleHeight();
     if (height == -1) {
         height = 0;
-        TLOGE(WmsLogTag::DEFAULT, "Get app window decor height failed");
+        TLOGW(WmsLogTag::DEFAULT, "Get app window decor height failed");
         return WMError::WM_OK;
     }
     float vpr = 0.f;
@@ -3777,16 +3806,6 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
         if (listener != nullptr) {
-            if (((property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-                  WindowHelper::IsMainWindow(GetType())) ||
-                 (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
-                  FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.IsPhoneWindow() ||
-                 (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
-                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
-                listener->OnSizeChange(occupiedAreaChangeInfo);
-                continue;
-            }
             listener->OnSizeChange(info);
         }
     }
@@ -3890,14 +3909,14 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
         static_cast<WsPiPControlStatus>(status));
 }
 
-void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart)
+void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
         return;
     }
     if (auto hostSession = GetHostSession()) {
-        hostSession->SetAutoStartPiP(isAutoStart);
+        hostSession->SetAutoStartPiP(isAutoStart, priority);
     }
 }
 

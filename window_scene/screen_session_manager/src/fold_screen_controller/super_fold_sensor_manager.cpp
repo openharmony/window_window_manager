@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef SENSOR_ENABLE
  
 #include <cmath>
 #include <hisysevent.h>
@@ -33,10 +32,11 @@ namespace {
 constexpr float ANGLE_MIN_VAL = 30.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr float ANGLE_FLAT_THRESHOLD = 150.0F;
+constexpr float ANGLE_SENSOR_THRESHOLD = 177.0F;
 constexpr float ANGLE_HALF_FOLD_THRESHOLD = 135.0F;
-constexpr int32_t HALL_HAVE_KEYBOARD_THRESHOLD = 0x0100;
-constexpr int32_t HALL_REMOVE_KEYBOARD_THRESHOLD = 0;
-constexpr int32_t HALL_ACTIVE = 1 << 2;
+constexpr uint16_t HALL_HAVE_KEYBOARD_THRESHOLD = 0B0100;
+constexpr uint16_t HALL_REMOVE_KEYBOARD_THRESHOLD = 0B0000;
+constexpr uint16_t HALL_ACTIVE = 1 << 2;
 constexpr int32_t SENSOR_SUCCESS = 0;
 constexpr int32_t POSTURE_INTERVAL = 100000000;
 constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
@@ -109,8 +109,6 @@ void SuperFoldSensorManager::UnregisterHallCallback()
     }
 }
 
-void SuperFoldSensorManager::RegisterSoftKeyboardCallback() {}
-
 void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
 {
     if (event == nullptr) {
@@ -126,35 +124,37 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
         return;
     }
     PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
-    globalAngle = (*postureData).angle;
-    if (std::isless(globalAngle, ANGLE_MIN_VAL) ||
-        std::isgreater(globalAngle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_PC)) {
-        TLOGI(WmsLogTag::DMS, "Invalid value, angle value is: %{public}f.", globalAngle);
+    curAngle_ = (*postureData).angle;
+    if (std::isgreater(curAngle_, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_PC)) {
+        TLOGI(WmsLogTag::DMS, "Invalid value, angle value is: %{public}f.", curAngle_);
         return;
     }
-    TLOGI(WmsLogTag::DMS, "angle value is: %{public}f.", globalAngle);
-    NotifyFoldAngleChanged(globalAngle);
+    TLOGD(WmsLogTag::DMS, "angle value is: %{public}f.", curAngle_);
+    NotifyFoldAngleChanged(curAngle_);
 }
 
 void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
 {
-    if (std::isgreater(foldAngle, ANGLE_FLAT_THRESHOLD)) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is not Folded");
-        events_ = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
+    SuperFoldStatusChangeEvents events;
+    if (std::isgreaterequal(foldAngle, ANGLE_FLAT_THRESHOLD)) {
+        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Expanded");
+        events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
     } else if (std::isless(foldAngle, ANGLE_HALF_FOLD_THRESHOLD) &&
         std::isgreater(foldAngle, ANGLE_MIN_VAL)) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is folded");
-        events_ = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
+        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Half Folded");
+        events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
+    } else if (std::islessequal(foldAngle, ANGLE_MIN_VAL)) {
+        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Folded");
+        events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
     } else {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged");
-        events_ = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
+        TLOGI(WmsLogTag::DMS, "Angle Don't Change!");
         return;
     }
     // notify
     std::vector<float> foldAngles;
     foldAngles.push_back(foldAngle);
     ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(foldAngles);
-    HandleSuperSensorChange();
+    HandleSuperSensorChange(events);
 }
 
 void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
@@ -175,50 +175,40 @@ void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
     auto status = static_cast<uint32_t>(data->status);
     TLOGI(WmsLogTag::DMS, "HallData status is: %{public}u.", status);
     
-    if (globalHall == (status & HALL_ACTIVE)) {
-        TLOGI(WmsLogTag::DMS, "Hall don't change, hall = %{public}u", globalHall);
+    if (curHall_ == (status & HALL_ACTIVE)) {
+        TLOGI(WmsLogTag::DMS, "Hall don't change, hall = %{public}u", curHall_);
         return;
     }
-    globalHall = (status & HALL_ACTIVE);
-    TLOGI(WmsLogTag::DMS, "Hall change, hall = %{public}u", globalHall);
-    NotifyHallChanged(globalHall);
+    curHall_ = (status & HALL_ACTIVE);
+    TLOGI(WmsLogTag::DMS, "Hall change, hall = %{public}u", curHall_);
+    NotifyHallChanged(curHall_);
 }
 
 void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 {
+    SuperFoldStatusChangeEvents events;
     if (Hall == HALL_REMOVE_KEYBOARD_THRESHOLD) {
-        TLOGI(WmsLogTag::DMS, "NotifyHallChanged is not hasPhysicalKeyboard");
-        hasKeyboard_ = false;
-        events_ = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
+        TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard off!");
+        events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
     } else if (Hall == HALL_HAVE_KEYBOARD_THRESHOLD) {
-        TLOGI(WmsLogTag::DMS, "NotifyHallChanged is hasPhysicalKeyboard");
-        hasKeyboard_ = true;
-        events_ = SuperFoldStatusChangeEvents::KEYBOARD_ON;
+        TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard on!");
+        events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
+        HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
     } else {
-        TLOGI(WmsLogTag::DMS, "NotifyHallChanged invalide hall value");
+        TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Invalid Hall Value!");
         return;
     }
     // notify
-    HandleSuperSensorChange();
+    HandleSuperSensorChange(events);
+    if (std::isgreater(curAngle_, ANGLE_SENSOR_THRESHOLD)) {
+        HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    }
 }
 
-void SuperFoldSensorManager::HandleSoftKeyboardData() {}
-
-void SuperFoldSensorManager::NotifySoftKeyboardChanged() {}
-
-void SuperFoldSensorManager::HandleSuperSensorChange()
+void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents events)
 {
     // trigger events
-    if (hasKeyboard_ && events_ != SuperFoldStatusChangeEvents::KEYBOARD_OFF) {
-        TLOGI(WmsLogTag::DMS, "Don't Change!");
-        return;
-    }
-    SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events_);
-}
-
-void SuperFoldSensorManager::SetHasKeyboard(bool flag)
-{
-    hasKeyboard_ = flag;
+    SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
 }
 
 SuperFoldSensorManager::SuperFoldSensorManager() {}
@@ -226,4 +216,3 @@ SuperFoldSensorManager::SuperFoldSensorManager() {}
 SuperFoldSensorManager::~SuperFoldSensorManager() {}
 } // Rosen
 } // OHOS
-#endif
