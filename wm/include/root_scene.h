@@ -65,7 +65,7 @@ public:
     }
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback)
     {
-        updateRootSceneRectCallback_ = callback;
+        updateRootSceneRectCallback_ = std::move(callback);
     }
 
     void OnBundleUpdated(const std::string& bundleName);

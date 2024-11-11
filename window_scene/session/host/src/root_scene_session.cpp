@@ -47,9 +47,9 @@ void RootSceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
-        TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s status bar %{public}s",
-              rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
+        TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s status bar %{public}s area %{public}s",
+              rect.ToString().c_str(), statusBarRect.ToString().c_str(), avoidArea.ToString().c_str());
     }
 }
 
@@ -66,8 +66,7 @@ void RootSceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, sessionProperty->GetDisplayId());
     }
     for (auto& inputMethod : inputMethodVector) {
-        if (inputMethod->GetSessionState() != SessionState::STATE_FOREGROUND &&
-            inputMethod->GetSessionState() != SessionState::STATE_ACTIVE) {
+        if (inputMethod->IsVisible()) {
             continue;
         }
         SessionGravity gravity = inputMethod->GetKeyboardGravity();
@@ -79,14 +78,14 @@ void RootSceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
             }
-            TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s keyboard %{public}s",
-                  rect.ToString().c_str(), keyboardRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
+            TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s keyboard %{public}s area %{public}s",
+                  rect.ToString().c_str(), keyboardRect.ToString().c_str(), avoidArea.ToString().c_str());
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s input method %{public}s",
-                  rect.ToString().c_str(), inputMethodRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
+            TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s input method %{public}s area %{public}s",
+                  rect.ToString().c_str(), inputMethodRect.ToString().c_str(), avoidArea.ToString().c_str());
         }
     }
 }
@@ -120,9 +119,9 @@ void RootSceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             cutoutArea.width_,
             cutoutArea.height_
         };
-        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s cutout %{public}s",
-              rect.ToString().c_str(), cutoutAreaRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
+        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s cutout %{public}s area %{public}s",
+              rect.ToString().c_str(), cutoutAreaRect.ToString().c_str(), avoidArea.ToString().c_str());
     }
 }
 
@@ -137,9 +136,9 @@ void RootSceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(sessionProperty->GetDisplayId());
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s AI bar %{public}s",
-          rect.ToString().c_str(), barArea.ToString().c_str());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
+    TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s AI bar %{public}s area %{public}s",
+          rect.ToString().c_str(), barArea.ToString().c_str(), avoidArea.ToString().c_str());
 }
 
 AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
@@ -152,7 +151,7 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
         }
 
         AvoidArea avoidArea;
-        WSRect rect = session->GetLastUpdateRect();
+        WSRect rect = session->GetSessionRect();
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
                 session->GetSystemAvoidArea(rect, avoidArea);
@@ -174,12 +173,12 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
                 return avoidArea;
             }
             default: {
-                TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
+                TLOGNE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
                     type, session->GetPersistentId());
                 return avoidArea;
             }
         }
     };
-    return PostSyncTask(task, "GetAvoidAreaByType");
+    return PostSyncTask(task, __func__);
 }
 } // namespace OHOS::Rosen

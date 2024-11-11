@@ -37,12 +37,12 @@ public:
     void LoadContent(
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
 
+    void SetSessionRect(const WSRect& rect) { winRect_ = rect; }
+
     /**
      * Window Immersive
      */
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
-    WSRect GetLastUpdateRect() { return lastUpdateRect_; }
-    void SetLastUpdateRect(WSRect& rect) { lastUpdateRect_ = rect; }
 
 private:
     LoadContentFunc loadContentFunc_;
@@ -50,7 +50,6 @@ private:
     /**
      * Window Immersive
      */
-    WSRect lastUpdateRect_;
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
