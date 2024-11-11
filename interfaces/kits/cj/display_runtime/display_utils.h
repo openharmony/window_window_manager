@@ -26,7 +26,7 @@ extern "C" {
 typedef struct {
     int32_t code;
     int64_t len;
-    void *data;
+    void* data;
 } RetStruct;
 
 typedef struct {
@@ -44,7 +44,7 @@ typedef struct {
 } CWaterfallDisplayAreaRects;
 
 typedef struct {
-    CRect *boundingRects;
+    CRect* boundingRects;
     int64_t number;
     CWaterfallDisplayAreaRects waterfallDisplayAreaRects;
 } CCutoutInfo;
@@ -52,7 +52,7 @@ typedef struct {
 typedef struct {
     uint32_t displayId;
     int64_t number;
-    CRect *creaseRects;
+    CRect* creaseRects;
 } CFoldCreaseRegion;
 }
 
@@ -64,6 +64,6 @@ enum class DisplayRetCode : int32_t {
     RET_FIND_EXISTS = 0xf0000000,
 };
 }
-}
+} // namespace OHOS
 
 #endif // OHOS_DISPLAY_UTILS_H
