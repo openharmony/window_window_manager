@@ -818,8 +818,8 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s Window is nullptr", where);
-            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "Window is nullptr."));
+            task->Reject(env,
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Window is nullptr."));
             return;
         }
         bool enabled = false;
