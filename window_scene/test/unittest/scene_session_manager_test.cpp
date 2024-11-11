@@ -1467,14 +1467,14 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo04, Function | SmallTes
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetRSVisible(true);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-
+ 
     int32_t windowId = 0;
     std::vector<sptr<UnreliableWindowInfo>> infos;
     WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
     EXPECT_EQ(WMError::WM_OK, result);
     EXPECT_EQ(1, infos.size());
 }
-
+ 
 /**
  * @tc.name: GetUnreliableWindowInfo05
  * @tc.desc: SceneSesionManager get unreliable window info, not correct window type, not visible
