@@ -550,6 +550,38 @@ void JsSceneSessionManager::ProcessAbilityManagerCollaboratorRegistered()
     SceneSessionManager::GetInstance().SetAbilityManagerCollaboratorRegisteredFunc(func);
 }
 
+void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
+{
+    RegisterDumpRootSceneElementInfoListener();
+    RegisterVirtualPixelRatioChangeListener();
+    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc([this] {
+        TLOGND(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
+        this->OnRootSceneBackEvent();
+    });
+    SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc([] {
+        RootScene::staticRootScene_->OnFlushUIParams();
+    });
+    SceneSessionManager::GetInstance().SetIsRootSceneLastFrameLayoutFinishedFunc([] {
+        return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
+    });
+}
+
+void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
+{
+    rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
+        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
+    });
+    if (!Session::IsScbCoreEnabled()) {
+        rootScene_->SetFrameLayoutFinishCallback([] {
+            SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
+            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
+        });
+    }
+    RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
+        SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
+    });
+}
+
 napi_value JsSceneSessionManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
@@ -1386,31 +1418,14 @@ napi_value JsSceneSessionManager::OnGetRootSceneSession(napi_env env, napi_callb
         rootScene_ = new RootScene();
     }
     RootScene::staticRootScene_ = rootScene_;
-    RegisterDumpRootSceneElementInfoListener();
-    RegisterVirtualPixelRatioChangeListener();
     rootSceneSession->SetLoadContentFunc([rootScene = rootScene_]
         (const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context) {
             rootScene->LoadContent(contentUrl, env, storage, context);
             ScenePersistentStorage::InitDir(context->GetPreferencesDir());
             SceneSessionManager::GetInstance().InitPersistentStorage();
         });
-    rootScene_->SetGetSessionRectCallback([](AvoidAreaType type) {
-        return SceneSessionManager::GetInstance().GetRootSessionAvoidSessionRect(type);
-    });
-    if (!Session::IsScbCoreEnabled()) {
-        rootScene_->SetFrameLayoutFinishCallback([]() {
-            SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
-            SceneSessionManager::GetInstance().FlushWindowInfoToMMI();
-        });
-    }
-    RootSceneProcessBackEventFunc processBackEventFunc = [this]() {
-        TLOGD(WmsLogTag::WMS_EVENT, "rootScene BackEvent");
-        this->OnRootSceneBackEvent();
-    };
-    SceneSessionManager::GetInstance().SetRootSceneProcessBackEventFunc(processBackEventFunc);
-    RootScene::SetOnConfigurationUpdatedCallback([](const std::shared_ptr<AppExecFwk::Configuration>& configuration) {
-        SceneSessionManager::GetInstance().OnConfigurationUpdated(configuration);
-    });
+    RegisterRootSceneCallbacksOnSSManager();
+    RegisterSSManagerCallbacksOnRootScene();
     napi_value jsRootSceneSessionObj = JsRootSceneSession::Create(env, rootSceneSession);
     if (jsRootSceneSessionObj == nullptr) {
         WLOGFE("[NAPI]jsRootSceneSessionObj is nullptr");
