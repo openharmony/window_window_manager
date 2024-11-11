@@ -2644,8 +2644,8 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
     if (argc > 1 && !ConvertFromJsValue(env, argv[INDEX_ONE], isDockHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isDockHoverShown parameter");
     }
-    // 2: params num; 2: index of callback
-    napi_value lastParam = (argc <= 2) ? nullptr : 
+    // 2: params num; 2: index of callback=
+    napi_value lastParam = (argc <= 2) ? nullptr :
         (GetType(env, argv[INDEX_TWO]) == napi_function ? argv[INDEX_TWO] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
@@ -6621,7 +6621,7 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowMask(windowMask));
         if (ret != WmErrorCode::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret));
-            TLOGNE((WmsLogTag::DEFAULT, "%{public}s Window [%{public}u, %{public}s] set window mask failed",
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s Window [%{public}u, %{public}s] set window mask failed",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
             return;
         }
