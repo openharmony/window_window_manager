@@ -3689,7 +3689,7 @@ napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().SetIsWindowRectAutoSaveMap(key, enabled);
+    SceneSessionManager::GetInstance().SetIsWindowRectAutoSave(key, enabled);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

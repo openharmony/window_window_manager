@@ -314,7 +314,7 @@ public:
      */
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
-    void SetIsWindowRectAutoSaveMap(const std::string& key, bool enabled);
+    void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
