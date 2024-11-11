@@ -206,7 +206,7 @@ napi_value JsWindow::MoveWindowToGlobal(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::GetGlobalScaledRect(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "GetGlobalScaledRect");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetGlobalScaledRect(env, info) : nullptr;
 }
@@ -1694,21 +1694,20 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info)
 {
-    wptr<Window> weakToken(windowToken_);
-    auto window = weakToken.promote();
-    if (window == nullptr) {
+    if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     Rect globalScaledRect;
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetGlobalScaledRect(globalScaledRect));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetGlobalScaledRect(globalScaledRect));
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] OnGetGlobalScaledRect end",
-        window->GetWindowId(), window->GetWindowName().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     napi_value globalScaledRectObj = GetRectAndConvertToJsValue(env, globalScaledRect);
     if (globalScaledRectObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "globalScaledRectObj is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return globalScaledRectObj;
