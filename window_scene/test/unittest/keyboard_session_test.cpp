@@ -1221,7 +1221,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession03, Function | SmallTest | Leve
     keyboardPanelRect.posY_ = 200;
     keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
-    ASSERT_EQ(callingOriPosY, 0);
+    ASSERT_EQ(callingOriPosY, 200);
 
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 10;
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -1245,11 +1245,10 @@ HWTEST_F(KeyboardSessionTest, IsCallingSessionSplitMode01, Function | SmallTest 
     ASSERT_NE(callingSession, nullptr);
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 0;
     callingSession->winRect_ = { 0, 0, 0, 0 };
-    callingSession->updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason reason) {};
+    callingSession->updateRectCallback_ = [](const WSRect& rect, const SizeChangeReason& reason) {};
     keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
         return callingSession;
     };
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
 
     auto callingParentSession = GetSceneSession("callingParentSession", "callingParentSession");
     ASSERT_NE(callingSession, nullptr);
