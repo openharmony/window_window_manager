@@ -997,7 +997,7 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
 
 /**
  * @tc.name: CheckTouchOutsideCallbackRegistered
- * @tc.desc:  * @tc.name: CheckTouchOutsideCallbackRegistered
+ * @tc.desc: CheckTouchOutsideCallbackRegistered
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | SmallTest | Level2)
