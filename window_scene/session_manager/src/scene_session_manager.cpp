@@ -7854,7 +7854,7 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, int32_t& p
 void SceneSessionManager::RemoveDuplicateDrawingData(uint64_t windowId) {
     for (auto elemIter = lastDrawingData_.begin(); elemIter != lastDrawingData_.end();) {
         auto elem = *elemIter;
-        if(std::get<0>(elem) == surfaceId) {
+        if(std::get<0>(elem) == windowId) {
             lastDrawingData_.erase(elemIter);
         } else {
             ++elemIter;
