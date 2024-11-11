@@ -14,7 +14,6 @@
  */
 
 #include "js_window_manager.h"
-#include "native_engine/native_engine.h"
 
 static napi_module g_winManagerModule = {
     .nm_filename = "module/libwindow_napi.so/window.js",

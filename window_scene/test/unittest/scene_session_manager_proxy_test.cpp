@@ -1031,6 +1031,22 @@ HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Funct
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
     ASSERT_EQ(sceneSessionManagerProxy->ReleaseForegroundSessionScreenLock(), WMError::WM_OK);
 }
+
+/**
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    const std::vector<uint64_t> windowIds = {1, 2};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    sceneSessionManagerProxy->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+}
 }  // namespace
 }
 }
