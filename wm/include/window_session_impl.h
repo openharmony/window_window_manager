@@ -284,6 +284,10 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
+
+    /**
+     * Window Layout
+     */
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
     /*
