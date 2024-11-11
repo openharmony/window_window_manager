@@ -59,16 +59,17 @@ namespace {
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
-    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().SetCurrentStatus(HALF_FOLDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED)
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
     };
 
     func();
-    curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::EXPANDED;
 
-    EXPECT_NE(curState, EXPANDED);
+    EXPECT_NE(curState, expState);
 }
 
 /**
@@ -79,16 +80,17 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
-    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().SetCurrentStatus(FOLDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::FOLDED)
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
     };
 
     func();
-    curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
 
-    EXPECT_NE(curState, HALF_FOLDED);
+    EXPECT_NE(curState, expState);
 }
 
 /**
@@ -99,16 +101,17 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
-    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().SetCurrentStatus(EXPANDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED)
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
     };
 
     func();
-    curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
 
-    EXPECT_NE(curState, HALF_FOLDED);
+    EXPECT_NE(curState, expState);
 }
 
 /**
@@ -119,16 +122,17 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
-    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().SetCurrentStatus(HALF_FOLDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED)
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
     };
 
     func();
-    curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::FOLDED;
 
-    EXPECT_NE(curState, FOLDED);
+    EXPECT_NE(curState, expState);
 }
 
 /**
@@ -139,16 +143,17 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
-    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().SetCurrentStatus(HALF_FOLDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::HALF_FOLDED)
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
     };
 
     func();
-    curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::KEYBOARD;
 
-    EXPECT_NE(curState, KEYBOARD);
+    EXPECT_NE(curState, expState);
 }
 
 /**
@@ -159,16 +164,17 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
-    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().SetCurrentStatus(EXPANDED)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED)
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
     };
 
     func();
-    curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::KEYBOARD;
 
-    EXPECT_NE(curState, KEYBOARD);
+    EXPECT_NE(curState, expState);
 }
 
 /**
@@ -179,16 +185,17 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, Function | Sm
 HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange07, Function | SmallTest | Level1)
 {
     SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
-    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().SetCurrentStatus(KEYBOARD)
+    SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::KEYBOARD)
     std::function<void()> func = [&]()
     {
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
     };
 
     func();
-    curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
 
-    EXPECT_NE(curState, HALF_FOLDED);
+    EXPECT_NE(curState, expState);
 }
 
 /**
