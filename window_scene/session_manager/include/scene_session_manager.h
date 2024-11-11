@@ -252,6 +252,8 @@ public:
         std::vector<SCBAbilityInfo> &scbAbilityInfos);
     WSError GetBatchAbilityInfos(const std::vector<std::string>& bundleNames, int32_t userId,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
+    WSError GetAbilityInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t userId, SCBAbilityInfo& scbAbilityInfo);
     WSError PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate);
     WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
 
@@ -597,7 +599,7 @@ private:
     bool GetExtensionWindowIds(const sptr<IRemoteObject>& token, int32_t& persistentId, int32_t& parentId);
     void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
     void EraseSceneSessionMapById(int32_t persistentId);
-    WSError GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo>& bundleInfos,
+    WSError GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
