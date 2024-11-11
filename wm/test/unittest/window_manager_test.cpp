@@ -1480,8 +1480,8 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
 }
 
 /**
- * @tc.name: SetProcessWatermark
- * @tc.desc: check SetProcessWatermark
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: check GetDisplayIdByWindowId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
