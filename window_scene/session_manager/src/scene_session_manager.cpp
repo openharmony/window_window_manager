@@ -7861,6 +7861,7 @@ void SceneSessionManager::RemoveDuplicateDrawingData(uint64_t windowId) {
         }
     }       
 }
+
 bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState)
 {
     bool isChange = true;
