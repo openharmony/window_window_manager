@@ -717,7 +717,7 @@ void SceneSession::RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callbac
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        session->OnTouchOutside_ = std::move(callback);
+        session->onTouchOutside_ = std::move(callback);
     };
     PostTask(task, __func__);
 }
@@ -3152,9 +3152,9 @@ void SceneSession::NotifyTouchOutside()
         WLOGFD("Notify sessionStage TouchOutside");
         sessionStage_->NotifyTouchOutside();
     }
-    if (OnTouchOutside_) {
+    if (onTouchOutside_) {
         WLOGFD("Notify sessionChangeCallback TouchOutside");
-        OnTouchOutside_();
+        onTouchOutside_();
     }
 }
 
@@ -3167,12 +3167,9 @@ void SceneSession::NotifyWindowVisibility()
     }
 }
 
-bool SceneSession::CheckOutTouchOutsideRegister()
+bool SceneSession::CheckTouchOutsideCallbackRegistered()
 {
-    if (OnTouchOutside_) {
-        return true;
-    }
-    return false;
+    return onTouchOutside_ != nulllptr;
 }
 
 void SceneSession::SetRequestedOrientation(Orientation orientation)
