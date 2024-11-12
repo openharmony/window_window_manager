@@ -7932,7 +7932,7 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool curre
     preWindowDrawingState = session->GetDrawingContentState();
     session->SetDrawingContentState(currentDrawingContentChange);
     RemoveDuplicateDrawingData(windowId);
-    SessionRelatedID Ids = { windowId, pid, session->GetCallingUid() };
+    SessionRelatedId Ids = { windowId, pid, session->GetCallingUid() };
     lastDrawingData_.emplace_back(Ids);
     return preWindowDrawingState;
 }

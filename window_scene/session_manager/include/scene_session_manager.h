@@ -1050,9 +1050,9 @@ private:
     /*
      * Window Property
      */
-    std::vector<SessionID> lastDrawingData_;
+    std::vector<SessionRelatedId> lastDrawingData_;
 
-    struct SessionRelatedID {
+    struct SessionRelatedId {
         uint64_t windowId_;
         int32_t pid_;
         int32_t uid_;
