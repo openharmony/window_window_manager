@@ -199,7 +199,7 @@ void PictureInPictureManager::DoLocateSource()
 
 void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "in");
+    TLOGI(WmsLogTag::WMS_PIP, "destroyWindow:%{public}d, byPriority:%{public}d", destroyWindow, byPriority);
     if (!HasActiveController()) {
         return;
     }
@@ -233,8 +233,8 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
     auto func = PIP_ACTION_MAP.find(actionName);
     if (func == PIP_ACTION_MAP.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "through pass");
-        if (HasActiveController()) {
-            activeController_->DoActionEvent(actionName, status);
+        if (auto controller = GetActiveController()) {
+            controller->DoActionEvent(actionName, status);
         }
         return;
     }
