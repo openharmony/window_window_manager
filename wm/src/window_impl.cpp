@@ -4270,15 +4270,5 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
-
-WMError WindowImpl::SetGestureBackEnabled(bool enable)
-{
-    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-}
-
-WMError GetGestureBackEnabled(bool& enable)
-{
-    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-}
 } // namespace Rosen
 } // namespace OHOS
