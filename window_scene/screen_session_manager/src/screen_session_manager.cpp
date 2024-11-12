@@ -2086,6 +2086,17 @@ int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
     return screenOffDelay_;
 }
 
+void ScreenSessionManager::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
+{
+    if ((cameraStatus_ == cameraStatus) && (cameraPosition_ = cameraPosition)) {
+        return; // no need to update
+    }
+    cameraStatus_ = cameraStatus;
+    cameraPosition_ = cameraPosition;
+    TLOGI(WmsLogTag::DMS, "SetCameraStatus, cameraStatus:%{public}d, cameraPosition:%{public}d",
+        cameraStatus, cameraPosition);
+}
+
 bool ScreenSessionManager::IsScreenLockSuspend(void)
 {
     return isScreenLockSuspend_;
@@ -6219,7 +6230,7 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
             }
         }
     }
-    
+
     if (firstSession != nullptr && secondarySession != nullptr) {
         MultiScreenManager::GetInstance().MultiScreenModeChange(firstSession, secondarySession, operateMode);
     } else {
@@ -6423,5 +6434,15 @@ void ScreenSessionManager::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldS
         return;
     }
     clientProxy_->OnSuperFoldStatusChanged(screenId, superFoldStatus);
+}
+
+int32_t ScreenSessionManager::GetCameraStatus()
+{
+    return cameraStatus_;
+}
+
+int32_t ScreenSessionManager::GetCameraPosition()
+{
+    return cameraPosition_;
 }
 } // namespace OHOS::Rosen

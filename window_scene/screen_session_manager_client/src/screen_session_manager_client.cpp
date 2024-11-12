@@ -415,6 +415,15 @@ int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
     return screenSessionManager_->SetScreenOffDelayTime(delay);
 }
 
+void ScreenSessionManagerClient::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->SetCameraStatus(cameraStatus, cameraPosition);
+}
+
 void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     if (!screenSessionManager_) {
