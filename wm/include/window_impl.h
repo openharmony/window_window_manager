@@ -318,7 +318,7 @@ public:
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
 
     /*
-     * Window Immersive
+     * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     WMError GetGestureBackEnabled(bool& enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
