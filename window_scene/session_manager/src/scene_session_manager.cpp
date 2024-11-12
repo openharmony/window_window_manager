@@ -3049,7 +3049,7 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
                 continue;
             }
             auto sessionId = sceneSession->GetPersistentId();
-            if ((!sceneSession->CheckOutTouchOutsideRegister()) &&
+            if (!sceneSession->CheckTouchOutsideCallbackRegistered() &&
                 (touchOutsideListenerSessionSet_.find(sessionId) == touchOutsideListenerSessionSet_.end())) {
                 WLOGFD("id: %{public}d is not in touchOutsideListenerNodes, don't notify.", sessionId);
                 continue;
