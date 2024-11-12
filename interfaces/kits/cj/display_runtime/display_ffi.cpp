@@ -261,6 +261,54 @@ float FfiOHOSDisplayGetYDPI(int64_t id)
     return ret;
 }
 
+RetStruct FfiOHOSDisplayGetColorSpaces(int64_t id)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetColorSpaces start");
+    auto instance = FFIData::GetData<DisplayImpl>(id);
+    if (!instance) {
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        return { DM_ERROR_SYSTEM_INNORMAL, 0, nullptr };
+    }
+    auto ret = instance->GetColorSpaces();
+    return ret;
+}
+
+RetStruct FfiOHOSDisplayGetHdrFormats(int64_t id)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetHdrFormats start");
+    auto instance = FFIData::GetData<DisplayImpl>(id);
+    if (!instance) {
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        return { DM_ERROR_SYSTEM_INNORMAL, 0, nullptr };
+    }
+    auto ret = instance->GetHdrFormats();
+    return ret;
+}
+
+uint32_t FfiOHOSDisplayGetAvailableWidth(int64_t id)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetAvailableWidth start");
+    auto instance = FFIData::GetData<DisplayImpl>(id);
+    if (!instance) {
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        return 0.0;
+    }
+    auto ret = instance->GetAvailableWidth();
+    return ret;
+}
+
+uint32_t FfiOHOSDisplayGetAvailableHeight(int64_t id)
+{
+    TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetAvailableHeight start");
+    auto instance = FFIData::GetData<DisplayImpl>(id);
+    if (!instance) {
+        TLOGE(WmsLogTag::DMS, "[Display] instance not exist %{public}" PRId64, id);
+        return 0.0;
+    }
+    auto ret = instance->GetAvailableHeight();
+    return ret;
+}
+
 RetStruct FfiOHOSDisplayGetCutoutInfo(int64_t id)
 {
     TLOGI(WmsLogTag::DMS, "FfiOHOSDisplayGetCutoutInfo start");

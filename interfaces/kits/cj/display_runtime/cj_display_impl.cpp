@@ -52,6 +52,26 @@ void SetCRect(const DMRect& row, CRect* ptr)
     ptr->height = row.height_;
 }
 
+uint32_t* CreateColorSpacesObject(std::vector<uint32_t>& colorSpaces)
+{
+    uint32_t* colorSpaces_ = static_cast<uint32_t*>(malloc(colorSpaces.size() * sizeof(uint32_t)));
+    if (!colorSpaces_) {
+        return nullptr;
+    }
+    std::copy(colorSpaces.begin(), colorSpaces.end(), colorSpaces_);
+    return colorSpaces_;
+}
+
+uint32_t* CreateHdrFormatsObject(std::vector<uint32_t>& hdrFormats)
+{
+    uint32_t* hdrFormats_ = static_cast<uint32_t*>(malloc(hdrFormats.size() * sizeof(uint32_t)));
+    if (!hdrFormats_) {
+        return nullptr;
+    }
+    std::copy(hdrFormats.begin(), hdrFormats.end(), hdrFormats_);
+    return hdrFormats_;
+}
+
 CRect* CreateCBoundingRects(std::vector<DMRect>& bound)
 {
     int32_t number = static_cast<int32_t>(bound.size());
@@ -286,6 +306,66 @@ float DisplayImpl::GetYDPI()
         return 0.0;
     }
     return info->GetYDpi();
+}
+
+RetStruct DisplayImpl::GetColorSpaces()
+{
+    auto info = display_->GetDisplayInfo();
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[GetColorSpaces] Failed to get display info");
+        return {};
+    }
+    auto colorSpaces = info->GetColorSpaces();
+    RetStruct result = {
+        .code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr
+    };
+    result.data = CreateColorSpacesObject(colorSpaces);
+    result.code = static_cast<int32_t>(DmErrorCode::DM_OK);
+    if (result.data == nullptr) {
+        result.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
+    }
+    result.len = colorSpaces.size();
+    return result;
+}
+
+RetStruct DisplayImpl::GetHdrFormats()
+{
+    auto info = display_->GetDisplayInfo();
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[GetHdrFormats] Failed to get display info");
+        return {};
+    }
+    auto hdrFormats = info->GetHdrFormats();
+    RetStruct result = {
+        .code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), .len = 0, .data = nullptr
+    };
+    result.data = CreateHdrFormatsObject(hdrFormats);
+    result.code = static_cast<int32_t>(DmErrorCode::DM_OK);
+    if (result.data == nullptr) {
+        result.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL);
+    }
+    result.len = hdrFormats.size();
+    return result;
+}
+
+uint32_t DisplayImpl::GetAvailableWidth()
+{
+    auto info = display_->GetDisplayInfo();
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[GetAvailableWidth] Failed to get display info");
+        return 0;
+    }
+    return info->GetAvailableWidth();
+}
+
+uint32_t DisplayImpl::GetAvailableHeight()
+{
+    auto info = display_->GetDisplayInfo();
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[GetAvailableHeight] Failed to get display info");
+        return 0;
+    }
+    return info->GetAvailableHeight();
 }
 
 RetStruct DisplayImpl::GetCutoutInfo()
