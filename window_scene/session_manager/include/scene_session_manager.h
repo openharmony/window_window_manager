@@ -668,10 +668,6 @@ private:
         const sptr<SceneSession>& sceneSession);
     std::vector<std::pair<uint64_t, WindowVisibilityState>> GetWindowVisibilityChangeInfo(
         std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
-    std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
-        std::vector<std::pair<uint64_t, bool>> currDrawingContentData);
-    void RemoveDuplicateDrawingData(uint64_t windowId);
-    void GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid);
     void GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionData> occlusionData,
         std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData,
         std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
@@ -682,6 +678,16 @@ private:
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
 
+    /*
+     * Window DrawingContent
+     */
+    std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
+        std::vector<std::pair<uint64_t, bool>> currDrawingContentData);
+    bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
+    bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
+    void RemoveDuplicateDrawingData(uint64_t windowId);
+    void GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid);
+    
     /*
      * Window Rotate Animation
      */
@@ -913,8 +919,6 @@ private:
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
-    bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
-    bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
     void CalculateCombinedExtWindowFlags();
