@@ -3145,6 +3145,25 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
     }
 }
 
+void SceneSession::MarkSystemSceneUIFirst(bool isUIFirst, bool isForceFlag)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::MarkSystemSceneUIFirst");
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
+        return;
+    }
+    if (leashWinSurfaceNode != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isUIFirst=%{public}d. isForceFlag=%{public}d",
+            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), isUIFirst, isForceFlag);
+        leashWinSurfaceNode->MarkSystemSceneUIFirst(isUIFirst, isForceFlag);
+    } else {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isUIFirst=%{public}d. isForceFlag=%{public}d",
+            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), isUIFirst, isForceFlag);
+        surfaceNode_->MarkSystemSceneUIFirst(isUIFirst, isForceFlag);
+    }
+}
+
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     auto task = [weakThis = wptr(this), needDefaultAnimationFlag]() {
