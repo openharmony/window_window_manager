@@ -1363,8 +1363,9 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
 WSError SceneSession::RaiseToAppTop()
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("raise to app top permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        TLOGE(WmsLogTag::DEFAULT, "raise to app top for public permission temporarily allowed!");
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "raise to app top for system permission already allowed!");
     }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
@@ -3737,7 +3738,6 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
-        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
         case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
@@ -3750,6 +3750,9 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
             }
             break;
         }
+        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
+            TLOGI(WmsLogTag::DEFAULT, "permission temporarily allowed! action: %{public}u", action);
+            return false;
         default:
             break;
     }
@@ -4147,8 +4150,9 @@ WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionPro
     WSPropertyChangeAction action)
 {
     if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property raiseEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        TLOGE(WmsLogTag::DEFAULT, "Update property raiseEnabled for public permission temporarily allowed!");
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "Update property raiseEnabled for system permission already allowed!");
     }
 
     auto sessionProperty = GetSessionProperty();
