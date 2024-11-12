@@ -7798,7 +7798,6 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 }
 
 void SceneSessionManager::GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid) {
-    bool findFlag = false;
     for (auto elemIter = lastDrawingData_.begin(); elemIter != lastDrawingData_.end(); ++elemIter) {
         auto elem = *elemIter;
         if(std::get<0>(elem) == windowId) {
