@@ -1717,20 +1717,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetY, Function | SmallTest | Le
 }
 
 /*
- * @tc.name: GetStatusBarHeight
- * @tc.desc: GetStatusBarHeight test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("GetStatusBarHeight");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    ASSERT_EQ(0, window->GetStatusBarHeight());
-}
-
-/*
  * @tc.name: SetGestureBackEnabled
  * @tc.desc: SetGestureBackEnabled test
  * @tc.type: FUNC

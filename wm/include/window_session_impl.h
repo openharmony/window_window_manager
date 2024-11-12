@@ -346,6 +346,7 @@ protected:
 
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
+    uint32_t GetStatusBarHeight() override;
 
     /**
      * Sub Window

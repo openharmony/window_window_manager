@@ -477,4 +477,13 @@ WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params,
     }
     return sessionStage_->NotifyDumpInfo(params, info);
 }
+
+int32_t ExtensionSession::GetStatusBarHeight()
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "called, persistenId=%{public}d", GetPersistentId());
+    if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->getStatusBarHeightFunc_ != nullptr) {
+        return extSessionEventCallback_->getStatusBarHeightFunc_();
+    }
+    return 0;
+}
 } // namespace OHOS::Rosen
