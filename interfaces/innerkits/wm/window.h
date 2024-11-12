@@ -2441,7 +2441,7 @@ public:
      * @brief Notify extension asynchronously
      *
      * @param notifyEvent event type
-     * @return * void
+     * @return void
      */
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
