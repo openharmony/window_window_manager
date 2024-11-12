@@ -1547,13 +1547,13 @@ HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, Function |
     sptr<SceneSession::SpecificSessionCallback> callback = ssm_->CreateSpecificSessionCallback();
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, callback);
     ssm_->sceneSessionMap_.insert({ parentSession->GetPersistentId(), parentSession });
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage), \
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
         WSError::WS_ERROR_NULLPTR);
     int64_t displayId = 1234;
     property->SetParentPersistentId(parentSession->GetPersistentId());
     parentSession->GetSessionProperty()->SetDisplayId(displayId);
     EXPECT_CALL(*sessionStage, UpdateDisplayId(displayId)).Times(1);
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage), \
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
         WSError::WS_OK);
     EXPECT_EQ(property->GetDisplayId(), displayId);
 }
@@ -1730,6 +1730,11 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, Function | S
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionInfoPersistentId(0);
     ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+    
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**

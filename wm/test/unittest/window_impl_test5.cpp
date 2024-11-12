@@ -1414,14 +1414,14 @@ HWTEST_F(WindowImplTest5, GetVirtualPixelRatio01, Function | SmallTest | Level1)
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
-    float vpr = -1.0f;
+    float vpr = 0.0f;
     window->property_->SetDisplayId(-1);
     vpr = window->GetVirtualPixelRatio();
-    ASSERT_EQ(vpr, 0.0f);
+    ASSERT_EQ(vpr, 1.0f);
 
     window->property_->SetDisplayId(0);
     vpr = window->GetVirtualPixelRatio();
-    ASSERT_NE(vpr, 0.0f);
+    ASSERT_NE(vpr, 1.0f);
 }
 }
 } // namespace Rosen

@@ -158,13 +158,14 @@ std::string DumpTransformInDisplayInfo(const std::vector<float>& transform)
 
 std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
 {
-    std::string infoStr =  "DisplayInfo: ";
-    infoStr = infoStr + " id: " + std::to_string(info.id) + " x: " + std::to_string(info.x) +
-        "y: " + std::to_string(info.y) + " width: " + std::to_string(info.width) +
-        "height: " + std::to_string(info.height) + " dpi: " + std::to_string(info.dpi) + " name:" + info.name +
-        " uniq: " + info.uniq + " displayMode: " + std::to_string(static_cast<int>(info.displayMode)) +
-        " direction: " + std::to_string(static_cast<int>(info.direction)) +
-        " transform: " + DumpTransformInDisplayInfo(info.transform);
+    std::ostringstream infoStream("DisplayInfo: ");
+    infoStream << " id: " << info.id << " x: " << info.x << " y: " << info.y
+               << " width: " << info.width << " height: " << info.height << " dpi: " << info.dpi
+               << " name: " << info.name << " uniq: " << info.uniq
+               << " displayMode: " << static_cast<int>(info.displayMode)
+               << " direction: " << static_cast<int>(info.direction)
+               << " transform: " << DumpTransformInDisplayInfo(info.transform);
+    std::string infoStr = infoStream.str();
     return infoStr;
 }
 } //namespace
@@ -187,6 +188,10 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
 {
     std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.empty()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "screensProperties is empty");
+        return;
+    }
     auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     for (auto& iter: screensProperties) {
         auto screenId = iter.first;
@@ -399,7 +404,7 @@ void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
 void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList)
 {
     int windowListSize = static_cast<int>(windowInfoList.size());
-    std::string idList;
+    std::ostringstream idListStream;
     static std::string lastIdList;
     static uint32_t windowEventID = 0;
     if (windowEventID == UINT32_MAX) {
@@ -409,22 +414,18 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {
-        idList += std::to_string(e.id) + "|" + std::to_string(e.flags) + "|" +
-            std::to_string(static_cast<int32_t>(e.zOrder)) + "|" +
-            std::to_string(e.pid) + "|" +
-            std::to_string(e.defaultHotAreas.size());
+        idListStream << e.id << "|" << e.flags << "|" << static_cast<int32_t>(e.zOrder) << "|"
+                     << e.pid << "|" << e.defaultHotAreas.size();
 
         if (e.defaultHotAreas.size() > 0) {
             auto iter = lastWindowDefaultHotArea.find(e.id);
             if (iter == lastWindowDefaultHotArea.end() || iter->second != e.defaultHotAreas[0]) {
-                idList += "|" + std::to_string(e.defaultHotAreas[0].x) + "|" +
-                    std::to_string(e.defaultHotAreas[0].y) + "|" +
-                    std::to_string(e.defaultHotAreas[0].width) + "|" +
-                    std::to_string(e.defaultHotAreas[0].height);
+                idListStream << "|" << e.defaultHotAreas[0].x << "|" << e.defaultHotAreas[0].y
+                             << "|" << e.defaultHotAreas[0].width << "|" << e.defaultHotAreas[0].height;
             }
             currWindowDefaultHotArea.insert({e.id, e.defaultHotAreas[0]});
         }
-        idList += ",";
+        idListStream << ",";
         if ((focusedSessionId_ == e.id) && (e.id == e.agentWindowId)) {
             UpdateFocusedSessionId(focusedSessionId_);
         }
@@ -433,7 +434,8 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         }
     }
     lastWindowDefaultHotArea = currWindowDefaultHotArea;
-    idList += std::to_string(focusedSessionId_);
+    idListStream << focusedSessionId_;
+    std::string idList = idListStream.str();
     if (lastIdList != idList) {
         windowEventID++;
         TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,size:%{public}d,idList:%{public}s",
@@ -445,19 +447,17 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
 void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos)
 {
     int displayListSize = static_cast<int>(displayInfos.size());
-    std::string displayList = "";
+    std::ostringstream displayListStream;
     static std::string lastDisplayList = "";
     for (auto& displayInfo : displayInfos) {
-        displayList += std::to_string(displayInfo.id) + "|" +
-            std::to_string(displayInfo.x) + "|" +
-            std::to_string(displayInfo.y) + "|" +
-            std::to_string(displayInfo.width) + "|" +
-            std::to_string(displayInfo.height) + "|" +
-            std::to_string(static_cast<int32_t>(displayInfo.direction)) + "|" +
-            std::to_string(static_cast<int32_t>(displayInfo.displayDirection)) + "|" +
-            std::to_string(static_cast<int32_t>(displayInfo.displayMode));
-        displayList += ",";
+        displayListStream << displayInfo.id << "|" << displayInfo.x << "|" << displayInfo.y << "|"
+                          << displayInfo.width << "|" << displayInfo.height << "|"
+                          << static_cast<int32_t>(displayInfo.direction) << "|"
+                          << static_cast<int32_t>(displayInfo.displayDirection) << "|"
+                          << static_cast<int32_t>(displayInfo.displayMode) << ",";
     }
+
+    std::string displayList = displayListStream.str();
     if (lastDisplayList != displayList) {
         TLOGI(WmsLogTag::WMS_EVENT, "num:%{public}d,displayList:%{public}s", displayListSize, displayList.c_str());
         lastDisplayList = displayList;
