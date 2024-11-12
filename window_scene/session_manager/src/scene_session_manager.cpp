@@ -3345,8 +3345,10 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
             ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
             FlushWindowInfoToMMI(true);
             NotifyAllAccessibilityInfo();
+            rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
         } else { // switch to another user
             SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
+            rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
         }
 
         // Change app life cycle in pc when user switch, do app freeze
@@ -3916,7 +3918,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
     bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (!isPC) {
-            auto task = [] {                
+            auto task = [] {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             };
             postTaskRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
@@ -7777,7 +7779,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
             i++;
         } else if (lastVisibleData_[i].first > currVisibleData[j].first) {
             if (currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-                visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);    
+                visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             }
             j++;
         } else {
@@ -9460,7 +9462,7 @@ void SceneSessionManager::ProcessUpdateLastFocusedAppId(const std::vector<uint32
     }
 }
 
-void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) 
+void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty)
 {
     if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
         return;
