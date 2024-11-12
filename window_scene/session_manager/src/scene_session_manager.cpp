@@ -613,7 +613,8 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& 
     const ContinueState& continueState)
 {
     TLOGI(WmsLogTag::DEFAULT, "Enter");
-    auto task = [this, token, continueState]() {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    auto task = [this, token, continueState, callingUid]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "fail to find session by token.");
@@ -621,7 +622,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& 
         }
         sceneSession->SetSessionInfoContinueState(continueState);
         DistributedClient::GetInstance().SetMissionContinueState(sceneSession->GetPersistentId(),
-            static_cast<AAFwk::ContinueState>(continueState));
+            static_cast<AAFwk::ContinueState>(continueState), callingUid);
         TLOGI(WmsLogTag::DEFAULT, "SetSessionContinueState id:%{public}d, continueState:%{public}d",
             sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
