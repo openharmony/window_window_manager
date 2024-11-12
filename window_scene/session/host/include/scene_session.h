@@ -190,7 +190,8 @@ public:
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
     WSError NotifySessionExceptionInner(
-        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false, bool isFromClient = false);
+        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false,
+        bool isFromClient = false, bool startFail = false);
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
 
