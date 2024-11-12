@@ -2649,26 +2649,26 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
         (GetType(env, argv[INDEX_TWO]) == napi_function ? argv[INDEX_TWO] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    const char* const funcName = __func__;
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), isTitleHoverShown,
-        isDockHoverShown, env, task = napiAsyncTask, funcName] {
-        auto window = windowToken.promote();
+    const char* const where = __func__;
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), isTitleHoverShown,
+        isDockHoverShown, env, task = napiAsyncTask, where] {
+        auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", funcName);
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
         WMError errCode = window->SetTitleAndDockHoverShown(isTitleHoverShown, isDockHoverShown);
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
         if (ret != WmErrorCode::WM_OK) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s set title and dock hover show failed!", funcName);
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s set title and dock hover show failed!", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
                 ret, "Window OnSetTitleAndDockHoverShown failed."));
             return;
         }
         task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s window [%{public}u, %{public}s] [%{public}d, %{public}d]",
-            funcName, window->GetWindowId(), window->GetWindowName().c_str(),
+            where, window->GetWindowId(), window->GetWindowName().c_str(),
             isTitleHoverShown, isDockHoverShown);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -5913,7 +5913,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (WindowHelper::IsSubWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "subWindow hide");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "subWindow use hide");
         return HideWindowFunction(env, info, WmErrorCode::WM_OK);
     }
 
@@ -5922,9 +5922,10 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     const char* const where = __func__;
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
-        auto window = windowToken.promote();
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
+        auto window = weakToken.promote();
         if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
             task->Reject(env,
                 JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr"));
             return;
@@ -5936,7 +5937,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Minimize failed."));
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s [NAPI]Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
@@ -6317,7 +6318,7 @@ napi_value JsWindow::OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_inf
 napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 1: the minimum param num  2: the maximum param num
         TLOGE(WmsLogTag::WMS_SUB, "Argc is invalid: %{public}zu", argc);
@@ -6348,7 +6349,8 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
-    auto asyncTask = [where, window = wptr<Window>(windowToken_), isModal, modalityType, env, task = napiAsyncTask] {
+    auto asyncTask = [where, weakToken = wptr<Window>(windowToken_), isModal, modalityType, env, task = napiAsyncTask] {
+        auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s window is nullptr", where);
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
@@ -6591,7 +6593,7 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        TLOGI(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (!CheckWindowMaskParams(env, argv[INDEX_ZERO])) {
@@ -6599,15 +6601,17 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     }
     std::vector<std::vector<uint32_t>> windowMask;
     if (!GetWindowMaskFromJsValue(env, argv[INDEX_ZERO], windowMask)) {
-        TLOGI(WmsLogTag::DEFAULT, "GetWindowMaskFromJsValue failed");
+        TLOGE(WmsLogTag::DEFAULT, "GetWindowMaskFromJsValue failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), windowMask, env, task = napiAsyncTask, where] {
-        auto window = windowToken.promote();
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), windowMask = std::move(windowMask), env,
+        task = napiAsyncTask, where] {
+        auto window = weakToken.promote();
         if (window == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s window is nullptr", where);
             WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "window is nullptr"));
             return;
