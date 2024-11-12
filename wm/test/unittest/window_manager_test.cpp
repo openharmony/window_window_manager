@@ -891,6 +891,21 @@ HWTEST_F(WindowManagerTest, DumpSessionWithId, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetWindowModeType01
+ * @tc.desc: GetWindowModeType01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    infos.clear();
+    WindowModeType windowModeType;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetWindowModeType(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModeType(windowModeType));
+}
+
+/**
  * @tc.name: RegisterVisibleWindowNumChangedListener
  * @tc.desc: check RegisterVisibleWindowNumChangedListener
  * @tc.type: FUNC
@@ -1000,16 +1015,6 @@ HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
     WMError res3 = WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(5, 5, true);
     ASSERT_EQ(WMError::WM_OK, res3);
     WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
-}
-
-HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
-{
-    std::vector<sptr<AccessibilityWindowInfo>> infos;
-    infos.clear();
-    WindowModeType windowModeType;
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetWindowModeType(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModeType(windowModeType));
 }
 
 /**
@@ -1475,8 +1480,8 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
 }
 
 /**
- * @tc.name: SetProcessWatermark
- * @tc.desc: check SetProcessWatermark
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: check GetDisplayIdByWindowId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)

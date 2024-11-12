@@ -27,6 +27,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
+#include "process_options.h"
 #include "key_event.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
@@ -995,6 +996,8 @@ HWTEST_F(WindowSessionTest2, SetSessionInfo, Function | SmallTest | Level2)
     info.uiAbilityId_ = 1;
     info.startSetting = nullptr;
     info.continueSessionId_ = "";
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
+    info.processOptions = processOptions;
     session_->SetSessionInfo(info);
     ASSERT_EQ(nullptr, session_->sessionInfo_.want);
     ASSERT_EQ(nullptr, session_->sessionInfo_.callerToken_);
@@ -1004,6 +1007,7 @@ HWTEST_F(WindowSessionTest2, SetSessionInfo, Function | SmallTest | Level2)
     ASSERT_EQ(1, session_->sessionInfo_.uiAbilityId_);
     ASSERT_EQ("", session_->sessionInfo_.continueSessionId_);
     ASSERT_EQ(nullptr, session_->sessionInfo_.startSetting);
+    ASSERT_EQ(processOptions, session_->sessionInfo_.processOptions);
 }
 
 /**
@@ -1442,8 +1446,12 @@ HWTEST_F(WindowSessionTest2, DrawingCompleted, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, RemoveStartingWindow, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    auto result = session_->RemoveStartingWindow();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->RemoveStartingWindow();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
 /**
@@ -2063,7 +2071,7 @@ HWTEST_F(WindowSessionTest2, SetSessionExceptionListener, Function | SmallTest |
 {
     session_->SetSessionExceptionListener(nullptr, true);
 
-    NotifySessionExceptionFunc func = [](const SessionInfo& info, bool needRemoveSession) {};
+    NotifySessionExceptionFunc func = [](const SessionInfo& info, bool needRemoveSession, bool startFail) {};
     session_->SetSessionExceptionListener(func, true);
 
     ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);

@@ -16,6 +16,7 @@
 #include "session/host/include/main_session.h"
 
 #include "session_helper.h"
+#include "window_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
 
 namespace OHOS::Rosen {
@@ -31,7 +32,8 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
     }
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId());
+    pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this));
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
@@ -87,9 +89,13 @@ WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
-    if (CheckDialogOnForeground()) {
+    auto isModal = IsModal();
+    if (!isModal && CheckDialogOnForeground()) {
         HandlePointDownDialog();
         return WSError::WS_OK;
+    }
+    if (isModal) {
+        Session::ProcessClickModalWindowOutside(posX, posY);
     }
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
@@ -231,21 +237,87 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
-WSError MainSession::OnRestoreMainWindow()
+WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
 {
-    auto task = [weakThis = wptr(this)]() {
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", funcName);
+            return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRestoreMainWindowFunc_) {
-            session->sessionChangeCallback_->onRestoreMainWindowFunc_();
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d", funcName,
+            isTitleHoverShown, isDockHoverShown);
+        if (session->onTitleAndDockHoverShowChangeFunc_) {
+            session->onTitleAndDockHoverShowChangeFunc_(isTitleHoverShown, isDockHoverShown);
         }
-        return WSError::WS_OK;
     };
-    PostTask(task, "OnRestoreMainWindow");
+    PostTask(task, funcName);
     return WSError::WS_OK;
 }
 
+WSError MainSession::OnRestoreMainWindow()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        if (session->onRestoreMainWindowFunc_) {
+            session->onRestoreMainWindowFunc_();
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
+WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
+{
+    auto task = [weakThis = wptr(this), enabled] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return ;
+        }
+        if (session->onSetWindowRectAutoSaveFunc_) {
+            session->onSetWindowRectAutoSaveFunc_(enabled);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
+WSError MainSession::OnMainSessionModalTypeChange(bool isModal)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), isModal, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s main window isModal:%{public}d", where, isModal);
+        if (session->onMainSessionModalTypeChange_) {
+            session->onMainSessionModalTypeChange_(isModal);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsModal() const
+{
+    bool isModal = false;
+    auto property = GetSessionProperty();
+    if (property != nullptr) {
+        isModal = WindowHelper::IsModalMainWindow(property->GetWindowType(), property->GetWindowFlags());
+    }
+    return isModal;
+}
+
+bool MainSession::IsApplicationModal() const
+{
+    return IsModal();
+}
 } // namespace OHOS::Rosen

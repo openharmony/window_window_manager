@@ -634,6 +634,20 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenRotationLockedChanged02, Functi
 }
 
 /**
+ * @tc.name: OnSuperFoldStatusChanged
+ * @tc.desc: OnSuperFoldStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnSuperFoldStatusChanged, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->OnSuperFoldStatusChanged(screenId, superFoldStatus);
+}
+
+/**
  * @tc.name: RegisterDisplayChangeListener
  * @tc.desc: RegisterDisplayChangeListener test
  * @tc.type: FUNC

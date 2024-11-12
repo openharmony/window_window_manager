@@ -53,7 +53,6 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         TLOGE(WmsLogTag::DMS, "Failed to init, env or exportObj is null!");
         return nullptr;
     }
-
     sptr<JsScreenSessionManager> jsScreenSessionManager = new (std::nothrow) JsScreenSessionManager(env);
     if (jsScreenSessionManager == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to create, jsScreenSessionManager is null");
@@ -70,6 +69,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenUtils::CreateJsFoldStatus(env));
     napi_set_named_property(env, exportObj, "ScreenPropertyChangeType",
         JsScreenUtils::CreateJsScreenPropertyChangeType(env));
+    napi_set_named_property(env, exportObj, "SuperFoldStatus",
+        JsScreenUtils::CreateJsSuperFoldStatus(env));
 
     const char* moduleName = "JsScreenSessionManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenSessionManager::RegisterCallback);

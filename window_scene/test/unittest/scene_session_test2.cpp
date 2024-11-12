@@ -721,7 +721,7 @@ HWTEST_F(SceneSessionTest2, SetScale, Function | SmallTest | Level2)
 
 /**
  * @tc.name: RequestHideKeyboard
- * @tc.desc:  * @tc.name: RequestHideKeyboard
+ * @tc.desc: RequestHideKeyboard
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, RequestHideKeyboard, Function | SmallTest | Level2)
@@ -742,7 +742,7 @@ HWTEST_F(SceneSessionTest2, RequestHideKeyboard, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetIsDisplayStatusBarTemporarily
- * @tc.desc:  * @tc.name: SetIsDisplayStatusBarTemporarily
+ * @tc.desc: SetIsDisplayStatusBarTemporarily
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetIsDisplayStatusBarTemporarily, Function | SmallTest | Level2)
@@ -760,7 +760,7 @@ HWTEST_F(SceneSessionTest2, SetIsDisplayStatusBarTemporarily, Function | SmallTe
 
 /**
  * @tc.name: UpdateAvoidArea
- * @tc.desc:  * @tc.name: UpdateAvoidArea
+ * @tc.desc: UpdateAvoidArea
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, UpdateAvoidArea, Function | SmallTest | Level2)
@@ -949,7 +949,7 @@ HWTEST_F(SceneSessionTest2, CalculateCombinedExtWindowFlags, Function | SmallTes
 
 /**
  * @tc.name: SaveUpdatedIcon
- * @tc.desc:  * @tc.name: SaveUpdatedIcon
+ * @tc.desc: SaveUpdatedIcon
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SaveUpdatedIcon, Function | SmallTest | Level2)
@@ -966,7 +966,7 @@ HWTEST_F(SceneSessionTest2, SaveUpdatedIcon, Function | SmallTest | Level2)
 
 /**
  * @tc.name: NotifyTouchOutside
- * @tc.desc:  * @tc.name: NotifyTouchOutside
+ * @tc.desc: NotifyTouchOutside
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
@@ -997,7 +997,7 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
 
 /**
  * @tc.name: CheckOutTouchOutsideRegister
- * @tc.desc:  * @tc.name: CheckOutTouchOutsideRegister
+ * @tc.desc: CheckOutTouchOutsideRegister
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, CheckOutTouchOutsideRegister, Function | SmallTest | Level2)
@@ -1027,7 +1027,7 @@ HWTEST_F(SceneSessionTest2, CheckOutTouchOutsideRegister, Function | SmallTest |
 
 /**
  * @tc.name: UpdateRotationAvoidArea
- * @tc.desc:  * @tc.name: UpdateRotationAvoidArea
+ * @tc.desc: UpdateRotationAvoidArea
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, UpdateRotationAvoidArea, Function | SmallTest | Level2)
@@ -1055,7 +1055,7 @@ HWTEST_F(SceneSessionTest2, UpdateRotationAvoidArea, Function | SmallTest | Leve
 
 /**
  * @tc.name: NotifyForceHideChange
- * @tc.desc:  * @tc.name: NotifyForceHideChange
+ * @tc.desc: NotifyForceHideChange
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2)
@@ -1082,7 +1082,7 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
 
 /**
  * @tc.name: RegisterSessionChangeCallback
- * @tc.desc:  * @tc.name: RegisterSessionChangeCallback
+ * @tc.desc: RegisterSessionChangeCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, RegisterSessionChangeCallback, Function | SmallTest | Level2)
@@ -1098,7 +1098,7 @@ HWTEST_F(SceneSessionTest2, RegisterSessionChangeCallback, Function | SmallTest 
 
 /**
  * @tc.name: ClearSpecificSessionCbMap
- * @tc.desc:  * @tc.name: ClearSpecificSessionCbMap
+ * @tc.desc: ClearSpecificSessionCbMap
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, ClearSpecificSessionCbMap, Function | SmallTest | Level2)
@@ -1113,7 +1113,7 @@ HWTEST_F(SceneSessionTest2, ClearSpecificSessionCbMap, Function | SmallTest | Le
 
 /**
  * @tc.name: SendPointerEventToUI
- * @tc.desc:  * @tc.name: SendPointerEventToUI
+ * @tc.desc: SendPointerEventToUI
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SendPointerEventToUI, Function | SmallTest | Level2)
@@ -1135,7 +1135,7 @@ HWTEST_F(SceneSessionTest2, SendPointerEventToUI, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetFloatingScale
- * @tc.desc:  * @tc.name: SetFloatingScale
+ * @tc.desc: SetFloatingScale
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetFloatingScale, Function | SmallTest | Level2)
@@ -1171,7 +1171,7 @@ HWTEST_F(SceneSessionTest2, SetFloatingScale, Function | SmallTest | Level2)
 
 /**
  * @tc.name: ProcessPointDownSession
- * @tc.desc:  * @tc.name: ProcessPointDownSession
+ * @tc.desc: ProcessPointDownSession
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, ProcessPointDownSession, Function | SmallTest | Level2)
@@ -1203,7 +1203,7 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, Function | SmallTest | Leve
 
 /**
  * @tc.name: SetSelfToken
- * @tc.desc:  * @tc.name: SetSelfToken
+ * @tc.desc: SetSelfToken
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetSelfToken, Function | SmallTest | Level2)
@@ -1242,7 +1242,7 @@ HWTEST_F(SceneSessionTest2, SetSelfToken, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetLastSafeRect
- * @tc.desc:  * @tc.name: SetLastSafeRect
+ * @tc.desc: SetLastSafeRect
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetLastSafeRect, Function | SmallTest | Level2)
@@ -1265,7 +1265,7 @@ HWTEST_F(SceneSessionTest2, SetLastSafeRect, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GetSessionTargetRect
- * @tc.desc:  * @tc.name: GetSessionTargetRect
+ * @tc.desc: GetSessionTargetRect
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
@@ -1280,11 +1280,11 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     bool res = sceneSession->AddSubSession(sceneSession);
     EXPECT_EQ(true, res);
     EXPECT_EQ(sceneSession, (sceneSession->GetSubSession())[0]);
-    sceneSession->moveDragController_ = new MoveDragController(1024);
+    sceneSession->moveDragController_ = new MoveDragController(1024, WindowType::WINDOW_TYPE_FLOAT);
     WSRect rectResult = sceneSession->GetSessionTargetRect();
     EXPECT_EQ(0, rectResult.posX_);
     EXPECT_EQ(0, rectResult.width_);
-    auto dragHotAreaFunc = [sceneSession](DisplayId displayId, int32_t type, const SizeChangeReason reason) {
+    auto dragHotAreaFunc = [sceneSession](DisplayId displayId, int32_t type, SizeChangeReason reason) {
         if (SizeChangeReason::END == reason) {
             GTEST_LOG_(INFO) << "type = " << type;
         }
@@ -1300,7 +1300,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetPipActionEvent
- * @tc.desc:  * @tc.name: SetPipActionEvent
+ * @tc.desc: SetPipActionEvent
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetPipActionEvent, Function | SmallTest | Level2)
@@ -1321,7 +1321,7 @@ HWTEST_F(SceneSessionTest2, SetPipActionEvent, Function | SmallTest | Level2)
 
 /*
  * @tc.name: SetPiPControlEvent
- * @tc.desc:  * @tc.name: SetPiPControlEvent
+ * @tc.desc: SetPiPControlEvent
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetPiPControlEvent, Function | SmallTest | Level2)
@@ -1374,7 +1374,7 @@ HWTEST_F(SceneSessionTest2, SetForceHideState, Function | SmallTest | Level2)
 
 /**
  * @tc.name: ClearSpecificSessionCbMap
- * @tc.desc:  * @tc.name: ClearSpecificSessionCbMap
+ * @tc.desc: ClearSpecificSessionCbMap
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, ClearSpecificSessionCbMap01, Function | SmallTest | Level2)
@@ -1405,7 +1405,7 @@ HWTEST_F(SceneSessionTest2, ClearSpecificSessionCbMap01, Function | SmallTest | 
 
 /**
  * @tc.name: OnSessionEvent01
- * @tc.desc:  * @tc.name: OnSessionEvent
+ * @tc.desc: OnSessionEvent
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
@@ -1419,7 +1419,7 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
 
     sceneSession->leashWinSurfaceNode_ = nullptr;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(event);
 
@@ -1434,7 +1434,7 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetSessionRectChangeCallback
- * @tc.desc:  * @tc.name: SetSessionRectChangeCallback
+ * @tc.desc: SetSessionRectChangeCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetSessionRectChangeCallback, Function | SmallTest | Level2)
@@ -1461,7 +1461,7 @@ HWTEST_F(SceneSessionTest2, SetSessionRectChangeCallback, Function | SmallTest |
 
 /**
  * @tc.name: SetSessionPiPControlStatusChangeCallback
- * @tc.desc:  * @tc.name: SetSessionPiPControlStatusChangeCallback
+ * @tc.desc: SetSessionPiPControlStatusChangeCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetSessionPiPControlStatusChangeCallback, Function | SmallTest | Level2)
@@ -1493,7 +1493,7 @@ HWTEST_F(SceneSessionTest2, SetAutoStartPiPStatusChangeCallback, Function | Smal
 
 /**
  * @tc.name: RaiseAppMainWindowToTop
- * @tc.desc:  * @tc.name: RaiseAppMainWindowToTop
+ * @tc.desc: RaiseAppMainWindowToTop
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Level2)
@@ -1522,7 +1522,7 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
 
 /**
  * @tc.name: GetKeyboardAvoidArea
- * @tc.desc:  * @tc.name: GetKeyboardAvoidArea01
+ * @tc.desc: GetKeyboardAvoidArea01
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, GetKeyboardAvoidArea01, Function | SmallTest | Level2)
@@ -1542,7 +1542,7 @@ HWTEST_F(SceneSessionTest2, GetKeyboardAvoidArea01, Function | SmallTest | Level
 
 /**
  * @tc.name: GetCutoutAvoidArea
- * @tc.desc:  * @tc.name: GetCutoutAvoidArea
+ * @tc.desc: GetCutoutAvoidArea
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, GetCutoutAvoidArea01, Function | SmallTest | Level2)
@@ -1565,7 +1565,7 @@ HWTEST_F(SceneSessionTest2, GetCutoutAvoidArea01, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GetAINavigationBarArea
- * @tc.desc:  * @tc.name: GetAINavigationBarArea
+ * @tc.desc: GetAINavigationBarArea
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level2)
@@ -1607,7 +1607,7 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
 
 /**
  * @tc.name: TransferPointerEvent
- * @tc.desc:  * @tc.name: TransferPointerEvent
+ * @tc.desc: TransferPointerEvent
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level2)
@@ -1647,7 +1647,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
 
 /**
  * @tc.name: OnMoveDragCallback
- * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.desc: OnMoveDragCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, OnMoveDragCallback, Function | SmallTest | Level2)
@@ -1662,7 +1662,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback, Function | SmallTest | Level2)
     Session session(info);
     WSRect rect;
     sceneSession->UpdateWinRectForSystemBar(rect);
-    sceneSession->SetSurfaceBounds(rect);
+    sceneSession->SetSurfaceBounds(rect, false);
     sceneSession->GetWindowNameAllType();
     session.scenePersistence_ = new ScenePersistence("aa", 0);
     sceneSession->GetUpdatedIconPath();
@@ -1677,7 +1677,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback, Function | SmallTest | Level2)
 
 /**
  * @tc.name: OnMoveDragCallback
- * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.desc: OnMoveDragCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, OnMoveDragCallback01, Function | SmallTest | Level2)
@@ -1704,7 +1704,7 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback01, Function | SmallTest | Level2)
 
 /**
  * @tc.name: OnMoveDragCallback
- * @tc.desc:  * @tc.name: OnMoveDragCallback
+ * @tc.desc: OnMoveDragCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
@@ -1738,13 +1738,13 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
     bool isPreImeEvent = true;
     sceneSession->SendKeyEventToUI(keyEvent, isPreImeEvent);
     sceneSession->IsDirtyWindow();
-    sceneSession->moveDragController_ = new MoveDragController(0);
+    sceneSession->moveDragController_ = new MoveDragController(0, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->NotifyUILostFocus();
 }
 
 /**
  * @tc.name: IsStartMoving
- * @tc.desc:  * @tc.name: IsStartMoving
+ * @tc.desc: IsStartMoving
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, IsStartMoving, Function | SmallTest | Level2)
@@ -1792,7 +1792,7 @@ HWTEST_F(SceneSessionTest2, IsSystemSpecificSession, Function | SmallTest | Leve
 
 /**
  * @tc.name: SetTemporarilyShowWhenLocked
- * @tc.desc:  * @tc.name: SetTemporarilyShowWhenLocked
+ * @tc.desc: SetTemporarilyShowWhenLocked
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, SetTemporarilyShowWhenLocked, Function | SmallTest | Level2)
@@ -1818,7 +1818,7 @@ HWTEST_F(SceneSessionTest2, SetTemporarilyShowWhenLocked, Function | SmallTest |
 
 /**
  * @tc.name: GetShowWhenLockedFlagValue
- * @tc.desc:  * @tc.name: GetShowWhenLockedFlagValue
+ * @tc.desc: GetShowWhenLockedFlagValue
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest2, GetShowWhenLockedFlagValue, Function | SmallTest | Level2)
@@ -1906,13 +1906,10 @@ HWTEST_F(SceneSessionTest2, SetSessionModalTypeChangeCallback, Function | SmallT
     info.bundleName_ = "SetSessionModalTypeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    NotifySessionModalTypeChangeFunc func = [](SubWindowModalType subWindowModalType) {
-        return WSError::WS_OK;
-    };
-    sceneSession->SetSessionModalTypeChangeCallback(func);
-    EXPECT_NE(sceneSession->sessionChangeCallback_->onSessionModalTypeChange_, nullptr);
+    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
 }
 
 /**
@@ -1927,14 +1924,29 @@ HWTEST_F(SceneSessionTest2, OnSessionModalTypeChange, Function | SmallTest | Lev
     info.bundleName_ = "OnSessionModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    NotifySessionModalTypeChangeFunc func = [](SubWindowModalType subWindowModalType) {
-        return WSError::WS_OK;
-    };
-    sceneSession->SetSessionModalTypeChangeCallback(func);
-    EXPECT_NE(sceneSession->sessionChangeCallback_->onSessionModalTypeChange_, nullptr);
+    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
     EXPECT_EQ(sceneSession->OnSessionModalTypeChange(SubWindowModalType::TYPE_WINDOW_MODALITY), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetMainSessionModalTypeChangeCallback
+ * @tc.desc: SetMainSessionModalTypeChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetMainSessionModalTypeChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMainSessionModalTypeChangeCallback";
+    info.bundleName_ = "SetMainSessionModalTypeChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
 }
 
 /**
@@ -2023,6 +2035,23 @@ HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(nullptr);
     auto result = sceneSession->IsFullScreenMovable();
     ASSERT_EQ(false, result);
+}
+
+/**
+ * @tc.name: SetTitleAndDockHoverShowChangeCallback
+ * @tc.desc: SetTitleAndDockHoverShowChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTitleAndDockHoverShowChangeCallback";
+    info.bundleName_ = "SetTitleAndDockHoverShowChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetTitleAndDockHoverShowChangeCallback([](bool isTitleHoverShown, bool isDockHoverShown) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
 }
 }
 }

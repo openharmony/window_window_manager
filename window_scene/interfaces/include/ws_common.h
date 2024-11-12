@@ -412,6 +412,7 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_SECONDARY,
     EVENT_DRAG_START,
     EVENT_DRAG,
+    EVENT_MAXIMIZE_WITHOUT_ANIMATION,
 };
 
 enum class BrokerStates: uint32_t {
@@ -600,6 +601,7 @@ struct AppWindowSceneConfig {
 
 struct DeviceScreenConfig {
     std::string rotationPolicy_ = "11"; // default use phone policy
+    std::string defaultRotationPolicy_ = "1"; // default unspecified policy
     bool isRightPowerButton_ = true;
 };
 

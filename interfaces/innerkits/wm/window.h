@@ -1821,8 +1821,9 @@ public:
      * @brief set auto start status for window.
      *
      * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     * @param priority 1 means height priority, 0 means low priority.
      */
-    virtual void SetAutoStartPiP(bool isAutoStart) {}
+    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
@@ -2081,7 +2082,7 @@ public:
      *
      * @return Value of PixelRatio obtained from displayInfo.
      */
-    virtual float GetVirtualPixelRatio() { return 0.0f; }
+    virtual float GetVirtualPixelRatio() { return 1.0f; }
 
     /**
      * @brief Hide None Secure Windows.
@@ -2117,7 +2118,18 @@ public:
     }
 
     /**
-     * @brief Set the modality of window.
+     * @brief Set the application modality of main window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set the modality of sub window.
      *
      * @param isModal bool.
      * @param modalityType ModalityType.
@@ -2135,6 +2147,22 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set to automatically save the window rect.
+     *
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether the auto-save the window rect is enabled or not.
+     *
+     * @param enabled True means the window rect auto-save is enabled, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the rect of host window.
@@ -2436,14 +2464,14 @@ public:
      * @param enable the value true means to enable gesture back, and false means the opposite.
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
+    virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get whether to enable gesture back.
      * @param enable the value true means to enable gesture back, and false means the opposite.
      * @return WM_OK means get success, others means get failed.
      */
-    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+    virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

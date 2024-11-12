@@ -97,7 +97,7 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio12, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
 
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(0);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(0, sceneSession->GetWindowType());
     result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(sceneSession->GetAspectRatio(), ratio);
@@ -632,22 +632,11 @@ HWTEST_F(SceneSessionTest3, SetRestoreMainWindowCallback, Function | SmallTest |
     info.abilityName_ = "SetRestoreMainWindowCallback";
     info.bundleName_ = "SetRestoreMainWindowCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
 
-    NotifyRestoreMainWindowFunc func;
-    sceneSession->SetRestoreMainWindowCallback(func);
-
-    NotifyRestoreMainWindowFunc func1 = [sceneSession]() {
+    sceneSession->SetRestoreMainWindowCallback([]() {
         return;
-    };
-    sceneSession->SetRestoreMainWindowCallback(func1);
-    ASSERT_EQ(nullptr, sceneSession->sessionChangeCallback_);
-
-    auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    sceneSession->RegisterSessionChangeCallback(sessionchangeCallback);
-    sceneSession->SetRestoreMainWindowCallback(func1);
-    ASSERT_NE(nullptr, sceneSession->sessionChangeCallback_);
+    });
+    ASSERT_NE(nullptr, sceneSession->onRestoreMainWindowFunc_);
 }
 
 /**
@@ -686,11 +675,11 @@ HWTEST_F(SceneSessionTest3, GetStartMoveFlag, Function | SmallTest | Level2)
     info.bundleName_ = "GetStartMoveFlag";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     bool isMoving = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
 
-    sceneSession->moveDragController_ = new MoveDragController(1024);
+    sceneSession->moveDragController_ = new MoveDragController(1024, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
 }
 
@@ -765,6 +754,24 @@ HWTEST_F(SceneSessionTest3, CompatibleFullScreenRecover, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: SetIsMidScene
+ * @tc.desc: SetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetIsMidScene, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsMidScene";
+    info.bundleName_ = "SetIsMidScene";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetIsMidScene(true);
+    bool res = sceneSession->GetIsMidScene();
+    EXPECT_EQ(res, true);
+}
+
+/**
  * @tc.name: SetIsPcAppInPad
  * @tc.desc: SetIsPcAppInPad
  * @tc.type: FUNC
@@ -806,6 +813,27 @@ HWTEST_F(SceneSessionTest3, CompatibleFullScreenClose, Function | SmallTest | Le
     sceneSession->property_ = windowSessionProperty;
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
     ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
+}
+
+/**
+ * @tc.name: SetWindowRectAutoSaveCallback
+ * @tc.desc: SetWindowRectAutoSaveCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetWindowRectAutoSaveCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowRectAutoSaveCallback";
+    info.bundleName_ = "SetWindowRectAutoSaveCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled) {
+        return;
+    };
+    sceneSession->SetWindowRectAutoSaveCallback(std::move(func1));
+    ASSERT_NE(nullptr, sceneSession->onSetWindowRectAutoSaveFunc_);
 }
 }
 }

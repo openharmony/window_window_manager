@@ -289,6 +289,37 @@ sptr<CutoutInfo> DisplayManagerLiteProxy::GetCutoutInfo(DisplayId displayId)
     sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
     return info;
 }
+
+VirtualScreenFlag DisplayManagerLiteProxy::GetVirtualScreenFlag(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("GetVirtualScreenFlag: remote is null");
+        return VirtualScreenFlag::DEFAULT;
+    }
+ 
+    if (screenId == SCREEN_ID_INVALID) {
+        return VirtualScreenFlag::DEFAULT;
+    }
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return VirtualScreenFlag::DEFAULT;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return VirtualScreenFlag::DEFAULT;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return VirtualScreenFlag::DEFAULT;
+    }
+    return static_cast<VirtualScreenFlag>(reply.ReadUint32());
+}
+
 /*
  * used by powermgr
  */

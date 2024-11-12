@@ -41,7 +41,7 @@ class XCNodeController extends NodeController {
 
 @Entry
 @Component
-export struct PiPContent {
+struct PiPContent {
   private xComponentController: XComponentController = new XComponentController();
   private nodeController: NodeController | null = null;
   private mXCNodeController: XCNodeController | null = null;

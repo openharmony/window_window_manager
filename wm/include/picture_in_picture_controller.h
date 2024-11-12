@@ -18,7 +18,6 @@
 
 #define PIP_WINDOW_NAME "pip_window"
 
-#include <event_handler.h>
 #include <refbase.h>
 #include <ability_context.h>
 #include "picture_in_picture_option.h"
@@ -128,7 +127,6 @@ private:
     Rect windowRect_ = {0, 0, 0, 0};
     bool isAutoStartEnabled_ = false;
     PiPWindowState curState_ = PiPWindowState::STATE_UNDEFINED;
-    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     std::shared_ptr<XComponentController> pipXComponentController_ = nullptr;
     std::shared_ptr<XComponentController> mainWindowXComponentController_ = nullptr;
     napi_env env_ = nullptr;
