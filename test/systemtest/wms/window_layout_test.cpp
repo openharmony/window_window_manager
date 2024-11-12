@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,14 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "common_test_utils.h"
-#include "window_test_utils.h"
-#include "wm_common.h"
-#include "window_adapter.h"
-#include "window_scene_session_impl.h"
 #include "ability_context_impl.h"
+#include "common_test_utils.h"
 #include "mock_session.h"
 #include "session/host/include/scene_session.h"
+#include "window_test_utils.h"
+#include "window_adapter.h"
+#include "window_scene_session_impl.h"
+#include "wm_common.h"
 
 
 using namespace testing;
