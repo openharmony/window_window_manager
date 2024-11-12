@@ -261,6 +261,7 @@ public:
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
+    void MarkSystemSceneUIFirst(bool isUIFirst, bool isForceFlag);
     void SetRequestedOrientation(Orientation orientation);
     WSError SetDefaultRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);

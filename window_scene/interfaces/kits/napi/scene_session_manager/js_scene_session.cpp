@@ -322,6 +322,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::SetSystemSceneOcclusionAlpha);
     BindNativeFunction(env, objValue, "setSystemSceneForceUIFirst",
         moduleName, JsSceneSession::SetSystemSceneForceUIFirst);
+    BindNativeFunction(env, objValue, "markSystemSceneUIFirst",
+        moduleName, JsSceneSession::MarkSystemSceneUIFirst);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setIsMidScene", moduleName, JsSceneSession::SetIsMidScene);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
@@ -1811,6 +1813,13 @@ napi_value JsSceneSession::SetSystemSceneForceUIFirst(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnSetSystemSceneForceUIFirst(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::MarkSystemSceneUIFirst(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnMarkSystemSceneUIFirst(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::SetFocusable(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
@@ -2479,6 +2488,40 @@ napi_value JsSceneSession::OnSetSystemSceneForceUIFirst(napi_env env, napi_callb
         return NapiGetUndefined(env);
     }
     session->SetSystemSceneForceUIFirst(forceUIFirst);
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI] end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnMarkSystemSceneUIFirst(napi_env env, napi_callback_info info) {
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) { // 1: params num
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isUIFirst = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isUIFirst)) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isUIFirst");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isForceFlag = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isForceFlag)) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isForceFlag");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->MarkSystemSceneUIFirst(isUIFirst, isForceFlag);
     TLOGD(WmsLogTag::DEFAULT, "[NAPI] end");
     return NapiGetUndefined(env);
 }
