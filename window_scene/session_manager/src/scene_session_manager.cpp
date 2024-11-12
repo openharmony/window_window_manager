@@ -7896,8 +7896,7 @@ void SceneSessionManager::GetDrawingDataElement(uint64_t windowId, int32_t& pid,
 }
 
 std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingContentChangeInfo(
-    const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData)
-{
+    const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData) {
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
     for (const auto& data : currDrawingContentData) {
         uint64_t windowId = data.first;
@@ -7905,11 +7904,11 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
         int32_t pid = 0;
         bool DrawingContentChange = false;
         sptr<SceneSession> session = SelectSesssionFromMap(windowId);
-        if 
-        (session == nullptr) {
+        if (session == nullptr) {
             WindowDrawingContentChange = true;
         }
-        if (!WindowDrawingContentChange && GetPreWindowDrawingState(windowId, currentDrawingContentChange, pid) == currentDrawingContentChange) {
+        if (!WindowDrawingContentChange &&
+            GetPreWindowDrawingState(windowId, currentDrawingContentChange, pid) == currentDrawingContentChange) {
             continue;
         }
         if (!WindowDrawingContentChange) {
