@@ -2187,6 +2187,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     }
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
+    bool isMainWindow = WindowHelper::IsMainWindow(property->GetWindowType());
     WSRect rect = moveDragController_->GetTargetRect();
     WLOGFD("OnMoveDragCallback rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason : %{public}d "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
@@ -2200,7 +2201,6 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
     if (isCompatibleModeInPc) {
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
-        bool isMainWindow = WindowHelper::IsMainWindow(property->GetWindowType());
         if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode() && isMainWindow) {
             OnSessionEvent(SessionEvent::EVENT_DRAG);
             return;
