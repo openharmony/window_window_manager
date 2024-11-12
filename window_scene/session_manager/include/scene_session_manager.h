@@ -850,7 +850,6 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     bool isReportTaskStart_ = false;
     std::vector<std::pair<uint64_t, WindowVisibilityState> > lastVisibleData_;
-    std::vector<std::tuple<uint64_t, int32_t, int32_t>> lastDrawingData_;
     RSInterfaces& rsInterface_;
     void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
