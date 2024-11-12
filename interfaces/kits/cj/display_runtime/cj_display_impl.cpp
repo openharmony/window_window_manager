@@ -348,10 +348,10 @@ bool IfCallbackRegistered(const std::string& type, int64_t funcId)
 int32_t DisplayImpl::OnUnRegisterAllDisplayManagerCallback(const std::string& type)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::WMS_DIALOG, "DisplayImpl::OnUnRegisterDisplayManagerCallbackWithType is called");
+    TLOGI(WmsLogTag::DMS, "DisplayImpl::OnUnRegisterDisplayManagerCallbackWithType is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterAllDisplayListenerWithType(type));
     if (ret != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Failed to unregister display listener with type %{public}s.", type.c_str());
+        TLOGE(WmsLogTag::DMS, "Failed to unregister display listener with type %{public}s.", type.c_str());
         ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     return static_cast<int32_t>(ret);
@@ -359,9 +359,9 @@ int32_t DisplayImpl::OnUnRegisterAllDisplayManagerCallback(const std::string& ty
 
 DMError DisplayImpl::UnRegisterAllDisplayListenerWithType(const std::string& type)
 {
-    TLOGI(WmsLogTag::WMS_DIALOG, "DisplayImpl::UnRegisterDisplayManagerListenerWithType is called");
+    TLOGI(WmsLogTag::DMS, "DisplayImpl::UnRegisterDisplayManagerListenerWithType is called");
     if (cjCbMap_.empty() || cjCbMap_.find(type) == cjCbMap_.end()) {
-        TLOGI(WmsLogTag::WMS_DIALOG, "UnRegisterDisplayManagerListenerWithType methodName %{public}s not registered",
+        TLOGI(WmsLogTag::DMS, "UnRegisterDisplayManagerListenerWithType methodName %{public}s not registered",
             type.c_str());
         return DMError::DM_OK;
     }
@@ -383,10 +383,10 @@ DMError DisplayImpl::UnRegisterAllDisplayListenerWithType(const std::string& typ
 int32_t DisplayImpl::OnRegisterDisplayManagerCallback(const std::string& type, int64_t funcId)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::WMS_DIALOG, "DisplayImpl::OnRegisterDisplayManagerCallback is called");
+    TLOGI(WmsLogTag::DMS, "DisplayImpl::OnRegisterDisplayManagerCallback is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(RegisterDisplayListenerWithType(type, funcId));
     if (ret != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Failed to register display listener with type %{public}s", type.c_str());
+        TLOGE(WmsLogTag::DMS, "Failed to register display listener with type %{public}s", type.c_str());
         ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     return static_cast<int32_t>(ret);
@@ -394,7 +394,7 @@ int32_t DisplayImpl::OnRegisterDisplayManagerCallback(const std::string& type, i
 
 DMError DisplayImpl::RegisterDisplayListenerWithType(const std::string& type, int64_t funcId)
 {
-    TLOGI(WmsLogTag::WMS_DIALOG, "DisplayImpl::RegisterDisplayListenerWithType is called");
+    TLOGI(WmsLogTag::DMS, "DisplayImpl::RegisterDisplayListenerWithType is called");
     if (IfCallbackRegistered(type, funcId)) {
         TLOGI(WmsLogTag::DMS, "RegisterDisplayListenerWithType callback already registered!");
         return DMError::DM_OK;
@@ -423,10 +423,10 @@ DMError DisplayImpl::RegisterDisplayListenerWithType(const std::string& type, in
 int32_t DisplayImpl::OnUnRegisterDisplayManagerCallback(const std::string& type, int64_t funcId)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::WMS_DIALOG, "DisplayImpl::OnUnRegisterDisplayManagerCallback is called");
+    TLOGI(WmsLogTag::DMS, "DisplayImpl::OnUnRegisterDisplayManagerCallback is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterDisplayListenerWithType(type, funcId));
     if (ret != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Failed to unregister display listener with type %{public}s", type.c_str());
+        TLOGE(WmsLogTag::DMS, "Failed to unregister display listener with type %{public}s", type.c_str());
         ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     return static_cast<int32_t>(ret);
@@ -434,10 +434,9 @@ int32_t DisplayImpl::OnUnRegisterDisplayManagerCallback(const std::string& type,
 
 DMError DisplayImpl::UnRegisterDisplayListenerWithType(const std::string& type, int64_t funcId)
 {
-    TLOGI(WmsLogTag::WMS_DIALOG, "DisplayImpl::UnRegisterDisplayListenerWithType is called");
+    TLOGI(WmsLogTag::DMS, "DisplayImpl::UnRegisterDisplayListenerWithType is called");
     if (cjCbMap_.empty() || cjCbMap_.find(type) == cjCbMap_.end()) {
-        TLOGI(WmsLogTag::WMS_DIALOG, "UnRegisterDisplayListenerWithType methodName %{public}s not registered",
-            type.c_str());
+        TLOGI(WmsLogTag::DMS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered", type.c_str());
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
