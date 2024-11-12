@@ -1038,7 +1038,7 @@ HWTEST_F(SceneSessionTest2, RegisterTouchOutsideCallback, Function | SmallTest |
     sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     sceneSession->onTouchOutside_ = nullptr;
     NotifyTouchOutsideFunc func = []() {};
-    sceneSession-> RegisterTouchOutsideCallback(std::move(func));
+    sceneSession->RegisterTouchOutsideCallback(std::move(func));
 
     ASSERT_NE(sceneSession->onTouchOutside_, nullptr);
 }
