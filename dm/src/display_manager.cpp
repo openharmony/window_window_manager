@@ -624,12 +624,12 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
             if (interval < MAX_INTERVAL_US) {
                 auto iter = displayMap_.find(displayId);
                 if (iter != displayMap_.end()) {
+                    WLOGFW("update display from cache, Id: %{public}" PRIu64" ", displayId);
                     return displayMap_[displayId];
                 }
             }
         }
     }
-    WLOGFI("update displayId: %{public}" PRIu64" ", displayId);
     sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
     if (displayInfo == nullptr) {
         WLOGFW("display null id : %{public}" PRIu64" ", displayId);
@@ -801,7 +801,7 @@ void DisplayManager::AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemote
     } else {
         displayIdList_.push_back(std::make_pair(abilityToken, displayId));
     }
-    ShowDisplayIdList(true);
+    ShowDisplayIdList(false);
 }
 
 void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken)
@@ -822,7 +822,7 @@ void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityTo
     if (iter != displayIdList_.end()) {
         displayIdList_.erase(iter);
     }
-    ShowDisplayIdList(true);
+    ShowDisplayIdList(false);
 }
 
 DisplayId DisplayManager::GetCallingAbilityDisplayId()
@@ -855,9 +855,9 @@ void DisplayManager::ShowDisplayIdList(bool isShowLog)
         oss << iter.second << ",";
     }
     if (isShowLog) {
-        WLOGFD("%{public}s]", oss.str().c_str());
-    } else {
         WLOGFI("%{public}s]", oss.str().c_str());
+    } else {
+        WLOGFD("%{public}s]", oss.str().c_str());
     }
 }
 
@@ -867,7 +867,7 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
         sptr<Display> display = nullptr;
         DisplayId displayId = GetCallingAbilityDisplayId();
         if (displayId != DISPLAY_ID_INVALID) {
-            WLOGFI("displayId:%{public}" PRIu64, displayId);
+            WLOGFD("displayId:%{public}" PRIu64, displayId);
             display = pImpl_->GetDisplayById(displayId);
         }
         if (display != nullptr) {
