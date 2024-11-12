@@ -54,7 +54,10 @@ public:
     static void AutoStartPipWindow();
     static void DoDestroy();
     static std::shared_ptr<NativeReference> innerCallbackRef_;
+
 private:
+    static sptr<PictureInPictureController> GetActiveController() { return activeController_; }
+
     // controller in use
     static sptr<PictureInPictureController> activeController_;
     static wptr<PictureInPictureController> autoStartController_;
