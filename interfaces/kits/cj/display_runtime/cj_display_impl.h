@@ -41,6 +41,10 @@ public:
     float GetVirtualPixelRatio();
     float GetXDPI();
     float GetYDPI();
+    RetStruct GetColorSpaces();
+    RetStruct GetHdrFormats();
+    uint32_t GetAvailableWidth();
+    uint32_t GetAvailableHeight();
     RetStruct GetCutoutInfo();
     RetStruct GetAvailableArea();
     int32_t OnUnRegisterAllDisplayManagerCallback(const std::string& type);
