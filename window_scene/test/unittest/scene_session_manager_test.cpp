@@ -1741,6 +1741,33 @@ HWTEST_F(SceneSessionManagerTest, GetCurrentPiPWindowInfo02, Function | SmallTes
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(info1.abilityName_, bundleName);
 }
+
+/**
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: test function : GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    DisplayId displayId = 0;
+    property->SetDisplayId(displayId);
+    sceneSession1->SetSessionProperty(property);
+
+    const std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    ASSERT_EQ(ssm_->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap), WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
