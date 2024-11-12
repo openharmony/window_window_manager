@@ -5171,6 +5171,10 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
     }
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to convert to TransitionController Object");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
     auto name = GetWindowName();
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(name);
     if (jsWindowObj == nullptr || jsWindowObj->GetNapiValue() == nullptr) {
@@ -5178,15 +5182,16 @@ WmErrorCode JsWindow::CreateTransitionController(napi_env env)
     }
     sptr<JsTransitionController> nativeController = new JsTransitionController(
         env, jsWindowObj, windowToken_);
-    if (objValue == nullptr) {
-        WLOGFE("Failed to convert to TransitionController Object");
+    auto nativeControllerVal = new wptr<JsTransitionController>(nativeController);
+    auto finalizer = [](napi_env, void* data, void*) {
+        WLOGFI("Finalizer for wptr JsTransitionController called");
+        delete static_cast<wptr<JsTransitionController>*>(data);
+    };
+    if (napi_wrap(env, objValue, nativeControllerVal, finalizer, nullptr, nullptr) != napi_ok) {
+        finalizer(env, nativeControllerVal, nullptr);
+        WLOGFE("Failed to wrap TransitionController Object");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    }
-    napi_wrap(env, objValue, new wptr<JsTransitionController>(nativeController),
-        [](napi_env, void* data, void*) {
-            WLOGFE("Finalizer for wptr form native Transition Controller is called");
-            delete static_cast<wptr<JsTransitionController>*>(data);
-        }, nullptr, nullptr);
+    };
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->RegisterAnimationTransitionController(nativeController));
     napi_ref result = nullptr;
     napi_create_reference(env, objValue, 1, &result);
