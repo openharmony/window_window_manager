@@ -3936,7 +3936,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
         SetDisplayBrightness(brightness);
     }
     if (!postTaskRet) {
-        TLOGE(WmsLogTag::DEFAULT, "Report post listener callback task failed. the task name is SetBrightness");
+        TLOGE(WmsLogTag::DEFAULT, "post task failed. task is SetBrightness");
     }
 }
 
@@ -7884,44 +7884,45 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 }
 
 void SceneSessionManager::GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid) {
-    for (auto elemIter = lastDrawingData_.begin(); elemIter != lastDrawingData_.end(); ++elemIter) {
-        auto elem = *elemIter;
-        if(std::get<0>(elem) == windowId) {
-            pid = std::get<1>(elem);
-            uid = std::get<2>(elem);
-            lastDrawingData_.erase(elemIter);
+    for (auto it = lastDrawingData_.begin(); it != lastDrawingData_.end(); ++it) {
+        auto& elem = *it;
+        if (elem.windowId_ == windowId) {
+            pid = elem.pid_;
+            uid = elem.uid_;
+            lastDrawingData_.erase(it);
             break;
         }
     }   
 }
 
 std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingContentChangeInfo(
-    std::vector<std::pair<uint64_t, bool>> currDrawingContentData)
+    const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData)
 {
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
     for (const auto& data : currDrawingContentData) {
         uint64_t windowId = data.first;
-        bool currentDrawingContentState = data.second;
+        bool currentDrawingContentChange = data.second;
         int32_t pid = 0;
-        bool isChange = false;
+        bool DrawingContentChange = false;
         sptr<SceneSession> session = SelectSesssionFromMap(windowId);
-        if (session == nullptr) {
-            isChange = true;
+        if 
+        (session == nullptr) {
+            WindowDrawingContentChange = true;
         }
-        if (!isChange && GetPreWindowDrawingState(windowId, pid, currentDrawingContentState) == currentDrawingContentState) {
+        if (!WindowDrawingContentChange && GetPreWindowDrawingState(windowId, currentDrawingContentChange, pid) == currentDrawingContentChange) {
             continue;
         }
-        if (!isChange) {
-            isChange = GetProcessDrawingState(windowId, pid, currentDrawingContentState);
+        if (!WindowDrawingContentChange) {
+            WindowDrawingContentChange = GetProcessDrawingState(windowId, pid, currentDrawingContentChange);
         }
-        if (isChange) {
-            processDrawingContentChangeInfo.emplace_back(windowId, currentDrawingContentState);
+        if (WindowDrawingContentChange) {
+            processDrawingContentChangeInfo.emplace_back(windowId, currentDrawingContentChange);
         }
     }
     return processDrawingContentChangeInfo;
 }
 
-bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState)
+bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool currentDrawingContentChange, int32_t& pid)
 {
     bool preWindowDrawingState = true;
     sptr<SceneSession> session = SelectSesssionFromMap(windowId);
@@ -7930,19 +7931,20 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, int32_t& p
     }
     pid = session->GetCallingPid();
     preWindowDrawingState = session->GetDrawingContentState();
-    session->SetDrawingContentState(currentDrawingContentState);
+    session->SetDrawingContentState(currentDrawingContentChange);
     RemoveDuplicateDrawingData(windowId);
-    lastDrawingData_.emplace_back(windowId, pid, session->GetCallingUid());
+    SessionRelatedID Ids = { windowId, pid, session->GetCallingUid() };
+    lastDrawingData_.emplace_back(Ids);
     return preWindowDrawingState;
 }
 
 void SceneSessionManager::RemoveDuplicateDrawingData(uint64_t windowId) {
-    for (auto elemIter = lastDrawingData_.begin(); elemIter != lastDrawingData_.end();) {
-        auto elem = *elemIter;
-        if(std::get<0>(elem) == windowId) {
-            lastDrawingData_.erase(elemIter);
+    for (auto it = lastDrawingData_.begin(); it != lastDrawingData_.end();) {
+        auto& elem = *it;
+        if (elem.windowId_ == windowId) {
+            lastDrawingData_.erase(it);
         } else {
-            ++elemIter;
+            ++it;
         }
     }       
 }
