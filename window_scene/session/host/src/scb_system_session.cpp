@@ -16,7 +16,6 @@
 #include "session/host/include/scb_system_session.h"
 
 #include <hisysevent.h>
-#include "key_event.h"
 #include "pointer_event.h"
 #include <ui/rs_surface_node.h>
 #include "window_manager_hilog.h"

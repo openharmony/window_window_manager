@@ -262,9 +262,16 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled03, Function | SmallTest |
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
-    window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    ASSERT_FALSE(WindowHelper::IsMainWindow(window->GetType()));
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     WMError retCode = window->SetResizeByDragEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    retCode = window->SetResizeByDragEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    retCode = window->SetResizeByDragEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_TYPE);
 }
 
@@ -342,28 +349,6 @@ HWTEST_F(WindowSessionImplTest, ColorSpace, Function | SmallTest | Level2)
     ColorSpace colorSpace2 = window->GetColorSpace();
     ASSERT_EQ(colorSpace2, ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: ColorSpace end";
-}
-
-/**
- * @tc.name: MakeSubOrDialogWindowDragableAndMoveble01
- * @tc.desc: MakeSubOrDialogWindowDragableAndMoveble
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, MakeSubOrDialogWindowDragableAndMoveble01, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(nullptr, option);
-    option->SetSubWindowDecorEnable(true);
-    option->SetWindowName("MakeSubOrDialogWindowDragableAndMoveble01");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->MakeSubOrDialogWindowDragableAndMoveble();
-    ASSERT_EQ(true, window->property_->IsDecorEnable());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: MakeSubOrDialogWindowDragableAndMoveble01 end";
 }
 
 /**
@@ -450,37 +435,11 @@ HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck01, Function | SmallTest
     option1->SetWindowName("WindowSessionCreateCheck"); // set the same name
     sptr<WindowSessionImpl> window1 =
         new (std::nothrow) WindowSessionImpl(option1);
-        
     ASSERT_NE(nullptr, window1);
 
     WMError res = window1->WindowSessionCreateCheck();
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck01 end";
-}
-
-/**
- * @tc.name: WindowSessionCreateCheck02
- * @tc.desc: WindowSessionCreateCheck02
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, WindowSessionCreateCheck02, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck02 start";
-    sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("WindowSessionCreateCheck");
-    sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    WMError res1 = window->WindowSessionCreateCheck();
-    ASSERT_EQ(res1, WMError::WM_OK);
-
-    window->property_->SetWindowName("test1");
-    window->windowSessionMap_.insert(std::make_pair("test2", std::make_pair(2, window)));
-    res1 = window->WindowSessionCreateCheck();
-    ASSERT_EQ(res1, WMError::WM_ERROR_REPEAT_OPERATION);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: WindowSessionCreateCheck02 end";
 }
 
 /**
@@ -1768,22 +1727,7 @@ HWTEST_F(WindowSessionImplTest, SetBackgroundColor01, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
     res = window->SetBackgroundColor(color);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-
-    color = "Blue";
-    window->property_->SetPersistentId(1);
-    window->state_ = WindowState::STATE_SHOWN;
-    window->hostSession_ = session;
-    ASSERT_FALSE(window->IsWindowSessionInvalid());
-    uint32_t colorValue;
-    ASSERT_FALSE(ColorParser::Parse(color, colorValue));
-    res = window->SetBackgroundColor(color);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
-
-    color = "#FFFFFF00";
-    ASSERT_TRUE(ColorParser::Parse(color, colorValue));
-    res = window->SetBackgroundColor(color);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_OPERATION);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBackgroundColor01 end";
 }
 
@@ -1809,19 +1753,6 @@ HWTEST_F(WindowSessionImplTest, SetBackgroundColor02, Function | SmallTest | Lev
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_OPERATION);
     uint32_t ret = window->GetBackgroundColor();
     ASSERT_EQ(ret, 0xffffffff);
-
-    ASSERT_EQ(window->aceAbilityHandler_, nullptr);
-    sptr<IAceAbilityHandler> handler = new (std::nothrow) MockIAceAbilityHandler();
-    window->SetAceAbilityHandler(handler);
-    res = window->SetBackgroundColor(0xffffffff);
-    ASSERT_NE(window->aceAbilityHandler_, nullptr);
-    ASSERT_EQ(res, WMError::WM_OK);
-
-    ASSERT_TRUE(!(0xff0000 & 0xff000000));
-    ASSERT_TRUE(WindowHelper::IsMainWindow(window->GetType()));
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    res = window->SetBackgroundColor(0xff0000);
-    ASSERT_EQ(res, WMError::WM_OK);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBackgroundColor02 end";
 }

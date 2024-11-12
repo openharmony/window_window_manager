@@ -267,6 +267,9 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
                 rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_COMMON_NODE;
             }
             break;
+        case WindowType::WINDOW_TYPE_PIP:
+            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
+            break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
@@ -679,9 +682,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
     property_->SetWindowRect(wmRect);
-    if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
-        windowSizeChanged_ = true;
-    }
     property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
@@ -705,6 +705,22 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
+void WindowSessionImpl::UpdateVirtualPixelRatio(const sptr<Display>& display)
+{
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null when rotation!");
+        return;
+    }
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null when rotation!");
+        return;
+    }
+    virtualPixelRatio_ = GetVirtualPixelRatio(displayInfo);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_);
+}
+
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config)
 {
@@ -714,6 +730,9 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         if (!window) {
             return;
         }
+        auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+        sptr<DisplayInfo> displayInfo = display ? display->GetDisplayInfo() : nullptr;
+        window->UpdateVirtualPixelRatio(display);
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         if (rsTransaction) {
             RSTransaction::FlushImplicitTransaction();
@@ -738,7 +757,7 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, displayInfo);
         RSNode::CloseImplicitAnimation();
         if (rsTransaction) {
             rsTransaction->Commit();
@@ -747,6 +766,18 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
         }
         window->postTaskDone_ = true;
     }, "WMS_WindowSessionImpl_UpdateRectForRotation");
+}
+
+void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
+        NotifySizeChange(wmRect, wmReason);
+        lastSizeChangeReason_ = wmReason;
+        postTaskDone_ = true;
+    }
+    UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+    UpdateFrameLayoutCallbackIfNeeded(wmReason);
 }
 
 bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wmReason)
@@ -762,14 +793,8 @@ bool WindowSessionImpl::CheckIfNeedCommitRsTransaction(WindowSizeChangeReason wm
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
-        NotifySizeChange(wmRect, wmReason);
-        lastSizeChangeReason_ = wmReason;
-        postTaskDone_ = true;
-    }
     if (handler_ == nullptr) {
-        UpdateViewportConfig(wmRect, wmReason, rsTransaction);
-        UpdateFrameLayoutCallbackIfNeeded(wmReason);
+        UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         return;
     }
 
@@ -785,12 +810,11 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
             rsTransaction->Begin();
         }
         if (wmReason == WindowSizeChangeReason::DRAG) {
-            window->UpdateViewportConfig(window->GetRect(), wmReason, rsTransaction);
+            window->UpdateRectForOtherReasonTask(window->GetRect(), preRect, wmReason, rsTransaction);
             window->isDragTaskUpdateDone_ = true;
         } else {
-            window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+            window->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         }
-        window->UpdateFrameLayoutCallbackIfNeeded(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             rsTransaction->Commit();
         }
@@ -833,8 +857,8 @@ void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
     if (!WindowHelper::IsMainWindow(GetType())) {
         return;
     }
-    if (windowSizeChanged_ || enableFrameLayoutFinishCb_) {
-        WSRect rect = {0, 0, width, height};
+    WSRect rect = { 0, 0, width, height };
+    if (layoutRect_ != rect || enableFrameLayoutFinishCb_) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
             "NotifyFrameLayoutFinishFromApp, id: %u, rect: %s, notifyListener: %d",
             GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
@@ -844,7 +868,7 @@ void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
         if (auto session = GetHostSession()) {
             session->NotifyFrameLayoutFinishFromApp(enableFrameLayoutFinishCb_, rect);
         }
-        windowSizeChanged_ = false;
+        layoutRect_ = rect;
         enableFrameLayoutFinishCb_ = false;
     }
 }
@@ -924,7 +948,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
             return win;
         }
     }
-    WLOGFW("Can not find main window, not app type");
+    TLOGD(WmsLogTag::DEFAULT, "Can not find main window, not app type");
     return nullptr;
 }
 
@@ -1055,20 +1079,11 @@ WSError WindowSessionImpl::UpdateWindowMode(WindowMode mode)
     return WSError::WS_OK;
 }
 
+/** @note @window.layout */
 float WindowSessionImpl::GetVirtualPixelRatio()
 {
-    float vpr = 0.0f; // This is an abnormal value, which is used to identify abnormal scenarios.
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
-        return vpr;
-    }
-    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null!");
-        return vpr;
-    }
-    return GetVirtualPixelRatio(displayInfo);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "virtualPixelRatio: %{public}f", virtualPixelRatio_);
+    return virtualPixelRatio_;
 }
 
 float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
@@ -1077,6 +1092,26 @@ float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
         return virtualPixelRatio_;
     }
     return displayInfo->GetVirtualPixelRatio();
+}
+
+WMError WindowSessionImpl::GetVirtualPixelRatio(float& vpr)
+{
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get display failed displayId: %{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get display info failed displayId: %{public}" PRIu64, property_->GetDisplayId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    vpr = GetVirtualPixelRatio(displayInfo);
+    if (MathHelper::NearZero(vpr)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get decor height failed, because of wrong vpr: %{public}f", vpr);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return WMError::WM_OK;
 }
 
 /** @note @window.layout */
@@ -1571,16 +1606,16 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    
+
     WLOGFD("%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsSubWindow(GetType())) {
         property_->SetDragEnabled(dragEnabled);
     } else {
-        WLOGFE("This is not main window.");
+        WLOGFE("This is not main window or sub window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
@@ -1744,6 +1779,7 @@ std::string WindowSessionImpl::GetRestoredRouterStack()
 
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
 {
+    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
     return uiContent_.get();
 }
 
@@ -1900,6 +1936,29 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::SetWindowTitleMoveEnabled(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType()) && !WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "called by invalid window type, type:%{public}d", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uicontent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent->EnableContainerModalGesture(enable);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enable:%{public}d end", enable);
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modalityType)
 {
     if (IsWindowSessionInvalid()) {
@@ -1935,26 +1994,45 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
     return modalRet;
 }
 
+WMError WindowSessionImpl::SetWindowModal(bool isModal)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "called by invalid window type, type:%{public}d", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    WMError modalRet = isModal ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    if (modalRet != WMError::WM_OK) {
+        return modalRet;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->OnMainSessionModalTypeChange(isModal);
+    return modalRet;
+}
+
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
-        return WMError::WM_ERROR_NULLPTR;
+    float vpr = 0.f;
+    auto err = GetVirtualPixelRatio(vpr);
+    if (err != WMError::WM_OK) {
+        return err;
     }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    float vpr = GetVirtualPixelRatio(displayInfo);
     int32_t decorHeightWithPx = static_cast<int32_t>(decorHeight * vpr);
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        WLOGFE("uicontent is empty");
+        TLOGE(WmsLogTag::DEFAULT, "uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->SetContainerModalTitleHeight(decorHeightWithPx);
@@ -1962,7 +2040,7 @@ WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)
     if (auto hostSession = GetHostSession()) {
         hostSession->SetCustomDecorHeight(decorHeight);
     }
-    WLOGFI("end, height: %{public}d", decorHeight);
+    TLOGI(WmsLogTag::DEFAULT, "end, height: %{public}d", decorHeight);
     return WMError::WM_OK;
 }
 
@@ -1973,32 +2051,22 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        WLOGFE("uiContent is null, windowId: %{public}u", GetWindowId());
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is null, windowId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
     height = uiContent->GetContainerModalTitleHeight();
     if (height == -1) {
         height = 0;
-        WLOGFE("Get app window decor height failed");
+        TLOGW(WmsLogTag::DEFAULT, "Get app window decor height failed");
         return WMError::WM_OK;
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    float vpr = GetVirtualPixelRatio(displayInfo);
-    if (MathHelper::NearZero(vpr)) {
-        WLOGFE("get decor height failed, because of wrong vpr: %{public}f", vpr);
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    float vpr = 0.f;
+    auto err = GetVirtualPixelRatio(vpr);
+    if (err != WMError::WM_OK) {
+        return err;
     }
     height = static_cast<int32_t>(height / vpr);
-    WLOGFI("end, height: %{public}d", height);
+    TLOGI(WmsLogTag::DEFAULT, "end, height: %{public}d", height);
     return WMError::WM_OK;
 }
 
@@ -2012,29 +2080,19 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     bool res = false;
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        WLOGFE("uicontent is empty");
+        TLOGE(WmsLogTag::DEFAULT, "uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
     res = uiContent->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
     if (!res) {
-        WLOGFE("GetContainerModalButtonsRect failed");
+        TLOGE(WmsLogTag::DEFAULT, "GetContainerModalButtonsRect failed");
         titleButtonRect.IsUninitializedRect();
         return WMError::WM_OK;
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    float vpr = GetVirtualPixelRatio(displayInfo);
-    if (MathHelper::NearZero(vpr)) {
-        WLOGFE("failed, because of wrong vpr: %{public}f", vpr);
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    float vpr = 0.f;
+    auto err = GetVirtualPixelRatio(vpr);
+    if (err != WMError::WM_OK) {
+        return err;
     }
     titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
         static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
@@ -2063,9 +2121,9 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto persistentId = GetPersistentId();
-    WLOGFD("Start, id:%{public}d", persistentId);
+    TLOGD(WmsLogTag::DEFAULT, "Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
-        WLOGFE("listener is null");
+        TLOGE(WmsLogTag::DEFAULT, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -2073,31 +2131,22 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
         WMError ret = RegisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
-            WLOGFE("register failed");
+            TLOGE(WmsLogTag::DEFAULT, "register failed");
             return ret;
         }
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    float vpr = GetVirtualPixelRatio(displayInfo);
-    if (MathHelper::NearZero(vpr)) {
-        WLOGFE("failed, because of wrong vpr: %{public}f", vpr);
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     if (auto uiContent = GetUIContentSharedPtr()) {
+        const char* const where = __func__;
         uiContent->SubscribeContainerModalButtonsRectChange(
-            [vpr, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
+            [where, weakThis = wptr(this)](Rect& decorRect, Rect& titleButtonLeftRect) {
             auto window = weakThis.promote();
             if (!window) {
-                TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null");
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is null", where);
+                return;
+            }
+            float vpr = 0.f;
+            auto err = window->GetVirtualPixelRatio(vpr);
+            if (err != WMError::WM_OK) {
                 return;
             }
             TitleButtonRect titleButtonRect;
@@ -2121,16 +2170,16 @@ WMError WindowSessionImpl::UnregisterWindowTitleButtonRectChangeListener(
     }
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
-    WLOGFD("Start, id:%{public}d", persistentId);
+    TLOGD(WmsLogTag::DEFAULT, "Start, id:%{public}d", persistentId);
     if (listener == nullptr) {
-        WLOGFE("listener is nullptr");
+        TLOGE(WmsLogTag::DEFAULT, "listener is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
         ret = UnregisterListener(windowTitleButtonRectChangeListeners_[persistentId], listener);
         if (ret != WMError::WM_OK) {
-            WLOGFE("failed");
+            TLOGE(WmsLogTag::DEFAULT, "failed");
             return ret;
         }
     }
@@ -3741,19 +3790,6 @@ WMError WindowSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
-{
-    auto sessionGravity = static_cast<SessionGravity>(gravity);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "%{public}u, percent: %{public}u", sessionGravity, percent);
-    property_->SetKeyboardSessionGravity(sessionGravity, percent);
-
-    if (auto hostSession = GetHostSession()) {
-        return static_cast<WMError>(hostSession->SetKeyboardSessionGravity(
-            static_cast<SessionGravity>(gravity), percent));
-    }
-    return WMError::WM_OK;
-}
-
 WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     return WMError::WM_OK;
@@ -3770,16 +3806,6 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChang
     auto occupiedAreaChangeListeners = GetListeners<IOccupiedAreaChangeListener>();
     for (auto& listener : occupiedAreaChangeListeners) {
         if (listener != nullptr) {
-            if (((property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-                  WindowHelper::IsMainWindow(GetType())) ||
-                 (WindowHelper::IsSubWindow(GetType()) && FindWindowById(GetParentId()) != nullptr &&
-                  FindWindowById(GetParentId())->GetMode() == WindowMode::WINDOW_MODE_FLOATING)) &&
-                (windowSystemConfig_.IsPhoneWindow() ||
-                 (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
-                sptr<OccupiedAreaChangeInfo> occupiedAreaChangeInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
-                listener->OnSizeChange(occupiedAreaChangeInfo);
-                continue;
-            }
             listener->OnSizeChange(info);
         }
     }
@@ -3883,14 +3909,14 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
         static_cast<WsPiPControlStatus>(status));
 }
 
-void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart)
+void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
         return;
     }
     if (auto hostSession = GetHostSession()) {
-        hostSession->SetAutoStartPiP(isAutoStart);
+        hostSession->SetAutoStartPiP(isAutoStart, priority);
     }
 }
 

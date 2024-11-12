@@ -22,11 +22,7 @@
 #include "dm_common.h"
 #include "screen_rotation_controller.h"
 #include "window_manager_hilog.h"
-
-#ifdef WM_SUBSCRIBE_MOTION_ENABLE
-#include "motion_agent.h"
-#include "motion_callback_stub.h"
-#endif
+#include "sensor_plugin.h"
 
 #ifdef SENSOR_ENABLE
 #include "sensor_agent.h"
@@ -65,14 +61,6 @@ private:
 #endif
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
-using OHOS::Msdp::MotionCallbackStub;
-using OHOS::Msdp::MotionEvent;
-
-class RotationMotionEventCallback : public MotionCallbackStub {
-public:
-    void OnMotionChanged(const MotionEvent& motionData) override;
-};
-
 class MotionSubscriber {
 friend SensorConnector;
 public:
@@ -82,7 +70,6 @@ private:
     static void SubscribeMotionSensor();
     static void UnsubscribeMotionSensor();
 
-    static sptr<RotationMotionEventCallback> motionEventCallback_;
     static bool isMotionSensorSubscribed_;
 };
 #endif

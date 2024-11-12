@@ -16,9 +16,7 @@
 #include "session/host/include/session.h"
 
 #include "ability_info.h"
-#include "ability_start_setting.h"
 #include "input_manager.h"
-#include "ipc_skeleton.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include <transaction/rs_interfaces.h>
@@ -29,15 +27,12 @@
 #include "common/include/session_permission.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
-#include "util.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "parameters.h"
 #include <hisysevent.h>
 #include "hitrace_meter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
-#include "session/host/include/ws_ffrt_helper.h"
-#include "singleton_container.h"
 #include "perform_reporter.h"
 
 namespace OHOS::Rosen {
@@ -45,6 +40,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
+std::mutex g_persistentIdSetMutex;
 constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
@@ -99,6 +95,16 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
         TLOGI(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
         SetFocusedOnShow(focusedOnShow);
+    }
+}
+
+Session::~Session()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
+    if (mainHandler_) {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() {
+            // do nothing
+        });
     }
 }
 
@@ -217,12 +223,6 @@ void Session::SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want)
     sessionInfo_.want = want;
 }
 
-void Session::SetSessionInfoProcessOptions(const std::shared_ptr<AAFwk::ProcessOptions>& processOptions)
-{
-    std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
-    sessionInfo_.processOptions = processOptions;
-}
-
 void Session::ResetSessionInfoResultCode()
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
@@ -288,6 +288,12 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
+    sessionInfo_.processOptions = info.processOptions;
+}
+
+DisplayId Session::GetScreenId() const
+{
+    return sessionInfo_.screenId_;
 }
 
 void Session::SetScreenId(uint64_t screenId)
@@ -409,6 +415,16 @@ void Session::NotifyLayoutFinished()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnLayoutFinished();
+        }
+    }
+}
+
+void Session::NotifyRemoveBlank()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveBlank();
         }
     }
 }
@@ -611,6 +627,16 @@ bool Session::IsFocusedOnShow() const
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "IsFocusedOnShow:%{public}d, id: %{public}d", focusedOnShow_, GetPersistentId());
     return focusedOnShow_;
+}
+
+void Session::SetStartingBeforeVisible(bool isStartingBeforeVisible)
+{
+    isStartingBeforeVisible_ = isStartingBeforeVisible;
+}
+
+bool Session::GetStartingBeforeVisible() const
+{
+    return isStartingBeforeVisible_;
 }
 
 WSError Session::SetTouchable(bool touchable)
@@ -1133,15 +1159,10 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     }
     isStarting_ = false;
 
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && GetParentSession() &&
-        !GetParentSession()->IsSessionForeground()) {
-        TLOGD(WmsLogTag::WMS_DIALOG, "parent is not foreground");
-        SetSessionState(SessionState::STATE_BACKGROUND);
-    }
-
     NotifyForeground();
 
     isTerminating_ = false;
+    isNeedSyncSessionRect_ = true;
     return WSError::WS_OK;
 }
 
@@ -1205,6 +1226,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         isActive_ = false;
     }
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "Background state invalid! id: %{public}d, state: %{public}u",
             GetPersistentId(), state);
@@ -1237,7 +1259,9 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     TLOGI(WmsLogTag::WMS_LIFE, "Disconnect session, id: %{public}d, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
+    isStartingBeforeVisible_ = false;
     bufferAvailable_ = false;
+    isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
             surfaceNode.reset();
@@ -1280,6 +1304,17 @@ WSError Session::DrawingCompleted()
     return WSError::WS_OK;
 }
 
+WSError Session::RemoveStartingWindow()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnAppRemoveStartingWindow();
+        }
+    }
+    return WSError::WS_OK;
+}
+
 WSError Session::SetActive(bool active)
 {
     SessionState state = GetSessionState();
@@ -1311,16 +1346,26 @@ WSError Session::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-void Session::ProcessClickModalSpecificWindowOutside(int32_t posX, int32_t posY)
+void Session::ProcessClickModalWindowOutside(int32_t posX, int32_t posY)
 {
-    if (clickModalSpecificWindowOutsideFunc_ && !winRect_.IsInRegion(posX, posY)) {
-        clickModalSpecificWindowOutsideFunc_();
+    if (clickModalWindowOutsideFunc_ && !winRect_.IsInRegion(posX, posY)) {
+        clickModalWindowOutsideFunc_();
     }
 }
 
-void Session::SetClickModalSpecificWindowOutsideListener(const NotifyClickModalSpecificWindowOutsideFunc& func)
+void Session::SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFunc&& func)
 {
-    clickModalSpecificWindowOutsideFunc_ = func;
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or func is null", where);
+            return;
+        }
+        session->clickModalWindowOutsideFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_DIALOG, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    };
+    PostTask(task, __func__);
 }
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
@@ -1356,6 +1401,18 @@ void Session::SetIsPendingToBackgroundState(bool isPendingToBackgroundState)
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d isPendingToBackgroundState:%{public}d",
         GetPersistentId(), isPendingToBackgroundState);
     return isPendingToBackgroundState_.store(isPendingToBackgroundState);
+}
+
+bool Session::IsActivatedAfterScreenLocked() const
+{
+    return isActivatedAfterScreenLocked_.load();
+}
+
+void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
+        GetPersistentId(), isActivatedAfterScreenLocked);
+    isActivatedAfterScreenLocked_.store(isActivatedAfterScreenLocked);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
@@ -1727,10 +1784,10 @@ sptr<Session> Session::GetParentSession() const
     return parentSession_;
 }
 
-sptr<Session> Session::GetMainSession()
+sptr<Session> Session::GetMainSession() const
 {
     if (SessionHelper::IsMainWindow(GetWindowType())) {
-        return this;
+        return const_cast<Session*>(this);
     } else if (parentSession_) {
         return parentSession_->GetMainSession();
     } else {
@@ -2238,14 +2295,18 @@ void Session::NotifySessionStateChange(const SessionState& state)
             WLOGFE("session is null");
             return;
         }
-        TLOGD(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
+        TLOGND(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
             static_cast<uint32_t>(state), session->GetPersistentId());
         if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
+        } else {
+            TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeFunc is null");
         }
 
         if (session->sessionStateChangeNotifyManagerFunc_) {
             session->sessionStateChangeNotifyManagerFunc_(session->GetPersistentId(), state);
+        } else {
+            TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeNotifyManagerFunc is null");
         }
     };
     PostTask(task, "NotifySessionStateChange");
@@ -2284,11 +2345,11 @@ void Session::NotifySessionTouchableChange(bool touchable)
     }
 }
 
-void Session::NotifyClick(bool requestFocus)
+void Session::NotifyClick(bool requestFocus, bool isClick)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "requestFocus: %{public}u", requestFocus);
+    TLOGD(WmsLogTag::WMS_FOCUS, "requestFocus: %{public}u, isClick: %{public}u", requestFocus, isClick);
     if (clickFunc_) {
-        clickFunc_(requestFocus);
+        clickFunc_(requestFocus, isClick);
     }
 }
 
@@ -2573,7 +2634,6 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "set property dragEnable: %{public}d", property->GetDragEnabled());
     {
         std::unique_lock<std::shared_mutex> lock(propertyMutex_);
         property_ = property;
@@ -2691,6 +2751,26 @@ WSRect Session::GetSessionRect() const
 }
 
 /** @note @window.layout */
+WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
+{
+    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        WSRect scaledRect = session->GetSessionGlobalRect();
+        scaledRect.width_ *= session->scaleX_;
+        scaledRect.height_ *= session->scaleY_;
+        globalScaledRect = { scaledRect.posX_, scaledRect.posY_, scaledRect.width_, scaledRect.height_ };
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+            session->GetPersistentId(), globalScaledRect.ToString().c_str());
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, "GetGlobalScaledRect");
+}
+
+/** @note @window.layout */
 WSRect Session::GetSessionGlobalRect() const
 {
     if (IsScbCoreEnabled()) {
@@ -2704,6 +2784,9 @@ WSRect Session::GetSessionGlobalRect() const
 void Session::SetSessionGlobalRect(const WSRect& rect)
 {
     std::lock_guard<std::mutex> lock(globalRectMutex_);
+    if (globalRect_ != rect) {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
+    }
     globalRect_ = rect;
 }
 
@@ -2758,6 +2841,36 @@ WSRect Session::GetClientRect() const
     return clientRect_;
 }
 
+void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)
+{
+    enableRemoveStartingWindow_ = enableRemoveStartingWindow;
+}
+
+bool Session::GetEnableRemoveStartingWindow() const
+{
+    return enableRemoveStartingWindow_;
+}
+
+void Session::SetAppBufferReady(bool appBufferReady)
+{
+    appBufferReady_ = appBufferReady;
+}
+
+bool Session::GetAppBufferReady() const
+{
+    return appBufferReady_;
+}
+
+void Session::SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked)
+{
+    useStartingWindowAboveLocked_ = useStartingWindowAboveLocked;
+}
+
+bool Session::UseStartingWindowAboveLocked() const
+{
+    return useStartingWindowAboveLocked_;
+}
+
 WindowType Session::GetWindowType() const
 {
     auto property = GetSessionProperty();
@@ -2808,6 +2921,7 @@ WSError Session::ProcessBackEvent()
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
 {
+    std::lock_guard lock(g_persistentIdSetMutex);
     if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(persistentId)) {
         g_persistentIdSet.insert(persistentId);
         persistentId_ = persistentId;
@@ -2834,12 +2948,25 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
         persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     }
     g_persistentIdSet.insert(g_persistentId);
-    WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const
 {
     return scenePersistence_;
+}
+
+bool Session::CheckIfNeedKeyboardAvoidAreaEmpty() const
+{
+    bool isMainFloating =
+            GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && WindowHelper::IsMainWindow(GetWindowType());
+    bool isParentFloating = (WindowHelper::IsSubWindow(GetWindowType()) && GetParentSession() != nullptr &&
+                            GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    bool isMidScene = GetIsMidScene();
+    bool isPhoneOrPadNotFreeMultiWindow =
+            systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+    return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 
 void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
@@ -2848,6 +2975,10 @@ void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
     if (!sessionStage_) {
         TLOGD(WmsLogTag::WMS_KEYBOARD, "session stage is nullptr");
         return;
+    }
+    if (CheckIfNeedKeyboardAvoidAreaEmpty()) {
+        info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Occupied area need to empty when in floating mode");
     }
     sessionStage_->NotifyOccupiedAreaChangeInfo(info, rsTransaction);
 }

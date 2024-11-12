@@ -505,6 +505,28 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnPropertyChanged, Function |
 }
 
 /**
+ * @tc.name: HandleOnSuperFoldStatusChanged
+ * @tc.desc: HandleOnSuperFoldStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnSuperFoldStatusChanged, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ScreenId screenId = 0;
+    data.WriteUint64(screenId);
+    ScreenProperty property;
+    RSMarshallingHelper::Marshalling(data, property);
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    data.WriteUint32(static_cast<uint32_t>(reason));
+
+    int ret = screenSessionManagerClientStub_->HandleOnSuperFoldStatusChanged(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: HandleOnHoverStatusChanged
  * @tc.desc: HandleOnHoverStatusChanged test
  * @tc.type: FUNC

@@ -54,6 +54,7 @@ public:
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override {};
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override {};
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {};
+    void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override {};
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };
@@ -110,7 +111,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch01, Function | SmallTe
     ScreenId mainScreenId = 1;
     std::vector<ScreenId> ScreenIds = {2, 3};
     ScreenId screenGroupId;
-    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(screenGroupId, 0);
 }
 
@@ -126,7 +128,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch02, Function | SmallTe
     ScreenId screenGroupId;
     sptr<ScreenSession> session = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[mainScreenId] = session;
-    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds,
+        DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -147,7 +150,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch03, Function | SmallTe
     ScreenCombination combination =  ScreenCombination::SCREEN_ALONE;
     sptr<ScreenSessionGroup> sessiongroup = new ScreenSessionGroup(mainScreenId, rsId, name, combination);
     ScreenSessionManager::GetInstance().smsScreenGroupMap_[mainScreenId] = sessiongroup;
-    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -161,7 +165,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch04, Function | SmallTe
     ScreenId mainScreenId = 1003;
     std::vector<ScreenId> ScreenIds = {2, 3};
     ScreenId screenGroupId;
-    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(screenGroupId, 0);
 }
 
@@ -175,7 +180,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch05, Function | SmallTe
     ScreenId mainScreenId = 101;
     std::vector<ScreenId> ScreenIds = {1, 2};
     ScreenId screenGroupId;
-    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(screenGroupId, 0);
 }
 
@@ -189,7 +195,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch06, Function | SmallTe
     ScreenId mainScreenId = 102;
     std::vector<ScreenId> ScreenIds = {1, 3};
     ScreenId screenGroupId;
-    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(screenGroupId, 0);
 }
 
@@ -201,7 +208,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch06, Function | SmallTe
 HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch01, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 
@@ -216,7 +223,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch02, Function | SmallT
     sptr<ScreenSession> session = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[
         ScreenSessionManager::GetInstance().defaultScreenId_] = session;
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -233,7 +240,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch03, Function | SmallT
         ScreenSessionManager::GetInstance().defaultScreenId_] = session;
     sptr<ScreenSession> session1 = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[1002] = session1;
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -248,7 +255,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch04, Function | SmallT
     sptr<ScreenSession> session = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[
         ScreenSessionManager::GetInstance().defaultScreenId_] = session;
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -266,7 +273,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch05, Function | SmallT
         ScreenSessionManager::GetInstance().defaultScreenId_] = session;
     sptr<ScreenSession> session1 = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[12] = session1;
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -537,7 +544,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -550,7 +557,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch01, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1001, 1002};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -563,7 +570,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch02, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -576,7 +583,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch03, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1003, 1002};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -589,7 +596,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch04, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1003, 2};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -1424,7 +1431,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange01, Function | SmallTest
 
 /**
  * @tc.name: InternalScreenOffChange02
- * @tc.desc: internal extend to external mirror
+ * @tc.desc: no need to change or paramater error
  * @tc.type: FUNC
  */
 HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange02, Function | SmallTest | Level1)
@@ -1477,7 +1484,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange02, Function | SmallTest
 
 /**
  * @tc.name: InternalScreenOffChange03
- * @tc.desc: paramater error
+ * @tc.desc: internal extend to external mirror
  * @tc.type: FUNC
  */
 HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange03, Function | SmallTest | Level1)
@@ -1518,7 +1525,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange03, Function | SmallTest
 
     EXPECT_EQ(true, internalSession->GetIsExtend());
     EXPECT_EQ(false, externalSession->GetIsExtend());
-    EXPECT_EQ(ScreenCombination::SCREEN_EXTEND, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, internalSession->GetScreenCombination());
     EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
     {
         std::lock_guard<std::recursive_mutex>
@@ -1571,7 +1578,7 @@ HWTEST_F(MultiScreenManagerTest, InternalScreenOffChange04, Function | SmallTest
 
     EXPECT_EQ(true, internalSession->GetIsExtend());
     EXPECT_EQ(false, externalSession->GetIsExtend());
-    EXPECT_EQ(ScreenCombination::SCREEN_EXTEND, internalSession->GetScreenCombination());
+    EXPECT_EQ(ScreenCombination::SCREEN_MIRROR, internalSession->GetScreenCombination());
     EXPECT_EQ(ScreenCombination::SCREEN_MAIN, externalSession->GetScreenCombination());
     {
         std::lock_guard<std::recursive_mutex>

@@ -26,8 +26,8 @@ class FutureCallback : public RefBase {
 public:
     WSError OnUpdateSessionRect(
         const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
-    Rect GetResizeAsyncResult(long timeOut);
-    Rect GetMoveToAsyncResult(long timeOut);
+    Rect GetResizeAsyncResult(long timeOut); // unit: ms
+    Rect GetMoveToAsyncResult(long timeOut); // unit: ms
     void ResetResizeLock();
     void ResetMoveToLock();
     

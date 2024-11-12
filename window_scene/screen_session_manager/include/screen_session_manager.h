@@ -35,6 +35,7 @@
 #include "screen_cutout_controller.h"
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS::Rosen {
 class RSInterfaces;
@@ -108,6 +109,8 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+        DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode) override;
     virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
@@ -163,7 +166,8 @@ public:
     bool HandleFoldScreenSessionCreate(ScreenId screenId);
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
-        const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination);
+             const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination,
+             DMRect mainScreenRegion = DMRect::NONE());
 
     bool RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup);
 
@@ -172,7 +176,7 @@ public:
         std::map<ScreenId, bool>& removeChildResMap);
     bool CheckScreenInScreenGroup(sptr<ScreenSession> screen) const;
 
-    DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens);
+    DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
 
     void NotifyScreenConnected(sptr<ScreenInfo> screenInfo);
@@ -206,6 +210,8 @@ public:
     void ScreenOffCVNotify(void);
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
+    sptr<ScreenSession> GetOrCreateFakeScreenSession(sptr<ScreenSession> screenSession);
+    void InitFakeScreenSession(sptr<ScreenSession> screenSession);
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -231,6 +237,8 @@ public:
     void SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status);
     void TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode);
     void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status);
+    void CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status);
+    void TryToRecoverFoldDisplayMode(ScreenPowerStatus status);
 
     void SetKeyguardDrawnDoneFlag(bool flag);
 
@@ -241,6 +249,7 @@ public:
     int NotifyFoldStatusChanged(const std::string& statusParam);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
+    void NotifyScreenMagneticStateChanged(bool isMagneticState);
     void OnTentModeChanged(bool isTentMode);
     void RegisterSettingDpiObserver();
     void RegisterExtendSettingDpiObserver();
@@ -294,6 +303,7 @@ public:
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
+    void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
     void NotifyCastWhenScreenConnectChange(bool isConnected);
@@ -319,6 +329,8 @@ public:
         DmErrorCode* errorCode = nullptr) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode) override;
 
 protected:
     ScreenSessionManager();
@@ -338,7 +350,7 @@ private:
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
-    void InitScreenDensity(sptr<ScreenSession> session, const ScreenProperty& property);
+    void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     float CalcDefaultExtendScreenDensity(const ScreenProperty& property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
@@ -364,6 +376,8 @@ private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void NotifyCaptureStatusChanged();
+    DMError DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        DMRect mainScreenRegion, ScreenId& screenGroupId);
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
@@ -374,6 +388,7 @@ private:
         const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type);
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession);
+    DisplayId GetFakeDisplayId(sptr<ScreenSession> screenSession);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
     void GetInternalAndExternalSession(sptr<ScreenSession>& internalSession, sptr<ScreenSession>& externalSession);
@@ -388,6 +403,7 @@ private:
         const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession);
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
+    bool IsExtendMode();
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -469,6 +485,7 @@ private:
     std::atomic<uint32_t> cachedSettingDpi_ {0};
 
     uint32_t defaultDpi {0};
+    uint32_t extendDefaultDpi_ {0};
     uint32_t defaultDeviceRotationOffset_ { 0 };
 
     bool isMultiScreenCollaboration_ = false;

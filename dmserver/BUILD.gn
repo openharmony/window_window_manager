@@ -50,6 +50,7 @@ ohos_shared_library("libdms") {
     "src/display_power_controller.cpp",
     "src/screen_rotation_controller.cpp",
     "src/sensor_connector.cpp",
+    "src/sensor_plugin.cpp",
   ]
 
   configs = [
@@ -69,6 +70,7 @@ ohos_shared_library("libdms") {
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -76,12 +78,12 @@ ohos_shared_library("libdms") {
     "ipc:ipc_single",
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = []
   if (window_manager_feature_subscribe_motion) {
     if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
-      external_deps += [ "motion:motion_interface_native" ]
       defines += [ "WM_SUBSCRIBE_MOTION_ENABLE" ]
     }
   }

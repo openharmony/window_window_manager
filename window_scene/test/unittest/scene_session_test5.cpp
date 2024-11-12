@@ -107,7 +107,7 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     EXPECT_EQ(session->reason_, SizeChangeReason::RECOVER);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     session->moveDragController_->isStartDrag_ = true;
     session->moveDragController_->isStartMove_ = true;
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
@@ -330,7 +330,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     session->property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
     session->ClearDialogVector();
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     SystemSessionConfig systemConfig;
     systemConfig.isSystemDecorEnable_ = false;
     systemConfig.decorModeSupportInfo_ = 2;
@@ -383,9 +383,9 @@ HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, Function | SmallTest | Level2)
     session->SetSessionRect(preRect);
 
     session->property_->SetDragEnabled(true);
-    session->SetSurfaceBounds(rect);
+    session->SetSurfaceBounds(rect, false);
     session->property_->SetDragEnabled(false);
-    session->SetSurfaceBounds(rect);
+    session->SetSurfaceBounds(rect, false);
     EXPECT_EQ(preRect, session->GetSessionRect());
 }
 
@@ -401,19 +401,53 @@ HWTEST_F(SceneSessionTest5, OnLayoutFullScreenChange, Function | SmallTest | Lev
     info.bundleName_ = "OnLayoutFullScreenChange";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
+    session->onLayoutFullScreenChangeFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+}
+
+/**
+ * @tc.name: RegisterLayoutFullScreenChangeCallback
+ * @tc.desc: test RegisterLayoutFullScreenChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, RegisterLayoutFullScreenChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterLayoutFullScreenChangeCallback";
+    info.bundleName_ = "RegisterLayoutFullScreenChangeCallback";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sceneSession->onLayoutFullScreenChangeFunc_ = nullptr;
+    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
+
+    sceneSession->RegisterLayoutFullScreenChangeCallback(std::move(func));
+    ASSERT_NE(sceneSession->onLayoutFullScreenChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: OnDefaultDensityEnabled
+ * @tc.desc: OnDefaultDensityEnabled function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, OnDefaultDensityEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnDefaultDensityEnabled";
+    info.bundleName_ = "OnDefaultDensityEnabled";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
 
     sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
         sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->RegisterSessionChangeCallback(sessionChangeCallback);
-    sessionChangeCallback->onLayoutFullScreenChangeFunc_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+    session->onDefaultDensityEnabledFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
 
-    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {
+    NotifyDefaultDensityEnabledFunc func = [](bool isLDefaultDensityEnabled) {
         return;
     };
-    sessionChangeCallback->onLayoutFullScreenChangeFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+    session->onDefaultDensityEnabledFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->OnDefaultDensityEnabled(true));
 }
 
 /**
@@ -449,7 +483,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -477,7 +511,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason, DisplayId displayId) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -781,10 +815,13 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    RequestVsyncFunc requestVsyncFunc = [](std::shared_ptr<VsyncCallback>& callback){};
+    session->SetRequestNextVsyncFunc(requestVsyncFunc);
+    EXPECT_NE(nullptr, session->requestNextVsyncFunc_);
     session->moveDragController_ = nullptr;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     session->OnMoveDragCallback(reason);
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     session->OnMoveDragCallback(reason);
 
     reason = SizeChangeReason::DRAG_END;
@@ -797,7 +834,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     session->OnMoveDragCallback(reason);
     EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
     session->SetSessionProperty(nullptr);
     session->OnMoveDragCallback(reason);
@@ -1594,7 +1631,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, Function | SmallTest | Le
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
 
-    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
 
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
@@ -1642,8 +1679,43 @@ HWTEST_F(SceneSessionTest5, SetRequestNextVsyncFunc01, Function | SmallTest | Le
         info1.bundleName_ = "test2";
     };
     session->SetRequestNextVsyncFunc(requestVsyncFunc1);
-    EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
     ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+}
+
+/**
+ * @tc.name: NotifyServerToUpdateRect01
+ * @tc.desc: NotifyServerToUpdateRect01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyServerToUpdateRect01";
+    info.bundleName_ = "NotifyServerToUpdateRect01";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    
+    session->foregroundInteractiveStatus_.store(true);
+    EXPECT_EQ(session->GetForegroundInteractiveStatus(), true);
+
+    SessionUIParam uiParam;
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false);
+
+    uiParam.rect_ = { 100, 100, 200, 200 };
+    session->SetNeedSyncSessionRect(false);
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // not sync
+    EXPECT_NE(session->GetSessionRect(), uiParam.rect_);
+
+    uiParam.needSync_ = false;
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // not sync
+    EXPECT_NE(session->GetSessionRect(), uiParam.rect_);
+
+    uiParam.needSync_ = true;
+    session->SetNeedSyncSessionRect(true); // sync first
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), true);
+    EXPECT_EQ(session->GetSessionRect(), uiParam.rect_);
+
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // skip same rect
 }
 }
 }

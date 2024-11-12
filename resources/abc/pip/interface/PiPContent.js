@@ -40,7 +40,7 @@ class XCNodeController extends NodeController {
     }
 }
 
-export class PiPContent extends ViewPU {
+class PiPContent extends ViewPU {
     constructor(b2, c2, d2, e2 = -1, f2 = undefined, g2) {
         super(b2, d2, e2, g2);
         if (typeof f2 === 'function') {
@@ -99,13 +99,6 @@ export class PiPContent extends ViewPU {
             return;
         }
         this.useNode = true;
-        let parent = this.xComponent.getParent();
-        if (parent === null || parent === undefined) {
-            pip.setPipNodeType(this.xComponent, false);
-        } else {
-            pip.setPipNodeType(this.xComponent, true);
-            parent.removeChild(this.xComponent);
-        }
         pip.setTypeNodeEnabled();
         this.mXCNodeController = new XCNodeController(this.xComponent);
         console.info(TAG, 'use Node Controller');

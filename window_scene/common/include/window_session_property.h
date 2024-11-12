@@ -74,7 +74,6 @@ public:
     void SetConfigWindowLimitsVP(const WindowLimits& windowLimitsVP);
     void SetLastLimitsVpr(float vpr);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
-    void SetKeyboardSessionGravity(SessionGravity gravity_, uint32_t percent);
     void SetKeyboardLayoutParams(const KeyboardLayoutParams& params);
     void SetDecorEnable(bool isDecorEnable);
     void SetAnimationFlag(uint32_t animationFlag);
@@ -140,7 +139,6 @@ public:
     float GetLastLimitsVpr() const;
     uint32_t GetModeSupportInfo() const;
     std::unordered_map<WindowType, SystemBarProperty> GetSystemBarProperty() const;
-    void GetSessionGravity(SessionGravity& gravity, uint32_t& percent);
     bool IsDecorEnable();
     uint32_t GetAnimationFlag() const;
     const Transform& GetTransform() const;
@@ -202,7 +200,7 @@ public:
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
 
-    /*
+    /**
      * UIExtension
      */
     void SetRealParentId(int32_t realParentId);
@@ -218,7 +216,7 @@ public:
     void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
     bool GetIsUIExtAnySubWindow() const;
 
-    /*
+    /**
      * Multi instance
      */
     void SetAppInstanceKey(const std::string& appInstanceKey);
@@ -278,6 +276,7 @@ private:
     std::string windowName_;
     SessionInfo sessionInfo_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
+    mutable std::mutex windowRectMutex_;
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
@@ -311,9 +310,7 @@ private:
     WindowLimits configLimitsVP_;
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
-    SessionGravity sessionGravity_ = SessionGravity::SESSION_GRAVITY_DEFAULT;
     KeyboardLayoutParams keyboardLayoutParams_;
-    uint32_t sessionGravitySizePercent_ = 0;
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,           SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
@@ -360,7 +357,7 @@ private:
      */
     uint32_t subWindowLevel_ = 1;
 
-    /*
+    /**
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -370,7 +367,7 @@ private:
     bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
-    /*
+    /**
      * Multi instance
      */
     std::string appInstanceKey_;

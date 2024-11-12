@@ -133,6 +133,7 @@ ohos_shared_library("libdm") {
   external_deps = [
     "ability_runtime:ability_manager",
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -193,6 +194,7 @@ ohos_shared_library("libdm_ndk") {
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:pixelmap",
+    "ipc:ipc_core",
   ]
 
   part_name = "window_manager"

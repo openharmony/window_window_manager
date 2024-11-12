@@ -24,12 +24,20 @@
 
 namespace OHOS::Rosen {
 const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
+
+enum class DisplayModeChangeReason : uint32_t {
+    DEFAULT = 0,
+    RECOVER,
+    INVALID,
+};
+
 class FoldScreenPolicy : public RefBase {
 public:
     FoldScreenPolicy();
     virtual ~FoldScreenPolicy();
 
-    virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode);
+    virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     virtual void SendSensorResult(FoldStatus foldStatus);
     virtual ScreenId GetCurrentScreenId();
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
@@ -38,6 +46,7 @@ public:
     virtual void UpdateForPhyScreenPropertyChange();
     virtual void ExitCoordination();
     virtual void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    virtual FoldDisplayMode GetModeMatchStatus() { return FoldDisplayMode::UNKNOWN; }
     virtual void BootAnimationFinishPowerInit() {};
     virtual void ChangeOnTentMode(FoldStatus currentState);
     virtual void ChangeOffTentMode();
@@ -56,7 +65,7 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
-    /*
+    /**
      *    Avoid fold to expand process queues public interface
      */
     bool GetModeChangeRunningStatus();
@@ -65,7 +74,7 @@ public:
     FoldDisplayMode GetLastCacheDisplayMode();
     
 protected:
-    /*
+    /**
      *    Avoid fold to expand process queues private variable
      */
     std::atomic<int> pengdingTask_{FOLD_TO_EXPAND_TASK_NUM};

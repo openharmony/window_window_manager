@@ -108,6 +108,8 @@ public:
     void OnMainWindowClose(bool& terminateCloseProcess) override;
 
 private:
+    void OnLastStrongRef(const void *) override;
+
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
@@ -115,7 +117,7 @@ private:
     napi_env env_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_;
     CaseType caseType_ = CaseType::CASE_WINDOW;
-    wptr<JsWindowListener> weakRef_  = nullptr;
+    wptr<JsWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
     RectChangeReason currentReason_ = RectChangeReason::UNDEFINED;

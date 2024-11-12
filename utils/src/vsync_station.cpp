@@ -141,6 +141,7 @@ __attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
         vsyncHandler_->PostTask(task, vsyncTimeoutTaskName_, VSYNC_TIME_OUT_MILLISECONDS);
     }
 
+    requestVsyncTimes_++;
     WindowFrameTraceImpl::GetInstance()->VsyncStartFrameTrace();
     auto task = [weakThis = weak_from_this()]
         (int64_t timestamp, int64_t frameCount, void* client) {
@@ -221,10 +222,15 @@ FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
 void VsyncStation::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
     if (auto frameRateLinker = GetFrameRateLinker()) {
+        if (lastFrameRateRange_ == nullptr) {
+            lastFrameRateRange_ = std::make_shared<FrameRateRange>(0, RANGE_MAX_REFRESHRATE, rate, rateType);
+        } else {
+            lastFrameRateRange_->Set(0, RANGE_MAX_REFRESHRATE, rate, rateType);
+        }
+        lastAnimatorExpectedFrameRate_ = animatorExpectedFrameRate;
         if (frameRateLinker->IsEnable()) {
             TLOGD(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64, rate, frameRateLinker->GetId());
-            FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, rate, rateType};
-            frameRateLinker->UpdateFrameRateRange(range, animatorExpectedFrameRate);
+            frameRateLinker->UpdateFrameRateRange(*lastFrameRateRange_, lastAnimatorExpectedFrameRate_);
         }
     }
 }
@@ -233,11 +239,18 @@ void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
 {
     if (auto frameRateLinker = GetFrameRateLinker()) {
         if (!enabled) {
+            // clear frameRate vote
             FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
             TLOGI(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64,
                 range.preferred_, frameRateLinker->GetId());
             frameRateLinker->UpdateFrameRateRange(range);
             frameRateLinker->UpdateFrameRateRangeImme(range);
+        } else if (lastFrameRateRange_) {
+            // to resolve these cases:
+            // case 1: when app go backGround and haven't cleared the vote itself, the vote will be invalid forever,
+            //         so we restore the vote which is cleared here.
+            // case 2: when frameRateLinker is disabled, the frameRate vote by app will be delayed until linker enable.
+            frameRateLinker->UpdateFrameRateRange(*lastFrameRateRange_, lastAnimatorExpectedFrameRate_);
         }
         frameRateLinker->SetEnable(enabled);
     }
@@ -262,6 +275,5 @@ void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
         receiver->SetUiDvsyncSwitch(dvsyncSwitch);
     }
 }
-
 } // namespace Rosen
 } // namespace OHOS

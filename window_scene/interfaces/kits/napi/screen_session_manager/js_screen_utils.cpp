@@ -60,6 +60,8 @@ napi_value JsScreenUtils::CreateJsScreenProperty(napi_env env, const ScreenPrope
         CreateJsValue(env, screenProperty.GetPropertyChangeReason()));
     napi_set_named_property(env, objValue, "rotation", CreateJsValue(env, screenProperty.GetRotation()));
     napi_set_named_property(env, objValue, "bounds", CreateJsRRect(env, screenProperty.GetBounds()));
+    napi_set_named_property(env, objValue, "fakeBounds", CreateJsRRect(env, screenProperty.GetFakeBounds()));
+    napi_set_named_property(env, objValue, "isFakeInUse", CreateJsValue(env, screenProperty.GetIsFakeInUse()));
     return objValue;
 }
 
@@ -119,6 +121,10 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeReason(napi_env env)
         static_cast<int32_t>(ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING)));
     napi_set_named_property(env, objValue, "VIRTUAL_SCREEN_RESIZE", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::VIRTUAL_SCREEN_RESIZE)));
+    napi_set_named_property(env, objValue, "RELATIVE_POSITION_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE)));
     return objValue;
 }
 
@@ -159,6 +165,28 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeType(napi_env env)
         static_cast<int32_t>(ScreenPropertyChangeType::ROTATION_END)));
     napi_set_named_property(env, objValue, "ROTATION_UPDATE_PROPERTY_ONLY", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY)));
+    return objValue;
+}
+
+napi_value JsScreenUtils::CreateJsSuperFoldStatus(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_UNKNOWN", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::UNKNOWN)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_EXPANDED", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::EXPANDED)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_FOLDED", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::FOLDED)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_HALF_FOLDED", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::HALF_FOLDED)));
+    napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_KEYBOARD", CreateJsValue(env,
+        static_cast<int32_t>(SuperFoldStatus::KEYBOARD)));
     return objValue;
 }
 

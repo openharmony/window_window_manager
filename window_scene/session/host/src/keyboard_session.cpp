@@ -14,12 +14,8 @@
  */
 
 #include "session/host/include/keyboard_session.h"
-#include "session/host/include/session.h"
-#include "common/include/session_permission.h"
-#include "display_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
-#include <parameters.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -56,10 +52,9 @@ sptr<SceneSession> KeyboardSession::GetKeyboardPanelSession() const
 SessionGravity KeyboardSession::GetKeyboardGravity() const
 {
     SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
-    uint32_t percent = 0;
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty) {
-        sessionProperty->GetSessionGravity(gravity, percent);
+        gravity = static_cast<SessionGravity>(sessionProperty->GetKeyboardLayoutParams().gravity_);
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}d", gravity);
     return gravity;
@@ -194,7 +189,6 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 
 void KeyboardSession::OnCallingSessionUpdated()
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d", GetPersistentId());
     if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
@@ -213,17 +207,14 @@ void KeyboardSession::OnCallingSessionUpdated()
     WSRect callingSessionRect = callingSession->GetSessionRect();
     NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, panelRect);
 
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "callSession Rect: %{public}s", callingSessionRect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, callSession Rect: %{public}s",
+        GetPersistentId(), callingSessionRect.ToString().c_str());
 }
 
-WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
+WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity)
 {
     if (keyboardGravityChangeFunc_) {
         keyboardGravityChangeFunc_(gravity);
-    }
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        sessionProperty->SetKeyboardSessionGravity(gravity, percent);
     }
     RelayoutKeyBoard();
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
@@ -293,7 +284,10 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
-        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
+        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_));
+        if (session->adjustKeyboardLayoutFunc_) {
+            session->adjustKeyboardLayoutFunc_(params);
+        }
         session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
@@ -301,9 +295,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
             params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
             params.PortraitPanelRect_.ToString().c_str(), session->GetSessionRequestRect().ToString().c_str());
-        if (session->adjustKeyboardLayoutFunc_) {
-            session->adjustKeyboardLayoutFunc_(params);
-        }
         return WSError::WS_OK;
     };
     PostTask(task, "AdjustKeyboardLayout");
@@ -384,7 +375,8 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
         (WindowHelper::IsSubWindow(callingSession->GetWindowType()) && callingSession->GetParentSession() != nullptr &&
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
-    if (isCallingSessionFloating && isMainOrParentFloating &&
+    bool isMidScene = callingSession->GetIsMidScene();
+    if (isCallingSessionFloating && isMainOrParentFloating && !isMidScene &&
         (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !isFreeMultiWindowMode))) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window.");
         return false;
@@ -520,9 +512,7 @@ void KeyboardSession::RelayoutKeyBoard()
 
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
-    SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
-    uint32_t percent = 0;
-    sessionProperty->GetSessionGravity(gravity, percent);
+    SessionGravity gravity = GetKeyboardGravity();
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
         return;
     }
@@ -534,10 +524,6 @@ void KeyboardSession::RelayoutKeyBoard()
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) {
         requestRect.width_ = screenWidth;
         requestRect.posX_ = 0;
-        if (percent != 0) {
-            // 100: for calc percent.
-            requestRect.height_ = static_cast<uint32_t>(screenHeight) * percent / 100u;
-        }
     }
     requestRect.posY_ = static_cast<int32_t>(screenHeight - requestRect.height_);
     sessionProperty->SetRequestRect(requestRect);

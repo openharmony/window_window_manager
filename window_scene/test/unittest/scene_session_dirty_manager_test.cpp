@@ -20,6 +20,7 @@
 #include <parameters.h>
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
+#include "session/host/include/sub_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "transaction/rs_uiextension_data.h"
 
@@ -160,16 +161,15 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | L
     manager_->IsFilterSession(sceneSession);
     sceneSession->isSystemActive_ = true;
     manager_->IsFilterSession(sceneSession);
-    info.sceneType_ = SceneType::PANEL_SCENE;
     info.isSystem_ = true;
-    sceneSession->UpdateVisibilityInner(true);
+    sceneSession->isVisible_ = true;
     sceneSession->SetSystemActive(true);
     manager_->IsFilterSession(sceneSession);
     info.isSystem_ = false;
-    sceneSession->UpdateVisibilityInner(false);
+    sceneSession->isVisible_ = false;
     sceneSession->SetSystemActive(false);
     manager_->IsFilterSession(sceneSession);
-    sceneSession->UpdateVisibilityInner(false);
+    sceneSession->isVisible_ = false;
     manager_->IsFilterSession(sceneSession);
     ASSERT_EQ(ret, 0);
 }
@@ -408,27 +408,15 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTe
 HWTEST_F(SceneSessionDirtyManagerTest, ConvertDegreeToMMIRotation, Function | SmallTest | Level2)
 {
     MMI::Direction dirction = MMI::DIRECTION0;
-    dirction = ConvertDegreeToMMIRotation(0.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(0.0);
     ASSERT_EQ(dirction, MMI::DIRECTION0);
-    dirction = ConvertDegreeToMMIRotation(90.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(90.0);
     ASSERT_EQ(dirction, MMI::DIRECTION90);
-    dirction = ConvertDegreeToMMIRotation(180.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(180.0);
     ASSERT_EQ(dirction, MMI::DIRECTION180);
-    dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(270.0);
     ASSERT_EQ(dirction, MMI::DIRECTION270);
-    if (g_screenRotationOffset != 0) {
-        dirction = ConvertDegreeToMMIRotation(0.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION90);
-        dirction = ConvertDegreeToMMIRotation(90.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION180);
-        dirction = ConvertDegreeToMMIRotation(180.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION270);
-        dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION0);
-        dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION90);
-    }
-    dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(30.0);
     ASSERT_EQ(dirction, MMI::DIRECTION0);
 }
 
@@ -489,13 +477,16 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, Function | SmallTe
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SubSession> sceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
     sceneSession->SetSessionProperty(property);
     sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
     sceneSession->SetParentSession(session);
     std::map<int32_t, sptr<SceneSession>> sessionMap;
     sessionMap.emplace(1, sceneSession);
@@ -811,12 +802,22 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfo, Function | SmallTes
  */
 HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask, Function | SmallTest | Level2)
 {
-    int ret = 0;
     auto preFlushWindowInfoCallback = manager_->flushWindowInfoCallback_;
     manager_->flushWindowInfoCallback_ = nullptr;
     manager_->ResetFlushWindowInfoTask();
+    EXPECT_TRUE(manager_->hasPostTask_.load());
     manager_->flushWindowInfoCallback_ = preFlushWindowInfoCallback;
-    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ResetFlushWindowInfoTask1
+ * @tc.desc: ResetFlushWindowInfoTask1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask1, Function | SmallTest | Level2)
+{
+    manager_->ResetFlushWindowInfoTask();
+    EXPECT_TRUE(manager_->hasPostTask_.load());
 }
 
 /**

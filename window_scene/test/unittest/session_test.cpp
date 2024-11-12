@@ -68,6 +68,7 @@ private:
         void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
             int64_t uiExtensionIdLevel) override {}
         void OnDrawingCompleted() override {}
+        void OnAppRemoveStartingWindow() override {}
     };
     std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 
@@ -420,6 +421,29 @@ HWTEST_F(WindowSessionTest, IsTopDialog, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetGlobalScaledRect
+ * @tc.desc: GetGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetGlobalScaledRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    Rect globalScaledRect;
+    sceneSession->globalRect_ = {100, 100, 50, 40};
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->scaleX_ = 0.5f;
+    sceneSession->scaleY_ = 0.5f;
+    WMError ret = sceneSession->GetGlobalScaledRect(globalScaledRect);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(100, globalScaledRect.posX_);
+    ASSERT_EQ(100, globalScaledRect.posY_);
+    ASSERT_EQ(25, globalScaledRect.width_);
+    ASSERT_EQ(20, globalScaledRect.height_);
+}
+
+
+/**
  * @tc.name: RaiseToAppTop01
  * @tc.desc: RaiseToAppTop
  * @tc.type: FUNC
@@ -466,17 +490,17 @@ HWTEST_F(WindowSessionTest, UpdateSessionRect01, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
     WSRect rect = {0, 0, 320, 240}; // width: 320, height: 240
-    auto result = scensession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
+    auto result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
+    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
         new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensessionchangeCallBack, nullptr);
-    scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
-    result = scensession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
+    EXPECT_NE(sceneSessionChangeCallBack, nullptr);
+    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
+    result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -490,23 +514,23 @@ HWTEST_F(WindowSessionTest, OnSessionEvent01, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
-    sptr<SceneSession> scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
-    auto result = scensession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession::SessionChangeCallback> scensessionchangeCallBack =
+    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
         new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(scensessionchangeCallBack, nullptr);
-    scensession->RegisterSessionChangeCallback(scensessionchangeCallBack);
-    result = scensession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    EXPECT_NE(sceneSessionChangeCallBack, nullptr);
+    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
+    result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
     int resultValue = 0;
     NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId, SessionEventParam param)
     { resultValue = 1; };
-    scensessionchangeCallBack->OnSessionEvent_ = onSessionEvent_;
-    result = scensession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+    sceneSessionChangeCallBack->OnSessionEvent_ = onSessionEvent_;
+    result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -522,7 +546,7 @@ HWTEST_F(WindowSessionTest, OnSessionEvent02, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect targetRect_ = { 100, 100, 1000, 1000 };
@@ -544,7 +568,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent01, Function | SmallTest | Level2)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
@@ -580,7 +604,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -618,7 +642,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, Function | SmallTest | Level2)
     pointerItem.SetDisplayX(205);
     pointerItem.SetDisplayY(650);
     result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -633,7 +657,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent01, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -675,7 +699,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -722,7 +746,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     pointerItem.SetDisplayX(250);
     pointerItem.SetDisplayY(250);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -737,7 +761,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -796,7 +820,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };

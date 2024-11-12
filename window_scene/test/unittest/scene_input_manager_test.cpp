@@ -162,10 +162,10 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, Function | SmallTest | Le
 }
 
 /**
-* @tc.name: NotifyWindowInfoChange
-* @tc.desc: check func NotifyWindowInfoChange
-* @tc.type: FUNC
-*/
+ * @tc.name: NotifyWindowInfoChange
+ * @tc.desc: check func NotifyWindowInfoChange
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChange start";
@@ -192,10 +192,10 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, Function | SmallTest | L
 }
 
 /**
-* @tc.name: NotifyWindowInfoChangeFromSession
-* @tc.desc: check func NotifyWindowInfoChangeFromSession
-* @tc.type: FUNC
-*/
+ * @tc.name: NotifyWindowInfoChangeFromSession
+ * @tc.desc: check func NotifyWindowInfoChangeFromSession
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChangeFromSession start";
@@ -220,10 +220,10 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, Function | Sm
 }
 
 /**
-* @tc.name: NotifyMMIWindowPidChange
-* @tc.desc: check func NotifyMMIWindowPidChange
-* @tc.type: FUNC
-*/
+ * @tc.name: NotifyMMIWindowPidChange
+ * @tc.desc: check func NotifyMMIWindowPidChange
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyMMIWindowPidChange start";

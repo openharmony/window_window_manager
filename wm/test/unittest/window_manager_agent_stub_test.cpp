@@ -283,7 +283,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest13, Function | SmallTest | L
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
-    
+    data.WriteUint8(static_cast<uint8_t>(WindowModeType::WINDOW_MODE_FLOATING));
     uint32_t code = static_cast<uint32_t>(
         IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
@@ -389,6 +389,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, Function | SmallTest | L
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    data.WriteUint8(static_cast<uint8_t>(1));
     uint32_t code = static_cast<uint32_t>(12);
     ASSERT_NE(stub_, nullptr);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
@@ -406,6 +407,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest19, Function | SmallTest | L
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    data.WriteUint8(static_cast<uint8_t>(WindowStyleType::WINDOW_STYLE_DEFAULT));
     uint32_t code = static_cast<uint32_t>(
         IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);

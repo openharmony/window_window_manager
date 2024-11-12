@@ -119,6 +119,7 @@ public:
         TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
         TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
         TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
+        TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -308,6 +309,8 @@ public:
     WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
+
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override { return WMError::WM_OK; }
 
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }

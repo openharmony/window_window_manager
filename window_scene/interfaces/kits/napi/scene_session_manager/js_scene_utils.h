@@ -66,6 +66,7 @@ enum class JsSessionType : uint32_t {
     TYPE_KEYBOARD_PANEL,
     TYPE_DIVIDER,
     TYPE_TRANSPARENT_VIEW,
+    TYPE_SCREEN_CONTROL
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -105,6 +106,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_KEYBOARD_PANEL,           JsSessionType::TYPE_KEYBOARD_PANEL          },
     { WindowType::WINDOW_TYPE_DOCK_SLICE,               JsSessionType::TYPE_DIVIDER                 },
     { WindowType::WINDOW_TYPE_TRANSPARENT_VIEW,         JsSessionType::TYPE_TRANSPARENT_VIEW        },
+    { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           JsSessionType::TYPE_SCREEN_CONTROL          },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -144,6 +146,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_KEYBOARD_PANEL,           WindowType::WINDOW_TYPE_KEYBOARD_PANEL          },
     { JsSessionType::TYPE_DIVIDER,                  WindowType::WINDOW_TYPE_DOCK_SLICE              },
     { JsSessionType::TYPE_TRANSPARENT_VIEW,         WindowType::WINDOW_TYPE_TRANSPARENT_VIEW        },
+    { JsSessionType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL          },
 };
 
 JsSessionType GetApiType(WindowType type);
@@ -169,6 +172,7 @@ napi_value CreateJsSessionState(napi_env env);
 napi_value CreateJsSessionSizeChangeReason(napi_env env);
 napi_value CreateJsSessionPiPControlType(napi_env env);
 napi_value CreateJsSessionPiPControlStatus(napi_env env);
+napi_value CreateJsSessionGravity(napi_env env);
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect);
@@ -202,6 +206,7 @@ public:
 private:
     void GetMainEventHandler();
     napi_env env_;
+    std::shared_ptr<int> envChecker_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::Rosen

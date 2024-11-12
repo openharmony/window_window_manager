@@ -36,6 +36,7 @@ public:
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override {}
     void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override {}
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
+    void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -457,6 +458,35 @@ HWTEST_F(ScreenSessionTest, ReportNotifyModeChange, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SuperFoldStatusChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SuperFoldStatusChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SuperFoldStatusChange start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    ScreenId screenId = 0;
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::EXPANDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::FOLDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::KEYBOARD;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::HALF_FOLDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    GTEST_LOG_(INFO) << "SuperFoldStatusChange end";
+}
+
+/**
  * @tc.name: UpdateRotationAfterBoot01
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -494,6 +524,25 @@ HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot02, Function | SmallTest | Le
     bool foldToExpand = false;
     screenSession->UpdateRotationAfterBoot(foldToExpand);
     GTEST_LOG_(INFO) << "UpdateRotationAfterBoot end";
+}
+
+/**
+ * @tc.name: UpdateValidRotationToScb
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateValidRotationToScb, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "UpdateValidRotationToScb start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    screenSession->UpdateValidRotationToScb();
+    GTEST_LOG_(INFO) << "UpdateValidRotationToScb end";
 }
 
 /**
@@ -2193,7 +2242,7 @@ HWTEST_F(ScreenSessionTest, PowerStatusChange, Function | SmallTest | Level2)
  * @tc.name: SetScreenScale
  * @tc.desc: SetScreenScale test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(ScreenSessionTest, SetScreenScale, Function | SmallTest | Level2)
 {
     ScreenSession session;

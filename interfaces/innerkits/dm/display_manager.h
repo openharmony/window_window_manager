@@ -144,6 +144,16 @@ public:
         virtual void OnDisplayModeChanged([[maybe_unused]]FoldDisplayMode displayMode) {}
     };
 
+    class IScreenMagneticStateListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen magnetic state changed.
+         *
+         * @param screenMagneticState ScreenMagneticState.
+         */
+        virtual void OnScreenMagneticStateChanged([[maybe_unused]]bool isMagneticState) {}
+    };
+
     class IAvailableAreaListener : public virtual RefBase {
     public:
         /**
@@ -518,6 +528,22 @@ public:
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
 
     /**
+     * @brief Register a listener for the event of screen magnetic state changed.
+     *
+     * @param listener IScreenMagneticStateListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of screen magnetic state changed.
+     *
+     * @param listener IScreenMagneticStateListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+
+    /**
      * @brief Register a listener for the event of available  area changed.
      *
      * @param listener IAvailableAreaListener.
@@ -716,6 +742,28 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
 
+    /**
+     * @brief Get screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param rect Rect of screenshot.
+     * @param size Size of screenshot.
+     * @param rotation Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
+        const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
 private:
     DisplayManager();
     ~DisplayManager();
