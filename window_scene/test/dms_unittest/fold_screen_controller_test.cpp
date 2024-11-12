@@ -307,7 +307,7 @@ namespace {
         ASSERT_EQ(ret, 0);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
-        auto ret = fsc_.GetCurrentScreenId();
+        ret = fsc_.GetCurrentScreenId();
         ASSERT_NE(ret, 0);
     }
 
@@ -394,8 +394,8 @@ namespace {
     }
 
     /**
-     * @tc.name: AddOrRemoveDisplayNodeToTree
-     * @tc.desc: test function :AddOrRemoveDisplayNodeToTree01
+     * @tc.name: AddOrRemoveDisplayNodeToTree01
+     * @tc.desc: test function :AddOrRemoveDisplayNodeToTree
      * @tc.type: FUNC
      */
     HWTEST_F(FoldScreenControllerTest, AddOrRemoveDisplayNodeToTree01, Function | SmallTest | Level3)
@@ -407,7 +407,7 @@ namespace {
         int32_t command = 0;
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
-        fsc_.UpdateForPhyScreenPropertyChange(screenId, command);
+        fsc_.AddOrRemoveDisplayNodeToTree(screenId, command);
         ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
     }
 
@@ -425,7 +425,7 @@ namespace {
         int32_t command = 1;
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
-        fsc_.UpdateForPhyScreenPropertyChange(screenId, command);
+        fsc_.AddOrRemoveDisplayNodeToTree(screenId, command);
         ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
     }
 
@@ -570,7 +570,7 @@ namespace {
         if (ssm_.IsFoldable()) {
             bool isTentMode = false;
             ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
-            
+
             ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), false);
         }
     }
