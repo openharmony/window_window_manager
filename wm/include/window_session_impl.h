@@ -101,6 +101,8 @@ public:
     bool IsTopmost() const override;
     WMError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
+    WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
+    WMError SetWindowModal(bool isModal) override;
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
@@ -154,7 +156,6 @@ public:
     WMError RequestFocusByClient(bool isFocused) const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override;
-    WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
     bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
@@ -248,14 +249,14 @@ public:
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
-    void SetAutoStartPiP(bool isAutoStart) override;
+    void SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
 
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
-    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
     virtual WMError SetDecorVisible(bool isVisible) override;
+    virtual WMError SetWindowTitleMoveEnabled(bool enable) override;
     virtual WMError SetDecorHeight(int32_t decorHeight) override;
     virtual WMError GetDecorHeight(int32_t& height) override;
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
@@ -283,6 +284,10 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
+
+    /**
+     * Window Layout
+     */
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
     /*
@@ -419,6 +424,8 @@ protected:
      */
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
+    void UpdateVirtualPixelRatio(const sptr<Display>& display);
+    WMError GetVirtualPixelRatio(float& vpr);
 
 private:
     //Trans between colorGamut and colorSpace
@@ -482,6 +489,8 @@ private:
         const SceneAnimationConfig& config);
     void UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    void UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const std::shared_ptr<RSTransaction>& rsTransaction);
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
@@ -549,7 +558,7 @@ private:
     /*
      * Window Layout
      */
-    std::atomic_bool windowSizeChanged_ = true;
+    WSRect layoutRect_;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;

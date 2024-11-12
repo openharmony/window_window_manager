@@ -138,7 +138,7 @@ void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const std::vector<sp
         return;
     }
 
-    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
         WLOGFE("Write windowUpdateType failed");
         return;
     }

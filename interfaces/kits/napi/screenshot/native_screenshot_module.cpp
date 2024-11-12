@@ -169,7 +169,7 @@ static void IsNeedNotify(napi_env env, std::unique_ptr<Param> &param, napi_value
 {
     GNAPI_LOG("Get Screenshot Option: IsNeedNotify");
     napi_value isNeedNotify;
-    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isNeedNotify", &isNeedNotify));
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isNotificationNeeded", &isNeedNotify));
     if (isNeedNotify != nullptr && GetType(env, isNeedNotify) == napi_boolean) {
         NAPI_CALL_RETURN_VOID(env, napi_get_value_bool(env, isNeedNotify, &param->option.isNeedNotify));
         GNAPI_LOG("IsNeedNotify: %{public}d", param->option.isNeedNotify);
@@ -182,7 +182,7 @@ static void IsNeedPointer(napi_env env, std::unique_ptr<Param> &param, napi_valu
 {
     GNAPI_LOG("Get Screenshot Option: IsNeedPointer");
     napi_value isNeedPointer;
-    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isNeedPointer", &isNeedPointer));
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isPointerNeeded", &isNeedPointer));
     if (isNeedPointer != nullptr && GetType(env, isNeedPointer) == napi_boolean) {
         NAPI_CALL_RETURN_VOID(env, napi_get_value_bool(env, isNeedPointer, &param->option.isNeedPointer));
         GNAPI_LOG("IsNeedPointer: %{public}d", param->option.isNeedPointer);
@@ -214,16 +214,26 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
         param->errMessage = "Get Screenshot Failed: Invalid input param";
         return;
     }
-    if (param->useInputOption) {
-        GNAPI_LOG("Get Screenshot by input option");
-        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
-            param->option.rect, param->option.size, param->option.rotation, &param->wret);
-    } else if (param->isPick) {
-        GNAPI_LOG("Get Screenshot by picker");
-        param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
+    CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer};
+    if (!param->isPick && (!option.isNeedNotify_ || !option.isNeedPointer_)) {
+        if (param->useInputOption) {
+            param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option,
+                param->option.rect, param->option.size, param->option.rotation, &param->wret);
+        } else {
+            param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option, &param->wret);
+        }
     } else {
-        GNAPI_LOG("Get Screenshot by default option");
-        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
+        if (param->useInputOption) {
+            GNAPI_LOG("Get Screenshot by input option");
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
+                param->option.rect, param->option.size, param->option.rotation, &param->wret);
+        } else if (param->isPick) {
+            GNAPI_LOG("Get Screenshot by picker");
+            param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
+        } else {
+            GNAPI_LOG("Get Screenshot by default option");
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
+        }
     }
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
         GNAPI_LOG("Get Screenshot failed!");

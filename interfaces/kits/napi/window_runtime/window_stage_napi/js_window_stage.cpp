@@ -15,11 +15,7 @@
 
 #include "js_err_utils.h"
 #include "js_window_stage.h"
-#include <string>
-#include "js_runtime_utils.h"
 #include "js_window.h"
-#include "js_window_register_manager.h"
-#include "js_window_utils.h"
 #include "window_manager_hilog.h"
 #include "permission.h"
 
@@ -28,6 +24,8 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 const int CONTENT_STORAGE_ARG = 2;
+constexpr size_t INDEX_ZERO = 0;
+constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowStage"};
 } // namespace
 
@@ -124,6 +122,13 @@ napi_value JsWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetSubWindow(env, info) : nullptr;
 }
 
+napi_value JsWindowStage::SetWindowModal(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnSetWindowModal(env, info) : nullptr;
+}
+
 /** @note @window.hierarchy */
 napi_value JsWindowStage::SetShowOnLockScreen(napi_env env, napi_callback_info info)
 {
@@ -144,6 +149,27 @@ napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_i
     TLOGD(WmsLogTag::WMS_LAYOUT, "SetDefaultDensityEnabled");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindowStage::RemoveStartingWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnRemoveStartingWindow(env, info) : nullptr;
+}
+
+napi_value JsWindowStage::SetWindowRectAutoSave(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnSetWindowRectAutoSave(env, info) : nullptr;
+}
+
+napi_value JsWindowStage::IsWindowRectAutoSave(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnIsWindowRectAutoSave(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::OnSetUIContent(napi_env env, napi_callback_info info)
@@ -522,6 +548,67 @@ napi_value JsWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+    if (!window->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
+        return NapiGetUndefined(env);
+    }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE];
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    bool isModal = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isModal)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to bool");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    const char* const where = __func__;
+    auto asyncTask = [where, weakWindow = wptr(window), isModal, env, task = napiAsyncTask] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, window is null", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        WMError ret = window->SetWindowModal(isModal);
+        if (ret == WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, ret is %{public}d", where, wmErrorCode);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set main window modal failed"));
+        }
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d",
+            where, window->GetWindowId(), window->GetWindowName().c_str(), isModal);
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowStage::OnSetShowOnLockScreen(napi_env env, napi_callback_info info)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -691,6 +778,135 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
     return result;
 }
 
+napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "windowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+
+    const char* const where = __func__;
+    NapiAsyncTask::CompleteCallback complete =
+        [where, windowScene](napi_env env, NapiAsyncTask& task, int32_t status) {
+        auto window = windowScene->GetMainWindow();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s [NAPI]Get main window failed", where);
+            task.Reject(env,
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Get main window failed"));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NotifyRemoveStartingWindow());
+        if (ret == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Notify remove starting window failed"));
+        }
+    };
+
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr :
+        (argv[INDEX_ZERO] != nullptr && GetType(env, argv[INDEX_ZERO]) == napi_function ? argv[INDEX_ZERO] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnRemoveStartingWindow",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) { // 1: maximum params num
+        TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    bool enabled;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "[NAPI]Failed to convert parameter to enabled");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+
+    auto window = windowScene->GetMainWindow();
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask, enabled] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s window is nullptr", where);
+            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled));
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s enable recover position failed!", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                ret, "window recover position failed."));
+        } else {
+            task->Resolve(env, NapiGetUndefined(env));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+
+    auto window = windowScene->GetMainWindow();
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s Window is nullptr", where);
+            task->Reject(env,
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Window is nullptr."));
+            return;
+        }
+        bool enabled = false;
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->IsWindowRectAutoSave(enabled));
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s get the auto-save state of the window rect failed!", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                ret, "Window recover position failed."));
+        } else {
+            napi_value jsEnabled = CreateJsValue(env, enabled);
+            task->Resolve(env, jsEnabled);
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene> windowScene)
 {
     WLOGFD("[NAPI]CreateJsWindowStage");
@@ -719,6 +935,7 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "createSubWindowWithOptions", moduleName, JsWindowStage::CreateSubWindowWithOptions);
     BindNativeFunction(env,
         objValue, "getSubWindow", moduleName, JsWindowStage::GetSubWindow);
+    BindNativeFunction(env, objValue, "setWindowModal", moduleName, JsWindowStage::SetWindowModal);
     BindNativeFunction(env, objValue, "on", moduleName, JsWindowStage::On);
     BindNativeFunction(env, objValue, "off", moduleName, JsWindowStage::Off);
     BindNativeFunction(env,
@@ -727,7 +944,12 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "disableWindowDecor", moduleName, JsWindowStage::DisableWindowDecor);
     BindNativeFunction(env,
         objValue, "setDefaultDensityEnabled", moduleName, JsWindowStage::SetDefaultDensityEnabled);
-
+    BindNativeFunction(env,
+        objValue, "removeStartingWindow", moduleName, JsWindowStage::RemoveStartingWindow);
+    BindNativeFunction(env,
+        objValue, "setWindowRectAutoSave", moduleName, JsWindowStage::SetWindowRectAutoSave);
+    BindNativeFunction(env,
+        objValue, "isWindowRectAutoSave", moduleName, JsWindowStage::IsWindowRectAutoSave);
     return objValue;
 }
 }  // namespace Rosen

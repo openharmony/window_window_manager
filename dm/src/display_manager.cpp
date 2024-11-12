@@ -86,6 +86,8 @@ public:
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+    DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+    DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     DMError ResetAllFreezeStatus();
@@ -157,6 +159,11 @@ private:
     sptr<DisplayManagerDisplayModeAgent> displayModeListenerAgent_;
     class DisplayManagerAvailableAreaAgent;
     sptr<DisplayManagerAvailableAreaAgent> availableAreaListenerAgent_;
+
+    void NotifyScreenMagneticStateChanged(bool isMagneticState);
+    std::set<sptr<IScreenMagneticStateListener>> screenMagneticStateListeners_;
+    class DisplayManagerScreenMagneticStateAgent;
+    sptr<DisplayManagerScreenMagneticStateAgent> screenMagneticStateListenerAgent_;
 };
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -357,7 +364,6 @@ private:
     sptr<Impl> pImpl_;
 };
 
-
 class DisplayManager::Impl::DisplayManagerDisplayModeAgent : public DisplayManagerAgentDefault {
 public:
     explicit DisplayManagerDisplayModeAgent(sptr<Impl> impl) : pImpl_(impl)
@@ -368,6 +374,21 @@ public:
     virtual void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override
     {
         pImpl_->NotifyDisplayModeChanged(displayMode);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManager::Impl::DisplayManagerScreenMagneticStateAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerScreenMagneticStateAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerScreenMagneticStateAgent() = default;
+
+    virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) override
+    {
+        pImpl_->NotifyScreenMagneticStateChanged(isMagneticState);
     }
 private:
     sptr<Impl> pImpl_;
@@ -1621,6 +1642,18 @@ void DisplayManager::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
     }
 }
 
+void DisplayManager::Impl::NotifyScreenMagneticStateChanged(bool isMagneticState)
+{
+    std::set<sptr<IScreenMagneticStateListener>> screenMagneticStateListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        screenMagneticStateListeners = screenMagneticStateListeners_;
+    }
+    for (auto& listener : screenMagneticStateListeners) {
+        listener->OnScreenMagneticStateChanged(isMagneticState);
+    }
+}
+
 void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect)
 {
     std::set<sptr<IAvailableAreaListener>> availableAreaListeners;
@@ -1686,6 +1719,63 @@ DMError DisplayManager::Impl::UnregisterDisplayModeListener(sptr<IDisplayModeLis
             displayModeListenerAgent_,
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
         displayModeListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
+DMError DisplayManager::RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("IScreenMagneticStateListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterScreenMagneticStateListener(listener);
+}
+
+DMError DisplayManager::Impl::RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (screenMagneticStateListenerAgent_ == nullptr) {
+        screenMagneticStateListenerAgent_ = new DisplayManagerScreenMagneticStateAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            screenMagneticStateListenerAgent_,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterScreenMagneticStateListener failed !");
+        screenMagneticStateListenerAgent_ = nullptr;
+    } else {
+        WLOGD("IScreenMagneticStateListener register success");
+        screenMagneticStateListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManager::UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterScreenMagneticStateListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterScreenMagneticStateListener(listener);
+}
+
+DMError DisplayManager::Impl::UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(screenMagneticStateListeners_.begin(), screenMagneticStateListeners_.end(), listener);
+    if (iter == screenMagneticStateListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    screenMagneticStateListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (screenMagneticStateListeners_.empty() && screenMagneticStateListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            screenMagneticStateListenerAgent_,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
+        screenMagneticStateListenerAgent_ = nullptr;
     }
     return ret;
 }
@@ -2143,6 +2233,57 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureO
         return nullptr;
     }
     return screenCapture;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    if (captureOption.displayId_ == DISPLAY_ID_INVALID) {
+        WLOGFE("displayId invalid!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        WLOGFE("get snapshot with option failed!");
+        return nullptr;
+    }
+    return screenShot;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
+    const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode)
+{
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        WLOGFE("set snapshot with option failed!");
+        return nullptr;
+    }
+    // check parameters
+    int32_t oriHeight = screenShot->GetHeight();
+    int32_t oriWidth = screenShot->GetWidth();
+    if (!pImpl_->CheckRectValid(rect, oriHeight, oriWidth)) {
+        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+            rect.left, rect.top, rect.width, rect.height);
+        return nullptr;
+    }
+    if (!pImpl_->CheckSizeValid(size, oriHeight, oriWidth)) {
+        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        return nullptr;
+    }
+    // create crop dest pixelmap
+    Media::InitializationOptions opt;
+    opt.size.width = size.width;
+    opt.size.height = size.height;
+    opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    opt.editable = false;
+    auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
+    if (pixelMap == nullptr) {
+        WLOGFE("Media::PixelMap::Create failed!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
+    return dstScreenshot;
 }
 } // namespace OHOS::Rosen
 

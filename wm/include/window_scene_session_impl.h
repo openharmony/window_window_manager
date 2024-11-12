@@ -31,6 +31,7 @@ public:
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
     WMError NotifyDrawingCompleted() override;
+    WMError NotifyRemoveStartingWindow() override;
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     void PreProcessCreate();
     void SetDefaultProperty();
@@ -42,14 +43,15 @@ public:
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
-    WMError Restore() override;
     void StartMove() override;
     bool GetStartMoveFlag() override;
-    WmErrorCode StartMoveSystemWindow() override;
+    WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError MoveToAsync(int32_t x, int32_t y) override;
+    WMError MoveWindowToGlobal(int32_t x, int32_t y) override;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
     WMError RaiseToAppTop() override;
@@ -63,8 +65,6 @@ public:
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
-    WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
-        bool isDockHoverShown = true) override;
     WMError SetFullScreen(bool status) override;
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
@@ -154,6 +154,11 @@ public:
      */
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError Restore() override;
+    WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
+    WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError IsWindowRectAutoSave(bool& enabled) override;
 
     /*
      * Free Multi Window

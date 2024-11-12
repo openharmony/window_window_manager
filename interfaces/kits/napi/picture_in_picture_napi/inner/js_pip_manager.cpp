@@ -27,13 +27,6 @@ namespace {
     constexpr int32_t NUMBER_TWO = 2;
 }
 
-napi_valuetype GetType(napi_env env, napi_value value)
-{
-    napi_valuetype res = napi_undefined;
-    napi_typeof(env, value, &res);
-    return res;
-}
-
 napi_value NapiGetUndefined(napi_env env)
 {
     napi_value result = nullptr;
@@ -186,37 +179,6 @@ napi_value JsPipManager::OnSetTypeNodeEnabled(napi_env env, napi_callback_info i
     return NapiGetUndefined(env);
 }
 
-napi_value JsPipManager::SetPipNodeType(napi_env env, napi_callback_info info)
-{
-    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
-    return (me != nullptr) ? me->OnSetPipNodeType(env, info) : nullptr;
-}
-
-napi_value JsPipManager::OnSetPipNodeType(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
-    size_t argc = 4; // 4: arg number
-    napi_value argv[4] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != NUMBER_TWO) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
-        return NapiGetUndefined(env);
-    }
-    napi_value typeNode = argv[0];
-    bool markPip = false;
-    if (!ConvertFromJsValue(env, argv[1], markPip)) {
-        TLOGW(WmsLogTag::WMS_PIP, "Failed to convert param to bool");
-    }
-    if (typeNode != nullptr && GetType(env, typeNode) != napi_undefined) {
-        XComponentControllerErrorCode ret =
-            XComponentController::SetSurfaceCallbackMode(env, typeNode, markPip ?
-                SurfaceCallbackMode::PIP : SurfaceCallbackMode::DEFAULT);
-        TLOGI(WmsLogTag::WMS_PIP, "set surface mode, ret: %{public}u, isPip: %{public}d",
-            static_cast<uint32_t>(ret), static_cast<uint32_t>(markPip));
-    }
-    return NapiGetUndefined(env);
-}
-
 napi_value JsPipManager::RegisterCallback(napi_env env, napi_callback_info info)
 {
     JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
@@ -288,7 +250,6 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsPipManager::UnregisterCallback);
     BindNativeFunction(env, exportObj, "setTypeNodeEnabled", moduleName, JsPipManager::SetTypeNodeEnabled);
-    BindNativeFunction(env, exportObj, "setPipNodeType", moduleName, JsPipManager::SetPipNodeType);
     return NapiGetUndefined(env);
 }
 } // namespace Rosen

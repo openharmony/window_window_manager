@@ -238,6 +238,16 @@ std::vector<DisplayId> DisplayManagerAdapterLite::GetAllDisplayIds()
     return displayManagerServiceProxy_->GetAllDisplayIds();
 }
 
+VirtualScreenFlag DisplayManagerAdapterLite::GetVirtualScreenFlag(ScreenId screenId)
+{
+    INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId id is invalid");
+        return VirtualScreenFlag::DEFAULT;
+    }
+    return displayManagerServiceProxy_->GetVirtualScreenFlag(screenId);
+}
+
 bool ScreenManagerAdapterLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
@@ -278,6 +288,10 @@ void DMSDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     }
     WLOGFI("dms OnRemoteDied");
     adapter_.Clear();
+    if (SingletonContainer::IsDestroyed()) {
+        WLOGFE("SingletonContainer is destroyed");
+        return;
+    }
     SingletonContainer::Get<DisplayManagerLite>().OnRemoteDied();
     SingletonContainer::Get<ScreenManagerLite>().OnRemoteDied();
     return;

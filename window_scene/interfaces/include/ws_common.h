@@ -348,7 +348,7 @@ struct SessionInfo {
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
 
-    /*
+    /**
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -357,7 +357,7 @@ struct SessionInfo {
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
 
-    /*
+    /**
      * Multi instance
      */
     bool isNewAppInstance_ = false;
@@ -412,6 +412,7 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_SECONDARY,
     EVENT_DRAG_START,
     EVENT_DRAG,
+    EVENT_MAXIMIZE_WITHOUT_ANIMATION,
 };
 
 enum class BrokerStates: uint32_t {
@@ -600,6 +601,7 @@ struct AppWindowSceneConfig {
 
 struct DeviceScreenConfig {
     std::string rotationPolicy_ = "11"; // default use phone policy
+    std::string defaultRotationPolicy_ = "1"; // default unspecified policy
     bool isRightPowerButton_ = true;
 };
 
@@ -689,6 +691,7 @@ enum class SessionUIDirtyFlag {
     Z_ORDER = 1 << 5,
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
+    GLOBAL_RECT = 1 << 8,
 };
 
 /**

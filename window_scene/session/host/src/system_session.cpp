@@ -17,11 +17,10 @@
 
 #include "common/include/session_permission.h"
 #include "key_event.h"
-#include "session/host/include/session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "parameters.h"
 #include "pointer_event.h"
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SystemSession" };
@@ -34,7 +33,7 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
     : SceneSession(info, specificCallback)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Create SystemSession");
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), true);
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
@@ -185,7 +184,7 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         }
     }
     if (type == WindowType::WINDOW_TYPE_DIALOG) {
-        Session::ProcessClickModalSpecificWindowOutside(posX, posY);
+        Session::ProcessClickModalWindowOutside(posX, posY);
         auto sessionProperty = GetSessionProperty();
         if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
             RaiseToAppTopForPointDown();

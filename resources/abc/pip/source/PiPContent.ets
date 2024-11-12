@@ -41,7 +41,7 @@ class XCNodeController extends NodeController {
 
 @Entry
 @Component
-export struct PiPContent {
+struct PiPContent {
   private xComponentController: XComponentController = new XComponentController();
   private nodeController: NodeController | null = null;
   private mXCNodeController: XCNodeController | null = null;
@@ -63,13 +63,6 @@ export struct PiPContent {
       return;
     }
     this.useNode = true;
-    let parent: FrameNode | null = this.xComponent.getParent();
-    if (parent === null || parent === undefined) {
-      pip.setPipNodeType(this.xComponent, false);
-    } else {
-      pip.setPipNodeType(this.xComponent, true);
-      parent.removeChild(this.xComponent);
-    }
     pip.setTypeNodeEnabled();
     this.mXCNodeController = new XCNodeController(this.xComponent);
     console.info(TAG, 'use Node Controller');

@@ -38,46 +38,6 @@ const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
 
-void AdjustMMIRotationFromDisplayMode(MMI::Direction& rotation, MMI::DisplayMode displayMode)
-{
-    if (displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) {
-        switch (rotation) {
-            case MMI::DIRECTION0:
-                rotation = MMI::DIRECTION90;
-                break;
-            case MMI::DIRECTION90:
-                rotation = MMI::DIRECTION180;
-                break;
-            case MMI::DIRECTION180:
-                rotation = MMI::DIRECTION270;
-                break;
-            case MMI::DIRECTION270:
-                rotation = MMI::DIRECTION0;
-                break;
-            default:
-                rotation = MMI::DIRECTION0;
-                break;
-        }
-    } else if (displayMode == MMI::DisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        switch (rotation) {
-            case MMI::DIRECTION0:
-                rotation = MMI::DIRECTION270;
-                break;
-            case MMI::DIRECTION90:
-                rotation = MMI::DIRECTION0;
-                break;
-            case MMI::DIRECTION180:
-                rotation = MMI::DIRECTION90;
-                break;
-            case MMI::DIRECTION270:
-                rotation = MMI::DIRECTION180;
-                break;
-            default:
-                rotation = MMI::DIRECTION0;
-                break;
-        }
-    }
-}
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -93,7 +53,7 @@ static bool operator!=(const MMI::Rect& a, const WSRect& b)
     return false;
 }
 
-MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
+MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
     MMI::Direction rotation = MMI::DIRECTION0;
     if (NearEqual(degree, DIRECTION0)) {
@@ -105,7 +65,6 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode display
     } else if (NearEqual(degree, DIRECTION270)) {
         rotation = MMI::DIRECTION270;
     }
-    AdjustMMIRotationFromDisplayMode(rotation, displayMode);
     return rotation;
 }
 
@@ -158,15 +117,13 @@ void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& s
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
-    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
         return;
     }
     auto screenProperty = screensProperties[displayId];
-    MMI::Direction displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-        static_cast<MMI::DisplayMode>(displayMode));
+    MMI::Direction displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation());
     float width = screenProperty.GetBounds().rect_.GetWidth();
     float height = screenProperty.GetBounds().rect_.GetHeight();
     Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
@@ -289,27 +246,24 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
     if (mainSession == nullptr) {
         return;
     }
-    bool isTopmostModalSubWindow = false;
+    bool isTopmostModalWindow = false;
     const auto& property = session->GetSessionProperty();
     if (property != nullptr && property->IsTopmost()) {
-        isTopmostModalSubWindow = true;
+        isTopmostModalWindow = true;
     }
     if (auto iter = dialogMap.find(mainSession->GetPersistentId());
         iter != dialogMap.end() && iter->second != nullptr) {
         auto& targetSession = iter->second;
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        SubWindowModalType targetModalType = targetSession->GetSubWindowModalType();
-        if (modalType == targetModalType) {
+        if (session->IsApplicationModal() == targetSession->IsApplicationModal()) {
             if (targetSession->GetSessionProperty() &&
                 targetSession->GetSessionProperty()->IsTopmost() &&
-                !isTopmostModalSubWindow) {
+                !isTopmostModalWindow) {
                 return;
             }
             if (targetSession->GetZOrder() > session->GetZOrder()) {
                 return;
             }
-        } else if (modalType == SubWindowModalType::TYPE_WINDOW_MODALITY &&
-                   targetModalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
+        } else if (!session->IsApplicationModal() && targetSession->IsApplicationModal()) {
             return;
         }
     }
@@ -338,9 +292,7 @@ static void AddCallingPidMapItem(const sptr<SceneSession>& session,
     auto sessionCallingPid = session->GetCallingPid();
     auto iter = callingPidMap.find(sessionCallingPid);
     if (iter == callingPidMap.end()) {
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        if (modalType == SubWindowModalType::TYPE_DIALOG ||
-            modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
+        if (!session->IsApplicationModal()) {
             return;
         }
         callingPidMap.emplace(std::make_pair(sessionCallingPid, session));
@@ -388,15 +340,13 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
         if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             continue;
         }
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        if (modalType == SubWindowModalType::TYPE_DIALOG ||
-            modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
-            AddDialogSessionMapItem(session, dialogMap);
-            AddCallingPidMapItem(session, callingPidMap);
-        } else if (modalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
-            AddDialogSessionMapItem(session, dialogMap);
+        if (!session->IsModal() && !session->IsDialogWindow()) {
+            continue;
+        }
+        AddDialogSessionMapItem(session, dialogMap);
+        AddCallingPidMapItem(session, callingPidMap);
+        if (session->IsApplicationModal()) {
             hasModalApplication = true;
-            AddCallingPidMapItem(session, callingPidMap);
         }
     }
     if (hasModalApplication) {
@@ -697,13 +647,13 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
         .uid = uid,
         .area = { windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_ },
-        .defaultHotAreas = touchHotAreas,
-        .pointerHotAreas = pointerHotAreas,
+        .defaultHotAreas = std::move(touchHotAreas),
+        .pointerHotAreas = std::move(pointerHotAreas),
         .agentWindowId = agentWindowId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .displayId = displayId,
         .zOrder = zOrder,
-        .pointerChangeAreas = pointerChangeAreas,
+        .pointerChangeAreas = std::move(pointerChangeAreas),
         .transform = transformData,
         .pixelMap = pixelMap.get(),
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
@@ -914,20 +864,23 @@ void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>
 void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,
     std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
-    std::unique_lock<std::shared_mutex> lock(secSurfaceInfoMutex_);
-    if (secSurfaceInfoMap.size() != secSurfaceInfoMap_.size() || secSurfaceInfoMap_ != secSurfaceInfoMap) {
-        secSurfaceInfoMap_ = secSurfaceInfoMap;
+    bool updateSecSurfaceInfoNeeded = false;
+    {
+        std::unique_lock<std::shared_mutex> lock(secSurfaceInfoMutex_);
+        if (secSurfaceInfoMap_ != secSurfaceInfoMap) {
+            secSurfaceInfoMap_ = secSurfaceInfoMap;
+            updateSecSurfaceInfoNeeded = true;
+        }
+    }
+    if (updateSecSurfaceInfoNeeded) {
         ResetFlushWindowInfoTask();
-        DumpSecSurfaceInfoMap(secSurfaceInfoMap_);
+        DumpSecSurfaceInfoMap(secSurfaceInfoMap);
     }
 }
 
 std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoList(
     const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const
 {
-    if (secSurfaceInfoMap_.size() == 0) {
-        return {};
-    }
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return {};

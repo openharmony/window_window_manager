@@ -14,7 +14,6 @@
  */
 
 #include "window_manager.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {

@@ -32,17 +32,27 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
 
-    /*
+    /**
      * Window Hierarchy
      */
     WSError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
     WSError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
+    WSError OnMainSessionModalTypeChange(bool isModal) override;
+    bool IsModal() const override;
+    bool IsApplicationModal() const override;
 
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
+
+    /**
+     * PC Window
+     */
+    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
+    WSError OnSetWindowRectAutoSave(bool enabled) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

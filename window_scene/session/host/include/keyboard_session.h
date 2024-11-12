@@ -17,8 +17,6 @@
 #define OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
 
 #include "session/host/include/system_session.h"
-#include <transaction/rs_interfaces.h>
-#include <transaction/rs_transaction.h>
 #include "transaction/rs_sync_transaction_controller.h"
 
 namespace OHOS::Rosen {
@@ -58,7 +56,7 @@ private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
     int32_t GetFocusedSessionId();
 
-    WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent) override;
+    WSError SetKeyboardSessionGravity(SessionGravity gravity);
     void SetCallingSessionId(uint32_t callingSessionId) override;
 
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,

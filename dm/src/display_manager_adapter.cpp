@@ -449,6 +449,10 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     }
     WLOGFI("dms OnRemoteDied");
     adapter_.Clear();
+    if (SingletonContainer::IsDestroyed()) {
+        WLOGFE("SingletonContainer is destroyed");
+        return;
+    }
     SingletonContainer::Get<DisplayManager>().OnRemoteDied();
     SingletonContainer::Get<ScreenManager>().OnRemoteDied();
     return;
@@ -474,11 +478,19 @@ void BaseAdapter::Clear()
 }
 
 DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-                                         ScreenId& screenGroupId)
+    ScreenId& screenGroupId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+}
+
+DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+    DMRect mainScreenRegion, ScreenId& screenGroupId)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion, screenGroupId);
 }
 
 DMError ScreenManagerAdapter::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
@@ -861,5 +873,12 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
     return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetDisplaySnapshotWithOption(captureOption, errorCode);
 }
 } // namespace OHOS::Rosen

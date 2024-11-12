@@ -40,11 +40,13 @@ private:
     int HandleShow(MessageParcel& data, MessageParcel& reply);
     int HandleHide(MessageParcel& data, MessageParcel& reply);
     int HandleDrawingCompleted(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& reply);
 
     // scene session
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
-    int HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleSyncSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
     int HandleBackPressed(MessageParcel& data, MessageParcel& reply);
     int HandleMarkProcessed(MessageParcel& data, MessageParcel& reply);
@@ -67,14 +69,14 @@ private:
     int HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
-    int HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply);
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply);
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
-    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
@@ -84,6 +86,7 @@ private:
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleMainSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -101,6 +104,9 @@ private:
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
+
+    // PC Window
+    int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

@@ -323,9 +323,12 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
 {
     auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info.callerPersistentId_);
     if (callerSession != nullptr) {
+        info.isCalledRightlyByCallerId_ = (info.callerToken_ == callerSession->GetAbilityToken()) &&
+            SessionPermission::VerifyPermissionByBundleName(info.bundleName_,
+                                                            "ohos.permission.CALLED_TRANSITION_ON_LOCK_SCREEN",
+                                                            SceneSessionManager::GetInstance().GetCurrentUserId());
         TLOGI(WmsLogTag::WMS_SCB,
-            "root isCalledRightlyByCallerId: %{public}d", false);
-        info.isCalledRightlyByCallerId_ = false;
+            "root isCalledRightlyByCallerId result is: %{public}d", info.isCalledRightlyByCallerId_);
     }
 }
 
@@ -373,7 +376,6 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         }
     }
-    sceneSession->SetSessionInfoProcessOptions(info.processOptions);
     return sceneSession;
 }
 } // namespace OHOS::Rosen

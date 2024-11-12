@@ -33,10 +33,11 @@ const ScreenId SCREEN_ID_MAIN = 5;
 
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
-const int32_t TP_TYPE_MAIN = 18;
+const int32_t TP_TYPE_POWER_CTRL = 18;
 const std::string FULL_TP = "0";
 const std::string MAIN_TP = "1";
 const std::string MAIN_TP_OFF = "1,1";
+const std::string FULL_TP_OFF = "0,1";
 #endif
 } // namespace
 
@@ -80,7 +81,7 @@ void SingleDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status)
     }
 }
 
-void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
+void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
@@ -109,11 +110,11 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
     switch (displayMode) {
         case FoldDisplayMode::MAIN: {
-            ChangeScreenDisplayModeToMain(screenSession);
+            ChangeScreenDisplayModeToMain(screenSession, reason);
             break;
         }
         case FoldDisplayMode::FULL: {
-            ChangeScreenDisplayModeToFull(screenSession);
+            ChangeScreenDisplayModeToFull(screenSession, reason);
             break;
         }
         case FoldDisplayMode::UNKNOWN: {
@@ -125,12 +126,12 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             break;
         }
     }
-    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
         lastDisplayMode_ = displayMode;
     }
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
 
 void SingleDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
@@ -232,7 +233,8 @@ void SingleDisplayFoldPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int
     }
 }
 
-void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession)
+void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
+    DisplayModeChangeReason reason)
 {
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
@@ -275,7 +277,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, Change ScreenId to Main.");
             screenId_ = SCREEN_ID_MAIN;
 #ifdef TP_FEATURE_ENABLE
-            RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_MAIN, MAIN_TP_OFF.c_str());
+            RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_POWER_CTRL, MAIN_TP_OFF.c_str());
 #endif
             SetdisplayModeChangeStatus(false);
         };
@@ -283,7 +285,8 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
     }
 }
 
-void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession)
+void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
+    DisplayModeChangeReason reason)
 {
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
@@ -325,7 +328,13 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         auto taskScreenOnFullOn = [=] {
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdFull ON.");
             screenId_ = SCREEN_ID_FULL;
-            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+            if (reason == DisplayModeChangeReason::RECOVER) {
+#ifdef TP_FEATURE_ENABLE
+                RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_POWER_CTRL, FULL_TP_OFF.c_str());
+#endif
+            } else {
+                PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+            }
             SetdisplayModeChangeStatus(false);
         };
         screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");

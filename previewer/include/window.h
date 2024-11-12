@@ -155,6 +155,7 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
+    virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
@@ -173,6 +174,8 @@ public:
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) = 0;
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y) { return WMError::WM_OK; }
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
     virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) = 0;
@@ -271,8 +274,9 @@ public:
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual void StartMove() = 0;
-    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_OK; };
+    virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }
     virtual WMError Close() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
     virtual bool IsSupportWideGamut() = 0;
@@ -294,7 +298,7 @@ public:
     virtual void SetDensity(float density) = 0;
     virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetDefaultDensityEnabled() { return false; }
-    virtual float GetVirtualPixelRatio() { return 0.0f; }
+    virtual float GetVirtualPixelRatio() { return 1.0f; }
     virtual void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
     virtual void SetContentInfoCallback(const ContentInfoCallback& callback) = 0;
@@ -326,6 +330,7 @@ public:
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) = 0;
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
         bool isCloseVisible)
     {
@@ -352,7 +357,17 @@ public:
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     /**
-     * @brief Set the modality of window.
+     * @brief Set the application modality of main window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    /**
+     * @brief Set the modality of sub window.
      *
      * @param isModal bool.
      * @param modalityType ModalityType.
@@ -410,6 +425,13 @@ public:
      * @param height The height after layout
      */
     virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
+    /**
+     * @brief notify window remove starting window.
+     *
+     * @return WMError
+     */
+    virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

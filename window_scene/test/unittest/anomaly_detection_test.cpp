@@ -265,10 +265,10 @@ void IsShowWhenLockedTest(sptr<SceneSessionManager> ssm_)
 }
 
 /**
-* @tc.name: SceneZOrderCheckProcess
-* @tc.desc: check func SceneZOrderCheckProcess
-* @tc.type: FUNC
-*/
+ * @tc.name: SceneZOrderCheckProcess
+ * @tc.desc: check func SceneZOrderCheckProcess
+ * @tc.type: FUNC
+ */
 HWTEST_F(AnomalyDetectionTest, SceneZOrderCheckProcess, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "AnomalyDetectionTest: SceneZOrderCheckProcess start";
@@ -305,10 +305,10 @@ void IsFocusedTest(sptr<SceneSessionManager> ssm_)
 }
 
 /**
-* @tc.name: FocusCheckProcess
-* @tc.desc: check func FocusCheckProcess
-* @tc.type: FUNC
-*/
+ * @tc.name: FocusCheckProcess
+ * @tc.desc: check func FocusCheckProcess
+ * @tc.type: FUNC
+ */
 HWTEST_F(AnomalyDetectionTest, FocusCheckProcess, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "AnomalyDetectionTest: FocusCheckProcess start";

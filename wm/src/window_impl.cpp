@@ -163,6 +163,9 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
         case WindowType::WINDOW_TYPE_APP_MAIN_WINDOW:
             rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
             break;
+        case WindowType::WINDOW_TYPE_PIP:
+            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
+            break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
@@ -686,7 +689,7 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
 
 float WindowImpl::GetVirtualPixelRatio()
 {
-    float vpr = 0.0f; // This is an abnormal value, which is used to identify abnormal scenarios.
+    float vpr = 1.0f; // This is an abnormal value, which is used to identify abnormal scenarios.
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
@@ -4022,6 +4025,13 @@ void WindowImpl::SetDefaultOption()
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetTouchable(false);
             property_->SetFocusable(false);
+            break;
+        }
+        case WindowType::WINDOW_TYPE_SCREEN_CONTROL: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+            property_->SetTouchable(false);
+            property_->SetFocusable(false);
+            property_->SetAlpha(0);
             break;
         }
         default:

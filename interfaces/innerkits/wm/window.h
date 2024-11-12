@@ -381,7 +381,7 @@ public:
  * @class IWindowVisibilityChangedListener
  *
  * @brief Listener to observe one window visibility changed.
-*/
+ */
 class IWindowVisibilityChangedListener : virtual public RefBase {
 public:
     virtual void OnWindowVisibilityChangedCallback(const bool isVisible) {};
@@ -392,7 +392,7 @@ using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
-*/
+ */
 class IWindowNoInteractionListener : virtual public RefBase {
 public:
     /**
@@ -883,6 +883,12 @@ public:
      */
     virtual WMError NotifyDrawingCompleted() { return WMError::WM_OK; }
     /**
+     * @brief notify window remove starting window.
+     *
+     * @return WMError
+     */
+    virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
      * @brief move the window to (x, y)
      *
      * @param x
@@ -898,6 +904,21 @@ public:
      * @return WMError
      */
     virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
+     * @brief move the window to global (x, y)
+     *
+     * @param x
+     * @param y
+     * @return WMError
+     */
+    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
+     * @brief Get window global scaled rect.
+     *
+     * @param Rect
+     * @return WMError
+     */
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief resize the window instance (w,h)
      *
@@ -1586,7 +1607,7 @@ public:
      * @brief start move system window. It is called by application.
      *
      */
-    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief Set flag that need remove window input channel.
      *
@@ -1768,7 +1789,7 @@ public:
      * @brief Transfer accessibility event data
      *
      * @param func Function to notify transfer component data.
-    */
+     */
     virtual WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) { return WMError::WM_OK; };
 
@@ -1800,15 +1821,16 @@ public:
      * @brief set auto start status for window.
      *
      * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
+     * @param priority 1 means height priority, 0 means low priority.
      */
-    virtual void SetAutoStartPiP(bool isAutoStart) {}
+    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
      *
      * @param keepKeyboardFlag true means the keyboard should be preserved, otherwise means the opposite.
      * @return WM_OK means set keep keyboard flag success, others means failed.
-    */
+     */
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag)
     {
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -1948,6 +1970,14 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Enable or disable move window by title bar.
+     *
+     * @param enable The value true means to enable window moving, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set window container color.
      *
      * @param activeColor Background active color.
@@ -2002,7 +2032,7 @@ public:
      *
      * @param titleButtonRect.
      * @return WMError.
-    */
+     */
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -2052,7 +2082,7 @@ public:
      *
      * @return Value of PixelRatio obtained from displayInfo.
      */
-    virtual float GetVirtualPixelRatio() { return 0.0f; }
+    virtual float GetVirtualPixelRatio() { return 1.0f; }
 
     /**
      * @brief Hide None Secure Windows.
@@ -2088,7 +2118,18 @@ public:
     }
 
     /**
-     * @brief Set the modality of window.
+     * @brief Set the application modality of main window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set the modality of sub window.
      *
      * @param isModal bool.
      * @param modalityType ModalityType.
@@ -2106,6 +2147,22 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set to automatically save the window rect.
+     *
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether the auto-save the window rect is enabled or not.
+     *
+     * @param enabled True means the window rect auto-save is enabled, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the rect of host window.
@@ -2233,7 +2290,7 @@ public:
      * @brief clear keyEvent filter.
      *
      * @return WMError
-    */
+     */
     virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     /**
@@ -2359,14 +2416,14 @@ public:
      */
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
-    /*
+    /**
      * @brief Get the real parent id of UIExtension
      *
      * @return Real parent id of UIExtension
      */
     virtual int32_t GetRealParentId() const { return static_cast<int32_t>(INVALID_WINDOW_ID); }
 
-    /*
+    /**
      * @brief Get the parent window type of UIExtension
      *
      * @return Parent window type of UIExtension
@@ -2389,7 +2446,7 @@ public:
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
-     * @brief Get isUIExtFirstSubWindow flag
+     * @brief Get whether this window is the first level sub window of UIExtension.
      *
      * @return true - is the first sub window of UIExtension, false - is not the first sub window of UIExtension
      */

@@ -219,6 +219,85 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, Function | SmallTest | Level3)
     rootScene.SetUiDvsyncSwitch(false);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
+
+/**
+ * @tc.name: IsLastFrameLayoutFinished
+ * @tc.desc: IsLastFrameLayoutFinished Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, IsLastFrameLayoutFinished, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    auto ret = rootScene.IsLastFrameLayoutFinished();
+    ASSERT_EQ(ret, true);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: OnFlushUIParams
+ * @tc.desc: OnFlushUIParams Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, OnFlushUIParams, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    rootScene.OnFlushUIParams();
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: OnBundleUpdated
+ * @tc.desc: OnBundleUpdated Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    std::string bundleName = "test";
+    rootScene.OnBundleUpdated(bundleName);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetDisplayOrientation
+ * @tc.desc: SetDisplayOrientation Test01
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, SetDisplayOrientationTest01, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    int32_t orientation = 0;
+    rootScene.SetDisplayOrientation(orientation);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetDisplayOrientation
+ * @tc.desc: SetDisplayOrientation Test02
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    int32_t orientation = 100;
+    rootScene.SetDisplayOrientation(orientation);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: GetAvoidAreaByType
+ * @tc.desc: GetAvoidAreaByType Test err
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
+    AvoidArea avoidArea;
+
+    auto ret = rootScene.GetAvoidAreaByType(type, avoidArea);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

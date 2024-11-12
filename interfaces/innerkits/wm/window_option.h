@@ -231,7 +231,7 @@ public:
     void SetOnlySupportSceneBoard(bool onlySupportSceneBoard);
 
     /**
-     * @brief Set whether this window is the first sub window of UIExtension.
+     * @brief Set whether this window is the first level sub window of UIExtension.
      *
      * @param isUIExtFirstSubWindow whether is the first sub window of UIExtension.
      */
@@ -409,28 +409,28 @@ public:
      * @brief Get subwindow title
      *
      * @return Return the subwindow title
-    */
+     */
     std::string GetSubWindowTitle() const;
 
     /**
      * @brief Get subwindow decor enable
      *
      * @return Return ture means the subwindow decor enabled, otherwise not.
-    */
+     */
     bool GetSubWindowDecorEnable() const;
 
     /**
      * @brief Get only sceneboard supported
      *
      * @return Return ture means only sceneboard supported, otherwise not.
-    */
+     */
     bool GetOnlySupportSceneBoard() const;
 
     /**
-     * @brief Get isUIExtFirstSubWindow flag
+     * @brief Get whether this window is the first level sub window of UIExtension.
      *
      * @return true - is the first sub window of UIExtension, false - is not the first sub window of UIExtension
-    */
+     */
     bool GetIsUIExtFirstSubWindow() const;
 
     /**
@@ -444,21 +444,21 @@ public:
      * @brief Get dialog decor enable
      *
      * @return true means the dialog decor is enabled, otherwise not.
-    */
+     */
     bool GetDialogDecorEnable() const;
 
     /**
      * @brief Get dialog title
      *
      * @return Return the dialog title
-    */
+     */
     std::string GetDialogTitle() const;
 
     /**
      * @brief Get window topmost
      *
      * @return true means the window is topmost, otherwise not.
-    */
+     */
     bool GetWindowTopmost() const;
 
     /**
@@ -480,7 +480,7 @@ public:
      *
      * @param isUIExtAnySubWindow true - is any sub window of UIExtension,
      *                            false - is not any sub window of UIExtension.
-    */
+     */
     void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
 
     /**

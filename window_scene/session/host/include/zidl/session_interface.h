@@ -44,6 +44,7 @@ public:
     virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Hide() = 0;
     virtual WSError DrawingCompleted() = 0;
+    virtual WSError RemoveStartingWindow() = 0;
 
     // scene session
     /**
@@ -58,15 +59,14 @@ public:
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
 
     /**
-     * @brief Receive session event from system application.
+     * @brief Receive session event from application.
      *
-     * This function provides the ability for system applications to move system window.\n
+     * This function provides the ability for applications to move window.\n
      * This interface will take effect after touch down event.\n
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
-     * @permission Make sure the caller has system permission.
      */
-    virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError SyncSessionEvent(SessionEvent event) { return WSError::WS_OK; }
     virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
 
     /**
@@ -78,11 +78,12 @@ public:
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
-     * @brief Callback for processing restore main window.
+     * @brief Callback for processing set default density enabled.
      *
+     * @param isDefaultDensityEnabled Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
+    virtual WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for processing title and dock hover show changes.
@@ -96,6 +97,13 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Callback for processing restore main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
 
     /**
      * @brief Raise the application subwindow to the top layer of the application.
@@ -114,8 +122,12 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
-        const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false) { return WSError::WS_OK; }
+        const WSRect &rect, SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+    virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
@@ -229,9 +241,10 @@ public:
      * @brief Update the auto start pip window status.
      *
      * @param isAutoStart Indicates the {@link bool}
+     * @param priority Indicates the {@link uint32_t} priority of pip window
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError SetAutoStartPiP(bool isAutoStart) { return WSError::WS_OK; }
+    virtual WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) { return WSError::WS_OK; }
 
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -249,10 +262,6 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateRectChangeListenerRegistered(bool isRegister)
-    {
-        return WSError::WS_OK;
-    }
-    virtual WSError SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
     {
         return WSError::WS_OK;
     }
@@ -282,7 +291,23 @@ public:
      */
     virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
-    /*
+    /**
+     * @brief Callback for main session modal type changes.
+     *
+     * @param isModal Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnMainSessionModalTypeChange(bool isModal) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for setting to automatically save the window rect.
+     *
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetWindowRectAutoSave(bool enabled) { return WSError::WS_OK; }
+
+    /**
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
