@@ -1337,5 +1337,15 @@ WMError WindowManager::ReleaseForegroundSessionScreenLock()
     }
     return ret;
 }
+
+WMError WindowManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

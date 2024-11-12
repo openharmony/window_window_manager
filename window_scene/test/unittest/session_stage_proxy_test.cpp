@@ -371,6 +371,18 @@ HWTEST_F(SessionStageProxyTest, SetPiPControlEvent, Function | SmallTest | Level
     auto status = WsPiPControlStatus::PLAY;
     sessionStage_->SetPiPControlEvent(controlType, status);
 }
+
+/**
+ * @tc.name: SetEnableDragBySystem
+ * @tc.desc: test function : SetEnableDragBySystem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetEnableDragBySystem, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetEnableDragBySystem(false);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
 }
 }
 }

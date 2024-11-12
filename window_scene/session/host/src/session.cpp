@@ -46,6 +46,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "Session" };
 std::atomic<int32_t> g_persistentId = INVALID_SESSION_ID;
 std::set<int32_t> g_persistentIdSet;
+std::mutex g_persistentIdSetMutex;
 constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
@@ -1010,6 +1011,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
+        property->SetDragEnabled(sessionProperty->GetDragEnabled());
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
@@ -1260,6 +1262,18 @@ void Session::SetForegroundInteractiveStatus(bool interactive)
 bool Session::GetForegroundInteractiveStatus() const
 {
     return foregroundInteractiveStatus_.load();
+}
+
+bool Session::IsActivatedAfterScreenLocked() const
+{
+    return isActivatedAfterScreenLocked_.load();
+}
+
+void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, isActivatedAfterScreenLocked:%{public}d",
+          GetPersistentId(), isActivatedAfterScreenLocked);
+    isActivatedAfterScreenLocked_.store(isActivatedAfterScreenLocked);
 }
 
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
@@ -2689,6 +2703,7 @@ WSError Session::MarkProcessed(int32_t eventId)
 
 void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
 {
+    std::lock_guard lock(g_persistentIdSetMutex);
     if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(persistentId)) {
         g_persistentIdSet.insert(persistentId);
         persistentId_ = persistentId;
@@ -2715,7 +2730,8 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
         persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
     }
     g_persistentIdSet.insert(g_persistentId);
-    WLOGFI("GeneratePersistentId, persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
+    TLOGI(WmsLogTag::WMS_LIFE,
+          "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
 
 sptr<ScenePersistence> Session::GetScenePersistence() const

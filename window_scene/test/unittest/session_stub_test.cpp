@@ -223,9 +223,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleRaiseAppMainWindowToTop(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleBackPressed(data, reply);
-    if (!data.ReadBool()) {
-        ASSERT_EQ(ERR_INVALID_DATA, res);
-    }
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->HandleMarkProcessed(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleSetGlobalMaximizeMode(data, reply);
@@ -345,7 +343,11 @@ HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
     MessageParcel reply;
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
     bool isAutoStartValid = true;
-    data.WriteInt32(isAutoStartValid);
+    uint32_t priority = 0;
+    data.WriteInt32(10);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
+    data.WriteBool(isAutoStartValid);
+    data.WriteUint32(priority);
     ASSERT_EQ(ERR_NONE, session_->HandleSetAutoStartPiP(data, reply));
 }
 
@@ -440,7 +442,7 @@ HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
     data.WriteBool(false);
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleRequestFocus(data, reply);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**

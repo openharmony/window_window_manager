@@ -53,7 +53,7 @@ using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlType controlType,
     WsPiPControlStatus status)>;
-using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart)>;
+using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
@@ -216,7 +216,7 @@ public:
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
-    WSError SetAutoStartPiP(bool isAutoStart) override;
+    WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
     void NotifyPiPWindowPrepareClose() override;
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
@@ -231,6 +231,11 @@ public:
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
+
+    /*
+     * Window Layout
+     */
+    WMError SetWindowEnableDragBySystem(bool enableDrag);
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
@@ -658,16 +663,16 @@ private:
     PostProcessFocusState postProcessFocusState_;
     bool postProcessProperty_ { false };
 
-    /*
-     * Window Visibility
-     */
-    NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
-
-    /*
+    /**
      * Gesture Back
      */
     bool isEnableGestureBack_ { true };
     bool isEnableGestureBackHadSet_ { false };
+
+    /**
+     * Window Visibility
+     */
+    NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 
     /*
      * Window Rotation

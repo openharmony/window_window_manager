@@ -201,7 +201,7 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, Function | SmallTest |
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, WindowManager::GetInstance().GetAccessibilityWindowInfo(infos));
 }
 
-/*
+/**
  * @tc.name: GetUnreliableWindowInfo
  * @tc.desc: GetUnreliableWindowInfo ok
  * @tc.type: FUNC
@@ -217,7 +217,7 @@ HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Leve
 
 /**
  * @tc.name: GetSnapshotByWindowId01
- * @tc.desc: Check GetSnapshotByWindowId01
+ * @tc.desc: Check GetSnapshotByWindowId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Level2)
@@ -1281,12 +1281,13 @@ HWTEST_F(WindowManagerTest, UnregisterFocusChangedListener01, Function | SmallTe
 
 /**
  * @tc.name: NotifyDisplayInfoChange01
- * @tc.desc: check NotifyDisplayInfoChange, Token is nullptr
+ * @tc.desc: check NotifyDisplayInfoChange
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Level2)
 {
-    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
+    WMError ret;
+    ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 }
 
@@ -1346,6 +1347,9 @@ HWTEST_F(WindowManagerTest, NotifyUnfocused01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTest | Level2)
 {
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
+    
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
 
@@ -1381,6 +1385,19 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
 {
     auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
     ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: check GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+{
+    const std::vector<uint64_t> windowIds = {1, 2};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
 } // namespace Rosen

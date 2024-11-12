@@ -295,6 +295,10 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetStartingWindowExitAnimationFlag);
     BindNativeFunction(env, objValue, "setNeedSyncSessionRect", moduleName,
         JsSceneSession::SetNeedSyncSessionRect);
+    BindNativeFunction(env, objValue, "setIsActivatedAfterScreenLocked", moduleName,
+        JsSceneSession::SetIsActivatedAfterScreenLocked);
+    BindNativeFunction(env, objValue, "setWindowEnableDragBySystem", moduleName,
+        JsSceneSession::SetWindowEnableDragBySystem);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -864,13 +868,13 @@ void JsSceneSession::ProcessAutoStartPiPStatusChangeRegister()
         TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    NotifyAutoStartPiPStatusChangeFunc func = [weakThis = wptr(this)](bool isAutoStart) {
+    NotifyAutoStartPiPStatusChangeFunc func = [weakThis = wptr(this)](bool isAutoStart, uint32_t priority) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnAutoStartPiPStatusChange(isAutoStart);
+        jsSceneSession->OnAutoStartPiPStatusChange(isAutoStart, priority);
     };
     session->SetAutoStartPiPStatusChangeCallback(func);
     TLOGI(WmsLogTag::WMS_PIP, "success");
@@ -1737,6 +1741,20 @@ napi_value JsSceneSession::SetNeedSyncSessionRect(napi_env env, napi_callback_in
     return (me != nullptr) ? me->OnSetNeedSyncSessionRect(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetIsActivatedAfterScreenLocked(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetWindowEnableDragBySystem(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetWindowEnableDragBySystem(env, info) : nullptr;
+}
+
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSession::IsCallbackRegistered[%s]", type.c_str());
@@ -2421,10 +2439,10 @@ void JsSceneSession::OnSessionPiPControlStatusChange(WsPiPControlType controlTyp
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
-void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart)
+void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u", isAutoStart);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAutoStart, env = env_] {
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}u", isAutoStart, priority);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAutoStart, priority, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession id:%{public}d has been destroyed", persistentId);
@@ -2436,7 +2454,8 @@ void JsSceneSession::OnAutoStartPiPStatusChange(bool isAutoStart)
             return;
         }
         napi_value isAutoStartValue = CreateJsValue(env, isAutoStart);
-        napi_value argv[] = {isAutoStartValue};
+        napi_value priorityValue = CreateJsValue(env, priority);
+        napi_value argv[] = {isAutoStartValue, priorityValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
@@ -3779,7 +3798,7 @@ napi_value JsSceneSession::OnNotifyPipOcclusionChange(napi_env env, napi_callbac
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                                      "Input parameter is missing or invalid"));
+            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool occluded = false;
@@ -4298,6 +4317,33 @@ napi_value JsSceneSession::OnUnSyncScenePanelGlobalPosition(napi_env env, napi_c
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "InputInvalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isActivatedAfterScreenLocked = false;
+    if (!ConvertFromJsValue(env, argv[0], isActivatedAfterScreenLocked)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isActivatedAfterScreenLocked");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]isActivatedAfterScreenLocked: %{public}u", isActivatedAfterScreenLocked);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]session is null, id: %{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetIsActivatedAfterScreenLocked(isActivatedAfterScreenLocked);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSession::OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -4325,6 +4371,33 @@ napi_value JsSceneSession::OnSetNeedSyncSessionRect(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     session->SetNeedSyncSessionRect(needSync);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetWindowEnableDragBySystem(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool enableDrag = true;
+    if (!ConvertFromJsValue(env, argv[0], enableDrag)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to bool");
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetWindowEnableDragBySystem(enableDrag);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
