@@ -155,7 +155,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
             return;                                                            \
         }                                                                      \
     } while (false)
- 
+
 #define CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, ret)              \
     do {                                                                       \
         if ((hostSession) == nullptr) {                                        \
@@ -163,7 +163,7 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
             return ret;                                                        \
         }                                                                      \
     } while (false)
- 
+
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 {
     WLOGFD("[WMSCom]WindowSessionImpl");
@@ -257,6 +257,9 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, 
             } else {
                 rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_COMMON_NODE;
             }
+            break;
+        case WindowType::WINDOW_TYPE_PIP:
+            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
             break;
         default:
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
@@ -3924,7 +3927,7 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
             return;
         }
-        
+
         if (window->setUIContentCompleted_.load()) {
             TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
             return;
