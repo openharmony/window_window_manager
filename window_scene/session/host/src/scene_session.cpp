@@ -5053,19 +5053,18 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
 
 WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
-
-    auto task = [weakThis = wptr(this), enableDrag]() {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
+    auto task = [weakThis = wptr(this), enableDrag] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return;
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "task id: %{public}d, enableDrag: %{public}d",
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enableDrag: %{public}d",
             session->GetPersistentId(), enableDrag);
         auto sessionProperty = session->GetSessionProperty();
         if (!sessionProperty) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
             return;
         }
         sessionProperty->SetDragEnabled(enableDrag);
@@ -5073,7 +5072,7 @@ WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
             session->sessionStage_->SetEnableDragBySystem(enableDrag);
         }
     };
-    PostTask(task, "SetWindowEnableDragBySystem");
+    PostTask(task, __func__);
     return WMError::WM_OK;
 }
 
