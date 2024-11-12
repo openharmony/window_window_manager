@@ -169,9 +169,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenStatus, Function | Small
 
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
-    } else {
         EXPECT_NE(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
+    } else {
+        EXPECT_EQ(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
     }
 }
 
@@ -907,9 +907,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, Function | SmallTe
 
     bool expectation = true;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
-    } else {
         EXPECT_NE(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
+    } else {
+        EXPECT_EQ(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
     }
 }
 

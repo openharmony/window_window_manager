@@ -69,7 +69,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange01, Function | Sm
     SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     SuperFoldStatus expState = SuperFoldStatus::EXPANDED;
 
-    EXPECT_NE(curState, expState);
+    EXPECT_EQ(curState, expState);
 }
 
 /**
@@ -90,7 +90,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange02, Function | Sm
     SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
 
-    EXPECT_NE(curState, expState);
+    EXPECT_EQ(curState, expState);
 }
 
 /**
@@ -111,7 +111,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange03, Function | Sm
     SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
 
-    EXPECT_NE(curState, expState);
+    EXPECT_EQ(curState, expState);
 }
 
 /**
@@ -132,7 +132,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange04, Function | Sm
     SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     SuperFoldStatus expState = SuperFoldStatus::FOLDED;
 
-    EXPECT_NE(curState, expState);
+    EXPECT_EQ(curState, expState);
 }
 
 /**
@@ -153,7 +153,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange05, Function | Sm
     SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     SuperFoldStatus expState = SuperFoldStatus::KEYBOARD;
 
-    EXPECT_NE(curState, expState);
+    EXPECT_EQ(curState, expState);
 }
 
 /**
@@ -174,7 +174,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, Function | Sm
     SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     SuperFoldStatus expState = SuperFoldStatus::KEYBOARD;
 
-    EXPECT_NE(curState, expState);
+    EXPECT_EQ(curState, expState);
 }
 
 /**
@@ -195,7 +195,7 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange07, Function | Sm
     SuperFoldStatus curState = SuperFoldStateManager::GetInstance().GetCurrentStatus();
     SuperFoldStatus expState = SuperFoldStatus::HALF_FOLDED;
 
-    EXPECT_NE(curState, expState);
+    EXPECT_EQ(curState, expState);
 }
 
 /**
@@ -214,7 +214,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus01, Function
 
     func();
     FoldStatus foldStatusExp = FoldStatus::EXPAND;
-    EXPECT_NE(foldStatus, foldStatusExp);
+    EXPECT_EQ(foldStatus, foldStatusExp);
 }
 
 /**
@@ -233,7 +233,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus02, Function
 
     func();
     FoldStatus foldStatusExp = FoldStatus::HALF_FOLD;
-    EXPECT_NE(foldStatus, foldStatusExp);
+    EXPECT_EQ(foldStatus, foldStatusExp);
 }
 
 /**
@@ -252,7 +252,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus03, Function
 
     func();
     FoldStatus foldStatusExp = FoldStatus::FOLDED;
-    EXPECT_NE(foldStatus, foldStatusExp);
+    EXPECT_EQ(foldStatus, foldStatusExp);
 }
 
 /**
@@ -271,7 +271,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus04, Function
 
     func();
     FoldStatus foldStatusExp = FoldStatus::HALF_FOLD;
-    EXPECT_NE(foldStatus, foldStatusExp);
+    EXPECT_EQ(foldStatus, foldStatusExp);
 }
 
 /**
@@ -290,7 +290,7 @@ HWTEST_F(SuperFoldStateManagerTest, MatchSuperFoldStatusToFoldStatus05, Function
 
     func();
     FoldStatus foldStatusExp = FoldStatus::UNKNOWN;
-    EXPECT_NE(foldStatus, foldStatusExp);
+    EXPECT_EQ(foldStatus, foldStatusExp);
 }
 
 }
