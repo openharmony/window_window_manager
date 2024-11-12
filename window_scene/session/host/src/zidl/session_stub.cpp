@@ -316,6 +316,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
         reply.WriteBool(property->GetCompatibleModeEnableInPad());
+        reply.WriteBool(property->GetDragEnabled());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -766,8 +767,13 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_PIP, "read isAutoStart error");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = SetAutoStartPiP(isAutoStart);
-    reply.WriteInt32(static_cast<uint32_t>(errCode));
+    uint32_t priority = 0;
+    if (!data.ReadUint32(priority)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read priority error");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetAutoStartPiP(isAutoStart, priority);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

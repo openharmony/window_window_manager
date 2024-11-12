@@ -16,6 +16,7 @@
 #include "session_manager/include/screen_session_manager_lite.h"
 #include <system_ability_definition.h>
 #include <iservice_registry.h>
+#include <transaction/rs_interfaces.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {

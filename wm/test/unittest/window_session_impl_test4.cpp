@@ -392,9 +392,10 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     bool isAutoStart = true;
-    window->SetAutoStartPiP(isAutoStart);
+    uint32_t priority = 1;
+    window->SetAutoStartPiP(isAutoStart, priority);
     window->hostSession_ = nullptr;
-    window->SetAutoStartPiP(isAutoStart);
+    window->SetAutoStartPiP(isAutoStart, priority);
 }
 
 /**
@@ -1200,6 +1201,23 @@ HWTEST_F(WindowSessionImplTest4, UpdateSubWindowStateAndNotify01, Function | Sma
     window->UpdateSubWindowStateAndNotify(1, WindowState::STATE_SHOWN);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
+ * @tc.name: SetEnableDragBySystem
+ * @tc.desc: test SetEnableDragBySystem
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetEnableDragBySystem, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetSubWindow start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetSubWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetDragEnabled(true);
+    window->SetEnableDragBySystem(false);
+    ASSERT_FALSE(window->property_->GetDragEnabled());
 }
 }
 } // namespace Rosen
