@@ -320,8 +320,8 @@ public:
     /*
      * Window Immersive
      */
-    WMError SetGestureBackEnabled(bool enable) override;
-    WMError GetGestureBackEnabled(bool& enable) override;
+    WMError SetGestureBackEnabled(bool enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    WMError GetGestureBackEnabled(bool& enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
