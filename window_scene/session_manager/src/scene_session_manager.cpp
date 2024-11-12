@@ -7776,7 +7776,7 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
         WindowType type = WindowType::APP_WINDOW_BASE;
         sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
         if (session == nullptr) {
-             GetDrawingDataElement(surfaceId, pid, uid);
+            GetDrawingDataElement(surfaceId, pid, uid);
         } else {
             winId = session->GetWindowId();
             pid = session->GetCallingPid();
