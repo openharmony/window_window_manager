@@ -685,7 +685,7 @@ private:
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
 
     /*
-     * Window DrawingContent
+     * Window Property
      */
     std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
         std::vector<std::pair<uint64_t, bool>> currDrawingContentData);
