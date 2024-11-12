@@ -2205,6 +2205,20 @@ HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest
     window->NotifySetUIContentComplete();
     EXPECT_EQ(window->setUIContentCompleted_.load(), false);
 }
+
+/*
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: GetStatusBarHeight test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("GetStatusBarHeight");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_EQ(0, window->GetStatusBarHeight());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -59,6 +59,7 @@ using NotifyAsyncOnFunc = std::function<void()>;
 using NotifyGetAvoidAreaByTypeFunc = std::function<AvoidArea(AvoidAreaType type)>;
 using NotifyBindModalFunc = std::function<void()>;
 using NotifyExtensionEventFunc = std::function<void(uint32_t notifyEvent)>;
+using GetStatusBarHeightFunc = std::function<int32_t()>;
 
 class ExtensionSession : public Session {
 public:
@@ -71,6 +72,7 @@ public:
         NotifyGetAvoidAreaByTypeFunc notifyGetAvoidAreaByTypeFunc_;
         NotifyBindModalFunc notifyBindModalFunc_;
         NotifyExtensionEventFunc notifyExtensionEventFunc_;
+        GetStatusBarHeightFunc getStatusBarHeightFunc_;
     };
 
     explicit ExtensionSession(const SessionInfo& info);
@@ -113,6 +115,7 @@ public:
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+    int32_t GetStatusBarHeight() override;
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
