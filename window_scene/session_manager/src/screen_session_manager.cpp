@@ -219,17 +219,23 @@ void ScreenSessionManager::FixPowerStatus()
 
 void ScreenSessionManager::Init()
 {
-    constexpr uint64_t interval = 5 * 1000; // 5 second
-    if (HiviewDFX::Watchdog::GetInstance().AddThread(
-        SCREEN_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
-        TLOGW(WmsLogTag::DMS, "Add thread %{public}s to watchdog failed.", SCREEN_SESSION_MANAGER_THREAD.c_str());
+    if (system::GetParameter("soc.boot.mode", "") != "rescue") {
+        constexpr uint64_t interval = 5 * 1000; // 5 second
+        if (HiviewDFX::Watchdog::GetInstance().AddThread(
+            SCREEN_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
+            TLOGW(WmsLogTag::DMS, "Add thread %{public}s to watchdog failed.", SCREEN_SESSION_MANAGER_THREAD.c_str());
+        }
+
+        if (HiviewDFX::Watchdog::GetInstance().AddThread(
+            SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD, screenPowerTaskScheduler_->GetEventHandler(), interval)) {
+            TLOGW(WmsLogTag::DMS, "Add thread %{public}s to watchdog failed.",
+                SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD.c_str());
+        }
+    } else {
+        TLOGI(WmsLogTag::DMS, "Dms in rescue mode, not need watchdog.");
+        screenEventTracker_.RecordEvent("Dms in rescue mode, not need watchdog.");
     }
 
-    if (HiviewDFX::Watchdog::GetInstance().AddThread(
-        SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD, screenPowerTaskScheduler_->GetEventHandler(), interval)) {
-        TLOGW(WmsLogTag::DMS, "Add thread %{public}s to watchdog failed.",
-            SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD.c_str());
-    }
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
     if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
         std::string defaultDisplayCutoutPath = static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]);
