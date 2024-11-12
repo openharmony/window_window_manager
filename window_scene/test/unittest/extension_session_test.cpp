@@ -910,20 +910,20 @@ HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, Function | SmallTest | Level1)
 HWTEST_F(ExtensionSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
 {
     ASSERT_NE(nullptr, extSessionEventCallback_);
-    MockFunction<void(uint32_t)> mockGetStatusBarHeightFunc_;
-    extSessionEventCallback_->getStatusBarHeightFunc_ = mockGetStatusBarHeightFunc_.AsStdFunction();
+    MockFunction<uint32_t()> mockGetStatusBarHeightFunc;
+    extSessionEventCallback_->getStatusBarHeightFunc_ = mockGetStatusBarHeightFunc.AsStdFunction();
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockGetStatusBarHeightFunc_, Call()).Times(1);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(1);
     extensionSession_->GetStatusBarHeight();
 
     extSessionEventCallback_->getStatusBarHeightFunc_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockGetStatusBarHeightFunc_, Call()).Times(0);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(0);
     extensionSession_->GetStatusBarHeight();
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockGetStatusBarHeightFunc_, Call()).Times(0);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(0);
     extensionSession_->GetStatusBarHeight();
 }
 }

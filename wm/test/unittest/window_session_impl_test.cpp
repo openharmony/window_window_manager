@@ -2137,7 +2137,7 @@ HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest
     EXPECT_EQ(window->setUIContentCompleted_.load(), false);
 }
 
-/*
+/**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: GetStatusBarHeight test
  * @tc.type: FUNC
