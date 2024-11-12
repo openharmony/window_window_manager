@@ -1645,20 +1645,19 @@ void JsSceneSession::OnForceHideChange(bool hide)
 
 void JsSceneSession::ProcessTouchOutsideRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    sessionchangeCallback->OnTouchOutside_ = [weakThis = wptr(this)] {
+    session->RegisterTouchOutsideCallback([weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessTouchOutsideRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnTouchOutside();
-    };
-    WLOGFD("success");
+    });
 }
 
 void JsSceneSession::OnTouchOutside()

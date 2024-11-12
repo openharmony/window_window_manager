@@ -128,7 +128,6 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
     };
 
@@ -366,7 +365,7 @@ public:
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void NotifyTouchOutside();
-    bool CheckOutTouchOutsideRegister();
+    bool CheckTouchOutsideCallbackRegistered();
     void UpdateNativeVisibility(bool visible);
     void DumpSessionElementInfo(const std::vector<std::string>& params);
     void NotifyForceHideChange(bool hide);
@@ -390,6 +389,11 @@ public:
     void RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback);
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /*
+     * Window Input Event
+     */
+    void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
 
     /**
      * Window Rotation
@@ -828,6 +832,11 @@ private:
      * Window Visibility
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
+
+    /*
+     * Window Input Event
+     */
+    NotifyTouchOutsideFunc onTouchOutside_;
 
     /*
      * Window Rotation
