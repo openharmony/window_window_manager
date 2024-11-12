@@ -388,7 +388,6 @@ public:
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
     const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
-    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     void NotifyUpdateRectAfterLayout();
     void FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams);
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
@@ -429,6 +428,12 @@ public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() { return taskScheduler_; }
 
     int32_t GetCustomDecorHeight(int32_t persistentId);
+
+    /*
+     * Window Property
+     */
+    WMError ReleaseForegroundSessionScreenLock() override;
+    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
 
     /*
      * Free Multi Window
@@ -490,11 +495,6 @@ public:
     int32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     void RefreshAppInfo(const std::string& bundleName);
-
-    /*
-     * Window Property
-     */
-    WMError ReleaseForegroundSessionScreenLock() override;
 
     /*
      * PiP Window
@@ -1047,6 +1047,11 @@ private:
         }
     };
     std::unordered_map<SessionInfoList, std::shared_ptr<AppExecFwk::AbilityInfo>, SessionHasher> abilityInfoMap_;
+
+    /*
+     * Window Property
+     */
+    std::vector<std::tuple<uint64_t, int32_t, int32_t>> lastDrawingData_;
 
     /**
      * PC Window
