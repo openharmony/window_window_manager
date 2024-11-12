@@ -690,7 +690,7 @@ private:
     std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
         const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
     bool GetPreWindowDrawingState(uint64_t windowId, bool currentDrawingContentChange, int32_t& pid)
-    bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
+    bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentChange);
     void RemoveDuplicateDrawingData(uint64_t windowId);
     void GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid);
     
