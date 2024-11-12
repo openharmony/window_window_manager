@@ -190,9 +190,10 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, Function | SmallTes
     ASSERT_NE(window_, nullptr);
 
     AppForceLandscapeConfig config = {};
+    window_->hostSession_ = nullptr;
     auto res = window_->GetAppForceLandscapeConfig(config);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_OK);
+        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
         ASSERT_EQ(config.mode_, 0);
         ASSERT_EQ(config.homePage_, "");
     }
