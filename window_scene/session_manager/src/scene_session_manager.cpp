@@ -17,6 +17,7 @@
 
 #include <ability_context.h>
 #include <ability_manager_client.h>
+#include <application_context.h>
 #include <bundlemgr/launcher_service.h>
 #include <hisysevent.h>
 #include <parameters.h>
@@ -60,7 +61,6 @@
 #include "anr_manager.h"
 #include "dms_reporter.h"
 #include "res_sched_client.h"
-#include "res_type.h"
 #include "anomaly_detection.h"
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
@@ -245,6 +245,7 @@ void SceneSessionManager::Init()
         this->NotifyWindowStateErrorFromMMI(pid, persistentId);
     });
     TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
+    UpdateDarkColorModeToRS();
 }
 
 void SceneSessionManager::InitScheduleUtils()
@@ -3107,19 +3108,19 @@ WSError SceneSessionManager::ProcessBackEvent()
     auto task = [this]() {
         auto session = GetSceneSession(focusedSessionId_);
         if (!session) {
-            WLOGFE("session is nullptr: %{public}d", focusedSessionId_);
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is nullptr: %{public}d", focusedSessionId_);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        WLOGFI("ProcessBackEvent session persistentId:%{public}d needBlock::%{public}d",
+        TLOGNI(WmsLogTag::WMS_MAIN, "ProcessBackEvent session persistentId:%{public}d needBlock:%{public}d",
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
         if (needBlockNotifyFocusStatusUntilForeground_) {
-            WLOGFD("RequestSessionBack when start session");
+            TLOGND(WmsLogTag::WMS_MAIN, "RequestSessionBack when start session");
             if (session->GetSessionInfo().abilityInfo != nullptr &&
                 session->GetSessionInfo().abilityInfo->unclearableMission) {
-                TLOGI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
+                TLOGNI(WmsLogTag::WMS_MAIN, "backPress unclearableMission");
                 return WSError::WS_OK;
             }
-            session->RequestSessionBack(false);
+            session->RequestSessionBack(true);
             return WSError::WS_OK;
         }
         if (session->GetSessionInfo().isSystem_ && rootSceneProcessBackEventFunc_) {
@@ -3130,7 +3131,7 @@ WSError SceneSessionManager::ProcessBackEvent()
         return WSError::WS_OK;
     };
 
-    taskScheduler_->PostAsyncTask(task, "ProcessBackEvent");
+    taskScheduler_->PostAsyncTask(task, __func__);
     return WSError::WS_OK;
 }
 
@@ -6432,27 +6433,78 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetBatchAbility
     return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
 }
 
-WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(std::vector<AppExecFwk::BundleInfo>& bundleInfos,
+WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const std::string& moduleName,
+    const std::string& abilityName, int32_t userId, SCBAbilityInfo& scbAbilityInfo)
+{
+    if (bundleMgr_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "bundleMgr_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto flags = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE));
+    AppExecFwk::BundleInfo bundleInfo;
+    if (bundleMgr_->GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        TLOGE(WmsLogTag::DEFAULT, "Query ability info from BMS failed, ability:%{public}s", abilityName.c_str());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto& hapModulesList = bundleInfo.hapModuleInfos;
+    if (hapModulesList.empty()) {
+        TLOGD(WmsLogTag::DEFAULT, "hapModulesList is empty, ability:%{public}s", abilityName.c_str());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto sdkVersion = bundleInfo.targetVersion % 100; // % 100 to get the real version
+    for (auto& hapModule : hapModulesList) {
+        auto& abilityInfoList = hapModule.abilityInfos;
+        for (auto& abilityInfo : abilityInfoList) {
+            if (abilityInfo.moduleName == moduleName && abilityInfo.name == abilityName) {
+                scbAbilityInfo.abilityInfo_ = abilityInfo;
+                scbAbilityInfo.sdkVersion_ = sdkVersion;
+                scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
+                return WSError::WS_OK;
+            }
+        }
+    }
+    TLOGW(WmsLogTag::DEFAULT, "Ability info not found, ability:%{public}s", abilityName.c_str());
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
+WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
     std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
     if (bundleInfos.empty()) {
         WLOGFE("bundleInfos is empty");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    for (auto bundleInfo: bundleInfos) {
-        auto hapModulesList = bundleInfo.hapModuleInfos;
+    for (auto& bundleInfo : bundleInfos) {
+        auto& hapModulesList = bundleInfo.hapModuleInfos;
         auto sdkVersion = bundleInfo.targetVersion % 100; // %100 to get the real version
         if (hapModulesList.empty()) {
             WLOGFD("hapModulesList is empty");
             continue;
         }
-        for (auto hapModule: hapModulesList) {
-            auto abilityInfoList = hapModule.abilityInfos;
-            for (auto abilityInfo : abilityInfoList) {
+        if (bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
+            bundleInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
+            auto iter = std::find_if(hapModulesList.begin(), hapModulesList.end(),
+                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); });
+            if (iter != hapModulesList.end()) {
+                SCBAbilityInfo scbAbilityInfo;
+                scbAbilityInfo.abilityInfo_ = iter->abilityInfos[0];
+                scbAbilityInfo.sdkVersion_ = sdkVersion;
+                scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
+                scbAbilityInfos.push_back(scbAbilityInfo);
+                continue;
+            }
+        }
+        for (auto& hapModule : hapModulesList) {
+            auto& abilityInfoList = hapModule.abilityInfos;
+            for (auto& abilityInfo : abilityInfoList) {
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
-                scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
                 scbAbilityInfos.push_back(scbAbilityInfo);
             }
         }
@@ -10330,7 +10382,7 @@ WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& 
         } else if (abilityInfo != nullptr) {
             info.bundleType_ = static_cast<int32_t>(abilityInfo->applicationInfo.bundleType);
             infos.push_back(info);
-            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d,"
+            TLOGD(WmsLogTag::WMS_MAIN, "Get mainWindow info: Session id:%{public}d, "
                 "bundleName:%{public}s, bundleType:%{public}d", session->GetPersistentId(),
                 info.bundleName_.c_str(), info.bundleType_);
         }
@@ -10706,5 +10758,52 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
     }
     TLOGW(WmsLogTag::WMS_PIP, "no PiP window");
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdateDarkColorModeToRS()
+{
+    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "app context is nullptr");
+        return;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "app configuration is nullptr");
+        return;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
+    TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d",
+        colorMode.c_str(), ret);
+}
+
+WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
+    std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    auto task = [this, windowIds, &windowDisplayIdMap] {
+        for (const uint64_t windowId : windowIds) {
+            sptr<SceneSession> session = GetSceneSession(static_cast<int32_t>(windowId));
+            if (session == nullptr) {
+                continue;
+            }
+            sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+            if (sessionProperty == nullptr) {
+                continue;
+            }
+			DisplayId displayId = sessionProperty->GetDisplayId();
+            TLOGNI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64 ", displayId:%{public}" PRIu64,
+                windowId, displayId);
+            windowDisplayIdMap.insert({windowId, displayId});
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 } // namespace OHOS::Rosen
