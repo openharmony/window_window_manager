@@ -1518,6 +1518,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetNotifyVisibleChangeFunc([this](int32_t persistentId) {
             this->NotifyVisibleChange(persistentId);
         });
+        sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
+            return this->IsLastFrameLayoutFinished(isLayoutFinished);
+        });
     }
     return sceneSession;
 }
@@ -4279,6 +4282,16 @@ WSError SceneSessionManager::GetTotalUITreeInfo(const std::string& strId, std::s
 void SceneSessionManager::SetDumpUITreeFunc(const DumpUITreeFunc& func)
 {
     dumpUITreeFunc_ = func;
+}
+
+void SceneSessionManager::SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func)
+{
+    onFlushUIParamsFunc_ = std::move(func);
+}
+
+void SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func)
+{
+    isRootSceneLastFrameLayoutFinishedFunc_ = std::move(func);
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
@@ -8943,6 +8956,9 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
     if (!Session::IsScbCoreEnabled()) {
         return;
     }
+    if (onFlushUIParamsFunc_ != nullptr) {
+        onFlushUIParamsFunc_();
+    }
     auto task = [this, screenId, uiParams = std::move(uiParams)]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushUIParams");
         TLOGD(WmsLogTag::WMS_PIPELINE, "FlushUIParams");
@@ -10806,5 +10822,15 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
+{
+    if (isRootSceneLastFrameLayoutFinishedFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isRootSceneLastFrameLayoutFinishedFunc is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    isLayoutFinished = isRootSceneLastFrameLayoutFinishedFunc_();
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

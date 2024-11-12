@@ -1301,13 +1301,44 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 
 void SceneSession::SetIsStatusBarVisible(bool isVisible)
 {
+    auto task = [weakThis = wptr(this), isVisible] {
+        sptr<SceneSession> sceneSession = weakThis.promote();
+        if (sceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            return;
+        }
+        sceneSession->SetIsStatusBarVisibleInner(isVisible);
+    };
+    PostTask(task, __func__);
+}
+
+WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
+{
     bool isNeedNotify = isStatusBarVisible_ != isVisible;
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, need notify %{public}u",
-          GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
+    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, "
+        "need notify %{public}u", GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
     isStatusBarVisible_ = isVisible;
-    if (isNeedNotify && specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
-        specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
+    if (!isNeedNotify) {
+        return WSError::WS_OK;
     }
+    if (isLastFrameLayoutFinishedFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, id: %{public}d", GetPersistentId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    bool isLayoutFinished = false;
+    WSError ret = isLastFrameLayoutFinishedFunc_(isLayoutFinished);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed: %{public}d", ret);
+        return ret;
+    }
+    if (isLayoutFinished) {
+        if (specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
+            specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
+        }
+    } else {
+        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+    }
+    return WSError::WS_OK;
 }
 
 void SceneSession::NotifyPropertyWhenConnect()
@@ -4407,6 +4438,11 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 bool SceneSession::IsDeviceWakeupByApplication() const
 {
     return isDeviceWakeupByApplication_.load();
+}
+
+void SceneSession::SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func)
+{
+    isLastFrameLayoutFinishedFunc_ = std::move(func);
 }
 
 void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)
