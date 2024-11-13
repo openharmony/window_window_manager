@@ -2753,10 +2753,10 @@ WSRect Session::GetSessionRect() const
 /** @note @window.layout */
 WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
 {
-    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+    auto task = [weakThis = wptr(this), &globalScaledRect] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
         WSRect scaledRect = session->GetSessionGlobalRect();
@@ -2767,7 +2767,7 @@ WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
             session->GetPersistentId(), globalScaledRect.ToString().c_str());
         return WMError::WM_OK;
     };
-    return PostSyncTask(task, "GetGlobalScaledRect");
+    return PostSyncTask(task, __func__);
 }
 
 /** @note @window.layout */
