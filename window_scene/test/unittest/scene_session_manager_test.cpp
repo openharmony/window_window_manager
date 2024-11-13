@@ -2172,7 +2172,7 @@ HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest 
     bool enabled = false;
     ssm_->SetIsWindowRectAutoSave(key, enabled);
     auto result = ssm_->IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(result, WMError::WM_OK); 
+    ASSERT_EQ(result, WMError::WM_OK);
 }
 
 /**
