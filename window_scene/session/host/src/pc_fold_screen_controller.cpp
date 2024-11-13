@@ -48,16 +48,7 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112;
 const WSRect RECT_ZERO = { 0, 0, 0, 0 };
 } // namespace
 
-PcFoldScreenManager& PcFoldScreenManager::GetInstance()
-{
-    static PcFoldScreenManager instance;
-    return instance;
-}
-
-PcFoldScreenManager::PcFoldScreenManager()
-{
-    displayId_ = DEFAULT_SCREEN_ID;
-}
+WM_IMPLEMENT_SINGLE_INSTANCE(PcFoldScreenManager);
 
 void PcFoldScreenManager::UpdateFoldScreenStatus(DisplayId displayId, ScreenFoldStatus status,
     const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect)
@@ -349,8 +340,8 @@ void PcFoldScreenManager::ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRec
     lastArrangedRect = { rect.posX_, rect.posY_, RULE_TRANS_X * vpr, titleHeight * vpr};
 }
 
-PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession) :
-    weakSceneSession_(std::move(weakSession)) {}
+PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession)
+    : weakSceneSession_(std::move(weakSession)) {}
 
 bool PcFoldScreenController::IsHalfFolded(DisplayId displayId)
 {
@@ -361,23 +352,26 @@ void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStar
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "rect: %{public}s, isStartFullScreen: %{public}d",
         rect.ToString().c_str(), isStartFullScreen);
+    std::unique_lock<std::mutex> moveMutex_;
     startMoveRect_ = rect;
     isStartFullScreen_ = isStartFullScreen;
 }
 
 bool PcFoldScreenController::IsStartFullScreen() const
 {
+    std::unique_lock<std::mutex> moveMutex_;
     return isStartFullScreen_;
 }
 
 void PcFoldScreenController::RecordMoveRects(const WSRect& rect)
 {
     auto time = std::chrono::high_resolution_clock::now();
+    std::unique_lock<std::mutex> moveMutex_;
     movingRectRecords_.push_back(std::make_pair(time, rect));
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rect: %{public}s", GetPersistentId(), rect.ToString().c_str());
     // pop useless record
     while (movingRectRecords_.size() > MOVING_RECORDS_SIZE_LIMIT ||
-            TimeHelper::GetDuration(movingRectRecords_[0].first, time) > MOVING_RECORDS_TIME_LIMIT) {
+           TimeHelper::GetDuration(movingRectRecords_[0].first, time) > MOVING_RECORDS_TIME_LIMIT) {
         movingRectRecords_.erase(movingRectRecords_.begin());
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "records size: %{public}zu, duration: %{public}d", movingRectRecords_.size(),
@@ -398,7 +392,10 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
         manager.ResetArrangeRule();
         return false;
     }
-    manager.ResetArrangeRule(startMoveRect_);
+    {
+        std::unique_lock<std::mutex> moveMutex_;
+        manager.ResetArrangeRule(startMoveRect_);
+    }
     WSRect titleRect = { rect.posX_, rect.posY_, rect.width_, GetTitleHeight() };
     ScreenSide startSide = manager.CalculateScreenSide(titleRect);
     WSRectF velocity = CalculateMovingVelocity();
@@ -468,6 +465,7 @@ int32_t PcFoldScreenController::GetTitleHeight() const
 WSRectF PcFoldScreenController::CalculateMovingVelocity()
 {
     WSRectF velocity = { 0.0f, 0.0f, 0.0f, 0.0f };
+    std::unique_lock<std::mutex> moveMutex_;
     int32_t recordsSize = movingRectRecords_.size();
     if (recordsSize <= 1) {
         return velocity;
@@ -488,11 +486,5 @@ WSRectF PcFoldScreenController::CalculateMovingVelocity()
         return velocity;
     }
     return velocity;
-}
-
-void PcFoldScreenController::RemoveMoveRects()
-{
-    RectRecordsVector vec;
-    movingRectRecords_.swap(vec);
 }
 } // namespace OHOS::Rosen
