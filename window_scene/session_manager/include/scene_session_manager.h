@@ -689,8 +689,8 @@ private:
      */
     std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
         const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
-    bool GetPreWindowDrawingState(uint64_t windowId, bool currentDrawingContentChange, int32_t& pid)
-    bool GetProcessDrawingState(uint64_t windowId, bool currentDrawingContentChange, int32_t pid);
+    bool GetPreWindowDrawingState(uint64_t windowId, bool currentWindowDrawingState, int32_t& pid)
+    bool GetProcessDrawingState(uint64_t windowId, int32_t pid);
     void RemoveDuplicateDrawingData(uint64_t windowId);
     void GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid);
     
@@ -1050,9 +1050,9 @@ private:
     /*
      * Window Property
      */
-    std::vector<SessionRelatedId> lastDrawingData_;
+    std::vector<DrawingSessionId> lastDrawingData_;
 
-    struct SessionRelatedId {
+    struct DrawingSessionId {
         uint64_t windowId_;
         int32_t pid_;
         int32_t uid_;
