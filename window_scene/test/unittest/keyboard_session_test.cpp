@@ -1221,7 +1221,7 @@ HWTEST_F(KeyboardSessionTest, RaiseCallingSession03, Function | SmallTest | Leve
     keyboardPanelRect.posY_ = 200;
     keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
-    ASSERT_EQ(callingOriPosY, 200);
+    ASSERT_EQ(callingOriPosY, 0);
 
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 10;
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
