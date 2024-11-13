@@ -7925,7 +7925,7 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
                                (GetPreWindowDrawingState(windowId, isWindowDrawing, pid) == isWindowDrawing) ||
                                GetProcessDrawingState(windowId, pid);
         if (isDrawingStateChange) {
-            processDrawingContentChangeInfo.emplace_back(windowId, currentWindowDrawingState);
+            processDrawingContentChangeInfo.emplace_back(windowId, isWindowDrawing);
         }
     }
     return processDrawingContentChangeInfo;
