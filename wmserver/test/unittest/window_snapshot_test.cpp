@@ -126,6 +126,16 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot04, Function | SmallTest | Level3)
     ASSERT_EQ(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
         snapshotController_->GetSnapshot(iRemoteObjectMockerInvalid, snapshot_));
 }
+
+/**
+ * @tc.name: 
+ * @tc.desc: GetSnapshot when parameter abilityToken is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSnapshotTest, , Function | SmallTest | Level3)
+{
+
+}
 }
 } // namespace Rosen
 } // namespace OHOS
