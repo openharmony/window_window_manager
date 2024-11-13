@@ -721,8 +721,7 @@ std::string DumpSecSurfaceInfo(const SecSurfaceInfo& secSurfaceInfo)
     return infoStr;
 }
 
-MMI::WindowInfo SceneSessionDirtyManager::MakeWindowInfoFormHostWindow(const SecRectInfo& secRectInfo,
-    const MMI::WindowInfo& hostWindowinfo) const
+MMI::WindowInfo SceneSessionDirtyManager::MakeWindowInfoFormHostWindow(const MMI::WindowInfo& hostWindowinfo) const
 {
     MMI::WindowInfo windowinfo;
     windowinfo.id = hostWindowinfo.id;
@@ -782,7 +781,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetHostComponentWindowInfo(const SecSu
     MMI::WindowInfo windowinfo;
     const auto& secRectInfoList = secSurfaceInfo.upperNodes;
     if (secRectInfoList.size() > 0) {
-        windowinfo = MakeWindowInfoFormHostWindow(secRectInfoList[0], hostWindowinfo);
+        windowinfo = MakeWindowInfoFormHostWindow(hostWindowinfo);
     }
     for (const auto& secRectInfo : secRectInfoList) {
         windowinfo.pid = secSurfaceInfo.hostPid;
@@ -803,7 +802,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetSecComponentWindowInfo(const SecSur
     }
     MMI::WindowInfo windowinfo;
     const auto& secRectInfo = secSurfaceInfo.uiExtensionRectInfo;
-    windowinfo = MakeWindowInfoFormHostWindow(secRectInfo, hostWindowinfo);
+    windowinfo = MakeWindowInfoFormHostWindow(hostWindowinfo);
     windowinfo.id = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(secSurfaceInfo.uiExtensionNodeId);
     if (windowinfo.id == 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "GetUIExtPersistentId ERROR");
