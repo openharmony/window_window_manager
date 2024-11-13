@@ -1103,8 +1103,8 @@ HWTEST_F(sceneSessionManagerProxyTest, IsPcOrPadFreeMultiWindowMode, Function | 
 }
 
 /**
- * @tc.name: OnIsWindowRectAutoSave
- * @tc.desc: OnIsWindowRectAutoSave
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: IsWindowRectAutoSave
  * @tc.type: FUNC
  */
 HWTEST_F(sceneSessionManagerProxyTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
