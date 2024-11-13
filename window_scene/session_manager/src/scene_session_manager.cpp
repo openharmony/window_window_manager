@@ -2451,18 +2451,18 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
     }
     AAFwk::UIExtensionSessionInfo info;
     AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
-     if (!checkIsPassed && info.persistentId != INVALID_SESSION_ID && info.hostWindowId != INVALID_SESSION_ID) {
+     if (info.persistentId != INVALID_SESSION_ID && info.hostWindowId != INVALID_SESSION_ID) {
         int32_t parentId = static_cast<int32_t>(info.hostWindowId);
         if (parentId == property->GetParentPersistentId()) {
             TLOGI(WmsLogTag::WMS_UIEXT, "parentId == property->GetParentPersistentId(parentId:%{public}d)", parentId);
             checkIsPassed = true
         }
     }
-    if (!checkIsPassed && SessionPermission::IsSystemCalling()) {
+    if (SessionPermission::IsSystemCalling()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "is system app");
         checkIsPassed = true
     }
-    if (!checkIsPassed && property->GetIsUIExtensionAbilityProcess() && SessionPermission::IsStartedByUIExtension()) {
+    if (property->GetIsUIExtensionAbilityProcess() && SessionPermission::IsStartedByUIExtension()) {
         SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
         AAFwk::UIExtensionHostInfo hostInfo;
         AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
