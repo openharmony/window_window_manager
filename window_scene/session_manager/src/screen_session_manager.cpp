@@ -2040,6 +2040,11 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
     ScreenPropertyChangeType screenPropertyChangeType)
 {
+    std::ostringstream oss;
+    std::string changeType = TransferPropertyChangeTypeToString(screenPropertyChangeType);
+    oss << "screenId: " << screenId << " rotation: " << rotation << " width: " << bounds.rect_.width_ \
+        << " height: " << bounds.rect_.height_ << " type: " << changeType;
+    screenEventTracker_.RecordBoundsEvent(oss.str());
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "update screen rotation property permission denied!");
         return;
@@ -4148,6 +4153,26 @@ std::string ScreenSessionManager::TransferTypeToString(ScreenType type) const
             break;
         default:
             screenType = "UNDEFINED";
+            break;
+    }
+    return screenType;
+}
+
+std::string ScreenSessionManager::TransferPropertyChangeTypeToString(ScreenPropertyChangeType type) const
+{
+    std::string screenType;
+    switch (type) {
+        case ScreenPropertyChangeType::UNSPECIFIED:
+            screenType = "UNSPECIFIED";
+            break;
+        case ScreenPropertyChangeType::ROTATION_BEGIN:
+            screenType = "ROTATION_BEGIN";
+            break;
+        case ScreenPropertyChangeType::ROTATION_END:
+            screenType = "ROTATION_END";
+            break;
+        default:
+            screenType = "ROTATION_UPDATE_PROPERTY_ONLY";
             break;
     }
     return screenType;
