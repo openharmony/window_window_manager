@@ -7888,24 +7888,32 @@ void SceneSessionManager::DealwithDrawingContentChange(
     }
 }
 
-int SceneSessionManager::GetDrawingDataIndex(uint64_t windowId) {
+int SceneSessionManager::GetDrawingDataIndex(uint64_t windowId)
+{
+    int index = -1;
     int num = static_cast<int>(lastDrawingData_.size());
-    for (int index = 0; index < lastDrawingData_.size(); ++index) {
-        if (lastDrawingData_[index].windowId_ == windowId) {
-            return index;
+    {
+        std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
+        for (int i = 0; i < num; ++i) {
+            if (lastDrawingData_[index].windowId_ == windowId) {
+                index = i;
+            }
         }
     }
-    return -1;
+    return index;
 }
 
-void SceneSessionManager::EraseDrawingDataElement(int index) {
+void SceneSessionManager::EraseDrawingDataElement(int index)
+{
+    std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
     if (index >= 0 && static_cast<size_t>(index) < lastDrawingData_.size()) {
         lastDrawingData_.erase(lastDrawingData_.begin() + index);
     }
 }
 
 std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingContentChangeInfo(
-    const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData) {
+    const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData)
+{
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
     for (const auto& data : currDrawingContentData) {
         uint64_t windowId = data.first;
@@ -7937,11 +7945,13 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool curre
     return preWindowDrawingState;
 }
 
-void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid) {
+void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid)
+{
     auto index = GetDrawingDataIndex(windowId);
     if (index < 0) {
         EraseDrawingDataElement(index);
     }
+    std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
     lastDrawingData_.emplace_back({ windowId, pid, uid });
 }
 
