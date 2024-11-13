@@ -7931,18 +7931,18 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
     return processDrawingContentChangeInfo;
 }
 
-bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool currentWindowDrawingState, int32_t& pid)
+bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool currentWindowDrawing, int32_t& pid)
 {
-    bool preWindowDrawingState = true;
+    bool preWindowDrawing = true;
     sptr<SceneSession> session = SelectSesssionFromMap(windowId);
     if (session == nullptr) {
         return false;
     }
     pid = session->GetCallingPid();
-    preWindowDrawingState = session->GetDrawingContentState();
-    session->SetDrawingContentState(currentDrawingContentState);
+    preWindowDrawing = session->GetDrawingContentState();
+    session->SetDrawingContentState(currentWindowDrawing);
     UpdateWindowDrawingData(windowId, pid, session->GetCallingUid());
-    return preWindowDrawingState;
+    return preWindowDrawing;
 }
 
 void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid)
