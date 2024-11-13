@@ -85,8 +85,7 @@ private:
         const Matrix3f hostTransform) const;
     MMI::WindowInfo GetHostComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
         const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const;
-    MMI::WindowInfo MakeWindowInfoFormHostWindow(const SecRectInfo& secRectInfo,
-        const MMI::WindowInfo& hostWindowinfo) const;
+    MMI::WindowInfo MakeWindowInfoFormHostWindow(const MMI::WindowInfo& hostWindowinfo) const;
     void ResetFlushWindowInfoTask();
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
