@@ -2503,15 +2503,15 @@ napi_value JsSceneSession::OnMarkSystemSceneUIFirst(napi_env env, napi_callback_
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    bool isUIFirst = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isUIFirst)) {
+    bool isForceFlag = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isForceFlag)) {
         TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isUIFirst");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    bool isForceFlag = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isForceFlag)) {
+    bool isUifirstEnable = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isUifirstEnable)) {
         TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isForceFlag");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -2522,7 +2522,7 @@ napi_value JsSceneSession::OnMarkSystemSceneUIFirst(napi_env env, napi_callback_
         TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->MarkSystemSceneUIFirst(isUIFirst, isForceFlag);
+    session->MarkSystemSceneUIFirst(isForceFlag, isUifirstEnable);
     TLOGD(WmsLogTag::DEFAULT, "[NAPI] end");
     return NapiGetUndefined(env);
 }

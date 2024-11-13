@@ -379,7 +379,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         bool isNeedFlush = false;
         if (isStartDrag_ && isPcWindow_) {
-            surfaceNode->MarkUifirstNode(false, true);
+            surfaceNode->MarkUifirstNode(false);
             isNeedFlush = true;
         }
         Gravity dragGravity = GRAVITY_MAP.at(type_);
@@ -396,7 +396,7 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
         if (!isStartDrag_ && isPcWindow_) {
-            surfaceNode->MarkUifirstNode(true, false);
+            surfaceNode->MarkUifirstNode(true);
         }
         surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
         RSTransaction::FlushImplicitTransaction();
