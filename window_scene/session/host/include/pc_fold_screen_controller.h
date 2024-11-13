@@ -36,10 +36,10 @@ using RectRecordsVector =
 
 enum class ScreenFoldStatus : uint8_t {
     UNKNOWN = 0,
-    COVER_CLOSE = 1,
-    HALF_FOLDED = 2,
-    HALF_FOLDED_PHYSICAL_KEYBOARD = 3,
-    FLATTENED = 4,
+    EXPANDED = 1,
+    FOLDED = 2,
+    HALF_FOLDED = 3,
+    HALF_FOLDED_KEYBOARD = 4,
 };
 
 enum class ScreenSide : uint8_t {
@@ -48,10 +48,10 @@ enum class ScreenSide : uint8_t {
     FOLD_C = 2,
 };
 
-class PcFoldScreenManager : public RefBase {
+class PcFoldScreenManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(PcFoldScreenManager);
 public:
-    explicit PcFoldScreenManager();
+    PcFoldScreenManager();
     void UpdateFoldScreenStatus(DisplayId displayId, ScreenFoldStatus status,
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     bool IsHalfFolded(DisplayId displayId);
@@ -72,7 +72,7 @@ public:
 
     void ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
 
-    bool NeedDoThrowSlip(ScreenSide startSide, WSRectF velocity);
+    bool NeedDoThrowSlip(ScreenSide startSide, const WSRectF& velocity);
     bool ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& rect,
         int32_t topAvoidHeight, int32_t botAvoidHeight, int32_t titleHeight);
     void MappingRectInScreenSide(ScreenSide side, WSRect& rect,
@@ -84,6 +84,7 @@ public:
         const WSRect& limitRect, int32_t titleHeight);
     void ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRect,
         const WSRect& limitRect, int32_t titleHeight);
+
 private:
     void SetDisplayInfo(DisplayId displayId, ScreenFoldStatus status);
     void SetDisplayRects(
@@ -115,7 +116,7 @@ private:
 
 class PcFoldScreenController : public RefBase {
 public:
-    explicit PcFoldScreenController(wptr<SceneSession> weak);
+    explicit PcFoldScreenController(wptr<SceneSession> weakSession);
     bool IsHalfFolded(DisplayId displayId);
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
     void RecordMoveRects(const WSRect& rect);
@@ -128,6 +129,7 @@ public:
     RSAnimationTimingCurve GetMovingTimingCurve();
     RSAnimationTimingProtocol GetThrowSlipTimingProtocol();
     RSAnimationTimingCurve GetThrowSlipTimingCurve();
+
 private:
     int32_t GetPersistentId() const;
     int32_t GetTitleHeight() const;
