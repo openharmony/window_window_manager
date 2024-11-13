@@ -50,8 +50,8 @@ const WSRect RECT_ZERO = { 0, 0, 0, 0 };
 
 PcFoldScreenManager& PcFoldScreenManager::GetInstance()
 {
-    static sptr<PcFoldScreenManager> instance = new PcFoldScreenManager();
-    return *instance;
+    static PcFoldScreenManager instance;
+    return instance;
 }
 
 PcFoldScreenManager::PcFoldScreenManager()
@@ -84,7 +84,6 @@ void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, ScreenFoldStatus s
     }
     vpr_ = display->GetVirtualPixelRatio();
     TLOGI(WmsLogTag::WMS_MAIN, "vpr: %{public}f", vpr_);
-    return;
 }
 
 void PcFoldScreenManager::SetDisplayRects(
@@ -197,7 +196,7 @@ void PcFoldScreenManager::ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeigh
     rect = limitRect;
 }
 
-bool PcFoldScreenManager::NeedDoThrowSlip(ScreenSide startSide, WSRectF velocity)
+bool PcFoldScreenManager::NeedDoThrowSlip(ScreenSide startSide, const WSRectF& velocity)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, velocity: %{public}s",
         static_cast<int32_t>(startSide), velocity.ToString().c_str());
@@ -213,6 +212,11 @@ bool PcFoldScreenManager::NeedDoThrowSlip(ScreenSide startSide, WSRectF velocity
     return false;
 }
 
+/*
+ * move rect to other side
+ * @param rect: current side, moved to other side
+ * @param titleHeight: used in arrange rule to avoid title bar
+ */
 bool PcFoldScreenManager::ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& rect,
     int32_t topAvoidHeight, int32_t botAvoidHeight, int32_t titleHeight)
 {
@@ -250,7 +254,7 @@ void PcFoldScreenManager::MappingRectInScreenSide(ScreenSide side, WSRect& rect,
                 MathHelper::Floor(virtualDisplayRect.width_ - RULE_TRANS_X * vpr));
             botRightLimit.posY_ = std::max(foldCreaseRect.posY_ + foldCreaseRect.height_,
                 MathHelper::Floor(virtualDisplayRect.posY_ + virtualDisplayRect.height_ -
-                                    botAvoidHeight - MIN_DECOR_HEIGHT * vpr));
+                    botAvoidHeight - MIN_DECOR_HEIGHT * vpr));
             botRightLimit.width_ = virtualDisplayRect.width_;
             botRightLimit.height_ = std::max(0,
                 virtualDisplayRect.posY_ + virtualDisplayRect.height_ - topLeftLimit.posY_ - botAvoidHeight);
@@ -320,7 +324,7 @@ void PcFoldScreenManager::ApplyInitArrangeRule(WSRect& rect, WSRect& lastArrange
     rect.posX_ = std::max(limitRect.posX_, limitRect.posX_ + (limitRect.width_ - rect.width_) / 2); // 2: center align
     rect.posY_ = std::max(limitRect.posY_, limitRect.posY_ + (limitRect.height_ - rect.height_) / 2); // 2: center align
     float vpr = GetVpr();
-    lastArrangedRect = { rect.posX_, rect.posY_, RULE_TRANS_X * vpr, titleHeight * vpr};
+    lastArrangedRect = { rect.posX_, rect.posY_, RULE_TRANS_X * vpr, titleHeight * vpr };
 }
 
 /*
@@ -345,7 +349,8 @@ void PcFoldScreenManager::ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRec
     lastArrangedRect = { rect.posX_, rect.posY_, RULE_TRANS_X * vpr, titleHeight * vpr};
 }
 
-PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weak) : weakSceneSession_(weak) {}
+PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession) :
+    weakSceneSession_(std::move(weakSession)) {}
 
 bool PcFoldScreenController::IsHalfFolded(DisplayId displayId)
 {
@@ -372,13 +377,19 @@ void PcFoldScreenController::RecordMoveRects(const WSRect& rect)
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rect: %{public}s", GetPersistentId(), rect.ToString().c_str());
     // pop useless record
     while (movingRectRecords_.size() > MOVING_RECORDS_SIZE_LIMIT ||
-        TimeHelper::GetDuration(movingRectRecords_[0].first, time) > MOVING_RECORDS_TIME_LIMIT) {
+            TimeHelper::GetDuration(movingRectRecords_[0].first, time) > MOVING_RECORDS_TIME_LIMIT) {
         movingRectRecords_.erase(movingRectRecords_.begin());
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "records size: %{public}zu, duration: %{public}d", movingRectRecords_.size(),
         TimeHelper::GetDuration(movingRectRecords_[0].first, movingRectRecords_[movingRectRecords_.size() - 1].first));
 }
 
+/*
+ * if move fast, window can be throwed to other side
+ * @param rect: current rect. if throwed, move it to other side
+ * @param topAvoidHeight: avoid status bar
+ * @param botAvoidHeight: avoid dock
+ */
 bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     int32_t topAvoidHeight, int32_t botAvoidHeight)
 {
@@ -403,6 +414,10 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     return true;
 }
 
+/*
+ * resize to fullscreen in one side considering avoid area
+ * @param rect: resize in its side
+ */
 void PcFoldScreenController::ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight)
 {
     PcFoldScreenManager::GetInstance().ResizeToFullScreen(rect, topAvoidHeight, botAvoidHeight);

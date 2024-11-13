@@ -573,7 +573,6 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
             where, static_cast<int32_t>(event),
             param.pointerX_, param.pointerY_, param.sessionWidth_, param.sessionHeight_);
         session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), param);
-        return;
     };
     PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<uint32_t>(event)));
     return WSError::WS_OK;
@@ -2513,7 +2512,6 @@ void SceneSession::InitializeCrossMoveDrag()
 void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
     bool isGlobal, bool needFlush)
 {
-    const char* const funcName = __func__;
     if (pcFoldScreenController_ && pcFoldScreenController_->IsHalfFolded(GetScreenId())) {
         auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
             pcFoldScreenController_->GetMovingTimingCurve());
