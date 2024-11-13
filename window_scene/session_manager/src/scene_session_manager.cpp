@@ -2653,7 +2653,7 @@ WSError SceneSessionManager::CheckSessionPropertyOnRecovery(const sptr<WindowSes
             return WSError::WS_ERROR_INVALID_PARAM;
         }
     } else {
-        if (!IsNeedRecover(property->GetPersistentId())) {
+        if (property->GetPersistentId() > 0 && !IsNeedRecover(property->GetPersistentId())) {
             TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
@@ -2703,7 +2703,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
             return errCode;
         }
         NotifyCreateSpecificSession(sceneSession, property, property->GetWindowType());
-        CacheSubSessionForRecovering(sceneSession, property);
+        CacheSpecificSessionForRecovering(sceneSession, property);
         NotifySessionUnfocusedToClient(persistentId);
         AddClientDeathRecipient(sessionStage, sceneSession);
         session = sceneSession;
@@ -2718,41 +2718,66 @@ void SceneSessionManager::NotifyRecoveringFinished()
             TLOGI(WmsLogTag::WMS_RECOVER, "RecoverFinished clear recoverSubSessionCacheMap");
             recoveringFinished_ = true;
             recoverSubSessionCacheMap_.clear();
+            recoverDialogSessionCacheMap_.clear();
         }, "NotifyRecoveringFinished");
 }
 
-void SceneSessionManager::CacheSubSessionForRecovering(
+void SceneSessionManager::CacheSpecificSessionForRecovering(
     sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property)
 {
-    if (recoveringFinished_) {
-        TLOGW(WmsLogTag::WMS_RECOVER, "recovering is finished");
-        return;
-    }
-
-    if (sceneSession == nullptr || property == nullptr) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "sceneSession or property is nullptr");
+    if (!IsWindowSupportCacheForRecovering(sceneSession, property)) {
         return;
     }
 
     auto windowType = property->GetWindowType();
-    if (!SessionHelper::IsSubWindow(windowType)) {
-        return;
+    auto parentId = property->GetParentPersistentId();
+    TLOGI(WmsLogTag::WMS_RECOVER, "Cache specificsession persistentId = %{public}" PRId32 ", parent persistentId = "
+        "%{public}" PRId32 ", window type = %{public}" PRId32 , sceneSession->GetPersistentId(), parentId, windowType);
+
+    if (WindowHelper::IsSubWindow(windowType)) {
+        if (recoverSubSessionCacheMap_.find(parentId) == recoverSubSessionCacheMap_.end()) {
+            recoverSubSessionCacheMap_[parentId] = std::vector{sceneSession};
+        } else {
+            recoverSubSessionCacheMap_[parentId].emplace_back(sceneSession);
+        }
     }
 
-    auto persistentId = property->GetParentPersistentId();
-    if (createSubSessionFuncMap_.find(persistentId) != createSubSessionFuncMap_.end()) {
-        return;
+    if (WindowHelper::IsDialogWindow(windowType)) {
+        if (recoverDialogSessionCacheMap_.find(parentId) == recoverDialogSessionCacheMap_.end()) {
+            recoverDialogSessionCacheMap_[parentId] = std::vector{sceneSession};
+        } else {
+            recoverDialogSessionCacheMap_[parentId].emplace_back(sceneSession);
+        }
+    }
+}
+
+bool SceneSessionManager::IsWindowSupportCacheForRecovering(
+    sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property)
+{
+    if (recoveringFinished_) {
+        TLOGW(WmsLogTag::WMS_RECOVER, "recovering is finished");
+        return false;
     }
 
-    TLOGI(WmsLogTag::WMS_RECOVER,
-        "Cache subsession persistentId = %{public}" PRId32 ", parent persistentId = %{public}" PRId32,
-        sceneSession->GetPersistentId(), persistentId);
-
-    if (recoverSubSessionCacheMap_.find(persistentId) == recoverSubSessionCacheMap_.end()) {
-        recoverSubSessionCacheMap_[persistentId] = std::vector{ sceneSession };
-    } else {
-        recoverSubSessionCacheMap_[persistentId].emplace_back(sceneSession);
+    if (sceneSession == nullptr || property == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "sceneSession or property is nullptr");
+        return false;
     }
+
+    auto windowType = property->GetWindowType();
+    if (!WindowHelper::IsSubWindow(windowType) && !WindowHelper::IsDialogWindow(windowType)) {
+        return false;
+    }
+
+    auto parentId = property->GetParentPersistentId();
+    if ((WindowHelper::IsSubWindow(windowType) &&
+        createSubSessionFuncMap_.find(parentId) != createSubSessionFuncMap_.end()) ||
+        (WindowHelper::IsDialogWindow(windowType) &&
+        bindDialogTargetFuncMap_.find(parentId) != bindDialogTargetFuncMap_.end())) {
+        return false;
+    }
+
+    return true;
 }
 
 void SceneSessionManager::RecoverCachedSubSession(int32_t persistentId)
@@ -2767,6 +2792,20 @@ void SceneSessionManager::RecoverCachedSubSession(int32_t persistentId)
         NotifyCreateSubSession(persistentId, sceneSession);
     }
     recoverSubSessionCacheMap_.erase(iter);
+}
+
+void SceneSessionManager::RecoverCachedDialogSession(int32_t persistentId)
+{
+    auto iter = recoverDialogSessionCacheMap_.find(persistentId);
+    if (iter == recoverDialogSessionCacheMap_.end()) {
+        return;
+    }
+
+    TLOGI(WmsLogTag::WMS_RECOVER, "Id=%{public}d", persistentId);
+    for (auto& sceneSession : iter->second) {
+        UpdateParentSessionForDialog(sceneSession, sceneSession->GetSessionProperty());
+    }
+    recoverDialogSessionCacheMap_.erase(iter);
 }
 
 void SceneSessionManager::NotifySessionUnfocusedToClient(int32_t persistentId)
@@ -2796,11 +2835,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         }
         SessionInfo sessionInfo = RecoverSessionInfo(property);
         sptr<SceneSession> sceneSession = nullptr;
-        if (SessionHelper::IsMainWindow(property->GetWindowType())) {
-            sceneSession = RequestSceneSession(sessionInfo, nullptr);
-        } else {
-            sceneSession = RequestSceneSession(sessionInfo, property);
-        }
+        sceneSession = RequestSceneSession(sessionInfo, nullptr);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "Request sceneSession failed");
             return WSError::WS_ERROR_NULLPTR;
@@ -2858,6 +2893,18 @@ void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
         return WMError::WM_OK;
     };
     taskScheduler_->PostSyncTask(task, "RegisterCreateSubSessionListener");
+}
+
+void SceneSessionManager::RegisterBindDialogTargetListener(int32_t persistentId,
+    const NotifyBindDialogSessionFunc& func)
+{
+    TLOGI(WmsLogTag::WMS_DIALOG, "RegisterBindDialogTargetListener, id: %{public}d", persistentId);
+    auto task = [this, persistentId, func]() {
+        bindDialogTargetFuncMap_[persistentId] = func;
+        RecoverCachedDialogSession(persistentId);
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostTask(task, "RegisterBindDialogTargetListener");
 }
 
 void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSession,
@@ -2994,6 +3041,21 @@ void SceneSessionManager::UnregisterCreateSubSessionListener(int32_t persistentI
             createSubSessionFuncMap_.erase(persistentId);
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "Can't find CreateSubSessionListener, id: %{public}d", persistentId);
+        }
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostSyncTask(task);
+}
+
+void SceneSessionManager::UnregisterBindDialogTargetListener(int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_DIALOG, "UnregisterBindDialogTargetListener, id: %{public}d", persistentId);
+    auto task = [this, persistentId]() {
+        auto iter = bindDialogTargetFuncMap_.find(persistentId);
+        if (iter != bindDialogTargetFuncMap_.end()) {
+            bindDialogTargetFuncMap_.erase(persistentId);
+        } else {
+            TLOGW(WmsLogTag::WMS_DIALOG, "Can't find BindDialogTargetListener, id: %{public}d", persistentId);
         }
         return WMError::WM_OK;
     };

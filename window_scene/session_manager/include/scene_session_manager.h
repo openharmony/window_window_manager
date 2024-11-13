@@ -370,6 +370,8 @@ public:
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);
+    void RegisterBindDialogTargetListener(int32_t persistentId, const NotifyBindDialogSessionFunc& func);
+    void UnregisterBindDialogTargetListener(int32_t persistentId);
 
     /*
      * Window Immersive
@@ -763,6 +765,8 @@ private:
     NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;
     std::map<int32_t, NotifyCreateSubSessionFunc> createSubSessionFuncMap_;
     std::map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
+    std::map<int32_t, NotifyBindDialogSessionFunc> bindDialogTargetFuncMap_;
+    std::map<int32_t, std::vector<sptr<SceneSession>>> recoverDialogSessionCacheMap_;
     bool recoveringFinished_ = false;
     NotifyRecoverSceneSessionFunc recoverSceneSessionFunc_;
     ProcessStatusBarEnabledChangeFunc statusBarEnabledChangeFunc_;
@@ -914,8 +918,10 @@ private:
                                 bool isFromInnerkits);
     void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0);
     void NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session);
-    void CacheSubSessionForRecovering(sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property);
+    void CacheSpecificSessionForRecovering(sptr<SceneSession> sceneSession,
+        const sptr<WindowSessionProperty>& property);
     void RecoverCachedSubSession(int32_t persistentId);
+    void RecoverCachedDialogSession(int32_t persistentId);
     void NotifySessionUnfocusedToClient(int32_t persistentId);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
@@ -931,6 +937,8 @@ private:
     void HideNonSecureFloatingWindows();
     void HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
+    bool IsWindowSupportCacheForRecovering(sptr<SceneSession> sceneSession,
+        const sptr<WindowSessionProperty>& property);
 
     /*
      * Window Snapshot

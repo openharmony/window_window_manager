@@ -448,6 +448,7 @@ JsSceneSession::~JsSceneSession()
     }
     session->UnregisterSessionChangeListeners();
     SceneSessionManager::GetInstance().UnregisterCreateSubSessionListener(session->GetPersistentId());
+    SceneSessionManager::GetInstance().UnregisterBindDialogTargetListener(session->GetPersistentId());
 }
 
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
@@ -1029,7 +1030,8 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
         TLOGE(WmsLogTag::WMS_DIALOG, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->RegisterBindDialogSessionCallback(std::move(onBindDialogTarget));
+    session->RegisterBindDialogSessionCallback(onBindDialogTarget);
+    SceneSessionManager::GetInstance().RegisterBindDialogTargetListener(session->GetPersistentId(), onBindDialogTarget);
     TLOGD(WmsLogTag::WMS_DIALOG, "success");
 }
 

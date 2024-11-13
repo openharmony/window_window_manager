@@ -352,11 +352,11 @@ HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndConnectSpecificSession, Fu
 }
 
 /**
- * @tc.name: CacheSubSessionForRecovering
- * @tc.desc: CacheSubSessionForRecovering
+ * @tc.name: CacheSpecificSessionForRecovering
+ * @tc.desc: CacheSpecificSessionForRecovering
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerSupplementTest, CacheSubSessionForRecovering, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerSupplementTest, CacheSpecificSessionForRecovering, Function | SmallTest | Level3)
 {
     sptr<SceneSession> sceneSession;
     SessionInfo info;
@@ -364,28 +364,28 @@ HWTEST_F(SceneSessionManagerSupplementTest, CacheSubSessionForRecovering, Functi
     info.abilityName_ = "test2";
     sptr<WindowSessionProperty> property;
     ssm_->recoveringFinished_ = false;
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
     property = new WindowSessionProperty();
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     property->SetParentPersistentId(1);
     NotifyCreateSubSessionFunc func;
     ssm_->createSubSessionFuncMap_.insert({1, func});
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
     ssm_->createSubSessionFuncMap_.clear();
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 1);
     ssm_->RecoverCachedSubSession(1);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
@@ -670,6 +670,23 @@ HWTEST_F(SceneSessionManagerSupplementTest, IsSessionVisible, Function | SmallTe
     ASSERT_EQ(ret, 0);
 }
 
+/**
+ * @tc.name: RegisterBindDialogTargetListener
+ * @tc.desc: RegisterBindDialogTargetListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, RegisterBindDialogTargetListener, Function | SmallTest | Level3)
+{
+    int ret = 0;
+    NotifyBindDialogSessionFunc func1;
+    ssm_->RegisterBindDialogTargetListener(1, func1);
+    ssm_->UnregisterBindDialogTargetListener(1);
+    ssm_->bindDialogTargetFuncMap_.insert({ 1, func1 });
+    ssm_->bindDialogTargetFuncMap_.erase(1);
+    ssm_->bindDialogTargetFuncMap_.insert({ 1, func1 });
+    ssm_->bindDialogTargetFuncMap_.clear();
+    ASSERT_EQ(ret, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
