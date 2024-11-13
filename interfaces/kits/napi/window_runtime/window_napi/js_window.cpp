@@ -2644,7 +2644,7 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
     if (argc > 1 && !ConvertFromJsValue(env, argv[INDEX_ONE], isDockHoverShown)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert isDockHoverShown parameter");
     }
-    // 2: params num; 2: index of callback=
+    // 2: params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
         (GetType(env, argv[INDEX_TWO]) == napi_function ? argv[INDEX_TWO] : nullptr);
     napi_value result = nullptr;
