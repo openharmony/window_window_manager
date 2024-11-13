@@ -283,7 +283,7 @@ bool CJDisplayManager::IfCallbackRegistered(const std::string& type, int64_t cal
 
 int32_t CJDisplayManager::OnUnregisterAllDisplayListenerWithType(const std::string& type)
 {
-    TLOGI(WmsLogTag::DMS, "CJDisplayManager::OnUnregisterAllDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS, "CJDisplayManager::OnUnregisterAllDisplayListenerWithType is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(CJDisplayManager::UnregisterAllDisplayListenerWithType(type));
     if (ret != DmErrorCode::DM_OK) {
         if (ret != DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
@@ -296,7 +296,7 @@ int32_t CJDisplayManager::OnUnregisterAllDisplayListenerWithType(const std::stri
 
 DMError CJDisplayManager::UnregisterAllDisplayListenerWithType(const std::string& type)
 {
-    TLOGI(WmsLogTag::DMS, "CJDisplayManager::UnregisterAllDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS, "CJDisplayManager::UnregisterAllDisplayListenerWithType is called");
     if (CJDisplayManager::cjCbMap_.empty() ||
         CJDisplayManager::cjCbMap_.find(type) == CJDisplayManager::cjCbMap_.end()) {
         TLOGI(
@@ -341,7 +341,7 @@ DMError CJDisplayManager::UnregisterAllDisplayListenerWithType(const std::string
 
 int32_t CJDisplayManager::OnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId)
 {
-    TLOGI(WmsLogTag::DMS, "CJDisplayManager::OnRegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS, "CJDisplayManager::OnRegisterDisplayListenerWithType is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(CJDisplayManager::RegisterDisplayListenerWithType(type, callbackId));
     if (ret != DmErrorCode::DM_OK) {
         if (ret != DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
@@ -354,7 +354,7 @@ int32_t CJDisplayManager::OnRegisterDisplayListenerWithType(const std::string& t
 
 DMError CJDisplayManager::RegisterDisplayListenerWithType(const std::string& type, int64_t callbackId)
 {
-    TLOGI(WmsLogTag::DMS, "CJDisplayManager::RegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS, "CJDisplayManager::RegisterDisplayListenerWithType is called");
     if (IfCallbackRegistered(type, callbackId)) {
         TLOGI(WmsLogTag::DMS, "RegisterDisplayListenerWithType callback with type %{public}s already registered",
             type.c_str());
@@ -396,7 +396,7 @@ DMError CJDisplayManager::RegisterDisplayListenerWithType(const std::string& typ
 
 int32_t CJDisplayManager::OnUnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId)
 {
-    TLOGI(WmsLogTag::DMS, "CJDisplayManager::OnUnRegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS, "CJDisplayManager::OnUnRegisterDisplayListenerWithType is called");
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(CJDisplayManager::UnRegisterDisplayListenerWithType(type, callbackId));
     if (ret != DmErrorCode::DM_OK) {
         if (ret != DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
@@ -409,7 +409,7 @@ int32_t CJDisplayManager::OnUnRegisterDisplayListenerWithType(const std::string&
 
 DMError CJDisplayManager::UnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId)
 {
-    TLOGI(WmsLogTag::DMS, "CJDisplayManager::UnRegisterDisplayListenerWithType is called");
+    TLOGD(WmsLogTag::DMS, "CJDisplayManager::UnRegisterDisplayListenerWithType is called");
     if (CJDisplayManager::cjCbMap_.empty() ||
         CJDisplayManager::cjCbMap_.find(type) == CJDisplayManager::cjCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered!", type.c_str());
