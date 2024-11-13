@@ -1006,7 +1006,7 @@ HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GetWindowModeType01
- * @tc.desc: check GetWindowModeType01
+ * @tc.desc: check GetWindowModeType
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
