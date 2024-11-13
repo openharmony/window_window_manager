@@ -2129,15 +2129,15 @@ void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEven
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool needNotifyClient)
 {
-    auto task = [weakThis = wptr(this), pointerEvent, needNotifyClient]() {
+    auto task = [weakThis = wptr(this), pointerEvent, needNotifyClient] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::DEFAULT, "session is null");
+            TLOGNE(WmsLogTag::DEFAULT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         return session->TransferPointerEventInner(pointerEvent, needNotifyClient);
     };
-    return PostSyncTask(task, __func__);
+    return PostSyncTask(std::move(task), __func__);
 }
 
 WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
