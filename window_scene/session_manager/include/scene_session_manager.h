@@ -692,8 +692,8 @@ private:
     bool GetPreWindowDrawingState(uint64_t windowId, bool currentWindowDrawing, int32_t& pid);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid);
     void UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid);
-    size_t GetDrawingDataIndex(uint64_t windowId);
-    void EraseDrawingDataElement(size_t index);
+    int GetSpecifiedDrawingData(uint64_t windowId);
+    void RemoveSpecifiedDrawingData(int index);
     
     /*
      * Window Rotate Animation
