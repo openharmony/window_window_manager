@@ -106,20 +106,20 @@ HWTEST_F(WindowSessionImplTwoTest, GetTitleButtonVisible, Function | SmallTest |
 {
     auto window = GetTestWindowImpl("GetTitleButtonVisible");
     ASSERT_NE(window, nullptr);
-    bool isPC = false;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     bool isMaximizeVisible = false;
     bool isMinimizeVisible = false;
     bool isSplitVisible = false;
     bool isCloseVisible = false;
-    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
+    window->GetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
     ASSERT_FALSE(isSplitVisible);
 
-    isPC = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->windowTitleVisibleFlags_.isSplitVisible = false;
     window->windowTitleVisibleFlags_.isMaximizeVisible = false;
     window->windowTitleVisibleFlags_.isMinimizeVisible = false;
     window->windowTitleVisibleFlags_.isCloseVisible = false;
-    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
+    window->GetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
     ASSERT_TRUE(isSplitVisible);
     ASSERT_TRUE(isMaximizeVisible);
     ASSERT_TRUE(isMinimizeVisible);
@@ -129,7 +129,7 @@ HWTEST_F(WindowSessionImplTwoTest, GetTitleButtonVisible, Function | SmallTest |
     window->windowTitleVisibleFlags_.isMaximizeVisible = true;
     window->windowTitleVisibleFlags_.isMinimizeVisible = true;
     window->windowTitleVisibleFlags_.isCloseVisible = true;
-    window->GetTitleButtonVisible(isPC, isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
+    window->GetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
     ASSERT_TRUE(isSplitVisible);
     ASSERT_TRUE(isMaximizeVisible);
     ASSERT_TRUE(isMinimizeVisible);
