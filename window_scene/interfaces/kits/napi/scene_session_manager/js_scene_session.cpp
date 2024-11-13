@@ -2492,7 +2492,7 @@ napi_value JsSceneSession::OnSetSystemSceneForceUIFirst(napi_env env, napi_callb
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnMarkSystemSceneUIFirst(napi_env env, napi_callback_info info) 
+napi_value JsSceneSession::OnMarkSystemSceneUIFirst(napi_env env, napi_callback_info info)
 {
     size_t argc = ARG_COUNT_4;
     napi_value argv[ARG_COUNT_4] = {nullptr};
