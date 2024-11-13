@@ -2480,7 +2480,7 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "can't create sub window: not system app; pid: %{public}d; persistentId %{public}d",
         pid, property->GetPersistentId());
-    return WSError::WS_OK;
+    return WSError::WS_ERROR_INVALID_WINDOW;
 }
 
 void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
