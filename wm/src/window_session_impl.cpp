@@ -844,10 +844,11 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
     }
 }
 
-void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton,
+void WindowSessionImpl::GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton,
     bool& hideSplitButton, bool& hideCloseButton)
 {
-    if (!isPC) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
         return;
     }
     if (hideMaximizeButton > !windowTitleVisibleFlags_.isMaximizeVisible) {
@@ -1156,7 +1157,6 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
@@ -1174,7 +1174,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     bool hideMinimizeButton = false;
     bool hideCloseButton = false;
-    GetTitleButtonVisible(isPC, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton, hideCloseButton]:"
         "[%{public}d, %{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
