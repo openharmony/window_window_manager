@@ -7849,8 +7849,8 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
 #endif
 }
 
-void SceneSessionManager::DealwithDrawingContentChange(
-    const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo)
+void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>&
+    drawingContentChangeInfo)
 {
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContenInfos;
     for (const auto& elem : drawingContentChangeInfo) {
