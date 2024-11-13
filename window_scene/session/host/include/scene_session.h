@@ -175,7 +175,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
-    WSError OnSessionEvent(SessionEvent event, SessionEventParam param);
+    WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param);
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
@@ -605,7 +605,7 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
 
     /*
-     * pc fold screen
+     * PC Fold Screen
      */
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
 
@@ -672,12 +672,6 @@ private:
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
-    void SetSurfaceBoundsWithAnimation(
-        std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve> animationParam,
-        const WSRect& rect, std::function<void()>&& finishCallback = nullptr,
-        bool isGlobal = false, bool needFlush = true
-    );
-    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
@@ -851,6 +845,11 @@ private:
     /**
      * Window Layout
      */
+    void SetSurfaceBoundsWithAnimation(
+        const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
+        const WSRect& rect, const std::function<void()>& finishCallback = nullptr,
+        bool isGlobal = false, bool needFlush = true);
+    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
 
     /**

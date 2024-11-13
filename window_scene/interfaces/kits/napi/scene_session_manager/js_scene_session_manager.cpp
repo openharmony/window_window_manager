@@ -3580,17 +3580,18 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
         return NapiGetUndefined(env);
     }
 
-    ScreenFoldStatus status = ScreenFoldStatus::UNKNOWN;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], status)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to type");
+    uint32_t statusNum;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], statusNum)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to status");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    ScreenFoldStatus status = static_cast<ScreenFoldStatus>(statusNum);
 
     WSRect defaultDisplayRect;
     if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], defaultDisplayRect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rect");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to display rect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3598,7 +3599,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
 
     WSRect virtualDisplayRect;
     if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], virtualDisplayRect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rect");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to virtual rect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3606,17 +3607,14 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
 
     WSRect foldCreaseRect;
     if (argv[ARG_INDEX_FOUR] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_FOUR], foldCreaseRect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rect");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to fold crease rect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    PcFoldScreenController::UpdateFoldScreenStatus(displayId, status);
-    PcFoldScreenController::SetDefaultDisplayRect(defaultDisplayRect);
-    PcFoldScreenController::SetVirtualDisplayRect(virtualDisplayRect);
-    PcFoldScreenController::SetFoldCreaseRect(foldCreaseRect);
-
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(displayId, status,
+        defaultDisplayRect, virtualDisplayRect, foldCreaseRect);
     return NapiGetUndefined(env);
 }
 
@@ -3641,8 +3639,7 @@ napi_value JsSceneSessionManager::OnResetPcFoldScreenArrangeRule(napi_env env, n
         return NapiGetUndefined(env);
     }
 
-    PcFoldScreenController::ResetArrangeRule(rect);
-
+    PcFoldScreenManager::GetInstance().ResetArrangeRule(rect);
     return NapiGetUndefined(env);
 }
 
