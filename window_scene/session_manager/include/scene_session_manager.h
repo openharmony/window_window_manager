@@ -689,7 +689,7 @@ private:
      */
     std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
         const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
-    bool GetPreWindowDrawingState(uint64_t windowId, bool currentWindowDrawingState, int32_t& pid);
+    bool GetPreWindowDrawingState(uint64_t windowId, bool currentWindowDrawing, int32_t& pid);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid);
     void UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid);
     size_t GetDrawingDataIndex(uint64_t windowId);
