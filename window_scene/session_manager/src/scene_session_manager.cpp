@@ -7861,7 +7861,13 @@ void SceneSessionManager::DealwithDrawingContentChange(
         WindowType type = WindowType::APP_WINDOW_BASE;
         sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
         if (session == nullptr) {
-            GetDrawingDataElement(surfaceId, pid, uid);
+            auto index = GetDrawingDataIndex(surfaceId);
+            if (index < 0) {
+                continue;
+            } 
+            pid = lastDrawingData_[index].pid_;
+            uid = lastDrawingData_[index].uid_;
+            EraseDrawingDataElement(index);
         } else {
             winId = session->GetWindowId();
             pid = session->GetCallingPid();
@@ -7882,15 +7888,19 @@ void SceneSessionManager::DealwithDrawingContentChange(
     }
 }
 
-void SceneSessionManager::GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid) {
-    for (auto it = lastDrawingData_.begin(); it != lastDrawingData_.end(); ++it) {
-        auto& elem = *it;
-        if (elem.windowId_ == windowId) {
-            pid = elem.pid_;
-            uid = elem.uid_;
-            lastDrawingData_.erase(it);
-            break;
+int SceneSessionManager::GetDrawingDataIndex(uint64_t windowId) {
+    int num = static_cast<int>(lastDrawingData_.size());
+    for (int index = 0; index < lastDrawingData_.size(); ++index) {
+        if (lastDrawingData_[index].windowId_ == windowId) {
+            return index;
         }
+    }
+    return -1;
+}
+
+void SceneSessionManager::EraseDrawingDataElement(int index) {
+    if (index >= 0 && static_cast<size_t>(index) < lastDrawingData_.size()) {
+        lastDrawingData_.erase(lastDrawingData_.begin() + index);
     }
 }
 
@@ -7899,21 +7909,14 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
     for (const auto& data : currDrawingContentData) {
         uint64_t windowId = data.first;
-        bool currentWindowDrawingState = data.second;
+        bool isWindowDrawing = data.second;
         int32_t pid = 0;
-        bool DrawingContentChange = false;
+        bool isDrawingStateChange = false;
         sptr<SceneSession> session = SelectSesssionFromMap(windowId);
-        if (session == nullptr) {
-            DrawingContentChange = true;
-        }
-        if (!DrawingContentChange &&
-            GetPreWindowDrawingState(windowId, currentWindowDrawingState, pid) == currentWindowDrawingState) {
-            continue;
-        }
-        if (!DrawingContentChange) {
-            WindowDrawingContentChange = GetProcessDrawingState(windowId, pid);
-        }
-        if (DrawingContentChange) {
+        isDrawingStateChange = (session == nullptr) ||
+                               (GetPreWindowDrawingState(windowId, isWindowDrawing, pid) == isWindowDrawing) ||
+                               GetProcessDrawingState(windowId, pid);
+        if (isDrawingStateChange) {
             processDrawingContentChangeInfo.emplace_back(windowId, currentWindowDrawingState);
         }
     }
@@ -7930,21 +7933,16 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool curre
     pid = session->GetCallingPid();
     preWindowDrawingState = session->GetDrawingContentState();
     session->SetDrawingContentState(currentDrawingContentState);
-    RemoveDuplicateDrawingData(windowId);
-    DrawingSessionId Ids = { windowId, pid, session->GetCallingUid() };
-    lastDrawingData_.emplace_back(Ids);
+    UpdateWindowDrawingData(windowId, pid, session->GetCallingUid());
     return preWindowDrawingState;
 }
 
-void SceneSessionManager::RemoveDuplicateDrawingData(uint64_t windowId) {
-    for (auto it = lastDrawingData_.begin(); it != lastDrawingData_.end();) {
-        auto& elem = *it;
-        if (elem.windowId_ == windowId) {
-            lastDrawingData_.erase(it);
-        } else {
-            ++it;
-        }
+void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid) {
+    auto index = GetDrawingDataIndex(windowId);
+    if (index < 0) {
+        EraseDrawingDataElement(index);
     }
+    lastDrawingData_.emplace_back({ windowId, pid, uid });
 }
 
 bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid)
@@ -7965,7 +7963,6 @@ bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid)
         }
     return isChange;
 }
-
 
 void SceneSessionManager::InitWithRenderServiceAdded()
 {

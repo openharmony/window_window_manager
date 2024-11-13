@@ -691,8 +691,9 @@ private:
         const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
     bool GetPreWindowDrawingState(uint64_t windowId, bool currentWindowDrawingState, int32_t& pid);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid);
-    void RemoveDuplicateDrawingData(uint64_t windowId);
-    void GetDrawingDataElement(uint64_t windowId, int32_t& pid, int32_t& uid);
+    void UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid);
+    int GetDrawingDataIndex(uint64_t windowId);
+    void EraseDrawingDataElement(int index);
     
     /*
      * Window Rotate Animation
@@ -1050,12 +1051,12 @@ private:
     /*
      * Window Property
      */
-    std::vector<DrawingSessionId> lastDrawingData_;
+    std::vector<DrawingSessionIdInfo> lastDrawingData_;
 
-    struct DrawingSessionId {
-        uint64_t windowId_;
-        int32_t pid_;
-        int32_t uid_;
+    struct DrawingSessionIdInfo {
+        uint64_t windowId_ = 0;
+        int32_t pid_ = 0;
+        int32_t uid_ = 0;
     };
 
     /**
