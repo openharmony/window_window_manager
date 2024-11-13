@@ -7897,6 +7897,7 @@ size_t SceneSessionManager::GetDrawingDataIndex(uint64_t windowId)
         for (int i = 0; i < lastDrawingData_.size(); ++i) {
             if (lastDrawingData_[index].windowId_ == windowId) {
                 index = i;
+                break;
             }
         }
     }
