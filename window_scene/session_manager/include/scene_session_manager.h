@@ -1051,6 +1051,7 @@ private:
     /*
      * Window Property
      */
+    std::mutex lastDrawingDataMutex_;
     std::vector<DrawingSessionIdInfo> lastDrawingData_;
 
     struct DrawingSessionIdInfo {
