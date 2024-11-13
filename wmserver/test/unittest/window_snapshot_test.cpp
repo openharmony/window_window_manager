@@ -139,6 +139,9 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot05, Function | SmallTest | Level3)
 
     sptr<WindowRoot> root = new WindowRoot([](Event event, const sptr<IRemoteObject>& remoteObject) {});
     sptr<WindowNode> node = new WindowNode();
+    sptr<WindowProperty> property = sptr<WindowProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    node->SetWindowProperty(property);
     root->windowNodeMap_.insert(std::make_pair(0, node));
 
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
