@@ -234,7 +234,7 @@ public:
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
 
-    /*
+    /**
      * Window Layout
      */
     WMError SetWindowEnableDragBySystem(bool enableDrag);
