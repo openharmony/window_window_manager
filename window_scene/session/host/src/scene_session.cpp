@@ -3145,7 +3145,7 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
     }
 }
 
-void SceneSession::MarkSystemSceneUIFirst(bool isUIFirst, bool isForceFlag)
+void SceneSession::MarkSystemSceneUIFirst(bool isForceFlag, bool isUifirstEnable)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::MarkSystemSceneUIFirst");
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
@@ -3154,13 +3154,13 @@ void SceneSession::MarkSystemSceneUIFirst(bool isUIFirst, bool isForceFlag)
         return;
     }
     if (leashWinSurfaceNode != nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isUIFirst=%{public}d. isForceFlag=%{public}d",
-            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), isUIFirst, isForceFlag);
-        leashWinSurfaceNode->MarkSystemSceneUIFirst(isUIFirst, isForceFlag);
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForceFlag=%{public}d. isUifirstEnable=%{public}d",
+            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), isForceFlag, isUifirstEnable);
+        leashWinSurfaceNode->MarkSystemSceneUIFirst(isForceFlag, isUifirstEnable);
     } else {
-        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isUIFirst=%{public}d. isForceFlag=%{public}d",
-            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), isUIFirst, isForceFlag);
-        surfaceNode_->MarkSystemSceneUIFirst(isUIFirst, isForceFlag);
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForceFlag=%{public}d. isUifirstEnable=%{public}d",
+            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), isForceFlag, isUifirstEnable);
+        surfaceNode_->MarkSystemSceneUIFirst(isForceFlag, isUifirstEnable);
     }
 }
 
