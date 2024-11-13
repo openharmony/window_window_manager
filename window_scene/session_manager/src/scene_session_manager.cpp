@@ -7948,7 +7948,7 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool curre
 void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid)
 {
     auto index = GetDrawingDataIndex(windowId);
-    if (index < 0) {
+    if (index >= 0) {
         EraseDrawingDataElement(index);
     }
     std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
