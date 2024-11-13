@@ -6538,7 +6538,7 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
- 
+
 napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
