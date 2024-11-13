@@ -7895,8 +7895,7 @@ size_t SceneSessionManager::GetDrawingDataIndex(uint64_t windowId)
     {
         std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
         for (int i = 0; i < lastDrawingData_.size(); ++i) {
-            if (
-                [index].windowId_ == windowId) {
+            if (lastDrawingData_[index].windowId_ == windowId) {
                 index = i;
             }
         }
