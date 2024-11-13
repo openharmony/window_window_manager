@@ -2144,9 +2144,9 @@ HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest
  */
 HWTEST_F(WindowSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetStatusBarHeight");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     ASSERT_EQ(0, window->GetStatusBarHeight());
 }
