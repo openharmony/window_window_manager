@@ -7888,14 +7888,14 @@ void SceneSessionManager::DealwithDrawingContentChange(
     }
 }
 
-int SceneSessionManager::GetDrawingDataIndex(uint64_t windowId)
+size_t SceneSessionManager::GetDrawingDataIndex(uint64_t windowId)
 {
-    int index = -1;
-    int num = static_cast<int>(lastDrawingData_.size());
+    size_t index = -1;
     {
         std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
-        for (int i = 0; i < num; ++i) {
-            if (lastDrawingData_[index].windowId_ == windowId) {
+        for (int i = 0; i < lastDrawingData_.size(); ++i) {
+            if (
+                [index].windowId_ == windowId) {
                 index = i;
             }
         }
@@ -7903,10 +7903,10 @@ int SceneSessionManager::GetDrawingDataIndex(uint64_t windowId)
     return index;
 }
 
-void SceneSessionManager::EraseDrawingDataElement(int index)
+void SceneSessionManager::EraseDrawingDataElement(size_t index)
 {
     std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
-    if (index >= 0 && static_cast<size_t>(index) < lastDrawingData_.size()) {
+    if (index >= 0 && index < lastDrawingData_.size()) {
         lastDrawingData_.erase(lastDrawingData_.begin() + index);
     }
 }
