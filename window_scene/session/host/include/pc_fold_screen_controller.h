@@ -49,9 +49,8 @@ enum class ScreenSide : uint8_t {
 };
 
 class PcFoldScreenManager {
-WM_DECLARE_SINGLE_INSTANCE_BASE(PcFoldScreenManager);
+WM_DECLARE_SINGLE_INSTANCE(PcFoldScreenManager);
 public:
-    PcFoldScreenManager();
     void UpdateFoldScreenStatus(DisplayId displayId, ScreenFoldStatus status,
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     bool IsHalfFolded(DisplayId displayId);
@@ -96,7 +95,7 @@ private:
      * if need, use map for multi fold screen
      */
     std::shared_mutex displayInfoMutex_; // protect display infos
-    DisplayId displayId_;
+    DisplayId displayId_ { SCREEN_ID_INVALID };
     float vpr_ { 1.5f }; // display vp ratio
     ScreenFoldStatus screenFoldStatus_ { ScreenFoldStatus::UNKNOWN };
     std::shared_mutex rectsMutex_; // protect rects
@@ -134,11 +133,11 @@ private:
     int32_t GetPersistentId() const;
     int32_t GetTitleHeight() const;
     WSRectF CalculateMovingVelocity();
-    void RemoveMoveRects();
 
     wptr<SceneSession> weakSceneSession_ = nullptr;
 
     // use queue to calculate velocity
+    std::mutex moveMutex_;
     WSRect startMoveRect_;
     bool isStartFullScreen_ { false };
     RectRecordsVector movingRectRecords_;
