@@ -855,7 +855,7 @@ private:
      */
     void UpdateDarkColorModeToRS();
 
-    /**
+    /*
      * Window Immersive
      */
     OnFlushUIParamsFunc onFlushUIParamsFunc_;
