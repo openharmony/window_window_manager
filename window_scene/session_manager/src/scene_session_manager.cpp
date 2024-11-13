@@ -2480,7 +2480,7 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
             sessionStage->UpdateDisplayId(parentProperty->GetDisplayId());
             property->SetDisplayId(parentProperty->GetDisplayId());
         }
-        return SError::WS_OK;
+        return WSError::WS_OK;
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "can't create sub window: persistentId %{public}d", property->GetPersistentId());
     return WSError::WS_ERROR_INVALID_WINDOW;
