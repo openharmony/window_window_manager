@@ -7862,13 +7862,13 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
         WindowType type = WindowType::APP_WINDOW_BASE;
         sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
         if (session == nullptr) {
-            auto index = GetDrawingDataIndex(surfaceId);
+            auto index = GetSpecifiedDrawingData(surfaceId);
             if (index < 0) {
                 continue;
             } 
             pid = lastDrawingData_[index].pid_;
             uid = lastDrawingData_[index].uid_;
-            EraseDrawingDataElement(index);
+            RemoveSpecifiedDrawingData(index);
         } else {
             winId = session->GetWindowId();
             pid = session->GetCallingPid();
@@ -7889,22 +7889,21 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
     }
 }
 
-size_t SceneSessionManager::GetDrawingDataIndex(uint64_t windowId)
+int SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId)
 {
-    size_t index = -1;
+    int index = -1;
     {
         std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
-        for (int i = 0; i < lastDrawingData_.size(); ++i) {
-            if (lastDrawingData_[index].windowId_ == windowId) {
-                index = i;
-                break;
-            }
+        auto it = std::find_if(lastDrawingData_.begin(), lastDrawingData_.end(),
+                               [windowId](const DrawingSessionIdInfo& info) { return info.windowId_ == windowId; });
+        if (it != lastDrawingData_.end()) {
+            index = it - lastDrawingData_.end();
         }
     }
     return index;
 }
 
-void SceneSessionManager::EraseDrawingDataElement(size_t index)
+void SceneSessionManager::RemoveSpecifiedDrawingData(int index)
 {
     std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
     if (index >= 0 && index < lastDrawingData_.size()) {
@@ -7948,9 +7947,9 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool curre
 
 void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid)
 {
-    auto index = GetDrawingDataIndex(windowId);
+    auto index = GetSpecifiedDrawingData(windowId);
     if (index >= 0) {
-        EraseDrawingDataElement(index);
+        RemoveSpecifiedDrawingData(index);
     }
     std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
     lastDrawingData_.emplace_back({ windowId, pid, uid });
