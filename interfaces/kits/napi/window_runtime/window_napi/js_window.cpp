@@ -1478,7 +1478,7 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     size_t argc = 4; // 4: number of arg
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 2) { // 2:minimum param num
+    if (argc < 2) { // 2: minimum param num
         WLOGFE("Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
@@ -6453,6 +6453,49 @@ napi_value JsWindow::OnRequestFocus(napi_env env, napi_callback_info info)
     return result;
 }
 
+static bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& WindowOption)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "jsObject is null");
+        return true;
+    }
+
+    std::string title;
+    if (ParseJsValue(jsObject, env, "title", title)) {
+        WindowOption->SetSubWindowTitle(title);
+    } else {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
+        return false;
+    }
+
+    bool decorEnabled;
+    if (ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
+        WindowOption->SetSubWindowDecorEnable(decorEnabled);
+    } else {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to decorEnabled");
+        return false;
+    }
+
+    bool isModal = false;
+    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
+        TLOGD(WmsLogTag::WMS_SUB, "isModal:%{public}d", isModal);
+        if (isModal) {
+            WindowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+        }
+    }
+
+    bool isTopmost = false;
+    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
+        if (!isModal && isTopmost) {
+            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow is topmost");
+            return false;
+        }
+        WindowOption->SetWindowTopmost(isTopmost);
+    }
+
+    return true;
+}
+
 napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -6518,49 +6561,6 @@ napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info in
     TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s], enable = %{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enable);
     return CreateJsValue(env, enable);
-}
-
-static bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& WindowOption)
-{
-    if (jsObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "jsObject is null");
-        return true;
-    }
-
-    std::string title;
-    if (ParseJsValue(jsObject, env, "title", title)) {
-        WindowOption->SetSubWindowTitle(title);
-    } else {
-        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
-        return false;
-    }
-
-    bool decorEnabled;
-    if (ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
-        WindowOption->SetSubWindowDecorEnable(decorEnabled);
-    } else {
-        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to decorEnabled");
-        return false;
-    }
-
-    bool isModal = false;
-    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
-        TLOGD(WmsLogTag::WMS_SUB, "isModal:%{public}d", isModal);
-        if (isModal) {
-            WindowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
-        }
-    }
-
-    bool isTopmost = false;
-    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
-        if (!isModal && isTopmost) {
-            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow is topmost");
-            return false;
-        }
-        WindowOption->SetWindowTopmost(isTopmost);
-    }
-
-    return true;
 }
 
 static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::string& windowName,
