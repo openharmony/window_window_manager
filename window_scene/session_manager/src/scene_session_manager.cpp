@@ -2447,7 +2447,7 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
     bool checkIsPassed = false;
     if (pid == parentPid) {
         TLOGI(WmsLogTag::WMS_UIEXT, "pid == parentPid");
-        checkIsPassed = true
+        checkIsPassed = true;
     }
     AAFwk::UIExtensionSessionInfo info;
     AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
@@ -2455,12 +2455,12 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
         int32_t parentId = static_cast<int32_t>(info.hostWindowId);
         if (parentId == property->GetParentPersistentId()) {
             TLOGI(WmsLogTag::WMS_UIEXT, "parentId == property->GetParentPersistentId(parentId:%{public}d)", parentId);
-            checkIsPassed = true
+            checkIsPassed = true;
         }
     }
     if (SessionPermission::IsSystemCalling()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "is system app");
-        checkIsPassed = true
+        checkIsPassed = true;
     }
     if (property->GetIsUIExtensionAbilityProcess() && SessionPermission::IsStartedByUIExtension()) {
         SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
@@ -2472,7 +2472,7 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
                 hostInfo.elementName_.GetBundleName().c_str());
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
-        checkIsPassed = true
+        checkIsPassed = true;
     }
     if (checkIsPassed) {
         sptr<WindowSessionProperty> parentProperty = extensionParentSession->GetSessionProperty();
