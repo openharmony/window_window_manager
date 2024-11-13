@@ -30,12 +30,12 @@ namespace Rosen {
 
 CJDisplayListener::CJDisplayListener()
 {
-    TLOGI(WmsLogTag::DMS, "Constructor execution");
+    TLOGD(WmsLogTag::DMS, "Constructor execution");
 }
 
 CJDisplayListener::~CJDisplayListener()
 {
-    TLOGI(WmsLogTag::DMS, "Destructor execution");
+    TLOGD(WmsLogTag::DMS, "Destructor execution");
 }
 
 void CJDisplayListener::AddCallback(const std::string& type, int64_t callbackObject)
@@ -49,7 +49,7 @@ void CJDisplayListener::AddCallback(const std::string& type, int64_t callbackObj
 void CJDisplayListener::RemoveAllCallback()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS, "CJDisplayListener::RemoveAllCallback is called");
+    TLOGD(WmsLogTag::DMS, "CJDisplayListener::RemoveAllCallback is called");
     cjCallBack_.clear();
 }
 

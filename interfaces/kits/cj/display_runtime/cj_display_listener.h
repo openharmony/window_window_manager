@@ -20,9 +20,6 @@
 #include <mutex>
 
 #include "display_manager.h"
-#include "dm_common.h"
-#include "native_engine/native_engine.h"
-#include "refbase.h"
 
 namespace OHOS {
 namespace Rosen {
