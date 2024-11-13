@@ -1163,7 +1163,10 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    WindowState validState = WindowHelper::IsSubWindow(type) ? requestState_ : state_;
+    WindowState validState = state_;
+    if (WindowHelper::IsSubWindow(type) || WindowHelper::IsDialogWindow(type)) {
+        validState = requestState_;
+    }
     if (validState == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         TLOGD(WmsLogTag::WMS_LIFE, "window session is alreay hidden, id:%{public}d", property_->GetPersistentId());
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
@@ -3616,9 +3619,8 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         if (state_ == WindowState::STATE_SHOWN) {
             return WSError::WS_OK;
         }
-        if (state_ == WindowState::STATE_HIDDEN) {
+        if (state_ == WindowState::STATE_HIDDEN && requestState_ == WindowState::STATE_SHOWN) {
             state_ = WindowState::STATE_SHOWN;
-            requestState_ = WindowState::STATE_SHOWN;
             NotifyAfterForeground();
         }
     } else {
@@ -3627,7 +3629,6 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
         }
         if (state_ == WindowState::STATE_SHOWN) {
             state_ = WindowState::STATE_HIDDEN;
-            requestState_ = WindowState::STATE_HIDDEN;
             NotifyAfterBackground();
         }
     }
