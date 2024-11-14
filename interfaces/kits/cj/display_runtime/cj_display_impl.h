@@ -41,16 +41,30 @@ public:
     float GetVirtualPixelRatio();
     float GetXDPI();
     float GetYDPI();
+    RetStruct GetColorSpaces();
+    RetStruct GetHdrFormats();
+    uint32_t GetAvailableWidth();
+    uint32_t GetAvailableHeight();
     RetStruct GetCutoutInfo();
-    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
+    RetStruct GetAvailableArea();
+    int32_t OnUnRegisterAllDisplayManagerCallback(const std::string& type);
+    DMError UnRegisterAllDisplayListenerWithType(const std::string& type);
+    int32_t OnRegisterDisplayManagerCallback(const std::string& type, int64_t funcId);
+    DMError RegisterDisplayListenerWithType(const std::string& type, int64_t funcId);
+    int32_t OnUnRegisterDisplayManagerCallback(const std::string& type, int64_t funcId);
+    DMError UnRegisterDisplayListenerWithType(const std::string& type, int64_t funcId);
+    OHOS::FFI::RuntimeType* GetRuntimeType() override
+    {
+        return GetClassType();
+    }
+
 private:
     sptr<Display> display_ = nullptr;
     friend class OHOS::FFI::RuntimeType;
     friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType *GetClassType()
+    static OHOS::FFI::RuntimeType* GetClassType()
     {
-        static OHOS::FFI::RuntimeType runtimeType =
-            OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("DisplayImpl");
+        static OHOS::FFI::RuntimeType runtimeType = OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("DisplayImpl");
         return &runtimeType;
     }
 };
@@ -64,7 +78,7 @@ enum class DisplayStateMode : uint32_t {
     STATE_VR,
     STATE_ON_SUSPEND
 };
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 
 #endif // DISPLAY_DISPLAY_IMPL
