@@ -3890,7 +3890,7 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
             return;
         }
         bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession);
-        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]",
+        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d, %{public}d, %{public}d]",
             sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(),
             sceneSession->IsVisible(), requireLock, shouldLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
@@ -3964,7 +3964,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
         SetDisplayBrightness(brightness);
     }
     if (!postTaskRet) {
-        TLOGI(WmsLogTag::DEFAULT, "Report post listener callback task failed. the task name is SetBrightness");
+        TLOGE(WmsLogTag::DEFAULT, "post task failed. task is SetBrightness");
     }
 }
 
@@ -7881,21 +7881,30 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
     drawingContentChangeInfo)
 {
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContenInfos;
-    for (const auto& elem : drawingContentChangeInfo) {
-        uint64_t surfaceId = elem.first;
-        bool drawingState = elem.second;
+    for (const auto& [surfaceId, drawingState] : drawingContentChangeInfo) {
+        int32_t windowId = 0;
+        int32_t pid = 0;
+        int32_t uid = 0;
+        WindowType type = WindowType::APP_WINDOW_BASE;
         sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
         if (session == nullptr) {
-            continue;
+            if (!GetSpecifiedDrawingData(surfaceId, pid, uid)) {
+                continue;
+            }
+            RemoveSpecifiedDrawingData(surfaceId);
+        } else {
+            windowId = session->GetWindowId();
+            pid = session->GetCallingPid();
+            uid = session->GetCallingUid();
+            type = session->GetWindowType();
         }
-        windowDrawingContenInfos.emplace_back(new WindowDrawingContentInfo(session->GetWindowId(),
-            session->GetCallingPid(), session->GetCallingUid(), drawingState, session->GetWindowType()));
+        windowDrawingContenInfos.emplace_back(new WindowDrawingContentInfo(windowId, pid, uid, drawingState, type));
         if (openDebugTrace_) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Drawing status changed pid:(%d ) surfaceId:(%" PRIu64 ")"
-                "drawingState:(%d )", session->GetCallingPid(), surfaceId, drawingState);
+                "drawingState:(%d )", pid, surfaceId, drawingState);
         }
         WLOGFD("drawing status changed pid:%{public}d, "
-            "surfaceId:%{public}" PRIu64 ", drawingState:%{public}d", session->GetCallingPid(), surfaceId, drawingState);
+            "surfaceId:%{public}" PRIu64 ", drawingState:%{public}d", pid, surfaceId, drawingState);
     }
     if (windowDrawingContenInfos.size() != 0) {
         WLOGFD("Notify WindowDrawingContenInfo changed start");
@@ -7903,44 +7912,66 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
     }
 }
 
+bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid)
+{
+    auto it = std::find_if(lastDrawingSessionInfoVec_.begin(), lastDrawingSessionInfoVec_.end(),
+        [surfaceId](const DrawingSessionInfo& info) { return info.surfaceId_ == surfaceId; });
+    if (it != lastDrawingSessionInfoVec_.end()) {
+        pid = it->pid_;
+        uid = it->uid_;
+        return true;
+    }
+    return false;
+}
+
+void SceneSessionManager::RemoveSpecifiedDrawingData(uint64_t surfaceId)
+{
+    auto it = std::find_if(lastDrawingSessionInfoVec_.begin(), lastDrawingSessionInfoVec_.end(),
+        [surfaceId](const DrawingSessionInfo& info) { return info.surfaceId_ == surfaceId; });
+    if (it != lastDrawingSessionInfoVec_.end()) {
+        lastDrawingSessionInfoVec_.erase(it);
+    }
+}
+
 std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingContentChangeInfo(
-    std::vector<std::pair<uint64_t, bool>> currDrawingContentData)
+    const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData)
 {
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
-    for (const auto& data : currDrawingContentData) {
-        uint64_t windowId = data.first;
-        bool currentDrawingContentState = data.second;
+    for (const auto& [surfaceId, isWindowDrawing] : currDrawingContentData) {
         int32_t pid = 0;
-        bool isChange = false;
-        if (GetPreWindowDrawingState(windowId, pid, currentDrawingContentState) == currentDrawingContentState) {
-            continue;
-        } else {
-            isChange = GetProcessDrawingState(windowId, pid, currentDrawingContentState);
-        }
-
-        if (isChange) {
-            processDrawingContentChangeInfo.emplace_back(windowId, currentDrawingContentState);
+        bool isPreWindowDrawing = GetPreWindowDrawingState(surfaceId, isWindowDrawing, pid);
+        bool isProcessDrawingStateChanged = GetProcessDrawingState(surfaceId, pid);
+        sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
+        bool isDrawingStateChanged =
+            session == nullptr || (isPreWindowDrawing != isWindowDrawing && isProcessDrawingStateChanged);
+        if (isDrawingStateChanged) {
+            processDrawingContentChangeInfo.emplace_back(surfaceId, isWindowDrawing);
         }
     }
     return processDrawingContentChangeInfo;
 }
 
-bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState)
+bool SceneSessionManager::GetPreWindowDrawingState(uint64_t surfaceId, bool currentWindowDrawing, int32_t& pid)
 {
-    bool preWindowDrawingState = true;
-    sptr<SceneSession> session = SelectSesssionFromMap(windowId);
+    sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
     if (session == nullptr) {
         return false;
     }
     pid = session->GetCallingPid();
-    preWindowDrawingState = session->GetDrawingContentState();
-    session->SetDrawingContentState(currentDrawingContentState);
-    return preWindowDrawingState;
+    bool preWindowDrawing = session->GetDrawingContentState();
+    session->SetDrawingContentState(currentWindowDrawing);
+    UpdateWindowDrawingData(surfaceId, pid, session->GetCallingUid());
+    return preWindowDrawing;
 }
 
-bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState)
+void SceneSessionManager::UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid)
 {
-    bool isChange = true;
+    RemoveSpecifiedDrawingData(surfaceId);
+    lastDrawingSessionInfoVec_.push_back({ surfaceId, pid, uid });
+}
+
+bool SceneSessionManager::GetProcessDrawingState(uint64_t surfaceId, int32_t pid)
+{
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& item : sceneSessionMap_) {
         auto sceneSession = item.second;
@@ -7948,15 +7979,14 @@ bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid,
             continue;
         }
         if (sceneSession->GetCallingPid() == pid && sceneSession->GetSurfaceNode() != nullptr &&
-            windowId != sceneSession->GetSurfaceNode()->GetId()) {
-                if (sceneSession->GetDrawingContentState()) {
-                    return false;
-                }
+            surfaceId != sceneSession->GetSurfaceNode()->GetId()) {
+            if (sceneSession->GetDrawingContentState()) {
+                return false;
             }
         }
-    return isChange;
+    }
+    return true;
 }
-
 
 void SceneSessionManager::InitWithRenderServiceAdded()
 {
