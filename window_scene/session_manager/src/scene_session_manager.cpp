@@ -7854,8 +7854,7 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 {
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContenInfos;
     for (const auto& elem : drawingContentChangeInfo) {
-        
-         surfaceId = elem.first;
+        uint64_t surfaceId = elem.first;
         bool drawingState = elem.second;
         int32_t winId = 0;
         int32_t pid = 0;
@@ -7889,7 +7888,7 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 
 bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId, int32_t& pid, int32_t& uid)
 {
-    std::shared_lock<std::shared_mutex> lock(lastDrawingDataMutex_);
+    std::shared_lock<std::mutex> lock(lastDrawingDataMutex_);
     auto it = std::find_if(lastDrawingData_.begin(), lastDrawingData_.end(),
         [windowId](const DrawingSessionIdInfo& info) { return info.windowId_ == windowId; });
     if (it != lastDrawingData_.end()) {
@@ -7902,7 +7901,7 @@ bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId, int32_t& pi
 
 void SceneSessionManager::RemoveSpecifiedDrawingData(int windowId)
 {
-    std::unique_lock<std::shared_mutex> lock(lastDrawingDataMutex_);
+    std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
     auto it = std::find_if(lastDrawingData_.begin(), lastDrawingData_.end(),
         [windowId](const DrawingSessionIdInfo& info) { return info.windowId_ == windowId; });
     if (it != lastDrawingData_.end()) {
@@ -7918,12 +7917,13 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
         uint64_t windowId = data.first;
         bool isWindowDrawing = data.second;
         int32_t pid = 0;
-        bool isDrawingStateChange = false;
-        sptr<SceneSession> session = SelectSesssionFromMap(windowId);
+        bool isDrawingStateChanged = false;
         bool isPreWindowDrawing = GetPreWindowDrawingState(windowId, isWindowDrawing, pid);
-        bool isStateChanged = GetProcessDrawingState(windowId, pid);
-        isDrawingStateChange = session == nullptr || (isPreWindowDrawing != isWindowDrawing && isStateChanged);
-        if (isDrawingStateChange) {
+        bool isProcessDrawingStateChanged = GetProcessDrawingState(windowId, pid);
+        sptr<SceneSession> session = SelectSesssionFromMap(windowId);
+        isDrawingStateChanged =
+            session == nullptr || (isPreWindowDrawing != isWindowDrawing && isProcessDrawingStateChanged);
+        if (isDrawingStateChanged) {
             processDrawingContentChangeInfo.emplace_back(windowId, isWindowDrawing);
         }
     }
@@ -7947,7 +7947,7 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, bool curre
 void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid)
 {
     RemoveSpecifiedDrawingData(windowId);
-    std::unique_lock<std::shared_mutex> lock(lastDrawingDataMutex_);
+    std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
     lastDrawingData_.push_back({ windowId, pid, uid });
 }
 
