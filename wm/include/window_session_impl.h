@@ -300,11 +300,6 @@ public:
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
 
-    /*
-     * Window Immersive
-     */
-    uint32_t GetStatusBarHeight() override;
-
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -430,6 +425,11 @@ protected:
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
+
+    /*
+     * Window Immersive
+     */
+    uint32_t GetStatusBarHeight() override;
 
 private:
     //Trans between colorGamut and colorSpace
