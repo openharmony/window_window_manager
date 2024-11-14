@@ -484,7 +484,7 @@ public:
         const std::vector<std::string>& bundleNameList) override;
 
     /*
-     * Multi instance
+     * Multi Instance
      */
     int32_t GetMaxInstanceCount(const std::string& bundleName);
     int32_t GetInstanceCount(const std::string& bundleName);
