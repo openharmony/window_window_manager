@@ -477,7 +477,7 @@ HWTEST_F(SceneSessionTest3, UpdateScaleInner, Function | SmallTest | Level2)
     res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
     EXPECT_EQ(true, res);
     res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
-    EXPECT_EQ(false, res);    
+    EXPECT_EQ(false, res);
 }
 
 /**
