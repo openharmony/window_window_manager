@@ -7888,7 +7888,7 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 
 bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId, int32_t& pid, int32_t& uid)
 {
-    std::shared_lock<std::mutex> lock(lastDrawingDataMutex_);
+    std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
     auto it = std::find_if(lastDrawingData_.begin(), lastDrawingData_.end(),
         [windowId](const DrawingSessionIdInfo& info) { return info.windowId_ == windowId; });
     if (it != lastDrawingData_.end()) {
