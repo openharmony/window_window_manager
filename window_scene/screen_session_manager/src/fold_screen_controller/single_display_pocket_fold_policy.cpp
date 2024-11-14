@@ -108,7 +108,6 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
     }
     ReportFoldDisplayModeChange(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
-    RSInterfaces::GetInstance().SetScreenSwitching(true);
     ChangeScreenDisplayModeProc(screenSession, displayMode);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
@@ -309,6 +308,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession)
 {
+    RSInterfaces::GetInstance().SetScreenSwitching(true);
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
@@ -326,6 +326,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession)
 {
+    RSInterfaces::GetInstance().SetScreenSwitching(true);
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
