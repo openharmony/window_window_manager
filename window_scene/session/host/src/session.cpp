@@ -3253,12 +3253,8 @@ void Session::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)
 void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, in", GetPersistentId());
-    TLOGD(WmsLogTag::WMS_LAYOUT, "clientScaleX_:%{public}d, clientScaleY_:%{public}d, "
-        "clientpivotX_:%{public}d, clientpivotY_:%{public}d, ",
-        clientScaleX_, clientScaleY_, clientpivotX_, clientpivotY_);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "scaleX:%{public}d, scaleY:%{public}d, "
-        "pivotX:%{public}d, pivotY:%{public}d, ",
-        scaleX, scaleY, pivotX, pivotY);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "clientScaleX_:%{public}f, clientScaleY_:%{public}f", clientScaleX_, clientScaleY_);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "scaleX:%{public}f, scaleY:%{public}f", scaleX, scaleY);
     clientScaleX_ = scaleX;
     clientScaleY_ = scaleY;
     clientpivotX_ = pivotX;
