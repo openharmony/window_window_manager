@@ -3952,6 +3952,17 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
             listener->OnWindowStatusChange(windowStatus);
         }
     }
+    if (state_ != WindowState::STATE_HIDDEN) {
+        auto ret = HiSysEventWrite(
+            HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "WINDOW_STATUS_CHANGE",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_,
+            "WINDOW_MODE", static_cast<int32_t>(mode));
+        if (ret) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "write event fail, WINDOW_STATUS_CHANGE, ret = %{public}d", ret);
+        }
+    }
 }
 
 void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
