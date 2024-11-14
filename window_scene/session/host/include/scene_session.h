@@ -234,7 +234,7 @@ public:
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
 
-    /*
+    /**
      * Window Layout
      */
     WMError SetWindowEnableDragBySystem(bool enableDrag);
@@ -448,6 +448,11 @@ public:
      */
     bool GetGestureBackEnabled();
     bool GetEnableGestureBackHadSet();
+
+    /*
+     * Window Layout
+     */
+    void ResetSizeChangeReasonIfDirty();
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
