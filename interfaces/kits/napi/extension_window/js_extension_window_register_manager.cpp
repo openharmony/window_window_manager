@@ -63,7 +63,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<J
     return ret;
 }
 
-WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener,
+WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsExtensionWindowListener> listener,
     sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {

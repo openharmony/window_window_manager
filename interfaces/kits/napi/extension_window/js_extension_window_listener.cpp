@@ -71,7 +71,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]OnSizeChange, [%{public}u, %{public}u], reason=%{public}u",
         rect.width_, rect.height_, reason);
-    if (currentRect_.width_ == rect.width_ && currentRect_.height_ == rect.height_ &&
+    if (currRect_.width_ == rect.width_ && currRect_.height_ == rect.height_ &&
         reason != WindowSizeChangeReason::DRAG_END) {
         TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]no need to change size");
         return;
@@ -158,7 +158,7 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         napi_close_handle_scope(env, scope);
     };
     if (!eventHandler_) {
-        TLOGE(WmsLogTag::WMS_UIEXTJsExtensionWindowListener, "Get main event handler failed!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Get main event handler failed!");
         return;
     }
     eventHandler_->PostTask(jsCallback, "wms:JsExtensionWindowListener::OnRectChange", 0,
