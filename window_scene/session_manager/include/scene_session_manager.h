@@ -1051,14 +1051,15 @@ private:
     /*
      * Window Property
      */
-    std::mutex lastDrawingDataMutex_;
-    std::vector<DrawingSessionIdInfo> lastDrawingData_;
-
     struct DrawingSessionIdInfo {
         uint64_t windowId_ = 0;
         int32_t pid_ = 0;
         int32_t uid_ = 0;
     };
+    
+
+    std::mutex lastDrawingDataMutex_;
+    std::vector<DrawingSessionIdInfo> lastDrawingData_;
 
     /**
      * PC Window
