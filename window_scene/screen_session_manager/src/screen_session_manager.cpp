@@ -6205,15 +6205,13 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenCapture(%" PRIu64")", captureOption.displayId_);
     auto res = GetScreenSnapshot(captureOption.displayId_);
+    AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
+        static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
     if (res == nullptr) {
         TLOGE(WmsLogTag::DMS, "get capture null.");
         *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
-        AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
-            static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
         return nullptr;
     }
-    AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
-        static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
     NotifyScreenshot(captureOption.displayId_);
     if (SessionPermission::IsBetaVersion()) {
         CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
