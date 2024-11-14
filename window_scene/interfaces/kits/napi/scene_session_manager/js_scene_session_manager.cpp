@@ -1545,6 +1545,7 @@ napi_value JsSceneSessionManager::OnGetAbilityInfo(napi_env env, napi_callback_i
     if (ret != WSErrorCode::WS_OK) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
             "System is abnormal"));
+        return NapiGetUndefined(env);
     }
     return CreateSCBAbilityInfo(env, scbAbilityInfo);
 }
