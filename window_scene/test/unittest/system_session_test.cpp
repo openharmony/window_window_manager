@@ -683,6 +683,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | L
     sysSession->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sysSession->state_ = SessionState::STATE_ACTIVE;
 
+    sysSession->dirtyFlags_ = 0;
     sysSession->isKeyboardPanelEnabled_ = true;
     sysSession->reason_ = SizeChangeReason::MAXIMIZE;
 
@@ -690,15 +691,18 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | L
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback, nullptr);
     sysSession->specificCallback_ = specificCallback;
+    sysSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
-    EXPECT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(sysSession->dirtyFlags_, 0);
 
+    sysSession->dirtyFlags_ = 0;
+    sysSession->SetScbCoreEnabled(true);
     sysSession->reason_ = SizeChangeReason::MAXIMIZE;
     sysSession->specificCallback_->onUpdateAvoidArea_ = [](const int32_t& persistentId) {};
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(sysSession->dirtyFlags_, static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA));
 }
 
 } // namespace
