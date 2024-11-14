@@ -2404,10 +2404,6 @@ void SceneSessionManager::AddClientDeathRecipient(const sptr<ISessionStage>& ses
 
     auto remoteObject = sessionStage->AsObject();
     remoteObjectMap_.insert(std::make_pair(remoteObject, sceneSession->GetPersistentId()));
-    if (windowDeath_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "failed to create death recipient");
-        return;
-    }
     if (!remoteObject->AddDeathRecipient(windowDeath_)) {
         TLOGE(WmsLogTag::WMS_LIFE, "failed to add death recipient");
         return;
@@ -3231,12 +3227,8 @@ void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistent
         if (iter->second != persistentId) {
             continue;
         }
-        if (windowDeath_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "death recipient is null");
-        } else {
-            if (iter->first == nullptr || !iter->first->RemoveDeathRecipient(windowDeath_)) {
-                TLOGE(WmsLogTag::WMS_LIFE, "failed to remove death recipient");
-            }
+        if (iter->first == nullptr || !iter->first->RemoveDeathRecipient(windowDeath_)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "failed to remove death recipient");
         }
         remoteObjectMap_.erase(iter);
         break;

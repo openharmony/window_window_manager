@@ -780,7 +780,13 @@ private:
     std::map<int32_t, int32_t> visibleWindowCountMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
-    std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
+    struct IRemoteObjectHash {
+        size_t operator()(const sptr<IRemoteObject>& sptr) const
+        {
+            return std::hash<IRemoteObject*>{}(sptr.GetRefPtr());
+        }
+    };
+    std::unordered_map<sptr<IRemoteObject>, int32_t, IRemoteObjectHash> remoteObjectMap_;
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> remoteExtSessionMap_;
     std::map<sptr<IRemoteObject>, ExtensionWindowAbilityInfo> extSessionInfoMap_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
@@ -949,8 +955,13 @@ private:
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
+
+    /*
+     * Specific Window
+     */
     void ClearSpecificSessionRemoteObjectMap(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
+
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
     void CalculateCombinedExtWindowFlags();
     void UpdateSpecialExtWindowFlags(int32_t persistentId, ExtensionWindowFlags flags, ExtensionWindowFlags actions);
