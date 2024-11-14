@@ -824,8 +824,8 @@ HWTEST_F(SceneSessionManagerTest4, GetPreWindowDrawingState, Function | SmallTes
 }
 
 /**
- * @tc.name: GetWindowDrawingContentChangeInfo
- * @tc.desc: GetWindowDrawingContentChangeInfo
+ * @tc.name: GetWindowDrawingContentChangeInfo01
+ * @tc.desc: GetWindowDrawingContentChangeInfo01
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo01, Function | SmallTest | Level3)
@@ -858,8 +858,8 @@ HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo01, Function
 }
 
 /**
- * @tc.name: GetWindowDrawingContentChangeInfo
- * @tc.desc: GetWindowDrawingContentChangeInfo
+ * @tc.name: GetWindowDrawingContentChangeInfo02
+ * @tc.desc: GetWindowDrawingContentChangeInfo02
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo02, Function | SmallTest | Level3)
