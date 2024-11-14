@@ -693,7 +693,7 @@ private:
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid);
     void UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid);
     bool GetSpecifiedDrawingData(uint64_t windowId, int32_t& pid, int32_t& uid);
-    void RemoveSpecifiedDrawingData(int windowId);
+    void RemoveSpecifiedDrawingData(uint64_t windowId);
     
     /*
      * Window Rotate Animation

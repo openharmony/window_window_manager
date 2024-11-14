@@ -7899,7 +7899,7 @@ bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId, int32_t& pi
     return false;
 }
 
-void SceneSessionManager::RemoveSpecifiedDrawingData(int windowId)
+void SceneSessionManager::RemoveSpecifiedDrawingData(uint64_t windowId)
 {
     std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
     auto it = std::find_if(lastDrawingData_.begin(), lastDrawingData_.end(),
