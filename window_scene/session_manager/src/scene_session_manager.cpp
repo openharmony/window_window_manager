@@ -2370,7 +2370,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
 
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         WSError err = CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage);
         if (err != WSError::WS_OK) {
             return err;
@@ -2438,26 +2438,52 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
 {
     sptr<SceneSession> extensionParentSession = GetSceneSession(property->GetParentPersistentId());
     if (extensionParentSession == nullptr) {
-        WLOGFE("extensionParentSession is invalid with %{public}d", property->GetParentPersistentId());
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionParentSession is invalid with %{public}d", 
+            property->GetParentPersistentId());
         return WSError::WS_ERROR_NULLPTR;
+    }
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    auto parentPid = extensionParentSession->GetCallingPid();
+    WSError result = WSError::WS_ERROR_INVALID_WINDOW;
+    if (pid == parentPid) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "pid == parentPid");
+        result = WSError::WS_OK;
+    }
+    AAFwk::UIExtensionSessionInfo info;
+    AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
+     if (info.persistentId != INVALID_SESSION_ID && info.hostWindowId != INVALID_SESSION_ID) {
+        int32_t parentId = static_cast<int32_t>(info.hostWindowId);
+        if (parentId == property->GetParentPersistentId()) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "parentId == property->GetParentPersistentId(parentId:%{public}d)", parentId);
+            result = WSError::WS_OK;
+        }
+    }
+    if (SessionPermission::IsSystemCalling()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "is system app");
+        result = WSError::WS_OK;
     }
     if (property->GetIsUIExtensionAbilityProcess() && SessionPermission::IsStartedByUIExtension()) {
         SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
         AAFwk::UIExtensionHostInfo hostInfo;
         AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
         if (sessionInfo.bundleName_ != hostInfo.elementName_.GetBundleName()) {
-            WLOGE("The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s, "
-                "hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
+            TLOGE(WmsLogTag::WMS_UIEXT, "The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s,"
+                " hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
                 hostInfo.elementName_.GetBundleName().c_str());
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
+        result = WSError::WS_OK;
     }
-    sptr<WindowSessionProperty> parentProperty = extensionParentSession->GetSessionProperty();
-    if (sessionStage && parentProperty) {
-        sessionStage->UpdateDisplayId(parentProperty->GetDisplayId());
-        property->SetDisplayId(parentProperty->GetDisplayId());
+    if (result == WSError::WS_OK) {
+        sptr<WindowSessionProperty> parentProperty = extensionParentSession->GetSessionProperty();
+        if (sessionStage && parentProperty && property->GetIsUIExtFirstSubWindow()) {
+            sessionStage->UpdateDisplayId(parentProperty->GetDisplayId());
+            property->SetDisplayId(parentProperty->GetDisplayId());
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "can't create sub window: persistentId %{public}d", property->GetPersistentId());
     }
-    return WSError::WS_OK;
+    return result;
 }
 
 void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
