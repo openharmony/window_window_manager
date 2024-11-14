@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr int32_t PIP_DESTROY_TIMEOUT = 600;
     constexpr int32_t PIP_SUCCESS = 1;
     constexpr int32_t FAILED = 0;
     constexpr uint32_t PIP_LOW_PRIORITY = 0;
@@ -53,7 +52,6 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
     uint32_t windowId, napi_env env)
     : weakRef_(this), pipOption_(pipOption), mainWindow_(mainWindow), mainWindowId_(windowId), env_(env)
 {
-    this->handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     curState_ = PiPWindowState::STATE_UNDEFINED;
 }
 
@@ -317,26 +315,8 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
     }
     ResetExtController();
     if (!withAnim) {
+        TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow without animation");
         DestroyPictureInPictureWindow();
-    } else {
-        // handle destroy timeout
-        if (handler_ == nullptr) {
-            handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-        }
-        auto timeoutTask = [weakThis = wptr(this)]() {
-            auto pipController = weakThis.promote();
-            if (pipController == nullptr) {
-                TLOGE(WmsLogTag::WMS_PIP, "execute destroy timeout task failed, pipController is null");
-                return;
-            }
-            if (pipController->curState_ == PiPWindowState::STATE_STOPPED) {
-                TLOGI(WmsLogTag::WMS_PIP, "pip window already destroyed");
-                return;
-            }
-            TLOGI(WmsLogTag::WMS_PIP, "DestroyPictureInPictureWindow timeout");
-            pipController->DestroyPictureInPictureWindow();
-        };
-        handler_->PostTask(std::move(timeoutTask), DESTROY_TIMEOUT_TASK, PIP_DESTROY_TIMEOUT);
     }
     if (syncTransactionController) {
         syncTransactionController->CloseSyncTransaction();
@@ -350,7 +330,6 @@ WMError PictureInPictureController::StopPictureInPictureInner(StopPipType stopTy
 WMError PictureInPictureController::DestroyPictureInPictureWindow()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    handler_->RemoveTask(DESTROY_TIMEOUT_TASK);
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "window is nullptr when destroy pip");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
@@ -364,9 +343,6 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
         }
         return WMError::WM_ERROR_PIP_DESTROY_FAILED;
     }
-    PictureInPictureManager::RemoveActiveController(this);
-    PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
-    window_ = nullptr;
 
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPictureInPictureStop();
@@ -384,6 +360,9 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
         mainWindow_->UnregisterLifeCycleListener(mainWindowLifeCycleListener_);
     }
     mainWindowLifeCycleListener_ = nullptr;
+    PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
+    window_ = nullptr;
+    PictureInPictureManager::RemoveActiveController(this);
     return WMError::WM_OK;
 }
 
