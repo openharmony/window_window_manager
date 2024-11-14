@@ -5224,7 +5224,12 @@ bool ScreenSessionManager::IsFoldable()
 
 bool ScreenSessionManager::IsCaptured()
 {
-    return isScreenShot_ || virtualScreenCount_ > 0 || hdmiScreenCount_ > 0;
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+        // 如果当前是PC拓展模式，非截屏，录屏，投屏，则返回false
+        return isScreenShot_ || virtualScreenCount_ > 0 || (hdmiScreenCount_ > 0 && !IsExtendMode());
+    } else {
+        return isScreenShot_ || virtualScreenCount_ > 0 || hdmiScreenCount_ > 0;
+    }
 }
 
 bool ScreenSessionManager::IsMultiScreenCollaboration()
