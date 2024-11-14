@@ -3156,11 +3156,11 @@ void SceneSession::MarkSystemSceneUIFirst(bool isForceFlag, bool isUifirstEnable
     if (leashWinSurfaceNode != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForceFlag=%{public}d. isUifirstEnable=%{public}d",
             leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), isForceFlag, isUifirstEnable);
-        leashWinSurfaceNode->MarkSystemSceneUIFirst(isForceFlag, isUifirstEnable);
+        leashWinSurfaceNode->MarkUifirstNode(isForceFlag, isUifirstEnable);
     } else {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForceFlag=%{public}d. isUifirstEnable=%{public}d",
             surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), isForceFlag, isUifirstEnable);
-        surfaceNode_->MarkSystemSceneUIFirst(isForceFlag, isUifirstEnable);
+        surfaceNode_->MarkUifirstNode(isForceFlag, isUifirstEnable);
     }
 }
 
