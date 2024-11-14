@@ -3256,8 +3256,8 @@ void Session::SetClientScale(float scaleX, float scaleY, float pivotX, float piv
         "newScaleX:%{public}f, newScaleY:%{public}f", GetPersistentId(), clientScaleX_, clientScaleY_, scaleX, scaleY);
     clientScaleX_ = scaleX;
     clientScaleY_ = scaleY;
-    clientpivotX_ = pivotX;
-    clientpivotY_ = pivotY;
+    clientPivotX_ = pivotX;
+    clientPivotY_ = pivotY;
 }
 
 float Session::GetScaleX() const
