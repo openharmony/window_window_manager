@@ -5069,9 +5069,7 @@ WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
             return;
         }
         sessionProperty->SetDragEnabled(enableDrag);
-        if (session->sessionStage_) {
-            session->sessionStage_->SetEnableDragBySystem(enableDrag);
-        }
+        session->SetClientDragEnable(enableDrag);
     };
     PostTask(task, __func__);
     return WMError::WM_OK;
