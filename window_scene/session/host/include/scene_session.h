@@ -754,7 +754,7 @@ private:
         WSPropertyChangeAction action);
     WMError HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
-    WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
+    WMError HandleActionUpdateWindowModeSupportType(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);

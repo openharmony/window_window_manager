@@ -60,7 +60,7 @@ public:
     {
         return WMError::WM_OK;
     };
-    virtual WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override
+    virtual WMError UpdateWindowWindowModeSupportType(uint32_t windowModeSupportType) override
     {
         return WMError::WM_OK;
     };
@@ -627,11 +627,11 @@ HWTEST_F(WindowNodeTest, SetShowingDisplays01, Function | SmallTest | Level1)
     ASSERT_EQ(1, windowNode->GetShowingDisplays().size());
 }
 /**
- * @tc.name: SetModeSupportInfo01
- * @tc.desc: SetModeSupportInfo & GetModeSupportInfo
+ * @tc.name: SetWindowModeSupportType01
+ * @tc.desc: SetWindowModeSupportType & GetWindowModeSupportType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowNodeTest, SetModeSupportInfo01, Function | SmallTest | Level1)
+HWTEST_F(WindowNodeTest, SetWindowModeSupportType01, Function | SmallTest | Level1)
 {
     std::string windowName = "WindowNode22";
     auto property = CreateWindowProperty(22, windowName);
@@ -639,9 +639,9 @@ HWTEST_F(WindowNodeTest, SetModeSupportInfo01, Function | SmallTest | Level1)
     sptr<WindowNode> windowNode = new WindowNode(property);
     ASSERT_NE(nullptr, windowNode);
     windowNode->SetWindowProperty(property);
-    ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL, windowNode->GetModeSupportInfo());
-    windowNode->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
-    ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN, windowNode->GetModeSupportInfo());
+    ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL, windowNode->GetWindowModeSupportType());
+    windowNode->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN, windowNode->GetWindowModeSupportType());
 }
 /**
  * @tc.name: SetDragType01

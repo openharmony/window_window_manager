@@ -872,16 +872,21 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         UpdateWindowSizeLimits();
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         // get support modes configuration
-        uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(abilityInfo->windowModes);
-        if (modeSupportInfo == 0) {
-            WLOGFI("mode config param is 0, all modes is supported");
-            modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+        uint32_t windowModeSupportType = property_->GetWindowModeSupportType();
+        if (windowModeSupportType == 0) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "startAbility support window mode param is 0, get modes from ability info");
+            windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(abilityInfo->windowModes);
+            if (windowModeSupportType == 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "mode config param is 0, all modes is supported");
+                windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+            }
         }
-        WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
-        property_->SetModeSupportInfo(modeSupportInfo);
-        // update modeSupportInfo to server
+        TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}u, windowModeSupportType: %{public}u",
+            GetWindowId(), windowModeSupportType);
+        property_->SetWindowModeSupportType(windowModeSupportType);
+        // update windowModeSupportType to server
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
-        bool onlySupportFullScreen = (modeSupportInfo == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
+        bool onlySupportFullScreen = (windowModeSupportType == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
             ((!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()) || IsFreeMultiWindowMode());
         if (onlySupportFullScreen || property_->GetFullScreenStart()) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "onlySupportFullScreen:%{public}d fullScreenStart:%{public}d",
@@ -1968,7 +1973,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 
     if (WindowHelper::IsMainWindow(GetType()) && !windowSystemConfig_.IsPhoneWindow() &&
         !windowSystemConfig_.IsPadWindow()) {
-        if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+            WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
@@ -2156,7 +2162,8 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 
     if (WindowHelper::IsMainWindow(GetType()) &&
         (IsFreeMultiWindowMode() || windowSystemConfig_.IsPcWindow())) {
-        if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+            WindowMode::WINDOW_MODE_FULLSCREEN)) {
             TLOGE(WmsLogTag::WMS_IMMS, "fullscreen window mode is not supported");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
@@ -2199,7 +2206,7 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool isValidWindow = isMainWindow ||
         ((isSubWindow || isDialogWindow) && property_->IsDecorEnable());
     bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
-        windowSystemConfig_.decorModeSupportInfo_, GetMode());
+        windowSystemConfig_.decorWindowModeSupportType_, GetMode());
     if (windowSystemConfig_.freeMultiWindowSupport_) {
         return isValidWindow && windowSystemConfig_.isSystemDecorEnable_;
     }
@@ -2256,7 +2263,8 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         TLOGE(WmsLogTag::WMS_LAYOUT, "maximize fail, not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     // The device is not supported
@@ -2310,7 +2318,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
         TLOGW(WmsLogTag::WMS_LAYOUT, "SetGlobalMaximizeMode fail, not main window");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(),
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -2338,7 +2346,7 @@ WMError WindowSceneSessionImpl::Recover()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!(WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
+    if (!(WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING) ||
           property_->GetCompatibleModeInPc())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "not support floating, can not Recover");
         return WMError::WM_ERROR_INVALID_OPERATION;
@@ -2403,8 +2411,8 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         WLOGFE("The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!(WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
-          property_->GetCompatibleModeInPc())) {
+    if (!(WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FLOATING) || property_->GetCompatibleModeInPc())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "not support floating, can not Recover");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
@@ -2686,7 +2694,7 @@ WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
     }
     bool isCompatibleModeInPcSetFloatingWindowMode =
             property_->GetCompatibleModeInPc() && (mode == WindowMode::WINDOW_MODE_FLOATING);
-    if (!(WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), mode) ||
+    if (!(WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), mode) ||
           isCompatibleModeInPcSetFloatingWindowMode)) {
         TLOGE(WmsLogTag::DEFAULT, "window %{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
@@ -3534,7 +3542,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     if (IsWindowSessionInvalid()) {
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), mode)) {
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), mode)) {
         WLOGFE("%{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
@@ -4198,7 +4206,8 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    if (!WindowHelper::IsWindowModeSupported(property_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     const WindowType curWindowType = GetType();
