@@ -2505,14 +2505,14 @@ napi_value JsSceneSession::OnMarkSystemSceneUIFirst(napi_env env, napi_callback_
     }
     bool isForceFlag = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isForceFlag)) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isUIFirst");
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isForceFlag");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool isUifirstEnable = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isUifirstEnable)) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isForceFlag");
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isUifirstEnable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
