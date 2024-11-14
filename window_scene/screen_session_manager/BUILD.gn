@@ -141,6 +141,9 @@ ohos_shared_library("screen_session_manager") {
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libprivacy_sdk",
+    "access_token:libtokenid_sdk",
   ]
 
   defines = []
