@@ -725,7 +725,7 @@ void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimat
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
         session->onWindowAnimationFlagChange_ = std::move(callback);
         session->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
