@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "display_manager_adapter_lite.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -156,7 +157,11 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SetDisplayState, Function | SmallTest | 
 {
     DisplayState state = DisplayState{1};
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetDisplayState(state);
-    ASSERT_FALSE(ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 }
 }
