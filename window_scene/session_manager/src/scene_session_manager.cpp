@@ -7911,11 +7911,10 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
     for (const auto& [surfaceId, isWindowDrawing] : currDrawingContentData) {
         int32_t pid = 0;
-        bool isDrawingStateChanged = false;
         bool isPreWindowDrawing = GetPreWindowDrawingState(surfaceId, isWindowDrawing, pid);
         bool isProcessDrawingStateChanged = GetProcessDrawingState(surfaceId, pid);
         sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
-        isDrawingStateChanged =
+        bool isDrawingStateChanged =
             session == nullptr || (isPreWindowDrawing != isWindowDrawing && isProcessDrawingStateChanged);
         if (isDrawingStateChanged) {
             processDrawingContentChangeInfo.emplace_back(surfaceId, isWindowDrawing);
