@@ -1089,7 +1089,10 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
-        property->SetDragEnabled(sessionProperty->GetDragEnabled());
+        std::optional<bool> clientDragEnable = GetClientDragEnable();
+        if (clientDragEnable.has_value()) {
+            property->SetDragEnabled(clientDragEnable.value());
+        }
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
