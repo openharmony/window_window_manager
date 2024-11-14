@@ -515,8 +515,6 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
-    std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
-
     /*
      * Specific Window
      */
@@ -557,9 +555,6 @@ private:
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
-    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
-    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
-    void InitVsyncStation();
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
@@ -1000,6 +995,14 @@ private:
     void RemoveProcessWatermarkPid(int32_t pid);
 
     /**
+     * Window Layout
+     */
+    std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    void InitVsyncStation();
+    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+
+    /*
      * Window Snapshot
      */
     std::unordered_set<int32_t> snapshotSkipPidSet_ GUARDED_BY(SCENE_GUARD); // ONLY Accessed on OS_sceneSession thread

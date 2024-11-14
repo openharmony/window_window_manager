@@ -813,9 +813,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     info.bundleName_ = "OnMoveDragCallback";
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    RequestVsyncFunc requestVsyncFunc = [](std::shared_ptr<VsyncCallback>& callback){};
-    session->SetRequestNextVsyncFunc(requestVsyncFunc);
+    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback){});
     EXPECT_NE(nullptr, session->requestNextVsyncFunc_);
     session->moveDragController_ = nullptr;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
@@ -1663,18 +1661,15 @@ HWTEST_F(SceneSessionTest5, SetRequestNextVsyncFunc01, Function | SmallTest | Le
     info.abilityName_ = "test1";
     info.bundleName_ = "test1";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
 
-    RequestVsyncFunc requestVsyncFunc;
-    session->SetRequestNextVsyncFunc(requestVsyncFunc);
+    session->SetRequestNextVsyncFunc(nullptr);
     ASSERT_EQ(nullptr, session->requestNextVsyncFunc_);
 
-    RequestVsyncFunc requestVsyncFunc1 = [](std::shared_ptr<VsyncCallback>& callback) {
+    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
         SessionInfo info1;
         info1.abilityName_ = "test2";
         info1.bundleName_ = "test2";
-    };
-    session->SetRequestNextVsyncFunc(requestVsyncFunc1);
+    });
     ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
 }
 
