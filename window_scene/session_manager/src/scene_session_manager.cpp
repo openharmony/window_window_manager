@@ -7893,7 +7893,7 @@ int SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId)
 {
     int index = -1;
     {
-        std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
+        std::shared_lock<std::shared_mutex> lock(lastDrawingDataMutex_);
         auto it = std::find_if(lastDrawingData_.begin(), lastDrawingData_.end(),
             [windowId](const DrawingSessionIdInfo& info) { return info.windowId_ == windowId; });
         if (it != lastDrawingData_.end()) {
@@ -7906,7 +7906,7 @@ int SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId)
 
 void SceneSessionManager::RemoveSpecifiedDrawingData(int index)
 {
-    std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
+    std::unique_lock<std::shared_mutex> lock(lastDrawingDataMutex_);
     if (index >= 0 && index < lastDrawingData_.size()) {
         lastDrawingData_.erase(lastDrawingData_.begin() + index);
     }
@@ -7952,7 +7952,7 @@ void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid
     if (index >= 0) {
         RemoveSpecifiedDrawingData(index);
     }
-    std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
+    std::unique_lock<std::shared_mutex> lock(lastDrawingDataMutex_);
     lastDrawingData_.push_back({ windowId, pid, uid });
 }
 
