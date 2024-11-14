@@ -824,11 +824,11 @@ HWTEST_F(SceneSessionManagerTest4, GetPreWindowDrawingState, Function | SmallTes
 }
 
 /**
- * @tc.name: GetWindowDrawingContentChangeInfo01
- * @tc.desc: GetWindowDrawingContentChangeInfo01
+ * @tc.name: GetWindowDrawingContentChangeInfo
+ * @tc.desc: GetWindowDrawingContentChangeInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
