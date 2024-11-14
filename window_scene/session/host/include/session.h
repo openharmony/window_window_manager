@@ -485,6 +485,12 @@ public:
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
 
+    /*
+     * Starting Window
+     */
+    void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
+    bool UseStartingWindowAboveLocked() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -729,6 +735,11 @@ private:
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
+
+    /*
+     * Starting Window
+     */
+    bool useStartingWindowAboveLocked_ { false };
 };
 } // namespace OHOS::Rosen
 
