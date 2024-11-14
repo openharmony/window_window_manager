@@ -7952,7 +7952,7 @@ void SceneSessionManager::UpdateWindowDrawingData(uint64_t windowId, int32_t pid
         RemoveSpecifiedDrawingData(index);
     }
     std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
-    lastDrawingData_.emplace_back({ windowId, pid, uid });
+    lastDrawingData_.push_back({ windowId, pid, uid });
 }
 
 bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid)
