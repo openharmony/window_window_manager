@@ -41,14 +41,52 @@ void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents ev
 
 void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
+    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
+        GetDefaultScreenSession();
+    if (meScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        return;
+    }
+    auto screenProperty = meScreenSession->GetScreenProperty();
+    auto screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
+
+    OHOS::Rect rectCur{
+        .x = 0,
+        .y = 0,
+        .w = static_cast<int>(screenWidth),
+        .h = static_cast<int>(screenHeight),
+    };
+    // SCREEN_ID_FULL = 0
+    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(true);
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOn()");
+    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
+        screenWidth, screenHeight, static_cast<long>(response));
 }
 
 void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
+    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
+        GetDefaultScreenSession();
+    if (meScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        return;
+    }
+    auto screenProperty = meScreenSession->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    
+    OHOS::Rect rectCur{
+        .x = 0,
+        .y = 0,
+        .w = static_cast<int>(screenWidth),
+        .h = static_cast<int>(screenHeight),
+    };
+    // SCREEN_ID_FULL = 0
+    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(false);
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOff()");
+    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
+        screenWidth, screenHeight, static_cast<long>(response));
 }
 
 void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event)
