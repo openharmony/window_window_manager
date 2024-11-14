@@ -979,7 +979,7 @@ private:
     std::unordered_set<int32_t> snapshotSkipPidSet_ GUARDED_BY(SCENE_GUARD); // ONLY Accessed on OS_sceneSession thread
     std::unordered_set<std::string> snapshotSkipBundleNameSet_ GUARDED_BY(SCENE_GUARD);
 
-    int32_t sessionMapDirty_ { 0 };
+    uint32_t sessionMapDirty_ { 0 };
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;

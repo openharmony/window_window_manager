@@ -3748,10 +3748,10 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
     bool needResize = false;
     Rect windowRect = GetRequestRect();
-    if (windowRect.IsUninitializedRect()) {
+    if (windowRect.IsUninitializedSize()) {
         windowRect = GetRect();
-        if (windowRect.IsUninitializedRect()) {
-            TLOGW(WmsLogTag::WMS_LAYOUT, "The requestRect and rect are uninitialized. winId: %{public}u",
+        if (windowRect.IsUninitializedSize()) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "The sizes of requestRect and rect are uninitialized. winId: %{public}u",
                 GetWindowId());
             return;
         }
