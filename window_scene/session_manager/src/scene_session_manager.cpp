@@ -4351,11 +4351,10 @@ void SceneSessionManager::RegisterRequestVsyncFunc(const sptr<SceneSession>& sce
         TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
         return;
     }
-    RequestVsyncFunc requestVsyncFunc = [this](std::shared_ptr<VsyncCallback> callback) {
+    sceneSession->SetRequestNextVsyncFunc([this](const std::shared_ptr<VsyncCallback>& callback) {
         vsyncStation_->RequestVsync(callback);
-    };
-    sceneSession->SetRequestNextVsyncFunc(requestVsyncFunc);
-};
+    });
+}
 
 void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession)
 {

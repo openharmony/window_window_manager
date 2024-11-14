@@ -362,8 +362,6 @@ public:
     bool GetShowWhenLockedFlagValue() const;
     bool IsFloatingWindowAppType() const;
     bool IsNeedDefaultAnimation() const;
-    bool IsDirtyWindow();
-    bool IsDirtyDragWindow();
     void SetSystemTouchable(bool touchable) override;
     bool IsVisibleForAccessibility() const;
     void SetStartingWindowExitAnimationFlag(bool enable);
@@ -528,13 +526,14 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible);
 
-    void SetRequestNextVsyncFunc(const RequestVsyncFunc& func);
-    void OnNextVsyncDragReceived();
-
     /**
      * Window Layout
      */
+    bool IsDirtyWindow();
+    bool IsDirtyDragWindow();
     void ResetSizeChangeReasonIfDirty();
+    void SetRequestNextVsyncFunc(const RequestVsyncFunc&& func);
+    void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
 
@@ -687,9 +686,6 @@ private:
         bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush = true);
     void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush);
-    void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
-    bool FixRectByAspectRatio(WSRect& rect);
-    bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
     void UpdateWinRectForSystemBar(WSRect& rect);
@@ -698,8 +694,6 @@ private:
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason);
-    void UpdateRectForDrag(WSRect& rect);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -794,6 +788,15 @@ private:
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     std::vector<UIExtensionTokenInfo> extensionTokenInfos_;
+
+    /**
+     * Window Layout
+     */
+    void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
+    bool FixRectByAspectRatio(WSRect& rect);
+    bool SaveAspectRatio(float ratio);
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason);
+    WSError UpdateRectForDrag(const WSRect& rect);
 
     /**
      * Window Decor
