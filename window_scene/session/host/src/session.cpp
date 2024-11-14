@@ -1371,6 +1371,14 @@ void Session::SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFu
     PostTask(task, __func__);
 }
 
+void Session::SetClientDragEnable(bool dragEnable) {
+    clientDragEnable_ = dragEnable;
+}
+
+std::optional<bool> Session::GetClientDragEnable() const {
+    return clientDragEnable_;
+}
+
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
 {
     SetForegroundInteractiveStatus(interactive);

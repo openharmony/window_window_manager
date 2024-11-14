@@ -536,7 +536,11 @@ public:
      */
     void ProcessClickModalWindowOutside(int32_t posX, int32_t posY);
     void SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFunc&& func);
-
+    /**
+     * Window MoveDrag 
+     */
+    void SetClientDragEnable(bool dragEnable);
+    std::optional<bool> GetClientDragEnable() const;
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -823,6 +827,12 @@ private:
     bool enableRemoveStartingWindow_ { false };
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
+
+    /**
+     * Window MoveDrag
+     */
+    std::optional<bool> clientDragEnable_;
+
 };
 } // namespace OHOS::Rosen
 

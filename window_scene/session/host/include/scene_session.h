@@ -532,8 +532,6 @@ public:
     void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
     void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
     void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
-    void SetClientDragEnable(bool dragEnable);
-    std::optional<bool> GetClientDragEnable() const;
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
@@ -861,11 +859,6 @@ private:
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
-
-    /**
-     * Window MoveDrag
-     */
-    std::optional<bool> clientDragEnable_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
