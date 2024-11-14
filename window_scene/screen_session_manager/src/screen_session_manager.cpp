@@ -29,6 +29,7 @@
 #include <ipc_skeleton.h>
 #include <parameter.h>
 #include <parameters.h>
+#include <privacy_kit.h>
 #include <system_ability_definition.h>
 #include <transaction/rs_interfaces.h>
 #include <xcollie/watchdog.h>
@@ -2549,6 +2550,11 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
     ScreenPropertyChangeType screenPropertyChangeType)
 {
+    std::ostringstream oss;
+    std::string changeType = TransferPropertyChangeTypeToString(screenPropertyChangeType);
+    oss << "screenId: " << screenId << " rotation: " << rotation << " width: " << bounds.rect_.width_ \
+        << " height: " << bounds.rect_.height_ << " type: " << changeType;
+    screenEventTracker_.RecordBoundsEvent(oss.str());
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
@@ -4689,6 +4695,26 @@ std::string ScreenSessionManager::TransferTypeToString(ScreenType type) const
     return screenType;
 }
 
+std::string ScreenSessionManager::TransferPropertyChangeTypeToString(ScreenPropertyChangeType type) const
+{
+    std::string screenType;
+    switch (type) {
+        case ScreenPropertyChangeType::UNSPECIFIED:
+            screenType = "UNSPECIFIED";
+            break;
+        case ScreenPropertyChangeType::ROTATION_BEGIN:
+            screenType = "ROTATION_BEGIN";
+            break;
+        case ScreenPropertyChangeType::ROTATION_END:
+            screenType = "ROTATION_END";
+            break;
+        default:
+            screenType = "ROTATION_UPDATE_PROPERTY_ONLY";
+            break;
+    }
+    return screenType;
+}
+
 void ScreenSessionManager::DumpAllScreensInfo(std::string& dumpInfo)
 {
     if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
@@ -6137,6 +6163,17 @@ void ScreenSessionManager::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t 
     clientProxy_->ScreenCaptureNotify(mainScreenId, uid, clientName);
 }
 
+void ScreenSessionManager::AddPermissionUsedRecord(const std::string& permission, int32_t successCount,
+    int32_t failCount)
+{
+    int32_t ret = Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(IPCSkeleton::GetCallingTokenID(),
+        permission, successCount, failCount);
+    if (ret != 0) {
+        TLOGW(WmsLogTag::DMS, "AddPermissionUsedRecord failed, permission:%{public}s, \
+            successCount %{public}d, failedCount %{public}d", permission.c_str(), successCount, failCount);
+    }
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const CaptureOption& captureOption,
     DmErrorCode* errorCode)
 {
@@ -6171,8 +6208,12 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     if (res == nullptr) {
         TLOGE(WmsLogTag::DMS, "get capture null.");
         *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+        AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
+            static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
         return nullptr;
     }
+    AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
+        static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
     NotifyScreenshot(captureOption.displayId_);
     if (SessionPermission::IsBetaVersion()) {
         CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
