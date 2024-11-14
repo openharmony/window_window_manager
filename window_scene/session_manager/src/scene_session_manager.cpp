@@ -7887,7 +7887,7 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid)
 {
     auto it = std::find_if(lastDrawingSessionInfoVec_.begin(), lastDrawingSessionInfoVec_.end(),
-        [surfaceId](const DrawingSessionIdInfo& info) { return info.surfaceId_ == surfaceId; });
+        [surfaceId](const DrawingSessionInfo& info) { return info.surfaceId_ == surfaceId; });
     if (it != lastDrawingSessionInfoVec_.end()) {
         pid = it->pid_;
         uid = it->uid_;
@@ -7899,7 +7899,7 @@ bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& p
 void SceneSessionManager::RemoveSpecifiedDrawingData(uint64_t surfaceId)
 {
     auto it = std::find_if(lastDrawingSessionInfoVec_.begin(), lastDrawingSessionInfoVec_.end(),
-        [surfaceId](const DrawingSessionIdInfo& info) { return info.surfaceId_ == surfaceId; });
+        [surfaceId](const DrawingSessionInfo& info) { return info.surfaceId_ == surfaceId; });
     if (it != lastDrawingSessionInfoVec_.end()) {
         lastDrawingSessionInfoVec_.erase(it);
     }
