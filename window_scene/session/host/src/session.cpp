@@ -3250,7 +3250,7 @@ void Session::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)
     pivotY_ = pivotY;
 }
 
-void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY)
+void Session::SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, preScaleX:%{public}f, preScaleY:%{public}f, "
         "newScaleX:%{public}f, newScaleY:%{public}f", GetPersistentId(), clientScaleX_, clientScaleY_, scaleX, scaleY);
