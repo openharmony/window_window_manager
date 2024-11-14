@@ -2444,10 +2444,10 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
     }
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto parentPid = extensionParentSession->GetCallingPid();
-    bool checkIsPassed = false;
+    WSError result = WSError::WS_ERROR_INVALID_WINDOW;
     if (pid == parentPid) {
         TLOGI(WmsLogTag::WMS_UIEXT, "pid == parentPid");
-        checkIsPassed = true;
+        result = WSError::WS_OK;
     }
     AAFwk::UIExtensionSessionInfo info;
     AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
@@ -2455,12 +2455,12 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
         int32_t parentId = static_cast<int32_t>(info.hostWindowId);
         if (parentId == property->GetParentPersistentId()) {
             TLOGI(WmsLogTag::WMS_UIEXT, "parentId == property->GetParentPersistentId(parentId:%{public}d)", parentId);
-            checkIsPassed = true;
+            result = WSError::WS_OK;
         }
     }
     if (SessionPermission::IsSystemCalling()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "is system app");
-        checkIsPassed = true;
+        result = WSError::WS_OK;
     }
     if (property->GetIsUIExtensionAbilityProcess() && SessionPermission::IsStartedByUIExtension()) {
         SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
@@ -2472,18 +2472,18 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
                 hostInfo.elementName_.GetBundleName().c_str());
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
-        checkIsPassed = true;
+        result = WSError::WS_OK;
     }
-    if (checkIsPassed) {
+    if (result == WSError::WS_OK) {
         sptr<WindowSessionProperty> parentProperty = extensionParentSession->GetSessionProperty();
         if (sessionStage && parentProperty && property->GetIsUIExtFirstSubWindow()) {
             sessionStage->UpdateDisplayId(parentProperty->GetDisplayId());
             property->SetDisplayId(parentProperty->GetDisplayId());
         }
-        return WSError::WS_OK;
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "can't create sub window: persistentId %{public}d", property->GetPersistentId());
     }
-    TLOGE(WmsLogTag::WMS_UIEXT, "can't create sub window: persistentId %{public}d", property->GetPersistentId());
-    return WSError::WS_ERROR_INVALID_WINDOW;
+    return result;
 }
 
 void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
