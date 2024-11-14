@@ -7854,7 +7854,8 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 {
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContenInfos;
     for (const auto& elem : drawingContentChangeInfo) {
-        uint64_t surfaceId = elem.first;
+        
+         surfaceId = elem.first;
         bool drawingState = elem.second;
         int32_t winId = 0;
         int32_t pid = 0;
@@ -7919,9 +7920,9 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
         int32_t pid = 0;
         bool isDrawingStateChange = false;
         sptr<SceneSession> session = SelectSesssionFromMap(windowId);
-        isDrawingStateChange =
-            session == nullptr || (GetPreWindowDrawingState(windowId, isWindowDrawing, pid) != isWindowDrawing &&
-                                   GetProcessDrawingState(windowId, pid));
+        bool isPreWindowDrawing = GetPreWindowDrawingState(windowId, isWindowDrawing, pid);
+        bool isStateChanged = GetProcessDrawingState(windowId, pid);
+        isDrawingStateChange = session == nullptr || (isPreWindowDrawing != isWindowDrawing && isStateChanged);
         if (isDrawingStateChange) {
             processDrawingContentChangeInfo.emplace_back(windowId, isWindowDrawing);
         }
