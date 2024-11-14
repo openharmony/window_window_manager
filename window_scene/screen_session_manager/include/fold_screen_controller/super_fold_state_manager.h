@@ -26,10 +26,13 @@
 
 #include "dm_common.h"
 #include "wm_single_instance.h"
+#include "transaction/rs_interfaces.h"
 
 namespace OHOS {
 
 namespace Rosen {
+
+class RSInterfaces;
 
 class SuperFoldStateManager final {
     WM_DECLARE_SINGLE_INSTANCE_BASE(SuperFoldStateManager)
@@ -47,7 +50,7 @@ public:
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
     SuperFoldStatus GetCurrentStatus();
-    
+
     FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::HALF_FOLDED;
