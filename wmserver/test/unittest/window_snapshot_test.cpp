@@ -148,9 +148,9 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot05, Function | SmallTest | Level3)
     node->abilityToken_ = iRemoteObjectMocker;
     node->SetSnapshot(CommonTestUtils::CreatePixelMap());
 
-    sptr<SnapshotController> snapshotController_ = new SnapshotController(root, handler);
+    sptr<SnapshotController> snapshotController = new SnapshotController(root, handler);
     AAFwk::Snapshot snapshot_;
-    ASSERT_EQ(static_cast<int32_t>(WMError::WM_OK), snapshotController_->GetSnapshot(iRemoteObjectMocker, snapshot_));
+    ASSERT_EQ(static_cast<int32_t>(WMError::WM_OK), snapshotController->GetSnapshot(iRemoteObjectMocker, snapshot_));
 }
 }
 } // namespace Rosen
