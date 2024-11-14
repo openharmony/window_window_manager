@@ -678,7 +678,8 @@ bool WindowRoot::CheckAddingModeAndSize(sptr<WindowNode>& node, const sptr<Windo
         return true;
     }
     // intercept the node which doesn't support floating mode at tile mode
-    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetModeSupportInfo(), container->GetCurrentLayoutMode())) {
+    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetWindowModeSupportType(),
+        container->GetCurrentLayoutMode())) {
         WLOGFE("window doesn't support floating mode in tile, windowId: %{public}u", node->GetWindowId());
         return false;
     }
