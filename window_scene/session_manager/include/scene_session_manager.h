@@ -804,6 +804,7 @@ private:
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
     bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
+    void ClearSpecificSessionRemoteObjectMap(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
     void CalculateCombinedExtWindowFlags();
