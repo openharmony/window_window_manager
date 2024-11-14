@@ -8897,7 +8897,7 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> sceneSession)
         WLOGFI("sceneSession abilityInfo is nullptr");
         return false;
     }
-    if (sessionInfo.abilityInfo->excludeFromMissions) {
+    if (sessionInfo.abilityInfo->excludeFromMissions && !sceneSession->IsAnco()) {
         WLOGFI("persistentId %{public}d is excludeFromMissions", sceneSession->GetPersistentId());
         return false;
     }
