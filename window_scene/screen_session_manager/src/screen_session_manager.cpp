@@ -29,6 +29,7 @@
 #include <ipc_skeleton.h>
 #include <parameter.h>
 #include <parameters.h>
+#include <privacy_kit.h>
 #include <system_ability_definition.h>
 #include <transaction/rs_interfaces.h>
 #include <xcollie/watchdog.h>
@@ -6360,6 +6361,17 @@ void ScreenSessionManager::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t 
     clientProxy_->ScreenCaptureNotify(mainScreenId, uid, clientName);
 }
 
+void ScreenSessionManager::AddPermissionUsedRecord(const std::string& permission, int32_t successCount,
+    int32_t failCount)
+{
+    int32_t ret = Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(IPCSkeleton::GetCallingTokenID(),
+        permission, successCount, failCount);
+    if (ret != 0) {
+        TLOGW(WmsLogTag::DMS, "AddPermissionUsedRecord failed, permission:%{public}s, \
+            successCount %{public}d, failedCount %{public}d", permission.c_str(), successCount, failCount);
+    }
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const CaptureOption& captureOption,
     DmErrorCode* errorCode)
 {
@@ -6391,6 +6403,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenCapture(%" PRIu64")", captureOption.displayId_);
     auto res = GetScreenSnapshot(captureOption.displayId_);
+    AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
+        static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
     if (res == nullptr) {
         TLOGE(WmsLogTag::DMS, "get capture null.");
         *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
