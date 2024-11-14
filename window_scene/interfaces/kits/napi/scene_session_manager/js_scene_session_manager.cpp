@@ -224,6 +224,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::ResetPcFoldScreenArrangeRule);
     BindNativeFunction(env, exportObj, "setIsWindowRectAutoSave", moduleName,
         JsSceneSessionManager::SetIsWindowRectAutoSave);
+    BindNativeFunction(env, exportObj, "NotifyAboveLockScreen", moduleName,
+        JsSceneSessionManager::NotifyAboveLockScreen);
     return NapiGetUndefined(env);
 }
 
@@ -1156,6 +1158,16 @@ napi_value JsSceneSessionManager::SetIsWindowRectAutoSave(napi_env env, napi_cal
     TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetIsWindowRectAutoSave(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::NotifyAboveLockScreen(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    if (me == nullptr) {
+        TLOGW(WmsLogTag::WMS_SCB, "me is null");
+        return nullptr;
+    }
+    return me->OnNotifyAboveLockScreen(env, info);
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3405,6 +3417,41 @@ napi_value JsSceneSessionManager::OnIsScbCoreEnabled(napi_env env, napi_callback
     napi_value result = nullptr;
     napi_get_boolean(env, Session::IsScbCoreEnabled(), &result);
     return result;
+}
+
+napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+ 
+    std::vector<int32_t> windowIds;
+    if (!ConvertInt32ArrayFromJs(env, argv[0], windowIds)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to convert windowIds");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    std::string windowIdListStr = "none";
+    if (!windowIds.empty()) {
+        windowIdListStr = std::accumulate(windowIds.begin() + 1,
+            windowIds.end(),
+            std::to_string(windowIds[0]),
+            [](const std::string &str, int32_t windowId) { return str + "," + std::to_string(windowId); });
+    }
+
+    TLOGI(WmsLogTag::WMS_UIEXT,
+        "UIExtOnLock: OnNotifyAboveLockScreen, window list: %{public}s",
+        windowIdListStr.c_str());
+    SceneSessionManager::GetInstance().OnNotifyAboveLockScreen(windowIds);
+    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_info info)
