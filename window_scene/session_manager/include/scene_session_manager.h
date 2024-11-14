@@ -1055,7 +1055,6 @@ private:
         int32_t uid_ = 0;
     };
 
-
     std::shared_mutex lastDrawingDataMutex_;
     std::vector<DrawingSessionIdInfo> lastDrawingData_;
 
