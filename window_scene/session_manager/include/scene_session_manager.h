@@ -1054,7 +1054,7 @@ private:
         int32_t pid_ = 0;
         int32_t uid_ = 0;
     };
-    std::vector<DrawingSessionIdInfo> lastDrawingSessionInfoVec_;
+    std::vector<DrawingSessionInfo> lastDrawingSessionInfoVec_;
 
     /**
      * PC Window
