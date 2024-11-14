@@ -245,9 +245,9 @@ HWTEST_F(RemoteAnimationTest, CheckTransition02, Function | SmallTest | Level2)
     sptr<WindowNode> dstNode = StartingWindow::CreateWindowNode(transitionInfo_, 1);
     ASSERT_NE(nullptr, dstNode);
     dstNode->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    dstNode->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    dstNode->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
     ASSERT_EQ(false, WindowHelper::CheckSupportWindowMode(dstNode->GetWindowMode(),
-        dstNode->GetModeSupportInfo(), transitionInfo_));
+        dstNode->GetWindowModeSupportType(), transitionInfo_));
     EXPECT_EQ(false, RemoteAnimation::CheckTransition(transitionInfo_, srcNode, transitionInfo_, dstNode));
 }
 

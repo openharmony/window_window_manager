@@ -597,7 +597,7 @@ void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
     FreeMultiWindowConfig freeMultiWindowConfig = systemConfig_.freeMultiWindowConfig_;
     if (enable) {
         systemConfig_.defaultWindowMode_ = freeMultiWindowConfig.defaultWindowMode_;
-        systemConfig_.decorModeSupportInfo_ = freeMultiWindowConfig.decorModeSupportInfo_;
+        systemConfig_.decorWindowModeSupportType_ = freeMultiWindowConfig.decorWindowModeSupportType_;
         systemConfig_.isSystemDecorEnable_ = freeMultiWindowConfig.isSystemDecorEnable_;
     } else {
         const auto& config = WindowSceneConfig::GetConfig();
@@ -703,10 +703,10 @@ void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decor
             }
         }
         if (mainConfig && item.IsStrings()) {
-            systemConfig_.decorModeSupportInfo_ = support;
+            systemConfig_.decorWindowModeSupportType_ = support;
         }
         if (!mainConfig && item.IsStrings()) {
-            systemConfig_.freeMultiWindowConfig_.decorModeSupportInfo_ = support;
+            systemConfig_.freeMultiWindowConfig_.decorWindowModeSupportType_ = support;
         }
     }
 }

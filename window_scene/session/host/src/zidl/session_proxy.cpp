@@ -299,6 +299,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         }
         property->SetCollaboratorType(reply.ReadInt32());
         property->SetFullScreenStart(reply.ReadBool());
+        property->SetWindowModeSupportType(reply.ReadUint32());
         property->SetCompatibleModeInPc(reply.ReadBool());
         property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
                                               reply.ReadInt32(), reply.ReadInt32());
@@ -481,6 +482,21 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     } else {
         if (!data.WriteBool(false)) {
             TLOGE(WmsLogTag::WMS_LIFE, "Write has not startWindowOption failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    auto size = abilitySessionInfo->supportWindowModes.size();
+    if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        if (!data.WriteUint32(static_cast<uint32_t>(size))) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        for (decltype(size) i = 0; i < size; i++) {
+            if (!data.WriteInt32(static_cast<int32_t>(abilitySessionInfo->supportWindowModes[i]))) {
+                return WSError::WS_ERROR_IPC_FAILED;
+            }
+        }
+    } else {
+        if (!data.WriteUint32(0)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }

@@ -1213,8 +1213,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest |
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
-    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { false, false, false, false };
@@ -1282,8 +1282,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, Function | SmallTest |
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
     // only not support WINDOW_MODE_SUPPORT_SPLIT
-    uint32_t modeSupportInfo = 1 | (1 << 1);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { true, true, true, true };
@@ -1314,8 +1314,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     ASSERT_NE(window->property_, nullptr);
     ASSERT_EQ(1, window->GetDisplayId());
     // only not support WINDOW_MODE_SUPPORT_SPLIT
-    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { false, false, false, false };

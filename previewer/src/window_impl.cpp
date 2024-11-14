@@ -196,7 +196,7 @@ uint32_t WindowImpl::GetWindowFlags() const
     return 0;
 }
 
-uint32_t WindowImpl::GetRequestModeSupportInfo() const
+uint32_t WindowImpl::GetRequestWindowModeSupportType() const
 {
     return 0;
 }
@@ -786,7 +786,7 @@ void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
     return;
 }
 
-void WindowImpl::SetRequestModeSupportInfo(uint32_t modeSupportInfo)
+void WindowImpl::SetRequestWindowModeSupportType(uint32_t windowModeSupportType)
 {
     return;
 }

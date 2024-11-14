@@ -77,8 +77,8 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     node->abilityInfo_.missionId_ = info->GetMissionId();
     node->abilityInfo_.bundleName_ = info->GetBundleName();
     node->abilityInfo_.abilityName_ = info->GetAbilityName();
-    uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(info->GetWindowSupportModes());
-    node->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(info->GetWindowSupportModes());
+    node->SetWindowModeSupportType(windowModeSupportType);
 
     if (CreateLeashAndStartingSurfaceNode(node) != WMError::WM_OK) {
         return nullptr;
