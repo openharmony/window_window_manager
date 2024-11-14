@@ -1462,16 +1462,16 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
     }
     auto ret = MoveTo(x, y);
     if (state_ == WindowState::STATE_SHOWN) {
-        layoutCallback_->ResetLock();
+        layoutCallback_->ResetMoveToLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-        layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        layoutCallback_->GetMoveToAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
         auto waitTime = endTime - startTime;
         if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
             TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
-            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+            layoutCallback_->GetMoveToAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
@@ -1511,10 +1511,17 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true);
-    if (state_ == WindowState::STATE_SHOWN && property_) {
-        if (layoutCallback_) {
-            layoutCallback_->ResetLock();
-            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+    if (state_ == WindowState::STATE_SHOWN) {
+        layoutCallback_->ResetMoveToLock();
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        layoutCallback_->GetMoveToAsyncResult(WINDOW_LAYOUT_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
+            layoutCallback_->GetMoveToAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);
@@ -1696,16 +1703,16 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
     }
     auto ret = Resize(width, height);
     if (state_ == WindowState::STATE_SHOWN) {
-        layoutCallback_->ResetLock();
+        layoutCallback_->ResetResizeLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-        layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+        layoutCallback_->GetResizeAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
         auto waitTime = endTime - startTime;
         if (waitTime >= WINDOW_LAYOUT_TIMEOUT) {
             TLOGW(WmsLogTag::WMS_LAYOUT, "Layout timeout, Id:%{public}d", property_->GetPersistentId());
-            layoutCallback_->GetResult(WINDOW_LAYOUT_TIMEOUT);
+            layoutCallback_->GetResizeAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
     return static_cast<WMError>(ret);

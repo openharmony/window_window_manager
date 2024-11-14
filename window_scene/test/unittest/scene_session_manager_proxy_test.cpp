@@ -35,7 +35,6 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<IRemoteObject> iRemoteObjectMocker;
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_;
 };
 
 void sceneSessionManagerProxyTest::SetUpTestCase()
@@ -990,7 +989,6 @@ HWTEST_F(sceneSessionManagerProxyTest, GetWindowStyleType, Function | SmallTest 
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy_ =
             new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy_, nullptr);
-
     WindowStyleType styleType;
     ASSERT_EQ(WMError::WM_OK, sceneSessionManagerProxy_->GetWindowStyleType(styleType));
     sceneSessionManagerProxy_ = nullptr;
