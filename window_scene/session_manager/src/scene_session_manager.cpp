@@ -7923,7 +7923,7 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
         bool isDrawingStateChange = false;
         sptr<SceneSession> session = SelectSesssionFromMap(windowId);
         isDrawingStateChange =
-            (session == nullptr) || (GetPreWindowDrawingState(windowId, isWindowDrawing, pid) == isWindowDrawing &&
+            (session == nullptr) || (GetPreWindowDrawingState(windowId, isWindowDrawing, pid) != isWindowDrawing &&
                                      GetProcessDrawingState(windowId, pid));
         if (isDrawingStateChange) {
             processDrawingContentChangeInfo.emplace_back(windowId, isWindowDrawing);
