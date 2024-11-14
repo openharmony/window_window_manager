@@ -300,6 +300,11 @@ public:
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
 
+    /*
+     * Window Immersive
+     */
+    uint32_t GetStatusBarHeight() override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -351,7 +356,6 @@ protected:
 
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
-    uint32_t GetStatusBarHeight() override;
 
     /**
      * Sub Window
