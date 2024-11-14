@@ -120,7 +120,7 @@ public:
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
     /*
-     * Multi instance
+     * Multi Instance
      */
     static napi_value GetMaxInstanceCount(napi_env env, napi_callback_info info);
     static napi_value GetInstanceCount(napi_env env, napi_callback_info info);
@@ -196,7 +196,7 @@ private:
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
     /*
-     * multi instance
+     * Multi Instance
      */
     napi_value OnGetMaxInstanceCount(napi_env env, napi_callback_info info);
     napi_value OnGetInstanceCount(napi_env env, napi_callback_info info);

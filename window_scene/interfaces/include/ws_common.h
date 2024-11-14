@@ -358,7 +358,7 @@ struct SessionInfo {
     SessionViewportConfig config_;
 
     /**
-     * Multi instance
+     * Multi Instance
      */
     bool isNewAppInstance_ = false;
     std::string appInstanceKey_;
