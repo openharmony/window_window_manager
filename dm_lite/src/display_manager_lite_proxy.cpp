@@ -304,12 +304,14 @@ VirtualScreenFlag DisplayManagerLiteProxy::GetVirtualScreenFlag(ScreenId screenI
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel reply;
     MessageParcel data;
+    WLOGFE("MessageParcel definded");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        WLOGFE("failed");
         return VirtualScreenFlag::DEFAULT;
     }
+    WLOGFE("WriteInterfaceToken success");
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        WLOGFE("Write failed");
         return VirtualScreenFlag::DEFAULT;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG),

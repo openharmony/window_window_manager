@@ -388,6 +388,19 @@ HWTEST_F(DisplayManagerTest, GetDisplayById02, Function | SmallTest | Level1)
     auto ret = DisplayManagerLite::GetInstance().GetDisplayById(displayId);
     ASSERT_EQ(ret, nullptr);
 }
+
+/**
+ * @tc.name: GetScreenBrightness
+ * @tc.desc: GetScreenBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
+{
+    uint64_t screenId = 2;
+    auto ret = DisplayManagerLite::GetInstance().GetScreenBrightness(screenId);
+    ASSERT_FALSE(ret == 1);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
