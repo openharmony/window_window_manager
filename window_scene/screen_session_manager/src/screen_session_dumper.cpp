@@ -152,6 +152,17 @@ void ScreenSessionDumper::ExcuteDumpCmd()
 
 void ScreenSessionDumper::ExcuteInjectCmd()
 {
+    bool isDeveloperMode = system::GetBoolParameter("const.security.developermode.state", false);
+    if (isDeveloperMode) {
+        if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
+            int errCode = SetFoldDisplayMode();
+            if (errCode != 0) {
+                ShowIllegalArgsInfo();
+            }
+            return;
+        }
+    }
+
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
         TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
@@ -169,12 +180,6 @@ void ScreenSessionDumper::ExcuteInjectCmd()
         return;
     } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
         MockSendCastPublishEvent(params_[0]);
-        return;
-    } else if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
-        int errCode = SetFoldDisplayMode();
-        if (errCode != 0) {
-            ShowIllegalArgsInfo();
-        }
         return;
     } else if (params_.size() == 1 && (params_[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
                 || params_[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
