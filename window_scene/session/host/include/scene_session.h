@@ -101,6 +101,12 @@ using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
 class SceneSession : public Session {
 public:
+    struct UIExtensionTokenInfo {
+        bool canShowOnLockScreen{false};
+        uint32_t callingTokenId{0};
+        sptr<IRemoteObject> abilityToken;
+    };
+
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
@@ -413,6 +419,10 @@ public:
      * Window Visibility
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
+    virtual WSError HideSync()
+    {
+        return WSError::WS_DO_NOTHING;
+    };
 
     /*
      * Window Lifecycle
@@ -472,6 +482,15 @@ public:
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
+    /**
+     * UIExtension
+     */
+    bool IsShowOnLockScreen(uint32_t lockScreenZOrder);
+    void AddExtensionTokenInfo(const SceneSession::UIExtensionTokenInfo &tokenInfo);
+    void RemoveExtensionTokenInfo(sptr<IRemoteObject> abilityToken);
+    void CheckExtensionOnLockScreenToClose();
+    void CloseExtensionSync(const SceneSession::UIExtensionTokenInfo& tokenInfo);
+    void OnNotifyAboveLockScreen();
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
     bool HasModalUIExtension();
@@ -763,10 +782,17 @@ private:
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
+
+    /**
+     * UIExtension
+     */
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+    mutable std::recursive_mutex extensionTokenInfosMutex_;
+    std::vector<UIExtensionTokenInfo> extensionTokenInfos_;
+
     int32_t customDecorHeight_ = 0;
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     static std::shared_mutex windowDragHotAreaMutex_;

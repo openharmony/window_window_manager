@@ -40,6 +40,8 @@ public:
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) { return WMError::WM_OK; };
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid) = 0;
+    virtual WMError CheckUIExtensionCreation(
+        int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName &element, int32_t &pid) = 0;
     virtual WMError GetWindowModeType(WindowModeType& windowModeType) { return WMError::WM_OK; }
     virtual WSError RaiseWindowToTop(int32_t persistentId) { return WSError::WS_OK; }
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) = 0;

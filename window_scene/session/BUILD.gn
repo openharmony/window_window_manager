@@ -81,6 +81,7 @@ ohos_shared_library("scene_session") {
     "ability_base:base",
     "ability_base:session_info",
     "ability_base:want",
+    "ability_runtime:ability_manager",
     "ability_runtime:ability_start_setting",
     "ability_runtime:process_options",
     "ability_runtime:start_window_option",
