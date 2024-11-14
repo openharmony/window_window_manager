@@ -5383,12 +5383,18 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
     }
 }
 
-bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY)
+bool SceneSession::IsTransformNeedChange(float scaleX, float scaleY, float pivotX, float pivotY)
 {
-    if (NearEqual(scaleX_, scaleX) && NearEqual(scaleY_, scaleY) &&
+    bool nearEqual = NearEqual(scaleX_, scaleX) && NearEqual(scaleY_, scaleY) &&
         NearEqual(pivotX_, pivotX) && NearEqual(pivotY_, pivotY) &&
         NearEqual(clientScaleX_, scaleX) && NearEqual(clientScaleY_, scaleY) &&
-        NearEqual(clientPivotX_, pivotX) && NearEqual(clientPivotY_, pivotY)) {
+        NearEqual(clientPivotX_, pivotX) && NearEqual(clientPivotY_, pivotY);
+    return !nearEqual;
+}
+
+bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    if (!IsTransformNeedChange()) {
         return false;
     }
     Session::SetScale(scaleX, scaleY, pivotX, pivotY);
