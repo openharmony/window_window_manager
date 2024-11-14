@@ -5394,7 +5394,7 @@ bool SceneSession::IsTransformNeedChange(float scaleX, float scaleY, float pivot
 
 bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY)
 {
-    if (!IsTransformNeedChange()) {
+    if (!IsTransformNeedChange(scaleX, scaleY, pivotX, pivotY)) {
         return false;
     }
     Session::SetScale(scaleX, scaleY, pivotX, pivotY);
