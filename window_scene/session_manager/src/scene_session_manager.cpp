@@ -7903,6 +7903,7 @@ int SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId)
     return index;
 }
 
+
 void SceneSessionManager::RemoveSpecifiedDrawingData(int index)
 {
     std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
@@ -7921,9 +7922,9 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
         int32_t pid = 0;
         bool isDrawingStateChange = false;
         sptr<SceneSession> session = SelectSesssionFromMap(windowId);
-        isDrawingStateChange = (session == nullptr) ||
-                               (GetPreWindowDrawingState(windowId, isWindowDrawing, pid) == isWindowDrawing) ||
-                               GetProcessDrawingState(windowId, pid);
+        isDrawingStateChange =
+            (session == nullptr) || (GetPreWindowDrawingState(windowId, isWindowDrawing, pid) == isWindowDrawing &&
+                                     GetProcessDrawingState(windowId, pid));
         if (isDrawingStateChange) {
             processDrawingContentChangeInfo.emplace_back(windowId, isWindowDrawing);
         }
