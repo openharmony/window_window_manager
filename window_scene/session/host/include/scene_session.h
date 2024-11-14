@@ -710,7 +710,7 @@ private:
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
-    WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
+    WMError HandleActionUpdateWindowModeSupportType(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);

@@ -70,8 +70,8 @@ public:
     void SetAnimationFlag(uint32_t animationFlag);
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetTokenState(bool hasToken);
-    void SetModeSupportInfo(uint32_t modeSupportInfo);
-    void SetRequestModeSupportInfo(uint32_t requestModeSupportInfo);
+    void SetWindowModeSupportType(uint32_t windowModeSupportType);
+    void SetRequestWindowModeSupportType(uint32_t requestWindowModeSupportType);
     void SetDragType(DragType dragType);
     void SetStretchable(bool stretchable);
     void SetOriginRect(const Rect& rect);
@@ -122,8 +122,8 @@ public:
     bool GetDecorEnable() const;
     const PointInfo& GetHitOffset() const;
     uint32_t GetAnimationFlag() const;
-    uint32_t GetModeSupportInfo() const;
-    uint32_t GetRequestModeSupportInfo() const;
+    uint32_t GetWindowModeSupportType() const;
+    uint32_t GetRequestWindowModeSupportType() const;
     DragType GetDragType() const;
     bool GetStretchable() const;
     const Rect& GetOriginRect() const;
@@ -190,10 +190,10 @@ private:
     uint32_t parentId_ = INVALID_WINDOW_ID;
     PointInfo hitOffset_ { 0, 0 };
     uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
-    // modeSupportInfo_ means supported modes in runtime, which can be changed
-    uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
-    // requestModeSupportInfo_ is configured in abilityInfo, usually can't be changed
-    uint32_t requestModeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
+    // windowModeSupportType_ means supported modes in runtime, which can be changed
+    uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
+    // requestWindowModeSupportType_ is configured in abilityInfo, usually can't be changed
+    uint32_t requestWindowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
