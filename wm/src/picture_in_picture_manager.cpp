@@ -244,10 +244,9 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
 void PictureInPictureManager::DoControlEvent(PiPControlType controlType, PiPControlStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, enabled:%{public}d", controlType, status);
-    if (!HasActiveController()) {
-        return;
+    if (auto controller = GetActiveController()) {
+        controller->DoControlEvent(controlType, status);
     }
-    activeController_->DoControlEvent(controlType, status);
 }
 
 void PictureInPictureManager::AutoStartPipWindow()
