@@ -536,6 +536,7 @@ public:
      */
     void ProcessClickModalWindowOutside(int32_t posX, int32_t posY);
     void SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFunc&& func);
+
     /**
      * Window MoveDrag 
      */
