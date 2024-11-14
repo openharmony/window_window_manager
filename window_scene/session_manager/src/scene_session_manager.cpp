@@ -7895,7 +7895,7 @@ int SceneSessionManager::GetSpecifiedDrawingData(uint64_t windowId)
     {
         std::unique_lock<std::mutex> lock(lastDrawingDataMutex_);
         auto it = std::find_if(lastDrawingData_.begin(), lastDrawingData_.end(),
-                               [windowId](const DrawingSessionIdInfo& info) { return info.windowId_ == windowId; });
+            [windowId](const DrawingSessionIdInfo& info) { return info.windowId_ == windowId; });
         if (it != lastDrawingData_.end()) {
             index = it - lastDrawingData_.begin();
         }
