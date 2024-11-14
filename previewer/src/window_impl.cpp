@@ -274,6 +274,37 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
     return;
 }
 
+WMError WindowImpl::SetUIContentByName(
+    const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "contentInfo: %{public}s", contentInfo.c_str());
+    if (uiContent_) {
+        uiContent_->Destroy();
+    }
+    std::unique_ptr<Ace::UIContent> uiContent;
+    if (ability != nullptr) {
+        uiContent = Ace::UIContent::Create(ability);
+    } else {
+        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    }
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "fail to SetUIContentByName");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent->InitializeByName(this, contentInfo, storage);
+    uiContent_ = std::move(uiContent);
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "uiContent_ is NULL");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    NotifySetIgnoreSafeArea(isIgnoreSafeArea_);
+    UpdateViewportConfig();
+    if (contentInfoCallback_) {
+        contentInfoCallback_(contentInfo);
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
