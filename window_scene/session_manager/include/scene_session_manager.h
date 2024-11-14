@@ -689,11 +689,11 @@ private:
      */
     std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
         const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
-    bool GetPreWindowDrawingState(uint64_t windowId, bool currentWindowDrawing, int32_t& pid);
-    bool GetProcessDrawingState(uint64_t windowId, int32_t pid);
-    void UpdateWindowDrawingData(uint64_t windowId, int32_t pid, int32_t uid);
-    bool GetSpecifiedDrawingData(uint64_t windowId, int32_t& pid, int32_t& uid);
-    void RemoveSpecifiedDrawingData(uint64_t windowId);
+    bool GetPreWindowDrawingState(uint64_t surfaceId, bool currentWindowDrawing, int32_t& pid);
+    bool GetProcessDrawingState(uint64_t surfaceId, int32_t pid);
+    void UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid);
+    bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
+    void RemoveSpecifiedDrawingData(uint64_t surfaceId);
     
     /*
      * Window Rotate Animation
@@ -1049,14 +1049,12 @@ private:
     /*
      * Window Property
      */
-    struct DrawingSessionIdInfo {
-        uint64_t windowId_ = 0;
+    struct DrawingSessionInfo {
+        uint64_t surfaceId_ = 0;
         int32_t pid_ = 0;
         int32_t uid_ = 0;
     };
-
-    std::mutex lastDrawingDataMutex_;
-    std::vector<DrawingSessionIdInfo> lastDrawingData_;
+    std::vector<DrawingSessionIdInfo> lastDrawingSessionInfoVec_;
 
     /**
      * PC Window
