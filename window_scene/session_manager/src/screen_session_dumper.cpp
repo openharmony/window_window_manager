@@ -110,6 +110,17 @@ void ScreenSessionDumper::ExcuteDumpCmd()
 
 void ScreenSessionDumper::ExcuteInjectCmd()
 {
+    bool isDeveloperMode = system::GetBoolParameter("const.security.developermode.state", false);
+    if (isDeveloperMode) {
+        if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
+            int errCode = SetFoldDisplayMode();
+            if (errCode != 0) {
+                ShowIllegalArgsInfo();
+            }
+            return;
+        }
+    }
+
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
         TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
@@ -118,11 +129,6 @@ void ScreenSessionDumper::ExcuteInjectCmd()
     }
     if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
         ShowNotifyFoldStatusChangedInfo();
-    } else if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
-        int errCode = SetFoldDisplayMode();
-        if (errCode != 0) {
-            ShowIllegalArgsInfo();
-        }
     } else if (params_.size() == 1 && (params_[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
                 || params_[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
         int errCode = SetFoldStatusLocked();
