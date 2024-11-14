@@ -384,9 +384,6 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
     persistentId = 1;
     slController->NotifySessionIconChanged(persistentId, icon);
     ASSERT_EQ(persistentId, 1);
-
-    slController->NotifySessionIconChanged(persistentId, icon);
-    EXPECT_EQ(1, persistentId);
 }
 
 /**
