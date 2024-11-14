@@ -88,6 +88,7 @@ public:
         const std::string& identityToken = "") override;
 
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    int32_t GetStatusBarHeight() override;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
@@ -115,7 +116,6 @@ public:
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
-    int32_t GetStatusBarHeight() override;
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;

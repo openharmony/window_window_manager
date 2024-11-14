@@ -480,7 +480,7 @@ WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params,
 
 int32_t ExtensionSession::GetStatusBarHeight()
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called, persistenId=%{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId=%{public}d", GetPersistentId());
     if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->getStatusBarHeightFunc_ != nullptr) {
         return extSessionEventCallback_->getStatusBarHeightFunc_();
     }
