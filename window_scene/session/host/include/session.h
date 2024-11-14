@@ -255,16 +255,16 @@ public:
     virtual bool IsExitSplitOnBackground() const;
     virtual bool NeedStartingWindowExitAnimation() const { return true; }
 
-    void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
+    void SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         const NotifyChangeSessionVisibilityWithStatusBarFunc& func);
-    void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
+    void SetTerminateSessionListener(NotifyTerminateSessionFunc&& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
-    void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
-    void SetSessionExceptionListener(const NotifySessionExceptionFunc& func, bool fromJsScene);
+    void SetTerminateSessionListenerNew(NotifyTerminateSessionFuncNew&& func);
+    void SetSessionExceptionListener(NotifySessionExceptionFunc&& func, bool fromJsScene);
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
-    void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
+    void SetTerminateSessionListenerTotal(NotifyTerminateSessionFuncTotal&& func);
     WSError Clear(bool needStartCaller = false);
     WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
@@ -283,7 +283,7 @@ public:
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
-    void SetBackPressedListenser(const NotifyBackPressedFunc& func);
+    void SetBackPressedListenser(NotifyBackPressedFunc&& func);
     virtual WSError ProcessBackEvent(); // send back event to session_stage
 
     sptr<ScenePersistence> GetScenePersistence() const;
@@ -297,9 +297,9 @@ public:
     WSError NotifyDestroy();
     WSError NotifyCloseExistPipWindow();
 
-    void SetPendingSessionToForegroundListener(const NotifyPendingSessionToForegroundFunc& func);
+    void SetPendingSessionToForegroundListener(NotifyPendingSessionToForegroundFunc&& func);
     WSError PendingSessionToForeground();
-    void SetPendingSessionToBackgroundForDelegatorListener(const NotifyPendingSessionToBackgroundForDelegatorFunc&
+    void SetPendingSessionToBackgroundForDelegatorListener(NotifyPendingSessionToBackgroundForDelegatorFunc&&
         func);
     WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
 
@@ -638,8 +638,8 @@ protected:
     NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
     NofitySessionLabelUpdatedFunc updateSessionLabelFunc_;
     NofitySessionIconUpdatedFunc updateSessionIconFunc_;
-    std::shared_ptr<NotifySessionExceptionFunc> sessionExceptionFunc_;
-    std::shared_ptr<NotifySessionExceptionFunc> jsSceneSessionExceptionFunc_;
+    NotifySessionExceptionFunc sessionExceptionFunc_;
+    NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
     NotifySessionSnapshotFunc notifySessionSnapshotFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
