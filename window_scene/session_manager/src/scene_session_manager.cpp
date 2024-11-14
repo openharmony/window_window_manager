@@ -22,7 +22,6 @@
 #include <hisysevent.h>
 #include <parameters.h>
 #include <hitrace_meter.h>
-#include "ffrt_inner.h"
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
 
@@ -120,8 +119,6 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
-
-constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -268,10 +265,6 @@ void SceneSessionManager::Init()
         WLOGFW("Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
     }
     taskScheduler_->SetExportHandler(eventHandler_);
-
-    ret = ffrt_set_cpu_worker_max_num(ffrt_qos_user_interactive, FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
-    TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max thread number: %{public}d, retcode: %{public}d",
-        FFRT_USER_INTERACTIVE_MAX_THREAD_NUM, ret);
 
     listenerController_ = std::make_shared<SessionListenerController>();
 
