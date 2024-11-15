@@ -284,6 +284,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
     napi_set_named_property(env, objValue, "appInstanceKey",
         CreateJsValue(env, session->GetSessionInfo().appInstanceKey_));
+    napi_set_named_property(env, objValue, "isSystemKeyboard",
+        CreateJsValue(env, static_cast<int32_t>(session->IsSystemKeyboard())));
     SetWindowSizeAndPosition(env, objValue, session);
     sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
     if (sessionProperty != nullptr) {
