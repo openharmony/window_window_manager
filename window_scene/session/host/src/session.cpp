@@ -1478,7 +1478,7 @@ void Session::SetPendingSessionActivationEventListener(NotifyPendingSessionActiv
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
-        session->pendingSessionActivationFunc_ = func;
+        session->pendingSessionActivationFunc_ = std::move(func);
     };
     PostTask(task, where);
 }
@@ -1492,7 +1492,7 @@ void Session::SetBackPressedListenser(NotifyBackPressedFunc&& func)
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
-        session->backPressedFunc_ = func;
+        session->backPressedFunc_ = std::move(func);
     };
     PostTask(task, where);
 }
@@ -1506,7 +1506,7 @@ void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
-        session->terminateSessionFunc_ = func;
+        session->terminateSessionFunc_ = std::move(func);
     };
     PostTask(task, where);
 }
@@ -1621,7 +1621,7 @@ void Session::SetTerminateSessionListenerNew(NotifyTerminateSessionFuncNew&& fun
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
-        session->terminateSessionFuncNew_ = func;
+        session->terminateSessionFuncNew_ = std::move(func);
     };
     PostTask(task, where);
 }
@@ -1662,7 +1662,7 @@ void Session::SetTerminateSessionListenerTotal(NotifyTerminateSessionFuncTotal&&
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
-        session->terminateSessionFuncTotal_ = func;
+        session->terminateSessionFuncTotal_ = std::move(func);
     };
     PostTask(task, where);
 }
@@ -1730,9 +1730,9 @@ void Session::SetSessionExceptionListener(NotifySessionExceptionFunc&& func, boo
             return;
         }
         if (fromJsScene) {
-            session->jsSceneSessionExceptionFunc_ = func;
+            session->jsSceneSessionExceptionFunc_ = std::move(func);
         } else {
-            session->sessionExceptionFunc_ = func;
+            session->sessionExceptionFunc_ = std::move(func);
         }
     };
     PostTask(task, where);
@@ -1756,7 +1756,7 @@ void Session::SetPendingSessionToForegroundListener(NotifyPendingSessionToForegr
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
-        session->pendingSessionToForegroundFunc_ = func;
+        session->pendingSessionToForegroundFunc_ = std::move(func);
     };
     PostTask(task, where);
 }
@@ -1767,7 +1767,7 @@ WSError Session::PendingSessionToForeground()
     SessionInfo info = GetSessionInfo();
     if (pendingSessionActivationFunc_) {
         pendingSessionActivationFunc_(info);
-    };
+    }
     return WSError::WS_OK;
 }
 
@@ -1781,7 +1781,7 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
-        session->pendingSessionToBackgroundForDelegatorFunc_ = func;
+        session->pendingSessionToBackgroundForDelegatorFunc_ = std::move(func);
     };
     PostTask(task, where);
 }

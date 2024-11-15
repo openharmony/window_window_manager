@@ -2019,7 +2019,6 @@ HWTEST_F(WindowSessionTest2, UpdateSizeChangeReason, Function | SmallTest | Leve
 HWTEST_F(WindowSessionTest2, SetPendingSessionActivationEventListener, Function | SmallTest | Level2)
 {
     int resultValue = 0;
-    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
     session_->SetPendingSessionActivationEventListener([&resultValue](const SessionInfo& info) {
         resultValue = 1;
     });
