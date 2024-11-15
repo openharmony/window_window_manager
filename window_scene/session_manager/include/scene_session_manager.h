@@ -368,10 +368,6 @@ public:
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
-    void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
-    void UnregisterCreateSubSessionListener(int32_t persistentId);
-    void RegisterBindDialogTargetListener(int32_t persistentId, const NotifyBindDialogSessionFunc& func);
-    void UnregisterBindDialogTargetListener(int32_t persistentId);
 
     /*
      * Window Immersive
@@ -512,6 +508,14 @@ public:
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
+
+    /*
+    * Specific Window Recovery
+    */
+    void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
+    void RegisterBindDialogTargetListener(const sptr<SceneSession>& sceneSession,
+        const NotifyBindDialogSessionFunc& func);
+    void UnregisterSpecificSessionCreateListener(int32_t persistentId);
 
 protected:
     SceneSessionManager();
@@ -763,10 +767,6 @@ private:
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;
-    std::map<int32_t, NotifyCreateSubSessionFunc> createSubSessionFuncMap_;
-    std::map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
-    std::map<int32_t, NotifyBindDialogSessionFunc> bindDialogTargetFuncMap_;
-    std::map<int32_t, std::vector<sptr<SceneSession>>> recoverDialogSessionCacheMap_;
     bool recoveringFinished_ = false;
     NotifyRecoverSceneSessionFunc recoverSceneSessionFunc_;
     ProcessStatusBarEnabledChangeFunc statusBarEnabledChangeFunc_;
@@ -918,10 +918,6 @@ private:
                                 bool isFromInnerkits);
     void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0);
     void NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session);
-    void CacheSpecificSessionForRecovering(sptr<SceneSession> sceneSession,
-        const sptr<WindowSessionProperty>& property);
-    void RecoverCachedSubSession(int32_t persistentId);
-    void RecoverCachedDialogSession(int32_t persistentId);
     void NotifySessionUnfocusedToClient(int32_t persistentId);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
@@ -937,8 +933,6 @@ private:
     void HideNonSecureFloatingWindows();
     void HideNonSecureSubWindows(const sptr<SceneSession>& sceneSession);
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
-    bool IsWindowSupportCacheForRecovering(sptr<SceneSession> sceneSession,
-        const sptr<WindowSessionProperty>& property);
 
     /*
      * Window Snapshot
@@ -1052,6 +1046,20 @@ private:
      */
     std::mutex isWindowRectAutoSaveMapMutex_;
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
+
+    /*
+    * Specific Window Recovery
+    */
+    std::unordered_map<int32_t, NotifyCreateSubSessionFunc> createSubSessionFuncMap_;
+    std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
+    std::unordered_map<int32_t, NotifyBindDialogSessionFunc> bindDialogTargetFuncMap_;
+    std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverDialogSessionCacheMap_;
+    bool IsWindowSupportCacheForRecovering(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property);
+    void CacheSpecificSessionForRecovering(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property);
+    void RecoverCachedSubSession(int32_t persistentId);
+    void RecoverCachedDialogSession(int32_t persistentId);
 };
 } // namespace OHOS::Rosen
 

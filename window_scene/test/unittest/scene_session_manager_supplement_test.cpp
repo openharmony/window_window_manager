@@ -487,7 +487,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifyCreateSubSession, Function | S
     info.abilityName_ = "test2";
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ssm_->NotifyCreateSubSession(1, sceneSession);
-    ssm_->UnregisterCreateSubSessionListener(1);
+    ssm_->UnregisterSpecificSessionCreateListener(1);
     SessionInfo info1;
     info1.bundleName_ = "test1";
     info1.abilityName_ = "test2";
@@ -495,7 +495,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifyCreateSubSession, Function | S
     NotifyCreateSubSessionFunc func;
     ssm_->createSubSessionFuncMap_.insert({1, func});
     ssm_->NotifyCreateSubSession(1, sceneSession);
-    ssm_->UnregisterCreateSubSessionListener(1);
+    ssm_->UnregisterSpecificSessionCreateListener(1);
     ssm_->createSubSessionFuncMap_.clear();
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
@@ -679,8 +679,9 @@ HWTEST_F(SceneSessionManagerSupplementTest, RegisterBindDialogTargetListener, Fu
 {
     int ret = 0;
     NotifyBindDialogSessionFunc func1;
-    ssm_->RegisterBindDialogTargetListener(1, func1);
-    ssm_->UnregisterBindDialogTargetListener(1);
+    sptr<SceneSession> sceneSession;
+    ssm_->RegisterBindDialogTargetListener(sceneSession, func1);
+    ssm_->UnregisterSpecificSessionCreateListener(1);
     ssm_->bindDialogTargetFuncMap_.insert({ 1, func1 });
     ssm_->bindDialogTargetFuncMap_.erase(1);
     ssm_->bindDialogTargetFuncMap_.insert({ 1, func1 });
