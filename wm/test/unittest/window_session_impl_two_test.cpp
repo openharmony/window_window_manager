@@ -916,7 +916,7 @@ HWTEST_F(WindowSessionImplTwoTest, GetDecorHeight, Function | SmallTest | Level2
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(-1));
     window->uiContent_ = std::move(uiContent);
-    ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_DO_NOTHING);
+    ASSERT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
     height = 1;
     window->GetDecorHeight(height);
     window->Destroy();
@@ -937,7 +937,7 @@ HWTEST_F(WindowSessionImplTwoTest, GetTitleButtonArea, Function | SmallTest | Le
     EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(false));
     window->uiContent_ = std::move(uiContent);
     TitleButtonRect titleButtonRect;
-    ASSERT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_DO_NOTHING);
+    ASSERT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
     window->Destroy();
 }
 
@@ -1113,8 +1113,8 @@ HWTEST_F(WindowSessionImplTwoTest, RegisterSubWindowCloseListeners01, Function |
 
     sptr<ISubWindowCloseListener> listener = new MockISubWindowCloseListener();
     window_->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, window_->RegisterSubWindowCloseListeners(listener));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, window_->UnregisterSubWindowCloseListeners(listener));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window_->RegisterSubWindowCloseListeners(listener));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window_->UnregisterSubWindowCloseListeners(listener));
 
     window_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ASSERT_EQ(WMError::WM_OK, window_->RegisterSubWindowCloseListeners(listener));

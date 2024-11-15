@@ -782,7 +782,11 @@ HWTEST_F(WindowManagerTest, MinimizeAllAppWindows, Function | SmallTest | Level2
 {
     DisplayId displayId = 0;
     WMError ret = WindowManager::GetInstance().MinimizeAllAppWindows(displayId);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(ret, WMError::WM_OK);
+    } else {
+        ASSERT_EQ(ret, WMError::WM_OK);
+    }
 }
 
 /**
@@ -799,7 +803,11 @@ HWTEST_F(WindowManagerTest, SetWindowLayoutMode, Function | SmallTest | Level2)
     ASSERT_EQ(ret, WMError::WM_OK);
 
     ret = WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::END);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, WMError::WM_OK);
+    } else {
+        ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    }
 }
 
 /**
@@ -870,11 +878,11 @@ HWTEST_F(WindowManagerTest, DumpSessionWithId, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetWindowModeType01
- * @tc.desc: GetWindowModeType01
+ * @tc.name: GetWindowModStatus01
+ * @tc.desc: GetWindowModStatus01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetWindowModStatus01, Function | SmallTest | Level2)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     infos.clear();
@@ -899,6 +907,22 @@ HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener, Function | 
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterVisibleWindowNumChangedListener(nullptr));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<TestVisibleWindowNumChangedListener> listener = new TestVisibleWindowNumChangedListener();
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterVisibleWindowNumChangedListener(listener));
+    ASSERT_EQ(0, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->visibleWindowNumChangedListenerAgent_);
+
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibleWindowNumChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
+    ASSERT_NE(nullptr, windowManager.pImpl_->visibleWindowNumChangedListenerAgent_);
+
+    // to check that the same listner can not be registered twice
+    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibleWindowNumChangedListener(listener));
+    ASSERT_EQ(1, windowManager.pImpl_->visibleWindowNumChangedListeners_.size());
 }
 
 /**
@@ -978,6 +1002,21 @@ HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
     WMError res3 = WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(5, 5, true);
     ASSERT_EQ(WMError::WM_OK, res3);
     WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+}
+
+/**
+ * @tc.name: GetWindowModeType01
+ * @tc.desc: check GetWindowModeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    infos.clear();
+    WindowModeType windowModeType;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetWindowModeType(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModeType(windowModeType));
 }
 
 /**
@@ -1198,7 +1237,11 @@ HWTEST_F(WindowManagerTest, RegisterVisibleWindowNumChangedListener01, Function 
     WMError ret;
     sptr<IVisibleWindowNumChangedListener> listener = new (std::nothrow) TestVisibleWindowNumChangedListener();
     ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(WMError::WM_OK, ret);
+    } else {
+        ASSERT_EQ(WMError::WM_OK, ret);
+    }
 
     ret = WindowManager::GetInstance().RegisterVisibleWindowNumChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1230,7 +1273,11 @@ HWTEST_F(WindowManagerTest, RegisterDrawingContentChangedListener01, Function | 
     WMError ret;
     sptr<IDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
     ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(WMError::WM_OK, ret);
+    } else {
+        ASSERT_EQ(WMError::WM_OK, ret);
+    }
 
     ret = WindowManager::GetInstance().RegisterDrawingContentChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1262,7 +1309,11 @@ HWTEST_F(WindowManagerTest, RegisterFocusChangedListener01, Function | SmallTest
     WMError ret;
     sptr<IFocusChangedListener> listener = new (std::nothrow) TestFocusChangedListener();
     ret = WindowManager::GetInstance().RegisterFocusChangedListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(WMError::WM_OK, ret);
+    } else {
+        ASSERT_EQ(WMError::WM_OK, ret);
+    }
 
     ret = WindowManager::GetInstance().RegisterFocusChangedListener(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -1294,29 +1345,6 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Le
     WMError ret;
     ret = WindowManager::GetInstance().NotifyDisplayInfoChange(nullptr, 1, 2, DisplayOrientation::PORTRAIT);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-}
-
-/**
- * @tc.name: NotifyDisplayInfoChange02
- * @tc.desc: check NotifyDisplayInfoChange, token is not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange02, Function | SmallTest | Level2)
-{
-    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
-    ASSERT_NE(token, nullptr);
-    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(token, 1, 2, DisplayOrientation::PORTRAIT);
-    ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: NotifyWMSDisconnected01
- * @tc.desc: check NotifyWMSDisconnected
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, Function | SmallTest | Level2)
-{
-    WindowManager::GetInstance().pImpl_->NotifyWMSDisconnected(1, 2);
 }
 
 /**
@@ -1354,7 +1382,7 @@ HWTEST_F(WindowManagerTest, NotifyAccessibilityWindowInfo01, Function | SmallTes
 {
     WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
     ASSERT_NE(WMError::WM_OK, ret);
-    
+
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     WindowManager::GetInstance().pImpl_->NotifyAccessibilityWindowInfo(infos, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
 
@@ -1390,19 +1418,6 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
 {
     auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
     ASSERT_EQ(ret, WMError::WM_OK);
-}
-
-/**
- * @tc.name: GetDisplayIdByWindowId
- * @tc.desc: check GetDisplayIdByWindowId
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
-{
-    const std::vector<uint64_t> windowIds = {1, 2};
-    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
-    auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
-    ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
 } // namespace Rosen

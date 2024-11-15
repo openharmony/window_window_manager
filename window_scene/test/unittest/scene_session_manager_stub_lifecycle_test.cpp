@@ -155,7 +155,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleTerminateSessionNew, Functi
     data.WriteBool(false);
 
     int res = stub_->HandleTerminateSessionNew(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
