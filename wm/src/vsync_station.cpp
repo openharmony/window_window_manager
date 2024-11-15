@@ -193,7 +193,7 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp, int64_t frameCount)
 
 void VsyncStation::OnVsyncTimeOut()
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "in");
+    TLOGW(WmsLogTag::WMS_MAIN, "in");
     std::lock_guard<std::mutex> lock(mutex_);
     hasRequestedVsync_ = false;
 }
