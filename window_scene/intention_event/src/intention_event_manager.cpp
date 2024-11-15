@@ -84,10 +84,13 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent)
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent is null");
         return false;
     }
-    auto listener = std::make_shared<IntentionEventManager::InputEventListener>(uiContent,
-        SceneSessionManager::GetInstance()::GetTaskScheduler()->GetEventHandler());
-    MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener,
-        SceneSessionManager::GetInstance()::GetTaskScheduler()->GetEventHandler());
+    auto eventHandler = SceneSessionManager::GetInstance()::GetTaskScheduler()->GetEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null");
+        return false;
+    }
+    auto listener = std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
+    MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
     TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
     if (IS_BETA) {
         // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event
