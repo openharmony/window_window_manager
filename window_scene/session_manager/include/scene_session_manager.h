@@ -1059,11 +1059,10 @@ private:
      * Window Property
      */
     struct DrawingSessionInfo {
-        uint64_t surfaceId_ = 0;
         int32_t pid_ = 0;
         int32_t uid_ = 0;
     };
-    std::vector<DrawingSessionInfo> lastDrawingSessionInfoVec_;
+    std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
 
     /**
      * PC Window

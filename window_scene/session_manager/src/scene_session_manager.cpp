@@ -8017,9 +8017,8 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 
 bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid)
 {
-    auto it = std::find_if(lastDrawingSessionInfoVec_.begin(), lastDrawingSessionInfoVec_.end(),
-        [surfaceId](const DrawingSessionInfo& info) { return info.surfaceId_ == surfaceId; });
-    if (it != lastDrawingSessionInfoVec_.end()) {
+    auto it = lastDrawingSessionInfoMap_.find(surfaceId);
+    if (it != lastDrawingSessionInfoMap_.end()) {
         pid = it->pid_;
         uid = it->uid_;
         return true;
@@ -8029,10 +8028,9 @@ bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& p
 
 void SceneSessionManager::RemoveSpecifiedDrawingData(uint64_t surfaceId)
 {
-    auto it = std::find_if(lastDrawingSessionInfoVec_.begin(), lastDrawingSessionInfoVec_.end(),
-        [surfaceId](const DrawingSessionInfo& info) { return info.surfaceId_ == surfaceId; });
-    if (it != lastDrawingSessionInfoVec_.end()) {
-        lastDrawingSessionInfoVec_.erase(it);
+    auto it = lastDrawingSessionInfoMap_.find(surfaceId);
+    if (it != lastDrawingSessionInfoMap_.end()) {
+        lastDrawingSessionInfoMap_.erase(it);
     }
 }
 
@@ -8042,11 +8040,10 @@ std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingCont
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
     for (const auto& [surfaceId, isWindowDrawing] : currDrawingContentData) {
         int32_t pid = 0;
-        bool isPreWindowDrawing = GetPreWindowDrawingState(surfaceId, isWindowDrawing, pid);
-        bool isProcessDrawingStateChanged = GetProcessDrawingState(surfaceId, pid);
         sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
         bool isDrawingStateChanged =
-            session == nullptr || (isPreWindowDrawing != isWindowDrawing && isProcessDrawingStateChanged);
+            session == nullptr || (GetPreWindowDrawingState(surfaceId, isWindowDrawing, pid) != isWindowDrawing &&
+                                   GetProcessDrawingState(surfaceId, pid));
         if (isDrawingStateChanged) {
             processDrawingContentChangeInfo.emplace_back(surfaceId, isWindowDrawing);
         }
@@ -8069,8 +8066,7 @@ bool SceneSessionManager::GetPreWindowDrawingState(uint64_t surfaceId, bool curr
 
 void SceneSessionManager::UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid)
 {
-    RemoveSpecifiedDrawingData(surfaceId);
-    lastDrawingSessionInfoVec_.push_back({ surfaceId, pid, uid });
+    lastDrawingSessionInfoMap_[surfaceId] = { pid, uid };
 }
 
 bool SceneSessionManager::GetProcessDrawingState(uint64_t surfaceId, int32_t pid)
