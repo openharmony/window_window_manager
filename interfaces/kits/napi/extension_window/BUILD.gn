@@ -90,7 +90,7 @@ ohos_shared_library("extensionwindow_napi") {
     ":extension_window_kit_config",
     "../../../../resources/config/build:coverage_flags",
   ]
-  public_configs = [":extension_window_kit_config"]
+  public_configs = [ ":extension_window_kit_config" ]
 
   include_dirs = [ "extension_window" ]
   deps = [
