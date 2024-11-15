@@ -24,6 +24,14 @@ namespace Rosen {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
+namespace {
+#ifdef TP_FEATURE_ENABLE
+const int32_t TP_TYPE = 12;
+const char* KEYBOARD_ON_CONFIG = "version:3+main";
+const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
+#endif
+}
+
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeFolded()");
@@ -60,6 +68,10 @@ void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
     // SCREEN_ID_FULL = 0
     auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(true);
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
+        KEYBOARD_ON_CONFIG, TpFeatureConfigType::AFT_TP_FEATURE);
+#endif
     TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
         screenWidth, screenHeight, static_cast<long>(response));
 }
@@ -85,6 +97,10 @@ void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
     // SCREEN_ID_FULL = 0
     auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(false);
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
+        KEYBOARD_OFF_CONFIG, TpFeatureConfigType::DEFAULT_TP_FEATURE);
+#endif
     TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
         screenWidth, screenHeight, static_cast<long>(response));
 }
