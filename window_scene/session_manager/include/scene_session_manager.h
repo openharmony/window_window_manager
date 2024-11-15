@@ -605,6 +605,7 @@ private:
     bool GetExtensionWindowIds(const sptr<IRemoteObject>& token, int32_t& persistentId, int32_t& parentId);
     void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
     void EraseSceneSessionMapById(int32_t persistentId);
+    void EraseSceneSessionAndMarkDirtyLocked(int32_t persistentId);   // lock-free
     WSError GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void UpdatePrivateStateAndNotifyForAllScreens();
@@ -842,8 +843,13 @@ private:
     void ResetWant(sptr<SceneSession>& sceneSession);
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
 
+    /*
+     * Window Pipeline
+     */
+    int32_t sessionMapDirty_ { 0 };
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
+
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
 
     /*
