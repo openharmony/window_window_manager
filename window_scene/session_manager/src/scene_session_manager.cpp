@@ -4210,35 +4210,33 @@ static bool IsValidDigitString(const std::string& windowIdStr)
 void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    NotifySessionExceptionFunc sessionExceptionFunc = [this](
+    const char* const where = __func__;
+    sceneSession->SetSessionExceptionListener([this, where](
         const SessionInfo& info, bool needRemoveSession, bool startFail) {
-        auto task = [this, info] {
+        auto task = [this, info, where] {
             auto session = GetSceneSession(info.persistentId_);
             if (session == nullptr) {
-                WLOGW("NotifySessionExceptionFunc, Not found session, id: %{public}d",
-                    info.persistentId_);
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s Not found session, id:%{public}d", where, info.persistentId_);
                 return;
             }
             if (session->GetSessionInfo().isSystem_) {
-                WLOGW("NotifySessionExceptionFunc, id: %{public}d is system",
-                    session->GetPersistentId());
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d is system", where, session->GetPersistentId());
                 return;
             }
-            WLOGI("NotifySessionExceptionFunc, errorCode: %{public}d, id: %{public}d",
-                info.errorCode, info.persistentId_);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s errorCode: %{public}d, id: %{public}d",
+                where, info.errorCode, info.persistentId_);
             if (info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT) ||
                 info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_FOREGROUND_TIMEOUT)) {
-                WLOGD("NotifySessionClosed when ability load timeout "
+                TLOGND(WmsLogTag::WMS_LIFE, "NotifySessionClosed when ability load timeout "
                     "or foreground timeout, id: %{public}d", info.persistentId_);
                 listenerController_->NotifySessionClosed(info.persistentId_);
             }
         };
         taskScheduler_->PostVoidSyncTask(task, "sessionException");
-    };
-    sceneSession->SetSessionExceptionListener(sessionExceptionFunc, false);
+    }, false);
     TLOGD(WmsLogTag::WMS_LIFE, "success, id: %{public}d", sceneSession->GetPersistentId());
 }
 

@@ -362,15 +362,11 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, Function | SmallTest
  */
 HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew02, Function | SmallTest | Level2)
 {
-    NotifyTerminateSessionFuncNew callback =
-        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
-    {
-    };
-
     bool needStartCaller = true;
     bool isFromBroker = true;
     sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
-    session_->SetTerminateSessionListenerNew(callback);
+    session_->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {});
+    usleep(WAIT_SYNC_IN_NS);
     auto result = session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
     EXPECT_EQ(result, WSError::WS_OK);
 }
@@ -571,8 +567,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, Function | SmallTe
     ASSERT_NE(session_, nullptr);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
     session_->isTerminating_ = false;
-    NotifyTerminateSessionFuncTotal func = nullptr;
-    session_->SetTerminateSessionListenerTotal(func);
+    session_->SetTerminateSessionListenerTotal(nullptr);
     ASSERT_EQ(WSError::WS_OK,
             session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
