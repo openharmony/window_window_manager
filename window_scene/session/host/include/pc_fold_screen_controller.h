@@ -34,14 +34,6 @@ class SceneSession;
 using RectRecordsVector =
     std::vector<std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>, WSRect>>;
 
-enum class ScreenFoldStatus : uint8_t {
-    UNKNOWN = 0,
-    EXPANDED = 1,
-    FOLDED = 2,
-    HALF_FOLDED = 3,
-    HALF_FOLDED_KEYBOARD = 4,
-};
-
 enum class ScreenSide : uint8_t {
     EXPAND = 0,
     FOLD_B = 1,
@@ -51,7 +43,7 @@ enum class ScreenSide : uint8_t {
 class PcFoldScreenManager {
 WM_DECLARE_SINGLE_INSTANCE(PcFoldScreenManager);
 public:
-    void UpdateFoldScreenStatus(DisplayId displayId, ScreenFoldStatus status,
+    void UpdateFoldScreenStatus(DisplayId displayId, SuperFoldStatus status,
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     bool IsHalfFolded(DisplayId displayId);
 
@@ -85,7 +77,7 @@ public:
         const WSRect& limitRect, int32_t titleHeight);
 
 private:
-    void SetDisplayInfo(DisplayId displayId, ScreenFoldStatus status);
+    void SetDisplayInfo(DisplayId displayId, SuperFoldStatus status);
     void SetDisplayRects(
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     float GetVpr();
@@ -97,7 +89,7 @@ private:
     std::shared_mutex displayInfoMutex_; // protect display infos
     DisplayId displayId_ { SCREEN_ID_INVALID };
     float vpr_ { 1.5f }; // display vp ratio
-    ScreenFoldStatus screenFoldStatus_ { ScreenFoldStatus::UNKNOWN };
+    SuperFoldStatus screenFoldStatus_ { SuperFoldStatus::UNKNOWN };
     std::shared_mutex rectsMutex_; // protect rects
     WSRect defaultDisplayRect_;
     WSRect virtualDisplayRect_;
@@ -117,6 +109,7 @@ class PcFoldScreenController : public RefBase {
 public:
     explicit PcFoldScreenController(wptr<SceneSession> weakSession);
     bool IsHalfFolded(DisplayId displayId);
+    bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
     void RecordMoveRects(const WSRect& rect);
     bool ThrowSlip(DisplayId displayId, WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
