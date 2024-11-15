@@ -1656,9 +1656,9 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 
     const char* const where = __func__;
     auto task = [this, sessionInfo, property, where] {
-        TLOGNI(WmsLogTag::WMS_LIFE, "RequestSceneSession, appName: [%{public}s %{public}s %{public}s]"
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: appName: [%{public}s %{public}s %{public}s] "
             "appIndex %{public}d, type %{public}u system %{public}u, isPersistentRecover %{public}u",
-            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
+            where, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
             sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_,
             static_cast<uint32_t>(sessionInfo.isSystem_), static_cast<uint32_t>(sessionInfo.isPersistentRecover_));
         sptr<SceneSession> sceneSession = CreateSceneSession(sessionInfo, property);
@@ -1700,8 +1700,8 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
-        TLOGNI(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, type: %{public}d",
-            sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id: %{public}d, type: %{public}d",
+             where, sceneSession->GetPersistentId(), sceneSession->GetWindowType());
         return sceneSession;
     };
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
@@ -2744,8 +2744,8 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
 
 void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "Number of persistentIds need to be recovered = %{public}zu. CurrentUserId = "
-        "%{public}d", alivePersistentIds.size(), currentUserId_);
+    TLOGI(WmsLogTag::WMS_RECOVER, "PersistentIds need to be recovered=%{public}zu, CurrentUserId=%{public}d",
+          alivePersistentIds.size(), currentUserId_);
     alivePersistentIds_ = alivePersistentIds;
 }
 
