@@ -2643,10 +2643,15 @@ void SceneSession::InitializeCrossMoveDrag()
 void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
     bool isGlobal, bool needFlush)
 {
+    throwSlipFullScreenFlag_.store(false);
     if (pcFoldScreenController_ && pcFoldScreenController_->IsHalfFolded(GetScreenId())) {
-        auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
-            pcFoldScreenController_->GetMovingTimingCurve());
-        SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal, needFlush);
+        if (pcFoldScreenController_->NeedFollowHandAnimation()) {
+            auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
+                pcFoldScreenController_->GetMovingTimingCurve());
+            SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal, needFlush);
+        } else {
+            SetSurfaceBounds(globalRect, isGlobal, needFlush);
+        }
         if (reason == SizeChangeReason::MOVE) {
             pcFoldScreenController_->RecordMoveRects(rect);
         }
@@ -2728,6 +2733,14 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
             auto session = weakThis.promote();
             if (session == nullptr) {
                 TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+                return;
+            }
+            if (!session->IsVisibleForeground()) {
+                TLOGNW(WmsLogTag::WMS_LAYOUT, "session go background when throw");
+                return;
+            }
+            if (!session->throwSlipFullScreenFlag_.load()) {
+                TLOGNW(WmsLogTag::WMS_LAYOUT, "session moved when throw");
                 return;
             }
             session->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_WITHOUT_ANIMATION,

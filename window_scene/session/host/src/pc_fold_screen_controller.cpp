@@ -14,6 +14,7 @@
  */
 
 #include "session/host/include/pc_fold_screen_controller.h"
+#include <parameters.h>
 #include "display_manager.h"
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
@@ -50,14 +51,14 @@ const WSRect RECT_ZERO = { 0, 0, 0, 0 };
 
 WM_IMPLEMENT_SINGLE_INSTANCE(PcFoldScreenManager);
 
-void PcFoldScreenManager::UpdateFoldScreenStatus(DisplayId displayId, ScreenFoldStatus status,
+void PcFoldScreenManager::UpdateFoldScreenStatus(DisplayId displayId, SuperFoldStatus status,
     const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect)
 {
     SetDisplayInfo(displayId, status);
     SetDisplayRects(defaultDisplayRect, virtualDisplayRect, foldCreaseRect);
 }
 
-void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, ScreenFoldStatus status)
+void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, SuperFoldStatus status)
 {
     std::unique_lock<std::shared_mutex> lock(displayInfoMutex_);
     if (displayId_ == displayId && screenFoldStatus_ == status) {
@@ -89,7 +90,7 @@ void PcFoldScreenManager::SetDisplayRects(
 bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId)
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
-    return screenFoldStatus_ == ScreenFoldStatus::HALF_FOLDED && displayId_ == displayId;
+    return screenFoldStatus_ == SuperFoldStatus::HALF_FOLDED && displayId_ == displayId;
 }
 
 float PcFoldScreenManager::GetVpr()
@@ -346,6 +347,13 @@ PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession)
 bool PcFoldScreenController::IsHalfFolded(DisplayId displayId)
 {
     return PcFoldScreenManager::GetInstance().IsHalfFolded(displayId);
+}
+
+bool PcFoldScreenController::NeedFollowHandAnimation()
+{
+    static bool needFollowHandAnimation =
+        system::GetParameter("persist.window.throw_slip_follow_animation.enabled", "0") == "1";
+    return needFollowHandAnimation;
 }
 
 void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen)

@@ -628,6 +628,7 @@ protected:
      * PC Fold Screen
      */
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
+    std::atomic_bool throwSlipFullScreenFlag_ = false;
 
     /**
      * PC Window
