@@ -8019,8 +8019,8 @@ bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& p
 {
     auto it = lastDrawingSessionInfoMap_.find(surfaceId);
     if (it != lastDrawingSessionInfoMap_.end()) {
-        pid = it->pid_;
-        uid = it->uid_;
+        pid = it->second.pid_;
+        uid = it->second.uid_;
         return true;
     }
     return false;
