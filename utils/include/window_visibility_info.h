@@ -71,7 +71,7 @@ public:
 
     WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, WindowVisibilityState visibilityState,
         WindowType winType, WindowStatus windowStatus, const Rect& rect, const std::string& bundleName,
-        const std::string& abilityName, const bool isFocused) : windowId_(winId), pid_(pid), uid_(uid),
+        const std::string& abilityName, bool isFocused) : windowId_(winId), pid_(pid), uid_(uid),
         visibilityState_(visibilityState), windowType_(winType), windowStatus_(windowStatus), rect_(rect),
         bundleName_(bundleName), abilityName_(abilityName), isFocused_(isFocused) {}
 
