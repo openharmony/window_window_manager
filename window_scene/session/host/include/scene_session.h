@@ -216,6 +216,8 @@ public:
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true) override;
+    WSError TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool needNotifyClient = true);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -594,7 +596,7 @@ protected:
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-    
+
     /*
      * Dialog window
      */
@@ -636,7 +638,7 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
-    
+
     /*
      * Window Layout
      */
