@@ -2723,7 +2723,7 @@ void SceneSessionManager::NotifyRecoveringFinished()
 }
 
 void SceneSessionManager::CacheSpecificSessionForRecovering(
-    sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property)
+    const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property)
 {
     if (!IsWindowSupportCacheForRecovering(sceneSession, property)) {
         return;
@@ -2731,8 +2731,8 @@ void SceneSessionManager::CacheSpecificSessionForRecovering(
 
     auto windowType = property->GetWindowType();
     auto parentId = property->GetParentPersistentId();
-    TLOGI(WmsLogTag::WMS_RECOVER, "Cache specificsession persistentId = %{public}" PRId32 ", parent persistentId = "
-        "%{public}" PRId32 ", window type = %{public}" PRId32 , sceneSession->GetPersistentId(), parentId, windowType);
+    TLOGI(WmsLogTag::WMS_RECOVER, "Cache specific session persistentId = %{public}d, parent persistentId = "
+        "%{public}d, window type = %{public}d", sceneSession->GetPersistentId(), parentId, windowType);
 
     if (WindowHelper::IsSubWindow(windowType)) {
         if (recoverSubSessionCacheMap_.find(parentId) == recoverSubSessionCacheMap_.end()) {
@@ -2752,7 +2752,7 @@ void SceneSessionManager::CacheSpecificSessionForRecovering(
 }
 
 bool SceneSessionManager::IsWindowSupportCacheForRecovering(
-    sptr<SceneSession> sceneSession, const sptr<WindowSessionProperty>& property)
+    const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property)
 {
     if (recoveringFinished_) {
         TLOGW(WmsLogTag::WMS_RECOVER, "recovering is finished");
@@ -2886,7 +2886,7 @@ void SceneSessionManager::SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& f
 void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
     const NotifyCreateSubSessionFunc& func)
 {
-    TLOGI(WmsLogTag::WMS_SUB, "RegisterCreateSubSessionListener, id: %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_SUB, "Id: %{public}d", persistentId);
     auto task = [this, persistentId, func]() {
         createSubSessionFuncMap_[persistentId] = func;
         RecoverCachedSubSession(persistentId);
@@ -2895,10 +2895,12 @@ void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
     taskScheduler_->PostSyncTask(task, "RegisterCreateSubSessionListener");
 }
 
-void SceneSessionManager::RegisterBindDialogTargetListener(int32_t persistentId,
+void SceneSessionManager::RegisterBindDialogTargetListener(const sptr<SceneSession>& sceneSession,
     const NotifyBindDialogSessionFunc& func)
 {
-    TLOGI(WmsLogTag::WMS_DIALOG, "RegisterBindDialogTargetListener, id: %{public}d", persistentId);
+    sceneSession->RegisterBindDialogSessionCallback(func);
+    int32_t persistentId = sceneSession->GetPersistentId();
+    TLOGI(WmsLogTag::WMS_DIALOG, "Id: %{public}d", persistentId);
     auto task = [this, persistentId, func]() {
         bindDialogTargetFuncMap_[persistentId] = func;
         RecoverCachedDialogSession(persistentId);
@@ -3032,30 +3034,17 @@ void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<Sc
         persistentId, session->GetPersistentId());
 }
 
-void SceneSessionManager::UnregisterCreateSubSessionListener(int32_t persistentId)
+void SceneSessionManager::UnregisterSpecificSessionCreateListener(int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_SUB, "UnregisterCreateSubSessionListener, id: %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_SUB, "UnregisterSpecificSessionCreateListener, id: %{public}d", persistentId);
     auto task = [this, persistentId]() {
-        auto iter = createSubSessionFuncMap_.find(persistentId);
-        if (iter != createSubSessionFuncMap_.end()) {
+        auto iter1 = createSubSessionFuncMap_.find(persistentId);
+        if (iter1 != createSubSessionFuncMap_.end()) {
             createSubSessionFuncMap_.erase(persistentId);
-        } else {
-            TLOGW(WmsLogTag::WMS_SUB, "Can't find CreateSubSessionListener, id: %{public}d", persistentId);
         }
-        return WMError::WM_OK;
-    };
-    taskScheduler_->PostSyncTask(task);
-}
-
-void SceneSessionManager::UnregisterBindDialogTargetListener(int32_t persistentId)
-{
-    TLOGI(WmsLogTag::WMS_DIALOG, "UnregisterBindDialogTargetListener, id: %{public}d", persistentId);
-    auto task = [this, persistentId]() {
-        auto iter = bindDialogTargetFuncMap_.find(persistentId);
-        if (iter != bindDialogTargetFuncMap_.end()) {
+        auto iter2 = bindDialogTargetFuncMap_.find(persistentId);
+        if (iter2 != bindDialogTargetFuncMap_.end()) {
             bindDialogTargetFuncMap_.erase(persistentId);
-        } else {
-            TLOGW(WmsLogTag::WMS_DIALOG, "Can't find BindDialogTargetListener, id: %{public}d", persistentId);
         }
         return WMError::WM_OK;
     };
@@ -3195,7 +3184,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         EraseSceneSessionAndMarkDirtyLockFree(persistentId);
         systemTopSceneSessionMap_.erase(persistentId);
         nonSystemFloatSceneSessionMap_.erase(persistentId);
-        UnregisterCreateSubSessionListener(persistentId);
+        UnregisterSpecificSessionCreateListener(persistentId);
     }
     ClearSpecificSessionRemoteObjectMap(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy specific session end, id: %{public}d", persistentId);

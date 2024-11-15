@@ -386,7 +386,7 @@ public:
     /*
      * Dialog Window
      */
-    void RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback);
+    void RegisterBindDialogSessionCallback(const NotifyBindDialogSessionFunc& callback);
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
@@ -574,7 +574,7 @@ protected:
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-    
+
     /*
      * Dialog window
      */
@@ -615,7 +615,7 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
-    
+
     /*
      * Window Layout
      */

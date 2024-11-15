@@ -5119,17 +5119,9 @@ void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientati
     PostTask(task, __func__);
 }
 
-void SceneSession::RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback)
+void SceneSession::RegisterBindDialogSessionCallback(const NotifyBindDialogSessionFunc& callback)
 {
-    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return;
-        }
-        session->onBindDialogTarget_ = std::move(callback);
-    };
-    PostTask(task, __func__);
+    onBindDialogTarget_ = callback;
 }
 
 void SceneSession::RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback)
