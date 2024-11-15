@@ -1997,6 +1997,27 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
     }
 }
 
+void SessionProxy::NotifyExtensionDetachToDisplay()
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: UIExtcalled");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: WriteInterfaceToken failed");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    auto ret = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY), data, reply, option);
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: SendRequest failed");
+    }
+}
+
 WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
 {
     MessageParcel data;
