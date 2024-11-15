@@ -803,10 +803,19 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
     uiParam.rect_ = {0, 0, 1, 1};
 
     sceneSession->winRect_ = {0, 0, 1, 1};
-    ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+    sceneSession->clientRect_ = {0, 0, 1, 1};
+    ASSERT_FALSE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     sceneSession->winRect_ = {1, 1, 1, 1};
-    ASSERT_EQ(true, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+    ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    sceneSession->winRect_ = {0, 0, 1, 1};
+    sceneSession->clientRect_ = {1, 1, 1, 1};
+    ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    sceneSession->winRect_ = {1, 1, 1, 1};
+    sceneSession->clientRect_ = {1, 1, 1, 1};
+    ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     uiParam.rect_ = {0, 0, 1, 0};
     ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));

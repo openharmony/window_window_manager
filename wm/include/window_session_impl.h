@@ -426,6 +426,11 @@ protected:
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
 
+    /*
+     * Window Immersive
+     */
+    uint32_t GetStatusBarHeight() override;
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);

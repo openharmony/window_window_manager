@@ -198,6 +198,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return nullptr;
     }
+    WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId,
+        const AppExecFwk::ElementName& element, int32_t& pid) override
+    {
+        return WMError::WM_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -710,7 +715,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowManagerAgent, Func
     data.WriteUint32(static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS));
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
-    EXPECT_EQ(ERR_INVALID_DATA, res);
+    EXPECT_EQ(ERR_NONE, res);
 
     data.WriteUint32(-100);
     res = sceneSessionManagerLiteStub_->
@@ -740,7 +745,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnregisterWindowManagerAgent, Fu
     data.WriteUint32(static_cast<uint32_t>(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS));
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(data, reply);
-    EXPECT_EQ(ERR_INVALID_DATA, res);
+    EXPECT_EQ(ERR_NONE, res);
 
     data.WriteUint32(-100);
     res = sceneSessionManagerLiteStub_->

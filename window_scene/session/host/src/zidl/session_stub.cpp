@@ -222,6 +222,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleMainSessionModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE):
             return HandleSetWindowRectAutoSave(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY):
+            return HandleNotifyExtensionDetachToDisplay(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -704,12 +706,12 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
 int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    Rect tempRect;
-    WMError errorCode = GetGlobalScaledRect(tempRect);
-    reply.WriteInt32(tempRect.posX_);
-    reply.WriteInt32(tempRect.posY_);
-    reply.WriteUint32(tempRect.width_);
-    reply.WriteUint32(tempRect.height_);
+    Rect globalScaledRect;
+    WMError errorCode = GetGlobalScaledRect(globalScaledRect);
+    reply.WriteInt32(globalScaledRect.posX_);
+    reply.WriteInt32(globalScaledRect.posY_);
+    reply.WriteUint32(globalScaledRect.width_);
+    reply.WriteUint32(globalScaledRect.height_);
     reply.WriteInt32(static_cast<int32_t>(errorCode));
     return ERR_NONE;
 }
@@ -1199,6 +1201,13 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     bool isEnabled = data.ReadBool();
     WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel &data, MessageParcel &reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    NotifyExtensionDetachToDisplay();
     return ERR_NONE;
 }
 
