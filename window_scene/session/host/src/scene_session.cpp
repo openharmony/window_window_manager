@@ -5061,6 +5061,7 @@ WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
             TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return;
         }
+        session->SetClientDragEnable(enableDrag);
         TLOGNI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enableDrag: %{public}d",
             session->GetPersistentId(), enableDrag);
         auto sessionProperty = session->GetSessionProperty();
@@ -5069,7 +5070,9 @@ WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
             return;
         }
         sessionProperty->SetDragEnabled(enableDrag);
-        session->SetClientDragEnable(enableDrag);
+        if (session->sessionStage_) {
+            session->sessionStage_->SetEnableDragBySystem(enableDrag);
+        }
     };
     PostTask(task, __func__);
     return WMError::WM_OK;
