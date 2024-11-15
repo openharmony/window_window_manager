@@ -63,8 +63,8 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<J
     return ret;
 }
 
-WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(const sptr<JsExtensionWindowListener>& listener,
-    const sptr<Window>& window, bool isRegister)
+WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Window is nullptr");
