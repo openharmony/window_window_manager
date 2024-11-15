@@ -101,6 +101,7 @@ public:
     virtual void OnRemoveBlank() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnExtensionDied() {}
+    virtual void OnExtensionDetachToDisplay() {}
     virtual void OnExtensionTimeout(int32_t errorCode) {}
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
@@ -167,6 +168,7 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
+    void NotifyExtensionDetachToDisplay() override;
 
     /**
      * Cross Display Move Drag
@@ -662,6 +664,15 @@ protected:
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
+
+    /**
+     * Window Layout
+     */
+    float clientScaleX_ = 1.0f;
+    float clientScaleY_ = 1.0f;
+    float clientPivotX_ = 0.0f;
+    float clientPivotY_ = 0.0f;
+    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
 
     /**
      * Window ZOrder

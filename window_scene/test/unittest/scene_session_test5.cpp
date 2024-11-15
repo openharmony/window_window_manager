@@ -1715,6 +1715,7 @@ HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect01, Function | SmallTest | L
     EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), true);
     EXPECT_EQ(session->GetSessionRect(), uiParam.rect_);
 
+    session->clientRect_ = session->winRect_;
     EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // skip same rect
 }
 }

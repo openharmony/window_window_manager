@@ -471,6 +471,23 @@ void Session::NotifyTransferAccessibilityEvent(const Accessibility::Accessibilit
     }
 }
 
+void Session::NotifyExtensionDetachToDisplay()
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
+        return;
+    }
+
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto &listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnExtensionDetachToDisplay();
+        }
+    }
+
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+}
+
 float Session::GetAspectRatio() const
 {
     return aspectRatio_;
@@ -2753,10 +2770,10 @@ WSRect Session::GetSessionRect() const
 /** @note @window.layout */
 WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
 {
-    auto task = [weakThis = wptr(this), &globalScaledRect]() {
+    auto task = [weakThis = wptr(this), &globalScaledRect] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
         WSRect scaledRect = session->GetSessionGlobalRect();
@@ -2767,7 +2784,7 @@ WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
             session->GetPersistentId(), globalScaledRect.ToString().c_str());
         return WMError::WM_OK;
     };
-    return PostSyncTask(task, "GetGlobalScaledRect");
+    return PostSyncTask(task, __func__);
 }
 
 /** @note @window.layout */
@@ -3248,6 +3265,16 @@ void Session::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)
     scaleY_ = scaleY;
     pivotX_ = pivotX;
     pivotY_ = pivotY;
+}
+
+void Session::SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, preScaleX:%{public}f, preScaleY:%{public}f, "
+        "newScaleX:%{public}f, newScaleY:%{public}f", GetPersistentId(), clientScaleX_, clientScaleY_, scaleX, scaleY);
+    clientScaleX_ = scaleX;
+    clientScaleY_ = scaleY;
+    clientPivotX_ = pivotX;
+    clientPivotY_ = pivotY;
 }
 
 float Session::GetScaleX() const

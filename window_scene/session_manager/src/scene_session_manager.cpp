@@ -183,6 +183,46 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
     return false;
 }
 
+bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName &element, uint32_t callingTokenId)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT,
+        "UIExtOnLock: boundName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
+        element.GetBundleName().c_str(),
+        element.GetModuleName().c_str(),
+        element.GetAbilityName().c_str());
+
+    const std::vector<std::tuple<std::string, std::string, std::string>> whitelist = {
+        std::make_tuple("com.huawei.hmos.settings", "AccessibilityReConfirmDialog", "phone_settings"),
+        std::make_tuple("com.huawei.hmos.settings", "AccessibilityShortKeyDialog", "phone_settings"),
+        std::make_tuple("com.huawei.hmos.settings", "DefaultIntentUiExtensionAbility", "phone_settings"),
+        std::make_tuple("com.ohos.sceneboard", "ScbIntentUIExtensionAbility", "phone_sceneboard"),
+        std::make_tuple("com.huawei.hmos.motiongesture", "IntentUIExtensionAbility", "entry"),
+    };
+
+    auto itr = std::find_if(whitelist.begin(), whitelist.end(), [element](const auto &item) {
+        auto [bundleName, abilityName, moduleName] = item;
+        if (element.GetBundleName() != bundleName) {
+            return false;
+        }
+        if (element.GetAbilityName() != abilityName) {
+            return false;
+        }
+        return true;
+    });
+
+    if (itr != whitelist.end()) {
+        return true;
+    }
+
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in white list");
+    if (SessionPermission::VerifyPermissionByCallerToken(
+            callingTokenId, PermissionConstants::PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN)) {
+        return true;
+    }
+
+    return false;
+}
+
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
     BundleStatusCallback() = default;
@@ -1422,6 +1462,71 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
     return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
+uint32_t SceneSessionManager::GetLockScreenZorder()
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (auto &[sessionId, session] : sceneSessionMap_) {
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d: ", sessionId);
+            return session->GetZOrder();
+        }
+    }
+    TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not found");
+    return 0;
+}
+
+WMError SceneSessionManager::CheckUIExtensionCreation(
+    int32_t windowId, uint32_t callingTokenId, const AppExecFwk::ElementName &element, int32_t &pid)
+{
+    auto task = [this, windowId, &pid, &callingTokenId, element]() -> WMError {
+        pid = INVALID_PID;
+        auto sceneSession = GetSceneSession(windowId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: sceneSession(%{public}d) is nullptr", windowId);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        pid = sceneSession->GetCallingPid();
+
+        // 1. check window whether can show on main window
+        if (!sceneSession->IsShowOnLockScreen(GetLockScreenZorder())) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not called on lock screen");
+            return WMError::WM_OK;
+        }
+
+        // 2. check permission
+        if (!IsUIExtCanShowOnLockScreen(element, callingTokenId)) {
+            TLOGE(WmsLogTag::WMS_UIEXT,
+                "UIExtOnLock: no permisson, window id %{public}d, %{public}d",
+                windowId,
+                callingTokenId);
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
+
+        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
+        return WMError::WM_OK;
+    };
+
+    std::stringstream ss;
+    ss << "UIExtOnLockCheck"
+       << "_" << windowId << "_" << callingTokenId;
+    return taskScheduler_->PostSyncTask(task, ss.str());
+}
+
+// windowIds are all main window
+void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t> &windowIds)
+{
+    // check every window
+    for (auto windowId : windowIds) {
+        auto sceneSession = GetSceneSession(windowId);
+        if (!sceneSession) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: sesssion is null for %{public}d", windowId);
+            continue;
+        }
+        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: check for %{public}d", windowId);
+        sceneSession->OnNotifyAboveLockScreen();
+    }
+}
+
 void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession)
 {
     if (!isKeyboardPanelEnabled_) {
@@ -2370,7 +2475,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
 
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         WSError err = CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage);
         if (err != WSError::WS_OK) {
             return err;
@@ -2438,26 +2543,52 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
 {
     sptr<SceneSession> extensionParentSession = GetSceneSession(property->GetParentPersistentId());
     if (extensionParentSession == nullptr) {
-        WLOGFE("extensionParentSession is invalid with %{public}d", property->GetParentPersistentId());
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionParentSession is invalid with %{public}d", 
+            property->GetParentPersistentId());
         return WSError::WS_ERROR_NULLPTR;
+    }
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    auto parentPid = extensionParentSession->GetCallingPid();
+    WSError result = WSError::WS_ERROR_INVALID_WINDOW;
+    if (pid == parentPid) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "pid == parentPid");
+        result = WSError::WS_OK;
+    }
+    AAFwk::UIExtensionSessionInfo info;
+    AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
+     if (info.persistentId != INVALID_SESSION_ID && info.hostWindowId != INVALID_SESSION_ID) {
+        int32_t parentId = static_cast<int32_t>(info.hostWindowId);
+        if (parentId == property->GetParentPersistentId()) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "parentId == property->GetParentPersistentId(parentId:%{public}d)", parentId);
+            result = WSError::WS_OK;
+        }
+    }
+    if (SessionPermission::IsSystemCalling()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "is system app");
+        result = WSError::WS_OK;
     }
     if (property->GetIsUIExtensionAbilityProcess() && SessionPermission::IsStartedByUIExtension()) {
         SessionInfo sessionInfo = extensionParentSession->GetSessionInfo();
         AAFwk::UIExtensionHostInfo hostInfo;
         AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
         if (sessionInfo.bundleName_ != hostInfo.elementName_.GetBundleName()) {
-            WLOGE("The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s, "
-                "hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
+            TLOGE(WmsLogTag::WMS_UIEXT, "The hostWindow is not this parentwindow ! parentwindow bundleName: %{public}s,"
+                " hostwindow bundleName: %{public}s", sessionInfo.bundleName_.c_str(),
                 hostInfo.elementName_.GetBundleName().c_str());
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
+        result = WSError::WS_OK;
     }
-    sptr<WindowSessionProperty> parentProperty = extensionParentSession->GetSessionProperty();
-    if (sessionStage && parentProperty) {
-        sessionStage->UpdateDisplayId(parentProperty->GetDisplayId());
-        property->SetDisplayId(parentProperty->GetDisplayId());
+    if (result == WSError::WS_OK) {
+        sptr<WindowSessionProperty> parentProperty = extensionParentSession->GetSessionProperty();
+        if (sessionStage && parentProperty && property->GetIsUIExtFirstSubWindow()) {
+            sessionStage->UpdateDisplayId(parentProperty->GetDisplayId());
+            property->SetDisplayId(parentProperty->GetDisplayId());
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "can't create sub window: persistentId %{public}d", property->GetPersistentId());
     }
-    return WSError::WS_OK;
+    return result;
 }
 
 void SceneSessionManager::ClosePipWindowIfExist(WindowType type)
@@ -3049,7 +3180,7 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
                 continue;
             }
             auto sessionId = sceneSession->GetPersistentId();
-            if ((!sceneSession->CheckOutTouchOutsideRegister()) &&
+            if (!sceneSession->CheckTouchOutsideCallbackRegistered() &&
                 (touchOutsideListenerSessionSet_.find(sessionId) == touchOutsideListenerSessionSet_.end())) {
                 WLOGFD("id: %{public}d is not in touchOutsideListenerNodes, don't notify.", sessionId);
                 continue;
@@ -3864,7 +3995,7 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
             return;
         }
         bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession);
-        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d], %{public}d], %{public}d]",
+        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d, %{public}d, %{public}d]",
             sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(),
             sceneSession->IsVisible(), requireLock, shouldLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
@@ -3938,7 +4069,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
         SetDisplayBrightness(brightness);
     }
     if (!postTaskRet) {
-        TLOGI(WmsLogTag::DEFAULT, "Report post listener callback task failed. the task name is SetBrightness");
+        TLOGE(WmsLogTag::DEFAULT, "post task failed. task is SetBrightness");
     }
 }
 
@@ -7855,21 +7986,30 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
     drawingContentChangeInfo)
 {
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContenInfos;
-    for (const auto& elem : drawingContentChangeInfo) {
-        uint64_t surfaceId = elem.first;
-        bool drawingState = elem.second;
+    for (const auto& [surfaceId, drawingState] : drawingContentChangeInfo) {
+        int32_t windowId = 0;
+        int32_t pid = 0;
+        int32_t uid = 0;
+        WindowType type = WindowType::APP_WINDOW_BASE;
         sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
         if (session == nullptr) {
-            continue;
+            if (!GetSpecifiedDrawingData(surfaceId, pid, uid)) {
+                continue;
+            }
+            RemoveSpecifiedDrawingData(surfaceId);
+        } else {
+            windowId = session->GetWindowId();
+            pid = session->GetCallingPid();
+            uid = session->GetCallingUid();
+            type = session->GetWindowType();
         }
-        windowDrawingContenInfos.emplace_back(new WindowDrawingContentInfo(session->GetWindowId(),
-            session->GetCallingPid(), session->GetCallingUid(), drawingState, session->GetWindowType()));
+        windowDrawingContenInfos.emplace_back(new WindowDrawingContentInfo(windowId, pid, uid, drawingState, type));
         if (openDebugTrace_) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Drawing status changed pid:(%d ) surfaceId:(%" PRIu64 ")"
-                "drawingState:(%d )", session->GetCallingPid(), surfaceId, drawingState);
+                "drawingState:(%d )", pid, surfaceId, drawingState);
         }
         WLOGFD("drawing status changed pid:%{public}d, "
-            "surfaceId:%{public}" PRIu64 ", drawingState:%{public}d", session->GetCallingPid(), surfaceId, drawingState);
+            "surfaceId:%{public}" PRIu64 ", drawingState:%{public}d", pid, surfaceId, drawingState);
     }
     if (windowDrawingContenInfos.size() != 0) {
         WLOGFD("Notify WindowDrawingContenInfo changed start");
@@ -7877,44 +8017,66 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
     }
 }
 
+bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid)
+{
+    auto it = std::find_if(lastDrawingSessionInfoVec_.begin(), lastDrawingSessionInfoVec_.end(),
+        [surfaceId](const DrawingSessionInfo& info) { return info.surfaceId_ == surfaceId; });
+    if (it != lastDrawingSessionInfoVec_.end()) {
+        pid = it->pid_;
+        uid = it->uid_;
+        return true;
+    }
+    return false;
+}
+
+void SceneSessionManager::RemoveSpecifiedDrawingData(uint64_t surfaceId)
+{
+    auto it = std::find_if(lastDrawingSessionInfoVec_.begin(), lastDrawingSessionInfoVec_.end(),
+        [surfaceId](const DrawingSessionInfo& info) { return info.surfaceId_ == surfaceId; });
+    if (it != lastDrawingSessionInfoVec_.end()) {
+        lastDrawingSessionInfoVec_.erase(it);
+    }
+}
+
 std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingContentChangeInfo(
-    std::vector<std::pair<uint64_t, bool>> currDrawingContentData)
+    const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData)
 {
     std::vector<std::pair<uint64_t, bool>> processDrawingContentChangeInfo;
-    for (const auto& data : currDrawingContentData) {
-        uint64_t windowId = data.first;
-        bool currentDrawingContentState = data.second;
+    for (const auto& [surfaceId, isWindowDrawing] : currDrawingContentData) {
         int32_t pid = 0;
-        bool isChange = false;
-        if (GetPreWindowDrawingState(windowId, pid, currentDrawingContentState) == currentDrawingContentState) {
-            continue;
-        } else {
-            isChange = GetProcessDrawingState(windowId, pid, currentDrawingContentState);
-        }
-
-        if (isChange) {
-            processDrawingContentChangeInfo.emplace_back(windowId, currentDrawingContentState);
+        bool isPreWindowDrawing = GetPreWindowDrawingState(surfaceId, isWindowDrawing, pid);
+        bool isProcessDrawingStateChanged = GetProcessDrawingState(surfaceId, pid);
+        sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
+        bool isDrawingStateChanged =
+            session == nullptr || (isPreWindowDrawing != isWindowDrawing && isProcessDrawingStateChanged);
+        if (isDrawingStateChanged) {
+            processDrawingContentChangeInfo.emplace_back(surfaceId, isWindowDrawing);
         }
     }
     return processDrawingContentChangeInfo;
 }
 
-bool SceneSessionManager::GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState)
+bool SceneSessionManager::GetPreWindowDrawingState(uint64_t surfaceId, bool currentWindowDrawing, int32_t& pid)
 {
-    bool preWindowDrawingState = true;
-    sptr<SceneSession> session = SelectSesssionFromMap(windowId);
+    sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
     if (session == nullptr) {
         return false;
     }
     pid = session->GetCallingPid();
-    preWindowDrawingState = session->GetDrawingContentState();
-    session->SetDrawingContentState(currentDrawingContentState);
-    return preWindowDrawingState;
+    bool preWindowDrawing = session->GetDrawingContentState();
+    session->SetDrawingContentState(currentWindowDrawing);
+    UpdateWindowDrawingData(surfaceId, pid, session->GetCallingUid());
+    return preWindowDrawing;
 }
 
-bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState)
+void SceneSessionManager::UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid)
 {
-    bool isChange = true;
+    RemoveSpecifiedDrawingData(surfaceId);
+    lastDrawingSessionInfoVec_.push_back({ surfaceId, pid, uid });
+}
+
+bool SceneSessionManager::GetProcessDrawingState(uint64_t surfaceId, int32_t pid)
+{
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& item : sceneSessionMap_) {
         auto sceneSession = item.second;
@@ -7922,15 +8084,14 @@ bool SceneSessionManager::GetProcessDrawingState(uint64_t windowId, int32_t pid,
             continue;
         }
         if (sceneSession->GetCallingPid() == pid && sceneSession->GetSurfaceNode() != nullptr &&
-            windowId != sceneSession->GetSurfaceNode()->GetId()) {
-                if (sceneSession->GetDrawingContentState()) {
-                    return false;
-                }
+            surfaceId != sceneSession->GetSurfaceNode()->GetId()) {
+            if (sceneSession->GetDrawingContentState()) {
+                return false;
             }
         }
-    return isChange;
+    }
+    return true;
 }
-
 
 void SceneSessionManager::InitWithRenderServiceAdded()
 {
@@ -8871,7 +9032,7 @@ bool SceneSessionManager::IsSessionClearable(sptr<SceneSession> sceneSession)
         WLOGFI("sceneSession abilityInfo is nullptr");
         return false;
     }
-    if (sessionInfo.abilityInfo->excludeFromMissions) {
+    if (sessionInfo.abilityInfo->excludeFromMissions && !sceneSession->IsAnco()) {
         WLOGFI("persistentId %{public}d is excludeFromMissions", sceneSession->GetPersistentId());
         return false;
     }
@@ -9869,7 +10030,9 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
         }
         int32_t persistentId = INVALID_SESSION_ID;
         int32_t parentId = INVALID_SESSION_ID;
-        if (!GetExtensionWindowIds(iter->second, persistentId, parentId)) {
+
+        auto abilityToken = iter->second;
+        if (!GetExtensionWindowIds(abilityToken, persistentId, parentId)) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
         }
@@ -9891,6 +10054,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             }
             sceneSession->RemoveModalUIExtension(persistentId);
             sceneSession->RemoveUIExtSurfaceNodeId(persistentId);
+            sceneSession->RemoveExtensionTokenInfo(abilityToken);
         } else {
             ExtensionWindowFlags actions;
             actions.SetAllActive();
@@ -9958,7 +10122,9 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
     const sptr<IRemoteObject>& token, uint64_t surfaceNodeId)
 {
     auto pid = IPCSkeleton::GetCallingRealPid();
-    auto task = [this, sessionStage, token, surfaceNodeId, pid]() {
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+
+    auto task = [this, sessionStage, token, surfaceNodeId, pid, callingTokenId]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
             return;
@@ -10005,6 +10171,12 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
             };
             parentSession->AddModalUIExtension(extensionInfo);
         }
+
+        SceneSession::UIExtensionTokenInfo tokenInfo;
+        tokenInfo.abilityToken = token;
+        tokenInfo.callingTokenId = callingTokenId;
+        tokenInfo.canShowOnLockScreen = IsUIExtCanShowOnLockScreen(info.elementName, callingTokenId);
+        parentSession->AddExtensionTokenInfo(tokenInfo);
     };
     taskScheduler_->PostAsyncTask(task, "AddExtensionWindowStageToSCB");
 }

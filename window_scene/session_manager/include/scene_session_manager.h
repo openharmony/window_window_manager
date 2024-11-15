@@ -352,7 +352,6 @@ public:
     void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
     void SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds);
     void NotifyRecoveringFinished();
-
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
@@ -388,7 +387,6 @@ public:
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
     const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
-    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingChangeInfos);
     void NotifyUpdateRectAfterLayout();
     void FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams);
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
@@ -404,6 +402,16 @@ public:
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     int32_t ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSessions, bool visibility);
+
+    /*
+     * UIExtension
+     */
+    uint32_t GetLockScreenZorder();
+    WMError CheckUIExtensionCreation(int32_t windowId,
+                                     uint32_t tokenId,
+                                     const AppExecFwk::ElementName& element,
+                                     int32_t& pid);
+    void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override;
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
@@ -429,6 +437,12 @@ public:
     std::shared_ptr<TaskScheduler> GetTaskScheduler() { return taskScheduler_; }
 
     int32_t GetCustomDecorHeight(int32_t persistentId);
+
+    /*
+     * Window Property
+     */
+    WMError ReleaseForegroundSessionScreenLock() override;
+    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
 
     /*
      * Free Multi Window
@@ -484,17 +498,12 @@ public:
         const std::vector<std::string>& bundleNameList) override;
 
     /*
-     * Multi instance
+     * Multi Instance
      */
     int32_t GetMaxInstanceCount(const std::string& bundleName);
     int32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     void RefreshAppInfo(const std::string& bundleName);
-
-    /*
-     * Window Property
-     */
-    WMError ReleaseForegroundSessionScreenLock() override;
 
     /*
      * PiP Window
@@ -674,8 +683,6 @@ private:
         const sptr<SceneSession>& sceneSession);
     std::vector<std::pair<uint64_t, WindowVisibilityState>> GetWindowVisibilityChangeInfo(
         std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
-    std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
-        std::vector<std::pair<uint64_t, bool>> currDrawingContentData);
     void GetWindowLayerChangeInfo(std::shared_ptr<RSOcclusionData> occlusionData,
         std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData,
         std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
@@ -686,6 +693,17 @@ private:
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
 
+    /*
+     * Window Property
+     */
+    std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
+        const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
+    bool GetPreWindowDrawingState(uint64_t surfaceId, bool currentWindowDrawing, int32_t& pid);
+    bool GetProcessDrawingState(uint64_t surfaceId, int32_t pid);
+    void UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid);
+    bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
+    void RemoveSpecifiedDrawingData(uint64_t surfaceId);
+    
     /*
      * Window Rotate Animation
      */
@@ -921,8 +939,6 @@ private:
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
-    bool GetPreWindowDrawingState(uint64_t windowId, int32_t& pid, bool currentDrawingContentState);
-    bool GetProcessDrawingState(uint64_t windowId, int32_t pid, bool currentDrawingContentState);
     void ClearSpecificSessionRemoteObjectMap(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
@@ -979,7 +995,7 @@ private:
     std::unordered_set<int32_t> snapshotSkipPidSet_ GUARDED_BY(SCENE_GUARD); // ONLY Accessed on OS_sceneSession thread
     std::unordered_set<std::string> snapshotSkipBundleNameSet_ GUARDED_BY(SCENE_GUARD);
 
-    int32_t sessionMapDirty_ { 0 };
+    uint32_t sessionMapDirty_ { 0 };
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
@@ -1038,6 +1054,16 @@ private:
         }
     };
     std::unordered_map<SessionInfoList, std::shared_ptr<AppExecFwk::AbilityInfo>, SessionHasher> abilityInfoMap_;
+
+    /*
+     * Window Property
+     */
+    struct DrawingSessionInfo {
+        uint64_t surfaceId_ = 0;
+        int32_t pid_ = 0;
+        int32_t uid_ = 0;
+    };
+    std::vector<DrawingSessionInfo> lastDrawingSessionInfoVec_;
 
     /**
      * PC Window

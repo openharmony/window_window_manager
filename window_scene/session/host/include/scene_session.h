@@ -98,6 +98,12 @@ using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
 class SceneSession : public Session {
 public:
+    struct UIExtensionTokenInfo {
+        bool canShowOnLockScreen{false};
+        uint32_t callingTokenId{0};
+        sptr<IRemoteObject> abilityToken;
+    };
+
     friend class HidumpController;
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
@@ -128,7 +134,6 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
     };
 
@@ -176,7 +181,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
-    WSError OnSessionEvent(SessionEvent event, SessionEventParam param);
+    WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param);
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
@@ -261,6 +266,7 @@ public:
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
+    void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
     WSError SetDefaultRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
@@ -366,7 +372,7 @@ public:
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void NotifyTouchOutside();
-    bool CheckOutTouchOutsideRegister();
+    bool CheckTouchOutsideCallbackRegistered();
     void UpdateNativeVisibility(bool visible);
     void DumpSessionElementInfo(const std::vector<std::string>& params);
     void NotifyForceHideChange(bool hide);
@@ -391,6 +397,11 @@ public:
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
+    /*
+     * Window Input Event
+     */
+    void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
+
     /**
      * Window Rotation
      */
@@ -405,6 +416,10 @@ public:
      * Window Visibility
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
+    virtual WSError HideSync()
+    {
+        return WSError::WS_DO_NOTHING;
+    };
 
     /**
      * Window Lifecycle
@@ -456,6 +471,15 @@ public:
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
+    /**
+     * UIExtension
+     */
+    bool IsShowOnLockScreen(uint32_t lockScreenZOrder);
+    void AddExtensionTokenInfo(const SceneSession::UIExtensionTokenInfo &tokenInfo);
+    void RemoveExtensionTokenInfo(sptr<IRemoteObject> abilityToken);
+    void CheckExtensionOnLockScreenToClose();
+    void CloseExtensionSync(const SceneSession::UIExtensionTokenInfo& tokenInfo);
+    void OnNotifyAboveLockScreen();
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
     bool HasModalUIExtension();
@@ -551,6 +575,7 @@ protected:
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
+    bool IsTransformNeedChange(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
 
@@ -601,7 +626,7 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
 
     /*
-     * pc fold screen
+     * PC Fold Screen
      */
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
 
@@ -668,12 +693,6 @@ private:
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
-    void SetSurfaceBoundsWithAnimation(
-        std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve> animationParam,
-        const WSRect& rect, std::function<void()>&& finishCallback = nullptr,
-        bool isGlobal = false, bool needFlush = true
-    );
-    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
@@ -767,10 +786,16 @@ private:
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
+
+    /**
+     * UIExtension
+     */
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+    mutable std::recursive_mutex extensionTokenInfosMutex_;
+    std::vector<UIExtensionTokenInfo> extensionTokenInfos_;
 
     /**
      * Window Decor
@@ -830,6 +855,11 @@ private:
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 
     /*
+     * Window Input Event
+     */
+    NotifyTouchOutsideFunc onTouchOutside_;
+
+    /*
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
@@ -842,6 +872,11 @@ private:
     /**
      * Window Layout
      */
+    void SetSurfaceBoundsWithAnimation(
+        const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
+        const WSRect& rect, const std::function<void()>& finishCallback = nullptr,
+        bool isGlobal = false, bool needFlush = true);
+    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
 
     /**

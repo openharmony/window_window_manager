@@ -103,7 +103,7 @@ public:
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
-    
+
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError OnMainSessionModalTypeChange(bool isModal) override;
     
