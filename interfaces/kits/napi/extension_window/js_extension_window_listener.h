@@ -43,7 +43,7 @@ public:
     ~JsExtensionWindowListener();
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    void OnRectChange(const Rect& rect, WindowSizeChangeReason reason) override;
+    void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnModeChange(WindowMode mode, bool hasDeco) override;
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
     void AfterForeground() override;

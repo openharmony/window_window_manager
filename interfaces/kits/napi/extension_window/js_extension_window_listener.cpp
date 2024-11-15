@@ -116,7 +116,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
     currRect_ = rect;
 }
 
-void JsExtensionWindowListener::OnRectChange(const Rect& rect, WindowSizeChangeReason reason)
+void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
     if (currRect_ == rect && reason == WindowSizeChangeReason::UNDEFINED) {
         TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]Skip redundant rect update");
