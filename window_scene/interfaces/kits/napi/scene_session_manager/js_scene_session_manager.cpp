@@ -3635,7 +3635,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    ScreenFoldStatus status = static_cast<ScreenFoldStatus>(statusNum);
+    SuperFoldStatus status = static_cast<SuperFoldStatus>(statusNum);
 
     WSRect defaultDisplayRect;
     if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], defaultDisplayRect)) {
