@@ -135,7 +135,7 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::OnRectChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]This listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "[NAPI]This listener or env is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;
@@ -143,12 +143,12 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to create js object");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to create js object");
             return;
         }
         napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
         if (rectObjValue == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to create rect js object");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to create rect js object");
             return;
         }
         napi_set_named_property(env, objValue, "rect", rectObjValue);
