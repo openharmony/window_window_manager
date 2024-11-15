@@ -352,7 +352,6 @@ public:
     void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
     void SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds);
     void NotifyRecoveringFinished();
-
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
@@ -403,6 +402,16 @@ public:
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     int32_t ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSessions, bool visibility);
+
+    /*
+     * UIExtension
+     */
+    uint32_t GetLockScreenZorder();
+    WMError CheckUIExtensionCreation(int32_t windowId,
+                                     uint32_t tokenId,
+                                     const AppExecFwk::ElementName& element,
+                                     int32_t& pid);
+    void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override;
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,

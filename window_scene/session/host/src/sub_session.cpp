@@ -70,6 +70,16 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SubSession::Hide()
 {
+    return Hide(false);  // async mode
+}
+
+WSError SubSession::HideSync()
+{
+    return Hide(true);  // sync mode
+}
+
+WSError SubSession::Hide(bool needSyncHide)
+{
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
@@ -95,7 +105,12 @@ WSError SubSession::Hide()
         ret = session->SceneSession::Background();
         return ret;
     };
-    PostTask(task, "Hide");
+
+    if (needSyncHide) {
+        return PostSyncTask(task, "HideSync");
+    }
+
+    PostTask(task, "HideAsync");
     return WSError::WS_OK;
 }
 
