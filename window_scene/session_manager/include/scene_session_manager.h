@@ -958,6 +958,7 @@ private:
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
+    sptr<SceneSession> RequestKeyboardPanelSession(std::string& panelName, uint64_t displayId);
 
     /*
      * Specific Window

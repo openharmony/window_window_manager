@@ -1713,6 +1713,29 @@ HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect01, Function | SmallTest | L
     session->clientRect_ = session->winRect_;
     EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // skip same rect
 }
+
+/**
+ * @tc.name: SetAndIsSystemKeyboard
+ * @tc.desc: test SetIsSystemKeyboard and IsSystemKeyboard func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetAndIsSystemKeyboard, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAndIsSystemKeyboard";
+    info.bundleName_ = "SetAndIsSystemKeyboard";
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, session);
+
+    ASSERT_EQ(false, session->IsSystemKeyboard());
+    session->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, session->IsSystemKeyboard());
+
+    WSError ret = session->SetSessionProperty(nullptr);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    session->SetIsSystemKeyboard(true);
+    ASSERT_EQ(false, session->IsSystemKeyboard());
+}
 }
 }
 }

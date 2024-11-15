@@ -428,7 +428,9 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
         newRect.posY_ = std::max(keyboardPanelRect.posY_ - newRect.height_, statusHeight);
         newRect.posY_ = std::min(oriPosYBeforeRaisedByKeyboard, newRect.posY_);
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
-        callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+        if (!IsSystemKeyboard()) {
+            callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+        }
     } else {
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
     }
@@ -457,7 +459,9 @@ void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>
         }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "oriPosYBeforeRaisedByKeyboard: %{public}d, sessionMode: %{public}d",
             oriPosYBeforeRaisedByKeyboard, callingSession->GetWindowMode());
-        callingSession->UpdateSessionRect(callingSessionRestoringRect, SizeChangeReason::UNDEFINED);
+        if (!IsSystemKeyboard()) {
+            callingSession->UpdateSessionRect(callingSessionRestoringRect, SizeChangeReason::UNDEFINED);
+        }
     }
     callingSession->SetOriPosYBeforeRaisedByKeyboard(0); // 0: default value
 }
