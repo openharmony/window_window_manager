@@ -1106,7 +1106,10 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
-        property->SetDragEnabled(sessionProperty->GetDragEnabled());
+        std::optional<bool> clientDragEnable = GetClientDragEnable();
+        if (clientDragEnable.has_value()) {
+            property->SetDragEnabled(clientDragEnable.value());
+        }
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
@@ -1383,6 +1386,16 @@ void Session::SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFu
         TLOGNI(WmsLogTag::WMS_DIALOG, "%{public}s id: %{public}d", where, session->GetPersistentId());
     };
     PostTask(task, __func__);
+}
+
+void Session::SetClientDragEnable(bool dragEnable)
+{
+    clientDragEnable_ = dragEnable;
+}
+
+std::optional<bool> Session::GetClientDragEnable() const
+{
+    return clientDragEnable_;
 }
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
