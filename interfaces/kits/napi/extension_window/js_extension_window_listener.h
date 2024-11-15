@@ -26,8 +26,8 @@
 #include "window.h"
 #include "window_manager.h"
 #include "wm_common.h"
-#include "js_window_utils.h"
 #include "js_extension_window_utils.h"
+#include "js_window_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -43,7 +43,7 @@ public:
     ~JsExtensionWindowListener();
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+    void OnRectChange(const Rect& rect, WindowSizeChangeReason reason) override;
     void OnModeChange(WindowMode mode, bool hasDeco) override;
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
     void AfterForeground() override;
@@ -59,8 +59,8 @@ public:
     void SetMainEventHandler();
 
 private:
-    Rect currRect_ = {};
-    RectChangeReason currentReason_ = RectChangeReason::UNDEFINED;
+    Rect currRect_;
+    RectChangeReason currentRectChangeReason_ = RectChangeReason::UNDEFINED;
     napi_env env_ = nullptr;
     WindowState state_ {WindowState::STATE_INITIAL};
     std::shared_ptr<NativeReference> jsCallBack_;
