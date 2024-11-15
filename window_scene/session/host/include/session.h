@@ -134,6 +134,9 @@ public:
     void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
         const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler = nullptr);
 
+    /**
+     * Window LifeCycle
+     */
     virtual WSError ConnectInner(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
@@ -150,9 +153,21 @@ public:
     WSError DrawingCompleted() override;
     void ResetSessionConnectState();
     void ResetIsActive();
-
+    WSError PendingSessionToForeground();
+    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
+    void SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func);
+    void SetTerminateSessionListener(NotifyTerminateSessionFunc&& func);
+    void SetTerminateSessionListenerNew(NotifyTerminateSessionFuncNew&& func);
+    void SetSessionExceptionListener(NotifySessionExceptionFunc&& func, bool fromJsScene);
+    void SetTerminateSessionListenerTotal(NotifyTerminateSessionFuncTotal&& func);
+    void SetBackPressedListenser(NotifyBackPressedFunc&& func);
+    void SetPendingSessionToForegroundListener(NotifyPendingSessionToForegroundFunc&& func);
+    void SetPendingSessionToBackgroundForDelegatorListener(NotifyPendingSessionToBackgroundForDelegatorFunc&& func);
+    void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
+    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
+    WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
 
     /**
      * Callbacks for ILifecycleListener
@@ -257,16 +272,8 @@ public:
     virtual bool IsExitSplitOnBackground() const;
     virtual bool NeedStartingWindowExitAnimation() const { return true; }
 
-    void SetPendingSessionActivationEventListener(const NotifyPendingSessionActivationFunc& func);
     void SetChangeSessionVisibilityWithStatusBarEventListener(
         const NotifyChangeSessionVisibilityWithStatusBarFunc& func);
-    void SetTerminateSessionListener(const NotifyTerminateSessionFunc& func);
-    WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
-    void SetTerminateSessionListenerNew(const NotifyTerminateSessionFuncNew& func);
-    void SetSessionExceptionListener(const NotifySessionExceptionFunc& func, bool fromJsScene);
-    void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
-    WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
-    void SetTerminateSessionListenerTotal(const NotifyTerminateSessionFuncTotal& func);
     WSError Clear(bool needStartCaller = false);
     WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);
@@ -285,7 +292,6 @@ public:
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
-    void SetBackPressedListenser(const NotifyBackPressedFunc& func);
     virtual WSError ProcessBackEvent(); // send back event to session_stage
 
     sptr<ScenePersistence> GetScenePersistence() const;
@@ -298,12 +304,6 @@ public:
     void ClearDialogVector();
     WSError NotifyDestroy();
     WSError NotifyCloseExistPipWindow();
-
-    void SetPendingSessionToForegroundListener(const NotifyPendingSessionToForegroundFunc& func);
-    WSError PendingSessionToForeground();
-    void SetPendingSessionToBackgroundForDelegatorListener(const NotifyPendingSessionToBackgroundForDelegatorFunc&
-        func);
-    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
     void SetSessionTouchableChangeListener(const NotifySessionTouchableChangeFunc& func);
@@ -626,7 +626,6 @@ protected:
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
-    NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
@@ -637,20 +636,12 @@ protected:
     NotifyUIRequestFocusFunc requestFocusFunc_;
     NotifyUILostFocusFunc lostFocusFunc_;
     GetStateFromManagerFunc getStateFromManagerFunc_;
-    NotifyBackPressedFunc backPressedFunc_;
     NotifySessionFocusableChangeFunc sessionFocusableChangeFunc_;
     NotifySessionTouchableChangeFunc sessionTouchableChangeFunc_;
     NotifyClickFunc clickFunc_;
-    NotifyTerminateSessionFunc terminateSessionFunc_;
-    NotifyTerminateSessionFuncNew terminateSessionFuncNew_;
-    NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
     NofitySessionLabelUpdatedFunc updateSessionLabelFunc_;
     NofitySessionIconUpdatedFunc updateSessionIconFunc_;
-    std::shared_ptr<NotifySessionExceptionFunc> sessionExceptionFunc_;
-    std::shared_ptr<NotifySessionExceptionFunc> jsSceneSessionExceptionFunc_;
     NotifySessionSnapshotFunc notifySessionSnapshotFunc_;
-    NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
-    NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
     NotifyRaiseToTopForPointDownFunc raiseToTopForPointDownFunc_;
     NotifySessionInfoLockedStateChangeFunc sessionInfoLockedStateChangeFunc_;
     NotifySystemSessionPointerEventFunc systemSessionPointerEventFunc_;
@@ -658,6 +649,19 @@ protected:
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
+
+    /**
+     * Window LifeCycle
+     */
+    NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
+    NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
+    NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;
+    NotifyBackPressedFunc backPressedFunc_;
+    NotifyTerminateSessionFunc terminateSessionFunc_;
+    NotifyTerminateSessionFuncNew terminateSessionFuncNew_;
+    NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
+    NotifySessionExceptionFunc sessionExceptionFunc_;
+    NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
 
     /**
      * Window Rotate Animation
