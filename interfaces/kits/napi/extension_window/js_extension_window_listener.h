@@ -59,7 +59,7 @@ public:
     void SetMainEventHandler();
 
 private:
-    Rect currRect_ = {0, 0, 0, 0};
+    Rect currRect_ = {};
     RectChangeReason currentReason_ = RectChangeReason::UNDEFINED;
     napi_env env_ = nullptr;
     WindowState state_ {WindowState::STATE_INITIAL};
