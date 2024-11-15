@@ -1302,7 +1302,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             break;
         case WindowSetUIContentType::BY_ABC:
             auto abcContent = GetAbcContent(contentInfo);
-            aceRet = uiContent->Initialize(this, abcContent, storage);
+            aceRet = uiContent->Initialize(this, abcContent, storage, contentInfo);
             break;
     }
     // make uiContent available after Initialize/Restore
