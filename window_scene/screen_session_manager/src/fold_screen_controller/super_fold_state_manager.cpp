@@ -24,6 +24,14 @@ namespace Rosen {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
+namespace {
+#ifdef TP_FEATURE_ENABLE
+const int32_t TP_TYPE = 12;
+const char* KEYBOARD_ON_CONFIG = "version:3+main";
+const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
+#endif
+}
+
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeFolded()");
@@ -41,14 +49,60 @@ void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents ev
 
 void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
+    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
+        GetDefaultScreenSession();
+    if (meScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        return;
+    }
+    auto screenProperty = meScreenSession->GetScreenProperty();
+    auto screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
+
+    OHOS::Rect rectCur{
+        .x = 0,
+        .y = 0,
+        .w = static_cast<int>(screenWidth),
+        .h = static_cast<int>(screenHeight),
+    };
+    // SCREEN_ID_FULL = 0
+    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(true);
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOn()");
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
+        KEYBOARD_ON_CONFIG, TpFeatureConfigType::AFT_TP_FEATURE);
+#endif
+    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
+        screenWidth, screenHeight, static_cast<long>(response));
 }
 
 void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
+    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
+        GetDefaultScreenSession();
+    if (meScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        return;
+    }
+    auto screenProperty = meScreenSession->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    
+    OHOS::Rect rectCur{
+        .x = 0,
+        .y = 0,
+        .w = static_cast<int>(screenWidth),
+        .h = static_cast<int>(screenHeight),
+    };
+    // SCREEN_ID_FULL = 0
+    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(false);
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOff()");
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
+        KEYBOARD_OFF_CONFIG, TpFeatureConfigType::DEFAULT_TP_FEATURE);
+#endif
+    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
+        screenWidth, screenHeight, static_cast<long>(response));
 }
 
 void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event)
