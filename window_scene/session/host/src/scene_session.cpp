@@ -5224,7 +5224,7 @@ WMError SceneSession::HandleActionUpdateWindowModeSupportType(const sptr<WindowS
     WSPropertyChangeAction action)
 {
     if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property windowModeSupportType permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 

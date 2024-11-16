@@ -524,9 +524,9 @@ public:
 
     static bool IsOnlySupportSplitAndShowWhenLocked(bool isShowWhenLocked, uint32_t windowModeSupportType)
     {
-        uint32_t splitModeInfo = (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-                                  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
-        if (isShowWhenLocked && (splitModeInfo == windowModeSupportType)) {
+        uint32_t splitMode = (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                              WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+        if (isShowWhenLocked && (splitMode == windowModeSupportType)) {
             return true;
         }
         return false;
@@ -548,8 +548,8 @@ public:
             return true;
         }
 
-        if ((!IsWindowModeSupported(windowModeSupportType, winMode)) ||
-            (IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), windowModeSupportType))) {
+        if (!IsWindowModeSupported(windowModeSupportType, winMode) ||
+            IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), windowModeSupportType)) {
             return false;
         }
         return true;

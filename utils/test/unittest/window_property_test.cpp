@@ -176,20 +176,20 @@ HWTEST_F(WindowPropertyTest, SetAbilityInfo, Function | SmallTest | Level2)
 HWTEST_F(WindowPropertyTest, ResumeLastWindowMode, Function | SmallTest | Level2)
 {
     WindowProperty winPropDst;
-    winPropDst.windowModeSupportType_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
-    winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
+    winPropDst.windowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+    winPropDst.lastMode_ = WindowMode::WINDOW_MODE_PIP;
     winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     winPropDst.ResumeLastWindowMode();
     ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, winPropDst.mode_);
 
-    winPropDst.windowModeSupportType_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
-    winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
+    winPropDst.windowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+    winPropDst.lastMode_ = WindowMode::WINDOW_MODE_PIP;
     winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     winPropDst.ResumeLastWindowMode();
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, winPropDst.mode_);
 
-    winPropDst.windowModeSupportType_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
-    winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
+    winPropDst.windowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    winPropDst.lastMode_ = WindowMode::WINDOW_MODE_PIP;
     winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     winPropDst.ResumeLastWindowMode();
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, winPropDst.mode_);

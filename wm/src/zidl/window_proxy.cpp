@@ -103,7 +103,7 @@ WMError WindowProxy::UpdateWindowMode(WindowMode mode)
     return WMError::WM_OK;
 }
 
-WMError WindowProxy::UpdateWindowWindowModeSupportType(uint32_t windowModeSupportType)
+WMError WindowProxy::UpdateWindowModeSupportType(uint32_t windowModeSupportType)
 {
     MessageParcel data;
     MessageParcel reply;
