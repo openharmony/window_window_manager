@@ -156,6 +156,7 @@ public:
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType) override;
+    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
     uint32_t GetCurvedCompressionArea() override;
