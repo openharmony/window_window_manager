@@ -151,7 +151,7 @@ __attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
         }
     };
     receiver->RequestNextVSync({
-        .userData_ = nullptr, .callbackWithId_ = task,
+        .userData_ = nullptr, .callbackWithId_ = std::move(task),
     });
 }
 

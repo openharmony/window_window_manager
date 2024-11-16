@@ -2603,7 +2603,7 @@ napi_value JsSceneSessionManager::OnPreloadInLakeApp(napi_env env, napi_callback
     auto preloadTask = [bundleName = std::move(bundleName)] {
         SceneSessionManager::GetInstance().PreloadInLakeApp(bundleName);
     };
-    localScheduler->PostAsyncTask(preloadTask);
+    localScheduler->PostAsyncTask(preloadTask, __func__);
     return NapiGetUndefined(env);
 }
 

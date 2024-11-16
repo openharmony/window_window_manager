@@ -73,13 +73,12 @@ HWTEST_F(TaskSchedulerTest, PostTask, Function | SmallTest | Level2)
         GTEST_LOG_(INFO) << "START_TASK";
         resultValue = 1;
     };
-    taskScheduler->PostAsyncTask(taskFunc);
+    taskScheduler->PostAsyncTask(taskFunc, "ssmTask");
     EXPECT_NE(taskScheduler->handler_, nullptr);
     EXPECT_EQ(resultValue, 0);
 
-    std::string name = "ssmTask";
     int64_t delayTime = 1;
-    taskScheduler->PostAsyncTask(taskFunc, name, delayTime);
+    taskScheduler->PostAsyncTask(taskFunc, "ssmTask", delayTime);
     EXPECT_EQ(resultValue, 0);
 }
 
