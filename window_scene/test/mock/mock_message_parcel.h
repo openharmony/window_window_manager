@@ -27,6 +27,7 @@ public:
     static void SetWriteString16ErrorFlag(bool flag);
     static void SetWriteParcelableErrorFlag(bool flag);
     static void SetWriteInterfaceTokenErrorFlag(bool flag);
+    static void SetReadUint32ErrorFlag(bool flag);
     static void SetReadInt32ErrorFlag(bool flag);
     static void SetReadInt64ErrorFlag(bool flag);
 };
