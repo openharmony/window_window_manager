@@ -25,7 +25,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
-class WindowWindowModeSupportTypeTest : public testing::Test {
+class WindowModeSupportTypeTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -37,7 +37,7 @@ private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
 };
 
-void WindowWindowModeSupportTypeTest::SetUpTestCase()
+void WindowModeSupportTypeTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
@@ -45,11 +45,11 @@ void WindowWindowModeSupportTypeTest::SetUpTestCase()
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowWindowModeSupportTypeTest::TearDownTestCase()
+void WindowModeSupportTypeTest::TearDownTestCase()
 {
 }
 
-void WindowWindowModeSupportTypeTest::SetUp()
+void WindowModeSupportTypeTest::SetUp()
 {
     fullAppInfo_1_ = {
             .name = "FullWindow",
@@ -71,17 +71,17 @@ void WindowWindowModeSupportTypeTest::SetUp()
     };
 }
 
-void WindowWindowModeSupportTypeTest::TearDown()
+void WindowModeSupportTypeTest::TearDown()
 {
 }
 
 namespace {
 /**
- * @tc.name: WindowWindowModeSupportType01
+ * @tc.name: WindowModeSupportType01
  * @tc.desc: SetRequestWindowModeSupportType | GetRequestWindowModeSupportType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType01, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType01, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
     if (window == nullptr) {
@@ -93,11 +93,11 @@ HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType01, Functio
 }
 
 /**
- * @tc.name: WindowWindowModeSupportType02
+ * @tc.name: WindowModeSupportType02
  * @tc.desc: windowModeSupportType test for single window, only support fullScreen mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType02, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType02, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
     if (window == nullptr) {
@@ -121,11 +121,11 @@ HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType02, Functio
 }
 
 /**
- * @tc.name: WindowWindowModeSupportType03
+ * @tc.name: WindowModeSupportType03
  * @tc.desc: windowModeSupportType test for single window, support both fullScreen and floating mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType03, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType03, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
     if (window == nullptr) {
@@ -153,11 +153,11 @@ HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType03, Functio
 }
 
 /**
- * @tc.name: WindowWindowModeSupportType04
+ * @tc.name: WindowModeSupportType04
  * @tc.desc: windowModeSupportType test for single window, window mode is not supported when show, show failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType04, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType04, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
     if (window == nullptr) {
@@ -172,11 +172,11 @@ HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType04, Functio
 }
 
 /**
- * @tc.name: WindowWindowModeSupportType05
+ * @tc.name: WindowModeSupportType05
  * @tc.desc: windowModeSupportType test for layout cascade
  * @tc.type: FUNC
  */
-HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType05, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType05, Function | MediumTest | Level3)
 {
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullAppInfo_1_);
     if (window1 == nullptr) {
@@ -203,11 +203,11 @@ HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType05, Functio
 }
 
 /**
- * @tc.name: WindowWindowModeSupportType06
+ * @tc.name: WindowModeSupportType06
  * @tc.desc: windowModeSupportType test for layout tile
  * @tc.type: FUNC
  */
-HWTEST_F(WindowWindowModeSupportTypeTest, WindowWindowModeSupportType06, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType06, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
     if (window == nullptr) {
