@@ -2895,16 +2895,15 @@ void SceneSessionManager::RegisterCreateSubSessionListener(int32_t persistentId,
     taskScheduler_->PostSyncTask(task, "RegisterCreateSubSessionListener");
 }
 
-void SceneSessionManager::RegisterBindDialogTargetListener(const sptr<SceneSession>& sceneSession,
-    const NotifyBindDialogSessionFunc& func)
+void SceneSessionManager::RegisterBindDialogTargetListener(const sptr<SceneSession>& session,
+    NotifyBindDialogSessionFunc&& func)
 {
-    sceneSession->RegisterBindDialogSessionCallback(func);
-    int32_t persistentId = sceneSession->GetPersistentId();
+    int32_t persistentId = session->GetPersistentId();
     TLOGI(WmsLogTag::WMS_DIALOG, "Id: %{public}d", persistentId);
-    auto task = [this, persistentId, func]() {
-        bindDialogTargetFuncMap_[persistentId] = func;
+    auto task = [this, session, persistentId, func = std::move(func)]() {
+        session->RegisterBindDialogSessionCallback(func);
+        bindDialogTargetFuncMap_[persistentId] = std::move(func);
         RecoverCachedDialogSession(persistentId);
-        return WMError::WM_OK;
     };
     taskScheduler_->PostTask(task, "RegisterBindDialogTargetListener");
 }
@@ -3036,7 +3035,7 @@ void SceneSessionManager::NotifyCreateToastSession(int32_t persistentId, sptr<Sc
 
 void SceneSessionManager::UnregisterSpecificSessionCreateListener(int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_SUB, "UnregisterSpecificSessionCreateListener, id: %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_SUB, "Id: %{public}d", persistentId);
     auto task = [this, persistentId]() {
         auto iter1 = createSubSessionFuncMap_.find(persistentId);
         if (iter1 != createSubSessionFuncMap_.end()) {
