@@ -157,7 +157,7 @@ HWTEST_F(StartingWindowTest, NeedToStopStartingWindow04, Function | SmallTest | 
     sptr<WindowNode> node = new WindowNode(CreateWindowProperty());
     transitionInfo_->SetShowFlagWhenLocked(true);
     node->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-                             WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+                                   WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
     ASSERT_EQ(false, WindowHelper::CheckSupportWindowMode(node->GetWindowMode(),
         node->GetWindowModeSupportType(), transitionInfo_));
 }

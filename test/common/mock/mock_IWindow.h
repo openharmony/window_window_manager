@@ -31,7 +31,7 @@ public:
     MOCK_METHOD4(UpdateWindowRect, WMError(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction));
     MOCK_METHOD1(UpdateWindowMode, WMError(WindowMode mode));
-    MOCK_METHOD1(UpdateWindowWindowModeSupportType, WMError(uint32_t windowModeSupportType));
+    MOCK_METHOD1(UpdateWindowModeSupportType, WMError(uint32_t windowModeSupportType));
     MOCK_METHOD1(UpdateFocusStatus, WMError(bool focused));
     MOCK_METHOD2(UpdateAvoidArea, WMError(const sptr<AvoidArea>& avoidArea, AvoidAreaType type));
     MOCK_METHOD1(UpdateWindowState, WMError(WindowState state));
