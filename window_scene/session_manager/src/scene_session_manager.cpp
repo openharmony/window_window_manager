@@ -9915,7 +9915,7 @@ const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSession
 void SceneSessionManager::NotifyUpdateRectAfterLayout()
 {
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-    if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+    if (auto transactionController = RSSyncTransactionController::GetInstance()) {
         rsTransaction = transactionController->GetRSTransaction();
     }
     auto task = [this, rsTransaction] {
