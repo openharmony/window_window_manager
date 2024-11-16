@@ -678,13 +678,17 @@ HWTEST_F(SceneSessionManagerSupplementTest, IsSessionVisible, Function | SmallTe
 HWTEST_F(SceneSessionManagerSupplementTest, RegisterBindDialogTargetListener, Function | SmallTest | Level3)
 {
     int ret = 0;
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     NotifyBindDialogSessionFunc func1;
-    sptr<SceneSession> sceneSession;
-    ssm_->RegisterBindDialogTargetListener(sceneSession, func1);
+    ssm_->RegisterBindDialogTargetListener(sceneSession, std::move(func1));
     ssm_->UnregisterSpecificSessionCreateListener(1);
-    ssm_->bindDialogTargetFuncMap_.insert({ 1, func1 });
+    NotifyBindDialogSessionFunc func2;
+    ssm_->bindDialogTargetFuncMap_.insert({ 1, func2 });
     ssm_->bindDialogTargetFuncMap_.erase(1);
-    ssm_->bindDialogTargetFuncMap_.insert({ 1, func1 });
+    ssm_->bindDialogTargetFuncMap_.insert({ 1, func2 });
     ssm_->bindDialogTargetFuncMap_.clear();
     ASSERT_EQ(ret, 0);
 }
