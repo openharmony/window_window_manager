@@ -495,6 +495,12 @@ private:
     bool IsNotifyInteractiveDuplicative(bool interactive);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
 
+    /**
+     * PC Window
+     */
+    void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
+        bool& hideCloseButton);
+
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;
     static std::recursive_mutex avoidAreaChangeListenerMutex_;
@@ -560,12 +566,6 @@ private:
      * Multi Window
      */
     bool isSplitButtonVisible_ = true;
-
-    /**
-     * PC Window
-     */
-    void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
-        bool& hideCloseButton);
 };
 } // namespace Rosen
 } // namespace OHOS
