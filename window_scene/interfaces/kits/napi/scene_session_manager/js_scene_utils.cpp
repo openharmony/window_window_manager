@@ -1569,20 +1569,14 @@ MainThreadScheduler::MainThreadScheduler(napi_env env)
 
 inline void MainThreadScheduler::GetMainEventHandler()
 {
-    if (handler_ != nullptr) {
-        return;
-    }
     auto runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
-    if (runner == nullptr) {
-        return;
-    }
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
 }
 
 void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string traceInfo, int64_t delayTime)
 {
-    GetMainEventHandler();
-    auto task = [env = env_, localTask, traceInfo, envChecker = std::weak_ptr<int>(envChecker_)]() {
+    auto task = [env = env_, localTask = std::move(localTask), traceInfo,
+                 envChecker = std::weak_ptr<int>(envChecker_)] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SCBCb:%s", traceInfo.c_str());
         if (envChecker.expired()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "post task expired because of invalid scheduler");

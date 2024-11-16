@@ -121,7 +121,7 @@ void Session::PostTask(Task&& task, const std::string& name, int64_t delayTime)
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    auto localTask = [task = std::move(task), name]() {
+    auto localTask = [task = std::move(task), name] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         task();
     };
@@ -134,7 +134,7 @@ void Session::PostExportTask(Task&& task, const std::string& name, int64_t delay
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    auto localTask = [task = std::move(task), name]() {
+    auto localTask = [task = std::move(task), name] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         task();
     };
