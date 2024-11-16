@@ -878,11 +878,11 @@ HWTEST_F(WindowManagerTest, DumpSessionWithId, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetWindowModStatus01
- * @tc.desc: GetWindowModStatus01
+ * @tc.name: GetWindowModeType01
+ * @tc.desc: GetWindowModeType01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, GetWindowModStatus01, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
 {
     std::vector<sptr<AccessibilityWindowInfo>> infos;
     infos.clear();
@@ -1002,21 +1002,6 @@ HWTEST_F(WindowManagerTest, Test01, Function | SmallTest | Level2)
     WMError res3 = WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(5, 5, true);
     ASSERT_EQ(WMError::WM_OK, res3);
     WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
-}
-
-/**
- * @tc.name: GetWindowModeType01
- * @tc.desc: check GetWindowModeType
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, GetWindowModeType01, Function | SmallTest | Level2)
-{
-    std::vector<sptr<AccessibilityWindowInfo>> infos;
-    infos.clear();
-    WindowModeType windowModeType;
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetWindowModeType(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetWindowModeType(windowModeType));
 }
 
 /**
@@ -1348,6 +1333,31 @@ HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange01, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: NotifyDisplayInfoChange02
+ * @tc.desc: check NotifyDisplayInfoChange, token is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyDisplayInfoChange02, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObjectMocker();
+    ASSERT_NE(token, nullptr);
+    WMError ret = WindowManager::GetInstance().NotifyDisplayInfoChange(token, 1, 2, DisplayOrientation::PORTRAIT);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyWMSDisconnected01
+ * @tc.desc: check NotifyWMSDisconnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWMSDisconnected01, Function | SmallTest | Level2)
+{
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
+    WindowManager::GetInstance().pImpl_->NotifyWMSDisconnected(1, 2);
+}
+
+/**
  * @tc.name: NotifyFocused01
  * @tc.desc: check NotifyFocused
  * @tc.type: FUNC
@@ -1418,6 +1428,19 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
 {
     auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
     ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: check GetDisplayIdByWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
+{
+    const std::vector<uint64_t> windowIds = {1, 2};
+    std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
+    auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 }
 } // namespace Rosen
