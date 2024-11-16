@@ -38,6 +38,7 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
 const std::string PIP_WINDOW = "pip_window";
+constexpr size_t INDEX_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
@@ -1207,13 +1208,13 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
 napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE || argc > ARGC_FOUR) { // min param num 1, max param num 4
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
-    if (!ConvertFromJsValue(env, argv[0], displayId)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -1235,27 +1236,28 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
         y = INVALID_COORDINATE;
     }
     napi_value result = nullptr;
-    NapiAsyncTask::CompleteCallback complete =
-        [displayId, windowNumber, x, y](napi_env env, NapiAsyncTask& task, int32_t status) {
-            std::vector<int32_t> windowIds;
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
-                GetWindowIdsByCoordinate(static_cast<uint64_t>(displayId), windowNumber, x, y, windowIds));
-            if (ret == WmErrorCode::WM_OK) {
-                std::vector<sptr<Window>> windows(windowIds.size());
-                for (size_t i = 0; i < windowIds.size(); i++) {
-                    sptr<Window> window = Window::GetWindowWithId(windowIds[i]);
-                    windows[i] = window;
-                }
-                task.Resolve(env, CreateJsWindowArrayObject(env, windows));
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetWindowsByCoordinate failed"));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [displayId, windowNumber, x, y, env, task = napiAsyncTask] {
+        std::vector<int32_t> windowIds;
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+            GetWindowIdsByCoordinate(static_cast<uint64_t>(displayId), windowNumber, x, y, windowIds));
+        if (ret == WmErrorCode::WM_OK) {
+            std::vector<sptr<Window>> windows(windowIds.size());
+            for (size_t i = 0; i < windowIds.size(); i++) {
+                sptr<Window> window = Window::GetWindowWithId(windowIds[i]);
+                windows[i] = window;
             }
-        };
-    NapiAsyncTask::Schedule("JsWindowManager::OnGetWindowsByCoordinate",
-        env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+            task->Resolve(env, CreateJsWindowArrayObject(env, windows));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "getWindowsByCoordinate failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
-
 
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
