@@ -377,6 +377,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(winRect.height_);
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
+        reply.WriteUint32(property->GetWindowModeSupportType());
         reply.WriteBool(property->GetCompatibleModeInPc());
         reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
@@ -655,6 +656,14 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (hasStartWindowOption) {
         auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
         abilitySessionInfo->startWindowOption.reset(startWindowOption);
+    }
+    uint32_t size = data.ReadUint32();
+    if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        abilitySessionInfo->supportWindowModes.reserve(size);
+        for (uint32_t i = 0; i < size; i++) {
+            abilitySessionInfo->supportWindowModes.push_back(
+                static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
+        }
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));

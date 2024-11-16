@@ -121,7 +121,7 @@ void Session::PostTask(Task&& task, const std::string& name, int64_t delayTime)
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    auto localTask = [task = std::move(task), name]() {
+    auto localTask = [task = std::move(task), name] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         task();
     };
@@ -134,7 +134,7 @@ void Session::PostExportTask(Task&& task, const std::string& name, int64_t delay
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         return task();
     }
-    auto localTask = [task = std::move(task), name]() {
+    auto localTask = [task = std::move(task), name] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
         task();
     };
@@ -1088,6 +1088,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
+        property->SetWindowModeSupportType(GetSessionInfo().windowModeSupportType);
     }
     if (sessionProperty && property) {
         property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());

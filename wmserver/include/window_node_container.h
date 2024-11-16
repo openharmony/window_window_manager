@@ -171,7 +171,7 @@ private:
     void UpdateRSTreeWhenShowingDisplaysChange(sptr<WindowNode>& node,
         const std::vector<DisplayId>& lastShowingDisplays);
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
-    void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
+    void UpdateWindowModeSupportTypeWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
     void RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation);
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowMode srcMode, WindowMode dstMode);
     void UpdatePrivateWindowCount();

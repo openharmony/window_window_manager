@@ -87,17 +87,17 @@ HWTEST_F(WindowAgentTest, UpdateWindowMode, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateWindowModeSupportInfo
- * @tc.desc: UpdateWindowModeSupportInfo
+ * @tc.name: UpdateWindowWindowModeSupportType
+ * @tc.desc: UpdateWindowWindowModeSupportType
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAgentTest, UpdateWindowModeSupportInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowAgentTest, UpdateWindowWindowModeSupportType, Function | SmallTest | Level2)
 {
-    WMError err = windowAgent_->UpdateWindowModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    WMError err = windowAgent_->UpdateWindowWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(err, WMError::WM_OK);
 
     windowAgent_->window_ = nullptr;
-    err = windowAgent_->UpdateWindowModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    err = windowAgent_->UpdateWindowWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(err, WMError::WM_ERROR_NULLPTR);
 }
 

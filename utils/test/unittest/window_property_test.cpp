@@ -176,19 +176,19 @@ HWTEST_F(WindowPropertyTest, SetAbilityInfo, Function | SmallTest | Level2)
 HWTEST_F(WindowPropertyTest, ResumeLastWindowMode, Function | SmallTest | Level2)
 {
     WindowProperty winPropDst;
-    winPropDst.modeSupportInfo_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+    winPropDst.windowModeSupportType_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
     winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
     winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     winPropDst.ResumeLastWindowMode();
     ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, winPropDst.mode_);
 
-    winPropDst.modeSupportInfo_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
+    winPropDst.windowModeSupportType_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
     winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
     winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     winPropDst.ResumeLastWindowMode();
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, winPropDst.mode_);
 
-    winPropDst.modeSupportInfo_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    winPropDst.windowModeSupportType_ =  WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
     winPropDst.lastMode_ =  WindowMode::WINDOW_MODE_PIP;
     winPropDst.mode_ = WindowMode::WINDOW_MODE_UNDEFINED;
     winPropDst.ResumeLastWindowMode();
@@ -453,31 +453,31 @@ HWTEST_F(WindowPropertyTest, GetAnimationFlag018, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetModeSupportInfo019
- * @tc.desc: GetModeSupportInfo test
+ * @tc.name: GetWindowModeSupportType019
+ * @tc.desc: GetWindowModeSupportType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetModeSupportInfo019, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetWindowModeSupportType019, Function | SmallTest | Level2)
 {
     WindowProperty winPropSrc;
-    uint32_t modeSupportInfo = 1;
-    winPropSrc.SetModeSupportInfo(modeSupportInfo);
-    uint32_t res = winPropSrc.GetModeSupportInfo();
-    ASSERT_EQ(res, modeSupportInfo);
+    uint32_t windowModeSupportType = 1;
+    winPropSrc.SetWindowModeSupportType(windowModeSupportType);
+    uint32_t res = winPropSrc.GetWindowModeSupportType();
+    ASSERT_EQ(res, windowModeSupportType);
 }
 
 /**
- * @tc.name: GetRequestModeSupportInfo020
- * @tc.desc: GetRequestModeSupportInfo test
+ * @tc.name: GetRequestWindowModeSupportType020
+ * @tc.desc: GetRequestWindowModeSupportType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPropertyTest, GetRequestModeSupportInfo020, Function | SmallTest | Level2)
+HWTEST_F(WindowPropertyTest, GetRequestWindowModeSupportType020, Function | SmallTest | Level2)
 {
     WindowProperty winPropSrc;
-    uint32_t requestModeSupportInfo = 1;
-    winPropSrc.SetRequestModeSupportInfo(requestModeSupportInfo);
-    uint32_t res = winPropSrc.GetRequestModeSupportInfo();
-    ASSERT_EQ(res, requestModeSupportInfo);
+    uint32_t requestWindowModeSupportType = 1;
+    winPropSrc.SetRequestWindowModeSupportType(requestWindowModeSupportType);
+    uint32_t res = winPropSrc.GetRequestWindowModeSupportType();
+    ASSERT_EQ(res, requestWindowModeSupportType);
 }
 
 /**

@@ -2213,22 +2213,23 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, Displa
     return WMError::WM_OK;
 }
 
-void WindowNodeContainer::UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up)
+void WindowNodeContainer::UpdateWindowModeSupportTypeWhenKeyguardChange(const sptr<WindowNode>& node, bool up)
 {
-    if (!WindowHelper::IsWindowModeSupported(node->GetWindowProperty()->GetRequestModeSupportInfo(),
+    if (!WindowHelper::IsWindowModeSupported(node->GetWindowProperty()->GetRequestWindowModeSupportType(),
                                              WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
         WLOGFD("window doesn't support split mode, winId: %{public}d", node->GetWindowId());
         return;
     }
-    uint32_t modeSupportInfo;
+    uint32_t windowModeSupportType;
     if (up) {
-        modeSupportInfo = node->GetModeSupportInfo() & (~WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+        windowModeSupportType = node->GetWindowModeSupportType() &
+            (~WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     } else {
-        modeSupportInfo = node->GetModeSupportInfo() | WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY;
+        windowModeSupportType = node->GetWindowModeSupportType() | WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY;
     }
-    node->SetModeSupportInfo(modeSupportInfo);
+    node->SetWindowModeSupportType(windowModeSupportType);
     if (node->GetWindowToken() != nullptr) {
-        node->GetWindowToken()->UpdateWindowModeSupportInfo(modeSupportInfo);
+        node->GetWindowToken()->UpdateWindowWindowModeSupportType(windowModeSupportType);
     }
 }
 
@@ -2300,7 +2301,7 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
             }
         }
 
-        UpdateModeSupportInfoWhenKeyguardChange(needReZOrderNode, up);
+        UpdateWindowModeSupportTypeWhenKeyguardChange(needReZOrderNode, up);
 
         parentNode->children_.insert(position, needReZOrderNode);
         if (up && WindowHelper::IsSplitWindowMode(needReZOrderNode->GetWindowMode())) {
