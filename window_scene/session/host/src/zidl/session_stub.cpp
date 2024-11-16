@@ -508,13 +508,14 @@ int SessionStub::HandleUpdateClientRect(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    Rect tempRect;
-    WMError errorCode = GetGlobalScaledRect(tempRect);
-    reply.WriteInt32(tempRect.posX_);
-    reply.WriteInt32(tempRect.posY_);
-    reply.WriteUint32(tempRect.width_);
-    reply.WriteUint32(tempRect.height_);
-    reply.WriteInt32(static_cast<int32_t>(errorCode));
+    Rect globalScaledRect;
+    WMError errorCode = GetGlobalScaledRect(globalScaledRect);
+    if (!reply.WriteInt32(globalScaledRect.posX_) || !reply.WriteInt32(globalScaledRect.posY_) ||
+        !reply.WriteUint32(globalScaledRect.width_) || !reply.WriteUint32(globalScaledRect.height_) ||
+        !reply.WriteInt32(static_cast<int32_t>(errorCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
