@@ -1702,7 +1702,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id: %{public}d, type: %{public}d, instanceKey: %{public}s",
                where, sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
-               sceneSession->GetAppInstanceKey.c_str());
+               sceneSession->GetAppInstanceKey().c_str());
         return sceneSession;
     };
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
