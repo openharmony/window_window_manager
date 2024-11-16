@@ -257,6 +257,72 @@ HWTEST_F(ScreenPropertyTest, GetRotation, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetPhysicalRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetPhysicalRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPhysicalRotation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    float rotation = 2.0f;
+    property->SetPhysicalRotation(rotation);
+    ASSERT_EQ(property->physicalRotation_, rotation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetPhysicalRotation end";
+}
+
+/**
+ * @tc.name: GetPhysicalRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetPhysicalRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPhysicalRotation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    float rotation = property->GetPhysicalRotation();
+    ASSERT_EQ(property->physicalRotation_, rotation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetPhysicalRotation end";
+}
+
+/**
+ * @tc.name: SetScreenComponentRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetScreenComponentRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenComponentRotation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    float rotation = 2.0f;
+    property->SetScreenComponentRotation(rotation);
+    ASSERT_EQ(property->screenComponentRotation_, rotation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenComponentRotation end";
+}
+
+/**
+ * @tc.name: GetScreenComponentRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetScreenComponentRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenComponentRotation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    float rotation = property->GetScreenComponentRotation();
+    ASSERT_EQ(property->screenComponentRotation_, rotation);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenComponentRotation end";
+}
+
+/**
  * @tc.name: GetBounds
  * @tc.desc: normal function
  * @tc.type: FUNC
