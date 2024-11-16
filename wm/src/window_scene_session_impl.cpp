@@ -2412,7 +2412,8 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!(WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
-        WindowMode::WINDOW_MODE_FLOATING) || property_->GetCompatibleModeInPc())) {
+                                              WindowMode::WINDOW_MODE_FLOATING) ||
+          property_->GetCompatibleModeInPc())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "not support floating, can not Recover");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }

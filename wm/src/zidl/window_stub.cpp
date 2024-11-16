@@ -104,7 +104,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
                 TLOGE(WmsLogTag::WMS_LAYOUT, "read windowModeSupportType failed");
                 return ERR_INVALID_DATA;
             }
-            UpdateWindowWindowModeSupportType(windowModeSupportType);
+            UpdateWindowModeSupportType(windowModeSupportType);
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_FOCUS_STATUS: {

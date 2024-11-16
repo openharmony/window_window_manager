@@ -60,7 +60,7 @@ public:
     {
         return WMError::WM_OK;
     };
-    virtual WMError UpdateWindowWindowModeSupportType(uint32_t windowModeSupportType) override
+    virtual WMError UpdateWindowModeSupportType(uint32_t windowModeSupportType) override
     {
         return WMError::WM_OK;
     };

@@ -2229,7 +2229,7 @@ void WindowNodeContainer::UpdateWindowModeSupportTypeWhenKeyguardChange(const sp
     }
     node->SetWindowModeSupportType(windowModeSupportType);
     if (node->GetWindowToken() != nullptr) {
-        node->GetWindowToken()->UpdateWindowWindowModeSupportType(windowModeSupportType);
+        node->GetWindowToken()->UpdateWindowModeSupportType(windowModeSupportType);
     }
 }
 
