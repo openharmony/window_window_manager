@@ -49,13 +49,13 @@ WMError WindowAgent::UpdateWindowMode(WindowMode mode)
     return WMError::WM_OK;
 }
 
-WMError WindowAgent::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
+WMError WindowAgent::UpdateWindowWindowModeSupportType(uint32_t windowModeSupportType)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    window_->UpdateModeSupportInfo(modeSupportInfo);
+    window_->UpdateWindowModeSupportType(windowModeSupportType);
     return WMError::WM_OK;
 }
 

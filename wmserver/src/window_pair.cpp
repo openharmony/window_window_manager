@@ -199,7 +199,7 @@ void WindowPair::Clear()
                           WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
     if (primary_ != nullptr && primary_->GetWindowProperty() != nullptr &&
         primary_->GetWindowToken() != nullptr) {
-        if (primary_->GetModeSupportInfo() == splitModeInfo) {
+        if (primary_->GetWindowModeSupportType() == splitModeInfo) {
             MinimizeApp::AddNeedMinimizeApp(primary_, MinimizeReason::SPLIT_QUIT);
             MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::SPLIT_QUIT);
         } else {
@@ -216,7 +216,7 @@ void WindowPair::Clear()
     }
     if (secondary_ != nullptr && secondary_->GetWindowProperty() != nullptr &&
         secondary_->GetWindowToken() != nullptr) {
-        if (secondary_->GetModeSupportInfo() == splitModeInfo) {
+        if (secondary_->GetWindowModeSupportType() == splitModeInfo) {
             MinimizeApp::AddNeedMinimizeApp(secondary_, MinimizeReason::SPLIT_QUIT);
             MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::SPLIT_QUIT);
         } else {
