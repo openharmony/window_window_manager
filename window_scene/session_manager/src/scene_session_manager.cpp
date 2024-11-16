@@ -868,7 +868,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
         }
         RemoveFailRecoveredSession();
     };
-    return taskScheduler_->PostAsyncTask(task, "UpdateSessionInfoBySCB");
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
 bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig,
@@ -1700,8 +1700,9 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
-        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id: %{public}d, type: %{public}d",
-               where, sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id: %{public}d, type: %{public}d, instanceKey: %{public}s",
+               where, sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
+               sceneSession->GetAppInstanceKey.c_str());
         return sceneSession;
     };
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
@@ -2801,7 +2802,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         }
         // recover specific session
         SessionInfo info = RecoverSessionInfo(property);
-        TLOGNI(WmsLogTag::WMS_RECOVER, "callingSessionId = %{public}" PRIu32, property->GetCallingSessionId());
+        TLOGNI(WmsLogTag::WMS_RECOVER, "callingWindowId = %{public}" PRIu32, property->GetCallingSessionId());
         ClosePipWindowIfExist(property->GetWindowType());
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
@@ -3161,7 +3162,7 @@ void SceneSessionManager::NotifySessionTouchOutside(int32_t persistentId)
                 persistentId, callingSessionId);
         }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto & [_, sceneSession] : sceneSessionMap_) {
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
                 continue;
             }
@@ -4899,7 +4900,7 @@ void SceneSessionManager::RequestAllAppSessionUnfocus()
  */
 WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     // base block
     WSError basicCheckRet = RequestFocusBasicCheck(persistentId);
     if (basicCheckRet != WSError::WS_OK) {
@@ -5536,7 +5537,7 @@ std::string SceneSessionManager::GetAllSessionFocusInfo()
             return false;
         }
         os << "WindowName: " << session->GetWindowName() << ", id: " << session->GetPersistentId() <<
-           " ,focusable: " << session->GetFocusable() << ";";
+              ", focusable: " << session->GetFocusable() << ";";
         return false;
     };
     TraverseSessionTree(func, true);
@@ -8891,7 +8892,7 @@ WSError SceneSessionManager::ClearSession(sptr<SceneSession> sceneSession)
 
 WSError SceneSessionManager::ClearAllSessions()
 {
-    WLOGFI("in");
+    WLOGFD("in");
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
         WLOGFE("The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -8914,7 +8915,7 @@ WSError SceneSessionManager::ClearAllSessions()
 
 void SceneSessionManager::GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector)
 {
-    WLOGFI("in");
+    WLOGFD("in");
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto &item : sceneSessionMap_) {
         auto sceneSession = item.second;
@@ -9913,22 +9914,20 @@ const std::map<int32_t, sptr<SceneSession>> SceneSessionManager::GetSceneSession
 
 void SceneSessionManager::NotifyUpdateRectAfterLayout()
 {
-    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
     std::shared_ptr<RSTransaction> rsTransaction = nullptr;
-    if (transactionController) {
+    if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
         rsTransaction = transactionController->GetRSTransaction();
     }
-    auto task = [this, rsTransaction]() {
+    auto task = [this, rsTransaction] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& iter: sceneSessionMap_) {
-            auto sceneSession = iter.second;
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession && sceneSession->IsDirtyWindow()) {
                 sceneSession->NotifyClientToUpdateRect("AfterLayoutFromPersistentTask", rsTransaction);
             }
         }
     };
     // need sync task since animation transcation need
-    return taskScheduler_->PostAsyncTask(task, "NotifyUpdateRectAfterLayout");
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
