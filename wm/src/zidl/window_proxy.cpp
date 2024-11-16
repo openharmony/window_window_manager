@@ -103,7 +103,7 @@ WMError WindowProxy::UpdateWindowMode(WindowMode mode)
     return WMError::WM_OK;
 }
 
-WMError WindowProxy::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
+WMError WindowProxy::UpdateWindowWindowModeSupportType(uint32_t windowModeSupportType)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -112,7 +112,7 @@ WMError WindowProxy::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(modeSupportInfo)) {
+    if (!data.WriteUint32(windowModeSupportType)) {
         WLOGFE("Write WindowMode failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }

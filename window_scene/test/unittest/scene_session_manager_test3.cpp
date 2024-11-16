@@ -1369,7 +1369,7 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, Function 
     property->SetFloatingWindowAppType(true);
     ssm_->UpdateForceHideState(sceneSession, property, true);
     ssm_->UpdateForceHideState(sceneSession, property, false);
-    uint32_t result = property->GetModeSupportInfo();
+    uint32_t result = property->GetWindowModeSupportType();
     ASSERT_EQ(result, WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
 }
 

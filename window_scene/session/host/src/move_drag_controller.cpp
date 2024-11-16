@@ -823,7 +823,7 @@ void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> proper
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     isDecorEnable_ = (isMainWindow || ((isSubWindow || isDialogWindow) && property->IsDecorEnable())) &&
         sysConfig.isSystemDecorEnable_ &&
-        WindowHelper::IsWindowModeSupported(sysConfig.decorModeSupportInfo_, property->GetWindowMode());
+        WindowHelper::IsWindowModeSupported(sysConfig.decorWindowModeSupportType_, property->GetWindowMode());
 }
 
 void MoveDragController::ProcessSessionRectChange(SizeChangeReason reason)

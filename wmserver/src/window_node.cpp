@@ -129,9 +129,9 @@ void WindowNode::SetShowingDisplays(const std::vector<DisplayId>& displayIdVec)
     showingDisplays_.assign(displayIdVec.begin(), displayIdVec.end());
 }
 
-void WindowNode::SetModeSupportInfo(uint32_t modeSupportInfo)
+void WindowNode::SetWindowModeSupportType(uint32_t windowModeSupportType)
 {
-    property_->SetModeSupportInfo(modeSupportInfo);
+    property_->SetWindowModeSupportType(windowModeSupportType);
 }
 
 void WindowNode::ResetWindowSizeChangeReason()
@@ -372,9 +372,9 @@ std::vector<DisplayId> WindowNode::GetShowingDisplays() const
     return showingDisplays_;
 }
 
-uint32_t WindowNode::GetModeSupportInfo() const
+uint32_t WindowNode::GetWindowModeSupportType() const
 {
-    return property_->GetModeSupportInfo();
+    return property_->GetWindowModeSupportType();
 }
 
 void WindowNode::GetTouchHotAreas(std::vector<Rect>& rects) const
