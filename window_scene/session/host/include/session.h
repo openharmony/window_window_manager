@@ -589,7 +589,7 @@ protected:
             FinishTraceForSyncTask();
             return ret;
         }
-        auto syncTask = [&ret, &task, name]() {
+        auto syncTask = [&ret, &task, &name] {
             StartTraceForSyncTask(name);
             ret = task();
             FinishTraceForSyncTask();
