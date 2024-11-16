@@ -66,7 +66,8 @@ void WindowLayoutPolicyCascade::Reorder()
                 continue;
             }
             // if window don't support floating mode, or default rect of cascade is not satisfied with limits
-            if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
+            if (!WindowHelper::IsWindowModeSupported(node->GetWindowModeSupportType(),
+                WindowMode::WINDOW_MODE_FLOATING) ||
                 !WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowUpdatedSizeLimits())) {
                 MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_CASCADE);
                 continue;

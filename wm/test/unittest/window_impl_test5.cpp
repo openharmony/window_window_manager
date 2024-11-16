@@ -990,7 +990,7 @@ HWTEST_F(WindowImplTest5, SetImmersiveModeEnabledState02, Function | SmallTest |
     EXPECT_EQ(window->SetImmersiveModeEnabledState(true), WMError::WM_ERROR_INVALID_WINDOW);
 
     window->state_ = WindowState::STATE_CREATED;
-    window->UpdateModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
+    window->UpdateWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
 
     window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     EXPECT_EQ(window->SetImmersiveModeEnabledState(true), WMError::WM_ERROR_INVALID_WINDOW);
@@ -1174,7 +1174,7 @@ HWTEST_F(WindowImplTest5, NeedToStopShowing, Function | SmallTest | Level1)
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(window->NeedToStopShowing(), true);
 
-    window->UpdateModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    window->UpdateWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     window->property_->SetWindowFlags(1 << 2);
     EXPECT_EQ(window->NeedToStopShowing(), false);
