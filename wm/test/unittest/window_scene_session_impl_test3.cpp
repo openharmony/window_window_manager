@@ -174,6 +174,8 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateTitleInTargetPos, Function | SmallTe
     ASSERT_NE(nullptr, session);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->windowSessionMap_.insert(std::make_pair(windowSceneSessionImpl->GetWindowName(),
+        std::make_pair(windowSceneSessionImpl->GetWindowId(), windowSceneSessionImpl)));
     ret = windowSceneSessionImpl->SwitchFreeMultiWindow(true);
     EXPECT_EQ(WSError::WS_OK, ret);
     ret = windowSceneSessionImpl->SwitchFreeMultiWindow(false);
@@ -191,6 +193,7 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateTitleInTargetPos, Function | SmallTe
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
     ret = windowSceneSessionImpl->UpdateTitleInTargetPos(false, 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    windowSceneSessionImpl->windowSessionMap_.erase(windowSceneSessionImpl->GetWindowName());
 }
 
 /**

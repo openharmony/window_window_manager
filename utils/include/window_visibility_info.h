@@ -71,9 +71,9 @@ public:
 
     WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, WindowVisibilityState visibilityState,
         WindowType winType, WindowStatus windowStatus, const Rect& rect, const std::string& bundleName,
-        const std::string& abilityName) : windowId_(winId), pid_(pid), uid_(uid), visibilityState_(visibilityState),
-        windowType_(winType), windowStatus_(windowStatus), rect_(rect), bundleName_(bundleName),
-        abilityName_(abilityName) {}
+        const std::string& abilityName, bool isFocused) : windowId_(winId), pid_(pid), uid_(uid),
+        visibilityState_(visibilityState), windowType_(winType), windowStatus_(windowStatus), rect_(rect),
+        bundleName_(bundleName), abilityName_(abilityName), isFocused_(isFocused) {}
 
     /**
      * @brief Deconstruct of WindowVisibilityInfo.
@@ -109,6 +109,8 @@ public:
 
     WindowVisibilityState GetWindowVisibilityState() const { return visibilityState_; }
 
+    bool IsFocused() const { return isFocused_; }
+
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
@@ -118,6 +120,7 @@ public:
     Rect rect_ = {0, 0, 0, 0};
     std::string bundleName_;
     std::string abilityName_;
+    bool isFocused_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_VISIBILITY_INFO_H

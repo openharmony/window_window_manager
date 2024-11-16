@@ -822,8 +822,7 @@ WMError SessionProxy::GetGlobalScaledRect(Rect& globalScaledRect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    Rect tempRect = { reply.ReadInt32(), reply.ReadInt32(), reply.ReadUint32(), reply.ReadUint32() };
-    globalScaledRect = tempRect;
+    globalScaledRect = { reply.ReadInt32(), reply.ReadInt32(), reply.ReadUint32(), reply.ReadUint32() };
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
@@ -1995,6 +1994,27 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_DIALOG, "SendRequest failed");
         return;
+    }
+}
+
+void SessionProxy::NotifyExtensionDetachToDisplay()
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: UIExtcalled");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: WriteInterfaceToken failed");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    auto ret = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY), data, reply, option);
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: SendRequest failed");
     }
 }
 

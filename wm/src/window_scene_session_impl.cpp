@@ -3748,10 +3748,10 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
     bool needResize = false;
     Rect windowRect = GetRequestRect();
-    if (windowRect.IsUninitializedRect()) {
+    if (windowRect.IsUninitializedSize()) {
         windowRect = GetRect();
-        if (windowRect.IsUninitializedRect()) {
-            TLOGW(WmsLogTag::WMS_LAYOUT, "The requestRect and rect are uninitialized. winId: %{public}u",
+        if (windowRect.IsUninitializedSize()) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "The sizes of requestRect and rect are uninitialized. winId: %{public}u",
                 GetWindowId());
             return;
         }
@@ -4223,16 +4223,6 @@ bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
         return false;
     }
     return enableImmersiveMode_;
-}
-
-uint32_t WindowSceneSessionImpl::GetStatusBarHeight()
-{
-    uint32_t height = 0;
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, height);
-    height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
-    TLOGI(WmsLogTag::WMS_IMMS, "%{public}d", height);
-    return height;
 }
 
 template <typename K, typename V>

@@ -1302,7 +1302,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             break;
         case WindowSetUIContentType::BY_ABC:
             auto abcContent = GetAbcContent(contentInfo);
-            aceRet = uiContent->Initialize(this, abcContent, storage);
+            aceRet = uiContent->Initialize(this, abcContent, storage, contentInfo);
             break;
     }
     // make uiContent available after Initialize/Restore
@@ -1625,6 +1625,24 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
     WLOGFD("%{public}d", raiseEnabled);
+    auto parentId = GetParentId();
+    if (parentId == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window id: %{public}d Parent id is invalid!",
+              GetPersistentId());
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window id: %{public}d Must be app sub window!",
+              GetPersistentId());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window id: %{public}d The sub window must be shown!",
+              GetPersistentId());
+        return WMError::WM_DO_NOTHING;
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -3938,6 +3956,16 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
         windowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
     }
     return windowStatus;
+}
+
+uint32_t WindowSessionImpl::GetStatusBarHeight()
+{
+    uint32_t height = 0;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, height);
+    height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
+    TLOGI(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}u", height);
+    return height;
 }
 
 /** @note @window.layout */

@@ -1090,19 +1090,15 @@ HWTEST_F(SceneSessionTest5, UpdateWindowAnimationFlag, Function | SmallTest | Le
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
 
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->RegisterSessionChangeCallback(nullptr);
     EXPECT_EQ(WSError::WS_OK, session->UpdateWindowAnimationFlag(true));
 
-    sessionChangeCallback->onWindowAnimationFlagChange_ = nullptr;
-    session->RegisterSessionChangeCallback(sessionChangeCallback);
+    session->onWindowAnimationFlagChange_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->UpdateWindowAnimationFlag(true));
 
     NotifyWindowAnimationFlagChangeFunc func = [](const bool flag) {
         return;
     };
-    sessionChangeCallback->onWindowAnimationFlagChange_ = func;
+    session->onWindowAnimationFlagChange_ = func;
     EXPECT_EQ(WSError::WS_OK, session->UpdateWindowAnimationFlag(true));
 }
 

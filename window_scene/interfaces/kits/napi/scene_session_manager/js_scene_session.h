@@ -105,6 +105,7 @@ private:
     static napi_value SetIsMidScene(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
+    static napi_value MarkSystemSceneUIFirst(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
     static napi_value SetFocusableOnShow(napi_env env, napi_callback_info info);
     static napi_value SetSystemFocusable(napi_env env, napi_callback_info info);
@@ -169,6 +170,7 @@ private:
     napi_value OnSetIsMidScene(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
+    napi_value OnMarkSystemSceneUIFirst(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetFocusableOnShow(napi_env env, napi_callback_info info);
     napi_value OnSetSystemFocusable(napi_env env, napi_callback_info info);

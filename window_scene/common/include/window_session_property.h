@@ -217,7 +217,7 @@ public:
     bool GetIsUIExtAnySubWindow() const;
 
     /**
-     * Multi instance
+     * Multi Instance
      */
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
@@ -368,7 +368,7 @@ private:
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
     /**
-     * Multi instance
+     * Multi Instance
      */
     std::string appInstanceKey_;
 };
