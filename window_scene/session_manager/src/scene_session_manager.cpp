@@ -2838,10 +2838,10 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
 void SceneSessionManager::NotifyRecoveringFinished()
 {
     taskScheduler_->PostAsyncTask([this]() {
-            TLOGI(WmsLogTag::WMS_RECOVER, "RecoverFinished clear recoverSubSessionCacheMap");
-            recoveringFinished_ = true;
-            recoverSubSessionCacheMap_.clear();
-        }, "NotifyRecoveringFinished");
+        TLOGNI(WmsLogTag::WMS_RECOVER, "RecoverFinished clear recoverSubSessionCacheMap");
+        recoveringFinished_ = true;
+        recoverSubSessionCacheMap_.clear();
+    }, "NotifyRecoveringFinished");
 }
 
 void SceneSessionManager::CacheSubSessionForRecovering(
@@ -7173,8 +7173,7 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
 {
-    wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession]() {
+    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession)] {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -7625,7 +7624,7 @@ void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpd
         }
         SceneInputManager::GetInstance().NotifyWindowInfoChange(sceneSession, type);
     };
-    taskScheduler_->PostAsyncTask(notifySceneInputTask);
+    taskScheduler_->PostAsyncTask(notifySceneInputTask, "notifySceneInputTask");
 }
 
 bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos,
@@ -8431,18 +8430,16 @@ void SceneSessionManager::NotifyMMIWindowPidChange(int32_t windowId, bool startM
         return;
     }
 
-    wptr<SceneSession> weakSceneSession(sceneSession);
-    WLOGFI("SceneSessionManager NotifyMMIWindowPidChange to notify window: %{public}d, pid: %{public}d", windowId, pid);
-    auto task = [weakSceneSession, startMoving]() -> WSError {
+    WLOGFI("Notify window: %{public}d, pid: %{public}d", windowId, pid);
+    auto task = [weakSceneSession = wptr<SceneSession>(sceneSession), startMoving] {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             WLOGFW("session is null");
-            return WSError::WS_ERROR_NULLPTR;
+            return;
         }
         SceneInputManager::GetInstance().NotifyMMIWindowPidChange(sceneSession, startMoving);
-        return WSError::WS_OK;
     };
-    return taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
 void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
@@ -8793,7 +8790,7 @@ void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo>& displayInfo)
         return;
     }
 
-    auto task = [displayInfo]() -> WSError {
+    auto task = [displayInfo] {
         ScreenSessionManagerClient::GetInstance().UpdateDisplayScale(displayInfo->GetScreenId(),
             displayInfo->GetScaleX(),
             displayInfo->GetScaleY(),
@@ -8803,9 +8800,8 @@ void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo>& displayInfo)
             displayInfo->GetTranslateY());
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI(true);
-        return WSError::WS_OK;
     };
-    return taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
 void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -9934,7 +9930,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("GetVisibilityWindowInfo permission denied!");
+        WLOGFE("permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto task = [this, &infos]() {
@@ -9974,17 +9970,17 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
 {
     auto task = [this, forceFlush] {
         if (isUserBackground_) {
-            TLOGD(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
+            TLOGND(WmsLogTag::WMS_MULTI_USER, "The user is in the background, no need to flush info to MMI");
             return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().FlushDisplayInfoToMMI(forceFlush);
     };
-    taskScheduler_->PostAsyncTask(task);
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
-void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask &&task,
-    const std::string taskName, const int delayTime)
+void SceneSessionManager::PostFlushWindowInfoTask(FlushWindowInfoTask&& task,
+    const std::string& taskName, const int delayTime)
 {
     taskScheduler_->PostAsyncTask(std::move(task), taskName, delayTime);
 }
