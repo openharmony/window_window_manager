@@ -750,12 +750,12 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
         .angle = postureVal,
     };
     SensorEvent hallEvent = {
-        .dataLen = sizeof(ExtHallData),
         .data = reinterpret_cast<uint8_t *>(&hallData),
+        .dataLen = sizeof(ExtHallData),
     };
     SensorEvent postureEvent = {
-        .dataLen = sizeof(PostureData),
         .data = reinterpret_cast<uint8_t *>(&postureData),
+        .dataLen = sizeof(PostureData),
     };
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
