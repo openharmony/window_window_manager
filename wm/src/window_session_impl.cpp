@@ -3046,6 +3046,8 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
         auto windowChangeListeners = GetListeners<IWindowChangeListener>();
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, sizeChange listenerSize:%{public}zu",
+            GetPersistentId(), windowChangeListeners.size());
         for (auto& listener : windowChangeListeners) {
             if (listener != nullptr) {
                 listener->OnSizeChange(rect, reason);
@@ -3055,6 +3057,8 @@ void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reaso
     {
         std::lock_guard<std::mutex> lockRectListener(windowRectChangeListenerMutex_);
         auto windowRectChangeListeners = GetListeners<IWindowRectChangeListener>();
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, rectChange listenerSize:%{public}zu",
+            GetPersistentId(), windowRectChangeListeners.size());
         for (auto& listener : windowRectChangeListeners) {
             if (listener != nullptr) {
                 listener->OnRectChange(rect, reason);
