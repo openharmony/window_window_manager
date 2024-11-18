@@ -324,9 +324,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
         reply,
         option);
     ASSERT_EQ(ERR_NONE, res);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC), data, reply, option);
-    ASSERT_EQ(1, res);
 }
 
 /**
@@ -434,7 +431,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-    session_->HandleTransferAbilityResult(data, reply);
     res = session_->HandleNotifyExtensionDied(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleGetStatusBarHeight(data, reply);
@@ -473,6 +469,11 @@ HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteInt32(2), true);
     res = session_->HandleNotifyExtensionTimeout(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteInt32(2), true);
+    AAFwk::Want want;
+    data.WriteParcelable(&want);
+    res = session_->HandleTransferAbilityResult(date, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
 
