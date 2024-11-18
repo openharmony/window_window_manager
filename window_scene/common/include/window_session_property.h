@@ -44,6 +44,7 @@ public:
     void SetRequestRect(const struct Rect& rect);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
+    void SetFocusableOnShow(bool isFocusableOnShow);
     void SetTouchable(bool isTouchable);
     void SetDragEnabled(bool dragEnabled);
     void SetHideNonSystemFloatingWindows(bool hide);
@@ -104,6 +105,7 @@ public:
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;
     bool GetFocusable() const;
+    bool GetFocusableOnShow() const;
     bool GetTouchable() const;
     bool GetDragEnabled() const;
     bool GetHideNonSystemFloatingWindows() const;
@@ -260,6 +262,7 @@ private:
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
+    bool focusableOnShow_ { true };
     bool touchable_ { true };
     bool dragEnabled_ = { true };
     bool raiseEnabled_ = { true };

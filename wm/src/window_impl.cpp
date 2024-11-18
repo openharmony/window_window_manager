@@ -1601,7 +1601,7 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
     }
 }
 
-WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     if (state_ == WindowState::STATE_FROZEN) {
         WLOGFE("window is frozen, can not be shown, windowId: %{public}u", property_->GetWindowId());

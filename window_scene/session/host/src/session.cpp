@@ -532,6 +532,13 @@ WSError Session::SetFocusable(bool isFocusable)
     return WSError::WS_OK;
 }
 
+WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d", GetPersistentId(), isFocusableOnShow);
+    focusableOnShow_ = isFocusableOnShow;
+    return WSError::WS_OK;
+}
+
 bool Session::GetFocusable() const
 {
     auto property = GetSessionProperty();
@@ -540,6 +547,11 @@ bool Session::GetFocusable() const
     }
     WLOGFD("property is null");
     return true;
+}
+
+bool Session::IsFocusableOnShow() const
+{
+    return focusableOnShow_;
 }
 
 bool Session::IsFocused() const

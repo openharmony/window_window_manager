@@ -1004,7 +1004,7 @@ napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
-            WMError ret = weakWindow->Show(0, false);
+            WMError ret = weakWindow->Show(0, false, true);
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
@@ -1038,7 +1038,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
-            WMError ret = weakWindow->Show(0, false);
+            WMError ret = weakWindow->Show(0, false, true);
             WLOGI("Window [%{public}u, %{public}s] show with ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret == WMError::WM_OK) {
@@ -1090,7 +1090,7 @@ napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Show(0, true));
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Show(0, true, true));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
