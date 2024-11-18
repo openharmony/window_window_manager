@@ -275,6 +275,7 @@ private:
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
+    mutable std::mutex requestRectMutex_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     mutable std::mutex windowRectMutex_;
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
