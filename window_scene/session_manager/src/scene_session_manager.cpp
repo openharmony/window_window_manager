@@ -2859,9 +2859,7 @@ void SceneSessionManager::CacheSpecificSessionForRecovering(
 
     if (WindowHelper::IsSubWindow(windowType)) {
         recoverSubSessionCacheMap_[parentId].emplace_back(sceneSession);
-    }
-
-    if (WindowHelper::IsDialogWindow(windowType)) {
+    } else if (WindowHelper::IsDialogWindow(windowType)) {
         recoverDialogSessionCacheMap_[parentId].emplace_back(sceneSession);
     }
 }
@@ -2886,9 +2884,9 @@ bool SceneSessionManager::IsWindowSupportCacheForRecovering(
 
     auto parentId = property->GetParentPersistentId();
     if ((WindowHelper::IsSubWindow(windowType) &&
-        createSubSessionFuncMap_.find(parentId) != createSubSessionFuncMap_.end()) ||
+         createSubSessionFuncMap_.find(parentId) != createSubSessionFuncMap_.end()) ||
         (WindowHelper::IsDialogWindow(windowType) &&
-        bindDialogTargetFuncMap_.find(parentId) != bindDialogTargetFuncMap_.end())) {
+         bindDialogTargetFuncMap_.find(parentId) != bindDialogTargetFuncMap_.end())) {
         return false;
     }
 
@@ -2949,8 +2947,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             return WSError::WS_ERROR_NULLPTR;
         }
         SessionInfo sessionInfo = RecoverSessionInfo(property);
-        sptr<SceneSession> sceneSession = nullptr;
-        sceneSession = RequestSceneSession(sessionInfo, nullptr);
+        sptr<SceneSession> sceneSession = RequestSceneSession(sessionInfo, nullptr);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "Request sceneSession failed");
             return WSError::WS_ERROR_NULLPTR;
@@ -3015,12 +3012,11 @@ void SceneSessionManager::RegisterBindDialogTargetListener(const sptr<SceneSessi
 {
     int32_t persistentId = session->GetPersistentId();
     TLOGI(WmsLogTag::WMS_DIALOG, "Id: %{public}d", persistentId);
-    auto task = [this, session, persistentId, func = std::move(func)]() {
+    taskScheduler_->PostTask([this, session, persistentId, func = std::move(func)] {
         session->RegisterBindDialogSessionCallback(func);
         bindDialogTargetFuncMap_[persistentId] = std::move(func);
         RecoverCachedDialogSession(persistentId);
-    };
-    taskScheduler_->PostTask(task, __func__);
+    }, __func__);
 }
 
 void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSession,

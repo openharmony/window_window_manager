@@ -2196,12 +2196,12 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTes
  */
 HWTEST_F(SceneSessionManagerTest2, RecoverCachedDialogSession, Function | SmallTest | Level3)
 {
-    sptr<WindowSessionProperty> property;
     ASSERT_NE(ssm_, nullptr);
     ssm_->recoveringFinished_ = false;
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property;
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(sceneSession, nullptr);
 

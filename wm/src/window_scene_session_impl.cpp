@@ -441,8 +441,8 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
 
 WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "windowName = %{public}s, windowMode = %{public}u, windowType = %{public}u, "
-        "persistentId = %{public}d, windowState = %{public}d, requestWindowState = %{public}d, parentId = %{public}d",
+    TLOGI(WmsLogTag::WMS_RECOVER, "windowName=%{public}s, windowMode=%{public}u, windowType=%{public}u, "
+        "persistentId=%{public}d, windowState=%{public}d, requestWindowState=%{public}d, parentId=%{public}d",
         GetWindowName().c_str(), property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_,
         requestState_, property_->GetParentId());
 
@@ -473,6 +473,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         iSessionStage, eventChannel, surfaceNode_, property_, session, token);
 
     property_->SetWindowState(state_);
+
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Recover failed, session is nullptr");
         return WMError::WM_ERROR_NULLPTR;
@@ -490,8 +491,8 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 
 WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "windowName = %{public}s, windowMode = %{public}u, windowType = %{public}u, "
-        "persistentId = %{public}d, windowState = %{public}d, requestWindowState = %{public}d", GetWindowName().c_str(),
+    TLOGI(WmsLogTag::WMS_RECOVER, "windowName=%{public}s, windowMode=%{public}u, windowType=%{public}u, "
+        "persistentId=%{public}d, windowState=%{public}d, requestWindowState=%{public}d", GetWindowName().c_str(),
         property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_, requestState_);
 
     if (isFocused_) {
