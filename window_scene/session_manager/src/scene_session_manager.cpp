@@ -1827,6 +1827,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->userId = currentUserId_;
     abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
     abilitySessionInfo->processOptions = sessionInfo.processOptions;
+    abilitySessionInfo->tmpSpecifiedId = sessionInfo.specifiedId;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -1902,8 +1903,10 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             sceneSession->SetForegroundInteractiveStatus(true);
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
-        TLOGNI(WmsLogTag::WMS_MAIN, "Request active id:%{public}d system:%{public}u isNewActive:%{public}d",
-            persistentId, static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_), isNewActive);
+        TLOGNI(WmsLogTag::WMS_MAIN,
+            "Request active id:%{public}d, system:%{public}d, isNewActive:%{public}d, specifiedId:%{public}d",
+            persistentId, sceneSession->GetSessionInfo().isSystem_,
+            isNewActive, sceneSession->GetSessionInfo().specifiedId);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "Request active session invalid by %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
@@ -2019,12 +2022,13 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSessionInfo->collaboratorType = sceneSession->GetCollaboratorType();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "id %{public}d want-ability: %{public}s, bundle: %{public}s, "
-        "module: %{public}s, uri: %{public}s, appIndex: %{public}d.", persistentId,
+        "module: %{public}s, uri: %{public}s, appIndex: %{public}d, tmpSpecifiedId:%{public}d", persistentId,
         sceneSessionInfo->want.GetElement().GetAbilityName().c_str(),
         sceneSessionInfo->want.GetElement().GetBundleName().c_str(),
         sceneSessionInfo->want.GetElement().GetModuleName().c_str(),
         sceneSessionInfo->want.GetElement().GetURI().c_str(),
-        sceneSessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0));
+        sceneSessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0),
+        sceneSessionInfo->tmpSpecifiedId);
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
     bool isAppSupportPhoneInPc = false;
