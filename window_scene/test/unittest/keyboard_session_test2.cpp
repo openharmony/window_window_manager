@@ -746,7 +746,6 @@ HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction4, Function | SmallTe
     auto callingSessionId = keyboardSession->property_->GetCallingSessionId();
     ASSERT_EQ(callingSessionId, INVALID_WINDOW_ID);
 }
-
 }  // namespace
 }  // namespace Rosen
 }  // namespace OHOS
