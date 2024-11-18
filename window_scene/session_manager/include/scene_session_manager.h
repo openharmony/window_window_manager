@@ -756,7 +756,7 @@ private:
     WSError StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive);
 
     /*
-     * Specific Window
+     * Window Recover
      */
     bool IsWindowSupportCacheForRecovering(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property);
