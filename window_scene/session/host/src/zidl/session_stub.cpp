@@ -1022,7 +1022,7 @@ int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessagePar
     return ERR_NONE;
 }
 
-int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
     NotifyExtensionDetachToDisplay();
