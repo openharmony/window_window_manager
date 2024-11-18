@@ -110,11 +110,6 @@ void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents eve
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoFoldedToHalfFolded()");
 }
 
-void SuperFoldStateManager::DoExpandedToKeyboard(SuperFoldStatusChangeEvents event)
-{
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoExpandedToKeyboard()");
-}
-
 SuperFoldStateManager::SuperFoldStateManager()
 {
     AddStateManagerMap(SuperFoldStatus::HALF_FOLDED,
@@ -142,15 +137,31 @@ SuperFoldStateManager::SuperFoldStateManager()
         SuperFoldStatus::KEYBOARD,
         &SuperFoldStateManager::DoKeyboardOn);
 
-    AddStateManagerMap(SuperFoldStatus::EXPANDED,
-        SuperFoldStatusChangeEvents::KEYBOARD_ON,
-        SuperFoldStatus::HALF_FOLDED,
-        &SuperFoldStateManager::DoExpandedToKeyboard);
-
     AddStateManagerMap(SuperFoldStatus::KEYBOARD,
         SuperFoldStatusChangeEvents::KEYBOARD_OFF,
         SuperFoldStatus::HALF_FOLDED,
         &SuperFoldStateManager::DoKeyboardOff);
+
+    // 开机状态自检
+    AddStateManagerMap(SuperFoldStatus::UNKNOWN,
+        SuperFoldStatusChangeEvents::KEYBOARD_ON,
+        SuperFoldStatus::KEYBOARD,
+        [&](SuperFoldStatusChangeEvents events) {});
+
+    AddStateManagerMap(SuperFoldStatus::UNKNOWN,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED,
+        SuperFoldStatus::HALF_FOLDED,
+        [&](SuperFoldStatusChangeEvents events) {});
+
+    AddStateManagerMap(SuperFoldStatus::UNKNOWN,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED,
+        SuperFoldStatus::EXPANDED,
+        [&](SuperFoldStatusChangeEvents events) {});
+
+    AddStateManagerMap(SuperFoldStatus::UNKNOWN,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED,
+        SuperFoldStatus::FOLDED,
+        [&](SuperFoldStatusChangeEvents events) {});
 }
 
 SuperFoldStateManager::~SuperFoldStateManager() = default;

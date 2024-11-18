@@ -53,7 +53,7 @@ public:
 
     FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 private:
-    std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::HALF_FOLDED;
+    std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
 
     struct Transition {
         SuperFoldStatus nextState;
@@ -74,8 +74,6 @@ private:
     static void DoKeyboardOff(SuperFoldStatusChangeEvents event);
 
     static void DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event);
-
-    static void DoExpandedToKeyboard(SuperFoldStatusChangeEvents event);
 
     void SetCurrentStatus(SuperFoldStatus curState);
 
