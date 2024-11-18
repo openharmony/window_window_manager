@@ -403,7 +403,7 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
     session->onRestoreMainWindowFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
-    NotifyRestoreMainWindowFunc func = []() {
+    NotifyRestoreMainWindowFunc func = [] {
         return;
     };
     session->onRestoreMainWindowFunc_ = func;
