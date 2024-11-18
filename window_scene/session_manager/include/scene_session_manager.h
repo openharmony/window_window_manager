@@ -519,8 +519,8 @@ public:
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
 
     /*
-    * Specific Window Recovery
-    */
+     * Specific Window
+     */
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void RegisterBindDialogTargetListener(const sptr<SceneSession>& session, NotifyBindDialogSessionFunc&& func);
     void UnregisterSpecificSessionCreateListener(int32_t persistentId);
@@ -708,7 +708,7 @@ private:
     void UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid);
     bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
-    
+
     /*
      * Window Rotate Animation
      */
@@ -754,6 +754,16 @@ private:
     bool IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession);
     bool IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid);
     WSError StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive);
+
+    /*
+     * Specific Window
+     */
+    bool IsWindowSupportCacheForRecovering(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property);
+    void CacheSpecificSessionForRecovering(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property);
+    void RecoverCachedSubSession(int32_t persistentId);
+    void RecoverCachedDialogSession(int32_t persistentId);
 
     /*
      * Gesture Back
@@ -1072,18 +1082,12 @@ private:
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
 
     /*
-    * Specific Window Recovery
-    */
+     * Specific Window
+     */
     std::unordered_map<int32_t, NotifyCreateSubSessionFunc> createSubSessionFuncMap_;
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
     std::unordered_map<int32_t, NotifyBindDialogSessionFunc> bindDialogTargetFuncMap_;
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverDialogSessionCacheMap_;
-    bool IsWindowSupportCacheForRecovering(const sptr<SceneSession>& sceneSession,
-        const sptr<WindowSessionProperty>& property);
-    void CacheSpecificSessionForRecovering(const sptr<SceneSession>& sceneSession,
-        const sptr<WindowSessionProperty>& property);
-    void RecoverCachedSubSession(int32_t persistentId);
-    void RecoverCachedDialogSession(int32_t persistentId);
 };
 } // namespace OHOS::Rosen
 
