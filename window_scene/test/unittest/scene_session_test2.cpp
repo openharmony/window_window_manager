@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "window_helper.h"
 #include "display_manager.h"
 #include "pointer_event.h"
@@ -1337,7 +1338,7 @@ HWTEST_F(SceneSessionTest2, SetPipActionEvent, Function | SmallTest | Level2)
     ASSERT_EQ(res, WSError::WS_OK);
 }
 
-/*
+/**
  * @tc.name: SetPiPControlEvent
  * @tc.desc: SetPiPControlEvent
  * @tc.type: FUNC

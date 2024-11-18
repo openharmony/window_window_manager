@@ -86,6 +86,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_Unlock, Function 
     });
     controller.NotifyDisplayEvent(event);
 }
+
 /**
  * @tc.name: SetDisplayState
  * @tc.desc: SetDisplayState func

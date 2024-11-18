@@ -159,7 +159,6 @@ HWTEST_F(MainSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, mainSession_->TransferKeyEvent(keyEvent));
 }
 
-
 /**
  * @tc.name: ProcessPointDownSession01
  * @tc.desc: check func ProcessPointDownSession
@@ -171,6 +170,7 @@ HWTEST_F(MainSessionTest, ProcessPointDownSession01, Function | SmallTest | Leve
     mainSession_->ClearDialogVector();
     EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(10, 20));
 }
+
 /**
  * @tc.name: ProcessPointDownSession02
  * @tc.desc: check func ProcessPointDownSession
@@ -192,6 +192,7 @@ HWTEST_F(MainSessionTest, SetTopmost01, Function | SmallTest | Level1)
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(false));
 }
+
 /**
  * @tc.name: SetTopmost02
  * @tc.desc: check func SetTopmost
@@ -322,6 +323,7 @@ HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Leve
     bool ret = mainSession_->IsExitSplitOnBackground();
     ASSERT_EQ(false, ret);
 }
+
 /**
  * @tc.name: NotifyClientToUpdateInteractive01
  * @tc.desc: check func NotifyClientToUpdateInteractive
@@ -332,6 +334,7 @@ HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive01, Function | SmallTes
     mainSession_->NotifyClientToUpdateInteractive(true);
     ASSERT_TRUE(true); // exec success
 }
+
 /**
  * @tc.name: NotifyClientToUpdateInteractive02
  * @tc.desc: check func NotifyClientToUpdateInteractive

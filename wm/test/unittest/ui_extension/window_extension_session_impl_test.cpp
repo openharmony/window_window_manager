@@ -1360,7 +1360,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterOccupiedAreaChangeListener, F
     ASSERT_EQ(WMError::WM_OK, window_->UnregisterOccupiedAreaChangeListener(nullptr));
 }
 
-
 /**
  * @tc.name: GetAvoidAreaByType01
  * @tc.desc: NotifyExecuteAction Test

@@ -276,6 +276,7 @@ HWTEST_F(SessionStubLifecycleTest, Show03, Function | SmallTest | Level1)
     auto result = subSession_->Show(property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
+
 /**
  * @tc.name: Show04
  * @tc.desc: check func Show
@@ -294,6 +295,7 @@ HWTEST_F(SessionStubLifecycleTest, Show04, Function | SmallTest | Level1)
     subSession_->SetSessionProperty(property);
     ASSERT_EQ(subSession_->Show(property), WSError::WS_OK);
 }
+
 /**
  * @tc.name: ProcessPointDownSession01
  * @tc.desc: check func ProcessPointDownSession
@@ -310,6 +312,7 @@ HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession01, Function | SmallTe
     subSession_->RectCheck(50, 100);
     ASSERT_EQ(subSession_->ProcessPointDownSession(50, 100), WSError::WS_OK);
 }
+
 /**
  * @tc.name: ProcessPointDownSession02
  * @tc.desc: check func ProcessPointDownSession

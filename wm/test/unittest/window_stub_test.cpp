@@ -195,7 +195,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
     EXPECT_EQ(res, 0);
 }
 
-
 /**
  * @tc.name: OnRemoteRequest07
  * @tc.desc: test TRANS_ID_NOTIFY_CLIENT_POINT_UP success
@@ -353,7 +352,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_NE(res, 10);
 }
-
 
 /**
  * @tc.name: OnRemoteRequest13

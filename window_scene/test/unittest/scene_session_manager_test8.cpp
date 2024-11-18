@@ -80,7 +80,6 @@ HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, Function | SmallTest | Le
     EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(strId, dumpInfo));
 }
 
-
 /**
  * @tc.name: GetRemoteSessionSnapshotInfo
  * @tc.desc: GetRemoteSessionSnapshotInfo set gesture navigation enabled
@@ -524,6 +523,7 @@ HWTEST_F(SceneSessionManagerTest8, HandleTurnScreenOn, Function | SmallTest | Le
     constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
     usleep(NOT_WAIT_SYNC_IN_NS);
 }
+
 /**
  * @tc.name: HandleKeepScreenOn
  * @tc.desc: test function : HandleKeepScreenOn

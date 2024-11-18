@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_extension_window_config.h"
 #include <string>
 #include "js_window_utils.h"

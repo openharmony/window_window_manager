@@ -87,6 +87,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
     property->SetRaiseEnabled(true);
     ASSERT_EQ(property->GetRaiseEnabled(), true);
 }
+
 /**
  * @tc.name: SetRequestedOrientation
  * @tc.desc: SetRequestedOrientation test
@@ -418,6 +419,7 @@ HWTEST_F(WindowSessionPropertyTest, SetModeSupportInfo, Function | SmallTest | L
     WindowSessionProperty *property = new WindowSessionProperty();
     ASSERT_NE(property->GetModeSupportInfo(), 0);
 }
+
 /**
  * @tc.name: IsFloatingWindowAppType
  * @tc.desc: IsFloatingWindowAppType test
@@ -764,6 +766,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
+
 /**
  * @tc.name: GetWindowName
  * @tc.desc: GetWindowName

@@ -1447,7 +1447,6 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest65, Function | SmallTest |
     EXPECT_EQ(res, 0);
 }
 
-
 /**
  * @tc.name: OnRemoteRequest66
  * @tc.desc: normal function, TRANS_ID_SWITCH_USER test

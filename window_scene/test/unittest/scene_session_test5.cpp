@@ -362,7 +362,6 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     session->ClearDialogVector();
 }
 
-
 /**
  * @tc.name: SetSurfaceBounds01
  * @tc.desc: SetSurfaceBounds function
@@ -1656,6 +1655,7 @@ HWTEST_F(SceneSessionTest5, SetNotifyVisibleChangeFunc, Function | SmallTest | L
     session->SetNotifyVisibleChangeFunc([](int32_t persistentId) {});
     EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
 }
+
 /**
  * @tc.name: SetRequestNextVsyncFunc
  * @tc.desc: SetRequestNextVsyncFunc01 Test

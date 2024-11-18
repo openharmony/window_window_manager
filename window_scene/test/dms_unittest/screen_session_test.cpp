@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "screen_session.h"
 #include <gtest/gtest.h>
 #include "screen_session_manager/include/screen_session_manager.h"
@@ -1643,6 +1644,7 @@ HWTEST_F(ScreenSessionTest, SetUpdateToInputManagerCallback, Function | SmallTes
 
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateToInputManagerCallbackend";
 }
+
 /**
  * @tc.name: SetScreenRotationLocked
  * @tc.desc: normal function

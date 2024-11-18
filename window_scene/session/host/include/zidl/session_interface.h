@@ -283,6 +283,7 @@ public:
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
+
     /**
      * @brief Callback for session modal type changes.
      *

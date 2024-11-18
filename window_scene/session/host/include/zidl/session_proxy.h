@@ -112,7 +112,7 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
-     /*
+     /**
       * Starting Window
       */
     WSError RemoveStartingWindow() override;
