@@ -349,6 +349,7 @@ struct SessionInfo {
     bool isPcOrPadEnableActivation_ = false;
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
+    int32_t specifiedId = 0;
 
     /**
      * UIExtension
