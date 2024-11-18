@@ -197,10 +197,9 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
     };
 
     auto it = std::find_if(whitelist.begin(), whitelist.end(), [&element](const auto& item) {
-        auto& [bundleName, abilityName, moduleName] = item;
+        auto& [bundleName, abilityName, _] = item;
         return (element.GetBundleName() == bundleName && element.GetAbilityName() == abilityName);
     });
-
     if (it != whitelist.end()) {
         return true;
     }
@@ -1450,7 +1449,7 @@ uint32_t SceneSessionManager::GetLockScreenZorder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (auto& [persistentId, session] : sceneSessionMap_) {
-        if (persistentId && (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD)) {
+        if (session && (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD)) {
             TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
             return session->GetZOrder();
         }
