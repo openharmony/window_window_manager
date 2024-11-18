@@ -2003,7 +2003,6 @@ WSError SessionProxy::RequestFocus(bool isFocused)
 void SessionProxy::NotifyExtensionDetachToDisplay()
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: UIExtcalled");
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -2014,10 +2013,15 @@ void SessionProxy::NotifyExtensionDetachToDisplay()
     }
 
     sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: remote is null");
+        return;
+    }
+
     auto ret = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY), data, reply, option);
     if (ret != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: SendRequest failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: SendRequest failed, ret code: %{public}u", ret);
     }
 }
 
