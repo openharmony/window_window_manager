@@ -24,7 +24,7 @@ namespace {
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
-void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
+void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason) {}
 
 FoldDisplayMode FoldScreenPolicy::GetScreenDisplayMode()
 {

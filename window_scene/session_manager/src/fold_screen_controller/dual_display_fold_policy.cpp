@@ -103,7 +103,7 @@ ScreenId DualDisplayFoldPolicy::GetScreenIdByDisplayMode(FoldDisplayMode display
     return screenId;
 }
 
-void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
+void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
