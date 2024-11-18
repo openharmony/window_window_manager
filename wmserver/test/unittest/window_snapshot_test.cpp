@@ -120,11 +120,11 @@ HWTEST_F(WindowSnapshotTest, GetSnapshot04, Function | SmallTest | Level3)
     sptr<SnapshotController> snapshotController = new SnapshotController(root, handler);
     AAFwk::Snapshot snapshot;
     ASSERT_EQ(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
-        snapshotController->GetSnapshot(iRemoteObjectMocker, snapshot_));
+        snapshotController->GetSnapshot(iRemoteObjectMocker, snapshot));
 
     sptr<IRemoteObject> iRemoteObjectMockerInvalid = new IRemoteObjectMocker();
     ASSERT_EQ(static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
-        snapshotController->GetSnapshot(iRemoteObjectMockerInvalid, snapshot_));
+        snapshotController->GetSnapshot(iRemoteObjectMockerInvalid, snapshot));
 }
 }
 } // namespace Rosen
