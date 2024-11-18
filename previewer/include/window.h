@@ -356,6 +356,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
     /**
      * @brief Set the application modality of main window.
      *
@@ -366,6 +367,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
     /**
      * @brief Set the modality of sub window.
      *

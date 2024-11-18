@@ -887,7 +887,7 @@ HWTEST_F(WindowImplTest3, UpdateConfigurationForAll01, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-/*
+/**
  * @tc.name: GetSurfaceNode01
  * @tc.desc: GetSurfaceNode01 Test
  * @tc.type: FUNC

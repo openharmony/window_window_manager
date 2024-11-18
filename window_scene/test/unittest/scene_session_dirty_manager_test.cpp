@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "transaction/rs_uiextension_data.h"
 #include "input_manager.h"
 #include "session_manager/include/scene_session_dirty_manager.h"

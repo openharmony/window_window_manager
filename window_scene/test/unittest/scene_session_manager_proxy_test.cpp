@@ -851,7 +851,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetSessionSnapshotById, Function | SmallT
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TerminateSessionNew
  * @tc.desc: normal function
  * @tc.type: FUNC

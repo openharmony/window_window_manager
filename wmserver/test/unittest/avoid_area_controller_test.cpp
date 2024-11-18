@@ -525,6 +525,7 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, Function | SmallTest | Le
     }
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
 }
+
 /**
  * @tc.name: KeyboardAvoidArea02
  * @tc.desc: Get avoid areas with listener, TYPE_KEYBOARD.

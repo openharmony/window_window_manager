@@ -629,6 +629,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml01, Function | SmallTest 
     ASSERT_EQ(ssm_->systemConfig_.defaultWindowMode_,
         static_cast<WindowMode>(static_cast<uint32_t>(102)));
 }
+
 /**
  * @tc.name: ConfigWindowSceneXml02
  * @tc.desc: call defaultWindowMode
@@ -2155,7 +2156,6 @@ HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | Smal
     ssm_->RecoverCachedSubSession(parentPersistentId);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 0);
 }
-
 
 /**
  * @tc.name: SetAlivePersistentIds

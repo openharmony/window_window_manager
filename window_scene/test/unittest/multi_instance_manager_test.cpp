@@ -292,7 +292,6 @@ HWTEST_F(MultiInstanceManagerTest, GetInstanceCount, Function | SmallTest | Leve
     ASSERT_EQ(MultiInstanceManager::GetInstance().GetInstanceCount(BUNDLE_NAME), 0);
 }
 
-
 /**
  * @tc.name: GetLastInstanceKey
  * @tc.desc: test function : GetLastInstanceKey

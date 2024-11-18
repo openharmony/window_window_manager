@@ -45,7 +45,7 @@ namespace {
 template<typename T1, typename T2, typename Ret>
 using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
 
-/*
+/**
  * DFX
  */
 const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
@@ -71,7 +71,7 @@ public:
         const sptr<Rosen::ISession>& iSession,
         const std::string& identityToken = "") { return WMError::WM_OK; }
 
-    /*
+    /**
      * inherits from window
      */
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
@@ -94,7 +94,7 @@ public:
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
 
-    /*
+    /**
      * Window Hierarchy
      */
     WMError SetTopmost(bool topmost) override;
@@ -110,7 +110,7 @@ public:
     WMError SetSingleFrameComposerEnabled(bool enable) override;
     bool IsFloatingWindowAppType() const override;
 
-    /*
+    /**
      * PC Window
      */
     bool IsPcOrPadCapabilityEnabled() const override;
@@ -140,7 +140,7 @@ public:
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
 
-    /*
+    /**
      * inherits from session stage
      */
     WSError SetActive(bool active) override;
@@ -241,7 +241,7 @@ public:
     WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
 
-    /*
+    /**
      * PiP Window
      */
     WSError NotifyCloseExistPipWindow() override;
@@ -280,7 +280,7 @@ public:
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
 
-    /*
+    /**
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
@@ -290,7 +290,7 @@ public:
      */
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
-    /*
+    /**
      * Free Multi Window
      */
     WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
@@ -311,7 +311,7 @@ protected:
     void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
 
-    /*
+    /**
      * Free Multi Window
      */
     void ClearSwitchFreeMultiWindowListenersById(int32_t persistentId);
@@ -401,7 +401,7 @@ protected:
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
 
-    /*
+    /**
      * DFX
      */
     void SetUIContentComplete();
@@ -412,13 +412,13 @@ protected:
         SET_UICONTENT_TIMEOUT = 1000
     };
 
-    /*
+    /**
      * Window Lifecycle
      */
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
 
-    /*
+    /**
      * Window Layout
      */
     void FlushLayoutSize(int32_t width, int32_t height) override;
@@ -554,7 +554,7 @@ private:
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 
-    /*
+    /**
      * Window Layout
      */
     WSRect layoutRect_;
@@ -563,7 +563,7 @@ private:
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
 
-    /*
+    /**
      * Multi Window
      */
     bool isSplitButtonVisible_ = true;

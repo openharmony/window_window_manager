@@ -1836,7 +1836,6 @@ HWTEST_F(WindowSessionImplTest2, GetKeyboardAnimationConfig, Function | SmallTes
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetKeyboardAnimationConfig end";
 }
 
-
 /**
  * @tc.name: GetSubWindow
  * @tc.desc: GetSubWindow

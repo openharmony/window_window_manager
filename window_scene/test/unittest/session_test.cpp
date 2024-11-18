@@ -442,7 +442,6 @@ HWTEST_F(WindowSessionTest, GetGlobalScaledRect, Function | SmallTest | Level2)
     ASSERT_EQ(20, globalScaledRect.height_);
 }
 
-
 /**
  * @tc.name: RaiseToAppTop01
  * @tc.desc: RaiseToAppTop
@@ -1335,6 +1334,7 @@ HWTEST_F(WindowSessionTest, TransferFocusStateEvent02, Function | SmallTest | Le
 
     ASSERT_EQ(WSError::WS_OK, session_->TransferFocusStateEvent(false));
 }
+
 /**
  * @tc.name: CreateDetectStateTask001
  * @tc.desc: Create detection task when there are no pre_existing tasks.
