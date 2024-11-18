@@ -18,8 +18,10 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
+#include <cinttypes>
 
 #include "setting_observer.h"
+#include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -43,16 +45,17 @@ public:
     static bool GetSettingRotationScreenID(int32_t& screenId, const std::string& key = SETTING_ROTATION_SCREEN_ID_KEY);
     static std::string RemoveInvalidChar(const std::string& input);
     static bool SplitString(std::vector<std::string>& splitValues, const std::string& input, char delimiter = ',');
+    static bool IsNumber(std::string str);
     static int32_t GetDataFromString(std::vector<uint64_t>& datas, const std::string& inputString);
     static bool GetSettingRecoveryResolutionString(std::vector<std::string>& resolutionStrings,
         const std::string& key = SETTING_RECOVERY_RESOLUTION_KEY);
-    static bool GetSettingRecoveryResolutionMap(std::map<uint64_t, std::pair<int32_t, int32_t>>& resolution);
+    static bool GetSettingRecoveryResolutionMap(std::map<ScreenId, std::pair<int32_t, int32_t>>& resolution);
     static bool GetSettingScreenModeString(std::vector<std::string>& screenModeStrings,
         const std::string& key = SETTING_SCREEN_MODE_KEY);
-    static bool GetSettingScreenModeMap(std::map<uint64_t, uint32_t>& screenMode);
+    static bool GetSettingScreenModeMap(std::map<ScreenId, uint32_t>& screenMode);
     static bool GetSettingRelativePositionString(std::vector<std::string>& relativePositionStrings,
         const std::string& key = SETTING_RELATIVE_POSITION_KEY);
-    static bool GetSettingRelativePositionMap(std::map<uint64_t, std::pair<uint32_t, uint32_t>>& relativePosition);
+    static bool GetSettingRelativePositionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& relativePosition);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
