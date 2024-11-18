@@ -201,6 +201,7 @@ public:
     virtual void NotifyAsyncOn() {}
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
      * @brief Close pip window while stopPip is called.
@@ -282,7 +283,6 @@ public:
      */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 
-    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
     /**
      * @brief Callback for session modal type changes.
      *
