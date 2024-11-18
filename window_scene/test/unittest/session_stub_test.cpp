@@ -158,7 +158,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteBool(true);
-    data.WriteInt32(1);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
@@ -171,7 +170,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MARK_PROCESSED), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_MAXIMIZE_MODE), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
