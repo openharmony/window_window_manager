@@ -224,7 +224,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::ResetPcFoldScreenArrangeRule);
     BindNativeFunction(env, exportObj, "setIsWindowRectAutoSave", moduleName,
         JsSceneSessionManager::SetIsWindowRectAutoSave);
-    BindNativeFunction(env, exportObj, "NotifyAboveLockScreen", moduleName,
+    BindNativeFunction(env, exportObj, "notifyAboveLockScreen", moduleName,
         JsSceneSessionManager::NotifyAboveLockScreen);
     return NapiGetUndefined(env);
 }
@@ -3423,7 +3423,7 @@ napi_value JsSceneSessionManager::OnIsScbCoreEnabled(napi_env env, napi_callback
 napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Argc is invalid: %{public}zu", argc);
@@ -3440,17 +3440,7 @@ napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
 
-    std::string windowIdListStr = "none";
-    if (!windowIds.empty()) {
-        windowIdListStr = std::accumulate(windowIds.begin() + 1,
-            windowIds.end(),
-            std::to_string(windowIds[0]),
-            [](const std::string &str, int32_t windowId) { return str + "," + std::to_string(windowId); });
-    }
-
-    TLOGI(WmsLogTag::WMS_UIEXT,
-        "UIExtOnLock: OnNotifyAboveLockScreen, window list: %{public}s",
-        windowIdListStr.c_str());
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: window list size: %{public}zu", windowIds.size());
     SceneSessionManager::GetInstance().OnNotifyAboveLockScreen(windowIds);
     return NapiGetUndefined(env);
 }

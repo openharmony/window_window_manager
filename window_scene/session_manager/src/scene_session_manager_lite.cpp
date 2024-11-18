@@ -190,8 +190,8 @@ WMError SceneSessionManagerLite::CheckWindowId(int32_t windowId, int32_t& pid)
     return SceneSessionManager::GetInstance().CheckWindowId(windowId, pid);
 }
 
-WMError SceneSessionManagerLite::CheckUIExtensionCreation(
-    int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName &element, int32_t &pid)
+WMError SceneSessionManagerLite::CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId,
+    const AppExecFwk::ElementName& element, int32_t& pid)
 {
     return SceneSessionManager::GetInstance().CheckUIExtensionCreation(windowId, tokenId, element, pid);
 }

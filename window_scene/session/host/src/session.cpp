@@ -473,19 +473,18 @@ void Session::NotifyTransferAccessibilityEvent(const Accessibility::Accessibilit
 
 void Session::NotifyExtensionDetachToDisplay()
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
         return;
     }
 
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    for (auto &listener : lifecycleListeners) {
+    for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnExtensionDetachToDisplay();
         }
     }
-
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
 }
 
 float Session::GetAspectRatio() const
