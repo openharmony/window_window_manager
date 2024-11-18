@@ -372,7 +372,7 @@ int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel& dat
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", typeId);
+    TLOGI(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -390,7 +390,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", typeId);
+    TLOGI(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);

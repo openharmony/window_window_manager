@@ -29,6 +29,7 @@
 #include <ipc_skeleton.h>
 #include <parameter.h>
 #include <parameters.h>
+#include <privacy_kit.h>
 #include <system_ability_definition.h>
 #include <transaction/rs_interfaces.h>
 #include <xcollie/watchdog.h>
@@ -2637,6 +2638,20 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     IPCSkeleton::SetCallingIdentity(identity);
 }
 
+void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"",
+            screenId);
+        return;
+    }
+    screenSession->SetPhysicalRotation(rotation, GetFoldStatus());
+    screenSession->SetScreenComponentRotation(screenComponentRotation);
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", rotation: %{public}f, screenComponentRotation: %{public}f",
+        screenId, rotation, screenComponentRotation);
+}
+
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
     ScreenPropertyChangeType screenPropertyChangeType)
 {
@@ -2685,7 +2700,6 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     }
     {
         std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-        screenSession->SetPhysicalRotation(rotation, GetFoldStatus());
         screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
     }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
@@ -4400,13 +4414,13 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", option.displayId_);
         auto res = GetScreenSnapshot(option.displayId_);
         if (res != nullptr) {
-            NotifyScreenshot(option.displayId_);
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
             }
             TLOGI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
             if (option.isNeedNotify_) {
                 isScreenShot_ = true;
+                NotifyScreenshot(option.displayId_);
                 NotifyCaptureStatusChanged();
             }
         }
@@ -6118,7 +6132,6 @@ void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSessi
     uint32_t screenHeight = screenProperty.GetBounds().rect_.GetHeight();
     fakeScreenSession->UpdatePropertyByResolution(screenWidth, screenHeight / HALF_SCREEN_PARAM);
     screenSession->UpdatePropertyByFakeBounds(screenWidth, screenHeight / HALF_SCREEN_PARAM);
-    screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetFakeScreenSession(fakeScreenSession);
     screenSession->SetIsFakeInUse(true);
 }
@@ -6360,6 +6373,17 @@ void ScreenSessionManager::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t 
     clientProxy_->ScreenCaptureNotify(mainScreenId, uid, clientName);
 }
 
+void ScreenSessionManager::AddPermissionUsedRecord(const std::string& permission, int32_t successCount,
+    int32_t failCount)
+{
+    int32_t ret = Security::AccessToken::PrivacyKit::AddPermissionUsedRecord(IPCSkeleton::GetCallingTokenID(),
+        permission, successCount, failCount);
+    if (ret != 0) {
+        TLOGW(WmsLogTag::DMS, "AddPermissionUsedRecord failed, permission:%{public}s, \
+            successCount %{public}d, failedCount %{public}d", permission.c_str(), successCount, failCount);
+    }
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const CaptureOption& captureOption,
     DmErrorCode* errorCode)
 {
@@ -6391,6 +6415,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenCapture(%" PRIu64")", captureOption.displayId_);
     auto res = GetScreenSnapshot(captureOption.displayId_);
+    AddPermissionUsedRecord(CUSTOM_SCREEN_CAPTURE_PERMISSION,
+        static_cast<int32_t>(res != nullptr), static_cast<int32_t>(res == nullptr));
     if (res == nullptr) {
         TLOGE(WmsLogTag::DMS, "get capture null.");
         *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;

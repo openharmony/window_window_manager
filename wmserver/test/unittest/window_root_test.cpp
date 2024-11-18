@@ -1167,7 +1167,7 @@ HWTEST_F(WindowRootTest, CheckAddingModeAndSize02, Function | SmallTest | Level2
     sptr<WindowNodeContainer> container = new WindowNodeContainer(
         defaultDisplay_->GetDisplayInfo(), defaultDisplay_->GetScreenId());
     container->layoutMode_ = WindowLayoutMode::TILE;
-    node->property_->SetModeSupportInfo(0);
+    node->property_->SetWindowModeSupportType(0);
     ASSERT_TRUE((windowRoot_ != nullptr));
     windowRoot_->CheckAddingModeAndSize(node, container);
 }
@@ -1859,7 +1859,7 @@ HWTEST_F(WindowRootTest, AddWindowNode05, Function | SmallTest | Level2)
     WMError ret;
     sptr<WindowNode> node = new WindowNode();
     node->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    node->property_->SetModeSupportInfo(0);
+    node->property_->SetWindowModeSupportType(0);
 
     ret = windowRoot_->AddWindowNode(INVALID_WINDOW_ID, node, false);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_DISPLAY);

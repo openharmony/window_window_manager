@@ -877,9 +877,9 @@ void DisplayManager::ShowDisplayIdList(bool isShowLog)
         oss << iter.second << ",";
     }
     if (isShowLog) {
-        WLOGFD("%{public}s]", oss.str().c_str());
-    } else {
         WLOGFI("%{public}s]", oss.str().c_str());
+    } else {
+        WLOGFD("%{public}s]", oss.str().c_str());
     }
 }
 

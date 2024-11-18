@@ -32,12 +32,14 @@ class StartWindowOption;
 }
 namespace OHOS::AppExecFwk {
 struct AbilityInfo;
+enum class SupportWindowMode;
 }
 
 namespace OHOS::Rosen {
 class RSTransaction;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
+constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -377,10 +379,16 @@ struct SessionInfo {
     SessionViewportConfig config_;
 
     /**
-     * Multi instance
+     * Multi Instance
      */
     bool isNewAppInstance_ = false;
     std::string appInstanceKey_;
+
+    /**
+     * PC Window
+     */
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+    uint32_t windowModeSupportType = 0;
 };
 
 enum class SessionFlag : uint32_t {

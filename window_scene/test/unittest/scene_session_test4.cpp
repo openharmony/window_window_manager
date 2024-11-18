@@ -1148,10 +1148,7 @@ HWTEST_F(SceneSessionTest4, TerminateSession01, Function | SmallTest | Level2)
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 
     sceneSession->isTerminating_ = false;
-    NotifyTerminateSessionFunc func = [sceneSession](const SessionInfo& info) {
-        return;
-    };
-    sceneSession->SetTerminateSessionListener(func);
+    sceneSession->SetTerminateSessionListener([sceneSession](const SessionInfo& info) {});
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 }
 

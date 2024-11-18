@@ -251,6 +251,7 @@ public:
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
     void SetPhysicalRotation(int rotation, FoldStatus foldStatus);
+    void SetScreenComponentRotation(int rotation);
     void SetStartPosition(uint32_t startX, uint32_t startY);
     void SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion);
     std::pair<ScreenId, DMRect> GetMirrorScreenRegion();

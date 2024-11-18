@@ -58,15 +58,13 @@ private:
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiver();
     std::shared_ptr<VSyncReceiver> GetOrCreateVsyncReceiverLocked();
     std::shared_ptr<RSFrameRateLinker> GetFrameRateLinker();
+    std::shared_ptr<RSFrameRateLinker> GetFrameRateLinkerLocked();
     void VsyncCallbackInner(int64_t nanoTimestamp, int64_t frameCount);
     void OnVsyncTimeOut();
 
     NodeId nodeId_ = 0;
     std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
     std::string vsyncTimeoutTaskName_;
-
-    std::shared_ptr<FrameRateRange> lastFrameRateRange_ = nullptr;
-    int32_t lastAnimatorExpectedFrameRate_ = 0;
 
     std::mutex mutex_;
     bool isFirstVsyncRequest_ = true;
@@ -77,6 +75,8 @@ private:
     std::shared_ptr<RSFrameRateLinker> frameRateLinker_ = nullptr;
     using Callbacks = std::unordered_set<std::shared_ptr<VsyncCallback>>;
     Callbacks vsyncCallbacks_;
+    std::shared_ptr<FrameRateRange> lastFrameRateRange_ = nullptr;
+    int32_t lastAnimatorExpectedFrameRate_ = 0;
     // Above guarded by mutex_
 
     std::atomic<int32_t> requestVsyncTimes_ {0};

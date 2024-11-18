@@ -1626,17 +1626,15 @@ public:
     /**
      * @brief Set requested mode support info.
      *
-     * @param modeSupportInfo Mode of window supported.
+     * @param windowModeSupportType Mode of window supported.
      */
-    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) {}
-
+    virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) {}
     /**
      * @brief Get requested mode support info.
      *
      * @return Enumeration values under WindowModeSupport.
      */
-    virtual uint32_t GetRequestModeSupportInfo() const { return 0; }
-
+    virtual uint32_t GetRequestWindowModeSupportType() const { return 0; }
     /**
      * @brief Set touch hot areas.
      *

@@ -511,6 +511,11 @@ struct Rect {
     {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
     }
+
+    bool IsUninitializedSize() const
+    {
+        return width_ == 0 && height_ == 0;
+    }
 };
 
 /**

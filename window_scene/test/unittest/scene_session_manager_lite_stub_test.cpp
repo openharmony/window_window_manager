@@ -198,6 +198,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return nullptr;
     }
+    WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId,
+        const AppExecFwk::ElementName& element, int32_t& pid) override
+    {
+        return WMError::WM_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
