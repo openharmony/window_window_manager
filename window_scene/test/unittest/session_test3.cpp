@@ -165,6 +165,7 @@ HWTEST_F(WindowSessionTest3, SetFocusableOnShow, Function | SmallTest | Level2)
     ASSERT_EQ(session_->IsFocusableOnShow(), true);
     bool focusableOnShow = false;
     session_->SetFocusableOnShow(focusableOnShow);
+    usleep(10000); // sleep 10ms
     ASSERT_EQ(session_->IsFocusableOnShow(), focusableOnShow);
 }
 
