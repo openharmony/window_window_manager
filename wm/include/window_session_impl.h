@@ -254,7 +254,7 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     WMError SetContinueState(int32_t continueState) override;
 
-    /**
+    /*
      * Window Layout
      */
     WSError SetEnableDragBySystem(bool enableDrag) override;
