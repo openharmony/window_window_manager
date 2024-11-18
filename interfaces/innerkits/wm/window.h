@@ -824,6 +824,8 @@ public:
      */
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
                          bool withFocus = true) { return WMError::WM_OK; }
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
+                         bool withFocus = true) { return WMError::WM_OK; }
     /**
      * @brief Hide window
      *
