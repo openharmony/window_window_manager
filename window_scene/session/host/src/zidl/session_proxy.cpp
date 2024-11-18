@@ -45,6 +45,7 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
         !data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)) ||
         !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
+        !data.WriteInt32(abilitySessionInfo->tmpSpecifiedId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
         return false;
