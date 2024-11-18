@@ -183,15 +183,12 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
     return false;
 }
 
-bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName &element, uint32_t callingTokenId)
+bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t callingTokenId)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT,
-        "UIExtOnLock: boundName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
-        element.GetBundleName().c_str(),
-        element.GetModuleName().c_str(),
-        element.GetAbilityName().c_str());
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: boundName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
+          element.GetBundleName().c_str(), element.GetModuleName().c_str(), element.GetAbilityName().c_str());
 
-    const std::vector<std::tuple<std::string, std::string, std::string>> whitelist = {
+    static const std::vector<std::tuple<std::string, std::string, std::string>> whitelist = {
         std::make_tuple("com.huawei.hmos.settings", "AccessibilityReConfirmDialog", "phone_settings"),
         std::make_tuple("com.huawei.hmos.settings", "AccessibilityShortKeyDialog", "phone_settings"),
         std::make_tuple("com.huawei.hmos.settings", "DefaultIntentUiExtensionAbility", "phone_settings"),
@@ -199,28 +196,17 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName &element, uint32_t
         std::make_tuple("com.huawei.hmos.motiongesture", "IntentUIExtensionAbility", "entry"),
     };
 
-    auto itr = std::find_if(whitelist.begin(), whitelist.end(), [element](const auto &item) {
-        auto [bundleName, abilityName, moduleName] = item;
-        if (element.GetBundleName() != bundleName) {
-            return false;
-        }
-        if (element.GetAbilityName() != abilityName) {
-            return false;
-        }
-        return true;
+    auto it = std::find_if(whitelist.begin(), whitelist.end(), [&element](const auto& item) {
+        auto& [bundleName, abilityName, _] = item;
+        return (element.GetBundleName() == bundleName && element.GetAbilityName() == abilityName);
     });
-
-    if (itr != whitelist.end()) {
+    if (it != whitelist.end()) {
         return true;
     }
 
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in white list");
-    if (SessionPermission::VerifyPermissionByCallerToken(
-            callingTokenId, PermissionConstants::PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN)) {
-        return true;
-    }
-
-    return false;
+    return SessionPermission::VerifyPermissionByCallerToken(callingTokenId,
+        PermissionConstants::PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN);
 }
 
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
@@ -1462,9 +1448,9 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
 uint32_t SceneSessionManager::GetLockScreenZorder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (auto &[sessionId, session] : sceneSessionMap_) {
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d: ", sessionId);
+    for (auto& [persistentId, session] : sceneSessionMap_) {
+        if (session && (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD)) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
             return session->GetZOrder();
         }
     }
@@ -1472,56 +1458,58 @@ uint32_t SceneSessionManager::GetLockScreenZorder()
     return 0;
 }
 
-WMError SceneSessionManager::CheckUIExtensionCreation(
-    int32_t windowId, uint32_t callingTokenId, const AppExecFwk::ElementName &element, int32_t &pid)
+WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t callingTokenId,
+    const AppExecFwk::ElementName& element, int32_t& pid)
 {
-    auto task = [this, windowId, &pid, &callingTokenId, element]() -> WMError {
+    auto task = [this, windowId, &callingTokenId, &element, &pid]() -> WMError {
         pid = INVALID_PID;
         auto sceneSession = GetSceneSession(windowId);
         if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: sceneSession(%{public}d) is nullptr", windowId);
+            TLOGNE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: sceneSession(%{public}d) is nullptr", windowId);
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         pid = sceneSession->GetCallingPid();
 
         // 1. check window whether can show on main window
         if (!sceneSession->IsShowOnLockScreen(GetLockScreenZorder())) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not called on lock screen");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not called on lock screen");
             return WMError::WM_OK;
         }
 
         // 2. check permission
         if (!IsUIExtCanShowOnLockScreen(element, callingTokenId)) {
-            TLOGE(WmsLogTag::WMS_UIEXT,
-                "UIExtOnLock: no permisson, window id %{public}d, %{public}d",
-                windowId,
+            TLOGNE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: no permisson, window id %{public}d, %{public}d", windowId,
                 callingTokenId);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
 
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
+        TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
         return WMError::WM_OK;
     };
 
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "UIExtOnLockCheck"
        << "_" << windowId << "_" << callingTokenId;
     return taskScheduler_->PostSyncTask(task, ss.str());
 }
 
 // windowIds are all main window
-void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t> &windowIds)
+void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds)
 {
-    // check every window
-    for (auto windowId : windowIds) {
-        auto sceneSession = GetSceneSession(windowId);
-        if (!sceneSession) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: sesssion is null for %{public}d", windowId);
-            continue;
+    auto task = [this, &windowIds]() -> WMError {
+        // check every window
+        for (auto windowId : windowIds) {
+            auto sceneSession = GetSceneSession(windowId);
+            if (!sceneSession) {
+                TLOGNE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: sesssion is null for %{public}d", windowId);
+                continue;
+            }
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: check for %{public}d", windowId);
+            sceneSession->OnNotifyAboveLockScreen();
         }
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: check for %{public}d", windowId);
-        sceneSession->OnNotifyAboveLockScreen();
-    }
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostSyncTask(task, "OnNotifyAboveLockScreen");
 }
 
 void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession)
@@ -10104,7 +10092,6 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
 {
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-
     auto task = [this, sessionStage, token, surfaceNodeId, pid, callingTokenId]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
@@ -10142,22 +10129,24 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         extSessionInfoMap_.insert(std::make_pair(token, ExtensionWindowAbilityInfo{ persistentId, parentId, usage }));
 
         auto parentSession = GetSceneSession(parentId);
-        if (parentSession) {
-            parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
+        if (!parentSession) {
+            TLOGNI(WmsLogTag::WMS_UIEXT, "no parent session for %{public}d", persistentId);
+            return;
         }
-        if (usage == UIExtensionUsage::MODAL && parentSession && parentSession->GetCallingPid() != GetPid()) {
+
+        UIExtensionTokenInfo tokenInfo;
+        tokenInfo.abilityToken = token;
+        tokenInfo.callingTokenId = callingTokenId;
+        tokenInfo.canShowOnLockScreen = IsUIExtCanShowOnLockScreen(info.elementName, callingTokenId);
+        parentSession->AddExtensionTokenInfo(tokenInfo);
+        parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
+        if (usage == UIExtensionUsage::MODAL && parentSession->GetCallingPid() != GetPid()) {
             ExtensionWindowEventInfo extensionInfo {
                 .persistentId = persistentId,
                 .pid = pid,
             };
             parentSession->AddModalUIExtension(extensionInfo);
         }
-
-        SceneSession::UIExtensionTokenInfo tokenInfo;
-        tokenInfo.abilityToken = token;
-        tokenInfo.callingTokenId = callingTokenId;
-        tokenInfo.canShowOnLockScreen = IsUIExtCanShowOnLockScreen(info.elementName, callingTokenId);
-        parentSession->AddExtensionTokenInfo(tokenInfo);
     };
     taskScheduler_->PostAsyncTask(task, "AddExtensionWindowStageToSCB");
 }
