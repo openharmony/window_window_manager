@@ -563,11 +563,6 @@ bool Session::IsFocusableOnShow() const
     return focusableOnShow_;
 }
 
-bool Session::IsFocusableOnShow() const
-{
-    return focusableOnShow_;
-}
-
 bool Session::IsFocused() const
 {
     return isFocused_;
