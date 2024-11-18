@@ -1213,7 +1213,7 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
     NotifyExtensionDetachToDisplay();
