@@ -473,7 +473,7 @@ HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
     ASSERT_EQ(data.WriteInt32(2), true);
     AAFwk::Want want;
     data.WriteParcelable(&want);
-    res = session_->HandleTransferAbilityResult(date, reply);
+    res = session_->HandleTransferAbilityResult(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
 
