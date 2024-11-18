@@ -1819,8 +1819,8 @@ void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& sess
     }
 }
 
-{
 sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession)
+{
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     auto sessionInfo = sceneSession->GetSessionInfo();
     sptr<ISession> iSession(sceneSession);
