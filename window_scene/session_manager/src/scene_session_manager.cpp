@@ -1918,7 +1918,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         TLOGNI(WmsLogTag::WMS_MAIN,
             "Request active id:%{public}d, system:%{public}u, isNewActive:%{public}d, specifiedId:%{public}d",
             persistentId, static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_),
-            isNewActive, static_cast<uint32_t>(sceneSession->GetSessionInfo().tmpSpecifiedId_);
+            isNewActive, sceneSession->GetSessionInfo().tmpSpecifiedId_);
         if (!GetSceneSession(persistentId)) {
             TLOGE(WmsLogTag::WMS_MAIN, "Request active session invalid by %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
@@ -2039,7 +2039,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSessionInfo->want.GetElement().GetBundleName().c_str(),
         sceneSessionInfo->want.GetElement().GetModuleName().c_str(),
         sceneSessionInfo->want.GetElement().GetURI().c_str(),
-        sceneSessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0), sceneSessionInfo->tmpSpecifiedId);
+        sceneSessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0),
+        sceneSessionInfo->tmpSpecifiedId);
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
     bool isAppSupportPhoneInPc = false;
