@@ -532,6 +532,22 @@ WSError Session::SetFocusable(bool isFocusable)
     return WSError::WS_OK;
 }
 
+WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
+{
+    auto task = [weakThis = wptr(this), isFocusableOnShow]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "session is null");
+            return;
+        }
+        TLOGND(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
+            session->GetPersistentId(), isFocusableOnShow);
+        session->focusableOnShow_ = isFocusableOnShow;
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
 bool Session::GetFocusable() const
 {
     auto property = GetSessionProperty();
@@ -540,6 +556,11 @@ bool Session::GetFocusable() const
     }
     WLOGFD("property is null");
     return true;
+}
+
+bool Session::IsFocusableOnShow() const
+{
+    return focusableOnShow_;
 }
 
 bool Session::IsFocused() const
@@ -1283,12 +1304,6 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
-        }
-        if (isAttach && session->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_FLOAT &&
-            !session->IsFocused() && session->GetFocusable()) {
-            TLOGW(WmsLogTag::WMS_FOCUS, "re RequestFocusStatus, id:%{public}d", session->GetPersistentId());
-            FocusChangeReason reason = FocusChangeReason::FOREGROUND;
-            session->NotifyRequestFocusStatusNotifyManager(true, true, reason);
         }
     };
     PostTask(task, "SetAttachState");

@@ -100,6 +100,7 @@ private:
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
+    static napi_value SetFocusableOnShow(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     static napi_value UpdateSizeChangeReason(napi_env env, napi_callback_info info);
     static napi_value OpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);
@@ -125,6 +126,7 @@ private:
     static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
@@ -151,6 +153,7 @@ private:
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
+    napi_value OnSetFocusableOnShow(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneBlockingFocus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSizeChangeReason(napi_env env, napi_callback_info info);
     napi_value OnOpenKeyboardSyncTransaction(napi_env env, napi_callback_info info);

@@ -161,6 +161,13 @@ public:
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
+
+    /**
+     * @brief Request to get focus or lose focus.
+     *
+     * @param isFocused True means window wants to get focus, false means the opposite.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 
     /*

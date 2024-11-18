@@ -175,6 +175,13 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionFocus02, Function | SmallTest |
     ssm_->RequestSessionFocus(1, false, FocusChangeReason::DEFAULT);
 
     sceneSession->SetFocusedOnShow(true);
+    sceneSession->SetFocusableOnShow(false);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    WSError ret = ssm_->RequestSessionFocus(1, false, FocusChangeReason::FOREGROUND);
+    ASSERT_EQ(ret, WSError::WS_DO_NOTHING);
+
+    sceneSession->SetFocusableOnShow(false);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->RequestSessionFocus(1, false, FocusChangeReason::DEFAULT);
@@ -188,6 +195,38 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionFocus02, Function | SmallTest |
     sceneSession->SetTopmost(true);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->RequestSessionFocus(1, false, FocusChangeReason::DEFAULT);
+}
+
+/**
+ * @tc.name: ProcessFocusWhenForegroundScbCore
+ * @tc.desc: ProcessFocusWhenForegroundScbCore
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, ProcessFocusWhenForegroundScbCore, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->focusedSessionId_ = 0;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "ProcessFocusWhenForegroundScbCore";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->persistentId_ = 1;
+    ASSERT_NE(nullptr, sceneSession->property_);
+    sceneSession->SetFocusableOnShow(false);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->ProcessFocusWhenForegroundScbCore(sceneSession);
+    ASSERT_EQ(sceneSession->GetPostProcessFocusState().isFocused_, false);
+    ASSERT_EQ(ssm_->focusedSessionId_, 0);
+
+    sceneSession->SetFocusableOnShow(true);
+    ssm_->ProcessFocusWhenForegroundScbCore(sceneSession); // SetPostProcessFocusState
+    ASSERT_EQ(sceneSession->GetPostProcessFocusState().isFocused_, true);
+
+    sceneSession->isVisible_ = true;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->ProcessFocusWhenForegroundScbCore(sceneSession); // RequestSessionFocus
+    ASSERT_EQ(ssm_->focusedSessionId_, 1);
 }
 
 /**
