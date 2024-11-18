@@ -37,6 +37,7 @@ public:
     virtual ~FoldScreenController();
 
     void SetDisplayMode(const FoldDisplayMode displayMode);
+    void RecoverDisplayMode();
     FoldDisplayMode GetDisplayMode();
     bool IsFoldable();
     FoldStatus GetFoldStatus();
