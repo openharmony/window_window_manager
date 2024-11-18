@@ -455,10 +455,11 @@ HWTEST_F(WindowStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
+    data.WriteUint32(1);
 
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**

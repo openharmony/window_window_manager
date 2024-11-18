@@ -771,7 +771,7 @@ HWTEST_F(WindowImplTest3, UpdateDecorEnable, Function | SmallTest | Level3)
     window->property_->mode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->windowSystemConfig_.decorModeSupportInfo_ = WINDOW_MODE_SUPPORT_FLOATING;
+    window->windowSystemConfig_.decorWindowModeSupportType_ = WINDOW_MODE_SUPPORT_FLOATING;
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
     sptr<MockWindowChangeListener> listener = new MockWindowChangeListener;
@@ -782,7 +782,7 @@ HWTEST_F(WindowImplTest3, UpdateDecorEnable, Function | SmallTest | Level3)
     window->UpdateDecorEnable(true);
     ASSERT_TRUE(window->IsDecorEnable());
     ASSERT_FALSE(window->property_->GetDecorEnable());
-    window->windowSystemConfig_.decorModeSupportInfo_ = WINDOW_MODE_SUPPORT_ALL;
+    window->windowSystemConfig_.decorWindowModeSupportType_ = WINDOW_MODE_SUPPORT_ALL;
     window->UpdateDecorEnable();
     ASSERT_TRUE(window->IsDecorEnable());
     ASSERT_TRUE(window->property_->GetDecorEnable());
@@ -1255,7 +1255,7 @@ HWTEST_F(WindowImplTest3, SetFloatingMaximize, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-    window->UpdateModeSupportInfo(0);
+    window->UpdateWindowModeSupportType(0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFloatingMaximize(true));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

@@ -772,7 +772,6 @@ HWTEST_F(SceneSessionManagerTest4, GetProcessDrawingState, Function | SmallTest 
     ASSERT_NE(nullptr, ssm_);
     uint64_t windowId = 10;
     int32_t pid = 1;
-    bool currentDrawingContentState = true;
     SessionInfo info;
     info.abilityName_ = "SetBrightness";
     sptr<SceneSession> sceneSession01 = nullptr;
@@ -793,7 +792,7 @@ HWTEST_F(SceneSessionManagerTest4, GetProcessDrawingState, Function | SmallTest 
     sceneSession03->SetCallingPid(pid);
     sceneSession03->surfaceNode_ = nullptr;
     sceneSession04->SetCallingPid(6);
-    auto result = ssm_->GetProcessDrawingState(windowId, pid, currentDrawingContentState);
+    auto result = ssm_->GetProcessDrawingState(windowId, pid);
     EXPECT_EQ(result, true);
 }
 
@@ -807,7 +806,7 @@ HWTEST_F(SceneSessionManagerTest4, GetPreWindowDrawingState, Function | SmallTes
     ASSERT_NE(nullptr, ssm_);
     uint64_t surfaceId = 0;
     int32_t pid = 10;
-    bool result = ssm_->GetPreWindowDrawingState(surfaceId, pid, true);
+    bool result = ssm_->GetPreWindowDrawingState(surfaceId, true, pid);
     EXPECT_EQ(result, false);
 
     SessionInfo info;
@@ -820,7 +819,7 @@ HWTEST_F(SceneSessionManagerTest4, GetPreWindowDrawingState, Function | SmallTes
     ASSERT_NE(sceneSession01->surfaceNode_, nullptr);
     sceneSession01->surfaceNode_->id_ = 10;
     surfaceId = 10;
-    result = ssm_->GetPreWindowDrawingState(surfaceId, pid, true);
+    result = ssm_->GetPreWindowDrawingState(surfaceId, true, pid);
     EXPECT_EQ(result, false);
 }
 
@@ -856,6 +855,28 @@ HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo, Function |
     sceneSession->SetCallingPid(2);
     result = ssm_->GetWindowDrawingContentChangeInfo(currDrawingContentData);
     EXPECT_NE(result, currDrawingContentData);
+}
+
+/**
+ * @tc.name: GetWindowDrawingContentChangeInfo02
+ * @tc.desc: GetWindowDrawingContentChangeInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "GetWindowDrawingContentChangeInfo02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
+
+    std::vector<std::pair<uint64_t, bool>> currDrawingContentData;
+    currDrawingContentData.push_back(std::make_pair(0, false));
+    currDrawingContentData.push_back(std::make_pair(1, true));
+
+    auto result = ssm_->GetWindowDrawingContentChangeInfo(currDrawingContentData);
+    EXPECT_EQ(result, currDrawingContentData);
 }
 
 /**

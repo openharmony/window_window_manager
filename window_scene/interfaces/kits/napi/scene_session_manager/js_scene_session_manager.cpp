@@ -224,6 +224,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::ResetPcFoldScreenArrangeRule);
     BindNativeFunction(env, exportObj, "setIsWindowRectAutoSave", moduleName,
         JsSceneSessionManager::SetIsWindowRectAutoSave);
+    BindNativeFunction(env, exportObj, "NotifyAboveLockScreen", moduleName,
+        JsSceneSessionManager::NotifyAboveLockScreen);
     return NapiGetUndefined(env);
 }
 
@@ -1158,6 +1160,16 @@ napi_value JsSceneSessionManager::SetIsWindowRectAutoSave(napi_env env, napi_cal
     return (me != nullptr) ? me->OnSetIsWindowRectAutoSave(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::NotifyAboveLockScreen(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    if (me == nullptr) {
+        TLOGW(WmsLogTag::WMS_SCB, "me is null");
+        return nullptr;
+    }
+    return me->OnNotifyAboveLockScreen(env, info);
+}
+
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSessionManager::IsCallbackRegistered[%s]", type.c_str());
@@ -1545,6 +1557,7 @@ napi_value JsSceneSessionManager::OnGetAbilityInfo(napi_env env, napi_callback_i
     if (ret != WSErrorCode::WS_OK) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
             "System is abnormal"));
+        return NapiGetUndefined(env);
     }
     return CreateSCBAbilityInfo(env, scbAbilityInfo);
 }
@@ -2590,7 +2603,7 @@ napi_value JsSceneSessionManager::OnPreloadInLakeApp(napi_env env, napi_callback
     auto preloadTask = [bundleName = std::move(bundleName)] {
         SceneSessionManager::GetInstance().PreloadInLakeApp(bundleName);
     };
-    localScheduler->PostAsyncTask(preloadTask);
+    localScheduler->PostAsyncTask(preloadTask, __func__);
     return NapiGetUndefined(env);
 }
 
@@ -3407,6 +3420,41 @@ napi_value JsSceneSessionManager::OnIsScbCoreEnabled(napi_env env, napi_callback
     return result;
 }
 
+napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+ 
+    std::vector<int32_t> windowIds;
+    if (!ConvertInt32ArrayFromJs(env, argv[0], windowIds)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to convert windowIds");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    std::string windowIdListStr = "none";
+    if (!windowIds.empty()) {
+        windowIdListStr = std::accumulate(windowIds.begin() + 1,
+            windowIds.end(),
+            std::to_string(windowIds[0]),
+            [](const std::string &str, int32_t windowId) { return str + "," + std::to_string(windowId); });
+    }
+
+    TLOGI(WmsLogTag::WMS_UIEXT,
+        "UIExtOnLock: OnNotifyAboveLockScreen, window list: %{public}s",
+        windowIdListStr.c_str());
+    SceneSessionManager::GetInstance().OnNotifyAboveLockScreen(windowIds);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -3587,7 +3635,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    ScreenFoldStatus status = static_cast<ScreenFoldStatus>(statusNum);
+    SuperFoldStatus status = static_cast<SuperFoldStatus>(statusNum);
 
     WSRect defaultDisplayRect;
     if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], defaultDisplayRect)) {

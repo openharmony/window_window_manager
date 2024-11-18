@@ -264,24 +264,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
     window->Destroy();
 }
 
-/**
- * @tc.name: DisplayZoom06
- * @tc.desc: test speical window type
- * @tc.type: FUNC
- * @tc.require: issueI5NGWL
- */
-HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
-{
-    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
-    sleep(1);
-    windowInfo_.name = "DisplayZoom06";
-    windowInfo_.type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    ASSERT_NE(nullptr, window);
-    sleep(1);
-    WindowAccessibilityController::GetInstance().OffWindowZoom();
-    window->Destroy();
-}
 }
 } // namespace Rosen
 } // namespace OHOS

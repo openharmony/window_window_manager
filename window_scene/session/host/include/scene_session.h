@@ -98,6 +98,12 @@ using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
 class SceneSession : public Session {
 public:
+    struct UIExtensionTokenInfo {
+        bool canShowOnLockScreen{false};
+        uint32_t callingTokenId{0};
+        sptr<IRemoteObject> abilityToken;
+    };
+
     friend class HidumpController;
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
@@ -126,7 +132,6 @@ public:
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
-        NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
     };
@@ -211,6 +216,8 @@ public:
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true) override;
+    WSError TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool needNotifyClient = true);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -260,6 +267,7 @@ public:
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
+    void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
     WSError SetDefaultRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
@@ -378,7 +386,6 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
-    void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
@@ -404,11 +411,16 @@ public:
      * Window Animation
      */
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
+    void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
 
     /**
      * Window Visibility
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
+    virtual WSError HideSync()
+    {
+        return WSError::WS_DO_NOTHING;
+    };
 
     /**
      * Window Lifecycle
@@ -460,6 +472,15 @@ public:
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
+    /**
+     * UIExtension
+     */
+    bool IsShowOnLockScreen(uint32_t lockScreenZOrder);
+    void AddExtensionTokenInfo(const SceneSession::UIExtensionTokenInfo &tokenInfo);
+    void RemoveExtensionTokenInfo(sptr<IRemoteObject> abilityToken);
+    void CheckExtensionOnLockScreenToClose();
+    void CloseExtensionSync(const SceneSession::UIExtensionTokenInfo& tokenInfo);
+    void OnNotifyAboveLockScreen();
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
     bool HasModalUIExtension();
@@ -555,6 +576,7 @@ protected:
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
+    bool IsTransformNeedChange(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
 
@@ -608,6 +630,7 @@ protected:
      * PC Fold Screen
      */
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
+    std::atomic_bool throwSlipFullScreenFlag_ = false;
 
     /**
      * PC Window
@@ -734,7 +757,7 @@ private:
         WSPropertyChangeAction action);
     WMError HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
-    WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
+    WMError HandleActionUpdateWindowModeSupportType(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
@@ -765,10 +788,16 @@ private:
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
+
+    /**
+     * UIExtension
+     */
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+    mutable std::recursive_mutex extensionTokenInfosMutex_;
+    std::vector<UIExtensionTokenInfo> extensionTokenInfos_;
 
     /**
      * Window Decor
@@ -841,6 +870,7 @@ private:
      * Window Animation
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+    NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
 
     /**
      * Window Layout

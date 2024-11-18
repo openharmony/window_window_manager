@@ -98,15 +98,13 @@ napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callba
 
 napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callback_info info)
 {
-    auto task = []() {
-        auto transactionController = RSSyncTransactionController::GetInstance();
-        if (transactionController) {
+    auto task = [] {
+        if (auto transactionController = RSSyncTransactionController::GetInstance()) {
             transactionController->CloseSyncTransaction();
         }
     };
-    auto handler = SceneSessionManager::GetInstance().GetTaskScheduler();
-    if (handler) {
-        handler->PostAsyncTask(task);
+    if (auto handler = SceneSessionManager::GetInstance().GetTaskScheduler()) {
+        handler->PostAsyncTask(task, __func__);
     } else {
         task();
     }

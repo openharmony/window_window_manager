@@ -99,7 +99,7 @@ struct ModeChangeHotZonesConfig {
 
 struct SystemConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
-    uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    uint32_t decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationCurve animationIn_;
@@ -110,7 +110,7 @@ struct SystemConfig : public Parcelable {
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteBool(isSystemDecorEnable_) || !parcel.WriteBool(isStretchable_) ||
-            !parcel.WriteUint32(decorModeSupportInfo_)) {
+            !parcel.WriteUint32(decorWindowModeSupportType_)) {
             return false;
         }
 
@@ -135,7 +135,7 @@ struct SystemConfig : public Parcelable {
         SystemConfig* config = new SystemConfig();
         config->isSystemDecorEnable_ = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
-        config->decorModeSupportInfo_ = parcel.ReadUint32();
+        config->decorWindowModeSupportType_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         sptr<KeyboardAnimationCurve> animationIn = parcel.ReadParcelable<KeyboardAnimationCurve>();
         if (animationIn == nullptr) {

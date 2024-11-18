@@ -285,6 +285,123 @@ HWTEST_F(SceneSessionManagerTest11, GetAllSessionDumpDetailInfo, Function | Smal
     std::string dumpInfo;
     ASSERT_EQ(ssm_->GetAllSessionDumpDetailInfo(dumpInfo), WSError::WS_OK);
 }
+
+/**
+ * @tc.name: GetAbilityInfo
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo, Function | SmallTest | Level1)
+{
+    ssm_->bundleMgr_ = nullptr;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetAbilityInfo02
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo02, Function | SmallTest | Level1)
+{
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce(Return(1));
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetAbilityInfo03
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo03, Function | SmallTest | Level1)
+{
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
+        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+        bundleInfo.hapModuleInfos = {};
+        return 0;
+    });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetAbilityInfo04
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo04, Function | SmallTest | Level1)
+{
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
+        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+        AppExecFwk::AbilityInfo abilityInfo;
+        abilityInfo.moduleName = "moduleName";
+        abilityInfo.name = "abilityName";
+        AppExecFwk::HapModuleInfo hapModuleInfo;
+        hapModuleInfo.abilityInfos = { abilityInfo };
+        bundleInfo.hapModuleInfos = { hapModuleInfo };
+        bundleInfo.applicationInfo.codePath = "testCodePath";
+        return 0;
+    });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    ASSERT_EQ(scbAbilityInfo.codePath_, "testCodePath");
+}
+
+/**
+ * @tc.name: GetAbilityInfo05
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo05, Function | SmallTest | Level1)
+{
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
+        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+        AppExecFwk::AbilityInfo abilityInfo;
+        abilityInfo.moduleName = "moduleName2";
+        abilityInfo.name = "abilityName2";
+        AppExecFwk::HapModuleInfo hapModuleInfo;
+        hapModuleInfo.abilityInfos = { abilityInfo };
+        bundleInfo.hapModuleInfos = { hapModuleInfo };
+        return 0;
+    });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
 }  // namespace
 }
 }

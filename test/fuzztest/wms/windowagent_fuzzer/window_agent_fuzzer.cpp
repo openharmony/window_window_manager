@@ -61,9 +61,9 @@ void CheckWindowAgentFunctionsPart1(sptr<WindowAgent> agent, const uint8_t* data
     startPos += GetObject<WindowMode>(mode, data + startPos, size - startPos);
     agent->UpdateWindowMode(mode);
 
-    uint32_t modeSupportInfo;
-    startPos += GetObject<uint32_t>(modeSupportInfo, data + startPos, size - startPos);
-    agent->UpdateWindowModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType;
+    startPos += GetObject<uint32_t>(windowModeSupportType, data + startPos, size - startPos);
+    agent->UpdateWindowModeSupportType(windowModeSupportType);
     agent->UpdateFocusStatus(boolVal);
     agent->NotifyForegroundInteractiveStatus(boolVal);
 

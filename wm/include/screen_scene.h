@@ -76,15 +76,11 @@ public:
         return 1; // 1 for root and screen
     }
 
-    Ace::UIContent* GetUIContent() const override
-    {
-        return uiContent_.get();
-    }
-
+    Ace::UIContent* GetUIContent() const override;
     WMError Destroy() override;
 
 private:
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     float density_ = 1.0f;
     int32_t orientation_;

@@ -407,17 +407,17 @@ HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: SetModeSupportInfo
- * @tc.desc: SetModeSupportInfo test
+ * @tc.name: SetWindowModeSupportType
+ * @tc.desc: SetWindowModeSupportType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetModeSupportInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionPropertyTest, SetWindowModeSupportType, Function | SmallTest | Level2)
 {
-    uint32_t modeSupportInfo = 1234567890;
+    uint32_t windowModeSupportType = 1234567890;
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetModeSupportInfo(modeSupportInfo);
+    windowSessionProperty.SetWindowModeSupportType(windowModeSupportType);
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_NE(property->GetModeSupportInfo(), 0);
+    ASSERT_NE(property->GetWindowModeSupportType(), 0);
 }
 
 /**
