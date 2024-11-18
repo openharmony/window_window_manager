@@ -32,7 +32,7 @@ class MockWindow : public Window {
 public:
     MockWindow() {};
     ~MockWindow() {};
-    MOCK_METHOD2(Show, WMError(uint32_t reason, bool withAnimation));
+    MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD0(Destroy, WMError());
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
     MOCK_METHOD2(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority));
@@ -129,25 +129,25 @@ HWTEST_F(PictureInPictureControllerTest, ShowPictureInPictureWindow01, Function 
     auto listener = sptr<IPiPLifeCycle>::MakeSptr();
     ASSERT_NE(nullptr, listener);
     pipControl->RegisterPiPLifecycle(listener);
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_CALL(*(mw), Show(_, _, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->ShowPictureInPictureWindow(startType));
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     startType = StartPipType::AUTO_START;
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     startType = StartPipType::NULL_START;
     pipControl->pipOption_->SetContentSize(10, 10);
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->pipOption_->SetContentSize(0, 10);
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->pipOption_->SetContentSize(10, 0);
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
     pipControl->pipOption_->SetContentSize(0, 0);
-    EXPECT_CALL(*(mw), Show(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw), Show(_, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, pipControl->ShowPictureInPictureWindow(startType));
 }
 

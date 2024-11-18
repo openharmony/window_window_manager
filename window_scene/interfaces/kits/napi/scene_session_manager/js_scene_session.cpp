@@ -232,6 +232,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeMethodForKeyboard(env, objValue, moduleName);
     BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
     BindNativeMethodForSCBSystemSession(env, objValue, moduleName);
+    BindNativeMethodForFocus(env, objValue, moduleName);
     napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
@@ -257,9 +258,6 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::SetSystemSceneForceUIFirst);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setIsMidScene", moduleName, JsSceneSession::SetIsMidScene);
-    BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
-    BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
-        JsSceneSession::SetSystemSceneBlockingFocus);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
     BindNativeFunction(env, objValue, "setWindowLastSafeRect", moduleName, JsSceneSession::SetWindowLastSafeRect);
     BindNativeFunction(env, objValue, "setOffset", moduleName, JsSceneSession::SetOffset);
@@ -325,6 +323,13 @@ void JsSceneSession::BindNativeMethodForSCBSystemSession(napi_env env, napi_valu
         JsSceneSession::SyncScenePanelGlobalPosition);
     BindNativeFunction(env, objValue, "unSyncScenePanelGlobalPosition", moduleName,
         JsSceneSession::UnSyncScenePanelGlobalPosition);
+}
+
+void JsSceneSession::BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName)
+{
+    BindNativeFunction(env, objValue, "setFocusable", moduleName, JsSceneSession::SetFocusable);
+    BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
+        JsSceneSession::SetSystemSceneBlockingFocus);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)

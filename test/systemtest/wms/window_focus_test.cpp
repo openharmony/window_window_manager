@@ -18,6 +18,7 @@
 #include "wm_common.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
+#include "scene_board_judgement.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -549,6 +550,52 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
     ASSERT_EQ(belowSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     mainWindow1->Destroy();
+}
+
+
+/**
+ * @tc.name: WindowShowWithoutFocusTest
+ * @tc.desc: add main window and sub window and show it to test focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Level3)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
+
+    fullScreenAppInfo_.name = "WindowShowWithoutFocusTest_1";
+    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
+    ASSERT_NE(nullptr, window1);
+
+
+    floatAppInfo_.name = "WindowShowWithoutFocusTest_2";
+    const sptr<Window>& window2 = Utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, window2);
+
+    subAppInfo_.name = "WindowShowWithoutFocusTest_3";
+    subAppInfo_.parentId = window2->GetWindowId();
+    const sptr<Window>& subWindow = Utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, subWindow);
+
+    ASSERT_EQ(WMError::WM_OK, window1->Show());
+    // Await 100ms and get callback result in listener.
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(window1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
+
+    ASSERT_EQ(WMError::WM_OK, window2->Show(0, false, false));
+    // Await 100ms and get callback result in listener.
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(window1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
+
+    ASSERT_EQ(WMError::WM_OK, subWindow->Show(0, false, false));
+    // Await 100ms and get callback result in listener.
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(window1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
+
+    window1->Destroy();
+    window2->Destroy();
+    subWindow->Destroy();
 }
 }
 } // namespace Rosen

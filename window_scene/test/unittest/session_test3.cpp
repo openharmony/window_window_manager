@@ -155,6 +155,20 @@ HWTEST_F(WindowSessionTest3, SetFocusable04, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetFocusableOnShow
+ * @tc.desc: SetFocusableOnShow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetFocusableOnShow, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    ASSERT_EQ(session_->IsFocusableOnShow(), true);
+    bool focusableOnShow = false;
+    session_->SetFocusableOnShow(focusableOnShow);
+    ASSERT_EQ(session_->IsFocusableOnShow(), focusableOnShow);
+}
+
+/**
  * @tc.name: SetTouchable03
  * @tc.desc: IsSessionValid() and touchable return true
  * @tc.type: FUNC
