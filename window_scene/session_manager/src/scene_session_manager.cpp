@@ -2858,19 +2858,11 @@ void SceneSessionManager::CacheSpecificSessionForRecovering(
         "%{public}d, window type = %{public}d", sceneSession->GetPersistentId(), parentId, windowType);
 
     if (WindowHelper::IsSubWindow(windowType)) {
-        if (recoverSubSessionCacheMap_.find(parentId) == recoverSubSessionCacheMap_.end()) {
-            recoverSubSessionCacheMap_[parentId] = std::vector{sceneSession};
-        } else {
-            recoverSubSessionCacheMap_[parentId].emplace_back(sceneSession);
-        }
+        recoverSubSessionCacheMap_[parentId].emplace_back(sceneSession);
     }
 
     if (WindowHelper::IsDialogWindow(windowType)) {
-        if (recoverDialogSessionCacheMap_.find(parentId) == recoverDialogSessionCacheMap_.end()) {
-            recoverDialogSessionCacheMap_[parentId] = std::vector{sceneSession};
-        } else {
-            recoverDialogSessionCacheMap_[parentId].emplace_back(sceneSession);
-        }
+        recoverDialogSessionCacheMap_[parentId].emplace_back(sceneSession);
     }
 }
 
@@ -3028,7 +3020,7 @@ void SceneSessionManager::RegisterBindDialogTargetListener(const sptr<SceneSessi
         bindDialogTargetFuncMap_[persistentId] = std::move(func);
         RecoverCachedDialogSession(persistentId);
     };
-    taskScheduler_->PostTask(task, "RegisterBindDialogTargetListener");
+    taskScheduler_->PostTask(task, __func__);
 }
 
 void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSession,
@@ -3160,12 +3152,10 @@ void SceneSessionManager::UnregisterSpecificSessionCreateListener(int32_t persis
 {
     TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", persistentId);
     auto task = [this, persistentId]() {
-        auto iter1 = createSubSessionFuncMap_.find(persistentId);
-        if (iter1 != createSubSessionFuncMap_.end()) {
+        if (createSubSessionFuncMap_.find(persistentId) != createSubSessionFuncMap_.end()) {
             createSubSessionFuncMap_.erase(persistentId);
         }
-        auto iter2 = bindDialogTargetFuncMap_.find(persistentId);
-        if (iter2 != bindDialogTargetFuncMap_.end()) {
+        if (bindDialogTargetFuncMap_.find(persistentId) != bindDialogTargetFuncMap_.end()) {
             bindDialogTargetFuncMap_.erase(persistentId);
         }
         return WMError::WM_OK;

@@ -677,20 +677,27 @@ HWTEST_F(SceneSessionManagerSupplementTest, IsSessionVisible, Function | SmallTe
  */
 HWTEST_F(SceneSessionManagerSupplementTest, RegisterBindDialogTargetListener, Function | SmallTest | Level3)
 {
-    int ret = 0;
     SessionInfo info;
     info.bundleName_ = "test1";
     info.abilityName_ = "test2";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    int32_t persistentId = 1;
+    ssm_->UnregisterSpecificSessionCreateListener(persistentId);
     NotifyBindDialogSessionFunc func1;
     ssm_->RegisterBindDialogTargetListener(sceneSession, std::move(func1));
-    ssm_->UnregisterSpecificSessionCreateListener(1);
+    ssm_->UnregisterSpecificSessionCreateListener(persistentId);
+
     NotifyBindDialogSessionFunc func2;
-    ssm_->bindDialogTargetFuncMap_.insert({ 1, func2 });
-    ssm_->bindDialogTargetFuncMap_.erase(1);
-    ssm_->bindDialogTargetFuncMap_.insert({ 1, func2 });
+    ssm_->bindDialogTargetFuncMap_.insert({ persistentId, func2 });
+    ASSERT_NE(ssm_->bindDialogTargetFuncMap_.find(persistentId), ssm_->bindDialogTargetFuncMap_.end());
+    ssm_->bindDialogTargetFuncMap_.erase(persistentId);
+    ASSERT_EQ(ssm_->bindDialogTargetFuncMap_.find(persistentId), ssm_->bindDialogTargetFuncMap_.end());
+    ssm_->bindDialogTargetFuncMap_.insert({ persistentId, func2 });
+    ASSERT_NE(ssm_->bindDialogTargetFuncMap_.find(persistentId), ssm_->bindDialogTargetFuncMap_.end());
     ssm_->bindDialogTargetFuncMap_.clear();
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(ssm_->bindDialogTargetFuncMap_.find(persistentId), ssm_->bindDialogTargetFuncMap_.end());
 }
 }
 } // namespace Rosen
