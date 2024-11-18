@@ -41,6 +41,7 @@ const std::string ON_SCREEN_EXTEND_CHANGE = "screenExtendChange";
 const std::string ON_HOVER_STATUS_CHANGE_CALLBACK = "hoverStatusChange";
 const std::string ON_SCREEN_CAPTURE_NOTIFY = "screenCaptureNotify";
 const std::string ON_SUPER_FOLD_STATUS_CHANGE_CALLBACK = "superFoldStatusChange";
+const std::string ON_CAMERA_FOLD_STATUS_CHANGE_CALLBACK = "cameraStatusChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -288,7 +289,7 @@ void JsScreenSession::UnRegisterScreenChangeListener()
         WLOGFE("Failed to unregister screen change listener, session is null!");
         return;
     }
- 
+
     screenSession_->UnregisterScreenChangeListener(this);
     WLOGFI("unregister screen change listener success.");
 }
