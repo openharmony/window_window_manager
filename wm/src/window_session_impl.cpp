@@ -232,6 +232,7 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
             property_->SetDecorEnable(windowOption_->GetSubWindowDecorEnable());
             property_->SetDragEnabled(windowOption_->GetSubWindowDecorEnable());
+            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
             subWindowTitle_ = windowOption_->GetSubWindowTitle();
         }
         bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
@@ -1607,7 +1608,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    WLOGFD("%{public}d", dragEnabled);
+    TLOGD(WmsLogTag::DEFAULT, "%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1615,7 +1616,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
     if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsSubWindow(GetType())) {
         property_->SetDragEnabled(dragEnabled);
     } else {
-        WLOGFE("This is not main window or sub window.");
+        TLOGE(WmsLogTag::DEFAULT, "This is not main window or sub window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
