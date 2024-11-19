@@ -469,6 +469,9 @@ protected:
         + to_string(rect.posX_) + ", " + to_string(rect.posY_) + "]";
     }
 
+    /*
+     * Window Pipeline
+     */
     bool UpdateVisibilityInner(bool visibility);
     bool UpdateInteractiveInner(bool interactive);
     virtual void NotifyClientToUpdateInteractive(bool interactive) {}
