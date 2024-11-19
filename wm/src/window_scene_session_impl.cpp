@@ -441,12 +441,12 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
 
 WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 {
-    auto persistentId = property_->GetPersistentId();
-    TLOGI(WmsLogTag::WMS_RECOVER, "windowName = %{public}s, windowMode = %{public}u, "
-        "windowType = %{public}u, persistentId = %{public}d, windowState = %{public}d", GetWindowName().c_str(),
-        property_->GetWindowMode(), property_->GetWindowType(), persistentId, state_);
+    TLOGI(WmsLogTag::WMS_RECOVER, "windowName=%{public}s, windowMode=%{public}u, windowType=%{public}u, "
+        "persistentId=%{public}d, windowState=%{public}d, requestWindowState=%{public}d, parentId=%{public}d",
+        GetWindowName().c_str(), property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_,
+        requestState_, property_->GetParentId());
 
-    property_->SetWindowState(state_);
+    property_->SetWindowState(requestState_);
 
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
@@ -472,6 +472,8 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
         iSessionStage, eventChannel, surfaceNode_, property_, session, token);
 
+    property_->SetWindowState(state_);
+
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Recover failed, session is nullptr");
         return WMError::WM_ERROR_NULLPTR;
@@ -489,6 +491,10 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 
 WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "windowName=%{public}s, windowMode=%{public}u, windowType=%{public}u, "
+        "persistentId=%{public}d, windowState=%{public}d, requestWindowState=%{public}d", GetWindowName().c_str(),
+        property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_, requestState_);
+
     if (isFocused_) {
         UpdateFocus(false);
     }
@@ -507,11 +513,6 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
     }
     property_->SetWindowState(state_);
-    TLOGI(WmsLogTag::WMS_RECOVER,
-        "bundle=%{public}s, module=%{public}s, ability=%{public}s, appIndex=%{public}d, type=%{public}u, "
-        "Id=%{public}d, windowState=%{public}d",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.windowType_,
-        GetPersistentId(), state_);
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;
@@ -1519,9 +1520,9 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
         requestRect.width_, requestRect.height_, windowRect.posX_, windowRect.posY_,
         windowRect.width_, windowRect.height_, newRect.posX_, newRect.posY_,
         newRect.width_, newRect.height_);
- 
+
     property_->SetRequestRect(newRect);
- 
+
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
