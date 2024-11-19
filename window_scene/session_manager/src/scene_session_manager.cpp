@@ -193,6 +193,8 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.huawei.hmos.settings", "AccessibilityShortKeyDialog", "phone_settings"),
         std::make_tuple("com.huawei.hmos.settings", "DefaultIntentUiExtensionAbility", "phone_settings"),
         std::make_tuple("com.ohos.sceneboard", "ScbIntentUIExtensionAbility", "phone_sceneboard"),
+        std::make_tuple("com.ohos.sceneboard", "PoweroffAbility", "phone_sceneboard"),
+        std::make_tuple("com.ohos.sceneboard", "com.ohos.sceneboard.MetaBallsAbility", "metaBallsTurbo"),
         std::make_tuple("com.huawei.hmos.motiongesture", "IntentUIExtensionAbility", "entry"),
     };
 
