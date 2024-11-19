@@ -320,7 +320,9 @@ enum class WindowSizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
+    RESIZE_WITH_ANIMATION,
     MOVE,
+    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -484,6 +486,19 @@ private:
     {
         return -0.001f < val && val < 0.001f;
     }
+};
+
+/**
+ * @struct RectAnimationConfig
+ *
+ * @brief Window RectAnimationConfig
+ */
+struct RectAnimationConfig {
+    uint32_t duration_ = 0;
+    float x1_ = 0.0f;
+    float y1_ = 0.0f;
+    float x2_ = 0.0f;
+    float y2_ = 0.0f;
 };
 
 /**

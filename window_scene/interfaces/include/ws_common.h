@@ -409,7 +409,9 @@ enum class SizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
+    RESIZE_WITH_ANIMATION,
     MOVE,
+    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -585,6 +587,14 @@ struct WindowAnimationConfig {
     float translateX_ = 0.0f;
     float translateY_ = 0.0f;
     float opacity_ = 0;
+};
+
+struct WSRectAnimationConfig {
+    uint32_t duration_ = 0;
+    float x1_ = 0.0f;
+    float y1_ = 0.0f;
+    float x2_ = 0.0f;
+    float y2_ = 0.0f;
 };
 
 struct StartingWindowInfo {

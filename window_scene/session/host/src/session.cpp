@@ -2998,6 +2998,31 @@ bool Session::UseStartingWindowAboveLocked() const
     return useStartingWindowAboveLocked_;
 }
 
+void Session::SetSessionRequestRectAnimationConfig(const WSRectAnimationConfig& rectAnimationConfig)
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return;
+    }
+    property->SetRectAnimationConfig(SessionHelper::TransferToRectAnimationConfig(rectAnimationConfig));
+    WLOGFD("is: %{public}d, rectAnimationConfig: [%{public}u]", persistentId_,
+        rectAnimationConfig.duration_);
+}
+
+WSRectAnimationConfig Session::GetSessionRequestRectAnimationConfig() const
+{
+    WSRectAnimationConfig rectAnimationConfig;
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        return rectAnimationConfig;
+    }
+    rectAnimationConfig = SessionHelper::TransferToWSRectAnimationConfig(property->GetRequestRectAnimationConfig());
+    WLOGFD("id: %{public}d, rectAnimationConfig: [%{public}u]", persistentId_,  rectAnimationConfig.duration_);
+    return rectAnimationConfig;
+}
+
 WindowType Session::GetWindowType() const
 {
     auto property = GetSessionProperty();

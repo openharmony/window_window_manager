@@ -1003,13 +1003,14 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
     NotifySessionRectChangeFunc func = [weakThis = wptr(this)](const WSRect& rect,
-        SizeChangeReason reason, DisplayId displayId = DISPLAY_ID_INVALID) {
+        SizeChangeReason reason, DisplayId displayId = DISPLAY_ID_INVALID,
+        const WSRectAnimationConfig& rectAnimationConfig = {}) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionRectChangeRegister jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnSessionRectChange(rect, reason, displayId);
+        jsSceneSession->OnSessionRectChange(rect, reason, displayId, rectAnimationConfig);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -2892,14 +2893,16 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
 }
 
 /** @note @window.layout */
-void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId)
+void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId,
+    const WSRectAnimationConfig& rectAnimationConfig)
 {
     if (!IsMoveToOrDragMove(reason) && reason != SizeChangeReason::PIP_RESTORE && rect.IsEmpty()) {
         WLOGFD("Rect is empty, there is no need to notify");
         return;
     }
     WLOGFD("[NAPI]");
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, rect, displayId, reason, env = env_] {
+        auto task = [weakThis = wptr(this), persistentId = persistentId_, rect, displayId, reason,
+        rectAnimationConfig, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "OnSessionRectChange jsSceneSession id:%{public}d has been destroyed",
@@ -2914,7 +2917,8 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason re
         napi_value jsSessionRect = CreateJsSessionRect(env, rect);
         napi_value jsSizeChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
         napi_value jsDisplayId = CreateJsValue(env, static_cast<int32_t>(displayId));
-        napi_value argv[] = {jsSessionRect, jsSizeChangeReason, jsDisplayId};
+        napi_value jsAnimationConfigObj = CreateJsAnimationConfig(env, rectAnimationConfig);
+        napi_value argv[] = {jsSessionRect, jsSizeChangeReason, jsDisplayId, jsAnimationConfigObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     std::string rectInfo = "OnSessionRectChange [" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_)

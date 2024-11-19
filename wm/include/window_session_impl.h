@@ -515,6 +515,8 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction);
+    void UpdateRectForResizeWithAnimation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const RectAnimationConfig& rectAnimationConfig, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
