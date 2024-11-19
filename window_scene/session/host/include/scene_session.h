@@ -565,7 +565,8 @@ public:
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
-        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
+        const WSRectAnimationConfig& rectAnimationConfig = {});
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -716,6 +717,8 @@ private:
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
+        const WSRectAnimationConfig& rectAnimationConfig);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,

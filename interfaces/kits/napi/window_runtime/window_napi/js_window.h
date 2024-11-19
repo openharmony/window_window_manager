@@ -59,9 +59,11 @@ public:
     static napi_value MoveWindowToAsync(napi_env env, napi_callback_info info);
     static napi_value MoveWindowToGlobal(napi_env env, napi_callback_info info);
     static napi_value GetGlobalScaledRect(napi_env env, napi_callback_info info);
+    static napi_value MoveWindowToWithAnimation(napi_env env, napi_callback_info info);
     static napi_value Resize(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value ResizeWindowAsync(napi_env env, napi_callback_info info);
+    static napi_value ResizeWindowWithAnimation(napi_env env, napi_callback_info info);
     static napi_value SetWindowType(napi_env env, napi_callback_info info);
     static napi_value SetWindowMode(napi_env env, napi_callback_info info);
     static napi_value GetProperties(napi_env env, napi_callback_info info);
@@ -192,6 +194,7 @@ private:
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits);
+    static bool ParseAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig);
     bool CheckWindowMaskParams(napi_env env, napi_value jsObject);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
@@ -210,9 +213,11 @@ private:
     napi_value OnMoveWindowToAsync(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowToGlobal(napi_env env, napi_callback_info info);
     napi_value OnGetGlobalScaledRect(napi_env env, napi_callback_info info);
+    napi_value OnMoveWindowToWithAnimation(napi_env env, napi_callback_info info);
     napi_value OnResize(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
     napi_value OnResizeWindowAsync(napi_env env, napi_callback_info info);
+    napi_value OnResizeWindowWithAnimation(napi_env env, napi_callback_info info);
     napi_value OnSetWindowType(napi_env env, napi_callback_info info);
     napi_value OnSetWindowMode(napi_env env, napi_callback_info info);
     napi_value OnGetProperties(napi_env env, napi_callback_info info);

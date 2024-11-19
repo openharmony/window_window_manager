@@ -878,7 +878,8 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
     WSRect overlapRect = { 0, 0, 0, 0 };
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
-    sceneSession->sessionRectChangeFunc_ = [](const WSRect& rect, SizeChangeReason reason, DisplayId displayId) {
+    sceneSession->sessionRectChangeFunc_ = [](const WSRect& rect,
+        SizeChangeReason reason, DisplayId displayId, const WSRectAnimationConfig& rectAnimationConfig) {
         return;
     };
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);

@@ -31,6 +31,12 @@ WSError FutureCallback::OnUpdateSessionRect(const Rect& rect, WindowSizeChangeRe
         case WindowSizeChangeReason::RESIZE:
             resizeFuture_.SetValue(rect);
             return WSError::WS_OK;
+        case WindowSizeChangeReason::MOVE_WITH_ANIMATION:
+            moveToFuture_.SetValue(rect);
+            return WSError::WS_OK;
+        case WindowSizeChangeReason::RESIZE_WITH_ANIMATION:
+            resizeFuture_.SetValue(rect);
+            return WSError::WS_OK;
         default:
             TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, reason:%{public}u is not move or resize",
                 persistentId, reason);
