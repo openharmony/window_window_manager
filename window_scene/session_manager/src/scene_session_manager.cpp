@@ -5596,7 +5596,7 @@ void SceneSessionManager::ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& 
         if (IsSessionVisibleForeground(sceneSession)) {
             RequestSessionFocus(sceneSession->GetPersistentId(), true, FocusChangeReason::APP_FOREGROUND);
         } else {
-            PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
+            PostProcessFocusState state = {true, true, FocusChangeReason::APP_FOREGROUND};
             sceneSession->SetPostProcessFocusState(state);
         }
     } else {
