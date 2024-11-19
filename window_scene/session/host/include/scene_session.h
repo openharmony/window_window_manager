@@ -393,7 +393,7 @@ public:
     /**
      * Dialog Window
      */
-    void RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback);
+    void RegisterBindDialogSessionCallback(const NotifyBindDialogSessionFunc& callback);
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 

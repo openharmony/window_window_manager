@@ -289,7 +289,7 @@ HWTEST_F(SceneSessionTest3, RegisterBindDialogSessionCallback1, Function | Small
     sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     sceneSession->onBindDialogTarget_ = nullptr;
     NotifyBindDialogSessionFunc func = [](const sptr<SceneSession>& sceneSession) {};
-    sceneSession->RegisterBindDialogSessionCallback(std::move(func));
+    sceneSession->RegisterBindDialogSessionCallback(func);
     ASSERT_NE(sceneSession->onBindDialogTarget_, nullptr);
 }
 
