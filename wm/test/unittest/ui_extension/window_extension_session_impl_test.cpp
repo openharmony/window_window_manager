@@ -2120,11 +2120,10 @@ HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Fun
  */
 HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventAsync, Function | SmallTest | Level3)
 {
-    ASSERT_NE(nullptr, window_->property_);
     window_->NotifyExtensionEventAsync(0);
 
     SessionInfo sessionInfo;
-    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    window_->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
     window_->property_->SetPersistentId(1);
     window_->NotifyExtensionEventAsync(0);

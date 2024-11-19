@@ -284,6 +284,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.callerPersistentId_ = info.callerPersistentId_;
     sessionInfo_.callingTokenId_ = info.callingTokenId_;
     sessionInfo_.uiAbilityId_ = info.uiAbilityId_;
+    sessionInfo_.specifiedId = info.specifiedId;
     sessionInfo_.startSetting = info.startSetting;
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
@@ -473,19 +474,18 @@ void Session::NotifyTransferAccessibilityEvent(const Accessibility::Accessibilit
 
 void Session::NotifyExtensionDetachToDisplay()
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "called");
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
         return;
     }
 
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    for (auto &listener : lifecycleListeners) {
+    for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnExtensionDetachToDisplay();
         }
     }
-
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
 }
 
 float Session::GetAspectRatio() const

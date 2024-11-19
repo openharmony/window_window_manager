@@ -45,6 +45,7 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
         !data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)) ||
         !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
+        !data.WriteInt32(abilitySessionInfo->tmpSpecifiedId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
         return false;
@@ -1993,22 +1994,22 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint32(notifyEvent)) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Write notifyEvent failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write notifyEvent failed");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "remote is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
         return;
     }
 }
@@ -2016,7 +2017,6 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
 void SessionProxy::NotifyExtensionDetachToDisplay()
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: UIExtcalled");
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -2027,10 +2027,15 @@ void SessionProxy::NotifyExtensionDetachToDisplay()
     }
 
     sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: remote is null");
+        return;
+    }
+
     auto ret = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY), data, reply, option);
     if (ret != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: SendRequest failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: SendRequest failed, ret code: %{public}u", ret);
     }
 }
 
