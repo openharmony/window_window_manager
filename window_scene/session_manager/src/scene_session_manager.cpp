@@ -3855,20 +3855,23 @@ int32_t SceneSessionManager::GetFocusedSessionId() const
 void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
 {
     if (!SessionPermission::IsSACalling()) {
-        WLOGFE("GetFocusWindowInfo permission denied!");
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return;
     }
-    auto sceneSession = GetSceneSession(focusedSessionId_);
-    if (sceneSession) {
-        WLOGFD("Get focus session info success");
-        focusInfo.windowId_ = sceneSession->GetWindowId();
-        focusInfo.displayId_ = static_cast<DisplayId>(0);
-        focusInfo.pid_ = sceneSession->GetCallingPid();
-        focusInfo.uid_ = sceneSession->GetCallingUid();
-        focusInfo.windowType_ = sceneSession->GetWindowType();
-        focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
-    }
-    return;
+    auto task = [this, &focusInfo] {
+        if (auto sceneSession = GetSceneSession(focusedSessionId_)) {
+            TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
+            focusInfo.windowId_ = sceneSession->GetWindowId();
+            focusInfo.displayId_ = static_cast<DisplayId>(0);
+            focusInfo.pid_ = sceneSession->GetCallingPid();
+            focusInfo.uid_ = sceneSession->GetCallingUid();
+            focusInfo.windowType_ = sceneSession->GetWindowType();
+            focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
+            return WSError::WS_OK;
+        }
+        return WSError::WS_ERROR_DESTROYED_OBJECT;
+    };
+    taskScheduler_->PostSyncTask(task, __func__);
 }
 
 static bool IsValidDigitString(const std::string& windowIdStr)
@@ -9092,7 +9095,7 @@ void SceneSessionManager::ProcessUpdateLastFocusedAppId(const std::vector<uint32
     }
 }
 
-void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty) 
+void SceneSessionManager::ProcessFocusZOrderChange(uint32_t dirty)
 {
     if (!(dirty & static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER))) {
         return;
