@@ -68,6 +68,7 @@ public:
      * @param screenId ID of the screen that is connected to the WMS, screenId is currently always 0.
      */
     virtual void OnConnected(int32_t userId, int32_t screenId) = 0;
+
     /**
      * @brief Notify caller when WMS disconnected
      *
@@ -91,6 +92,7 @@ public:
      * @param focusChangeInfo Window info while its focus status changed.
      */
     virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) = 0;
+
     /**
      * @brief Notify caller when window lose focus
      *
@@ -113,7 +115,6 @@ public:
      */
     virtual void OnWindowModeUpdate(WindowModeType mode) = 0;
 };
-
 
 /**
  * @class ISystemBarChangedListener
@@ -218,6 +219,7 @@ public:
      * @brief Default construct of AccessibilityWindowInfo.
      */
     AccessibilityWindowInfo() = default;
+
     /**
      * @brief Default deconstruct of AccessibilityWindowInfo.
      */
@@ -230,6 +232,7 @@ public:
      * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
+
     /**
      * @brief Unmarshalling AccessibilityWindowInfo.
      *
@@ -266,6 +269,7 @@ public:
      * @brief Default construct of UnreliableWindowInfo.
      */
     UnreliableWindowInfo() = default;
+
     /**
      * @brief Default deconstruct of UnreliableWindowInfo.
      */
@@ -278,6 +282,7 @@ public:
      * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
+
     /**
      * @brief Unmarshalling UnreliableWindowInfo.
      *
@@ -428,6 +433,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
+
     /**
      * @brief Unregister WMS connection status changed listener.
      * @attention Callable only by u0 system user.
@@ -435,6 +441,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWMSConnectionChangedListener();
+
     /**
      * @brief Register focus changed listener.
      *
@@ -442,6 +449,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+
     /**
      * @brief Unregister focus changed listener.
      *
@@ -449,6 +457,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+
     /**
      * @brief Register window mode listener.
      *
@@ -456,6 +465,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+
     /**
      * @brief Unregister window mode listener.
      *
@@ -463,6 +473,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+
     /**
      * @brief Get window mode type.
      *
@@ -470,6 +481,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetWindowModeType(WindowModeType& windowModeType) const;
+
     /**
      * @brief Register system bar changed listener.
      *
@@ -477,6 +489,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
+
     /**
      * @brief Unregister system bar changed listener.
      *
@@ -484,6 +497,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
+
     /**
      * @brief Register window updated listener.
      *
@@ -491,6 +505,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+
     /**
      * @brief Unregister window updated listener.
      *
@@ -498,6 +513,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+
     /**
      * @brief Register visibility changed listener.
      *
@@ -505,6 +521,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+
     /**
      * @brief Unregister visibility changed listener.
      *
@@ -512,6 +529,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+
     /**
      * @brief Register drawingcontent changed listener.
      *
@@ -535,6 +553,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
+
     /**
      * @brief Unregister camera float window changed listener.
      *
@@ -542,6 +561,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
+
     /**
      * @brief Register water mark flag changed listener.
      *
@@ -549,6 +569,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
+
     /**
      * @brief Unregister water mark flag changed listener.
      *
@@ -556,6 +577,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
+
     /**
      * @brief Register gesture navigation enabled changed listener.
      *
@@ -564,6 +586,7 @@ public:
      */
     WMError RegisterGestureNavigationEnabledChangedListener(
         const sptr<IGestureNavigationEnabledChangedListener>& listener);
+
     /**
      * @brief Unregister gesture navigation enabled changed listener.
      *
@@ -632,12 +655,14 @@ public:
      * @return WM_OK means minimize success, others means minimize failed.
      */
     WMError MinimizeAllAppWindows(DisplayId displayId);
+
     /**
      * @brief Toggle all app windows to the foreground.
      *
      * @return WM_OK means toggle success, others means toggle failed.
      */
     WMError ToggleShownStateForAllAppWindows();
+
     /**
      * @brief Set window layout mode.
      *
@@ -645,6 +670,7 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
+
     /**
      * @brief Get accessibility window info.
      *
@@ -652,6 +678,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
+
     /**
      * @brief Get unreliable window info.
      *
@@ -660,6 +687,7 @@ public:
      */
     WMError GetUnreliableWindowInfo(int32_t windowId,
         std::vector<sptr<UnreliableWindowInfo>>& infos) const;
+
     /**
      * @brief Get visibility window info.
      *
@@ -667,6 +695,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
+
     /**
      * @brief Set gesture navigation enabled.
      *
@@ -751,6 +780,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener);
+
     /**
      * @brief Unregister visible main window num changed listener.
      *

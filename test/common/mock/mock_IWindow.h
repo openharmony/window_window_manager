@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "iremote_broker.h"
 #include "window.h"
 #include "zidl/window_interface.h"

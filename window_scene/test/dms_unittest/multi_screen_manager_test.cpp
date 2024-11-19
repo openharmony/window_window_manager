@@ -316,7 +316,6 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch04, Function | SmallT
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
-
 /**
  * @tc.name: PhysicalScreenMirrorSwitch05
  * @tc.desc: defaultSession != nullptr
@@ -1060,7 +1059,6 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange02, Function | SmallTest | L
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
 }
 
-
 /**
  * @tc.name: DoFirstMirrorChange
  * @tc.desc: DoFirstMirrorChangeExtend
@@ -1118,7 +1116,6 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange04, Function | SmallTest | L
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
 }
-
 
 /**
  * @tc.name: DoFirstExtendChange

@@ -186,7 +186,7 @@ public:
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
     WSError RaiseToAppTop() override;
 
-    /*
+    /**
      * Window Layout
      */
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
@@ -390,14 +390,14 @@ public:
     void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
-    /*
+    /**
      * Dialog Window
      */
     void RegisterBindDialogSessionCallback(const NotifyBindDialogSessionFunc& callback);
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
-    /*
+    /**
      * Window Input Event
      */
     void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
@@ -593,8 +593,8 @@ protected:
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-
-    /*
+    
+    /**
      * Dialog window
      */
     NotifyBindDialogSessionFunc onBindDialogTarget_;
@@ -611,19 +611,19 @@ protected:
     NotifyMainSessionModalTypeChangeFunc onMainSessionModalTypeChange_;
     NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
 
-    /*
+    /**
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
 
-    /*
+    /**
      * Window Lifecycle
      */
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
 
-    /*
+    /**
      * PC Fold Screen
      */
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
@@ -635,8 +635,8 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
-
-    /*
+    
+    /**
      * Window Layout
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
@@ -852,12 +852,12 @@ private:
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 
-    /*
+    /**
      * Window Input Event
      */
     NotifyTouchOutsideFunc onTouchOutside_;
 
-    /*
+    /**
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;

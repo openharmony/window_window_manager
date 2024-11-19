@@ -268,7 +268,6 @@ HWTEST_F(WindowSessionLifecycleTest, Foreground03, Function | SmallTest | Level2
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
-
 /**
  * @tc.name: Background01
  * @tc.desc: check func Background

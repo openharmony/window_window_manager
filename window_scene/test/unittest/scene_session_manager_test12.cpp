@@ -189,6 +189,7 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource03, Function | Sma
     bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
     EXPECT_EQ(result, false);
 }
+
 /**
  * @tc.name: GetStartupPageFromResource04
  * @tc.desc: GetStartupPageFromResource

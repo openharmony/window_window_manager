@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
@@ -809,7 +810,6 @@ HWTEST_F(WindowSessionImplTest, RequestVsyncSucc, Function | SmallTest | Level2)
     window->vsyncStation_ = nullptr;
     window->RequestVsync(vsyncCallback);
 }
-
 
 /**
  * @tc.name: RequestVsyncErr

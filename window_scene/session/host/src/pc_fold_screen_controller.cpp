@@ -204,7 +204,7 @@ bool PcFoldScreenManager::NeedDoThrowSlip(ScreenSide startSide, const WSRectF& v
     return false;
 }
 
-/*
+/**
  * move rect to other side
  * @param rect: current side, moved to other side
  * @param titleHeight: used in arrange rule to avoid title bar
@@ -306,7 +306,7 @@ void PcFoldScreenManager::MappingRectInScreenSideWithArrangeRule(ScreenSide side
     }
 }
 
-/*
+/**
  * init rule: move rect to center of display
  * @param titleHeight: in vp
  */
@@ -319,7 +319,7 @@ void PcFoldScreenManager::ApplyInitArrangeRule(WSRect& rect, WSRect& lastArrange
     lastArrangedRect = { rect.posX_, rect.posY_, RULE_TRANS_X * vpr, titleHeight * vpr };
 }
 
-/*
+/**
  * init rule: move rect to bottom-right of last arranged position
  * @param titleHeight: in vp
  */
@@ -386,7 +386,7 @@ void PcFoldScreenController::RecordMoveRects(const WSRect& rect)
         TimeHelper::GetDuration(movingRectRecords_[0].first, movingRectRecords_[movingRectRecords_.size() - 1].first));
 }
 
-/*
+/**
  * if move fast, window can be throwed to other side
  * @param rect: current rect. if throwed, move it to other side
  * @param topAvoidHeight: avoid status bar
@@ -419,7 +419,7 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     return true;
 }
 
-/*
+/**
  * resize to fullscreen in one side considering avoid area
  * @param rect: resize in its side
  */
@@ -457,7 +457,7 @@ int32_t PcFoldScreenController::GetPersistentId() const
     return sceneSession->GetPersistentId();
 }
 
-/*
+/**
  * get height of title bar
  * @return: vp
  */

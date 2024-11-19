@@ -56,6 +56,7 @@ public:
      * @brief Default construct of WindowVisibilityInfo.
      */
     WindowVisibilityInfo() = default;
+
     /**
      * @brief Construct of WindowVisibilityInfo.
      *
@@ -87,6 +88,7 @@ public:
      * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
+
     /**
      * @brief Unmarshalling WindowVisibilityInfo.
      *

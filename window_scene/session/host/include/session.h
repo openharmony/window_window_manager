@@ -481,7 +481,7 @@ public:
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
 
-    /*
+    /**
      * Window Lifecycle
      */
     bool GetIsPendingToBackgroundState() const;
@@ -522,7 +522,7 @@ public:
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
 
-    /*
+    /**
      * Starting Window
      */
     WSError RemoveStartingWindow() override;
@@ -533,7 +533,7 @@ public:
     void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
     bool UseStartingWindowAboveLocked() const;
 
-    /*
+    /**
      * Window Hierarchy
      */
     void ProcessClickModalWindowOutside(int32_t posX, int32_t posY);
@@ -716,12 +716,12 @@ protected:
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
 
-    /*
+    /**
      * Window Hierarchy
      */
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
 
-    /*
+    /**
      * Window Pipeline
      */
     uint32_t dirtyFlags_ = 0; // only accessed on SSM thread
@@ -816,7 +816,7 @@ private:
     std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
 
-    /*
+    /**
      * Window Lifecycle
      */
     std::atomic<bool> isAttach_ { false };
@@ -829,7 +829,7 @@ private:
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 
-    /*
+    /**
      * Starting Window
      */
     bool enableRemoveStartingWindow_ { false };

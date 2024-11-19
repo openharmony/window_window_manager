@@ -1680,7 +1680,6 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
     ssm_->ProcessBackEvent();
 }
 
-
 /**
  * @tc.name: RequestInputMethodCloseKeyboard
  * @tc.desc: RequestInputMethodCloseKeyboard

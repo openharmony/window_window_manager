@@ -139,6 +139,7 @@ public:
      * @param y The position y of hit offset.
      */
     void SetHitOffset(int32_t x, int32_t y);
+
     /**
      * @brief Set window tag.
      *

@@ -129,7 +129,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, Function | Sm
     ASSERT_EQ(resultValue, 1);
 }
 
-
 /**
  * @tc.name: ProxyForFreeze
  * @tc.desc: ProxyForFreeze
@@ -1037,7 +1036,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, DestroyVirtualScreen, Function | SmallTe
     }
 }
 
-
 /**
  * @tc.name: MakeMirror
  * @tc.desc: MakeMirror
@@ -1719,7 +1717,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, Function | Sma
     }
 }
 
-
 /**
  * @tc.name: SetFoldStatusLocked
  * @tc.desc: SetFoldStatusLocked
@@ -1958,7 +1955,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayNode, Function | SmallTest | L
     func();
     EXPECT_EQ(resultValue, 1);
 }
-
 
 /**
  * @tc.name: GetCurvedCompressionArea
