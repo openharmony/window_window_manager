@@ -632,18 +632,19 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->pcFoldScreenController_->RecordStartMoveRect(session->GetSessionRect(),
                     session->IsFullScreenMovable());
             }
+            WSRect rect = session->winRect_;
             if (session->IsFullScreenMovable()) {
-                WSRect rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
+                rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->GetSessionRequestRect());
                 session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, "OnSessionEvent", nullptr);
                 session->moveDragController_->SetStartMoveFlag(true);
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
             } else {
                 session->moveDragController_->SetStartMoveFlag(true);
-                session->moveDragController_->CalcFirstMoveTargetRect(session->winRect_, false);
+                session->moveDragController_->CalcFirstMoveTargetRect(rect, false);
             }
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
-                session->moveDragController_->GetOriginalPointerPosY()});
+                session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
         }
         if (session->moveDragController_ && event == SessionEvent::EVENT_DRAG) {
             WSRect rect = session->moveDragController_->GetTargetRect(
