@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 
 #include "display_manager.h"
@@ -76,7 +77,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio11, Function | SmallTest | Level2)
     auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
-
 
 /**
  * @tc.name: SetAspectRatio12

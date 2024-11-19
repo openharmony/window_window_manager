@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 
 #include "display_manager.h"
@@ -179,6 +180,7 @@ HWTEST_F(WindowNodeTest, NewWindowNode01, Function | SmallTest | Level3)
     ASSERT_NE(nullptr, windowNode2);
     ASSERT_EQ(windowName, windowNode2->GetWindowName());
 }
+
 /**
  * @tc.name: NewWindowNode02
  * @tc.desc: new window node with WindowProperty, RSSurfaceNode, IWindow
@@ -201,6 +203,7 @@ HWTEST_F(WindowNodeTest, NewWindowNode02, Function | SmallTest | Level1)
     windowNode->SetWindowProperty(property);
     ASSERT_EQ(windowName, windowNode->GetWindowName());
 }
+
 /**
  * @tc.name: NewWindowNode03
  * @tc.desc: new window node with WindowProperty, RSSurfaceNode, IWindow, pid , uid
@@ -274,6 +277,7 @@ HWTEST_F(WindowNodeTest, SetEntireWindowTouchHotArea01, Function | SmallTest | L
     ASSERT_EQ(testValue.width_, windowNode->GetEntireWindowTouchHotArea().width_);
     ASSERT_EQ(testValue.height_, windowNode->GetEntireWindowTouchHotArea().height_);
 }
+
 /**
  * @tc.name: SetEntireWindowPointerHotArea01
  * @tc.desc: SetEntireWindowPointerHotArea & GetEntireWindowPointerHotArea
@@ -303,6 +307,7 @@ HWTEST_F(WindowNodeTest, SetEntireWindowPointerHotArea01, Function | SmallTest |
     ASSERT_EQ(255, windowNode->GetEntireWindowPointerHotArea().width_);
     ASSERT_EQ(255, windowNode->GetEntireWindowPointerHotArea().height_);
 }
+
 /**
  * @tc.name: SetWindowRect01
  * @tc.desc: SetWindowRect & GetWindowRect
@@ -332,6 +337,7 @@ HWTEST_F(WindowNodeTest, SetWindowRect01, Function | SmallTest | Level1)
     ASSERT_EQ(255, windowNode->GetWindowRect().width_);
     ASSERT_EQ(255, windowNode->GetWindowRect().height_);
 }
+
 /**
  * @tc.name: SetDecoStatus01
  * @tc.desc: SetDecoStatus & GetDecoStatus
@@ -356,6 +362,7 @@ HWTEST_F(WindowNodeTest, SetDecoStatus01, Function | SmallTest | Level1)
     windowNode->SetDecorEnable(false);
     ASSERT_EQ(false, windowNode->GetWindowProperty()->GetDecorEnable());
 }
+
 /**
  * @tc.name: SetRequestRect01
  * @tc.desc: SetRequestRect & GetRequestRect
@@ -384,6 +391,7 @@ HWTEST_F(WindowNodeTest, SetRequestRect01, Function | SmallTest | Level1)
     ASSERT_EQ(255, windowNode->GetRequestRect().width_);
     ASSERT_EQ(255, windowNode->GetRequestRect().height_);
 }
+
 /**
  * @tc.name: SetWindowProperty01
  * @tc.desc: SetWindowProperty & GetWindowProperty
@@ -404,6 +412,7 @@ HWTEST_F(WindowNodeTest, SetWindowProperty01, Function | SmallTest | Level1)
     windowNode->SetWindowProperty(property2);
     ASSERT_EQ(property2, windowNode->GetWindowProperty());
 }
+
 /**
  * @tc.name: SetSystemBarProperty01
  * @tc.desc: SetSystemBarProperty & GetSystemBarProperty
@@ -430,6 +439,7 @@ HWTEST_F(WindowNodeTest, SetSystemBarProperty01, Function | SmallTest | Level1)
     ASSERT_EQ(systemBarProperty2, systemBarProperties.find(WindowType::WINDOW_TYPE_NAVIGATION_BAR)->second);
     ASSERT_EQ(systemBarProperties.end(), systemBarProperties.find(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
 }
+
 /**
  * @tc.name: SetWindowMode01
  * @tc.desc: SetWindowMode & GetWindowMode
@@ -449,6 +459,7 @@ HWTEST_F(WindowNodeTest, SetWindowMode01, Function | SmallTest | Level1)
     windowNode->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, windowNode->GetWindowMode());
 }
+
 /**
  * @tc.name: SetBrightness01
  * @tc.desc: SetBrightness & GetBrightness
@@ -470,6 +481,7 @@ HWTEST_F(WindowNodeTest, SetBrightness01, Function | SmallTest | Level1)
     windowNode->SetBrightness(1.1f);
     ASSERT_EQ(1.1f, windowNode->GetBrightness());
 }
+
 /**
  * @tc.name: SetTurnScreenOn01
  * @tc.desc: SetTurnScreenOn & IsTurnScreenOn
@@ -487,6 +499,7 @@ HWTEST_F(WindowNodeTest, SetTurnScreenOn01, Function | SmallTest | Level1)
     windowNode->SetTurnScreenOn(true);
     ASSERT_EQ(true, windowNode->IsTurnScreenOn());
 }
+
 /**
  * @tc.name: SetKeepScreenOn01
  * @tc.desc: SetKeepScreenOn & IsKeepScreenOn
@@ -504,6 +517,7 @@ HWTEST_F(WindowNodeTest, SetKeepScreenOn01, Function | SmallTest | Level1)
     windowNode->SetKeepScreenOn(true);
     ASSERT_EQ(true, windowNode->IsKeepScreenOn());
 }
+
 /**
  * @tc.name: SetCallingWindow01
  * @tc.desc: SetCallingWindow & GetCallingWindow
@@ -521,6 +535,7 @@ HWTEST_F(WindowNodeTest, SetCallingWindow01, Function | SmallTest | Level1)
     windowNode->SetCallingWindow(100);
     ASSERT_EQ(100, windowNode->GetCallingWindow());
 }
+
 /**
  * @tc.name: SetCallingPid01
  * @tc.desc: SetCallingPid & GetCallingPid, SetInputEventCallingPid & GetInputEventCallingPid
@@ -545,6 +560,7 @@ HWTEST_F(WindowNodeTest, SetCallingPid01, Function | SmallTest | Level1)
     ASSERT_EQ(1, windowNode->GetCallingPid());
     ASSERT_EQ(2, windowNode->GetInputEventCallingPid());
 }
+
 /**
  * @tc.name: SetCallingUid01
  * @tc.desc: SetCallingUid & GetCallingUid
@@ -564,6 +580,7 @@ HWTEST_F(WindowNodeTest, SetCallingUid01, Function | SmallTest | Level1)
     windowNode->SetCallingUid(1);
     ASSERT_EQ(1, windowNode->GetCallingUid());
 }
+
 /**
  * @tc.name: SetWindowSizeChangeReason01
  * @tc.desc: SetWindowSizeChangeReason & GetWindowSizeChangeReason & ResetWindowSizeChangeReason
@@ -584,6 +601,7 @@ HWTEST_F(WindowNodeTest, SetWindowSizeChangeReason01, Function | SmallTest | Lev
     windowNode->ResetWindowSizeChangeReason();
     ASSERT_EQ(WindowSizeChangeReason::UNDEFINED, windowNode->GetWindowSizeChangeReason());
 }
+
 /**
  * @tc.name: SetRequestedOrientation01
  * @tc.desc: SetRequestedOrientation & GetRequestedOrientation
@@ -601,6 +619,7 @@ HWTEST_F(WindowNodeTest, SetRequestedOrientation01, Function | SmallTest | Level
     windowNode->SetRequestedOrientation(Orientation::REVERSE_VERTICAL);
     ASSERT_EQ(Orientation::REVERSE_VERTICAL, windowNode->GetRequestedOrientation());
 }
+
 /**
  * @tc.name: SetShowingDisplays01
  * @tc.desc: SetShowingDisplays & GetShowingDisplays
@@ -626,6 +645,7 @@ HWTEST_F(WindowNodeTest, SetShowingDisplays01, Function | SmallTest | Level1)
     windowNode->SetShowingDisplays(displays);
     ASSERT_EQ(1, windowNode->GetShowingDisplays().size());
 }
+
 /**
  * @tc.name: SetWindowModeSupportType01
  * @tc.desc: SetWindowModeSupportType & GetWindowModeSupportType
@@ -643,6 +663,7 @@ HWTEST_F(WindowNodeTest, SetWindowModeSupportType01, Function | SmallTest | Leve
     windowNode->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN, windowNode->GetWindowModeSupportType());
 }
+
 /**
  * @tc.name: SetDragType01
  * @tc.desc: SetDragType & GetDragType
@@ -660,6 +681,7 @@ HWTEST_F(WindowNodeTest, SetDragType01, Function | SmallTest | Level1)
     windowNode->SetDragType(DragType::DRAG_BOTTOM_OR_TOP);
     ASSERT_EQ(DragType::DRAG_BOTTOM_OR_TOP, windowNode->GetDragType());
 }
+
 /**
  * @tc.name: SetOriginRect01
  * @tc.desc: SetOriginRect & GetOriginRect
@@ -684,6 +706,7 @@ HWTEST_F(WindowNodeTest, SetOriginRect01, Function | SmallTest | Level1)
     auto resultRect = windowNode->GetOriginRect();
     ASSERT_EQ(testRect, resultRect);
 }
+
 /**
  * @tc.name: SetTouchHotAreas01
  * @tc.desc: SetTouchHotAreas & GetTouchHotAreas
@@ -710,6 +733,7 @@ HWTEST_F(WindowNodeTest, SetTouchHotAreas01, Function | SmallTest | Level1)
     ASSERT_EQ(1, resultRect.size());
     ASSERT_EQ(rect1, resultRect[0]);
 }
+
 /**
  * @tc.name: SetPointerHotAreas01
  * @tc.desc: SetPointerHotAreas & GetPointerHotAreas
@@ -736,6 +760,7 @@ HWTEST_F(WindowNodeTest, SetPointerHotAreas01, Function | SmallTest | Level1)
     ASSERT_EQ(1, resultRect.size());
     ASSERT_EQ(rect1, resultRect[0]);
 }
+
 /**
  * @tc.name: SetPointerHotAreas01
  * @tc.desc: SetWindowSizeLimits & GetWindowSizeLimits
@@ -768,6 +793,7 @@ HWTEST_F(WindowNodeTest, SetWindowSizeLimits01, Function | SmallTest | Level1)
     ASSERT_EQ(testValue.maxHeight_, resultValue.maxHeight_);
     ASSERT_EQ(testValue.maxRatio_, resultValue.maxRatio_);
 }
+
 /**
  * @tc.name: SetWindowUpdatedSizeLimits01
  * @tc.desc: SetWindowUpdatedSizeLimits & GetWindowUpdatedSizeLimits
@@ -800,6 +826,7 @@ HWTEST_F(WindowNodeTest, SetWindowUpdatedSizeLimits01, Function | SmallTest | Le
     ASSERT_EQ(testValue.maxHeight_, resultValue.maxHeight_);
     ASSERT_EQ(testValue.maxRatio_, resultValue.maxRatio_);
 }
+
 /**
  * @tc.name: SetSnapshot01
  * @tc.desc: SetSnapshot & GetSnapshot
@@ -829,6 +856,7 @@ HWTEST_F(WindowNodeTest, SetSnapshot01, Function | SmallTest | Level1)
     auto resultValue = windowNode->GetSnapshot();
     ASSERT_EQ(3, resultValue.use_count());
 }
+
 /**
  * @tc.name: UpdateZoomTransform01
  * @tc.desc: UpdateZoomTransform & GetZoomTransform
@@ -854,6 +882,7 @@ HWTEST_F(WindowNodeTest, UpdateZoomTransform01, Function | SmallTest | Level1)
     ASSERT_EQ(1.0f, resultValue.pivotX_);
     ASSERT_EQ(1.0f, resultValue.pivotY_);
 }
+
 /**
  * @tc.name: SetTransform01
  * @tc.desc: SetTransform & ComputeTransform

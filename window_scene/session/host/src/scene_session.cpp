@@ -2705,7 +2705,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     OnSessionEvent(SessionEvent::EVENT_END_MOVE);
 }
 
-/*
+/**
  * move with init velocity
  * @return true: rect change notified when move
  */

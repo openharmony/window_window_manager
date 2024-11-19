@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "display_manager_proxy.h"
 #include "display_manager_adapter.h"
 #include "display_manager.h"
@@ -318,7 +319,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect01, Function | SmallTest |
     ASSERT_EQ(resultValue, 1);
 }
 
-
 /**
  * @tc.name: OnScreenDisconnect
  * @tc.desc: OnScreenDisconnect
@@ -522,7 +522,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange01, Function | SmallTest |
     func();
     ASSERT_EQ(resultValue, 1);
 }
-
 
 /**
  * @tc.name: OnScreenshot

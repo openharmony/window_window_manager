@@ -238,7 +238,6 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
     sleep(SPLIT_TEST_SLEEP_S);
 }
 
-
 /**
  * @tc.name: WindowRotationTest4
  * @tc.desc: create window with orientation after setting screen default orientation.

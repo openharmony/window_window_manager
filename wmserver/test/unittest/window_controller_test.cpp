@@ -2040,7 +2040,6 @@ HWTEST_F(WindowControllerTest, UpdateProperty12, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, res);
 }
 
-
 /**
  * @tc.name: UpdateProperty
  * @tc.desc: Window controller UpdateProperty ACTION_UPDATE_SET_BRIGHTNESS

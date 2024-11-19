@@ -1002,6 +1002,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, Function | SmallTest | Level2)
     ret = windowSceneSessionImpl->Resize(100, 100);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
+
 /**
  * @tc.name: Resize01
  * @tc.desc: Resize

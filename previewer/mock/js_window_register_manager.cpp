@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_window_register_manager.h"
 #include "window_manager_hilog.h"
 

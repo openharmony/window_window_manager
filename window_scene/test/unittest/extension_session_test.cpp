@@ -308,7 +308,6 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, Function | SmallTest |
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
 
-
 /**
  * @tc.name: UpdateSessionViewportConfig1
  * @tc.desc: normal test

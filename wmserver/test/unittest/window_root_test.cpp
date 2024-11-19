@@ -1779,7 +1779,6 @@ HWTEST_F(WindowRootTest, CheckMultiDialogWindows, Function | SmallTest | Level2)
     ASSERT_EQ(false, res);
 }
 
-
 /**
  * @tc.name: GetSplitScreenWindowNodes
  * @tc.desc: test WindowRoot GetSplitScreenWindowNodes

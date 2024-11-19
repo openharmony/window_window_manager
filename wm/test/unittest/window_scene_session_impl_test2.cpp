@@ -477,7 +477,6 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateConfiguration01, Function | SmallTes
     ASSERT_EQ(ret, 0);
 }
 
-
 /**
  * @tc.name: UpdateConfigurationForAll01
  * @tc.desc: UpdateConfigurationForAll
@@ -1316,6 +1315,7 @@ HWTEST_F(WindowSceneSessionImplTest2, AdjustKeyboardLayout01, Function | SmallTe
     params.PortraitPanelRect_ = {1, 2, 3, 4};
     ASSERT_EQ(WMError::WM_OK, window->AdjustKeyboardLayout(params));
 }
+
 /**
  * @tc.name: HideNonSecureWindows01
  * @tc.desc: HideNonSecureWindows

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
@@ -101,7 +102,6 @@ HWTEST_F(WindowSessionImplTest4, GetFocusable, Function | SmallTest | Level2)
     ASSERT_EQ(ret, true);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetFocusabletest01 end";
 }
-
 
 /**
  * @tc.name: TransferAccessibilityEvent
@@ -707,7 +707,6 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, Function | SmallTest | Le
     window->state_ = WindowState::STATE_CREATED;
     window->GetCallingWindowRect(rect);
 }
-
 
 /**
  * @tc.name: EnableDrag

@@ -149,7 +149,7 @@ public:
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 
-    /*
+    /**
      * PC Window
      */
     bool IsPcOrPadCapabilityEnabled() const override;
@@ -160,7 +160,7 @@ public:
     WMError SetWindowRectAutoSave(bool enabled) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
 
-    /*
+    /**
      * Free Multi Window
      */
     WSError SwitchFreeMultiWindow(bool enable) override;
@@ -174,7 +174,7 @@ public:
     bool GetIsUIExtFirstSubWindow() const override;
     bool GetIsUIExtAnySubWindow() const override;
 
-    /*
+    /**
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;
@@ -258,12 +258,12 @@ private:
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
 
-    /*
+    /**
      * Gesture Back
      */
     bool gestureBackEnabled_ = true;
 
-    /*
+    /**
      * Window Property.
      */
     void InitSystemSessionDragEnable();
