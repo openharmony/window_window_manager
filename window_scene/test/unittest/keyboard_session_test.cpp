@@ -284,6 +284,63 @@ HWTEST_F(KeyboardSessionTest, NotifyClientToUpdateRect02, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetKeyboardSessionGravity
+ * @tc.desc: SetKeyboardSessionGravity
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, SetKeyboardSessionGravity, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetKeyboardSessionGravity";
+    info.bundleName_ = "SetKeyboardSessionGravity";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        new (std::nothrow) SceneSession::SpecificSessionCallback();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    auto ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    sptr<SceneSession::SessionChangeCallback> sessionChangeCb =
+        new (std::nothrow) SceneSession::SessionChangeCallback();
+    EXPECT_NE(sessionChangeCb, nullptr);
+    keyboardSession->sessionChangeCallback_ = sessionChangeCb;
+    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    keyboardSession->keyboardGravityChangeFunc_ = [](SessionGravity) {
+        return 0;
+    };
+    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    keyboardSession->isKeyboardPanelEnabled_ = true;
+    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->isKeyboardPanelEnabled_ = false;
+    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    keyboardSession->isKeyboardPanelEnabled_ = true;
+    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    keyboardSession->state_ = SessionState::STATE_DISCONNECT;
+    ret = keyboardSession->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_FLOAT);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetSceneSession01
  * @tc.desc: GetSceneSession
  * @tc.type: FUNC
