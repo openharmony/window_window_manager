@@ -466,6 +466,42 @@ HWTEST_F(SceneSessionTest3, GetBufferAvailableCallbackEnable, Function | SmallTe
     ASSERT_EQ(enable, scensession->GetBufferAvailableCallbackEnable());
 }
 
+/**
+ * @tc.name: UpdateScaleInner
+ * @tc.desc: check func UpdateScaleInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateScaleInner, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateScaleInner";
+    info.bundleName_ = "UpdateScaleInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    sceneSession->sessionStage_ = nullptr;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    bool res = sceneSession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 10.0f);
+    EXPECT_EQ(true, res);
+
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    EXPECT_EQ(true, res);
+
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    EXPECT_EQ(false, res);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    sceneSession->sessionStage_ = mockSessionStage;
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    EXPECT_EQ(true, res);
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    EXPECT_EQ(false, res);
+}
 }
 }
 }
