@@ -63,6 +63,7 @@ config("extension_window_kit_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "../extension_window",
     "../window_runtime/window_napi",
     "../../../innerkits/wm",
     "../../../../utils/include",
