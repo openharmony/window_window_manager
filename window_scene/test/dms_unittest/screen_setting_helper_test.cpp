@@ -213,30 +213,6 @@ namespace {
     }
 
     /**
-     * @tc.name: UnregisterExtendSettingDpiObserver01
-     * @tc.desc: UnregisterExtendSettingDpiObserver01
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterExtendSettingDpiObserver01, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper::extendDpiObserver_ = nullptr;
-        ScreenSettingHelper::UnregisterExtendSettingDpiObserver();
-        ASSERT_EQ(ScreenSettingHelper::extendDpiObserver_, nullptr);
-    }
-
-    /**
-     * @tc.name: UnregisterExtendSettingDpiObserver02
-     * @tc.desc: UnregisterExtendSettingDpiObserver02
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterExtendSettingDpiObserver02, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper::extendDpiObserver_ = new SettingObserver;
-        ScreenSettingHelper::UnregisterExtendSettingDpiObserver();
-        ASSERT_EQ(ScreenSettingHelper::extendDpiObserver_, nullptr);
-    }
-
-    /**
      * @tc.name: UnregisterSettingRotationObserver01
      * @tc.desc: UnregisterSettingRotationObserver01
      * @tc.type: FUNC
@@ -244,7 +220,6 @@ namespace {
     HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver01, Function | SmallTest | Level3)
     {
         ScreenSettingHelper::rotationObserver_ = nullptr;
-        ScreenSettingHelper::UnregisterExtendSettingDpiObserver();
         ASSERT_EQ(ScreenSettingHelper::rotationObserver_, nullptr);
     }
 
@@ -256,7 +231,6 @@ namespace {
     HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver02, Function | SmallTest | Level3)
     {
         ScreenSettingHelper::rotationObserver_ = new SettingObserver;
-        ScreenSettingHelper::UnregisterExtendSettingDpiObserver();
         ASSERT_NE(ScreenSettingHelper::rotationObserver_, nullptr);
     }
 
