@@ -2756,7 +2756,7 @@ void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTa
     wptr<Window> weakToken, std::map<WindowType, SystemBarProperty>& systemBarProperties,
     std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, std::shared_ptr<WMError> errCodePtr)
 {
-    execute = [weakToken, systemBarProperties, systemBarPropertyFlags, errCodePtr] mutable {
+    execute = [weakToken, systemBarProperties, systemBarPropertyFlags, errCodePtr]() mutable {
         if (errCodePtr == nullptr) {
             return;
         }
