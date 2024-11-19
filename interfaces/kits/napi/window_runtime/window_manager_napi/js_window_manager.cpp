@@ -1244,8 +1244,7 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
         if (ret == WmErrorCode::WM_OK) {
             std::vector<sptr<Window>> windows(windowIds.size());
             for (size_t i = 0; i < windowIds.size(); i++) {
-                sptr<Window> window = Window::GetWindowWithId(windowIds[i]);
-                windows[i] = window;
+                windows[i] = Window::GetWindowWithId(windowIds[i]);
             }
             task->Resolve(env, CreateJsWindowArrayObject(env, windows));
         } else {
