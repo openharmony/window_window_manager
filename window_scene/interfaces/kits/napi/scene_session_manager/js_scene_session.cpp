@@ -2107,7 +2107,7 @@ napi_value JsSceneSession::OnSetFocusable(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     session->SetFocusable(isFocusable);
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]OnSetFocusable end");
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI] end");
     return NapiGetUndefined(env);
 }
 
