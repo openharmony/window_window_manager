@@ -167,7 +167,7 @@ DMError ScreenSessionManagerProxy::GetDensityInCurResolution(ScreenId screenId, 
         WLOGFW("GetDensityInCurResolution: remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -2793,6 +2793,37 @@ int32_t ScreenSessionManagerProxy::SetScreenOffDelayTime(int32_t delay)
     return reply.ReadInt32();
 }
 
+void ScreenSessionManagerProxy::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SetCameraStatus: remote is null");
+        return;
+    }
+
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(cameraStatus)) {
+        WLOGFE("Write cameraStatus failed");
+        return;
+    }
+    if (!data.WriteInt32(cameraPosition)) {
+        WLOGFE("Write cameraPosition failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_CAMERA_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+
 DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect& area)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -3147,7 +3178,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenSecurityExemption(ScreenId sc
         WLOGFE("write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
-    
+
     if (!data.WriteUInt64Vector(windowIdList)) {
         WLOGFE("write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;

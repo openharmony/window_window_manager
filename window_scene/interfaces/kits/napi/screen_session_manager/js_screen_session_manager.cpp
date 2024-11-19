@@ -92,12 +92,12 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::SetScreenOffDelayTime);
     BindNativeFunction(env, exportObj, "notifyFoldToExpandCompletion", moduleName,
         JsScreenSessionManager::NotifyFoldToExpandCompletion);
-    BindNativeFunction(env, exportObj, "getFoldStatus", moduleName,
-        JsScreenSessionManager::GetFoldStatus);
+    BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
         JsScreenSessionManager::GetScreenSnapshot);
     BindNativeFunction(env, exportObj, "getDeviceScreenConfig", moduleName,
         JsScreenSessionManager::GetDeviceScreenConfig);
+    BindNativeFunction(env, exportObj, "setCameraStatus", moduleName, JsScreenSessionManager::SetCameraStatus);
     return NapiGetUndefined(env);
 }
 
@@ -245,6 +245,13 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
     } else {
         WLOGFE("OnScreenConnected: env is nullptr");
     }
+}
+
+napi_value JsScreenSessionManager::SetCameraStatus(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]SetCameraStatus");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetCameraStatus(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& screenSession)
@@ -677,4 +684,41 @@ napi_value JsScreenSessionManager::OnGetDeviceScreenConfig(napi_env env, const n
     }
     return jsDeviceScreenConfigObj;
 }
+
+napi_value JsScreenSessionManager::OnSetCameraStatus(napi_env env, const napi_callback_info info)
+{
+    WLOGFD("[NAPI]OnSetCameraStatus");
+    size_t argc = 2;
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    napi_value argv[2] = {nullptr, nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2) { // 2: params num
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        napi_close_handle_scope(env, scope);
+        return NapiGetUndefined(env);
+    }
+    int32_t cameraStatus;
+    int32_t cameraPosition;
+    if (!ConvertFromJsValue(env, argv[0], cameraStatus)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to cameraStatus");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        napi_close_handle_scope(env, scope);
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[1], cameraPosition)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to cameraPosition");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        napi_close_handle_scope(env, scope);
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().SetCameraStatus(cameraStatus, cameraPosition);
+    napi_close_handle_scope(env, scope);
+    return NapiGetUndefined(env);
+}
+
 } // namespace OHOS::Rosen

@@ -66,6 +66,10 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "Read callingTokenId failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadInt32(abilitySessionInfo->tmpSpecifiedId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read tmpSpecifiedId failed.");
+        return ERR_INVALID_DATA;
+    }
     if (!data.ReadBool(abilitySessionInfo->reuse)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read reuse failed.");
         return ERR_INVALID_DATA;
@@ -1213,7 +1217,7 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel &data, MessageParcel &reply)
+int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
     NotifyExtensionDetachToDisplay();
