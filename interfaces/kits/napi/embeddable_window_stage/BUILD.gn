@@ -75,9 +75,7 @@ config("embeddable_window_stage_kit_config") {
 config("embeddablewindowstage_kit_public_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [
-    "../embeddable_window_stage",
-  ]
+  include_dirs = [ "../embeddable_window_stage" ]
 }
 
 ohos_shared_library("embeddablewindowstage_kit") {
