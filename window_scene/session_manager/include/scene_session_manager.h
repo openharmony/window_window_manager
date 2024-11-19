@@ -846,7 +846,7 @@ private:
     /*
      * Window Pipeline
      */
-    int32_t sessionMapDirty_ { 0 };
+    uint32_t sessionMapDirty_ { 0 };
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
 
