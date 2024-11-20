@@ -791,7 +791,6 @@ void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const R
 void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-
     if (handler_ == nullptr) {
         UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         return;
