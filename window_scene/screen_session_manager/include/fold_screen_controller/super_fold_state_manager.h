@@ -27,6 +27,7 @@
 #include "dm_common.h"
 #include "wm_single_instance.h"
 #include "transaction/rs_interfaces.h"
+#include "fold_screen_info.h"
 
 namespace OHOS {
 
@@ -49,11 +50,17 @@ public:
 
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
+    void InitSuperFoldStateManagerMap();
+
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+
     SuperFoldStatus GetCurrentStatus();
 
     FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
+
+    sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
 
     struct Transition {
         SuperFoldStatus nextState;

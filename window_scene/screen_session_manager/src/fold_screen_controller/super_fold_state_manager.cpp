@@ -110,7 +110,7 @@ void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents eve
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoFoldedToHalfFolded()");
 }
 
-SuperFoldStateManager::SuperFoldStateManager()
+void SuperFoldStateManager::InitSuperFoldStateManagerMap()
 {
     AddStateManagerMap(SuperFoldStatus::HALF_FOLDED,
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED,
@@ -162,6 +162,24 @@ SuperFoldStateManager::SuperFoldStateManager()
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED,
         SuperFoldStatus::FOLDED,
         [&](SuperFoldStatusChangeEvents events) {});
+}
+
+SuperFoldStateManager::SuperFoldStateManager()
+{
+    InitSuperFoldStateManagerMap();
+    ScreenId screenIdFull = 0;
+    int32_t superFoldCreaseRegionPosX = 0;
+    int32_t superFoldCreaseRegionPosY = 1624;
+    int32_t superFoldCreaseRegionPosWidth = 2472;
+    int32_t superFoldCreaseRegionPosHeight = 48;
+
+    std::vector<DMRect> rect = {
+        {
+            superFoldCreaseRegionPosX, superFoldCreaseRegionPosY,
+            superFoldCreaseRegionPosWidth, superFoldCreaseRegionPosHeight
+        }
+    };
+    currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
 SuperFoldStateManager::~SuperFoldStateManager() = default;
@@ -235,6 +253,12 @@ SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 void SuperFoldStateManager::SetCurrentStatus(SuperFoldStatus curState)
 {
     curState_.store(curState);
+}
+
+sptr<FoldCreaseRegion> SuperFoldStateManager::GetCurrentFoldCreaseRegion()
+{
+    TLOGI(WmsLogTag::DMS, "GetCurrentFoldCreaseRegion()");
+    return currentSuperFoldCreaseRegion_;
 }
 
 void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent)

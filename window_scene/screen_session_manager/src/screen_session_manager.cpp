@@ -5294,6 +5294,9 @@ bool ScreenSessionManager::GetTentMode()
 
 sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return SuperFoldStateManager::GetInstance().GetCurrentFoldCreaseRegion();
+    }
     if (!g_foldScreenFlag) {
         return nullptr;
     }
