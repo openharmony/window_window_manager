@@ -2296,7 +2296,8 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             if ((systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
                  (property->GetIsPcAppInPad() && !isMainWindow)) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
-                moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode_);
+                auto surfaceNode = GetSurfaceNode();
+                moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
                 pointerEvent->MarkProcessed();
                 return WSError::WS_OK;
@@ -2901,35 +2902,36 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     if (rsTransaction != nullptr && needFlush) {
         rsTransaction->Begin();
     }
+    auto surfaceNode = GetSurfaceNode();
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     auto property = GetSessionProperty();
-    if (surfaceNode_ && leashWinSurfaceNode) {
+    if (surfaceNode && leashWinSurfaceNode) {
         leashWinSurfaceNode->SetGlobalPositionEnabled(isGlobal);
         leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         leashWinSurfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
-        surfaceNode_->SetFrame(0, 0, rect.width_, rect.height_);
-    } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode_) {
+        surfaceNode->SetBounds(0, 0, rect.width_, rect.height_);
+        surfaceNode->SetFrame(0, 0, rect.width_, rect.height_);
+    } else if (WindowHelper::IsPipWindow(GetWindowType()) && surfaceNode) {
         TLOGD(WmsLogTag::WMS_PIP, "PipWindow setSurfaceBounds");
-        surfaceNode_->SetGlobalPositionEnabled(isGlobal);
-        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    } else if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_) {
+        surfaceNode->SetGlobalPositionEnabled(isGlobal);
+        surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode) {
         WLOGFD("subwindow setSurfaceBounds");
-        surfaceNode_->SetGlobalPositionEnabled(isGlobal);
-        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    } else if (WindowHelper::IsDialogWindow(GetWindowType()) && surfaceNode_) {
+        surfaceNode->SetGlobalPositionEnabled(isGlobal);
+        surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else if (WindowHelper::IsDialogWindow(GetWindowType()) && surfaceNode) {
         TLOGD(WmsLogTag::WMS_DIALOG, "dialogWindow setSurfaceBounds");
-        surfaceNode_->SetGlobalPositionEnabled(isGlobal);
-        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode->SetGlobalPositionEnabled(isGlobal);
+        surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else if (WindowHelper::IsSystemWindow(GetWindowType()) &&
-        property && property->GetDragEnabled() && surfaceNode_) {
+        property && property->GetDragEnabled() && surfaceNode) {
         TLOGD(WmsLogTag::WMS_SYSTEM, "drag enabled systemwindow setSurfaceBounds");
-        surfaceNode_->SetGlobalPositionEnabled(isGlobal);
-        surfaceNode_->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode_->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode->SetGlobalPositionEnabled(isGlobal);
+        surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
         WLOGE("SetSurfaceBounds surfaceNode is null!");
     }
@@ -3119,7 +3121,8 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
         WLOGFE("SetPrivacyMode property is null");
         return;
     }
-    if (!surfaceNode_) {
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
         WLOGFE("surfaceNode_ is null");
         return;
     }
@@ -3134,7 +3137,7 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
-    surfaceNode_->SetSecurityLayer(isPrivacy);
+    surfaceNode->SetSecurityLayer(isPrivacy);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSecurityLayer(isPrivacy);
@@ -3174,7 +3177,8 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
         TLOGE(WmsLogTag::DEFAULT, "property is null");
         return;
     }
-    if (!surfaceNode_) {
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
         TLOGE(WmsLogTag::DEFAULT, "surfaceNode_ is null");
         return;
     }
@@ -3189,7 +3193,7 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
-    surfaceNode_->SetSkipLayer(isSkip);
+    surfaceNode->SetSkipLayer(isSkip);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetSkipLayer(isSkip);
@@ -3201,7 +3205,8 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
 
 void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
 {
-    if (!surfaceNode_) {
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
         TLOGE(WmsLogTag::DEFAULT, "surfaceNode is null");
         return;
     }
@@ -3211,7 +3216,7 @@ void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool is
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
-    surfaceNode_->SetWatermarkEnabled(watermarkName, isEnabled);
+    surfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
     if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
         leashWinSurfaceNode->SetWatermarkEnabled(watermarkName, isEnabled);
     }
@@ -3232,7 +3237,8 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
         WLOGFE("OnSetSystemSceneOcclusionAlpha property is null");
         return;
     }
-    if (!surfaceNode_) {
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
         WLOGFE("surfaceNode_ is null");
         return;
     }
@@ -3242,7 +3248,7 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
-    surfaceNode_->SetAbilityBGAlpha(alpha8bit);
+    surfaceNode->SetAbilityBGAlpha(alpha8bit);
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         leashWinSurfaceNode->SetAbilityBGAlpha(alpha8bit);
@@ -3256,7 +3262,8 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    if (leashWinSurfaceNode == nullptr && surfaceNode_ == nullptr) {
+    auto surfaceNode = GetSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
         return;
     }
@@ -3268,10 +3275,10 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
             leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), forceUIFirst);
         leashWinSurfaceNode->SetForceUIFirst(forceUIFirst);
-    } else if (surfaceNode_ != nullptr) {
+    } else if (surfaceNode != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " forceUIFirst=%{public}d.",
-            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), forceUIFirst);
-        surfaceNode_->SetForceUIFirst(forceUIFirst);
+            surfaceNode->GetName().c_str(), surfaceNode->GetId(), forceUIFirst);
+        surfaceNode->SetForceUIFirst(forceUIFirst);
     }
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
@@ -3282,7 +3289,8 @@ void SceneSession::MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::MarkSystemSceneUIFirst");
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    if (leashWinSurfaceNode == nullptr && surfaceNode_ == nullptr) {
+    auto surfaceNode = GetSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
         return;
     }
@@ -3292,8 +3300,8 @@ void SceneSession::MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled)
         leashWinSurfaceNode->MarkUifirstNode(isForced, isUIFirstEnabled);
     } else {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForced=%{public}d. isUIFirstEnabled=%{public}d",
-            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), isForced, isUIFirstEnabled);
-        surfaceNode_->MarkUifirstNode(isForced, isUIFirstEnabled);
+            surfaceNode->GetName().c_str(), surfaceNode->GetId(), isForced, isUIFirstEnabled);
+        surfaceNode->MarkUifirstNode(isForced, isUIFirstEnabled);
     }
 }
 
@@ -5127,7 +5135,8 @@ bool SceneSession::IsTemporarilyShowWhenLocked() const
 
 void SceneSession::SetSkipDraw(bool skip)
 {
-    if (!surfaceNode_) {
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
         WLOGFE("surfaceNode_ is null");
         return;
     }
@@ -5135,9 +5144,8 @@ void SceneSession::SetSkipDraw(bool skip)
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
-    surfaceNode_->SetSkipDraw(skip);
-    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    if (leashWinSurfaceNode != nullptr) {
+    surfaceNode->SetSkipDraw(skip);
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
         leashWinSurfaceNode->SetSkipDraw(skip);
     }
     if (rsTransaction != nullptr) {
@@ -5749,12 +5757,13 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
 
 bool SceneSession::SetFrameGravity(Gravity gravity)
 {
-    if (surfaceNode_ == nullptr) {
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode == nullptr) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "fail id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
         return false;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
-    surfaceNode_->SetFrameGravity(gravity);
+    surfaceNode->SetFrameGravity(gravity);
     return true;
 }
 } // namespace OHOS::Rosen
