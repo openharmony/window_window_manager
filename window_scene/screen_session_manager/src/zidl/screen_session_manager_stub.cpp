@@ -898,6 +898,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetDisplaySnapshotWithOption(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_CAMERA_STATUS: {
+            int32_t cameraStatus = data.ReadInt32();
+            int32_t cameraPosition = data.ReadInt32();
+            SetCameraStatus(cameraStatus, cameraPosition);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
