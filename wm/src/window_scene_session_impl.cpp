@@ -744,30 +744,17 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     }
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
-    bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
-    bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !property_->GetDragEnabled();
-    bool isFixedSystemWin = WindowHelper::IsSystemWindow(windowType) && !property_->GetDragEnabled();
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
-    TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
-        isFixedSystemWin, isFixedSubWin, isDecorDialog);
-    if ((isFixedSystemWin || isFixedSubWin) && !isDecorDialog) {
-        if (!isFixedSubWin && !(windowType == WindowType::WINDOW_TYPE_DIALOG)) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent);
-        } else {
-            hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-        }
+    if (dragType != AreaType::UNDEFINED) {
+        hostSession->SendPointEventForMoveDrag(pointerEvent);
+        needNotifyEvent = false;
+    } else if (WindowHelper::IsMainWindow(windowType) ||
+        WindowHelper::IsSubWindow(windowType) ||
+        WindowHelper::IsSystemWindow(windowType)) {
+        hostSession->SendPointEventForMoveDrag(pointerEvent);
     } else {
-        if (dragType != AreaType::UNDEFINED) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent);
-            needNotifyEvent = false;
-        } else if (WindowHelper::IsMainWindow(windowType) ||
-            WindowHelper::IsSubWindow(windowType) ||
-            WindowHelper::IsSystemWindow(windowType)) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent);
-        } else {
-            hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-        }
+        hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     }
     return needNotifyEvent;
 }
