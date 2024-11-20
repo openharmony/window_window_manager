@@ -52,6 +52,7 @@
 #include "screen.h"
 #include "fold_screen_state_internel.h"
 #include "session/host/include/multi_instance_manager.h"
+#include "session/host/include/ability_info_manager.h"
 #include "session/host/include/pc_fold_screen_controller.h"
 
 #ifdef POWER_MANAGER_ENABLE
@@ -3802,8 +3803,11 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGNE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
+        bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
+            abilitySessionInfo->want.GetElement().GetBundleName(),
+            abilitySessionInfo->want.GetElement().GetAbilityName(), abilitySessionInfo->want.GetModuleName());
         if (session->DisallowActivationFromPendingBackground(session->IsPcOrPadEnableActivation(), isFoundationCall,
-            abilitySessionInfo->canStartAbilityFromBackground)) {
+            abilitySessionInfo->canStartAbilityFromBackground, isFromAncoAndToAnco)) {
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->sessionInfo_.startMethod = StartMethod::START_CALL;
@@ -3827,7 +3831,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
 }
 
 bool SceneSession::DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
-    bool canStartAbilityFromBackground)
+    bool canStartAbilityFromBackground, bool isFromAncoAndToAnco)
 {
     if (isPcOrPadEnableActivation || !WindowHelper::IsMainWindow(GetWindowType())) {
         return false;
@@ -3843,16 +3847,18 @@ bool SceneSession::DisallowActivationFromPendingBackground(bool isPcOrPadEnableA
         GetSessionState() == SessionState::STATE_ACTIVE;
     if (isSessionForeground) {
         if (isPendingToBackgroundState) {
-            if (!(isFoundationCall && canStartAbilityFromBackground)) {
-                TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from PendingBackground");
+            if (!(isFoundationCall && canStartAbilityFromBackground) && !isFromAncoAndToAnco) {
+                TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from PendingBackground, id:%{public}d",
+                    GetPersistentId());
                 return true;
             }
         } else if (!foregroundInteractiveStatus) {
             TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, session in a non interactive state");
             return true;
         }
-    } else if (!(isFoundationCall && canStartAbilityFromBackground)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from Background");
+    } else if (!(isFoundationCall && canStartAbilityFromBackground) && !isFromAncoAndToAnco) {
+        TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from Background, id:%{public}d",
+            GetPersistentId());
         return true;
     }
     return false;
