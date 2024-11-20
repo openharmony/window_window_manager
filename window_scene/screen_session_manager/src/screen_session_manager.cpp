@@ -3116,6 +3116,7 @@ void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObje
         deathRecipient_ =
             new(std::nothrow) AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
     }
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     if (deathRecipient_ != nullptr) {
         auto agIter = screenAgentMap_.find(displayManagerAgent);
         if (agIter == screenAgentMap_.end()) {
@@ -3155,7 +3156,6 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     }
     TLOGI(WmsLogTag::DMS, "rsId: %{public}" PRIu64"", rsId);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CreateVirtualScreen(%s)", option.name_.c_str());
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId smsScreenId = SCREEN_ID_INVALID;
     if (!screenIdManager_.ConvertToSmsScreenId(rsId, smsScreenId)) {
         TLOGI(WmsLogTag::DMS, "!ConvertToSmsScreenId(rsId, smsScreenId)");
@@ -3168,7 +3168,10 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         }
         screenSession->SetName(option.name_);
         screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
-        screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
+        }
         if (option.name_ == "CastEngine") {
             screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
         }
