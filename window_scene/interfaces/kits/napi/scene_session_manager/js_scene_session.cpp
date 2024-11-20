@@ -44,6 +44,7 @@ const std::string SESSION_TOUCHABLE_CHANGE_CB = "sessionTouchableChange";
 const std::string SESSION_TOP_MOST_CHANGE_CB = "sessionTopmostChange";
 const std::string SESSION_MODAL_TYPE_CHANGE_CB = "sessionModalTypeChange";
 const std::string MAIN_SESSION_MODAL_TYPE_CHANGE_CB = "mainSessionModalTypeChange";
+const std::string SESSION_FULLSCREEN_WATERFALL_MODE_CHANGE_CB = "sessionFullScreenWaterfallModeChange";
 const std::string CLICK_CB = "click";
 const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string TERMINATE_SESSION_CB_NEW = "terminateSessionNew";
@@ -105,6 +106,8 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SESSION_TOP_MOST_CHANGE_CB,            ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB},
     {SESSION_MODAL_TYPE_CHANGE_CB,          ListenerFuncType::SESSION_MODAL_TYPE_CHANGE_CB},
     {MAIN_SESSION_MODAL_TYPE_CHANGE_CB,     ListenerFuncType::MAIN_SESSION_MODAL_TYPE_CHANGE_CB},
+    {SESSION_FULLSCREEN_WATERFALL_MODE_CHANGE_CB,
+        ListenerFuncType::SESSION_FULLSCREEN_WATERFALL_MODE_CHANGE_CB},
     {CLICK_CB,                              ListenerFuncType::CLICK_CB},
     {TERMINATE_SESSION_CB,                  ListenerFuncType::TERMINATE_SESSION_CB},
     {TERMINATE_SESSION_CB_NEW,              ListenerFuncType::TERMINATE_SESSION_CB_NEW},
@@ -1395,6 +1398,25 @@ void JsSceneSession::ProcessMainSessionModalTypeChangeRegister()
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistent id:%{public}d", persistentId_);
 }
 
+void JsSceneSession::ProcessSessionFullScreenWaterfallModeChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, persistent id: %{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->RegisterFullScreenWaterfallModeChangeCallback([weakThis = wptr(this), where](bool state) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSessionFullScreenWaterfallModeChange(state);
+    });
+    TLOGD(WmsLogTag::WMS_LAYOUT, "register success, persistent id: %{public}d", persistentId_);
+}
+
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
 {
     NotifySessionFocusableChangeFunc func = [weakThis = wptr(this)](bool isFocusable) {
@@ -2282,6 +2304,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::MAIN_SESSION_MODAL_TYPE_CHANGE_CB):
             ProcessMainSessionModalTypeChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_FULLSCREEN_WATERFALL_MODE_CHANGE_CB):
+            ProcessSessionFullScreenWaterfallModeChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::CLICK_CB):
             ProcessClickRegister();
@@ -3198,6 +3223,28 @@ void JsSceneSession::OnMainSessionModalTypeChange(bool isModal)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnMainSessionModalTypeChange: " + std::to_string(isModal));
+}
+
+void JsSceneSession::OnSessionFullScreenWaterfallModeChange(bool state)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, state, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s jsSceneSession id: %{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_FULLSCREEN_WATERFALL_MODE_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsState = CreateJsValue(env, state);
+        napi_value argv[] = { jsState };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::OnClick(bool requestFocus, bool isClick)

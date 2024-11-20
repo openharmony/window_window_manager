@@ -621,6 +621,23 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WLOGFI("[WMSCom] event: %{public}d", static_cast<int32_t>(event));
+        // update waterfall mode
+        if (session->pcFoldScreenController_) {
+            switch (event) {
+                case SessionEvent::EVENT_MAXIMIZE_WATERFALL:
+                    session->UpdateFullScreenWaterfallMode(
+                        session->pcFoldScreenController_->IsHalfFolded(session->GetScreenId()));
+                    break;
+                case SessionEvent::EVENT_MAXIMIZE:
+                case SessionEvent::EVENT_RECOVER:
+                case SessionEvent::EVENT_SPLIT_PRIMARY:
+                case SessionEvent::EVENT_SPLIT_SECONDARY:
+                    session->UpdateFullScreenWaterfallMode(false);
+                    break;
+                default:
+                    break;
+            }
+        }
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
@@ -2340,7 +2357,8 @@ bool SceneSession::IsFullScreenMovable()
         return false;
     }
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING);
+        WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING) &&
+        !IsFullScreenWaterfallMode();
 }
 
 bool SceneSession::IsMovable()
@@ -3994,6 +4012,46 @@ bool SceneSession::GetEnableGestureBackHadSet()
     return isEnableGestureBackHadSet_;
 }
 
+void SceneSession::UpdateFullScreenWaterfallMode(bool state)
+{
+    auto task = [weakThis = wptr(this), state] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+            return;
+        }
+        if (session->pcFoldScreenController_ == nullptr) {
+            return;
+        }
+        session->pcFoldScreenController_->UpdateFullScreenWaterfallMode(state);
+    };
+    PostTask(task, __func__);
+}
+
+bool SceneSession::IsFullScreenWaterfallMode()
+{
+    if (pcFoldScreenController_ == nullptr) {
+        return false;
+    }
+    return pcFoldScreenController_->IsFullScreenWaterfallMode();
+}
+
+void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(const std::function<void(bool state)>& func)
+{
+    auto task = [weakThis = wptr(this), func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+            return;
+        }
+        if (session->pcFoldScreenController_ == nullptr) {
+            return;
+        }
+        session->pcFoldScreenController_->RegisterFullScreenWaterfallModeChangeCallback(std::move(func));
+    };
+    PostTask(task, __func__);
+}
+
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
 {
     TLOGD(WmsLogTag::DEFAULT, "setListener success");
@@ -5642,6 +5700,9 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
+        }
+        if (session->pcFoldScreenController_) {
+            session->pcFoldScreenController_->UnregisterFullScreenWaterfallModeChangeCallback();
         }
         session->Session::UnregisterSessionChangeListeners();
     };

@@ -20,6 +20,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include <tuple>
+#include <unordered_map>
 
 #include "animation/rs_animation_timing_curve.h"
 #include "animation/rs_animation_timing_protocol.h"
@@ -33,6 +34,8 @@ namespace OHOS::Rosen {
 class SceneSession;
 using RectRecordsVector =
     std::vector<std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>, WSRect>>;
+using FoldScreenStatusChangeCallback = std::function<void(DisplayId displayId,
+    SuperFoldStatus status, SuperFoldStatus prevStatus)>;
 
 enum class ScreenSide : uint8_t {
     EXPAND = 0,
@@ -76,6 +79,12 @@ public:
     void ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRect,
         const WSRect& limitRect, int32_t titleHeight);
 
+    /**
+     * Fold Screen Status Callback
+     */
+    void RegisterFoldScreenStatusChangeCallback(int32_t persistentId, const std::weak_ptr<FoldScreenStatusChangeCallback>& func);
+    void UnregisterFoldScreenStatusChangeCallback(int32_t persistentId);
+
 private:
     void SetDisplayInfo(DisplayId displayId, SuperFoldStatus status);
     void SetDisplayRects(
@@ -89,6 +98,7 @@ private:
     std::shared_mutex displayInfoMutex_; // protect display infos
     DisplayId displayId_ { SCREEN_ID_INVALID };
     float vpr_ { 1.5f }; // display vp ratio
+    SuperFoldStatus prevScreenFoldStatus_ { SuperFoldStatus::UNKNOWN };
     SuperFoldStatus screenFoldStatus_ { SuperFoldStatus::UNKNOWN };
     std::shared_mutex rectsMutex_; // protect rects
     WSRect defaultDisplayRect_;
@@ -103,11 +113,19 @@ private:
     std::mutex arrangedRectsMutex_;
     WSRect defaultArrangedRect_;
     WSRect virtualArrangedRect_;
+
+    /**
+     * Fold Screen Status Callback
+     */
+    void ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    std::mutex callbackMutex_;
+    std::unordered_map<int32_t, std::weak_ptr<FoldScreenStatusChangeCallback>> foldScreenStatusChangeCallbacks_;
 };
 
 class PcFoldScreenController : public RefBase {
 public:
-    explicit PcFoldScreenController(wptr<SceneSession> weakSession);
+    explicit PcFoldScreenController(wptr<SceneSession> weakSession, int32_t persistentId);
+    ~PcFoldScreenController();
     bool IsHalfFolded(DisplayId displayId);
     bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
@@ -122,18 +140,34 @@ public:
     RSAnimationTimingProtocol GetThrowSlipTimingProtocol();
     RSAnimationTimingCurve GetThrowSlipTimingCurve();
 
+    void UpdateFullScreenWaterfallMode(bool state);
+    inline bool IsFullScreenWaterfallMode() { return isFullScreenWaterfallMode_; }
+    void RegisterFullScreenWaterfallModeChangeCallback(const std::function<void(bool state)>& func);
+    void UnregisterFullScreenWaterfallModeChangeCallback();
+
 private:
     int32_t GetPersistentId() const;
     int32_t GetTitleHeight() const;
     WSRectF CalculateMovingVelocity();
 
     wptr<SceneSession> weakSceneSession_ = nullptr;
+    int32_t persistentId_;
 
     // use queue to calculate velocity
     std::mutex moveMutex_;
     WSRect startMoveRect_;
     bool isStartFullScreen_ { false };
     RectRecordsVector movingRectRecords_;
+
+    std::shared_ptr<FoldScreenStatusChangeCallback> onFoldScreenStatusChangeCallback_;
+
+    /**
+     * Waterfall Mode
+     * accessed on SSM thread
+     */
+    void ExecuteFullScreenWaterfallModeChangeCallback();
+    bool isFullScreenWaterfallMode_ { false };
+    std::function<void(bool state)> fullScreenWaterfallModeChangeCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen
 
