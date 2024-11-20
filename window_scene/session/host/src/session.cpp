@@ -1061,7 +1061,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     }
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
-    GetSurfaceNode(surfaceNode);
+    SetSurfaceNode(surfaceNode);
     abilityToken_ = token;
     systemConfig = systemConfig_;
     InitSessionPropertyWhenConnect(property);
@@ -1154,7 +1154,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
-    GetSurfaceNode(surfaceNode);
+    SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
     SetSessionProperty(property);
