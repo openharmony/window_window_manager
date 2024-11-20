@@ -5880,7 +5880,8 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    if (!FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+    if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
     }
     /* Avoid fold to expand process queues */
