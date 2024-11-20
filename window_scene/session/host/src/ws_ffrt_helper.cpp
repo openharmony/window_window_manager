@@ -40,7 +40,6 @@ const std::unordered_map<TaskQos, ffrt::qos> FFRT_QOS_MAP = {
     { TaskQos::DEADLINE_REQUEST, ffrt_qos_deadline_request },
     { TaskQos::USER_INTERACTIVE, ffrt_qos_user_interactive },
 };
-static std::unique_ptr<ffrt::queue> queue_ = nullptr;
 }
 
 class TaskHandleMap {
@@ -87,16 +86,13 @@ private:
 
 WSFFRTHelper::WSFFRTHelper() : taskHandleMap_(std::make_unique<TaskHandleMap>())
 {
-    queue_ = std::make_unique<ffrt::queue>(ffrt::queue_concurrent, "RestoreQueue,",
+    ffrtQueue_ = std::make_unique<ffrt::queue>(ffrt::queue_concurrent, "RestoreQueue,",
         ffrt::queue_attr().qos(ffrt_qos_user_interactive).max_concurrency(FFRT_USER_INTERACTIVE_MAX_THREAD_NUM));
     TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max queue thread number: %{public}d",
         FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
 }
 
-WSFFRTHelper::~WSFFRTHelper()
-{
-    queue_ = nullptr;
-}
+WSFFRTHelper::~WSFFRTHelper() = default;
 
 void WSFFRTHelper::SubmitTask(std::function<void()>&& task, const std::string& taskName, uint64_t delayTime,
     TaskQos qos)
@@ -109,7 +105,7 @@ void WSFFRTHelper::SubmitTask(std::function<void()>&& task, const std::string& t
         localTask();
         return;
     }
-    ffrt::task_handle handle = queue_->submit_h(localTask);
+    ffrt::task_handle handle = ffrtQueue_->submit_h(localTask);
     if (handle == nullptr) {
         WLOGE("Failed to post task, taskName = %{public}s", taskName.c_str());
         return;
