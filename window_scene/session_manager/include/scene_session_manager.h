@@ -424,7 +424,7 @@ public:
      */
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
-    void SetStartPiPFailedListener(const NotifyStartPiPFailedFunc& func);
+    void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
 
     /*
      * Screen Manager
