@@ -111,6 +111,7 @@ using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
+using NotifyStartPiPFailedFunc = std::function<void()>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -423,6 +424,7 @@ public:
      */
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
+    void SetStartPiPFailedListener(const NotifyStartPiPFailedFunc& func);
 
     /*
      * Screen Manager
@@ -678,6 +680,12 @@ private:
 
     AppWindowSceneConfig appWindowSceneConfig_;
     RotateAnimationConfig rotateAnimationConfig_;
+
+    /*
+     * PiP Window
+     */
+    NotifyStartPiPFailedFunc startPiPFailedFunc_;
+
     SystemSessionConfig systemConfig_;
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     float snapshotScale_ = 0.5;
