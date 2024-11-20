@@ -433,7 +433,7 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
     if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
-        eventId > static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
+        eventId >= static_cast<uint32_t>(SessionEvent::EVENT_END)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
     }
