@@ -753,7 +753,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config);
     } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "duration_:%{public}d", rectAnimationConfig.duration_);
+        TLOGNE(WmsLogTag::WMS_LAYOUT, "duration_:%{public}d", rectAnimationConfig.duration_);
         postTaskDone_ = false;
         UpdateRectForResizeWithAnimation(wmRect, preRect, wmReason, rectAnimationConfig, config.rsTransaction_);
     } else {
