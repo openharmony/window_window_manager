@@ -72,6 +72,7 @@ private:
     int HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
+    int HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
