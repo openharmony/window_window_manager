@@ -3002,11 +3002,11 @@ void Session::SetSessionRequestRectAnimationConfig(const WSRectAnimationConfig& 
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        TLOGNE(WmsLogTag::WMS_LAYOUT, "id: %{public}d property is nullptr", persistentId_);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id: %{public}d property is nullptr", persistentId_);
         return;
     }
     property->SetRectAnimationConfig(SessionHelper::TransferToRectAnimationConfig(rectAnimationConfig));
-    TLOGNE(WmsLogTag::WMS_LAYOUT, "is: %{public}d, rectAnimationConfig: [%{public}u]", persistentId_,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "is: %{public}d, rectAnimationConfig: [%{public}u]", persistentId_,
         rectAnimationConfig.duration_);
 }
 
@@ -3015,11 +3015,11 @@ WSRectAnimationConfig Session::GetSessionRequestRectAnimationConfig() const
     WSRectAnimationConfig rectAnimationConfig;
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        TLOGNE(WmsLogTag::WMS_LAYOUT, "id: %{public}d property is nullptr", persistentId_);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id: %{public}d property is nullptr", persistentId_);
         return rectAnimationConfig;
     }
     rectAnimationConfig = SessionHelper::TransferToWSRectAnimationConfig(property->GetRequestRectAnimationConfig());
-    TLOGNE(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rectAnimationConfig: [%{public}u]", persistentId_,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rectAnimationConfig: [%{public}u]", persistentId_,
         rectAnimationConfig.duration_);
     return rectAnimationConfig;
 }
