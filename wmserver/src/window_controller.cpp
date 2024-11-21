@@ -690,9 +690,9 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     /*
      *  if requestRect of systemBar equals to winRect, not need to resize. This may happen when rotate display
      */
+    bool isMove = reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE;
     if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
-        if ((reason== WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::RESIZE ||
-            reason == WindowSizeChangeReason::DRAG_MOVE) && rect == node->GetWindowRect()) {
+        if ((isMove || reason == WindowSizeChangeReason::RESIZE) && rect == node->GetWindowRect()) {
             return WMError::WM_OK;
         }
     }
@@ -700,7 +700,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     node->SetWindowSizeChangeReason(reason);
     Rect lastRect = property->GetWindowRect();
     Rect newRect;
-    if (reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE) {
+    if (isMove) {
         newRect = { rect.posX_, rect.posY_, lastRect.width_, lastRect.height_ };
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
             if (windowRoot_->IsForbidDockSliceMove(node->GetDisplayId())) {
@@ -718,9 +718,8 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         newRect = rect;
     }
     property->SetRequestRect(newRect);
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-        (reason == WindowSizeChangeReason::RESIZE || reason == WindowSizeChangeReason::MOVE ||
-        reason == WindowSizeChangeReason::DRAG_MOVE)) {
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && 
+        (reason == WindowSizeChangeReason::RESIZE || isMove)) {
         RelayoutKeyboard(node);
         ResizeSoftInputCallingWindowIfNeed(node);
     }
