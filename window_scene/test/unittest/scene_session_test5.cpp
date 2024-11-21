@@ -747,42 +747,42 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: FixRectByAspectRatio
- * @tc.desc: FixRectByAspectRatio function01
+ * @tc.name: AdjustRectByAspectRatio
+ * @tc.desc: AdjustRectByAspectRatio function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, FixRectByAspectRatio, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, AdjustRectByAspectRatio, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "FixRectByAspectRatio";
-    info.bundleName_ = "FixRectByAspectRatio";
+    info.abilityName_ = "AdjustRectByAspectRatio";
+    info.bundleName_ = "AdjustRectByAspectRatio";
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     session->SetSessionProperty(nullptr);
     WSRect rect;
-    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
     session->SetSessionProperty(property);
     property->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    EXPECT_EQ(true, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(true, session->AdjustRectByAspectRatio(rect));
 }
 
 /**
- * @tc.name: FixRectByAspectRatio01
- * @tc.desc: FixRectByAspectRatio function01
+ * @tc.name: AdjustRectByAspectRatio01
+ * @tc.desc: AdjustRectByAspectRatio function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, FixRectByAspectRatio01, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, AdjustRectByAspectRatio01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "FixRectByAspectRatio01";
-    info.bundleName_ = "FixRectByAspectRatio01";
+    info.abilityName_ = "AdjustRectByAspectRatio01";
+    info.bundleName_ = "AdjustRectByAspectRatio01";
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
@@ -796,14 +796,14 @@ HWTEST_F(SceneSessionTest5, FixRectByAspectRatio01, Function | SmallTest | Level
     systemConfig.isSystemDecorEnable_ = true;
     systemConfig.decorWindowModeSupportType_ = 2;
     session->SetSystemConfig(systemConfig);
-    EXPECT_EQ(true, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(true, session->AdjustRectByAspectRatio(rect));
 
     systemConfig.isSystemDecorEnable_ = false;
-    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
 
     systemConfig.isSystemDecorEnable_ = true;
     session->SetSessionProperty(nullptr);
-    EXPECT_EQ(false, session->FixRectByAspectRatio(rect));
+    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
 }
 
 /**
@@ -818,9 +818,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     info.bundleName_ = "OnMoveDragCallback";
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    RequestVsyncFunc requestVsyncFunc = [](std::shared_ptr<VsyncCallback>& callback){};
-    session->SetRequestNextVsyncFunc(requestVsyncFunc);
+    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {});
     EXPECT_NE(nullptr, session->requestNextVsyncFunc_);
     session->moveDragController_ = nullptr;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
@@ -1668,18 +1666,15 @@ HWTEST_F(SceneSessionTest5, SetRequestNextVsyncFunc01, Function | SmallTest | Le
     info.abilityName_ = "test1";
     info.bundleName_ = "test1";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
 
-    RequestVsyncFunc requestVsyncFunc;
-    session->SetRequestNextVsyncFunc(requestVsyncFunc);
+    session->SetRequestNextVsyncFunc(nullptr);
     ASSERT_EQ(nullptr, session->requestNextVsyncFunc_);
 
-    RequestVsyncFunc requestVsyncFunc1 = [](std::shared_ptr<VsyncCallback>& callback) {
+    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
         SessionInfo info1;
         info1.abilityName_ = "test2";
         info1.bundleName_ = "test2";
-    };
-    session->SetRequestNextVsyncFunc(requestVsyncFunc1);
+    });
     ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
 }
 

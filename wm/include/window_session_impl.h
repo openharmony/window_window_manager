@@ -388,7 +388,6 @@ protected:
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
-    std::atomic_bool isDragTaskUpdateDone_ = true;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
@@ -421,6 +420,7 @@ protected:
     /**
      * Window Layout
      */
+    std::atomic_bool isDragTaskPostDone_ = true;
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
