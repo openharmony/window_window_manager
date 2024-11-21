@@ -486,28 +486,24 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 
 void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
 {
-    WLOGFD("[NAPI]OnWindowTitleButtonRectChanged");
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, titleButtonRect, eng = env_] (napi_env env,
-            NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
-                return;
-            }
-            napi_value titleButtonRectValue = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
-            if (titleButtonRectValue == nullptr) {
-                return;
-            }
-            napi_value argv[] = { titleButtonRectValue };
-            thisListener->CallJsMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    auto jsCallback = [self = weakRef_, titleButtonRect, env = env_, where = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s this listener or env is nullptr", where);
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnWindowTitleButtonRectChanged",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_value titleButtonRectValue = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
+        if (titleButtonRectValue == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s titleButtonRectValue is nullptr", where);
+            return;
+        }
+        napi_value argv[] = { titleButtonRectValue };
+        thisListener->CallJsMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
+    };
 }
 
 void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
