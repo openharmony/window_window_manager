@@ -50,8 +50,8 @@ public:
     /**
      * @brief Receive session event from application.
      *
-     * This function provides the ability for applications to move window.\n
-     * This interface will take effect after touch down event.\n
+     * This function provides the ability for applications to move window.
+     * This interface will take effect after touch down event.
      *
      * @param event Indicates the {@link SessionEvent}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
@@ -214,8 +214,8 @@ public:
      * @brief Update the required params to system.
      *
      * Update the required rect and reason to determine the final size of pip window. Called when start pip,
-     * show pip window, update pip size and pip restore.\n
-     * Make sure the caller's process is same with the process which created pip window.\n
+     * show pip window, update pip size and pip restore.
+     * Make sure the caller's process is same with the process which created pip window.
      *
      * @param rect Indicates the {@link Rect} structure containing required size and position.
      * @param reason Indicates the {@link SizeChangeReason} reason.
@@ -226,8 +226,8 @@ public:
     /**
      * @brief Update the pip control status to pip control panel.
      *
-     * Called when the specified component's status needs to be updated.\n
-     * Make sure the caller's process is same with the process which created pip window.\n
+     * Called when the specified component's status needs to be updated.
+     * Make sure the caller's process is same with the process which created pip window.
      *
      * @param controlType Indicates the {@link WsPiPControlType} component in pip control panel.
      * @param status Indicates the {@link WsPiPControlStatus} status of specified component.

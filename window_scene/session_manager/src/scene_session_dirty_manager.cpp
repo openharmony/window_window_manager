@@ -144,7 +144,7 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     }
     transform = Matrix3f::IDENTITY;
     bool isRotate = sceneSession->GetSessionInfo().isRotable_;
-    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
         static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL ||
         (static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN &&
@@ -366,7 +366,7 @@ bool SceneSessionDirtyManager::IsFilterSession(const sptr<SceneSession>& sceneSe
     } else if (sceneSession->IsSystemSession() && sceneSession->IsVisible() && sceneSession->IsSystemActive()) {
         return false;
     }
-    if (!Rosen::SceneSessionManager::GetInstance().IsSessionVisible(sceneSession)) {
+    if (!SceneSessionManager::GetInstance().IsSessionVisible(sceneSession)) {
         return true;
     }
     return false;
@@ -453,7 +453,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
 {
     std::vector<MMI::WindowInfo> windowInfoList;
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
-    const auto sceneSessionMap = Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
+    const auto sceneSessionMap = SceneSessionManager::GetInstance().GetSceneSessionMap();
     // all input event should trans to dialog window if dialog exists
     const auto dialogMap = GetDialogSessionMap(sceneSessionMap);
     uint32_t maxHotAreasNum = 0;

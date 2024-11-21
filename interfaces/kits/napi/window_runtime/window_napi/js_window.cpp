@@ -823,7 +823,7 @@ napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI] EnableDrag");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnEnableDrag(env, info) : nullptr;
 }
@@ -958,7 +958,7 @@ napi_value JsWindow::RequestFocus(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::StartMoving(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]StartMoving");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnStartMoving(env, info) : nullptr;
 }
@@ -2281,7 +2281,7 @@ napi_value JsWindow::OnSetDialogBackGestureEnabled(napi_env env, napi_callback_i
 
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, isEnabled, errCodePtr]() {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, isEnabled, errCodePtr] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -2996,7 +2996,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
 {
     WMError errCode = WMError::WM_OK;
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
         errCode = WMError::WM_ERROR_NULLPTR;
     }
     size_t argc = 4;
@@ -3791,7 +3791,7 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
 
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, topmost, errCodePtr]() {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, topmost, errCodePtr] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -3954,7 +3954,7 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
     }
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, keepScreenOn, errCodePtr] () {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, keepScreenOn, errCodePtr] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -5751,7 +5751,7 @@ napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
     napi_get_value_bool(env, nativeBool, &isAddFlag);
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, isAddFlag, errCodePtr]() {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, isAddFlag, errCodePtr] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -6124,10 +6124,10 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
 }
 
 NapiAsyncTask::ExecuteCallback JsWindow::GetEnableDragExecuteCallback(bool enableDrag, const wptr<Window>& weakToken,
-    std::shared_ptr<WmErrorCode> &errCodePtr) const
+    std::shared_ptr<WmErrorCode>& errCodePtr) const
 {
     NapiAsyncTask::ExecuteCallback execute =
-        [weakToken, enableDrag, errCodePtr]() {
+        [weakToken, enableDrag, errCodePtr] {
             if (errCodePtr == nullptr) {
                 return;
             }
@@ -6169,16 +6169,12 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
+    if (argc < 1 || argv[0] == nullptr) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_value nativeObj = argv[0];
-    if (nativeObj == nullptr) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
     WindowLimits windowLimits;
-    if (!ParseWindowLimits(env, nativeObj, windowLimits)) {
+    if (!ParseWindowLimits(env, argv[0], windowLimits)) {
         WLOGFE("Failed to convert object to windowLimits");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -6253,7 +6249,7 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
+    if (argc < 1 || argv[0] == nullptr) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -6261,15 +6257,10 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
         WLOGFE("WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    napi_value nativeVal = argv[0];
-    if (nativeVal == nullptr) {
-        WLOGFE("Failed to convert parameter to visible");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
     bool isVisible = true;
     WmErrorCode errCode = WmErrorCode::WM_OK;
     CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-        napi_get_value_bool(env, nativeVal, &isVisible));
+        napi_get_value_bool(env, argv[0], &isVisible));
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -6670,7 +6661,7 @@ void SetWindowGrayScaleTask(const wptr<Window>& weakToken, double grayScale,
     NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete)
 {
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    execute = [weakToken, grayScale, err]() {
+    execute = [weakToken, grayScale, err] {
         if (err == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "wm error code is null");
             return;
@@ -6906,7 +6897,7 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     }
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [this, weakToken, err] () {
+    NapiAsyncTask::ExecuteCallback execute = [this, weakToken, err] {
         if (err == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "wm error code is null.");
             return;
