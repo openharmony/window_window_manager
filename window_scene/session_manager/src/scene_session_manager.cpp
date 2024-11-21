@@ -8808,13 +8808,13 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-        TLOGI(WmsLogTag::WMS_IMMS, "id: %{public}u, isVisible: %{public}u, sessionState: %{public}u",
+        TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, isVisible: %{public}u, sessionState: %{public}u",
             persistentId, sceneSession->IsVisible(), sceneSession->GetSessionState());
         needUpdate = false;
         return;
     }
     if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-        TLOGI(WmsLogTag::WMS_IMMS,
+        TLOGD(WmsLogTag::WMS_IMMS,
             "id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
         needUpdate = false;
         return;
@@ -8894,21 +8894,21 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
     auto task = [this, persistentId, type] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d is nullptr or invisible", persistentId);
+            TLOGNI(WmsLogTag::WMS_IMMS, "window %{public}d is nullptr or invisible", persistentId);
             return;
         }
         if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d has no listener, no need update", persistentId);
+            TLOGNI(WmsLogTag::WMS_IMMS, "window %{public}d has no listener, no need update", persistentId);
             return;
         }
         if (sceneSession->IsImmersiveType()) {
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d is immersive type", persistentId);
+            TLOGNI(WmsLogTag::WMS_IMMS, "window %{public}d is immersive type", persistentId);
             return;
         }
         auto avoidArea = sceneSession->GetAvoidAreaByType(type);
         if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
             isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d is navigation indicator type, but not on the bottom, "
+            TLOGNI(WmsLogTag::WMS_IMMS, "window %{public}d is navigation indicator type, but not on the bottom, "
                 "no need update", persistentId);
             return;
         }
