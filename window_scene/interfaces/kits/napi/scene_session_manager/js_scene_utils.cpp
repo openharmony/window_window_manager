@@ -1320,11 +1320,10 @@ napi_value CreateJsSessionRect(napi_env env, const T& rect)
 
 napi_value CreateJsAnimationConfig(napi_env env, const WSRectAnimationConfig& rectAnimationConfig)
 {
-    WLOGFD("CreateJsRectAnimationConfig.");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGNE(WmsLogTag::WMS_LAYOUT, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
