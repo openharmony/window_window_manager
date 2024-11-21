@@ -847,7 +847,7 @@ WMError SessionProxy::GetGlobalScaledRect(Rect& globalScaledRect)
 /** @note @window.layout */
 WSError SessionProxy::UpdateClientRect(const WSRect& rect)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     MessageParcel data;
     MessageParcel reply;
@@ -856,10 +856,10 @@ WSError SessionProxy::UpdateClientRect(const WSRect& rect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!((data.WriteInt32(static_cast<int32_t>(rect.posX_))) &&
-          (data.WriteInt32(static_cast<int32_t>(rect.posY_))) &&
-          (data.WriteUint32(static_cast<uint32_t>(rect.width_))) &&
-          (data.WriteUint32(static_cast<uint32_t>(rect.height_))))) {
+    if (!data.WriteInt32(rect.posX_) ||
+        !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) ||
+        !data.WriteInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write rect failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

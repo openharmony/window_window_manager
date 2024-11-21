@@ -563,8 +563,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanelRect: %{public}s, isKeyboardShow: %{public}d"
-            ", isRotating: %{public}d", keyboardPanelRect.ToString().c_str(), isKeyboardShow, isRotating);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, isKeyboardShow: %{public}d, isRotating: %{public}d",
+            isKeyboardShow, isRotating);
         std::shared_ptr<RSTransaction> rsTransaction = nullptr;
         if (!isRotating && session->isKeyboardSyncTransactionOpen_) {
             rsTransaction = session->GetRSTransaction();

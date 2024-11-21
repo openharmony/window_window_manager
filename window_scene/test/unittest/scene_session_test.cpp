@@ -886,11 +886,11 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: FixRectByAspectRatio
- * @tc.desc: FixRectByAspectRatio
+ * @tc.name: AdjustRectByAspectRatio
+ * @tc.desc: AdjustRectByAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, FixRectByAspectRatio, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, AdjustRectByAspectRatio, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -904,7 +904,7 @@ HWTEST_F(SceneSessionTest, FixRectByAspectRatio, Function | SmallTest | Level2)
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     WSRect originalRect_ = { 0, 0, 0, 0 };
-    ASSERT_EQ(false, sceneSession->FixRectByAspectRatio(originalRect_));
+    ASSERT_EQ(false, sceneSession->AdjustRectByAspectRatio(originalRect_));
 }
 
 /**
