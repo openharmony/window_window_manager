@@ -593,6 +593,19 @@ void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimat
     PostTask(task, "RegisterDefaultAnimationFlagChangeCallback");
 }
 
+void SceneSession::RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->onDefaultDensityEnabledFunc_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
 {
     auto task = [weakThis = wptr(this), callback = std::move(callback)] {
@@ -4415,6 +4428,24 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         return WSError::WS_OK;
     };
     PostTask(task, "OnLayoutFullScreenChange");
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
+{
+    auto task = [weakThis = wptr(this), isDefaultDensityEnabled] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "OnDefaultDensityEnabled session is null");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "OnDefaultDensityEnabled, isDefaultDensityEnabled: %{public}d",
+            isDefaultDensityEnabled);
+        if (session->onDefaultDensityEnabledFunc_) {
+            session->onDefaultDensityEnabledFunc_(isDefaultDensityEnabled);
+        }
+    };
+    PostTask(task, "OnDefaultDensityEnabled");
     return WSError::WS_OK;
 }
 
