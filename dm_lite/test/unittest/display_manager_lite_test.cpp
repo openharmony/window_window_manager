@@ -649,6 +649,18 @@ HWTEST_F(DisplayManagerTest, GetScreenBrightness, Function | SmallTest | Level1)
     ASSERT_FALSE(ret == 1);
 }
 
+/**
+ * @tc.name: GetVirtualScreenFlag
+ * @tc.desc: GetVirtualScreenFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetVirtualScreenFlag, Function | SmallTest | Level1)
+{
+    uint64_t screenId = 0;
+    auto ret = DisplayManagerLite::GetInstance().GetVirtualScreenFlag(screenId);
+    ASSERT_EQ(ret, VirtualScreenFlag::DEFAULT);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
