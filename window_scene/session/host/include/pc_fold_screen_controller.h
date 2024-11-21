@@ -113,7 +113,8 @@ private:
     WSRect virtualArrangedRect_;
 
     void ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId,
-        SuperFoldStatus status, SuperFoldStatus prevStatus);    std::mutex callbackMutex_;
+        SuperFoldStatus status, SuperFoldStatus prevStatus);
+    std::mutex callbackMutex_;
     std::unordered_map<int32_t, std::weak_ptr<FoldScreenStatusChangeCallback>> foldScreenStatusChangeCallbacks_;
 };
 

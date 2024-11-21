@@ -4052,8 +4052,7 @@ void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<v
             return;
         }
         session->pcFoldScreenController_->RegisterFullScreenWaterfallModeChangeCallback(std::move(func));
-    },
-        __func__);
+    }, __func__);
 }
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
