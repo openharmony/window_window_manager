@@ -105,7 +105,7 @@ void WSFFRTHelper::SubmitTask(std::function<void()>&& task, const std::string& t
         localTask();
         return;
     }
-    ffrt::task_handle handle = ffrtQueue_->submit_h(localTask);
+    ffrt::task_handle handle = ffrtQueue_->submit_h(std::move(localTask));
     if (handle == nullptr) {
         WLOGE("Failed to post task, taskName = %{public}s", taskName.c_str());
         return;
