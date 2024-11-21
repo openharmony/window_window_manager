@@ -8808,13 +8808,13 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-        TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, isVisible: %{public}u, sessionState: %{public}u",
+        TLOGI(WmsLogTag::WMS_IMMS, "id: %{public}u, isVisible: %{public}u, sessionState: %{public}u",
             persistentId, sceneSession->IsVisible(), sceneSession->GetSessionState());
         needUpdate = false;
         return;
     }
     if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-        TLOGD(WmsLogTag::WMS_IMMS,
+        TLOGI(WmsLogTag::WMS_IMMS,
             "id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
         needUpdate = false;
         return;
