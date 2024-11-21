@@ -2634,6 +2634,32 @@ bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& p
     return true;
 }
 
+void SceneSessionManager::NotifyPiPWindowVisibleChange() {
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> pipVisibilityChangeInfos;
+    if (pipSession_ != nullptr) {
+        if (isScreenLocked_) {
+            pipVisibilityChangeInfos.emplace_back(pipSurfaceId_, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+        } else {
+            pipVisibilityChangeInfos.emplace_back(pipSurfaceId_, WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+        }
+        DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleDate_);
+    }
+}
+
+bool SceneSessionManager::OcclusionPiPWindow(const uint64_t surfaceId, const WindowVisibilityState visibilityState) {
+    sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
+    if (session!= nullptr && session->GetWindowMode() == WindowMode::WINDOW_MODE_PIP && !isScreenLocked_ &&
+        session->GetSessionState() == SessionState::STATE_ACTIVE &&
+        visibilityState != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion. pipSurfaceId_: %{public}" PRIu64, surfaceId);
+        // no visibility notification processing after pip is occlusion
+        pipSurfaceId_ = surfaceId;
+        pipSession_ = session;
+        return true;
+    }
+    return false;
+}
+
 bool SceneSessionManager::CheckModalSubWindowPermission(const sptr<WindowSessionProperty>& property)
 {
     WindowType type = property->GetWindowType();
@@ -5688,6 +5714,7 @@ void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
 {
     isScreenLocked_ = isScreenLocked;
     DeleteStateDetectTask();
+    NotifyPiPWindowVisibleChange();
 }
 
 void SceneSessionManager::DeleteStateDetectTask()
@@ -7921,6 +7948,10 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
     i = j = 0;
     for (; i < lastVisibleData_.size() && j < currVisibleData.size();) {
         if (lastVisibleData_[i].first < currVisibleData[j].first) {
+            if (OcclusionPiPWindow(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+                i++;
+                continue;
+            }
             if (lastVisibleData_[i].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
                 visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
             }
@@ -7931,6 +7962,12 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
             }
             j++;
         } else {
+            if (lastVisibleData_[i].second != currVisibleData[j].second &&
+                OcclusionPiPWindow(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+                i++;
+                j++;
+                continue;
+            }
             if (lastVisibleData_[i].second != currVisibleData[j].second) {
                 visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             }
@@ -7939,6 +7976,9 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         }
     }
     for (; i < lastVisibleData_.size(); ++i) {
+        if (OcclusionPiPWindow(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+            continue;
+        }
         if (lastVisibleData_[i].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
             visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
         }
@@ -8163,7 +8203,11 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
         WLOGFE("sceneSession is nullptr!");
         return;
     }
-    if (sceneSession->GetRSVisible()) {
+    if (sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
+        TLOGI(WmsLogTag::WMS_PIP, "pipWindow destroyed");
+        pipSession_ = nullptr;
+    }
+    if (sceneSession->GetRSVisible() || sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
 #ifdef MEMMGR_WINDOW_ENABLE
         std::vector<sptr<Memory::MemMgrWindowInfo>> memMgrWindowInfos;
