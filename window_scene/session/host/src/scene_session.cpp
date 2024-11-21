@@ -586,7 +586,7 @@ void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimat
         }
         session->onWindowAnimationFlagChange_ = std::move(callback);
         session->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
-    }; 
+    };
     PostTask(task, __func__);
 }
 
