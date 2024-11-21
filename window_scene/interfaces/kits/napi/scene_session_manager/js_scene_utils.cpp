@@ -1323,7 +1323,7 @@ napi_value CreateJsAnimationConfig(napi_env env, const WSRectAnimationConfig& re
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TLOGNE(WmsLogTag::WMS_LAYOUT, "Failed to create object!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
