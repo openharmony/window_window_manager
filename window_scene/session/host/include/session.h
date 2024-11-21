@@ -616,6 +616,11 @@ protected:
     mutable std::mutex globalRectMutex_;
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
+    float clientScaleX_ = 1.0f;
+    float clientScaleY_ = 1.0f;
+    float clientPivotX_ = 0.0f;
+    float clientPivotY_ = 0.0f;
+    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
 
     /*
      * Window ZOrder
