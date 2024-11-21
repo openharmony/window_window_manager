@@ -63,6 +63,7 @@ config("extension_window_kit_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "../extension_window",
     "../window_runtime/window_napi",
     "../../../innerkits/wm",
     "../../../../utils/include",
@@ -90,6 +91,7 @@ ohos_shared_library("extensionwindow_napi") {
     ":extension_window_kit_config",
     "../../../../resources/config/build:coverage_flags",
   ]
+  public_configs = [ ":extension_window_kit_config" ]
 
   include_dirs = [ "extension_window" ]
   deps = [

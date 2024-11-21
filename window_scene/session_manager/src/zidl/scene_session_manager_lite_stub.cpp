@@ -94,6 +94,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUnregisterWindowManagerAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID):
             return HandleCheckWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UI_EXTENSION_CREATION_CHECK):
+            return HandleCheckUIExtensionCreation(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
             return HandleGetVisibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE):
@@ -284,7 +286,7 @@ int SceneSessionManagerLiteStub::HandleGetMainWindowStatesByPid(MessageParcel& d
 
 int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetSessionInfo!");
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
     SessionInfoBean info;
     std::u16string deviceIdU16;
     if (!data.ReadString16(deviceIdU16)) {
@@ -299,12 +301,12 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
     }
     WSError errCode = GetSessionInfo(deviceId, persistentId, info);
     if (!reply.WriteParcelable(&info)) {
-        WLOGFE("GetSessionInfo error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo fail");
         return ERR_INVALID_DATA;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        WLOGFE("GetSessionInfo result error");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo result fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -312,9 +314,14 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
 
 int SceneSessionManagerLiteStub::HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply)
 {
-    SessionInfoBean info;
-    std::string continueSessionId = data.ReadString();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    std::string continueSessionId;
+    if (!data.ReadString(continueSessionId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read continueSessionId fail");
+        return ERR_INVALID_DATA;
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId: %{public}s", continueSessionId.c_str());
+    SessionInfoBean info;
     WSError errCode = GetSessionInfoByContinueSessionId(continueSessionId, info);
     if (!reply.WriteParcelable(&info)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Get sessionInfo by continueSessionId error");
@@ -522,6 +529,44 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
+int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: called");
+
+    int32_t windowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get windowId");
+        return ERR_INVALID_DATA;
+    }
+
+    uint32_t token = -1;
+    if (!data.ReadUint32(token)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get token");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<AppExecFwk::ElementName> element = data.ReadParcelable<AppExecFwk::ElementName>();
+    if (!element) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get element");
+        return ERR_INVALID_DATA;
+    }
+
+    int32_t pid = INVALID_PID;
+    WMError errCode = CheckUIExtensionCreation(windowId, token, *element, pid);
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write errcode");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!reply.WriteInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write pid");
+        return ERR_INVALID_DATA;
+    }
+
+    return ERR_NONE;
+}
 
 int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply)
 {
@@ -532,7 +577,7 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel&
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", typeId);
+    TLOGI(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -550,7 +595,7 @@ int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParce
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", typeId);
+    TLOGI(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -712,7 +757,12 @@ int SceneSessionManagerLiteStub::HandleGetWindowStyleType(MessageParcel& data, M
 
 int SceneSessionManagerLiteStub::HandleTerminateSessionByPersistentId(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t persistentId = data.ReadInt32();
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     WMError errCode = TerminateSessionByPersistentId(persistentId);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         return ERR_INVALID_DATA;

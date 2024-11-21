@@ -178,7 +178,7 @@ public:
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
 
-    /*
+    /**
      * Gesture Back
      */
     static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
@@ -327,7 +327,7 @@ private:
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
 
-    /*
+    /**
      * Gesture Back
      */
     napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);

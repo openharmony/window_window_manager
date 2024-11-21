@@ -18,6 +18,7 @@
 
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
+#include "session/host/include/pc_fold_screen_controller.h"
 #include "vsync_station.h"
 #include "wm_common.h"
 
@@ -42,7 +43,7 @@ using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<Scene
     WindowType type, DisplayId displayId)>;
 using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
 using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
-using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
+using UpdateOccupiedAreaIfNeedCallback = std::function<void(int32_t persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 using NotifySessionTouchOutsideCallback = std::function<void(int32_t persistentId)>;
@@ -51,10 +52,11 @@ using RecoveryCallback = std::function<void(int32_t persistentId, Rect rect)>;
 using NotifyBindDialogSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlType controlType,
     WsPiPControlStatus status)>;
-using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart)>;
+using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
-using NotifySessionModalTypeChangeFunc = std::function<void(const SubWindowModalType subWindowModalType)>;
+using NotifySessionModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
+using NotifyMainSessionModalTypeChangeFunc = std::function<void(bool isModal)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -80,9 +82,9 @@ using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<Sce
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 using NotifyDefaultDensityEnabledFunc = std::function<void(bool isDefaultDensityEnabled)>;
-using NotifyRestoreMainWindowFunc = std::function<void()>;
 using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHoverShown,
     bool isDockHoverShown)>;
+using NotifyRestoreMainWindowFunc = std::function<void()>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
@@ -92,6 +94,13 @@ using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
+
+struct UIExtensionTokenInfo {
+    bool canShowOnLockScreen { false };
+    uint32_t callingTokenId { 0 };
+    sptr<IRemoteObject> abilityToken;
+};
 
 class SceneSession : public Session {
 public:
@@ -121,17 +130,10 @@ public:
     // callback for notify SceneBoard
     struct SessionChangeCallback : public RefBase {
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
-        NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
-        NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
-        NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
-        NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
-        NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
-        NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     };
 
     // func for change window scene pattern property
@@ -157,8 +159,6 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
-    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
-    void SetNeedSyncSessionRect(bool needSync);
     WSError BackgroundTask(const bool isSaveSnapshot = true);
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
@@ -180,21 +180,27 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param);
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
-    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
-        bool isDockHoverShown = true) override;
     WSError RaiseToAppTop() override;
+
+    /**
+     * Window Layout
+     */
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
-    virtual void OpenKeyboardSyncTransaction() {};
-    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
-        bool isKeyboardShow, bool isRotating) {};
+    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
+    void SetNeedSyncSessionRect(bool needSync);
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason,
+    WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
         bool isGlobal = false, bool isFromMoveToGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+
+    virtual void OpenKeyboardSyncTransaction() {}
+    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
+        bool isKeyboardShow, bool isRotating) {}
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
@@ -203,12 +209,15 @@ public:
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
     WSError NotifySessionExceptionInner(
-        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false, bool isFromClient = false);
+        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false,
+        bool isFromClient = false, bool startFail = false);
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true) override;
+    WSError TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool needNotifyClient = true);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -229,7 +238,7 @@ public:
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
-    WSError SetAutoStartPiP(bool isAutoStart) override;
+    WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
     void NotifyPiPWindowPrepareClose() override;
     void SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func);
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
@@ -245,8 +254,12 @@ public:
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
-    // Provide the ability to prohibit dragging for scb
+
+    /**
+     * Window Layout
+     */
     WMError SetWindowEnableDragBySystem(bool enableDrag);
+
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
     WSError SetTurnScreenOn(bool turnScreenOn);
@@ -254,6 +267,7 @@ public:
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
+    void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
     WSError SetDefaultRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
@@ -270,10 +284,12 @@ public:
     virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
     void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
-
     virtual bool IsModal() const { return false; }
+    virtual bool IsApplicationModal() const { return false; }
+    bool IsDialogWindow() const;
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
-    void SetSessionModalTypeChangeCallback(const NotifySessionModalTypeChangeFunc& func);
+    void SetSessionModalTypeChangeCallback(NotifySessionModalTypeChangeFunc&& func);
+    void SetMainSessionModalTypeChangeCallback(NotifyMainSessionModalTypeChangeFunc&& func);
 
     /**
      * Window Immersive
@@ -298,7 +314,6 @@ public:
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
     void SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func);
-    void SetRestoreMainWindowCallback(const NotifyRestoreMainWindowFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
@@ -358,7 +373,7 @@ public:
     WSError OnShowWhenLocked(bool showWhenLocked);
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon);
     void NotifyTouchOutside();
-    bool CheckOutTouchOutsideRegister();
+    bool CheckTouchOutsideCallbackRegistered();
     void UpdateNativeVisibility(bool visible);
     void DumpSessionElementInfo(const std::vector<std::string>& params);
     void NotifyForceHideChange(bool hide);
@@ -371,16 +386,21 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
-    void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
+    void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
-    /*
+    /**
      * Dialog Window
      */
-    void RegisterBindDialogSessionCallback(NotifyBindDialogSessionFunc&& callback);
+    void RegisterBindDialogSessionCallback(const NotifyBindDialogSessionFunc& callback);
 
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /**
+     * Window Input Event
+     */
+    void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
 
     /**
      * Window Rotation
@@ -391,6 +411,7 @@ public:
      * Window Animation
      */
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
+    void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
 
     /**
      * Window Visibility
@@ -405,6 +426,7 @@ public:
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
     void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
+    virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -447,6 +469,15 @@ public:
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
+    /**
+     * UIExtension
+     */
+    bool IsShowOnLockScreen(uint32_t lockScreenZOrder);
+    void AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo);
+    void RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityToken);
+    void CheckExtensionOnLockScreenToClose();
+    void CloseExtensionSync(const UIExtensionTokenInfo& tokenInfo);
+    void OnNotifyAboveLockScreen();
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
     bool HasModalUIExtension();
@@ -457,6 +488,7 @@ public:
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
     int32_t GetStatusBarHeight() override;
+    int32_t GetDockHeight();
     bool IsFreeMultiWindowMode() const
     {
         return systemConfig_.IsFreeMultiWindowMode();
@@ -503,6 +535,8 @@ public:
      * Window Layout
      */
     void ResetSizeChangeReasonIfDirty();
+    void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
+    bool SetFrameGravity(Gravity gravity);
 
     /**
      * Gesture Back
@@ -510,9 +544,16 @@ public:
     bool GetGestureBackEnabled();
     bool GetEnableGestureBackHadSet();
 
+    /**
+     * PC Window
+     */
+    void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
+    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect,
-        const SizeChangeReason reason = SizeChangeReason::UNDEFINED, const DisplayId displayId = DISPLAY_ID_INVALID);
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -532,14 +573,18 @@ protected:
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
+    bool IsTransformNeedChange(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
 
     /**
      * Window Immersive
      */
+    void CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoidRect, AvoidArea& avoidArea) const;
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
+    NotifyNeedAvoidFunc onNeedAvoid_;
 
     /**
      * Gesture Back
@@ -549,7 +594,7 @@ protected:
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
     
-    /*
+    /**
      * Dialog window
      */
     NotifyBindDialogSessionFunc onBindDialogTarget_;
@@ -560,27 +605,41 @@ protected:
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
 
     /**
-     * Window Immersive
-     */
-    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
-    NotifyNeedAvoidFunc onNeedAvoid_;
-
-    /**
      * Window Hierarchy
      */
     NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
+    NotifyMainSessionModalTypeChangeFunc onMainSessionModalTypeChange_;
+    NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
 
-    /*
+    /**
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
 
-    /*
+    /**
      * Window Lifecycle
      */
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
+
+    /**
+     * PC Fold Screen
+     */
+    sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
+    std::atomic_bool throwSlipFullScreenFlag_ = false;
+
+    /**
+     * PC Window
+     */
+    NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
+    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
+    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
+    
+    /**
+     * Window Layout
+     */
+    NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -591,7 +650,6 @@ private:
     /**
      * Window Immersive
      */
-    void CalculateAvoidAreaRect(WSRect& rect, WSRect& avoidRect, AvoidArea& avoidArea) const;
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
@@ -609,12 +667,13 @@ private:
     /**
      * Move Drag
      */
-    void HandleMoveDragSurfaceNode(const SizeChangeReason reason);
-    void OnMoveDragCallback(const SizeChangeReason reason);
+    void HandleMoveDragSurfaceNode(SizeChangeReason reason);
+    void OnMoveDragCallback(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
-    void HandleMoveDrag(WSRect& rect, WSRect& globalRect, const SizeChangeReason reason,
+    void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
         bool isGlobal, bool needFlush);
-    void HandleMoveDragEnd(WSRect& rect, const SizeChangeReason reason);
+    void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
+    bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
 
     /**
      * Gesture Back
@@ -624,23 +683,22 @@ private:
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
-    void HandleCompatibleModeMoveDrag(WSRect& rect, const SizeChangeReason reason,
-        bool isSupportDragInPcCompatibleMode, bool isGlobal = false, bool needFlush = true);
-    void HandleCompatibleModeDrag(WSRect& rect, const SizeChangeReason reason,
+    void HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason,
+        bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush = true);
+    void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason,
         bool isSupportDragInPcCompatibleMode, bool isGlobal, bool needFlush);
     void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
     bool FixRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
-    void SetSurfaceBounds(const WSRect& rect, bool isGlobal = false, bool needFlush = true);
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect);
     bool IsMovableWindowType();
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    void UpdateSessionRectInner(const WSRect& rect, const SizeChangeReason reason);
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason);
     void UpdateRectForDrag(WSRect& rect);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
@@ -696,7 +754,7 @@ private:
         WSPropertyChangeAction action);
     WMError HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
-    WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
+    WMError HandleActionUpdateWindowModeSupportType(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
@@ -727,10 +785,15 @@ private:
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
+
+    /**
+     * UIExtension
+     */
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+    std::vector<UIExtensionTokenInfo> extensionTokenInfos_;
 
     /**
      * Window Decor
@@ -789,7 +852,12 @@ private:
      */
     NotifyVisibleChangeFunc notifyVisibleChangeFunc_;
 
-    /*
+    /**
+     * Window Input Event
+     */
+    NotifyTouchOutsideFunc onTouchOutside_;
+
+    /**
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
@@ -798,6 +866,17 @@ private:
      * Window Animation
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
+    NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
+
+    /**
+     * Window Layout
+     */
+    void SetSurfaceBoundsWithAnimation(
+        const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
+        const WSRect& rect, const std::function<void()>& finishCallback = nullptr,
+        bool isGlobal = false, bool needFlush = true);
+    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
+    NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
 
     /**
      * Window Immersive

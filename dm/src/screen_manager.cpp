@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "screen_manager.h"
 
 #include <map>
@@ -486,7 +487,20 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId,
-                                                                             screenGroupId);
+        screenGroupId);
+    if (screenGroupId == SCREEN_ID_INVALID) {
+        WLOGFE("create mirror failed");
+    }
+    return ret;
+}
+
+DMError ScreenManager::MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId, DMRect mainScreenRegion,
+    ScreenId& screenGroupId)
+{
+    WLOGFI("Make mirror with region for screen: %{public}" PRIu64",mirrorScreen: %{public}" PRIu64"",
+        mainScreenId, mirrorScreenId);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId,
+        mainScreenRegion, screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
         WLOGFE("create mirror failed");
     }

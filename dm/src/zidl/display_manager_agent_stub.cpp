@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "zidl/display_manager_agent_stub.h"
 
 #include <vector>

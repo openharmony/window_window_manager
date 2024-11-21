@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
@@ -101,7 +102,6 @@ HWTEST_F(WindowSessionImplTest4, GetFocusable, Function | SmallTest | Level2)
     ASSERT_EQ(ret, true);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetFocusabletest01 end";
 }
-
 
 /**
  * @tc.name: TransferAccessibilityEvent
@@ -364,6 +364,38 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal02, Function | SmallTest | Lev
     res = window->SetSubWindowModal(true, ModalityType::APPLICATION_MODALITY);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest02 end";
+}
+
+/**
+ * @tc.name: SetWindowModal
+ * @tc.desc: SetWindowModal and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetWindowModal, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowModal start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetWindowModal");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WMError res = window->SetWindowModal(true);
+    ASSERT_EQ(res, WMError::WM_OK);
+    res = window->SetWindowModal(false);
+    ASSERT_EQ(res, WMError::WM_OK);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    res = window->SetWindowModal(true);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    res = window->SetWindowModal(false);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowModal end";
 }
 
 /**
@@ -676,7 +708,6 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, Function | SmallTest | Le
     window->GetCallingWindowRect(rect);
 }
 
-
 /**
  * @tc.name: EnableDrag
  * @tc.desc: EnableDrag Test
@@ -871,7 +902,8 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible, Function | SmallTest | L
     bool &hideMinimizeButton = isMinimizeVisible;
     bool &hideSplitButton = isSplitVisible;
     bool &hideCloseButton = isCloseVisible;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton,
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton,
         hideSplitButton, hideCloseButton);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
@@ -1181,8 +1213,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest |
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
-    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { false, false, false, false };
@@ -1190,7 +1222,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest |
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
     bool hideCloseButton = false;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton,
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton,
         hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
@@ -1250,8 +1283,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, Function | SmallTest |
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
     // only not support WINDOW_MODE_SUPPORT_SPLIT
-    uint32_t modeSupportInfo = 1 | (1 << 1);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { true, true, true, true };
@@ -1259,7 +1292,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, Function | SmallTest |
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
     bool hideCloseButton = false;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, false);
     ASSERT_EQ(hideMinimizeButton, false);
     ASSERT_EQ(hideSplitButton, false);
@@ -1282,8 +1316,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     ASSERT_NE(window->property_, nullptr);
     ASSERT_EQ(1, window->GetDisplayId());
     // only not support WINDOW_MODE_SUPPORT_SPLIT
-    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { false, false, false, false };
@@ -1291,7 +1325,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     bool hideMinimizeButton = true;
     bool hideSplitButton = true;
     bool hideCloseButton = true;
-    window->GetTitleButtonVisible(false, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
@@ -1366,9 +1401,10 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     bool isAutoStart = true;
-    window->SetAutoStartPiP(isAutoStart);
+    uint32_t priority = 1;
+    window->SetAutoStartPiP(isAutoStart, priority);
     window->hostSession_ = nullptr;
-    window->SetAutoStartPiP(isAutoStart);
+    window->SetAutoStartPiP(isAutoStart, priority);
 }
 
 /**
@@ -1708,7 +1744,6 @@ HWTEST_F(WindowSessionImplTest4, SetEnableDragBySystem, Function | SmallTest | L
     option->SetWindowName("GetSubWindow");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
-    ASSERT_NE(nullptr, window->property_);
     window->property_->SetDragEnabled(true);
     window->SetEnableDragBySystem(false);
     ASSERT_FALSE(window->property_->GetDragEnabled());

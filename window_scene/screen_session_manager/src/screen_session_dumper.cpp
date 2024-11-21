@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "screen_session_dumper.h"
 
 #include <csignal>
@@ -25,6 +26,8 @@
 #include "screen_sensor_connector.h"
 #include "parameters.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_controller/super_fold_sensor_manager.h"
+#include "fold_screen_state_internel.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -150,6 +153,17 @@ void ScreenSessionDumper::ExcuteDumpCmd()
 
 void ScreenSessionDumper::ExcuteInjectCmd()
 {
+    bool isDeveloperMode = system::GetBoolParameter("const.security.developermode.state", false);
+    if (isDeveloperMode) {
+        if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
+            int errCode = SetFoldDisplayMode();
+            if (errCode != 0) {
+                ShowIllegalArgsInfo();
+            }
+            return;
+        }
+    }
+
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
         TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
@@ -167,12 +181,6 @@ void ScreenSessionDumper::ExcuteInjectCmd()
         return;
     } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
         MockSendCastPublishEvent(params_[0]);
-        return;
-    } else if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
-        int errCode = SetFoldDisplayMode();
-        if (errCode != 0) {
-            ShowIllegalArgsInfo();
-        }
         return;
     } else if (params_.size() == 1 && (params_[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
                 || params_[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
@@ -701,6 +709,14 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
     }
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_HOVER_STATUS)) {
         std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            dumpInfo_.append("[error]: the value is too long");
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            dumpInfo_.append("[error]: value is not a number");
+            return;
+        }
         int32_t value = std::stoi(valueStr);
         if ((value < static_cast<int32_t>(DeviceHoverStatus::INVALID)) ||
             (value > static_cast<int32_t>(DeviceHoverStatus::CAMERA_STATUS_CANCEL))) {
@@ -735,12 +751,12 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
         .angle = postureVal,
     };
     SensorEvent hallEvent = {
-        .dataLen = sizeof(ExtHallData),
         .data = reinterpret_cast<uint8_t *>(&hallData),
+        .dataLen = sizeof(ExtHallData),
     };
     SensorEvent postureEvent = {
-        .dataLen = sizeof(PostureData),
         .data = reinterpret_cast<uint8_t *>(&postureData),
+        .dataLen = sizeof(PostureData),
     };
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
     OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
@@ -757,13 +773,23 @@ void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
         }
         int32_t value = std::stoi(valueStr);
         if (value) {
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterHallCallback();
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-            OHOS::Rosen::ScreenSensorConnector::SubscribeRotationSensor();
+            if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+                OHOS::Rosen::SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
+                OHOS::Rosen::SuperFoldSensorManager::GetInstance().RegisterHallCallback();
+            } else {
+                OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+                OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+                OHOS::Rosen::ScreenSensorConnector::SubscribeRotationSensor();
+            }
         } else {
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterHallCallback();
-            OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
-            OHOS::Rosen::ScreenSensorConnector::UnsubscribeRotationSensor();
+            if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+                OHOS::Rosen::SuperFoldSensorManager::GetInstance().UnregisterPostureCallback();
+                OHOS::Rosen::SuperFoldSensorManager::GetInstance().UnregisterHallCallback();
+            } else {
+                OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterHallCallback();
+                OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+                OHOS::Rosen::ScreenSensorConnector::UnsubscribeRotationSensor();
+            }
         }
         TLOGI(WmsLogTag::DMS, "hall and posture register status: %{public}d", value);
     }

@@ -309,6 +309,118 @@ namespace {
         auto result = ScreenSettingHelper::GetSettingRotation(screenId, key);
         ASSERT_EQ(result, false);
     }
+
+    /**
+     * @tc.name: GetSettingValue
+     * @tc.desc: GetSettingValue
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingValue, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        uint32_t value = 0;
+        std::string key = "test";
+        bool ret = screenSettingHelper.GetSettingValue(value, key);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: RemoveInvalidChar01
+     * @tc.desc: RemoveInvalidChar Test01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar01, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "test";
+        auto ret = screenSettingHelper.RemoveInvalidChar(test_str);
+        ASSERT_EQ(ret, "");
+    }
+
+    /**
+     * @tc.name: RemoveInvalidChar02
+     * @tc.desc: RemoveInvalidChar Test02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "test 2.0 ,";
+        auto ret = screenSettingHelper.RemoveInvalidChar(test_str);
+        ASSERT_EQ(ret, " 2.0 ,");
+    }
+
+    /**
+     * @tc.name: SplitString
+     * @tc.desc: SplitString Test01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, SplitString01, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::vector<std::string> splitValues = {"split", "test"};
+        std::string input = "";
+        char delimiter = ',';
+        auto ret = screenSettingHelper.SplitString(splitValues, input, delimiter);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: SplitString
+     * @tc.desc: SplitString Test02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, SplitString02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::vector<std::string> splitValues = {};
+        std::string input = "test, str";
+        char delimiter = ',';
+        auto ret = screenSettingHelper.SplitString(splitValues, input, delimiter);
+        ASSERT_TRUE(ret);
+    }
+
+    /**
+     * @tc.name: GetSettingRecoveryResolutionString
+     * @tc.desc: GetSettingRecoveryResolutionString Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRecoveryResolutionString, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::vector<std::string> resolutionString = {};
+        std::string key = "test, str";
+        auto ret = screenSettingHelper.GetSettingRecoveryResolutionString(resolutionString, key);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetSettingScreenModeString
+     * @tc.desc: GetSettingScreenModeString Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingScreenModeString, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::vector<std::string> screenModeStrings = {};
+        std::string key = "test, str";
+        auto ret = screenSettingHelper.GetSettingScreenModeString(screenModeStrings, key);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetSettingRelativePositionString
+     * @tc.desc: GetSettingRelativePositionString Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRelativePositionString, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::vector<std::string> relativePositionStrings = {};
+        std::string key = "test";
+        auto ret = screenSettingHelper.GetSettingRelativePositionString(relativePositionStrings, key);
+        ASSERT_FALSE(ret);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

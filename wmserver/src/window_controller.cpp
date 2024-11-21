@@ -96,7 +96,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
         }
     }
 
-    if (!WindowHelper::CheckSupportWindowMode(node->GetWindowMode(), node->GetModeSupportInfo(), info)) {
+    if (!WindowHelper::CheckSupportWindowMode(node->GetWindowMode(), node->GetWindowModeSupportType(), info)) {
         WLOGFE("need to cancel starting window");
         return;
     }
@@ -1519,7 +1519,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO: {
-            node->SetModeSupportInfo(property->GetModeSupportInfo());
+            node->SetWindowModeSupportType(property->GetWindowModeSupportType());
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {

@@ -65,10 +65,10 @@ private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, int);
     void SetCameraFoldStrategy(float angle);
-    void SetCameraStatusChange(float angle, int hall);
+    void SetCameraRotationStatusChange(float angle, int hall);
     sptr<ApplicationStatePocketObserver> applicationStateObserver_;
     bool isInCameraFoldStrategy_ = false;
-    bool isCameraStatus_ = false;
+    bool isCameraRotationStrategy_ = false;
     std::vector<std::string> hallSwitchPackageNameList_;
     int allowUserSensorForLargeFoldDevice = 0;
     bool TriggerTentExit(float angle, int hall);

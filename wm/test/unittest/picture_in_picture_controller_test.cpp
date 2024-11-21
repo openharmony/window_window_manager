@@ -35,7 +35,7 @@ public:
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD0(Destroy, WMError());
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
-    MOCK_METHOD1(SetAutoStartPiP, void(bool isAutoStart));
+    MOCK_METHOD2(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
 };
 
@@ -185,7 +185,6 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPicture01, Function | Smal
     pipControl->curState_ = PiPWindowState::STATE_STOPPING;
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPicture(false, StopPipType::NULL_STOP));
 
-    pipControl->handler_ = nullptr;
     pipControl->window_ = mw;
     pipControl->curState_ = PiPWindowState::STATE_STARTED;
     ASSERT_EQ(PiPWindowState::STATE_STARTED, pipControl->GetControllerState());
@@ -292,7 +291,7 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture01, Function | Sma
     auto option = sptr<PipOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
-    
+
     pipControl->pipOption_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, pipControl->StartPictureInPicture(startType));
     pipControl->pipOption_ = option;
@@ -435,27 +434,27 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     pipControl->mainWindow_ = nullptr;
     pipControl->SetAutoStartEnabled(enable);
     pipControl->mainWindow_ = mw;
+    pipControl->pipOption_ = nullptr;
+    pipControl->SetAutoStartEnabled(enable);
+    pipControl->pipOption_ = option;
+
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     enable = false;
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_->SetTypeNodeEnabled(false);
     ASSERT_EQ(false, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
-    pipControl->pipOption_ = nullptr;
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_)).WillRepeatedly(Return());
-    pipControl->SetAutoStartEnabled(enable);
-    pipControl->pipOption_ = option;
     pipControl->pipOption_->SetNavigationId("");
     ASSERT_EQ("", pipControl->pipOption_->GetNavigationId());
     pipControl->SetAutoStartEnabled(enable);
@@ -944,7 +943,7 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->window_ = mw;
-    
+
     pipControl->pipXComponentController_ = nullptr;
     pipControl->mainWindowXComponentController_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));

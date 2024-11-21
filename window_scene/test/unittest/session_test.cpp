@@ -442,7 +442,6 @@ HWTEST_F(WindowSessionTest, GetGlobalScaledRect, Function | SmallTest | Level2)
     ASSERT_EQ(20, globalScaledRect.height_);
 }
 
-
 /**
  * @tc.name: RaiseToAppTop01
  * @tc.desc: RaiseToAppTop
@@ -546,7 +545,7 @@ HWTEST_F(WindowSessionTest, OnSessionEvent02, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect targetRect_ = { 100, 100, 1000, 1000 };
@@ -568,7 +567,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent01, Function | SmallTest | Level2)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
@@ -604,7 +603,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -642,7 +641,7 @@ HWTEST_F(WindowSessionTest, ConsumeMoveEvent02, Function | SmallTest | Level2)
     pointerItem.SetDisplayX(205);
     pointerItem.SetDisplayY(650);
     result = sceneSession->moveDragController_->ConsumeMoveEvent(pointerEvent, originalRect);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -657,7 +656,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent01, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -699,7 +698,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -709,7 +708,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     SystemSessionConfig sessionConfig;
     sessionConfig.isSystemDecorEnable_ = true;
     sessionConfig.backgroundswitch = true;
-    sessionConfig.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
@@ -746,7 +745,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     pointerItem.SetDisplayX(250);
     pointerItem.SetDisplayY(250);
     result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
-    ASSERT_EQ(result, false);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -761,7 +760,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -771,7 +770,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     SystemSessionConfig sessionConfig;
     sessionConfig.isSystemDecorEnable_ = true;
     sessionConfig.backgroundswitch = true;
-    sessionConfig.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
@@ -820,7 +819,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1);
+    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE(sceneSession->moveDragController_);
     sceneSession->moveDragController_->InitMoveDragProperty();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -830,7 +829,7 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     SystemSessionConfig sessionConfig;
     sessionConfig.isSystemDecorEnable_ = true;
     sessionConfig.backgroundswitch = true;
-    sessionConfig.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
@@ -1210,8 +1209,7 @@ HWTEST_F(WindowSessionTest, SetTerminateSessionListener, Function | SmallTest | 
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    NotifyTerminateSessionFunc func = nullptr;
-    session_->SetTerminateSessionListener(func);
+    session_->SetTerminateSessionListener(nullptr);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
@@ -1225,8 +1223,7 @@ HWTEST_F(WindowSessionTest, SetTerminateSessionListenerTotal, Function | SmallTe
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    NotifyTerminateSessionFuncTotal func = nullptr;
-    session_->SetTerminateSessionListenerTotal(func);
+    session_->SetTerminateSessionListenerTotal(nullptr);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
@@ -1269,8 +1266,7 @@ HWTEST_F(WindowSessionTest, SetPendingSessionToForegroundListener, Function | Sm
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    NotifyPendingSessionToForegroundFunc func = nullptr;
-    session_->SetPendingSessionToForegroundListener(func);
+    session_->SetPendingSessionToForegroundListener(nullptr);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
@@ -1335,6 +1331,7 @@ HWTEST_F(WindowSessionTest, TransferFocusStateEvent02, Function | SmallTest | Le
 
     ASSERT_EQ(WSError::WS_OK, session_->TransferFocusStateEvent(false));
 }
+
 /**
  * @tc.name: CreateDetectStateTask001
  * @tc.desc: Create detection task when there are no pre_existing tasks.

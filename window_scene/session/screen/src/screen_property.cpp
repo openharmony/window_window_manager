@@ -47,6 +47,16 @@ float ScreenProperty::GetPhysicalRotation() const
     return physicalRotation_;
 }
 
+void ScreenProperty::SetScreenComponentRotation(float rotation)
+{
+    screenComponentRotation_ = rotation;
+}
+
+float ScreenProperty::GetScreenComponentRotation() const
+{
+    return screenComponentRotation_;
+}
+
 void ScreenProperty::SetBounds(const RRect& bounds)
 {
     bounds_ = bounds;
@@ -57,6 +67,26 @@ void ScreenProperty::SetBounds(const RRect& bounds)
 RRect ScreenProperty::GetBounds() const
 {
     return bounds_;
+}
+
+void ScreenProperty::SetFakeBounds(const RRect& fakeBounds)
+{
+    fakeBounds_ = fakeBounds;
+}
+
+RRect ScreenProperty::GetFakeBounds() const
+{
+    return fakeBounds_;
+}
+
+void ScreenProperty::SetIsFakeInUse(bool isFakeInUse)
+{
+    isFakeInUse_ = isFakeInUse;
+}
+
+bool ScreenProperty::GetIsFakeInUse() const
+{
+    return isFakeInUse_;
 }
 
 void ScreenProperty::SetScaleX(float scaleX)

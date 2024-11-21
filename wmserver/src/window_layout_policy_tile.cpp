@@ -218,9 +218,9 @@ void WindowLayoutPolicyTile::PushBackNodeInTileQueue(const sptr<WindowNode>& nod
         return;
     }
 
-    if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+    if (!WindowHelper::IsWindowModeSupported(node->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING)) {
         WLOGFD("Window don't support floating mode that should be minimized, winId: %{public}u, "
-            "modeSupportInfo: %{public}u", node->GetWindowId(), node->GetModeSupportInfo());
+            "windowModeSupportType: %{public}u", node->GetWindowId(), node->GetWindowModeSupportType());
         MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::INVALID_MODE_OR_SIZE_IN_TILE);
         return;
     }

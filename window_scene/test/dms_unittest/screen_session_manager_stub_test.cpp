@@ -1447,7 +1447,6 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest65, Function | SmallTest |
     EXPECT_EQ(res, 0);
 }
 
-
 /**
  * @tc.name: OnRemoteRequest66
  * @tc.desc: normal function, TRANS_ID_SWITCH_USER test
@@ -2871,6 +2870,27 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest134, Function | SmallTest 
 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_INFO);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest135
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest135, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    data.WriteFloat(0);
+    data.WriteFloat(0);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }

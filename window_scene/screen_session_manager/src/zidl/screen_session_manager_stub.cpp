@@ -269,6 +269,20 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_WITH_REGION: {
+            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenId mirrorScreenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t posX = data.ReadInt32();
+            int32_t posY = data.ReadInt32();
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMRect mainScreenRegion = { posX, posY, width, height };
+            ScreenId screenGroupId = INVALID_SCREEN_ID;
+            DMError ret = MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion, screenGroupId);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_MULTI_SCREEN_MODE_SWITCH: {
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenId secondaryScreenId = static_cast<ScreenId>(data.ReadUint64());
@@ -695,6 +709,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto screenComponentRotation = data.ReadFloat();
+            auto rotation = data.ReadFloat();
+            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             RRect bounds;
@@ -873,6 +894,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(info);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT_WITH_OPTION: {
+            ProcGetDisplaySnapshotWithOption(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_CAMERA_STATUS: {
+            int32_t cameraStatus = data.ReadInt32();
+            int32_t cameraPosition = data.ReadInt32();
+            SetCameraStatus(cameraStatus, cameraPosition);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -982,6 +1013,18 @@ void ScreenSessionManagerStub::ProcGetScreenCapture(MessageParcel& data, Message
     option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetScreenCapture(option, &errCode);
+    reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
+    static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
+}
+
+void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& data, MessageParcel& reply)
+{
+    CaptureOption option;
+    option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
+    option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
+    option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
     static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
 }

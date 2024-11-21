@@ -308,7 +308,6 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, Function | SmallTest |
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
 
-
 /**
  * @tc.name: UpdateSessionViewportConfig1
  * @tc.desc: normal test
@@ -900,6 +899,31 @@ HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, Function | SmallTest | Level1)
     extensionSession_->sessionStage_ = nullptr;
     res = extensionSession_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
+}
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: test function : GetStatusBarHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
+{
+    ASSERT_NE(nullptr, extSessionEventCallback_);
+    MockFunction<uint32_t()> mockGetStatusBarHeightFunc;
+    extSessionEventCallback_->getStatusBarHeightFunc_ = mockGetStatusBarHeightFunc.AsStdFunction();
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(1);
+    extensionSession_->GetStatusBarHeight();
+
+    extSessionEventCallback_->getStatusBarHeightFunc_ = nullptr;
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(0);
+    extensionSession_->GetStatusBarHeight();
+
+    extSessionEventCallback_ = nullptr;
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(0);
+    extensionSession_->GetStatusBarHeight();
 }
 }
 }

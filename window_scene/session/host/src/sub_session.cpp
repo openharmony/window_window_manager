@@ -14,12 +14,7 @@
  */
 
 #include "session/host/include/sub_session.h"
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
-
-#include "common/include/session_permission.h"
-#include "key_event.h"
 #include "window_helper.h"
-#include "parameters.h"
 #include "pointer_event.h"
 #include "window_manager_hilog.h"
 
@@ -32,7 +27,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SubSes
 SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId());
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
@@ -75,6 +70,16 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
 
 WSError SubSession::Hide()
 {
+    return Hide(false);  // async mode
+}
+
+WSError SubSession::HideSync()
+{
+    return Hide(true);  // sync mode
+}
+
+WSError SubSession::Hide(bool needSyncHide)
+{
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
@@ -100,7 +105,12 @@ WSError SubSession::Hide()
         ret = session->SceneSession::Background();
         return ret;
     };
-    PostTask(task, "Hide");
+
+    if (needSyncHide) {
+        return PostSyncTask(task, "HideSync");
+    }
+
+    PostTask(task, "HideAsync");
     return WSError::WS_OK;
 }
 
@@ -115,7 +125,7 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         return WSError::WS_OK;
     }
     if (isModal) {
-        Session::ProcessClickModalSpecificWindowOutside(posX, posY);
+        Session::ProcessClickModalWindowOutside(posX, posY);
     }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
@@ -201,6 +211,16 @@ bool SubSession::IsModal() const
         isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
     }
     return isModal;
+}
+
+bool SubSession::IsApplicationModal() const
+{
+    bool isAppModal = false;
+    auto property = GetSessionProperty();
+    if (property != nullptr) {
+        isAppModal = WindowHelper::IsApplicationModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
+    }
+    return isAppModal;
 }
 
 bool SubSession::IsVisibleForeground() const

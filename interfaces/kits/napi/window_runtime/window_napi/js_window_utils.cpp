@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_window_utils.h"
 #include <iomanip>
 #include <regex>
@@ -83,6 +84,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
     napi_set_named_property(env, objValue, "TYPE_HANDWRITE", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_HANDWRITE)));
+    napi_set_named_property(env, objValue, "TYPE_SCREEN_CONTROL", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
 
     return objValue;
 }
@@ -563,6 +566,7 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
     napi_set_named_property(env, objValue, "windowStatusType",
         CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    napi_set_named_property(env, objValue, "isFocused", CreateJsValue(env, info->IsFocused()));
     return objValue;
 }
 
@@ -1077,6 +1081,27 @@ std::unique_ptr<NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastPara
     }
 }
 
+std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,
+    napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred,
+            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef,
+            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    }
+}
+
 napi_value ModalityTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
@@ -1149,6 +1174,5 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     return ParseModalityParam(env, jsObject, windowOption);
 }
-
 } // namespace Rosen
 } // namespace OHOS
