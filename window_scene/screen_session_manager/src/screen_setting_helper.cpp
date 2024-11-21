@@ -268,7 +268,7 @@ bool ScreenSettingHelper::GetSettingRecoveryResolutionString(std::vector<std::st
 {
     std::string value;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetStringValue(key, value);
+    ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "get setting recovery resolution failed, ret=%{public}d", ret);
         return false;
@@ -317,7 +317,7 @@ bool ScreenSettingHelper::GetSettingScreenModeString(std::vector<std::string>& s
 {
     std::string value;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetStringValue(key, value);
+    ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "get setting screen mode failed, ret=%{public}d", ret);
         return false;
@@ -364,7 +364,7 @@ bool ScreenSettingHelper::GetSettingRelativePositionString(std::vector<std::stri
 {
     std::string value;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetStringValue(key, value);
+    ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "get setting relative position failed, ret=%{public}d", ret);
         return false;
