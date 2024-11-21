@@ -372,6 +372,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetFrameGravity);
     BindNativeFunction(env, objValue, "setUseStartingWindowAboveLocked", moduleName,
         JsSceneSession::SetUseStartingWindowAboveLocked);
+    BindNativeFunction(env, objValue, "saveSnapshotSync", moduleName,
+        JsSceneSession::SaveSnapshotSync);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2147,6 +2149,13 @@ napi_value JsSceneSession::SetUseStartingWindowAboveLocked(napi_env env, napi_ca
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetUseStartingWindowAboveLocked(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SaveSnapshotSync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSaveSnapshotSync(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -5299,6 +5308,17 @@ napi_value JsSceneSession::OnSetUseStartingWindowAboveLocked(napi_env env, napi_
         return NapiGetUndefined(env);
     }
     session->SetUseStartingWindowAboveLocked(useStartingWindowAboveLocked);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSaveSnapshotSync(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SaveSnapshot(false);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
