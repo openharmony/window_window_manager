@@ -781,9 +781,9 @@ private:
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
     struct IRemoteObjectHash {
-        size_t operator()(const sptr<IRemoteObject>& sptr) const
+        size_t operator()(const sptr<IRemoteObject>& ptr) const
         {
-            return std::hash<IRemoteObject*>{}(sptr.GetRefPtr());
+            return std::hash<IRemoteObject*>{}(ptr.GetRefPtr());
         }
     };
     std::unordered_map<sptr<IRemoteObject>, int32_t, IRemoteObjectHash> remoteObjectMap_;
