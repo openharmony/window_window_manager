@@ -6376,8 +6376,9 @@ NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(
 bool JsWindow::ParseAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig)
 {
     double data = 0.0f;
-    if (ParseJsValue(jsObject, env, "duration", data)) {
-        rectAnimationConfig.duration_ = data;
+    uint32_t duration = 0;
+    if (ParseJsValue(jsObject, env, "duration", duration)) {
+        rectAnimationConfig.duration_ = duration;
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
         return false;
