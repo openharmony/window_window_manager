@@ -210,15 +210,6 @@ void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
     PostTask(task, "SetSkipSelf");
 }
 
-std::shared_ptr<RSSurfaceNode> SCBSystemSession::GetSurfaceNode()
-{
-    if (!surfaceNode_) {
-        TLOGE(WmsLogTag::WMS_SCB, "surfaceNode_ is null");
-        return nullptr;
-    }
-    return surfaceNode_;
-}
-
 bool SCBSystemSession::IsVisibleForeground() const
 {
     return isVisible_;
