@@ -1766,7 +1766,7 @@ static void SetMoveWindowToWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(x, y, rectAnimationConfig));
-        TLOGNE(WmsLogTag::WMS_LAYOUT,
+        TLOGNI(WmsLogTag::WMS_LAYOUT,
             "%{public}s Window [%{public}u, %{public}s] move end, err = %{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
@@ -2042,7 +2042,7 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
             weakWindow->ResizeAsync(static_cast<uint32_t>(width), static_cast<uint32_t>(height), rectAnimationConfig));
-        TLOGNE(WmsLogTag::WMS_LAYOUT,
+        TLOGNI(WmsLogTag::WMS_LAYOUT,
             "%{public}s Window [%{public}u, %{public}s] resize with animation end, err = %{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
