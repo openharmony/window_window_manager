@@ -529,8 +529,7 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
         }
         controller->isFullScreenWaterfallMode_ = isWaterfallMode;
         controller->ExecuteFullScreenWaterfallModeChangeCallback();
-    },
-        __func__);
+    }, __func__);
 }
 
 void PcFoldScreenController::RegisterFullScreenWaterfallModeChangeCallback(

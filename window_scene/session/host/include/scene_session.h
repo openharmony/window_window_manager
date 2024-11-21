@@ -181,7 +181,6 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
-    void UpdateWaterfallMode(SessionEvent event);
     WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param);
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
@@ -635,6 +634,7 @@ protected:
      * PC Fold Screen
      */
     bool IsFullScreenWaterfallMode();
+    void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic_bool throwSlipFullScreenFlag_ = false;
 
