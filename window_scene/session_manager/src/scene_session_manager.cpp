@@ -2636,7 +2636,8 @@ bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& p
 
 void SceneSessionManager::NotifyPiPWindowVisibleChange() {
     std::vector<std::pair<uint64_t, WindowVisibilityState>> pipVisibilityChangeInfos;
-    if (pipSession_ != nullptr) {
+    sptr<SceneSession> session = SelectSesssionFromMap(pipSurfaceId_);
+    if (session != nullptr) {
         if (isScreenLocked_) {
             pipVisibilityChangeInfos.emplace_back(pipSurfaceId_, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
         } else {
@@ -2648,13 +2649,18 @@ void SceneSessionManager::NotifyPiPWindowVisibleChange() {
 
 bool SceneSessionManager::OcclusionPiPWindow(const uint64_t surfaceId, const WindowVisibilityState visibilityState) {
     sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
-    if (session!= nullptr && session->GetWindowMode() == WindowMode::WINDOW_MODE_PIP && !isScreenLocked_ &&
-        session->GetSessionState() == SessionState::STATE_ACTIVE &&
-        visibilityState != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion. pipSurfaceId_: %{public}" PRIu64, surfaceId);
+    if (session == nullptr || session->GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
+        TLOGI(WmsLogTag::WMS_PIP, "session is null or sessionWindowMode is not PIP");
+        return false;
+    }
+    if (isScreenLocked_) {
+        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion because of screen locked");
+        return false;
+    }
+    if (visibilityState != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
         // no visibility notification processing after pip is occlusion
+        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion success. pipSurfaceId_: %{public}" PRIu64, surfaceId);
         pipSurfaceId_ = surfaceId;
-        pipSession_ = session;
         return true;
     }
     return false;
@@ -8202,10 +8208,6 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession is nullptr!");
         return;
-    }
-    if (sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
-        TLOGI(WmsLogTag::WMS_PIP, "pipWindow destroyed");
-        pipSession_ = nullptr;
     }
     if (sceneSession->GetRSVisible() || sceneSession->GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
