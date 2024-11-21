@@ -1066,8 +1066,8 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = INT32_MAX;
-    uint32_t maxHeight_ = INT32_MAX;
+    uint32_t maxWidth_ = UINT32_MAX;
+    uint32_t maxHeight_ = UINT32_MAX;
     uint32_t minWidth_ = 1;
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
