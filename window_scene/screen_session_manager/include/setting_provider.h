@@ -27,6 +27,7 @@ class SettingProvider : public NoCopyable {
 public:
     static SettingProvider& GetInstance(int32_t systemAbilityId);
     ErrCode GetStringValue(const std::string& key, std::string& value);
+    ErrCode GetStringValueMultiUser(const std::string& key, std::string& value);
     ErrCode GetIntValue(const std::string& key, int32_t& value);
     ErrCode GetLongValue(const std::string& key, int64_t& value);
     ErrCode GetBoolValue(const std::string& key, bool& value);
@@ -50,8 +51,10 @@ private:
 
     static void Initialize(int32_t systemAbilityId);
     static std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
+    static std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelperMultiUser();
     static bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper>& helper);
     static Uri AssembleUri(const std::string& key);
+    static Uri AssembleUriMultiUser(const std::string& key);
 };
 } // namespace Rosen
 } // namespace OHOS
