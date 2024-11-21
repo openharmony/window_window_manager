@@ -2487,7 +2487,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_ERROR_NULLPTR;
         }
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP && !isEnablePiPCreate(property)) {
-            TLOGNE("pip window is not enable to create.");
+            TLOGNE(WmsLogTag::WMS_PIP, "pip window is not enable to create.");
             return WSError::WS_DO_NOTHING;
         }
         const auto& type = property->GetWindowType();
