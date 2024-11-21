@@ -259,6 +259,62 @@ public:
 };
 
 /**
+ * @class ControlAppInfo
+ *
+ * @brief Window info used for ControlAppInfo.
+ */
+class ControlAppInfo : public Parcelable {
+public:
+    /**
+     * @brief Default construct of ControlAppInfo.
+     */
+    ControlAppInfo() = default;
+
+    /**
+     * @brief Default deconstruct of ControlAppInfo.
+     */
+    ~ControlAppInfo() = default;
+
+    /**
+     * @brief Marshalling ControlAppInfo.
+     *
+     * @param parcel Package of ControlAppInfo.
+     * @return True means marshall success, false means marshall failed.
+     */
+    virtual bool Marshalling(Parcel &parcel) const override
+    {
+        return parcel.WriteString(bundleName_) &&
+               parcel.WriteInt32(appIndex_) &&
+               parcel.WriteBool(isNeedControl_);
+    }
+
+    /**
+     * @brief Unmarshalling ControlAppInfo.
+     *
+     * @param parcel Package of ControlAppInfo.
+     * @return ControlAppInfo object.
+     */
+    static ControlAppInfo *Unmarshalling(Parcel &parcel)
+    {
+        auto info = new (std::nothrow) ControlAppInfo();
+        if (info == nullptr) {
+            return nullptr;
+        }
+        bool res = parcel.ReadString(info->bundleName_) && parcel.ReadInt32(info->appIndex_) &&
+            parcel.ReadBool(info->isNeedControl_);
+        if (!res) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    std::string bundleName_ = "";
+    int32_t appIndex_ = 0;
+    bool isNeedControl_ = false;
+};
+
+/**
  * @class UnreliableWindowInfo
  *
  * @brief Unreliable Window Info.
