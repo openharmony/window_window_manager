@@ -3486,10 +3486,6 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
 
 WmErrorCode WindowSceneSessionImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is invalid");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    }
     property_->KeepKeyboardOnFocus(keepKeyboardFlag);
     return WmErrorCode::WM_OK;
 }
