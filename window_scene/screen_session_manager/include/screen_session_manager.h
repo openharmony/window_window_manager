@@ -252,7 +252,6 @@ public:
     void NotifyScreenMagneticStateChanged(bool isMagneticState);
     void OnTentModeChanged(bool isTentMode);
     void RegisterSettingDpiObserver();
-    void RegisterExtendSettingDpiObserver();
     void RegisterSettingRotationObserver();
 
     void OnConnect(ScreenId screenId) override {}
@@ -355,7 +354,6 @@ private:
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
-    float CalcDefaultExtendScreenDensity(const ScreenProperty& property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
         ScreenProperty property);
@@ -530,7 +528,6 @@ private:
     void HandleFoldScreenPowerInit();
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
     void SetDpiFromSettingData();
-    void SetDpiFromSettingData(bool isInternal);
     void SetRotateLockedFromSettingData();
     void NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode);
     void UpdateDisplayScaleState(ScreenId screenId);
@@ -549,6 +546,7 @@ private:
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
     void ExitCoordination(const std::string& reason);
     void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
+    void SetExtendPixelRatio(const float& dpi);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
 
 private:
