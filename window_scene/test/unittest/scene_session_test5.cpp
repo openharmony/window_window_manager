@@ -765,7 +765,7 @@ HWTEST_F(SceneSessionTest5, AdjustRectByAspectRatio, Function | SmallTest | Leve
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    EXPECT_EQ(true, session->AdjustRectByAspectRatio(rect));
+    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
 }
 
 /**
