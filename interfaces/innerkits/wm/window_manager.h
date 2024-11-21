@@ -284,7 +284,7 @@ public:
     virtual bool Marshalling(Parcel &parcel) const override
     {
         return parcel.WriteString(bundleName_) &&
-               parcel.WriteInt32(appIndex_) && 
+               parcel.WriteInt32(appIndex_) &&
                parcel.WriteBool(isNeedControl_);
     }
 
