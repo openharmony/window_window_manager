@@ -991,7 +991,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
         session->SaveAspectRatio(session->aspectRatio_);
         WSRect adjustedRect = session->winRect_;
         TLOGI(WmsLogTag::WMS_LAYOUT, "Before adjusting, the id:%{public}d, the current rect:%{public}s, "
-            "ratio: %{public}f", session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
+            "ratio:%{public}f", session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
         if (session->AdjustRectByAspectRatio(adjustedRect)) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
                 session->GetPersistentId(), adjustedRect.ToString().c_str());
