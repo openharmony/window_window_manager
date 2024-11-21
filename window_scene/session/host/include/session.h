@@ -671,10 +671,10 @@ protected:
      */
     RequestVsyncFunc requestNextVsyncFunc_;
     WSRect winRect_;
-    WSRect clientRect_; // rect saved when prelayout or notify client to update rect
+    WSRect clientRect_;     // rect saved when prelayout or notify client to update rect
     WSRect lastLayoutRect_; // rect saved when go background
-    WSRect layoutRect_; // rect of root view
-    WSRect globalRect_; // globalRect include translate
+    WSRect layoutRect_;     // rect of root view
+    WSRect globalRect_;     // globalRect include translate
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     float clientScaleX_ = 1.0f;

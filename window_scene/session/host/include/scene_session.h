@@ -532,7 +532,7 @@ public:
     bool IsDirtyWindow();
     bool IsDirtyDragWindow();
     void ResetSizeChangeReasonIfDirty();
-    void SetRequestNextVsyncFunc(const RequestVsyncFunc&& func);
+    void SetRequestNextVsyncFunc(RequestVsyncFunc&& func);
     void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
@@ -792,8 +792,8 @@ private:
     /**
      * Window Layout
      */
-    void FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr);
-    bool FixRectByAspectRatio(WSRect& rect);
+    void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
+    bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason);
     WSError UpdateRectForDrag(const WSRect& rect);
