@@ -940,7 +940,6 @@ private:
      * PiP Window
      */
     uint64_t pipSurfaceId_;
-    sptr<SceneSession> pipSession_;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
     bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool OcclusionPiPWindow(const uint64_t surfaceId, const WindowVisibilityState visibilityState);
