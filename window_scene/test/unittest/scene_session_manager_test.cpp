@@ -504,10 +504,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], sceneSession);
@@ -530,10 +530,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
@@ -556,10 +556,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
@@ -2171,6 +2171,8 @@ HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest 
     std::string key = "com.example.recposentryEntryAbility";
     bool enabled = false;
     ssm_->SetIsWindowRectAutoSave(key, enabled);
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
+    ASSERT_EQ(result, WMError::WM_OK);
 }
 
 /**

@@ -119,6 +119,9 @@ public:
     void SetPhysicalRotation(float rotation);
     float GetPhysicalRotation() const;
 
+    void SetScreenComponentRotation(float rotation);
+    float GetScreenComponentRotation() const;
+
     float GetXDpi() const;
     float GetYDpi() const;
 
@@ -160,6 +163,7 @@ private:
     }
     float rotation_ { 0.0f };
     float physicalRotation_ { 0.0f };
+    float screenComponentRotation_ { 0.0f };
     RRect bounds_;
     RRect phyBounds_;
     RRect fakeBounds_;

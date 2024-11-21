@@ -66,6 +66,10 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "Read callingTokenId failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadInt32(abilitySessionInfo->tmpSpecifiedId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read tmpSpecifiedId failed.");
+        return ERR_INVALID_DATA;
+    }
     if (!data.ReadBool(abilitySessionInfo->reuse)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read reuse failed.");
         return ERR_INVALID_DATA;
@@ -222,6 +226,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleMainSessionModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE):
             return HandleSetWindowRectAutoSave(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY):
+            return HandleNotifyExtensionDetachToDisplay(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -375,6 +381,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(winRect.height_);
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
+        reply.WriteUint32(property->GetWindowModeSupportType());
         reply.WriteBool(property->GetCompatibleModeInPc());
         reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
@@ -654,6 +661,14 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
         abilitySessionInfo->startWindowOption.reset(startWindowOption);
     }
+    uint32_t size = data.ReadUint32();
+    if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        abilitySessionInfo->supportWindowModes.reserve(size);
+        for (uint32_t i = 0; i < size; i++) {
+            abilitySessionInfo->supportWindowModes.push_back(
+                static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
+        }
+    }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -704,12 +719,12 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
 int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    Rect tempRect;
-    WMError errorCode = GetGlobalScaledRect(tempRect);
-    reply.WriteInt32(tempRect.posX_);
-    reply.WriteInt32(tempRect.posY_);
-    reply.WriteUint32(tempRect.width_);
-    reply.WriteUint32(tempRect.height_);
+    Rect globalScaledRect;
+    WMError errorCode = GetGlobalScaledRect(globalScaledRect);
+    reply.WriteInt32(globalScaledRect.posX_);
+    reply.WriteInt32(globalScaledRect.posY_);
+    reply.WriteUint32(globalScaledRect.width_);
+    reply.WriteUint32(globalScaledRect.height_);
     reply.WriteInt32(static_cast<int32_t>(errorCode));
     return ERR_NONE;
 }
@@ -1199,6 +1214,13 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     bool isEnabled = data.ReadBool();
     WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    NotifyExtensionDetachToDisplay();
     return ERR_NONE;
 }
 

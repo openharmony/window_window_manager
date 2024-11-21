@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 
 #include "display_manager.h"
@@ -803,10 +804,19 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
     uiParam.rect_ = {0, 0, 1, 1};
 
     sceneSession->winRect_ = {0, 0, 1, 1};
-    ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+    sceneSession->clientRect_ = {0, 0, 1, 1};
+    ASSERT_FALSE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     sceneSession->winRect_ = {1, 1, 1, 1};
-    ASSERT_EQ(true, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+    ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    sceneSession->winRect_ = {0, 0, 1, 1};
+    sceneSession->clientRect_ = {1, 1, 1, 1};
+    ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    sceneSession->winRect_ = {1, 1, 1, 1};
+    sceneSession->clientRect_ = {1, 1, 1, 1};
+    ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     uiParam.rect_ = {0, 0, 1, 0};
     ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
@@ -1138,10 +1148,7 @@ HWTEST_F(SceneSessionTest4, TerminateSession01, Function | SmallTest | Level2)
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 
     sceneSession->isTerminating_ = false;
-    NotifyTerminateSessionFunc func = [sceneSession](const SessionInfo& info) {
-        return;
-    };
-    sceneSession->SetTerminateSessionListener(func);
+    sceneSession->SetTerminateSessionListener([sceneSession](const SessionInfo& info) {});
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 }
 

@@ -16,9 +16,9 @@
 #ifndef OHOS_ROSEN_WM_MATH_H
 #define OHOS_ROSEN_WM_MATH_H
 
+#include <chrono>
 #include <cmath>
 #include <limits>
-#include <chrono>
 
 namespace OHOS::Rosen {
 namespace MathHelper {

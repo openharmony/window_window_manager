@@ -507,7 +507,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN));
 }
 
@@ -525,7 +525,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor02, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
 }
 
@@ -544,7 +544,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor03, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
 }
 
@@ -563,7 +563,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor04, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
 }
 
@@ -582,7 +582,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor05, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
         WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
 }
@@ -602,7 +602,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WINDOW_MODE_SUPPORT_ALL);
 }
 
@@ -629,6 +629,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml01, Function | SmallTest 
     ASSERT_EQ(ssm_->systemConfig_.defaultWindowMode_,
         static_cast<WindowMode>(static_cast<uint32_t>(102)));
 }
+
 /**
  * @tc.name: ConfigWindowSceneXml02
  * @tc.desc: call defaultWindowMode
@@ -2121,11 +2122,11 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession02, Function 
 }
 
 /**
- * @tc.name: CacheSubSessionForRecovering
- * @tc.desc: CacheSubSessionForRecovering
+ * @tc.name: CacheSpecificSessionForRecovering
+ * @tc.desc: CacheSpecificSessionForRecovering
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest2, CacheSpecificSessionForRecovering, Function | SmallTest | Level3)
 {
     sptr<WindowSessionProperty> property;
     ASSERT_NE(ssm_, nullptr);
@@ -2135,27 +2136,26 @@ HWTEST_F(SceneSessionManagerTest2, CacheSubSessionForRecovering, Function | Smal
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->CacheSubSessionForRecovering(nullptr, property);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(nullptr, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
 
     property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
-    ssm_->CacheSubSessionForRecovering(nullptr, property);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(nullptr, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     int32_t parentPersistentId = 1;
     property->SetParentPersistentId(parentPersistentId);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 1);
-    ssm_->CacheSubSessionForRecovering(sceneSession, property);
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 2);
     ssm_->RecoverCachedSubSession(parentPersistentId);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 0);
 }
-
 
 /**
  * @tc.name: SetAlivePersistentIds
@@ -2187,6 +2187,33 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateToastSession, Function | SmallTes
     Info.bundleName_ = "testInfo1b";
     sptr<SceneSession> session = new (std::nothrow) SceneSession(Info, nullptr);
     ssm_->NotifyCreateToastSession(persistentId, session);
+}
+
+/**
+ * @tc.name: RecoverCachedDialogSession
+ * @tc.desc: RecoverCachedDialogSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RecoverCachedDialogSession, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->recoveringFinished_ = false;
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<WindowSessionProperty> property;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(sceneSession, nullptr);
+
+    int32_t parentPersistentId = 1;
+    ssm_->RecoverCachedDialogSession(parentPersistentId);
+    ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_[parentPersistentId].size(), 0);
+    ssm_->recoverDialogSessionCacheMap_[parentPersistentId].emplace_back(sceneSession);
+    ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_[parentPersistentId].size(), 1);
+    ssm_->recoverDialogSessionCacheMap_[parentPersistentId].emplace_back(sceneSession);
+    ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_[parentPersistentId].size(), 2);
+    ssm_->RecoverCachedDialogSession(parentPersistentId);
+    ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_[parentPersistentId].size(), 0);
 }
 }
 } // namespace Rosen

@@ -581,6 +581,7 @@ HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
     ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
 }
+
 /**
  * @tc.name: SetWindowLimitsDataRoute
  * @tc.desc: test data route for SetWindowLimits

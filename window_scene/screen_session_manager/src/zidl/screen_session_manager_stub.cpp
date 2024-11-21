@@ -709,6 +709,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto screenComponentRotation = data.ReadFloat();
+            auto rotation = data.ReadFloat();
+            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             RRect bounds;
@@ -889,6 +896,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT_WITH_OPTION: {
             ProcGetDisplaySnapshotWithOption(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_CAMERA_STATUS: {
+            int32_t cameraStatus = data.ReadInt32();
+            int32_t cameraPosition = data.ReadInt32();
+            SetCameraStatus(cameraStatus, cameraPosition);
             break;
         }
         default:

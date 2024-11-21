@@ -203,7 +203,7 @@ enum class WMError : int32_t {
     WM_ERROR_NO_REMOTE_ANIMATION,
     WM_ERROR_INVALID_DISPLAY,
     WM_ERROR_INVALID_PARENT,
-    WM_ERROR_OPER_FULLSCREEN_FAILED,
+    WM_ERROR_INVALID_OP_IN_CUR_STATUS,
     WM_ERROR_REPEAT_OPERATION,
     WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_CALLING,
@@ -244,7 +244,7 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_START_ABILITY_FAILED = 1300007,
     WM_ERROR_INVALID_DISPLAY = 1300008,
     WM_ERROR_INVALID_PARENT = 1300009,
-    WM_ERROR_OPER_FULLSCREEN_FAILED = 1300010,
+    WM_ERROR_INVALID_OP_IN_CUR_STATUS = 1300010,
     WM_ERROR_PIP_DESTROY_FAILED = 1300011,
     WM_ERROR_PIP_STATE_ABNORMALLY = 1300012,
     WM_ERROR_PIP_CREATE_FAILED = 1300013,
@@ -711,6 +711,11 @@ struct Rect {
     bool IsUninitializedRect() const
     {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
+    }
+
+    bool IsUninitializedSize() const
+    {
+        return width_ == 0 && height_ == 0;
     }
 
     bool IsInsideOf(const Rect& a) const

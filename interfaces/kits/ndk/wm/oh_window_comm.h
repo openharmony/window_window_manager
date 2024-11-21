@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OH_WINDOW_COMM_H
 #define OH_WINDOW_COMM_H
 
@@ -29,8 +30,10 @@ extern "C" {
 typedef enum {
     /** succ. */
     OK = 0,
+
     /** window id is invaild. */
     INVAILD_WINDOW_ID = 1000,
+
     /** failed. */
     SERVICE_ERROR = 2000,
 } WindowManager_ErrorCode;

@@ -95,7 +95,6 @@ HWTEST_F(DisplayCutoutControllerTest, GetCutoutInfo, Function | SmallTest | Leve
     ASSERT_NE(cutoutInfo, nullptr);
 }
 
-
 /**
  * @tc.name: CalcBuiltInDisplayWaterfallRects
  * @tc.desc: CalcBuiltInDisplayWaterfallRects
@@ -117,7 +116,6 @@ HWTEST_F(DisplayCutoutControllerTest, CalcBuiltInDisplayWaterfallRects, Function
     controller->CalcBuiltInDisplayWaterfallRects();
     ASSERT_TRUE(controller->waterfallDisplayAreaRects_.isUninitialized());
 }
-
 
 /**
  * @tc.name: CalcBuiltInDisplayWaterfallRectsByRotation

@@ -328,6 +328,7 @@ HWTEST_F(ScreenManagerTest, OnScreenGroupChange01, Function | SmallTest | Level1
     screenManagerListener->OnScreenGroupChange(trigger, screenInfos, groupEvent);
     ScreenManager::GetInstance().pImpl_->screenManagerListener_ = nullptr;
 }
+
 /**
  * @tc.name: RemoveVirtualScreenFromGroup
  * @tc.desc: for interface coverage & check func RemoveVirtualScreenFromGroup
@@ -349,6 +350,7 @@ HWTEST_F(ScreenManagerTest, RemoveVirtualScreenFromGroup, Function | SmallTest |
     result = ScreenManager::GetInstance().RemoveVirtualScreenFromGroup(testScreens);
     ASSERT_EQ(DMError::DM_OK, result);
 }
+
 /**
  * @tc.name: SetScreenRotationLocked
  * @tc.desc: for interface coverage & check SetScreenRotationLocked
@@ -419,6 +421,7 @@ HWTEST_F(ScreenManagerTest, RegisterScreenGroupListener, Function | SmallTest | 
         ASSERT_EQ(DMError::DM_OK, result);
     }
 }
+
 /**
  * @tc.name: RegisterVirtualScreenGroupListener
  * @tc.desc: for interface coverage and

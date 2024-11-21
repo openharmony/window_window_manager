@@ -74,7 +74,7 @@ public:
     virtual uint32_t GetWindowId() const override;
     uint64_t GetDisplayId() const override;
     virtual uint32_t GetWindowFlags() const override;
-    uint32_t GetRequestModeSupportInfo() const override;
+    uint32_t GetRequestWindowModeSupportType() const override;
     bool IsMainHandlerAvailable() const override;
     virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     virtual bool IsFullScreen() const override;
@@ -167,7 +167,7 @@ public:
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
-    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
+    virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) override;
     virtual void ConsumeKeyEvent(const std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
