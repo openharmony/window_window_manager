@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef SUPPORT_SCREEN
 #define SUPPORT_SCREEN
 #endif
@@ -417,7 +418,7 @@ WSError SceneSessionManagerProxy::BindDialogSessionTarget(uint64_t persistentId,
     return static_cast<WSError>(ret);
 }
 
-WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener)
+WSError SceneSessionManagerProxy::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2478,7 +2479,7 @@ WMError SceneSessionManagerProxy::GetDisplayIdByWindowId(const std::vector<uint6
         TLOGE(WmsLogTag::DEFAULT, "Fail to read mapSize");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    for (int i = 0; i < mapSize; i++) {
+    for (int32_t i = 0; i < mapSize; i++) {
         uint64_t windowId;
         if (!reply.ReadUint64(windowId)) {
             TLOGE(WmsLogTag::DEFAULT, "Fail to read windowId");
@@ -2492,5 +2493,40 @@ WMError SceneSessionManagerProxy::GetDisplayIdByWindowId(const std::vector<uint6
         windowDisplayIdMap[windowId] = displayId;
     }
     return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::IsWindowRectAutoSave(const std::string& key, bool& enabled)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(key)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write key failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadBool(enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t ret = 0;
+    if (!reply.ReadUint32(ret)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 } // namespace OHOS::Rosen

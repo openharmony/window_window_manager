@@ -76,13 +76,13 @@ HWTEST_F(WindowProxyTest, UpdateWindowMode01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateWindowModeSupportInfo01
+ * @tc.name: UpdateWindowModeSupportType01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(WindowProxyTest, UpdateWindowModeSupportInfo01, Function | SmallTest | Level2)
+HWTEST_F(WindowProxyTest, UpdateWindowModeSupportType01, Function | SmallTest | Level2)
 {
-    WMError err = windowProxy_->UpdateWindowModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    WMError err = windowProxy_->UpdateWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
@@ -203,7 +203,6 @@ HWTEST_F(WindowProxyTest, NotifyDestroy01, Function | SmallTest | Level2)
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
-
 /**
  * @tc.name: NotifyForeground01
  * @tc.desc: normal function
@@ -214,7 +213,6 @@ HWTEST_F(WindowProxyTest, NotifyForeground01, Function | SmallTest | Level2)
     WMError err = windowProxy_->NotifyForeground();
     ASSERT_EQ(err, WMError::WM_OK);
 }
-
 
 /**
  * @tc.name: NotifyBackground01

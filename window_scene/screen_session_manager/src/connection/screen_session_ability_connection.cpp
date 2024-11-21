@@ -121,7 +121,9 @@ bool ScreenSessionAbilityConnectionStub::IsAbilityConnected()
 bool ScreenSessionAbilityConnectionStub::IsAbilityConnectedSync()
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
-    connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+    if (!isConnected_) {
+        connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+    }
     return IsAbilityConnected();
 }
 
@@ -129,7 +131,9 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
     MessageParcel &data, MessageParcel &reply)
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
-    connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+    if (!isConnected_) {
+        connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+    }
     if (!IsAbilityConnected()) {
         TLOGE(WmsLogTag::DMS, "ability connection is not established");
         lock.unlock();
@@ -154,7 +158,9 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCo
     MessageParcel &data, MessageParcel &reply)
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
-    connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+    if (!isConnected_) {
+        connectedCv_.wait_for(lock, std::chrono::milliseconds(SEND_MESSAGE_SYNC_OUT_TIME));
+    }
     if (!IsAbilityConnected()) {
         TLOGE(WmsLogTag::DMS, "ability connection is not established");
         lock.unlock();

@@ -84,7 +84,7 @@ public:
     void SetMainWindowTopmost(bool isTopmost);
     bool IsMainWindowTopmost() const;
     void AddWindowFlag(WindowFlag flag);
-    void SetModeSupportInfo(uint32_t modeSupportInfo);
+    void SetWindowModeSupportType(uint32_t windowModeSupportType);
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void KeepKeyboardOnFocus(bool keepKeyboardFlag);
@@ -137,7 +137,7 @@ public:
     WindowLimits GetUserWindowLimits() const;
     WindowLimits GetConfigWindowLimitsVP() const;
     float GetLastLimitsVpr() const;
-    uint32_t GetModeSupportInfo() const;
+    uint32_t GetWindowModeSupportType() const;
     std::unordered_map<WindowType, SystemBarProperty> GetSystemBarProperty() const;
     bool IsDecorEnable();
     uint32_t GetAnimationFlag() const;
@@ -217,7 +217,7 @@ public:
     bool GetIsUIExtAnySubWindow() const;
 
     /**
-     * Multi instance
+     * Multi Instance
      */
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
@@ -248,7 +248,7 @@ private:
     bool WriteActionUpdateWindowMask(Parcel& parcel);
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
-    bool WriteActionUpdateModeSupportInfo(Parcel& parcel);
+    bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -272,9 +272,10 @@ private:
     void ReadActionUpdateWindowMask(Parcel& parcel);
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
-    void ReadActionUpdateModeSupportInfo(Parcel& parcel);
+    void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
+    mutable std::mutex requestRectMutex_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     mutable std::mutex windowRectMutex_;
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
@@ -311,7 +312,7 @@ private:
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     KeyboardLayoutParams keyboardLayoutParams_;
-    uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
+    uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,           SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
@@ -368,21 +369,21 @@ private:
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
     /**
-     * Multi instance
+     * Multi Instance
      */
     std::string appInstanceKey_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
-    uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    uint32_t decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     uint32_t maxMainFloatingWindowNumber_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteBool(isSystemDecorEnable_) ||
-            !parcel.WriteUint32(decorModeSupportInfo_)) {
+            !parcel.WriteUint32(decorWindowModeSupportType_)) {
             return false;
         }
 
@@ -400,7 +401,7 @@ struct FreeMultiWindowConfig : public Parcelable {
             return nullptr;
         }
         config->isSystemDecorEnable_ = parcel.ReadBool();
-        config->decorModeSupportInfo_ = parcel.ReadUint32();
+        config->decorWindowModeSupportType_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->maxMainFloatingWindowNumber_ = parcel.ReadUint32();
         return config;
@@ -437,7 +438,7 @@ struct AppForceLandscapeConfig : public Parcelable {
 
 struct SystemSessionConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
-    uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    uint32_t decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationCurve animationIn_;
@@ -462,7 +463,7 @@ struct SystemSessionConfig : public Parcelable {
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteBool(isSystemDecorEnable_) || !parcel.WriteBool(isStretchable_) ||
-            !parcel.WriteUint32(decorModeSupportInfo_)) {
+            !parcel.WriteUint32(decorWindowModeSupportType_)) {
             return false;
         }
 
@@ -508,7 +509,7 @@ struct SystemSessionConfig : public Parcelable {
         }
         config->isSystemDecorEnable_ = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
-        config->decorModeSupportInfo_ = parcel.ReadUint32();
+        config->decorWindowModeSupportType_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         sptr<KeyboardAnimationCurve> animationIn = parcel.ReadParcelable<KeyboardAnimationCurve>();
         if (animationIn == nullptr) {

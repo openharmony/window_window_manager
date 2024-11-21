@@ -325,9 +325,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
 void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     bool boolVal = false;
@@ -388,9 +385,6 @@ void CheckWindowImplFunctionsPart1(sptr<Window> window, const uint8_t* data, siz
 
 void CheckWindowImplFunctionsPart2(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     int32_t posX;
@@ -434,9 +428,6 @@ void CheckWindowImplFunctionsPart2(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart3(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
     float floatVal;
     startPos += GetObject(floatVal, data + startPos, size - startPos);
@@ -470,9 +461,9 @@ void CheckWindowImplFunctionsPart3(sptr<WindowImpl> window, const uint8_t* data,
     startPos += GetObject(mode, data + startPos, size - startPos);
     window->UpdateMode(mode);
 
-    uint32_t modeSupportInfo;
-    startPos += GetObject(modeSupportInfo, data + startPos, size - startPos);
-    window->UpdateModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType;
+    startPos += GetObject(windowModeSupportType, data + startPos, size - startPos);
+    window->UpdateWindowModeSupportType(windowModeSupportType);
 
     WindowState windowState;
     startPos += GetObject(windowState, data + startPos, size - startPos);
@@ -492,9 +483,6 @@ void CheckWindowImplFunctionsPart3(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart4(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     bool boolVal;
@@ -536,9 +524,6 @@ void CheckWindowImplFunctionsPart4(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart5(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     OHOS::Rosen::Rect rect;
@@ -598,9 +583,6 @@ void CheckWindowImplFunctionsPart5(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
 
     TransitionReason reason;
@@ -614,7 +596,7 @@ void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data,
     uint32_t uint32Val[2];
     startPos += GetObject(uint32Val[0], data + startPos, size - startPos);
     startPos += GetObject(uint32Val[1], data + startPos, size - startPos);
-    window->SetModeSupportInfo(uint32Val[0]);
+    window->SetWindowModeSupportType(uint32Val[0]);
 
     float floatVal;
     startPos += GetObject(floatVal, data + startPos, size - startPos);
@@ -655,9 +637,6 @@ void CheckShadowColor(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 
 void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
     NotifyNativeWinDestroyFunc func = [](std::string) {};
     window->RegisterWindowDestroyedListener(func);
@@ -681,9 +660,9 @@ void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data,
     window->UnregisterDialogDeathRecipientListener(dialogDeathRecipientListener);
     sptr<IAceAbilityHandler> aceAbilityHandler = new AceAbilityHandler();
     window->SetAceAbilityHandler(aceAbilityHandler);
-    uint32_t modeSupportInfo;
-    startPos += GetObject<uint32_t>(modeSupportInfo, data + startPos, size - startPos);
-    window->SetRequestModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType;
+    startPos += GetObject<uint32_t>(windowModeSupportType, data + startPos, size - startPos);
+    window->SetRequestWindowModeSupportType(windowModeSupportType);
     float ratio;
     startPos += GetObject<float>(ratio, data + startPos, size - startPos);
     window->SetAspectRatio(ratio);
@@ -707,9 +686,6 @@ void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart8(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     size_t startPos = 0;
     std::vector<std::string> params{"-h"};
     std::vector<std::string> info{""};
@@ -747,9 +723,6 @@ void CheckWindowImplFunctionsPart8(sptr<WindowImpl> window, const uint8_t* data,
 
 void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data, size_t size)
 {
-    if (window == nullptr || data == nullptr || size < DATA_MIN_SIZE) {
-        return;
-    }
     std::shared_ptr<IInputEventConsumer> iInputEventConsumer = std::make_shared<IInputEventConsumer>();
     window->SetInputEventConsumer(iInputEventConsumer);
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();

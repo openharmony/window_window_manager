@@ -33,6 +33,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     FOLD_SCREEN_FOLDING,
     VIRTUAL_SCREEN_RESIZE,
     RELATIVE_POSITION_CHANGE,
+    SUPER_FOLD_STATUS_CHANGE,
 };
 class ScreenProperty {
 public:
@@ -47,6 +48,12 @@ public:
 
     void SetPhyBounds(const RRect& phyBounds);
     RRect GetPhyBounds() const;
+
+    void SetFakeBounds(const RRect& fakeBounds);
+    RRect GetFakeBounds() const;
+
+    void SetIsFakeInUse(bool isFakeInUse);
+    bool GetIsFakeInUse() const;
 
     void SetScaleX(float scaleX);
     float GetScaleX() const;
@@ -112,6 +119,9 @@ public:
     void SetPhysicalRotation(float rotation);
     float GetPhysicalRotation() const;
 
+    void SetScreenComponentRotation(float rotation);
+    float GetScreenComponentRotation() const;
+
     float GetXDpi() const;
     float GetYDpi() const;
 
@@ -153,8 +163,11 @@ private:
     }
     float rotation_ { 0.0f };
     float physicalRotation_ { 0.0f };
+    float screenComponentRotation_ { 0.0f };
     RRect bounds_;
     RRect phyBounds_;
+    RRect fakeBounds_;
+    bool isFakeInUse_ = false;  // is fake bounds in use
 
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };

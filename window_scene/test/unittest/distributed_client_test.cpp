@@ -195,9 +195,9 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState, Function | SmallTest | 
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState start.";
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
-    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state, 0), ERR_NULL_OBJECT);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state, 0), ERR_NULL_OBJECT);
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState end.";
 }
@@ -213,9 +213,9 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState02, Function | SmallTest 
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState02 start.";
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
-    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state, 0), ERR_NULL_OBJECT);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state, 0), ERR_NULL_OBJECT);
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState02 end.";
 }
@@ -231,9 +231,9 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState03, Function | SmallTest 
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState03 start.";
     AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_MAX;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
-    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state, 0), ERR_NULL_OBJECT);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state), ERR_NULL_OBJECT);
+    EXPECT_NE(distributedClient_->SetMissionContinueState(0, state, 0), ERR_NULL_OBJECT);
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState03 end.";
 }

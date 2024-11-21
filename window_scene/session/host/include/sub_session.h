@@ -26,6 +26,8 @@ public:
 
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
+    WSError HideSync() override;
+    WSError Hide(bool needSyncHide);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     int32_t GetMissionId() const override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
@@ -35,8 +37,13 @@ public:
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
+
+    /*
+     * Window Hierarchy
+     */
     bool IsTopmost() const override;
     bool IsModal() const override;
+    bool IsApplicationModal() const override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H

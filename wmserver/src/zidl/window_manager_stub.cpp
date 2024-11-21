@@ -103,8 +103,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             uint32_t windowId = data.ReadUint32();
             uint32_t avoidAreaTypeId = 0;
             if (!data.ReadUint32(avoidAreaTypeId) ||
-                avoidAreaTypeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
-                avoidAreaTypeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+                avoidAreaTypeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
                 return ERR_INVALID_DATA;
             }
             auto avoidAreaType = static_cast<AvoidAreaType>(avoidAreaTypeId);
@@ -371,7 +370,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_BIND_DIALOG_TARGET: {
             uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
-                TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 windowId");
+                TLOGE(WmsLogTag::DEFAULT, "Failed to read windowId");
                 return ERR_INVALID_DATA;
             }
             sptr<IRemoteObject> targetToken = data.ReadRemoteObject();

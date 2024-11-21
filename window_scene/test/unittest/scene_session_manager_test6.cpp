@@ -233,6 +233,37 @@ HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo03, Function | S
         std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
     visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
     ASSERT_EQ(visibilityChangeInfos.size(), 1);
+    currVisibleData.clear();
+    ssm_->lastVisibleData_.clear();
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    ssm_->lastVisibleData_.push_back(
+        std::make_pair(2, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 1);
+    ASSERT_EQ(visibilityChangeInfos[0].first, 2);
+}
+
+/**
+ * @tc.name: GetWindowVisibilityChangeInfo04
+ * @tc.desc: GetWindowVisibilityChangeInfo04
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetWindowVisibilityChangeInfo04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->lastVisibleData_.clear();
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> currVisibleData;
+    std::vector<std::pair<uint64_t, WindowVisibilityState>> visibilityChangeInfos;
+    ssm_->lastVisibleData_.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    currVisibleData.push_back(std::make_pair(0, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 1);
+
+    currVisibleData.clear();
+    currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    visibilityChangeInfos = ssm_->GetWindowVisibilityChangeInfo(currVisibleData);
+    ASSERT_EQ(visibilityChangeInfos.size(), 0);
 }
 
 /**
@@ -1648,7 +1679,6 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
     ssm_->SetRootSceneProcessBackEventFunc(func);
     ssm_->ProcessBackEvent();
 }
-
 
 /**
  * @tc.name: RequestInputMethodCloseKeyboard

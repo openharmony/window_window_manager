@@ -87,6 +87,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
     property->SetRaiseEnabled(true);
     ASSERT_EQ(property->GetRaiseEnabled(), true);
 }
+
 /**
  * @tc.name: SetRequestedOrientation
  * @tc.desc: SetRequestedOrientation test
@@ -406,18 +407,19 @@ HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: SetModeSupportInfo
- * @tc.desc: SetModeSupportInfo test
+ * @tc.name: SetWindowModeSupportType
+ * @tc.desc: SetWindowModeSupportType test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetModeSupportInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionPropertyTest, SetWindowModeSupportType, Function | SmallTest | Level2)
 {
-    uint32_t modeSupportInfo = 1234567890;
+    uint32_t windowModeSupportType = 1234567890;
     WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.SetModeSupportInfo(modeSupportInfo);
+    windowSessionProperty.SetWindowModeSupportType(windowModeSupportType);
     WindowSessionProperty *property = new WindowSessionProperty();
-    ASSERT_NE(property->GetModeSupportInfo(), 0);
+    ASSERT_NE(property->GetWindowModeSupportType(), 0);
 }
+
 /**
  * @tc.name: IsFloatingWindowAppType
  * @tc.desc: IsFloatingWindowAppType test
@@ -764,6 +766,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
+
 /**
  * @tc.name: GetWindowName
  * @tc.desc: GetWindowName

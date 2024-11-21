@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
 #define OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
 
@@ -24,12 +25,20 @@
 
 namespace OHOS::Rosen {
 const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
+
+enum class DisplayModeChangeReason : uint32_t {
+    DEFAULT = 0,
+    RECOVER,
+    INVALID,
+};
+
 class FoldScreenPolicy : public RefBase {
 public:
     FoldScreenPolicy();
     virtual ~FoldScreenPolicy();
 
-    virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode);
+    virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     virtual void SendSensorResult(FoldStatus foldStatus);
     virtual ScreenId GetCurrentScreenId();
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
@@ -38,6 +47,7 @@ public:
     virtual void UpdateForPhyScreenPropertyChange();
     virtual void ExitCoordination();
     virtual void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    virtual FoldDisplayMode GetModeMatchStatus() { return FoldDisplayMode::UNKNOWN; }
     virtual void BootAnimationFinishPowerInit() {};
     virtual void ChangeOnTentMode(FoldStatus currentState);
     virtual void ChangeOffTentMode();

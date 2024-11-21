@@ -59,6 +59,7 @@ using NotifyAsyncOnFunc = std::function<void()>;
 using NotifyGetAvoidAreaByTypeFunc = std::function<AvoidArea(AvoidAreaType type)>;
 using NotifyBindModalFunc = std::function<void()>;
 using NotifyExtensionEventFunc = std::function<void(uint32_t notifyEvent)>;
+using GetStatusBarHeightFunc = std::function<int32_t()>;
 
 class ExtensionSession : public Session {
 public:
@@ -71,6 +72,7 @@ public:
         NotifyGetAvoidAreaByTypeFunc notifyGetAvoidAreaByTypeFunc_;
         NotifyBindModalFunc notifyBindModalFunc_;
         NotifyExtensionEventFunc notifyExtensionEventFunc_;
+        GetStatusBarHeightFunc getStatusBarHeightFunc_;
     };
 
     explicit ExtensionSession(const SessionInfo& info);
@@ -86,6 +88,7 @@ public:
         const std::string& identityToken = "") override;
 
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    int32_t GetStatusBarHeight() override;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;

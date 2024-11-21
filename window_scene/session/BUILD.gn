@@ -51,6 +51,7 @@ ohos_shared_library("scene_session") {
     "host/src/main_session.cpp",
     "host/src/move_drag_controller.cpp",
     "host/src/multi_instance_manager.cpp",
+    "host/src/pc_fold_screen_controller.cpp",
     "host/src/root_scene_session.cpp",
     "host/src/scb_system_session.cpp",
     "host/src/scene_persistence.cpp",
@@ -78,6 +79,7 @@ ohos_shared_library("scene_session") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "ability_runtime:ability_start_setting",
     "ability_runtime:process_options",
     "ability_runtime:start_window_option",
@@ -89,6 +91,7 @@ ohos_shared_library("scene_session") {
     "ffrt:libffrt",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",

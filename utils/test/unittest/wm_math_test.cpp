@@ -97,6 +97,7 @@ HWTEST_F(WmMathTest, TransformMatrix, Function | SmallTest | Level2)
     ASSERT_EQ(true, MathHelper::NearZero((scale - scaleComp).Length()));
     ASSERT_EQ(true, MathHelper::NearZero((translation - translationComp).Length()));
 }
+
 /**
  * @tc.name: TransformWithPerspDiv
  * @tc.desc: Create transform matrix

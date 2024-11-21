@@ -18,6 +18,7 @@
 #include "wm_common.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
+#include "scene_board_judgement.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -558,6 +559,10 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Level3)
 {
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
+
     fullScreenAppInfo_.name = "WindowShowWithoutFocusTest_1";
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
     if (window1 == nullptr) {

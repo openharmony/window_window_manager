@@ -96,11 +96,19 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
                 property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
             displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
                 property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
+            if (config.isMirrored) {
+                EnableMirrorScreenRegion();
+            }
         } else {
             TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
         }
     }
     RSTransaction::FlushImplicitTransaction();
+}
+
+ScreenSession::~ScreenSession()
+{
+    WLOGI("~ScreenSession");
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
@@ -209,6 +217,41 @@ void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screen
         screenChangeListenerList_.end());
 }
 
+void ScreenSession::SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion)
+{
+    mirrorScreenRegion_ = std::make_pair(screenId, screenRegion);
+}
+
+std::pair<ScreenId, DMRect> ScreenSession::GetMirrorScreenRegion()
+{
+    return mirrorScreenRegion_;
+}
+
+void ScreenSession::EnableMirrorScreenRegion()
+{
+    auto& rect = mirrorScreenRegion_.second;
+    if (rect == DMRect::NONE()) {
+        return;
+    }
+    ScreenId screenId = INVALID_SCREEN_ID;
+    if (isPhysicalMirrorSwitch_) {
+        screenId = screenId_;
+    } else {
+        screenId = rsId_;
+    }
+    auto ret = RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(screenId,
+        { rect.posX_, rect.posY_, rect.width_, rect.height_ });
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("ScreenSession::EnableMirrorScreenRegion fail! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    } else {
+        WLOGE("ScreenSession::EnableMirrorScreenRegion success! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
+        ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+}
+
 sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
 {
     sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
@@ -218,8 +261,14 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     RRect bounds = property_.GetBounds();
     RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
-    displayInfo->SetWidth(bounds.rect_.GetWidth());
-    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    if (isBScreenHalf_) {
+        displayInfo->SetWidth(bounds.rect_.GetWidth());
+        displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
+    } else {
+        displayInfo->SetWidth(bounds.rect_.GetWidth());
+        displayInfo->SetHeight(bounds.rect_.GetHeight());
+    }
+    
     displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
     displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
@@ -293,6 +342,36 @@ void ScreenSession::SetIsCurrentInUse(bool isInUse)
 bool ScreenSession::GetIsCurrentInUse() const
 {
     return isInUse_;
+}
+
+void ScreenSession::SetIsFakeInUse(bool isFakeInUse)
+{
+    isFakeInUse_ = isFakeInUse;
+}
+
+bool ScreenSession::GetIsFakeInUse() const
+{
+    return isFakeInUse_;
+}
+
+void ScreenSession::SetIsBScreenHalf(bool isBScreenHalf)
+{
+    isBScreenHalf_ = isBScreenHalf;
+}
+
+bool ScreenSession::GetIsBScreenHalf() const
+{
+    return isBScreenHalf_;
+}
+
+void ScreenSession::SetFakeScreenSession(sptr<ScreenSession> fakeScreenSession)
+{
+    fakeScreenSession_ = fakeScreenSession;
+}
+
+sptr<ScreenSession> ScreenSession::GetFakeScreenSession() const
+{
+    return fakeScreenSession_;
 }
 
 std::string ScreenSession::GetName()
@@ -387,6 +466,14 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
     screenBounds.rect_.width_ = width;
     screenBounds.rect_.height_ = height;
     property_.SetBounds(screenBounds);
+}
+
+void ScreenSession::UpdatePropertyByFakeBounds(uint32_t width, uint32_t height)
+{
+    auto screenFakeBounds = property_.GetFakeBounds();
+    screenFakeBounds.rect_.width_ = width;
+    screenFakeBounds.rect_.height_ = height;
+    property_.SetFakeBounds(screenFakeBounds);
 }
 
 std::shared_ptr<RSDisplayNode> ScreenSession::GetDisplayNode() const
@@ -601,6 +688,12 @@ void ScreenSession::SetPhysicalRotation(int rotation, FoldStatus foldStatus)
         property_.GetPhysicalRotation(), rotation, offsetRotation);
 }
 
+void ScreenSession::SetScreenComponentRotation(int rotation)
+{
+    property_.SetScreenComponentRotation(static_cast<float>(rotation));
+    WLOGFI("screenComponentRotation :%{public}f ", property_.GetScreenComponentRotation());
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
@@ -650,6 +743,11 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+}
+
+void ScreenSession::UpdatePropertyByFakeInUse(bool isFakeInUse)
+{
+    property_.SetIsFakeInUse(isFakeInUse);
 }
 
 void ScreenSession::ReportNotifyModeChange(DisplayOrientation displayOrientation)
@@ -1201,6 +1299,9 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         screenId_, width, height);
     displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
     displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
+    if (config.isMirrored) {
+        EnableMirrorScreenRegion();
+    }
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
@@ -1398,6 +1499,10 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         UpdatePropertyByActiveMode();
         {
             std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+            if (displayNode_ == nullptr) {
+                WLOGFE("displayNode_ is null, resize failed");
+                return;
+            }
             displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
             displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
         }
@@ -1498,5 +1603,15 @@ void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus sup
         }
         listener->OnSuperFoldStatusChange(screenId, superFoldStatus);
     }
+}
+
+void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
+{
+    isPhysicalMirrorSwitch_ = isPhysicalMirrorSwitch;
+}
+
+bool ScreenSession::GetIsPhysicalMirrorSwitch()
+{
+    return isPhysicalMirrorSwitch_;
 }
 } // namespace OHOS::Rosen

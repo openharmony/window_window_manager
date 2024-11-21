@@ -246,27 +246,24 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
     if (mainSession == nullptr) {
         return;
     }
-    bool isTopmostModalSubWindow = false;
+    bool isTopmostModalWindow = false;
     const auto& property = session->GetSessionProperty();
     if (property != nullptr && property->IsTopmost()) {
-        isTopmostModalSubWindow = true;
+        isTopmostModalWindow = true;
     }
     if (auto iter = dialogMap.find(mainSession->GetPersistentId());
         iter != dialogMap.end() && iter->second != nullptr) {
         auto& targetSession = iter->second;
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        SubWindowModalType targetModalType = targetSession->GetSubWindowModalType();
-        if (modalType == targetModalType) {
+        if (session->IsApplicationModal() == targetSession->IsApplicationModal()) {
             if (targetSession->GetSessionProperty() &&
                 targetSession->GetSessionProperty()->IsTopmost() &&
-                !isTopmostModalSubWindow) {
+                !isTopmostModalWindow) {
                 return;
             }
             if (targetSession->GetZOrder() > session->GetZOrder()) {
                 return;
             }
-        } else if (modalType == SubWindowModalType::TYPE_WINDOW_MODALITY &&
-                   targetModalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
+        } else if (!session->IsApplicationModal() && targetSession->IsApplicationModal()) {
             return;
         }
     }
@@ -295,9 +292,7 @@ static void AddCallingPidMapItem(const sptr<SceneSession>& session,
     auto sessionCallingPid = session->GetCallingPid();
     auto iter = callingPidMap.find(sessionCallingPid);
     if (iter == callingPidMap.end()) {
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        if (modalType == SubWindowModalType::TYPE_DIALOG ||
-            modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
+        if (!session->IsApplicationModal()) {
             return;
         }
         callingPidMap.emplace(std::make_pair(sessionCallingPid, session));
@@ -345,15 +340,13 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
         if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             continue;
         }
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        if (modalType == SubWindowModalType::TYPE_DIALOG ||
-            modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
-            AddDialogSessionMapItem(session, dialogMap);
-            AddCallingPidMapItem(session, callingPidMap);
-        } else if (modalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
-            AddDialogSessionMapItem(session, dialogMap);
+        if (!session->IsModal() && !session->IsDialogWindow()) {
+            continue;
+        }
+        AddDialogSessionMapItem(session, dialogMap);
+        AddCallingPidMapItem(session, callingPidMap);
+        if (session->IsApplicationModal()) {
             hasModalApplication = true;
-            AddCallingPidMapItem(session, callingPidMap);
         }
     }
     if (hasModalApplication) {
@@ -654,13 +647,13 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
         .uid = uid,
         .area = { windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_ },
-        .defaultHotAreas = touchHotAreas,
-        .pointerHotAreas = pointerHotAreas,
+        .defaultHotAreas = std::move(touchHotAreas),
+        .pointerHotAreas = std::move(pointerHotAreas),
         .agentWindowId = agentWindowId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .displayId = displayId,
         .zOrder = zOrder,
-        .pointerChangeAreas = pointerChangeAreas,
+        .pointerChangeAreas = std::move(pointerChangeAreas),
         .transform = transformData,
         .pixelMap = pixelMap.get(),
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),

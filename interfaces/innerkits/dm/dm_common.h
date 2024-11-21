@@ -28,12 +28,15 @@ using ScreenId = uint64_t;
 namespace {
 constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
 constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+constexpr ScreenId SCREEN_ID_FAKE = 999;
+constexpr DisplayId DISPLAY_ID_FAKE = 999;
 constexpr ScreenId ERROR_ID_NOT_SYSTEM_APP = -202ULL;
 constexpr int DOT_PER_INCH = 160;
 const static std::string DEFAULT_SCREEN_NAME = "buildIn";
 constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 1000;
 constexpr int DOT_PER_INCH_MINIMUM_VALUE = 80;
 constexpr uint32_t BASELINE_DENSITY = 160;
+constexpr uint32_t HALF_SCREEN_PARAM = 2;
 }
 
 /**
@@ -220,6 +223,12 @@ enum class EventStatus : uint32_t {
     END,
 };
 
+enum class VirtualScreenFlag : uint32_t {
+    DEFAULT = 0,
+    CAST = 1,
+    MAX = 2,
+};
+
 class IDisplayPowerEventListener : public RefBase {
 public:
     /**
@@ -310,6 +319,7 @@ enum class DisplayChangeEvent : uint32_t {
     UPDATE_ORIENTATION_FROM_WINDOW,
     UPDATE_ROTATION_FROM_WINDOW,
     UPDATE_REFRESHRATE,
+    SUPER_FOLD_RESOLUTION_CHANGED,
     UNKNOWN,
 };
 
@@ -453,6 +463,15 @@ struct DisplayPhysicalResolution {
 struct ScrollableParam {
     std::string velocityScale_;
     std::string friction_;
+};
+
+/**
+ * @brief screen direction info
+ */
+struct ScreenDirectionInfo {
+    int32_t notifyRotation_;
+    int32_t screenRotation_;
+    int32_t rotation_;
 };
 
 /**

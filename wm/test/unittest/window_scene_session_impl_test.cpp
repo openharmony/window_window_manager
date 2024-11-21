@@ -1675,6 +1675,34 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetTitleAndDockHoverShown
+ * @tc.desc: SetTitleAndDockHoverShown test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetTitleAndDockHoverShown(true, true));
+
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleAndDockHoverShown(true, true));
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetTitleAndDockHoverShown(true, true));
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
+}
+
+/**
  * @tc.name: SetLayoutFullScreen02
  * @tc.desc: SetLayoutFullScreen test
  * @tc.type: FUNC
@@ -1690,37 +1718,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, Function | SmallTest
     window->property_->SetCompatibleModeInPc(true);
     WMError res = window->SetLayoutFullScreen(false);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
-}
-
-/**
- * @tc.name: SetTitleAndDockHoverShown
- * @tc.desc: SetTitleAndDockHoverShown test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
-
-    window->property_->SetPersistentId(1);
-    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetTitleAndDockHoverShown(true, true));
-
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleAndDockHoverShown(true, true));
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTitleAndDockHoverShown(true, true));
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
 }
 
 /**
@@ -1777,20 +1774,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetShadowOffsetY, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_OK, window->SetShadowOffsetY(1.0));
     window->surfaceNode_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetShadowOffsetY(1.0));
-}
-
-/**
- * @tc.name: GetStatusBarHeight
- * @tc.desc: GetStatusBarHeight test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("GetStatusBarHeight");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    ASSERT_EQ(0, window->GetStatusBarHeight());
 }
 
 /**

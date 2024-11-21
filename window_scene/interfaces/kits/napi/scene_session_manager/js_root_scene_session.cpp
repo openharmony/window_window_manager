@@ -118,10 +118,9 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
 
-    NotifyPendingSessionActivationFunc func = [this](SessionInfo& info) {
+    rootSceneSession_->SetPendingSessionActivationEventListener([this](SessionInfo& info) {
         this->PendingSessionActivation(info);
-    };
-    rootSceneSession_->SetPendingSessionActivationEventListener(func);
+    });
     std::shared_ptr<NativeReference> callbackRef;
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
@@ -376,7 +375,6 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             sceneSession->SetSessionInfoPersistentId(sceneSession->GetPersistentId());
         }
     }
-    sceneSession->SetSessionInfoProcessOptions(info.processOptions);
     return sceneSession;
 }
 } // namespace OHOS::Rosen

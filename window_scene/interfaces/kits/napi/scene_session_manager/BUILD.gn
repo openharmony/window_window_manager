@@ -72,6 +72,7 @@ ohos_shared_library("scenesessionmanager_napi") {
     "libxml2:libxml2",
     "napi:ace_napi",
     "preferences:native_preferences",
+    "samgr:samgr_proxy",
   ]
 
   defines = []

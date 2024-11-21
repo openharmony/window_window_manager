@@ -504,10 +504,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], sceneSession);
@@ -530,10 +530,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
@@ -556,10 +556,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
@@ -2149,6 +2149,33 @@ HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, Function | Small
 }
 
 /**
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: IsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | Level3)
+{
+    std::string key = "com.example.recposentryEntryAbilityabc";
+    bool enabled = false;
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetIsWindowRectAutoSave
+ * @tc.desc: SetIsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest | Level3)
+{
+    std::string key = "com.example.recposentryEntryAbility";
+    bool enabled = false;
+    ssm_->SetIsWindowRectAutoSave(key, enabled);
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
  * @tc.name: GetDisplayIdByWindowId
  * @tc.desc: test function : GetDisplayIdByWindowId
  * @tc.type: FUNC
@@ -2159,8 +2186,10 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
     info.abilityName_ = "test";
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();

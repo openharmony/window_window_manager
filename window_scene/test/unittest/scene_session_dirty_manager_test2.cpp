@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "common/include/window_session_property.h"
 #include <gtest/gtest.h>
 #include "input_manager.h"

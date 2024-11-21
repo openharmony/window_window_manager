@@ -80,6 +80,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_HANDWRITE,
     WINDOW_TYPE_SCENE_BOARD,
     WINDOW_TYPE_KEYBOARD_PANEL,
+    WINDOW_TYPE_SCREEN_CONTROL,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -171,7 +172,7 @@ enum class WMError : int32_t {
     WM_ERROR_NO_REMOTE_ANIMATION,
     WM_ERROR_INVALID_DISPLAY,
     WM_ERROR_INVALID_PARENT,
-    WM_ERROR_OPER_FULLSCREEN_FAILED,
+    WM_ERROR_INVALID_OP_IN_CUR_STATUS,
     WM_ERROR_REPEAT_OPERATION,
     WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_CALLING,
@@ -213,7 +214,7 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_START_ABILITY_FAILED = 1300007,
     WM_ERROR_INVALID_DISPLAY = 1300008,
     WM_ERROR_INVALID_PARENT = 1300009,
-    WM_ERROR_OPER_FULLSCREEN_FAILED = 1300010,
+    WM_ERROR_INVALID_OP_IN_CUR_STATUS = 1300010,
     WM_ERROR_PIP_DESTROY_FAILED = 1300011,
     WM_ERROR_PIP_STATE_ABNORMALLY = 1300012,
     WM_ERROR_PIP_CREATE_FAILED = 1300013,
@@ -247,9 +248,9 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
-    WINDOW_FLAG_HANDWRITING = 1 << 7,
-    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
     WINDOW_FLAG_END = 1 << 9,
 };
 
@@ -267,28 +268,28 @@ enum class WindowUIType : uint8_t {
  * @brief Used to map from WMError to WmErrorCode.
  */
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
-    {WMError::WM_OK,                                   WmErrorCode::WM_OK                           },
-    {WMError::WM_DO_NOTHING,                           WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_DESTROYED_OBJECT,               WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_DEVICE_NOT_SUPPORT,             WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT     },
-    {WMError::WM_ERROR_INVALID_OPERATION,              WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_INVALID_PARAM,                  WmErrorCode::WM_ERROR_INVALID_PARAM          },
-    {WMError::WM_ERROR_INVALID_PERMISSION,             WmErrorCode::WM_ERROR_NO_PERMISSION          },
-    {WMError::WM_ERROR_NOT_SYSTEM_APP,                 WmErrorCode::WM_ERROR_NOT_SYSTEM_APP         },
-    {WMError::WM_ERROR_INVALID_TYPE,                   WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_INVALID_WINDOW,                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE,    WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_IPC_FAILED,                     WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
-    {WMError::WM_ERROR_NO_MEM,                         WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
-    {WMError::WM_ERROR_NO_REMOTE_ANIMATION,            WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
-    {WMError::WM_ERROR_INVALID_DISPLAY,                WmErrorCode::WM_ERROR_INVALID_DISPLAY        },
-    {WMError::WM_ERROR_INVALID_PARENT,                 WmErrorCode::WM_ERROR_INVALID_PARENT         },
-    {WMError::WM_ERROR_OPER_FULLSCREEN_FAILED,         WmErrorCode::WM_ERROR_OPER_FULLSCREEN_FAILED },
-    {WMError::WM_ERROR_REPEAT_OPERATION,               WmErrorCode::WM_ERROR_REPEAT_OPERATION       },
-    {WMError::WM_ERROR_NULLPTR,                        WmErrorCode::WM_ERROR_STATE_ABNORMALLY       },
-    {WMError::WM_ERROR_SAMGR,                          WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
-    {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED   },
-    {WMError::WM_ERROR_SYSTEM_ABNORMALLY,              WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY      },
+    {WMError::WM_OK,                                   WmErrorCode::WM_OK                             },
+    {WMError::WM_DO_NOTHING,                           WmErrorCode::WM_ERROR_STATE_ABNORMALLY         },
+    {WMError::WM_ERROR_DESTROYED_OBJECT,               WmErrorCode::WM_ERROR_STATE_ABNORMALLY         },
+    {WMError::WM_ERROR_DEVICE_NOT_SUPPORT,             WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT       },
+    {WMError::WM_ERROR_INVALID_OPERATION,              WmErrorCode::WM_ERROR_STATE_ABNORMALLY         },
+    {WMError::WM_ERROR_INVALID_PARAM,                  WmErrorCode::WM_ERROR_INVALID_PARAM            },
+    {WMError::WM_ERROR_INVALID_PERMISSION,             WmErrorCode::WM_ERROR_NO_PERMISSION            },
+    {WMError::WM_ERROR_NOT_SYSTEM_APP,                 WmErrorCode::WM_ERROR_NOT_SYSTEM_APP           },
+    {WMError::WM_ERROR_INVALID_TYPE,                   WmErrorCode::WM_ERROR_STATE_ABNORMALLY         },
+    {WMError::WM_ERROR_INVALID_WINDOW,                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY         },
+    {WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE,    WmErrorCode::WM_ERROR_STATE_ABNORMALLY         },
+    {WMError::WM_ERROR_IPC_FAILED,                     WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
+    {WMError::WM_ERROR_NO_MEM,                         WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
+    {WMError::WM_ERROR_NO_REMOTE_ANIMATION,            WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
+    {WMError::WM_ERROR_INVALID_DISPLAY,                WmErrorCode::WM_ERROR_INVALID_DISPLAY          },
+    {WMError::WM_ERROR_INVALID_PARENT,                 WmErrorCode::WM_ERROR_INVALID_PARENT           },
+    {WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS,       WmErrorCode::WM_ERROR_INVALID_OP_IN_CUR_STATUS },
+    {WMError::WM_ERROR_REPEAT_OPERATION,               WmErrorCode::WM_ERROR_REPEAT_OPERATION         },
+    {WMError::WM_ERROR_NULLPTR,                        WmErrorCode::WM_ERROR_STATE_ABNORMALLY         },
+    {WMError::WM_ERROR_SAMGR,                          WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
+    {WMError::WM_ERROR_START_ABILITY_FAILED,           WmErrorCode::WM_ERROR_START_ABILITY_FAILED     },
+    {WMError::WM_ERROR_SYSTEM_ABNORMALLY,              WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
 };
 
 /**
@@ -510,6 +511,11 @@ struct Rect {
     {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
     }
+
+    bool IsUninitializedSize() const
+    {
+        return width_ == 0 && height_ == 0;
+    }
 };
 
 /**
@@ -547,11 +553,13 @@ struct SystemBarProperty {
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
-    TYPE_SYSTEM,               // area of SystemUI
-    TYPE_CUTOUT,               // cutout of screen
-    TYPE_SYSTEM_GESTURE,       // area for system gesture
-    TYPE_KEYBOARD,             // area for soft input keyboard
-    TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
+    TYPE_START = 0,
+    TYPE_SYSTEM = TYPE_START,           // area of SystemUI
+    TYPE_CUTOUT,                        // cutout of screen
+    TYPE_SYSTEM_GESTURE,                // area for system gesture
+    TYPE_KEYBOARD,                      // area for soft input keyboard
+    TYPE_NAVIGATION_INDICATOR,          // area for navigation indicator
+    TYPE_END,
 };
 
 /**
@@ -788,10 +796,10 @@ struct KeyboardAnimationConfig {
 };
 
 enum class MaximizePresentation {
-    FOLLOW_APP_IMMERSIVE_SETTING = 0,   // follow app set imersiveStateEnable
-    EXIT_IMMERSIVE = 1,        // imersiveStateEnable will be set as false
-    ENTER_IMMERSIVE = 2,        // imersiveStateEnable will be set as true
-    // imersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
+    FOLLOW_APP_IMMERSIVE_SETTING = 0,   // follow app set immersiveStateEnable
+    EXIT_IMMERSIVE = 1,        // immersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,        // immersiveStateEnable will be set as true
+    // immersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
 

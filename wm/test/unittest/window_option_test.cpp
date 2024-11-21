@@ -159,6 +159,7 @@ HWTEST_F(WindowOptionTest, WindowMode06, Function | SmallTest | Level2)
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, option->GetWindowMode());
 }
+
 /**
  * @tc.name: Focusable01
  * @tc.desc: SetFocusable/GetFocusable
