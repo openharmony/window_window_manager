@@ -718,7 +718,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         newRect = rect;
     }
     property->SetRequestRect(newRect);
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && 
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         (reason == WindowSizeChangeReason::RESIZE || isMove)) {
         RelayoutKeyboard(node);
         ResizeSoftInputCallingWindowIfNeed(node);
