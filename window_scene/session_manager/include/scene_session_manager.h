@@ -942,7 +942,7 @@ private:
     uint64_t pipSurfaceId_;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
     bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
-    bool OcclusionPiPWindow(const uint64_t surfaceId, const WindowVisibilityState visibilityState);
+    bool LastPiPWindowVisible(const uint64_t surfaceId, const WindowVisibilityState lastVisibilityState);
     void NotifyPiPWindowVisibleChange();
 
     void DestroySubSession(const sptr<SceneSession>& sceneSession);

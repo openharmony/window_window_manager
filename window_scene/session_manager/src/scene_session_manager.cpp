@@ -2647,7 +2647,7 @@ void SceneSessionManager::NotifyPiPWindowVisibleChange() {
     }
 }
 
-bool SceneSessionManager::OcclusionPiPWindow(const uint64_t surfaceId, const WindowVisibilityState visibilityState) {
+bool SceneSessionManager::LastPiPWindowVisible(const uint64_t surfaceId, const WindowVisibilityState lastVisibilityState) {
     sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
     if (session == nullptr || session->GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
         TLOGD(WmsLogTag::WMS_PIP, "session is null or sessionWindowMode is not PIP");
@@ -2657,7 +2657,7 @@ bool SceneSessionManager::OcclusionPiPWindow(const uint64_t surfaceId, const Win
         TLOGD(WmsLogTag::WMS_PIP, "pipWindow occlusion because of screen locked");
         return false;
     }
-    if (visibilityState != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+    if (lastVisibilityState != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
         // no visibility notification processing after pip is occlusion
         TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion success. pipSurfaceId_: %{public}" PRIu64, surfaceId);
         pipSurfaceId_ = surfaceId;
@@ -7954,7 +7954,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
     i = j = 0;
     for (; i < lastVisibleData_.size() && j < currVisibleData.size();) {
         if (lastVisibleData_[i].first < currVisibleData[j].first) {
-            if (OcclusionPiPWindow(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+            if (LastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
                 i++;
                 continue;
             }
@@ -7969,7 +7969,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
             j++;
         } else {
             if (lastVisibleData_[i].second != currVisibleData[j].second &&
-                OcclusionPiPWindow(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+                LastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
                 i++;
                 j++;
                 continue;
@@ -7982,7 +7982,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         }
     }
     for (; i < lastVisibleData_.size(); ++i) {
-        if (OcclusionPiPWindow(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+        if (LastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
             continue;
         }
         if (lastVisibleData_[i].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
