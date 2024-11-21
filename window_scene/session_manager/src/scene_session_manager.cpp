@@ -2611,7 +2611,7 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
     return true;
 }
 
-bool SceneSessionManager::isEnablePiPCreate(sptr<WindowSessionProperty>& property)
+bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& property)
 {
     if (isScreenLocked_) {
         TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as screen locked.");
@@ -2635,20 +2635,17 @@ bool SceneSessionManager::isEnablePiPCreate(sptr<WindowSessionProperty>& propert
 }
 
 void SceneSessionManager::NotifyPiPWindowVisibleChange(bool screenLocked) {
-    auto task = [this, screenLocked] {
-        sptr<SceneSession> session = SelectSesssionFromMap(pipWindowSurfaceId_);
-        if (session != nullptr) {
-            std::vector<std::pair<uint64_t, WindowVisibilityState>> pipVisibilityChangeInfos;
-            if (screenLocked) {
-                pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
-            } else {
-                pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
-            }
-            DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleData_);
+    sptr<SceneSession> session = SelectSesssionFromMap(pipWindowSurfaceId_);
+    if (session != nullptr) {
+        std::vector<std::pair<uint64_t, WindowVisibilityState>> pipVisibilityChangeInfos;
+        if (screenLocked) {
+            pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+        } else {
+            pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
         }
-        return WMError::WM_OK;
-    };
-    taskScheduler_->PostVoidSyncTask(task, __func__);
+        DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleData_);
+    }
+    return WMError::WM_OK;
 }
 
 bool SceneSessionManager::IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState) {
@@ -5722,9 +5719,11 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 
 void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
 {
-    isScreenLocked_ = isScreenLocked;
-    DeleteStateDetectTask();
-    NotifyPiPWindowVisibleChange(isScreenLocked);
+    taskScheduler_->PostTask([this, isScreenLocked] {
+        isScreenLocked_ = isScreenLocked;
+        DeleteStateDetectTask();
+        NotifyPiPWindowVisibleChange(isScreenLocked);
+    }, __func__);
 }
 
 void SceneSessionManager::DeleteStateDetectTask()
