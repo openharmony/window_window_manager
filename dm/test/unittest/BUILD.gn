@@ -27,6 +27,7 @@ group("unittest") {
     ":dm_display_manager_test",
     ":dm_display_power_unit_test",
     ":dm_display_test",
+    ":dm_oh_display_manager_test",
     ":dm_screen_group_test",
     ":dm_screen_manager_test",
     ":dm_screen_test",
@@ -174,6 +175,23 @@ ohos_unittest("dm_display_manager_agent_proxy_test") {
   sources = [ "display_manager_agent_proxy_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("dm_oh_display_manager_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "../../src" ]
+  sources = [ "oh_display_manager_test.cpp" ]
+
+  deps = [
+    ":dm_unittest_common",
+    "${window_base_path}/dm:libdm_ndk",
+  ]
 
   external_deps = [
     "c_utils:utils",
