@@ -41,6 +41,7 @@ enum class ListenerFunctionType : uint32_t {
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
     CLOSE_TARGET_FLOAT_WINDOW_CB,
+    START_PIP_FAILED_CB,
 };
 
 class JsSceneSessionManager final {
@@ -205,6 +206,12 @@ private:
     void OnAbilityManagerCollaboratorRegistered();
     void RegisterRootSceneCallbacksOnSSManager();
     void RegisterSSManagerCallbacksOnRootScene();
+
+    /*
+     * PiP Window
+     */
+    void OnStartPiPFailed();
+    void ProcessStartPiPFailedRegister();
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;
