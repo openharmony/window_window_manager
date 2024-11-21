@@ -381,7 +381,17 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(winRect.height_);
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
-        reply.WriteUint32(property->GetWindowModeSupportType());
+        std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+        property->GetSupportWindowModes(supportWindowModes);
+        auto size = supportWindowModes.size();
+        if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+            reply.WriteUint32(static_cast<uint32_t>(size));
+            for (decltype(size) i = 0; i < size; i++) {
+                reply.WriteInt32(static_cast<int32_t>(supportWindowModes[i]));
+            }
+        } else {
+            reply.WriteUint32(0);
+        }
         reply.WriteBool(property->GetCompatibleModeInPc());
         reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
