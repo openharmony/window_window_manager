@@ -2634,14 +2634,14 @@ bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& p
     return true;
 }
 
-void SceneSessionManager::NotifyPiPWindowVisibleChange() {
+void SceneSessionManager::NotifyPiPWindowVisibleChange(const screenLocked) {
     std::vector<std::pair<uint64_t, WindowVisibilityState>> pipVisibilityChangeInfos;
-    sptr<SceneSession> session = SelectSesssionFromMap(pipSurfaceId_);
+    sptr<SceneSession> session = SelectSesssionFromMap(pipWindowSurfaceId_);
     if (session != nullptr) {
-        if (isScreenLocked_) {
-            pipVisibilityChangeInfos.emplace_back(pipSurfaceId_, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+        if (screenLocked) {
+            pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
         } else {
-            pipVisibilityChangeInfos.emplace_back(pipSurfaceId_, WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+            pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
         }
         DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleData_);
     }
@@ -2659,8 +2659,8 @@ bool SceneSessionManager::LastPiPWindowVisible(const uint64_t surfaceId, const W
     }
     if (lastVisibilityState != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
         // no visibility notification processing after pip is occlusion
-        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion success. pipSurfaceId_: %{public}" PRIu64, surfaceId);
-        pipSurfaceId_ = surfaceId;
+        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion success. pipWindowSurfaceId_: %{public}" PRIu64, surfaceId);
+        pipWindowSurfaceId_ = surfaceId;
         return true;
     }
     return false;
@@ -5720,7 +5720,7 @@ void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
 {
     isScreenLocked_ = isScreenLocked;
     DeleteStateDetectTask();
-    NotifyPiPWindowVisibleChange();
+    NotifyPiPWindowVisibleChange(isScreenLocked);
 }
 
 void SceneSessionManager::DeleteStateDetectTask()
@@ -7969,12 +7969,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
             j++;
         } else {
             if (lastVisibleData_[i].second != currVisibleData[j].second &&
-                LastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
-                i++;
-                j++;
-                continue;
-            }
-            if (lastVisibleData_[i].second != currVisibleData[j].second) {
+                !LastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
                 visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             }
             i++;
