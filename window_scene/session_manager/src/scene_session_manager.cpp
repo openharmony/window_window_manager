@@ -2650,11 +2650,11 @@ void SceneSessionManager::NotifyPiPWindowVisibleChange() {
 bool SceneSessionManager::OcclusionPiPWindow(const uint64_t surfaceId, const WindowVisibilityState visibilityState) {
     sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
     if (session == nullptr || session->GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
-        TLOGI(WmsLogTag::WMS_PIP, "session is null or sessionWindowMode is not PIP");
+        TLOGD(WmsLogTag::WMS_PIP, "session is null or sessionWindowMode is not PIP");
         return false;
     }
     if (isScreenLocked_) {
-        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion because of screen locked");
+        TLOGD(WmsLogTag::WMS_PIP, "pipWindow occlusion because of screen locked");
         return false;
     }
     if (visibilityState != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
