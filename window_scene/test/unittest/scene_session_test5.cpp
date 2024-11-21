@@ -1152,6 +1152,8 @@ HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction, Function | SmallTest |
     action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
     res = session->HandleUpdatePropertyByAction(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
+    auto prop = sceneSession->GetSessionProperty();
+    EXPECT_EQ(prop->GetSystemBarProperty(), property->GetSystemBarProperty());
 }
 
 /**

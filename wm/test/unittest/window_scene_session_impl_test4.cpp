@@ -769,8 +769,10 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, Function | Sma
     option->SetWindowName("GetSystemBarPropertyByType");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty prop = SystemBarProperty();
+    windowSceneSessionImpl->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
+    auto prop2 = windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    EXPECT_EQ(prop2, prop);
 }
 
 /**
