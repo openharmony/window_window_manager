@@ -734,11 +734,11 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         if (!data.ReadUint32(rectAnimationConfig.duration_) || !data.ReadFloat(rectAnimationConfig.x1_) ||
             !data.ReadFloat(rectAnimationConfig.y1_) || !data.ReadFloat(rectAnimationConfig.x2_) ||
             !data.ReadFloat(rectAnimationConfig.y2_)) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "read animation config failed");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "read animation config failed");
             return ERR_INVALID_DATA;
         }
     }
-    TLOGNE(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig:[%{public}u, %{public}f, %{public}f, %{public}f, %{public}f]",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig:[%{public}u, %{public}f, %{public}f, %{public}f, %{public}f]",
         rectAnimationConfig.duration_, rectAnimationConfig.x1_, rectAnimationConfig.y1_, rectAnimationConfig.x2_,
         rectAnimationConfig.y2_);
     WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal, moveConfiguration, rectAnimationConfig);
