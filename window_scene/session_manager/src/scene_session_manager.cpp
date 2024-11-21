@@ -2475,10 +2475,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
 
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP && !isEnablePiPCreate(property)) {
-        WLOGFE("pip window is not enable to create.");
-        return WSError::WS_DO_NOTHING;
-    }
     TLOGI(WmsLogTag::WMS_LIFE, "create specific start, name:%{public}s, type:%{public}d, touchable:%{public}d",
         property->GetWindowName().c_str(), property->GetWindowType(), property->GetTouchable());
 
@@ -2489,6 +2485,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
                     &persistentId, &session, &systemConfig, token, pid, uid, isSystemCalling]() {
         if (property == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
+        }
+        if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP && !isEnablePiPCreate(property)) {
+            TLOGNE("pip window is not enable to create.");
+            return WSError::WS_DO_NOTHING;
         }
         const auto& type = property->GetWindowType();
         // create specific session
@@ -2611,7 +2611,7 @@ bool SceneSessionManager::CheckPiPPriority(const PiPTemplateInfo& pipTemplateInf
     return true;
 }
 
-bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& property)
+bool SceneSessionManager::isEnablePiPCreate(sptr<WindowSessionProperty>& property)
 {
     if (isScreenLocked_) {
         TLOGI(WmsLogTag::WMS_PIP, "skip create pip window as screen locked.");
@@ -2634,23 +2634,27 @@ bool SceneSessionManager::isEnablePiPCreate(const sptr<WindowSessionProperty>& p
     return true;
 }
 
-void SceneSessionManager::NotifyPiPWindowVisibleChange(const screenLocked) {
-    std::vector<std::pair<uint64_t, WindowVisibilityState>> pipVisibilityChangeInfos;
-    sptr<SceneSession> session = SelectSesssionFromMap(pipWindowSurfaceId_);
-    if (session != nullptr) {
-        if (screenLocked) {
-            pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
-        } else {
-            pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+void SceneSessionManager::NotifyPiPWindowVisibleChange(bool screenLocked) {
+    auto task = [this, screenLocked] {
+        sptr<SceneSession> session = SelectSesssionFromMap(pipWindowSurfaceId_);
+        if (session != nullptr) {
+            std::vector<std::pair<uint64_t, WindowVisibilityState>> pipVisibilityChangeInfos;
+            if (screenLocked) {
+                pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+            } else {
+                pipVisibilityChangeInfos.emplace_back(pipWindowSurfaceId_, WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+            }
+            DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleData_);
         }
-        DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleData_);
-    }
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostVoidSyncTask(task, __func__);
 }
 
-bool SceneSessionManager::LastPiPWindowVisible(const uint64_t surfaceId, const WindowVisibilityState lastVisibilityState) {
+bool SceneSessionManager::IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState) {
     sptr<SceneSession> session = SelectSesssionFromMap(surfaceId);
     if (session == nullptr || session->GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
-        TLOGD(WmsLogTag::WMS_PIP, "session is null or sessionWindowMode is not PIP");
+        TLOGD(WmsLogTag::WMS_PIP, "session is null or windowMode is not PIP");
         return false;
     }
     if (isScreenLocked_) {
@@ -2659,7 +2663,7 @@ bool SceneSessionManager::LastPiPWindowVisible(const uint64_t surfaceId, const W
     }
     if (lastVisibilityState != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
         // no visibility notification processing after pip is occlusion
-        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion success. pipWindowSurfaceId_: %{public}" PRIu64, surfaceId);
+        TLOGI(WmsLogTag::WMS_PIP, "pipWindow occlusion success. pipWindowSurfaceId: %{public}" PRIu64, surfaceId);
         pipWindowSurfaceId_ = surfaceId;
         return true;
     }
@@ -7954,7 +7958,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
     i = j = 0;
     for (; i < lastVisibleData_.size() && j < currVisibleData.size();) {
         if (lastVisibleData_[i].first < currVisibleData[j].first) {
-            if (LastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+            if (IsLastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
                 i++;
                 continue;
             }
@@ -7969,7 +7973,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
             j++;
         } else {
             if (lastVisibleData_[i].second != currVisibleData[j].second &&
-                !LastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+                !IsLastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
                 visibilityChangeInfo.emplace_back(currVisibleData[j].first, currVisibleData[j].second);
             }
             i++;
@@ -7977,7 +7981,7 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         }
     }
     for (; i < lastVisibleData_.size(); ++i) {
-        if (LastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
+        if (IsLastPiPWindowVisible(lastVisibleData_[i].first, lastVisibleData_[i].second)) {
             continue;
         }
         if (lastVisibleData_[i].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {

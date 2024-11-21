@@ -939,11 +939,11 @@ private:
     /**
      * PiP Window
      */
-    uint64_t pipWindowSurfaceId_;
+    uint64_t pipWindowSurfaceId_ = 0;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
-    bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
-    bool LastPiPWindowVisible(const uint64_t surfaceId, const WindowVisibilityState lastVisibilityState);
-    void NotifyPiPWindowVisibleChange(const isScreenLocked);
+    bool isEnablePiPCreate(sptr<WindowSessionProperty>& property);
+    bool IsLastPiPWindowVisible(uint64_t surfaceId,  WindowVisibilityState lastVisibilityState);
+    void NotifyPiPWindowVisibleChange(bool isScreenLocked);
 
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
