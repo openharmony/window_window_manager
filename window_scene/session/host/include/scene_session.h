@@ -320,8 +320,8 @@ public:
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
 
     bool IsAnco() const override;
-    void SetBlankFlag(bool isAddBlank) override;
-    bool GetBlankFlag() const override;
+    void SetBlank(bool isAddBlank) override;
+    bool GetBlank() const override;
     void SetBufferAvailableCallbackEnable(bool enable);
     bool GetBufferAvailableCallbackEnable() const override;
     int32_t GetCollaboratorType() const;

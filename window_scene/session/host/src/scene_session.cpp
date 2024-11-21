@@ -3534,12 +3534,12 @@ bool SceneSession::IsAnco() const
     return collaboratorType_ == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
 }
 
-void SceneSession::SetBlankFlag(bool isAddBlank)
+void SceneSession::SetBlank(bool isAddBlank)
 {
     isAddBlank_ = isAddBlank;
 }
 
-bool SceneSession::GetBlankFlag() const
+bool SceneSession::GetBlank() const
 {
     return isAddBlank_;
 }
