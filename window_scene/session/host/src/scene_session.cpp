@@ -5485,7 +5485,7 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     }
     WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
         uiParam.rect_.width_, uiParam.rect_.height_ };
-    if (winRect_ == rect && clientRect_ == rect) {
+    if (winRect_ == rect && (!sessionStage_ || clientRect_ == rect)) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s preGlobalRect:%{public}s!",
             GetPersistentId(), rect.ToString().c_str(), globalRect.ToString().c_str());
         return false;
