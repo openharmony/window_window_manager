@@ -691,8 +691,8 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
      *  if requestRect of systemBar equals to winRect, not need to resize. This may happen when rotate display
      */
     if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
-        if ((reason== WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::RESIZE) &&
-            rect == node->GetWindowRect()) {
+        if ((reason== WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::RESIZE ||
+            reason == WindowSizeChangeReason::DRAG_MOVE) && rect == node->GetWindowRect()) {
             return WMError::WM_OK;
         }
     }
@@ -700,7 +700,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     node->SetWindowSizeChangeReason(reason);
     Rect lastRect = property->GetWindowRect();
     Rect newRect;
-    if (reason == WindowSizeChangeReason::MOVE) {
+    if (reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE) {
         newRect = { rect.posX_, rect.posY_, lastRect.width_, lastRect.height_ };
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
             if (windowRoot_->IsForbidDockSliceMove(node->GetDisplayId())) {
@@ -719,7 +719,8 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     }
     property->SetRequestRect(newRect);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-        (reason == WindowSizeChangeReason::RESIZE || reason == WindowSizeChangeReason::MOVE)) {
+        (reason == WindowSizeChangeReason::RESIZE || reason == WindowSizeChangeReason::MOVE ||
+        reason == WindowSizeChangeReason::DRAG_MOVE)) {
         RelayoutKeyboard(node);
         ResizeSoftInputCallingWindowIfNeed(node);
     }
@@ -1451,7 +1452,8 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             ret = ResizeRectAndFlush(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
             if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && ret == WMError::WM_OK &&
                 callingWindowId_ == windowId && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
-                if (property->GetWindowSizeChangeReason() != WindowSizeChangeReason::MOVE) {
+                if (property->GetWindowSizeChangeReason() != WindowSizeChangeReason::MOVE &&
+                    property->GetWindowSizeChangeReason() != WindowSizeChangeReason::DRAG_MOVE) {
                     callingWindowId_ = 0u;
                     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
                 } else {

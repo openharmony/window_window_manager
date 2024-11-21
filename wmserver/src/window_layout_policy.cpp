@@ -384,7 +384,8 @@ void WindowLayoutPolicy::NotifyClientAndAnimation(const sptr<WindowNode>& node,
         WLOGFD("Id: %{public}d, winRect:[%{public}d, %{public}d, %{public}u, %{public}u], reason: "
             "%{public}u", node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
     }
-    if ((reason != WindowSizeChangeReason::MOVE) && (node->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE)) {
+    if (reason != WindowSizeChangeReason::MOVE && reason != WindowSizeChangeReason::DRAG_MOVE &&
+        node->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE) {
         node->ResetWindowSizeChangeReason();
     }
     NotifyAnimationSizeChangeIfNeeded();

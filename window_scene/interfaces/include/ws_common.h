@@ -423,6 +423,8 @@ enum class SizeChangeReason : uint32_t {
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
+    UPDATE_DPI_SYNC,
+    DRAG_MOVE,
     END,
 };
 

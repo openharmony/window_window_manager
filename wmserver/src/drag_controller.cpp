@@ -442,7 +442,7 @@ void MoveDragController::HandleMoveEvent(DisplayId displayId, int32_t posX, int3
     WLOGFD("[WMS] HandleMoveEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
     windowProperty_->SetRequestRect(newRect);
-    windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
+    windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG_MOVE);
     WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT, true);
 }
 

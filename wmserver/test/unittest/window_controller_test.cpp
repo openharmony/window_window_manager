@@ -1768,6 +1768,10 @@ HWTEST_F(WindowControllerTest, UpdateProperty3, Function | SmallTest | Level3)
     property->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
     res = windowController_->UpdateProperty(property, action);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG_MOVE);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
 }
 
 /**
