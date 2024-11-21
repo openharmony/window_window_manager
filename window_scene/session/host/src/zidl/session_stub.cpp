@@ -24,6 +24,7 @@
 
 #include "parcel/accessibility_event_info_parcel.h"
 #include "process_options.h"
+#include "start_window_option.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -473,6 +474,15 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (!data.ReadBool(abilitySessionInfo->isFromIcon)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read isFromIcon failed.");
         return ERR_INVALID_DATA;
+    }
+    bool hasStartWindowOption = false;
+    if (!data.ReadBool(hasStartWindowOption)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasStartWindowOption) {
+        auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
+        abilitySessionInfo->startWindowOption.reset(startWindowOption);
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
