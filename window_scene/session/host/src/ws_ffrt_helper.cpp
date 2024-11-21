@@ -86,7 +86,7 @@ private:
 
 WSFFRTHelper::WSFFRTHelper() : taskHandleMap_(std::make_unique<TaskHandleMap>())
 {
-    ffrtQueue_ = std::make_unique<ffrt::queue>(ffrt::queue_concurrent, "RestoreQueue,",
+    ffrtQueue_ = std::make_unique<ffrt::queue>(ffrt::queue_concurrent, "WSFFRTHelper",
         ffrt::queue_attr().qos(ffrt_qos_user_interactive).max_concurrency(FFRT_USER_INTERACTIVE_MAX_THREAD_NUM));
     TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max queue thread number: %{public}d",
         FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
