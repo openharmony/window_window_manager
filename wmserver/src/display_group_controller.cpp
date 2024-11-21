@@ -270,7 +270,8 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
         }
         case WindowUpdateType::WINDOW_UPDATE_ACTIVE: {
             // MoveTo can be called by user, calculate rect in display group if the reason is move
-            if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+            if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE ||
+                node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_MOVE) {
                 ChangeToRectInDisplayGroup(node, defaultDisplayId_);
             }
             WLOGFD("preprocess node when update window");
