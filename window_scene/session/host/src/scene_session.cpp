@@ -2163,8 +2163,8 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
         }
-        if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled())||
-        isDragEnabledSystemWindow) {
+        if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) ||
+            isDragEnabledSystemWindow) {
             if ((systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
                  (property->GetIsPcAppInPad() && !isMainWindow)) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
