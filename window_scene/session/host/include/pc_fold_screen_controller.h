@@ -79,7 +79,8 @@ public:
     void ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRect,
         const WSRect& limitRect, int32_t titleHeight);
 
-    void RegisterFoldScreenStatusChangeCallback(int32_t persistentId, const std::weak_ptr<FoldScreenStatusChangeCallback>& func);
+    void RegisterFoldScreenStatusChangeCallback(int32_t persistentId,
+        const std::weak_ptr<FoldScreenStatusChangeCallback>& func);
     void UnregisterFoldScreenStatusChangeCallback(int32_t persistentId);
 
 private:
