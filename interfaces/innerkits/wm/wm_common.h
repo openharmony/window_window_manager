@@ -292,6 +292,14 @@ enum class WindowUIType : uint8_t {
 };
 
 /**
+ * @brief Enumerates flag of ControlAppType.
+ */
+enum class ControlAppType : uint8_t {
+    APP_LOCK = 1,
+    CONTROL_APP_TYPE_END,
+};
+
+/**
  * @brief Used to map from WMError to WmErrorCode.
  */
 extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
