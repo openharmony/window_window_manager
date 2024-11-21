@@ -2486,7 +2486,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (property == nullptr) {
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP && !isEnablePiPCreate(property)) {
+        if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP && !IsEnablePiPCreate(property)) {
             TLOGNE(WmsLogTag::WMS_PIP, "pip window is not enable to create.");
             return WSError::WS_DO_NOTHING;
         }
@@ -2645,7 +2645,6 @@ void SceneSessionManager::NotifyPiPWindowVisibleChange(bool screenLocked) {
         }
         DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleData_);
     }
-    return WMError::WM_OK;
 }
 
 bool SceneSessionManager::IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState) {
