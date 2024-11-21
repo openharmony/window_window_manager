@@ -3674,4 +3674,9 @@ bool Session::IsVisible() const
 {
     return isVisible_;
 }
+
+std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
+{
+    return handler_;
+}
 } // namespace OHOS::Rosen

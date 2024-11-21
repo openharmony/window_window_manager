@@ -547,7 +547,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
         session->isKeyboardSyncTransactionOpen_ = true;
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
-            transactionController->OpenSyncTransaction();
+            transactionController->OpenSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
     };
@@ -588,7 +588,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         session->isKeyboardSyncTransactionOpen_ = false;
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
-            transactionController->CloseSyncTransaction();
+            transactionController->CloseSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
     };
