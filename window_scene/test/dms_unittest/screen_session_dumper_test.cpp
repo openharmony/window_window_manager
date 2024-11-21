@@ -537,7 +537,6 @@ HWTEST_F(ScreenSessionDumperTest, SetMotionSensorvalue02, Function | SmallTest |
     ASSERT_EQ(true, true);
 }
 
-
 /**
  * @tc.name: SetRotationLockedvalue
  * @tc.desc: test function : SetRotationLockedvalue
@@ -593,7 +592,6 @@ HWTEST_F(ScreenSessionDumperTest, MockSendCastPublishEvent02, Function | SmallTe
     dumper ->MockSendCastPublishEvent("-publishcastevent,1");
     ASSERT_EQ(true, true);
 }
-
 
 /**
  * @tc.name: MockSendCastPublishEvent

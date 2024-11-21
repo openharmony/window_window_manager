@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_err_utils.h"
 #include "js_window_manager.h"
 #include "js_window.h"

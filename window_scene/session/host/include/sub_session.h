@@ -26,6 +26,8 @@ public:
 
     WSError Show(sptr<WindowSessionProperty> property) override;
     WSError Hide() override;
+    WSError HideSync() override;
+    WSError Hide(bool needSyncHide);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     int32_t GetMissionId() const override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;

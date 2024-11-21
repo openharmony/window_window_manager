@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
 #define OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
 

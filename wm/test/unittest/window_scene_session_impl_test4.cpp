@@ -829,7 +829,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync01, Function | SmallTest | Leve
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
-    ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->MoveToAsync(10, 10));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS, window->MoveToAsync(10, 10));
 }
 
 /**
@@ -889,7 +889,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync01, Function | SmallTest | Leve
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
-    ASSERT_EQ(WMError::WM_ERROR_OPER_FULLSCREEN_FAILED, window->ResizeAsync(500, 500));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS, window->ResizeAsync(500, 500));
 }
 
 /**
@@ -1323,7 +1323,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode01, Function | SmallTest | Le
     sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
     ASSERT_NE(nullptr, subSession);
     subWindow->hostSession_ = subSession;
-    subWindow->property_->SetModeSupportInfo(0);
+    subWindow->property_->SetWindowModeSupportType(0);
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
 }
@@ -1344,7 +1344,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode02, Function | SmallTest | Le
     SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
     sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
     subWindow->hostSession_ = subSession;
-    subWindow->property_->SetModeSupportInfo(1);
+    subWindow->property_->SetWindowModeSupportType(1);
     auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     EXPECT_EQ(WMError::WM_OK, ret);
 }

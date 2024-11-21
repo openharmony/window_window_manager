@@ -80,7 +80,7 @@ public:
         }
         return WMError::WM_OK;
     }
-    WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override
+    WMError UpdateWindowModeSupportType(uint32_t windowModeSupportType) override
     {
         return WMError::WM_OK;
     }
@@ -525,6 +525,7 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, Function | SmallTest | Le
     }
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
 }
+
 /**
  * @tc.name: KeyboardAvoidArea02
  * @tc.desc: Get avoid areas with listener, TYPE_KEYBOARD.

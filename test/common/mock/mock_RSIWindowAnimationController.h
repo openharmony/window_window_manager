@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef FRAMEWORKS_WM_TEST_UT_MOCK_RSIWINDOWANIMATIONCONTROLLER_H
 #define FRAMEWORKS_WM_TEST_UT_MOCK_RSIWINDOWANIMATIONCONTROLLER_H
 

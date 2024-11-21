@@ -80,7 +80,7 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateTopmost),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
-        &WindowSessionProperty::WriteActionUpdateModeSupportInfo),
+        &WindowSessionProperty::WriteActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateMainWindowTopmost),
 };
@@ -139,7 +139,7 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateTopmost),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO),
-        &WindowSessionProperty::ReadActionUpdateModeSupportInfo),
+        &WindowSessionProperty::ReadActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateMainWindowTopmost),
 };
@@ -167,6 +167,7 @@ void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 
 void WindowSessionProperty::SetRequestRect(const Rect& requestRect)
 {
+    std::lock_guard<std::mutex> lock(requestRectMutex_);
     requestRect_ = requestRect;
 }
 
@@ -278,6 +279,7 @@ Rect WindowSessionProperty::GetWindowRect() const
 
 Rect WindowSessionProperty::GetRequestRect() const
 {
+    std::lock_guard<std::mutex> lock(requestRectMutex_);
     return requestRect_;
 }
 
@@ -544,14 +546,14 @@ bool WindowSessionProperty::IsDecorEnable()
     return isDecorEnable_;
 }
 
-void WindowSessionProperty::SetModeSupportInfo(uint32_t modeSupportInfo)
+void WindowSessionProperty::SetWindowModeSupportType(uint32_t windowModeSupportType)
 {
-    modeSupportInfo_ = modeSupportInfo;
+    windowModeSupportType_ = windowModeSupportType;
 }
 
-uint32_t WindowSessionProperty::GetModeSupportInfo() const
+uint32_t WindowSessionProperty::GetWindowModeSupportType() const
 {
-    return modeSupportInfo_;
+    return windowModeSupportType_;
 }
 
 void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
@@ -1169,6 +1171,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     maximizeMode_ = property->maximizeMode_;
     windowMode_ = property->windowMode_;
     limits_ = property->limits_;
+    windowModeSupportType_ = property->windowModeSupportType_;
     sysBarPropMap_ = property->sysBarPropMap_;
     isDecorEnable_ = property->isDecorEnable_;
     animationFlag_ = property->animationFlag_;
@@ -1313,9 +1316,9 @@ bool WindowSessionProperty::WriteActionUpdateMainWindowTopmost(Parcel& parcel)
     return MarshallingMainWindowTopmost(parcel);
 }
 
-bool WindowSessionProperty::WriteActionUpdateModeSupportInfo(Parcel& parcel)
+bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parcel)
 {
-    return parcel.WriteUint32(modeSupportInfo_);
+    return parcel.WriteUint32(windowModeSupportType_);
 }
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
@@ -1449,9 +1452,9 @@ void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
     UnmarshallingMainWindowTopmost(parcel, this);
 }
 
-void WindowSessionProperty::ReadActionUpdateModeSupportInfo(Parcel& parcel)
+void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel)
 {
-    SetModeSupportInfo(parcel.ReadUint32());
+    SetWindowModeSupportType(parcel.ReadUint32());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

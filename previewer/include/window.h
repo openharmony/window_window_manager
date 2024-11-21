@@ -262,8 +262,8 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
-    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) = 0;
-    virtual uint32_t GetRequestModeSupportInfo() const = 0;
+    virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) = 0;
+    virtual uint32_t GetRequestWindowModeSupportType() const = 0;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
     virtual bool IsMainHandlerAvailable() const = 0;
@@ -356,6 +356,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
     /**
      * @brief Set the application modality of main window.
      *
@@ -366,6 +367,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
     /**
      * @brief Set the modality of sub window.
      *

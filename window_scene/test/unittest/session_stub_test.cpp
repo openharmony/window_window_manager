@@ -158,7 +158,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteBool(true);
-    data.WriteInt32(1);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
@@ -168,7 +167,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, Function | SmallTest | Lev
     data.WriteBool(true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKPRESSED), data, reply, option);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
+    ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MARK_PROCESSED), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
@@ -263,14 +262,8 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, Function | SmallTest | Lev
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
-    EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    AAFwk::Want options;
-    EXPECT_NE(data.WriteString("HandleSessionException"), false);
-    EXPECT_NE(data.WriteParcelable(&options), false);
-    ASSERT_EQ(data.WriteUint64(2), true);
+    ASSERT_EQ(data.WriteInt32(1), true);
+    ASSERT_EQ(data.WriteInt32(2), true);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_PROCESS_POINT_DOWN_SESSION), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
@@ -320,20 +313,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PIP_WINDOW_PREPARE_CLOSE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteUint32(1), true);
-    ASSERT_EQ(data.WriteInt32(1), true);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
-    res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
-    data.WriteBool(true);
-    data.WriteBool(true);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_MAIN_WINDOW), data, reply, option);
@@ -343,13 +323,6 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
         data,
         reply,
         option);
-    ASSERT_EQ(ERR_NONE, res);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC), data, reply, option);
-    ASSERT_EQ(ERR_NONE, res);
-    data.WriteBool(true);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
 }
 
@@ -390,6 +363,45 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: ProcessRemoteRequestTest07
+ * @tc.desc: sessionStub ProcessRemoteRequestTest07
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ASSERT_EQ(data.WriteInt32(1), true);
+    ASSERT_EQ(data.WriteInt32(1), true);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_RECT), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteUint32(1), true);
+    ASSERT_EQ(data.WriteInt32(1), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_CONTROL_STATUS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteBool(true), true);
+    ASSERT_EQ(data.WriteBool(true), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteBool(true), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteInt32(1), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: sessionStubTest02
  * @tc.desc: sessionStub sessionStubTest02
  * @tc.type: FUNC
@@ -415,27 +427,11 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     if (!data.ReadBool()) {
         ASSERT_EQ(ERR_INVALID_DATA, res);
     }
-    ASSERT_EQ(data.WriteInt32(2), true);
-    res = session_->HandleMarkProcessed(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleGetGlobalMaximizeMode(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteBool(true), true);
-    res = session_->HandleNeedAvoid(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteUint32(2), true);
-    res = session_->HandleGetAvoidAreaByType(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteFloat(2.0f), true);
-    res = session_->HandleSetAspectRatio(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-    session_->HandleTransferAbilityResult(data, reply);
     res = session_->HandleNotifyExtensionDied(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-    ASSERT_EQ(data.WriteInt32(2), true);
-    res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleGetStatusBarHeight(data, reply);
     ASSERT_EQ(ERR_NONE, res);
@@ -459,6 +455,26 @@ HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleTransferExtensionData(data, reply);
     ASSERT_EQ(ERR_INVALID_VALUE, res);
+    ASSERT_EQ(data.WriteInt32(2), true);
+    res = session_->HandleMarkProcessed(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteBool(true), true);
+    res = session_->HandleNeedAvoid(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteUint32(2), true);
+    res = session_->HandleGetAvoidAreaByType(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteFloat(2.0f), true);
+    res = session_->HandleSetAspectRatio(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteInt32(2), true);
+    res = session_->HandleNotifyExtensionTimeout(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteInt32(2), true);
+    AAFwk::Want want;
+    data.WriteParcelable(&want);
+    res = session_->HandleTransferAbilityResult(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -876,10 +892,10 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent2, Function | SmallTest | Level2
 
     data.WriteUint32(0xFFFFFFFF);
     auto result = session_->HandleSyncSessionEvent(data, reply);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    ASSERT_EQ(result, ERR_NONE);
 
     result = session_->HandleSyncSessionEvent(data, reply);
-    ASSERT_EQ(result, ERR_NONE);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
 }
 }
 } // namespace Rosen

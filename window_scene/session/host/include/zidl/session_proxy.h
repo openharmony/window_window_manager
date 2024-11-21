@@ -81,6 +81,7 @@ public:
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void TriggerBindModalUIExtension() override;
+    void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
 
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
@@ -102,8 +103,8 @@ public:
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
-    void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
-    
+    void NotifyExtensionDetachToDisplay() override;
+
     WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError OnMainSessionModalTypeChange(bool isModal) override;
     
@@ -112,7 +113,7 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
-     /*
+     /**
       * Starting Window
       */
     WSError RemoveStartingWindow() override;

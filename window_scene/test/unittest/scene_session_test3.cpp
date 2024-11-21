@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 
 #include "display_manager.h"
@@ -76,7 +77,6 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio11, Function | SmallTest | Level2)
     auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
-
 
 /**
  * @tc.name: SetAspectRatio12
@@ -289,7 +289,7 @@ HWTEST_F(SceneSessionTest3, RegisterBindDialogSessionCallback1, Function | Small
     sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     sceneSession->onBindDialogTarget_ = nullptr;
     NotifyBindDialogSessionFunc func = [](const sptr<SceneSession>& sceneSession) {};
-    sceneSession->RegisterBindDialogSessionCallback(std::move(func));
+    sceneSession->RegisterBindDialogSessionCallback(func);
     ASSERT_NE(sceneSession->onBindDialogTarget_, nullptr);
 }
 
@@ -457,19 +457,27 @@ HWTEST_F(SceneSessionTest3, UpdateScaleInner, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, sceneSession);
 
     sceneSession->sessionStage_ = nullptr;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
     bool res = sceneSession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 10.0f);
     EXPECT_EQ(true, res);
+
     res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 10.0f);
     res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 10.0f);
     res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
     EXPECT_EQ(true, res);
+
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
     res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
     EXPECT_EQ(false, res);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     sceneSession->sessionStage_ = mockSessionStage;
     res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
     EXPECT_EQ(true, res);
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    EXPECT_EQ(false, res);
 }
 
 /**
@@ -633,7 +641,7 @@ HWTEST_F(SceneSessionTest3, SetRestoreMainWindowCallback, Function | SmallTest |
     info.bundleName_ = "SetRestoreMainWindowCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sceneSession->SetRestoreMainWindowCallback([]() {
+    sceneSession->SetRestoreMainWindowCallback([] {
         return;
     });
     ASSERT_NE(nullptr, sceneSession->onRestoreMainWindowFunc_);

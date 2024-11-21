@@ -547,6 +547,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, UpdateRecoveredSessionInfo02, Functio
     constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
     usleep(WAIT_SYNC_IN_NS);
 }
+
 /**
  * @tc.name: RequestSceneSession01
  * @tc.desc: SceneSesionManager test RequestSceneSession
@@ -587,6 +588,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession02, Function | Sma
     sptr<SceneSession> getSceneSession = ssm_->RequestSceneSession(info2, windowSessionProperty);
     ASSERT_NE(getSceneSession->GetSessionInfo().bundleName_, info2.bundleName_);
 }
+
 /**
  * @tc.name: RequestSceneSession03
  * @tc.desc: SceneSesionManager test RequestSceneSession
@@ -726,6 +728,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction01, Fun
     ASSERT_EQ(ssm_->RequestSceneSessionDestruction(
         sceneSession, needRemoveSession), WSError::WS_OK);
 }
+
 /**
  * @tc.name: RequestSceneSessionDestruction02
  * @tc.desc: SceneSesionManager test RequestSceneSessionDestruction
@@ -813,6 +816,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall01, Function
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ASSERT_EQ(ssm_->RequestSceneSessionByCall(sceneSession), WSError::WS_OK);
 }
+
 /**
  * @tc.name: RequestSceneSessionByCall02
  * @tc.desc: SceneSesionManager test RequestSceneSessionByCall

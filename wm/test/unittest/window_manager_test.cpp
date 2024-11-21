@@ -222,7 +222,7 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Leve
     WMError ret = windowManager.GetSnapshotByWindowId(windowId, pixelMap);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    }else {
+    } else {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     }
 }

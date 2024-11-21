@@ -99,12 +99,12 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO: {
-            uint32_t modeSupportInfo = 0;
-            if (!data.ReadUint32(modeSupportInfo)) {
-                TLOGE(WmsLogTag::WMS_LAYOUT, "read modeSupportInfo failed");
+            uint32_t windowModeSupportType = 0;
+            if (!data.ReadUint32(windowModeSupportType)) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "read windowModeSupportType failed");
                 return ERR_INVALID_DATA;
             }
-            UpdateWindowModeSupportInfo(modeSupportInfo);
+            UpdateWindowModeSupportType(windowModeSupportType);
             break;
         }
         case WindowMessage::TRANS_ID_UPDATE_FOCUS_STATUS: {
