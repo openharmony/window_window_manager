@@ -47,7 +47,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_TOP_MOST_CHANGE_CB,
     SESSION_MODAL_TYPE_CHANGE_CB,
     MAIN_SESSION_MODAL_TYPE_CHANGE_CB,
-    SESSION_FULLSCREEN_WATERFALL_MODE_CHANGE_CB,
+    FULLSCREEN_WATERFALL_MODE_CHANGE_CB,
     CLICK_CB,
     TERMINATE_SESSION_CB,
     TERMINATE_SESSION_CB_NEW,
@@ -240,7 +240,7 @@ private:
     void ProcessMainWindowTopmostChangeRegister();
     void ProcessSessionModalTypeChangeRegister();
     void ProcessMainSessionModalTypeChangeRegister();
-    void ProcessSessionFullScreenWaterfallModeChangeRegister();
+    void RegisterFullScreenWaterfallModeChangeCallback();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -299,7 +299,7 @@ private:
     void OnMainWindowTopmostChange(bool isTopmost);
     void OnSessionModalTypeChange(SubWindowModalType subWindowModalType);
     void OnMainSessionModalTypeChange(bool isModal);
-    void OnSessionFullScreenWaterfallModeChange(bool state);
+    void OnFullScreenWaterfallModeChange(bool isWaterfallMode);
     void OnClick(bool requestFocus, bool isClick);
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);

@@ -79,9 +79,6 @@ public:
     void ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRect,
         const WSRect& limitRect, int32_t titleHeight);
 
-    /**
-     * Fold Screen Status Callback
-     */
     void RegisterFoldScreenStatusChangeCallback(int32_t persistentId, const std::weak_ptr<FoldScreenStatusChangeCallback>& func);
     void UnregisterFoldScreenStatusChangeCallback(int32_t persistentId);
 
@@ -114,17 +111,14 @@ private:
     WSRect defaultArrangedRect_;
     WSRect virtualArrangedRect_;
 
-    /**
-     * Fold Screen Status Callback
-     */
-    void ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
-    std::mutex callbackMutex_;
+    void ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId,
+        SuperFoldStatus status, SuperFoldStatus prevStatus);    std::mutex callbackMutex_;
     std::unordered_map<int32_t, std::weak_ptr<FoldScreenStatusChangeCallback>> foldScreenStatusChangeCallbacks_;
 };
 
 class PcFoldScreenController : public RefBase {
 public:
-    explicit PcFoldScreenController(wptr<SceneSession> weakSession, int32_t persistentId);
+    PcFoldScreenController(wptr<SceneSession> weakSession, int32_t persistentId);
     ~PcFoldScreenController();
     bool IsHalfFolded(DisplayId displayId);
     bool NeedFollowHandAnimation();
@@ -140,9 +134,9 @@ public:
     RSAnimationTimingProtocol GetThrowSlipTimingProtocol();
     RSAnimationTimingCurve GetThrowSlipTimingCurve();
 
-    void UpdateFullScreenWaterfallMode(bool state);
+    void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
     inline bool IsFullScreenWaterfallMode() { return isFullScreenWaterfallMode_; }
-    void RegisterFullScreenWaterfallModeChangeCallback(const std::function<void(bool state)>& func);
+    void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
     void UnregisterFullScreenWaterfallModeChangeCallback();
 
 private:
@@ -158,6 +152,7 @@ private:
     WSRect startMoveRect_;
     bool isStartFullScreen_ { false };
     RectRecordsVector movingRectRecords_;
+    // Above guarded by moveMutex_
 
     std::shared_ptr<FoldScreenStatusChangeCallback> onFoldScreenStatusChangeCallback_;
 
@@ -167,7 +162,7 @@ private:
      */
     void ExecuteFullScreenWaterfallModeChangeCallback();
     bool isFullScreenWaterfallMode_ { false };
-    std::function<void(bool state)> fullScreenWaterfallModeChangeCallback_ { nullptr };
+    std::function<void(bool isWaterfallMode)> fullScreenWaterfallModeChangeCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen
 

@@ -181,6 +181,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    void UpdateWaterfallMode(SessionEvent event);
     WSError OnSessionEvent(SessionEvent event, const SessionEventParam& param);
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
@@ -548,8 +549,8 @@ public:
     /**
      * PC Fold Screen
      */
-    void UpdateFullScreenWaterfallMode(bool state);
-    void RegisterFullScreenWaterfallModeChangeCallback(const std::function<void(bool state)>& func);
+    void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
+    void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
 
     /**
      * PC Window
