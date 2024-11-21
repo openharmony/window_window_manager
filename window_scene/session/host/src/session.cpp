@@ -3019,7 +3019,8 @@ WSRectAnimationConfig Session::GetSessionRequestRectAnimationConfig() const
         return rectAnimationConfig;
     }
     rectAnimationConfig = SessionHelper::TransferToWSRectAnimationConfig(property->GetRequestRectAnimationConfig());
-    TLOGNE(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rectAnimationConfig: [%{public}u]", persistentId_,  rectAnimationConfig.duration_);
+    TLOGNE(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rectAnimationConfig: [%{public}u]", persistentId_,
+        rectAnimationConfig.duration_);
     return rectAnimationConfig;
 }
 
