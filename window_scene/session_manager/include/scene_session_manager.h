@@ -935,8 +935,17 @@ private:
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property);
     bool CheckModalSubWindowPermission(const sptr<WindowSessionProperty>& property);
+
+    /**
+     * PiP Window
+     */
+    uint64_t pipSurfaceId_;
+    sptr<SceneSession> pipSession_;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
     bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
+    bool OcclusionPiPWindow(const uint64_t surfaceId, const WindowVisibilityState visibilityState);
+    void NotifyPiPWindowVisibleChange();
+
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
