@@ -2642,7 +2642,7 @@ void SceneSessionManager::NotifyPiPWindowVisibleChange() {
         } else {
             pipVisibilityChangeInfos.emplace_back(pipSurfaceId_, WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
         }
-        DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleDate_);
+        DealwithVisibilityChange(pipVisibilityChangeInfos, lastVisibleData_);
     }
 }
 
