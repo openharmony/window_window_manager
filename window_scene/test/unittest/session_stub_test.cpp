@@ -859,8 +859,8 @@ HWTEST_F(SessionStubTest, HandleUpdateClientRect01, Function | SmallTest | Level
 
     data.WriteInt32(100);
     data.WriteInt32(100);
-    data.WriteUint32(800);
-    data.WriteUint32(800);
+    data.WriteInt32(800);
+    data.WriteInt32(800);
     res = session_->HandleUpdateClientRect(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
