@@ -5643,6 +5643,11 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     oldScbDisplayMode_ = GetFoldDisplayMode();
 }
 
+int32_t ScreenSessionManager::GetCurrentUserId()
+{
+    return currentUserId_;
+}
+
 void ScreenSessionManager::SetClientInner()
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
