@@ -304,9 +304,10 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties,
         std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
-    bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
-        napi_env env, napi_callback_info info, sptr<Window>& window);
+    bool GetSystemBarStatus(napi_env env, napi_callback_info info, bool& statusBarEnable, bool& naviBarEnable);
+    void SetSystemBarStatus(sptr<Window>& window, bool statusBarEnable, bool navBarEnable,
+        std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags);
     bool ParseAndCheckRect(napi_env env, napi_value jsObject, const Rect& windowRect, Rect& touchableRect);
     WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info, const Rect& windowRect,
         std::vector<Rect>& touchableAreas);
