@@ -420,7 +420,7 @@ protected:
     /**
      * Window Layout
      */
-    std::atomic_bool isDragTaskUpdateDone_ = true;
+    std::atomic_bool isDragTaskPostDone_ = true;
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);

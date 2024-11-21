@@ -338,7 +338,7 @@ WSError SceneSession::Foreground(
     return ForegroundTask(property);
 }
 
-void SceneSession::SetRequestNextVsyncFunc(const RequestVsyncFunc&& func)
+void SceneSession::SetRequestNextVsyncFunc(RequestVsyncFunc&& func)
 {
     if (func == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "func is nullptr");
@@ -964,7 +964,7 @@ static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ra
 /** @note @window.layout */
 WSError SceneSession::SetAspectRatio(float ratio)
 {
-    auto task = [weakThis = wptr(this), ratio]() {
+    auto task = [weakThis = wptr(this), ratio] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
@@ -989,13 +989,13 @@ WSError SceneSession::SetAspectRatio(float ratio)
             session->moveDragController_->SetAspectRatio(ratio);
         }
         session->SaveAspectRatio(session->aspectRatio_);
-        WSRect fixedRect = session->winRect_;
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Before fixing, the id:%{public}d, the current rect: %{public}s, "
-            "ratio: %{public}f", session->GetPersistentId(), fixedRect.ToString().c_str(), ratio);
-        if (session->FixRectByAspectRatio(fixedRect)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "After fixing, the id:%{public}d, the fixed rect: %{public}s",
-                session->GetPersistentId(), fixedRect.ToString().c_str());
-            session->NotifySessionRectChange(fixedRect, SizeChangeReason::RESIZE);
+        WSRect adjustedRect = session->winRect_;
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Before adjusting, the id:%{public}d, the current rect: %{public}s, "
+            "ratio: %{public}f", session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
+        if (session->AdjustRectByAspectRatio(adjustedRect)) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "After adjusting, the id:%{public}d, the adjusted rect: %{public}s",
+                session->GetPersistentId(), adjustedRect.ToString().c_str());
+            session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
         }
         return WSError::WS_OK;
     };
@@ -1007,7 +1007,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), rect, reason, rsTransaction,  updateReason, funcName]() {
+    auto task = [weakThis = wptr(this), rect, reason, rsTransaction,  updateReason, funcName] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
@@ -2466,7 +2466,7 @@ bool SceneSession::SaveAspectRatio(float ratio)
     return false;
 }
 
-void SceneSession::FixRectByLimits(WindowLimits limits, WSRect& rect, float ratio, bool isDecor, float vpr)
+void SceneSession::AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect)
 {
     if (isDecor) {
         rect.width_ = SessionUtils::ToLayoutWidth(rect.width_, vpr);
@@ -2494,7 +2494,7 @@ void SceneSession::FixRectByLimits(WindowLimits limits, WSRect& rect, float rati
         rect.width_ = SessionUtils::ToWinWidth(rect.width_, vpr);
     }
 }
-bool SceneSession::FixRectByAspectRatio(WSRect& rect)
+bool SceneSession::AdjustRectByAspectRatio(WSRect& rect)
 {
     const int tolerancePx = 2; // 2: tolerance delta pixel value, unit: px
     WSRect originalRect = rect;
@@ -2536,7 +2536,7 @@ bool SceneSession::FixRectByAspectRatio(WSRect& rect)
             rect.height_ = rect.width_ / aspectRatio_;
         }
     }
-    FixRectByLimits(property->GetWindowLimits(), rect, aspectRatio_, IsDecorEnable(), vpr);
+    AdjustRectByLimits(property->GetWindowLimits(), aspectRatio_, IsDecorEnable(), vpr, rect);
     if (std::abs(static_cast<int32_t>(originalRect.width_) - static_cast<int32_t>(rect.width_)) <= tolerancePx &&
         std::abs(static_cast<int32_t>(originalRect.height_) - static_cast<int32_t>(rect.height_)) <= tolerancePx) {
         rect = originalRect;

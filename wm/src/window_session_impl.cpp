@@ -811,7 +811,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         }
         if (wmReason == WindowSizeChangeReason::DRAG) {
             window->UpdateRectForOtherReasonTask(window->GetRect(), preRect, wmReason, rsTransaction);
-            window->isDragTaskUpdateDone_.store(true);
+            window->isDragTaskPostDone_.store(true);
         } else {
             window->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         }
@@ -820,9 +820,9 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         }
     };
     if (wmReason == WindowSizeChangeReason::DRAG) {
-        if (isDragTaskUpdateDone_.load()) {
+        bool isDragTaskPostDone = true;
+        if (isDragTaskPostDone_.compare_exchange_strong(isDragTaskPostDone, false)) {
             handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
-            isDragTaskUpdateDone_.store(false);
         }
     } else {
         handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
