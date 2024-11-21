@@ -1532,7 +1532,7 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    ASSERT_EQ(WSError::WS_OK, res);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
