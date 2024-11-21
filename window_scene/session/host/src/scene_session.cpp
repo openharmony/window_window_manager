@@ -990,10 +990,10 @@ WSError SceneSession::SetAspectRatio(float ratio)
         }
         session->SaveAspectRatio(session->aspectRatio_);
         WSRect adjustedRect = session->winRect_;
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Before adjusting, the id:%{public}d, the current rect: %{public}s, "
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Before adjusting, the id:%{public}d, the current rect:%{public}s, "
             "ratio: %{public}f", session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
         if (session->AdjustRectByAspectRatio(adjustedRect)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "After adjusting, the id:%{public}d, the adjusted rect: %{public}s",
+            TLOGI(WmsLogTag::WMS_LAYOUT, "After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
                 session->GetPersistentId(), adjustedRect.ToString().c_str());
             session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
         }
@@ -1037,13 +1037,13 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
                 funcName, session->GetPersistentId(), rect.ToString().c_str());
             return;
         }
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::UpdateRect%d [%d, %d, %u, %u]",
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::UpdateRect %d [%d, %d, %u, %u]",
             session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         // position change no need to notify client, since frame layout finish will notify
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_) &&
             (session->reason_ != SizeChangeReason::MOVE || !session->rectChangeListenerRegistered_)) {
             TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: position change no need notify client id:%{public}d, "
-                "rect:%{public}s, preRect: %{public}s", funcName,
+                "rect:%{public}s, preRect:%{public}s", funcName,
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
         } else {
@@ -2849,7 +2849,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
 {
     const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), rect, funcName] {
+    return PostSyncTask([weakThis = wptr(this), rect, funcName] {
         auto sceneSession = weakThis.promote();
         if (!sceneSession) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
@@ -2858,8 +2858,7 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
         sceneSession->winRect_ = rect;
         sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
         return WSError::WS_OK;
-    };
-    return PostSyncTask(task, funcName);
+    }, funcName);
 }
 
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
