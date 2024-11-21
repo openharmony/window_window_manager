@@ -544,6 +544,7 @@ public:
     void ResetDragDirtyFlags();
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
+    std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
