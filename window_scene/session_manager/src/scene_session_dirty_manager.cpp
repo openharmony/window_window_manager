@@ -625,7 +625,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     auto zOrder = sceneSession->GetZOrder();
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
     WindowType windowType = windowSessionProperty->GetWindowType();
-    CheckIfUpdatePointAreas(sceneSession, windowSessionProperty, pointerChangeAreas, windowType);
+    CheckIfUpdatePointAreas(windowType, sceneSession, windowSessionProperty, pointerChangeAreas);
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
@@ -657,24 +657,23 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     return {windowInfo, pixelMap};
 }
 
-void CheckIfUpdatePointAreas(const sptr <SceneSession>& sceneSession,
-    const sptr <WindowSessionProperty>& windowSessionProperty, std::vector<int32_t>& pointerChangeAreas,
-    const WindowType windowType) const
+void SceneSessionDirtyManager::CheckIfUpdatePointAreas(WindowType windowType, const sptr<SceneSession>& sceneSession,
+    const sptr<WindowSessionProperty>& windowSessionProperty, std::vector<int32_t>& pointerChangeAreas) const
 {
-    auto windowMode = windowSessionProperty->GetWindowMode();
-    auto maxMode = windowSessionProperty->GetMaximizeMode();
     bool isMainWindow = WindowHelper::IsMainWindow(windowType);
-    bool isDecorDialog = WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
-    bool isNoDialogAndDragEnabledSystemWindow = WindowHelper::IsSystemWindow(windowType) &&
-        (!WindowHelper::IsDialogWindow(windowType)) && windowSessionProperty->GetDragEnabled();
-    bool isDecorSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
+    bool isDecorEnabledDialog = WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
+    bool isDragEnabledSystemWindowButNotDialog = WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->GetDragEnabled();
+    bool isDecorEnabledSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
     bool isDragEnabledSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->GetDragEnabled();
-    bool isUpdatePointerAreasWindowNeeded = isMainWindow || isDecorDialog || isDecorSubWindow ||
-        isDragEnabledSubWindow || isNoDialogAndDragEnabledSystemWindow;
-    if ((windowMode == WindowMode::WINDOW_MODE_FLOATING && maxMode != MaximizeMode::MODE_AVOID_SYSTEM_BAR &&
-         isUpdatePointerAreasWindowNeeded) ||
-        (sceneSession->GetSessionInfo().isSetPointerAreas_)) {
-            UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    bool isUpdatePointerAreasNeeded = isMainWindow || isDecorEnabledDialog || isDecorEnabledSubWindow ||
+        isDragEnabledSubWindow || isDragEnabledSystemWindowButNotDialog;
+    auto windowMode = windowSessionProperty->GetWindowMode();
+    auto maximizeMode = windowSessionProperty->GetMaximizeMode();
+    if ((windowMode == WindowMode::WINDOW_MODE_FLOATING && maximizeMode != MaximizeMode::MODE_AVOID_SYSTEM_BAR &&
+         isUpdatePointerAreasNeeded) ||
+        sceneSession->GetSessionInfo().isSetPointerAreas_) {
+        UpdatePointerAreas(sceneSession, pointerChangeAreas);
     }
 }
 
