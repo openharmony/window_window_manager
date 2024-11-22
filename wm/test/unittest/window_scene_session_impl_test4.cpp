@@ -328,6 +328,14 @@ HWTEST_F(WindowSceneSessionImplTest4, HandlePointDownEvent, Function | SmallTest
     pointerItem.SetWindowX(1);
     ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     EXPECT_EQ(true, ret);
+
+    windowSceneSessionImpl->property_->SetDragEnabled(true);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    EXPECT_EQ(false, ret);
+
+    pointerItem.SetWindowX(100);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    EXPECT_EQ(true, ret);
 }
 
 /**
