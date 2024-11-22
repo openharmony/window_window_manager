@@ -2580,7 +2580,6 @@ void SceneSession::HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reaso
             MoveDragController::TargetRectCoordinate::GLOBAL);
     auto windowWidth = windowRect.width_;
     auto windowHeight = windowRect.height_;
-
     if (isSupportDragInPcCompatibleMode && windowWidth > windowHeight &&
         (rect.width_ < compatibleInPcLandscapeWidth - compatibleInPcDragLimit ||
             rect.width_ == static_cast<int32_t>(windowLimits.minWidth_))) {
@@ -2785,7 +2784,6 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
             MoveDragController::TargetRectCoordinate::GLOBAL);
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
-
     TLOGD(WmsLogTag::WMS_LAYOUT, "Rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason: %{public}d, "
         "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d", rect.posX_, rect.posY_,
         rect.width_, rect.height_, reason, isCompatibleModeInPc, isSupportDragInPcCompatibleMode);
