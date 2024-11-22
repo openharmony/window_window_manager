@@ -2782,7 +2782,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
         std::map<WindowType, SystemBarProperty> systemBarProperties;
@@ -2796,7 +2796,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "JsWindow::set systemBar enabled failed"));
         }
-    }
+    };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "set failed"));
@@ -2806,11 +2806,8 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-    errCode = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
     if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     size_t argc = FOUR_PARAMS_SIZE;
@@ -2829,7 +2826,7 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
         std::map<WindowType, SystemBarProperty> systemBarProperties;
@@ -2843,7 +2840,7 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "JsWindow::set systemBar enabled failed"));
         }
-    }
+    };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "set failed"));
