@@ -1778,6 +1778,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionBySessionInfo, Function | Smal
     sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info3, specificCallback);
     ASSERT_NE(sceneSession2, nullptr);
     ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    info3.persistentId_ = 1000;
     ASSERT_EQ(ssm_->GetSceneSessionBySessionInfo(info3), nullptr);
 
     SessionInfo info4;
