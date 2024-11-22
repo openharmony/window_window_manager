@@ -44,23 +44,36 @@ void AbilityInfoManager::SetCurrentUserId(int32_t userId)
 bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string& abilityName,
     const std::string& moduleName)
 {
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-    if (abilityInfo == nullptr || bundleMgr_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "abilityInfo or bundleMgr is nullptr!");
-        return false;
+    bool isAnco = false;
+    auto iter = appInfoMap_.find(bundleName);
+    if (iter == appInfoMap_.end()) {
+        std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+        if (abilityInfo == nullptr || bundleMgr_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "abilityInfo or bundleMgr is nullptr!");
+            return isAnco;
+        }
+        AAFwk::Want want;
+        want.SetElementName("", bundleName, abilityName, moduleName);
+        auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
+            AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
+            AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
+        TLOGI(WmsLogTag::WMS_LIFE, "bundleName: %{public}s, abilityName: %{public}s, moduleName: %{public}s, "
+            "userId: %{public}d, abilityInfoFlag: %{public}d", bundleName.c_str(), abilityName.c_str(),
+            moduleName.c_str(), userId_, abilityInfoFlag);
+        bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, userId_, *abilityInfo);
+        if (!ret) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Get ability info from BMS failed!");
+            return isAnco;
+        }
+        appInfoMap_[bundleName] = abilityInfo->applicationInfo;
+        TLOGI(WmsLogTag::WMS_LIFE, "codePath: %{public}d", abilityInfo->applicationInfo.codePath);
+        isAnco = abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
+            abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
+    } else {
+        isAnco = iter->second.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
+            iter->second.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
     }
-    AAFwk::Want want;
-    want.SetElementName("", bundleName, abilityName, moduleName);
-    auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
-    bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, userId_, *abilityInfo);
-    if (!ret) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Get ability info from BMS failed!");
-        return false;
-    }
-    return abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
-        abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
+    return isAnco;
 }
 
 void AbilityInfoManager::RefreshAppInfo(const std::string& bundleName)
