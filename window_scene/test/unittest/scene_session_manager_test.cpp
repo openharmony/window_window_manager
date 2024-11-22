@@ -994,6 +994,7 @@ HWTEST_F(SceneSessionManagerTest, SetScreenLocked001, Function | SmallTest | Lev
     sceneSession->handler_->PostTask(task, taskName, delayTime);
     int32_t beforeTaskNum = GetTaskCount(sceneSession);
     ssm_->SetScreenLocked(true);
+    sleep(1);
     ASSERT_EQ(beforeTaskNum - 1, GetTaskCount(sceneSession));
     ASSERT_EQ(DetectTaskState::NO_TASK, sceneSession->detectTaskInfo_.taskState);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, sceneSession->detectTaskInfo_.taskWindowMode);
@@ -1429,16 +1430,16 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsEnablePiPCreate start";
     ssm_->isScreenLocked_ = true;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     ssm_->isScreenLocked_ = false;
     Rect reqRect = { 0, 0, 0, 0 };
     property->SetRequestRect(reqRect);
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     reqRect = { 0, 0, 10, 0 };
     property->SetRequestRect(reqRect);
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     reqRect = { 0, 0, 10, 10 };
     property->SetRequestRect(reqRect);
@@ -1452,20 +1453,20 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sceneSession->pipTemplateInfo_ = {0, 100, {}};
     ssm_->sceneSessionMap_.insert({0, sceneSession});
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
     ssm_->sceneSessionMap_.clear();
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     property->SetParentPersistentId(100);
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     ssm_->sceneSessionMap_.clear();
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ASSERT_TRUE(ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(ssm_->IsEnablePiPCreate(property));
 }
 
 /**
