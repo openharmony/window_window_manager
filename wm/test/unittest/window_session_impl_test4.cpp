@@ -2190,8 +2190,6 @@ HWTEST_F(WindowSessionImplTest4, FlushLayoutSize, Function | SmallTest | Level2)
     sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
     option_->SetWindowName("FlushLayoutSize");
     sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
-    ASSERT_NE(window_, nullptr);
-    ASSERT_NE(window_->property_, nullptr);
     window_->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     int32_t width = 1320;
     int32_t height = 2710;
