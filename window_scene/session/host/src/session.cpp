@@ -534,10 +534,10 @@ WSError Session::SetFocusable(bool isFocusable)
 
 WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
 {
-    auto task = [weakThis = wptr(this), isFocusableOnShow]() {
+    auto task = [weakThis = wptr(this), isFocusableOnShow] {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "session is null");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "session is invalid");
             return;
         }
         TLOGND(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
