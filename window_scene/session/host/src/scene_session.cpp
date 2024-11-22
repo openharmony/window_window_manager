@@ -3121,8 +3121,11 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         int32_t persistentId = session->GetPersistentId();
         WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
             session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
+
+        bool beforeVisible = session->isVisible_;
+        session->isVisible_ = visible;
         if (session->visibilityChangedDetectFunc_) {
-            session->visibilityChangedDetectFunc_(session->GetCallingPid(), session->isVisible_, visible);
+            session->visibilityChangedDetectFunc_(session->GetCallingPid(), beforeVisible, visible);
         }
         session->isVisible_ = visible;
         if (session->specificCallback_ == nullptr) {
