@@ -350,6 +350,10 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     pointerEvent->SetPointerAction(2);
     EXPECT_EQ(WSError::WS_OK, session->TransferPointerEvent(pointerEvent, false));
 
+    session->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    session->property_->SetDecorEnable(false);
+    EXPECT_EQ(WSError::WS_OK, session->TransferPointerEvent(pointerEvent, false));
+
     pointerEvent->SetPointerAction(5);
     session->property_->SetDragEnabled(true);
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
