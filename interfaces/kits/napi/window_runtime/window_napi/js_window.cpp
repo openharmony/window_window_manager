@@ -2809,8 +2809,6 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    bool statusBarEnable = false;
-    bool naviBarEnable = false;
     if (argc < INDEX_ONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "invalid argc:%{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
