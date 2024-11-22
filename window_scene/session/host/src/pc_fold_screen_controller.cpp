@@ -66,9 +66,11 @@ void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, SuperFoldStatus st
     }
     TLOGI(WmsLogTag::WMS_MAIN, "display: %{public}" PRIu64", fold status: %{public}d",
         displayId, static_cast<int32_t>(status));
+    prevScreenFoldStatus_ = screenFoldStatus_;
     screenFoldStatus_ = status;
     ResetArrangeRule();
     displayId_ = displayId;
+    ExecuteFoldScreenStatusChangeCallbacks(displayId_, screenFoldStatus_, prevScreenFoldStatus_);
     auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to get display");
@@ -341,8 +343,70 @@ void PcFoldScreenManager::ApplyArrangeRule(WSRect& rect, WSRect& lastArrangedRec
     lastArrangedRect = { rect.posX_, rect.posY_, RULE_TRANS_X * vpr, titleHeight * vpr};
 }
 
-PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession)
-    : weakSceneSession_(std::move(weakSession)) {}
+void PcFoldScreenManager::RegisterFoldScreenStatusChangeCallback(int32_t persistentId,
+    const std::weak_ptr<FoldScreenStatusChangeCallback>& func)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d", persistentId);
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    auto [_, result] = foldScreenStatusChangeCallbacks_.insert_or_assign(persistentId, func);
+    if (result) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "callback has registered");
+    }
+}
+
+void PcFoldScreenManager::UnregisterFoldScreenStatusChangeCallback(int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d", persistentId);
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    auto iter = foldScreenStatusChangeCallbacks_.find(persistentId);
+    if (iter == foldScreenStatusChangeCallbacks_.end()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "callback not registered");
+        return;
+    }
+    foldScreenStatusChangeCallbacks_.erase(iter);
+}
+
+void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId,
+    SuperFoldStatus status, SuperFoldStatus prevStatus)
+{
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    for (auto iter = foldScreenStatusChangeCallbacks_.begin(); iter != foldScreenStatusChangeCallbacks_.end();) {
+        auto callback = iter->second.lock();
+        if (callback == nullptr) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "callback invalid, id: %{public}d", iter->first);
+            iter = foldScreenStatusChangeCallbacks_.erase(iter);
+            continue;
+        }
+        (*callback)(displayId, status, prevStatus);
+        iter++;
+    }
+}
+
+PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession, int32_t persistentId)
+    : weakSceneSession_(std::move(weakSession)), persistentId_(persistentId)
+{
+    onFoldScreenStatusChangeCallback_ = std::make_shared<FoldScreenStatusChangeCallback>(
+        [weakThis = wptr(this)](DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus) {
+            auto controller = weakThis.promote();
+            if (controller == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "controller is nullptr");
+                return;
+            }
+            if ((prevStatus == SuperFoldStatus::HALF_FOLDED && status == SuperFoldStatus::FOLDED) ||
+                (prevStatus == SuperFoldStatus::FOLDED && status == SuperFoldStatus::HALF_FOLDED)) {
+                return;
+            }
+            controller->UpdateFullScreenWaterfallMode(false);
+        }
+    );
+    PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(GetPersistentId(),
+        std::weak_ptr<FoldScreenStatusChangeCallback>(onFoldScreenStatusChangeCallback_));
+}
+
+PcFoldScreenController::~PcFoldScreenController()
+{
+    PcFoldScreenManager::GetInstance().UnregisterFoldScreenStatusChangeCallback(GetPersistentId());
+}
 
 bool PcFoldScreenController::IsHalfFolded(DisplayId displayId)
 {
@@ -448,13 +512,50 @@ RSAnimationTimingCurve PcFoldScreenController::GetThrowSlipTimingCurve()
     return PcFoldScreenManager::GetInstance().GetThrowSlipTimingCurve();
 }
 
-int32_t PcFoldScreenController::GetPersistentId() const
+void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
 {
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
-        return INVALID_SESSION_ID;
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
+        return;
     }
-    return sceneSession->GetPersistentId();
+    sceneSession->PostTask([weakThis = wptr(this), isWaterfallMode] {
+        auto controller = weakThis.promote();
+        if (controller == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "controller is nullptr");
+            return;
+        }
+        if (controller->isFullScreenWaterfallMode_ == isWaterfallMode) {
+            return;
+        }
+        controller->isFullScreenWaterfallMode_ = isWaterfallMode;
+        controller->ExecuteFullScreenWaterfallModeChangeCallback();
+    }, __func__);
+}
+
+void PcFoldScreenController::RegisterFullScreenWaterfallModeChangeCallback(
+    std::function<void(bool isWaterfallMode)>&& func)
+{
+    fullScreenWaterfallModeChangeCallback_ = std::move(func);
+    ExecuteFullScreenWaterfallModeChangeCallback();
+}
+
+void PcFoldScreenController::UnregisterFullScreenWaterfallModeChangeCallback()
+{
+    fullScreenWaterfallModeChangeCallback_ = nullptr;
+}
+
+void PcFoldScreenController::ExecuteFullScreenWaterfallModeChangeCallback()
+{
+    if (fullScreenWaterfallModeChangeCallback_ == nullptr) {
+        return;
+    }
+    fullScreenWaterfallModeChangeCallback_(isFullScreenWaterfallMode_);
+}
+
+int32_t PcFoldScreenController::GetPersistentId() const
+{
+    return persistentId_;
 }
 
 /**

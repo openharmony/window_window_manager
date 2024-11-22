@@ -105,6 +105,7 @@ struct UIExtensionTokenInfo {
 class SceneSession : public Session {
 public:
     friend class HidumpController;
+    friend class PcFoldScreenController;
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
@@ -544,6 +545,12 @@ public:
     bool GetEnableGestureBackHadSet();
 
     /**
+     * PC Fold Screen
+     */
+    void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
+    void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
+
+    /**
      * PC Window
      */
     void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
@@ -625,6 +632,8 @@ protected:
     /**
      * PC Fold Screen
      */
+    bool IsFullScreenWaterfallMode();
+    void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic_bool throwSlipFullScreenFlag_ = false;
 
