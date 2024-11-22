@@ -1007,7 +1007,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), rect, reason, rsTransaction,  updateReason, funcName] {
+    auto task = [weakThis = wptr(this), rect, reason, rsTransaction, updateReason, funcName] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
