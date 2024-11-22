@@ -1966,6 +1966,7 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& sceneSessio
     if (abilitySessionInfo == nullptr) {
         return ERR_NULL_OBJECT;
     }
+    sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
     return StartUIAbilityBySCB(abilitySessionInfo);
 }
 
@@ -1975,11 +1976,15 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abili
     return AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo, isColdStart);
 }
 
-int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSession, bool visibility)
+int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSession,
+    bool visibility, bool isFromClient)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
     if (abilitySessionInfo == nullptr) {
         return ERR_NULL_OBJECT;
+    }
+    if (!isFromClient) {
+        sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
     }
     return AAFwk::AbilityManagerClient::GetInstance()->ChangeUIAbilityVisibilityBySCB(abilitySessionInfo, visibility);
 }
