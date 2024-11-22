@@ -62,8 +62,8 @@
 #include "res_sched_client.h"
 #include "anomaly_detection.h"
 #include "hidump_controller.h"
-#include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/ability_info_manager.h"
+#include "session/host/include/multi_instance_manager.h"
 
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
