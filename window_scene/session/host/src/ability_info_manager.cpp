@@ -80,6 +80,6 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
 void AbilityInfoManager::RefreshAppInfo(const std::string& bundleName)
 {
     std::unique_lock<std::mutex> lock(codePathMutex_);
-    appInfoMap_.erase(bundleName);
+    codePathMap_.erase(bundleName);
 }
 } // namespace OHOS::Rosen
