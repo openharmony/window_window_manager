@@ -1689,8 +1689,10 @@ HWTEST_F(SceneSessionManagerTest3, IsScreenLocked, Function | SmallTest | Level3
 {
     ssm_->sceneSessionMap_.clear();
     ssm_->SetScreenLocked(true);
+    sleep(1);
     EXPECT_TRUE(ssm_->IsScreenLocked());
     ssm_->SetScreenLocked(false);
+    sleep(1);
     EXPECT_FALSE(ssm_->IsScreenLocked());
 }
 
