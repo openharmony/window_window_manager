@@ -3784,9 +3784,10 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.isFoundationCall_ = isFoundationCall;
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
-        info.supportWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
-            abilitySessionInfo->supportWindowModes.end());
-        info.windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(info.supportWindowModes);
+        if (!abilitySessionInfo->supportWindowModes.empty()) {
+            info.supportWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
+                abilitySessionInfo->supportWindowModes.end());
+        }
     }
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
@@ -3801,11 +3802,11 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
         "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
-        "supportWindowModes.size:%{public}zu, windowModeSupportType:%{public}u, specifiedId:%{public}d",
+        "supportWindowModes.size:%{public}zu, specifiedId:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
-        info.supportWindowModes.size(), info.windowModeSupportType, info.specifiedId);
+        info.supportWindowModes.size(), info.specifiedId);
     return info;
 }
 

@@ -389,7 +389,6 @@ struct SessionInfo {
      * PC Window
      */
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-    uint32_t windowModeSupportType = 0;
 };
 
 enum class SessionFlag : uint32_t {

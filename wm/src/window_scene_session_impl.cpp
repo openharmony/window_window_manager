@@ -873,14 +873,18 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         UpdateWindowSizeLimits();
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         // get support modes configuration
-        uint32_t windowModeSupportType = property_->GetWindowModeSupportType();
-        if (windowModeSupportType == 0) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "startAbility support window mode param is 0, get modes from ability info");
+        uint32_t windowModeSupportType = 0;
+        std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+        property_->GetSupportWindowModes(supportWindowModes);
+        auto size = supportWindowModes.size();
+        if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+            windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportWindowModes);
+        } else {
             windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(abilityInfo->windowModes);
-            if (windowModeSupportType == 0) {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "mode config param is 0, all modes is supported");
-                windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
-            }
+        }
+        if (windowModeSupportType == 0) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "mode config param is 0, all modes is supported");
+            windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
         }
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}u, windowModeSupportType: %{public}u",
             GetWindowId(), windowModeSupportType);

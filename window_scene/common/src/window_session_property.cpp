@@ -556,6 +556,18 @@ uint32_t WindowSessionProperty::GetWindowModeSupportType() const
     return windowModeSupportType_;
 }
 
+void WindowSessionProperty::SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+{
+    std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
+    supportWindowModes_ = supportWindowModes;
+}
+
+void WindowSessionProperty::GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const
+{
+    std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
+    supportWindowModes = supportWindowModes_;
+}
+
 void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
 {
     animationFlag_ = animationFlag;

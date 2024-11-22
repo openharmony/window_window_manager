@@ -222,6 +222,12 @@ public:
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
 
+    /**
+     * PC Window
+     */
+    void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
+    void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
+
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
@@ -372,6 +378,12 @@ private:
      * Multi Instance
      */
     std::string appInstanceKey_;
+
+    /**
+     * PC Window
+     */
+    mutable std::mutex supportWindowModesMutex_;
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
