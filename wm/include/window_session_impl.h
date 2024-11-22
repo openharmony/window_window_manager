@@ -419,13 +419,9 @@ protected:
     bool interactive_ = true;
 
     /**
-     * Window Pattern
-     */
-    void FlushLayoutSize(int32_t width, int32_t height) override;
-
-    /**
      * Window Layout
      */
+    void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
@@ -568,15 +564,11 @@ private:
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 
     /**
-     * Window pattern
+     * Window Layout
      */
     std::atomic_bool windowSizeChanged_ = false;
     WSRect layoutRect_;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
-
-    /**
-     * Window Layout
-     */
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
