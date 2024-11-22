@@ -3760,7 +3760,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.isFoundationCall_ = isFoundationCall;
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
-        if (!abilitySessionInfo->supportWindowModes.size().empty()) {
+        if (!abilitySessionInfo->supportWindowModes.empty()) {
             info.supportWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
         }
