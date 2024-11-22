@@ -2043,7 +2043,8 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
-            weakWindow->ResizeAsync(static_cast<uint32_t>(rect.width_), static_cast<uint32_t>(rect.height_), rectAnimationConfig));
+            weakWindow->ResizeAsync(static_cast<uint32_t>(rect.width_), static_cast<uint32_t>(rect.height_),
+            rectAnimationConfig));
         TLOGNI(WmsLogTag::WMS_LAYOUT,
             "%{public}s Window [%{public}u, %{public}s] resize with animation end, err = %{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
