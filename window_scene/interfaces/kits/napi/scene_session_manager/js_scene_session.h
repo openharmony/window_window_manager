@@ -80,6 +80,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB,
     TITLE_DOCK_HOVER_SHOW_CB,
     SET_WINDOW_RECT_AUTO_SAVE_CB,
+    UPDATE_APP_USE_CONTROL_CB,
 };
 
 class SceneSession;
@@ -271,7 +272,8 @@ private:
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
-
+    void ProcessUpdateAppUseControllRegister();
+    
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
