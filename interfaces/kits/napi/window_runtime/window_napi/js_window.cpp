@@ -1750,12 +1750,12 @@ napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info
 }
 
 static void SetMoveWindowToWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback& execute,
-    NapiAsyncTask::CompleteCallback& complete, wptr<Window> weakToken, int32_t x, int32_t y,
+    NapiAsyncTask::CompleteCallback& complete, wptr<Window> weakToken, const Rect& rect,
     RectAnimationConfig& rectAnimationConfig)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const where = __func__;
-    execute = [weakToken, errCodePtr, x, y, rectAnimationConfig, where] {
+    execute = [weakToken, errCodePtr, rect, rectAnimationConfig, where] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -1765,7 +1765,8 @@ static void SetMoveWindowToWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(x, y, rectAnimationConfig));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(rect.posX_, rect.posY_,
+            rectAnimationConfig));
         TLOGNI(WmsLogTag::WMS_LAYOUT,
             "%{public}s Window [%{public}u, %{public}s] move end, err = %{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
@@ -1821,7 +1822,8 @@ napi_value JsWindow::OnMoveWindowToWithAnimation(napi_env env, napi_callback_inf
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
-    SetMoveWindowToWithAnimationAsyncTask(execute, complete, weakToken, x, y, rectAnimationConfig);
+    Rect rect = { x, y, 0, 0 };
+    SetMoveWindowToWithAnimationAsyncTask(execute, complete, weakToken, rect, rectAnimationConfig);
 
     // 3: params num; 3: index of callback
     napi_value lastParam = (argc <= 3) ? nullptr :
@@ -2025,12 +2027,12 @@ napi_value JsWindow::OnResizeWindowAsync(napi_env env, napi_callback_info info)
 }
 
 static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback& execute,
-    NapiAsyncTask::CompleteCallback& complete, wptr<Window> weakToken, int32_t width, int32_t height,
+    NapiAsyncTask::CompleteCallback& complete, wptr<Window> weakToken, const Rect& rect,
     RectAnimationConfig& rectAnimationConfig)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const where = __func__;
-    execute = [weakToken, errCodePtr, width, height, rectAnimationConfig, where] {
+    execute = [weakToken, errCodePtr, rect, rectAnimationConfig, where] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -2041,7 +2043,7 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
-            weakWindow->ResizeAsync(static_cast<uint32_t>(width), static_cast<uint32_t>(height), rectAnimationConfig));
+            weakWindow->ResizeAsync(static_cast<uint32_t>(rect.width_), static_cast<uint32_t>(rect.height_), rectAnimationConfig));
         TLOGNI(WmsLogTag::WMS_LAYOUT,
             "%{public}s Window [%{public}u, %{public}s] resize with animation end, err = %{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
@@ -2103,7 +2105,8 @@ napi_value JsWindow::OnResizeWindowWithAnimation(napi_env env, napi_callback_inf
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
-    SetResizeWindowWithAnimationAsyncTask(execute, complete, weakToken, width, height, rectAnimationConfig);
+    Rect rect = { 0, 0, width, height };
+    SetResizeWindowWithAnimationAsyncTask(execute, complete, weakToken, rect, rectAnimationConfig);
 
     // 3: params num; 3: index of callback
     napi_value lastParam = (argc <= 3) ? nullptr :
