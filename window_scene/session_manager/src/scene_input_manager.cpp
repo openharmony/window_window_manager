@@ -197,13 +197,6 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         auto screenId = iter.first;
         auto& screenProperty = iter.second;
         auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
-        MMI::Direction displayRotation;
-        if (screenSession && screenSession->GetDisplayNode()) {
-            displayRotation = ConvertDegreeToMMIRotation(
-                screenSession->GetDisplayNode()->GetStagingProperties().GetRotation());
-        } else {
-            displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation());
-        }
         auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
         auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
         auto transform = Matrix3f::IDENTITY;
@@ -222,7 +215,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .name = "display" + std::to_string(screenId),
             .uniq = "default" + std::to_string(screenId),
             .direction = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation()),
-            .displayDirection = displayRotation,
+            .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
             .ppi = screenProperty.GetXDpi()};
