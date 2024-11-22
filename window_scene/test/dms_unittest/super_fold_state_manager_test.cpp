@@ -167,6 +167,8 @@ HWTEST_F(SuperFoldStateManagerTest, HandleSuperFoldStatusChange06, Function | Sm
     SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
     std::function<void()> func = [&]()
     {
+        SuperFoldStateManager::GetInstance().
+            HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
         SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
     };
 
