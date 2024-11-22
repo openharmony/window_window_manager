@@ -735,15 +735,15 @@ int SessionStub::HandleUpdateClientRect(MessageParcel& data, MessageParcel& repl
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
     int32_t posX = 0;
     int32_t posY = 0;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+    int32_t width = 0;
+    int32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadInt32(width) || !data.ReadInt32(height)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
         return ERR_INVALID_DATA;
     }
     WSRect rect = { posX, posY, width, height };
     WSError errCode = UpdateClientRect(rect);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

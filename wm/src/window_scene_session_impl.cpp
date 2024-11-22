@@ -1061,8 +1061,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         property_->GetWindowName().c_str(), GetPersistentId(), type, requestRect.ToString().c_str());
     if (requestRect.width_ != 0 && requestRect.height_ != 0) {
         UpdateViewportConfig(requestRect, WindowSizeChangeReason::RESIZE, nullptr, info);
-        auto hostSession = GetHostSession();
-        if (hostSession) {
+        if (auto hostSession = GetHostSession()) {
             WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
             property_->SetWindowRect(requestRect);
             hostSession->UpdateClientRect(wsRect);

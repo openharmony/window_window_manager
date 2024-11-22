@@ -2404,10 +2404,6 @@ void SceneSessionManager::AddClientDeathRecipient(const sptr<ISessionStage>& ses
 
     auto remoteObject = sessionStage->AsObject();
     remoteObjectMap_.insert(std::make_pair(remoteObject, sceneSession->GetPersistentId()));
-    if (windowDeath_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "failed to create death recipient");
-        return;
-    }
     if (!remoteObject->AddDeathRecipient(windowDeath_)) {
         TLOGE(WmsLogTag::WMS_LIFE, "failed to add death recipient");
         return;
@@ -3231,12 +3227,8 @@ void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistent
         if (iter->second != persistentId) {
             continue;
         }
-        if (windowDeath_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "death recipient is null");
-        } else {
-            if (iter->first == nullptr || !iter->first->RemoveDeathRecipient(windowDeath_)) {
-                TLOGE(WmsLogTag::WMS_LIFE, "failed to remove death recipient");
-            }
+        if (iter->first == nullptr || !iter->first->RemoveDeathRecipient(windowDeath_)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "failed to remove death recipient");
         }
         remoteObjectMap_.erase(iter);
         break;
@@ -4351,11 +4343,10 @@ void SceneSessionManager::RegisterRequestVsyncFunc(const sptr<SceneSession>& sce
         TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
         return;
     }
-    RequestVsyncFunc requestVsyncFunc = [this](std::shared_ptr<VsyncCallback> callback) {
+    sceneSession->SetRequestNextVsyncFunc([this](const std::shared_ptr<VsyncCallback>& callback) {
         vsyncStation_->RequestVsync(callback);
-    };
-    sceneSession->SetRequestNextVsyncFunc(requestVsyncFunc);
-};
+    });
+}
 
 void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession)
 {
@@ -5417,7 +5408,6 @@ WSError SceneSessionManager::ShiftFocus(sptr<SceneSession>& nextSession, FocusCh
     UpdateFocusStatus(nextSession, true);
     bool scbPrevFocus = focusedSession && focusedSession->GetSessionInfo().isSystem_;
     bool scbCurrFocus = nextSession && nextSession->GetSessionInfo().isSystem_;
-    AnomalyDetection::FocusCheckProcess(focusedId, nextId);
     if (!scbPrevFocus && scbCurrFocus) {
         if (notifySCBAfterFocusedFunc_ != nullptr) {
             notifySCBAfterFocusedFunc_();
@@ -7148,9 +7138,15 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
         snapshot.topAbility.SetBundleName(sessionInfo.bundleName_.c_str());
         snapshot.topAbility.SetModuleName(sessionInfo.moduleName_.c_str());
         snapshot.topAbility.SetAbilityName(sessionInfo.abilityName_.c_str());
-        auto oriSnapshot = sceneSession->Snapshot(false, sceneSession->GetFloatingScale(), false);
+        float snapShotScale = sceneSession->GetFloatingScale() > 1.0f ? 1.0f : sceneSession->GetFloatingScale();
+        auto oriSnapshot = sceneSession->Snapshot(false, snapShotScale, false);
         if (oriSnapshot != nullptr) {
+            if (sceneSession->GetFloatingScale() > 1.0f) {
+                oriSnapshot->scale(sceneSession->GetFloatingScale(), sceneSession->GetFloatingScale());
+            }
             snapshot.snapshot = oriSnapshot;
+            TLOGI(WmsLogTag::WMS_SYSTEM, "snapshot WxH = %{public}dx%{public}d",
+                oriSnapshot->GetWidth(), oriSnapshot->GetHeight());
             return WMError::WM_OK;
         }
         return WMError::WM_ERROR_NULLPTR;

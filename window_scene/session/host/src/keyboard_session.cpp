@@ -533,15 +533,21 @@ void KeyboardSession::RelayoutKeyBoard()
 
 void KeyboardSession::OpenKeyboardSyncTransaction()
 {
-    if (isKeyboardSyncTransactionOpen_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard sync transaction is already open");
-        return;
-    }
-    isKeyboardSyncTransactionOpen_ = true;
-    auto task = []() {
+    auto task = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->isKeyboardSyncTransactionOpen_) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "Keyboard sync transaction is already open");
+            return WSError::WS_OK;
+        }
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Open keyboard sync");
+        session->isKeyboardSyncTransactionOpen_ = true;
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
-            transactionController->OpenSyncTransaction();
+            transactionController->OpenSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
     };
@@ -551,15 +557,14 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
 void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
     bool isKeyboardShow, bool isRotating)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanelRect: %{public}s, isKeyboardShow: %{public}d, isRotating: %{public}d",
-        keyboardPanelRect.ToString().c_str(), isKeyboardShow, isRotating);
     auto task = [weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, isRotating]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, isKeyboardShow: %{public}d, isRotating: %{public}d",
+            isKeyboardShow, isRotating);
         std::shared_ptr<RSTransaction> rsTransaction = nullptr;
         if (!isRotating && session->isKeyboardSyncTransactionOpen_) {
             rsTransaction = session->GetRSTransaction();
@@ -583,7 +588,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         session->isKeyboardSyncTransactionOpen_ = false;
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
-            transactionController->CloseSyncTransaction();
+            transactionController->CloseSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
     };

@@ -332,39 +332,39 @@ HWTEST_F(SceneSessionTest3, IsMovableWindowType, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetBlankFlag
- * @tc.desc: check func SetBlankFlag
+ * @tc.name: SetBlank
+ * @tc.desc: check func SetBlank
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, SetBlankFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, SetBlank, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetBlankFlag";
-    info.bundleName_ = "SetBlankFlag";
+    info.abilityName_ = "SetBlank";
+    info.bundleName_ = "SetBlank";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     bool isAddBlank = true;
-    sceneSession->SetBlankFlag(isAddBlank);
-    ASSERT_EQ(isAddBlank, sceneSession->GetBlankFlag());
+    sceneSession->SetBlank(isAddBlank);
+    ASSERT_EQ(isAddBlank, sceneSession->GetBlank());
 }
 
 /**
- * @tc.name: GetBlankFlag
- * @tc.desc: check func GetBlankFlag
+ * @tc.name: GetBlank
+ * @tc.desc: check func GetBlank
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, GetBlankFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, GetBlank, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "GetBlankFlag";
-    info.bundleName_ = "GetBlankFlag";
+    info.abilityName_ = "GetBlank";
+    info.bundleName_ = "GetBlank";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     bool isAddBlank = true;
-    sceneSession->SetBlankFlag(isAddBlank);
-    ASSERT_EQ(isAddBlank, sceneSession->GetBlankFlag());
+    sceneSession->SetBlank(isAddBlank);
+    ASSERT_EQ(isAddBlank, sceneSession->GetBlank());
 }
 
 /**

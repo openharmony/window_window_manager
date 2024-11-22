@@ -99,7 +99,6 @@ constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t REMOVE_DISPLAY_MODE = 0;
-constexpr int32_t INVALID_DPI = 0;
 constexpr int32_t IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD = 10;
 constexpr uint32_t SCREEN_MAIN_IN_DATA = 0;
 constexpr uint32_t SCREEN_MIRROR_IN_DATA = 1;
@@ -113,14 +112,11 @@ const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotat
 constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
-static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
-static const constexpr char* SETTING_DPI_KEY_EXTEND {"user_set_dpi_value_extend"};
 static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 
 const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
 const std::string SCREEN_UNKNOWN = "unknown";
-constexpr float PHYSICAL_MASS = 1.6f;
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -807,7 +803,6 @@ void ScreenSessionManager::RecoverMultiScreenInfoFromData(sptr<ScreenSession> sc
         secondaryScreenOption.screenId_, secondaryScreenOption.startX_, secondaryScreenOption.startY_);
     SetMultiScreenMode(mainScreenOption.screenId_, secondaryScreenOption.screenId_, multiScreenMode);
     SetMultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
-    SetDpiFromSettingData(false);
 }
 
 void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSession,
@@ -1574,9 +1569,14 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
         TLOGI(WmsLogTag::DMS, "Not expandable screen, no need to set dpi");
         return;
     }
-    float extendDensity = CalcDefaultExtendScreenDensity(property);
+    ScreenId mainScreenId = GetDefaultScreenId();
+    sptr<ScreenSession> screenSession = GetScreenSession(mainScreenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    float extendDensity = screenSession->GetScreenProperty().GetDensity();
     TLOGI(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
-    extendDefaultDpi_ = static_cast<uint32_t>(extendDensity * BASELINE_DENSITY);
     session->SetVirtualPixelRatio(extendDensity);
     session->SetDefaultDensity(extendDensity);
     session->SetDensityInCurResolution(extendDensity);
@@ -1589,26 +1589,6 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
         phyScreenPropMap_[screenId] = property;
     }
     return;
-}
-
-float ScreenSessionManager::CalcDefaultExtendScreenDensity(const ScreenProperty& property)
-{
-    int32_t phyWith = property.GetPhyWidth();
-    int32_t phyHeight = property.GetPhyHeight();
-    float phyDiagonal = std::sqrt(static_cast<float>(phyWith * phyWith + phyHeight * phyHeight));
-    TLOGI(WmsLogTag::DMS, "phyDiagonal:%{public}f", phyDiagonal);
-    if (phyDiagonal > 0) {
-        RRect phyBounds = property.GetPhyBounds();
-        int32_t width = phyBounds.rect_.GetWidth();
-        int32_t height = phyBounds.rect_.GetHeight();
-        float PPI = std::sqrt(static_cast<float>(width * width + height * height)) * INCH_TO_MM / phyDiagonal;
-        float DPI = std::ceil(PPI * PHYSICAL_MASS);
-        TLOGI(WmsLogTag::DMS, "DPI:%{public}f", DPI);
-        float density = DPI / BASELINE_DENSITY;
-        return density;
-    } else {
-        return densityDpi_;
-    }
 }
 
 sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId)
@@ -2373,7 +2353,6 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
         that.RegisterSettingDpiObserver();
-        that.RegisterExtendSettingDpiObserver();
         if (that.foldScreenPowerInit_ != nullptr) {
             that.foldScreenPowerInit_();
         }
@@ -2412,21 +2391,9 @@ void ScreenSessionManager::SetRotateLockedFromSettingData()
 
 void ScreenSessionManager::RegisterSettingDpiObserver()
 {
-    TLOGI(WmsLogTag::DMS, "start");
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "mirror") {
-        SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
-        ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
-    } else {
-        SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(true); };
-        ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
-    }
-}
-
-void ScreenSessionManager::RegisterExtendSettingDpiObserver()
-{
-    TLOGI(WmsLogTag::DMS, "start");
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(false); };
-    ScreenSettingHelper::RegisterExtendSettingDpiObserver(updateFunc);
+    TLOGI(WmsLogTag::DMS, "Register Setting Dpi Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetDpiFromSettingData(); };
+    ScreenSettingHelper::RegisterSettingDpiObserver(updateFunc);
 }
 
 void ScreenSessionManager::SetDpiFromSettingData()
@@ -2445,45 +2412,22 @@ void ScreenSessionManager::SetDpiFromSettingData()
         float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
         ScreenId defaultScreenId = GetDefaultScreenId();
         SetVirtualPixelRatio(defaultScreenId, dpi);
+        if (g_isPcDevice) {
+            SetExtendPixelRatio(dpi);
+        }
     } else {
         TLOGE(WmsLogTag::DMS, "setting dpi error, settingDpi: %{public}d", settingDpi);
     }
 }
 
-void ScreenSessionManager::SetDpiFromSettingData(bool isInternal)
+void ScreenSessionManager::SetExtendPixelRatio(const float& dpi)
 {
-    uint32_t settingDpi = INVALID_DPI;
-    bool ret = false;
-    if (isInternal == true) {
-        ret = ScreenSettingHelper::GetSettingDpi(settingDpi, SETTING_DPI_KEY);
-    } else {
-        ret = ScreenSettingHelper::GetSettingDpi(settingDpi, SETTING_DPI_KEY_EXTEND);
-    }
-    if (!ret) {
-        TLOGW(WmsLogTag::DMS, "get setting dpi failed,use default dpi");
-        if (isInternal) {
-            settingDpi = defaultDpi;
-        } else {
-            settingDpi = extendDefaultDpi_;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (const auto& sessionIt : screenSessionMap_) {
+        const auto& screenSession = sessionIt.second;
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && !screenSession->isInternal_) {
+            SetVirtualPixelRatio(sessionIt.first, dpi);
         }
-    } else {
-        TLOGI(WmsLogTag::DMS, "get setting dpi success,settingDpi: %{public}u", settingDpi);
-    }
-    if (settingDpi >= DOT_PER_INCH_MINIMUM_VALUE && settingDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
-        float dpi = static_cast<float>(settingDpi) / BASELINE_DENSITY;
-        ScreenId screenId = SCREEN_ID_INVALID;
-        {
-            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-            for (const auto& sessionIt : screenSessionMap_) {
-                const auto& screenSession = sessionIt.second;
-                if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
-                    screenSession->isInternal_ == isInternal) {
-                    screenId = sessionIt.first;
-                    break;
-                }
-            }
-        }
-        SetVirtualPixelRatio(screenId, dpi);
     }
 }
 
@@ -3116,6 +3060,7 @@ void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObje
         deathRecipient_ =
             new(std::nothrow) AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
     }
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     if (deathRecipient_ != nullptr) {
         auto agIter = screenAgentMap_.find(displayManagerAgent);
         if (agIter == screenAgentMap_.end()) {
@@ -3155,7 +3100,6 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     }
     TLOGI(WmsLogTag::DMS, "rsId: %{public}" PRIu64"", rsId);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CreateVirtualScreen(%s)", option.name_.c_str());
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     ScreenId smsScreenId = SCREEN_ID_INVALID;
     if (!screenIdManager_.ConvertToSmsScreenId(rsId, smsScreenId)) {
         TLOGI(WmsLogTag::DMS, "!ConvertToSmsScreenId(rsId, smsScreenId)");
@@ -3168,7 +3112,10 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         }
         screenSession->SetName(option.name_);
         screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
-        screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
+        }
         if (option.name_ == "CastEngine") {
             screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
         }
@@ -5294,6 +5241,9 @@ bool ScreenSessionManager::GetTentMode()
 
 sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return SuperFoldStateManager::GetInstance().GetCurrentFoldCreaseRegion();
+    }
     if (!g_foldScreenFlag) {
         return nullptr;
     }
@@ -5693,6 +5643,11 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     oldScbDisplayMode_ = GetFoldDisplayMode();
 }
 
+int32_t ScreenSessionManager::GetCurrentUserId()
+{
+    return currentUserId_;
+}
+
 void ScreenSessionManager::SetClientInner()
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -5882,7 +5837,8 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    if (!FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+    if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
     }
     /* Avoid fold to expand process queues */

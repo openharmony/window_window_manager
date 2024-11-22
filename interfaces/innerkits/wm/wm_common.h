@@ -292,6 +292,14 @@ enum class WindowUIType : uint8_t {
 };
 
 /**
+ * @brief Enumerates flag of ControlAppType.
+ */
+enum class ControlAppType : uint8_t {
+    APP_LOCK = 1,
+    CONTROL_APP_TYPE_END,
+};
+
+/**
  * @brief Used to map from WMError to WmErrorCode.
  */
 extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
@@ -1066,8 +1074,8 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = INT32_MAX;
-    uint32_t maxHeight_ = INT32_MAX;
+    uint32_t maxWidth_ = UINT32_MAX;
+    uint32_t maxHeight_ = UINT32_MAX;
     uint32_t minWidth_ = 1;
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;

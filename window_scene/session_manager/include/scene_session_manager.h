@@ -515,8 +515,6 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
-    std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
-
     /*
      * Specific Window
      */
@@ -557,9 +555,6 @@ private:
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
-    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
-    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
-    void InitVsyncStation();
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
@@ -780,7 +775,13 @@ private:
     std::map<int32_t, int32_t> visibleWindowCountMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
-    std::map<sptr<IRemoteObject>, int32_t> remoteObjectMap_;
+    struct IRemoteObjectHash {
+        size_t operator()(const sptr<IRemoteObject>& ptr) const
+        {
+            return std::hash<IRemoteObject*>{}(ptr.GetRefPtr());
+        }
+    };
+    std::unordered_map<sptr<IRemoteObject>, int32_t, IRemoteObjectHash> remoteObjectMap_;
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> remoteExtSessionMap_;
     std::map<sptr<IRemoteObject>, ExtensionWindowAbilityInfo> extSessionInfoMap_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
@@ -949,8 +950,13 @@ private:
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
+
+    /*
+     * Specific Window
+     */
     void ClearSpecificSessionRemoteObjectMap(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
+
     WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
     void CalculateCombinedExtWindowFlags();
     void UpdateSpecialExtWindowFlags(int32_t persistentId, ExtensionWindowFlags flags, ExtensionWindowFlags actions);
@@ -1000,6 +1006,14 @@ private:
     void RemoveProcessWatermarkPid(int32_t pid);
 
     /**
+     * Window Layout
+     */
+    std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    void InitVsyncStation();
+    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+
+    /*
      * Window Snapshot
      */
     std::unordered_set<int32_t> snapshotSkipPidSet_ GUARDED_BY(SCENE_GUARD); // ONLY Accessed on OS_sceneSession thread
