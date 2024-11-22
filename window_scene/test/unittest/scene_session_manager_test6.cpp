@@ -1772,6 +1772,7 @@ HWTEST_F(SceneSessionManagerTest6, SearchSceneSessionByIdentityInfo, Function | 
     info3.bundleName_ = "SearchSceneSessionByIdentityInfoBundle2";
     info3.abilityName_ = "SearchSceneSessionByIdentityInfoAbility2";
     info3.appInstanceKey_ = "";
+    info3.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     info3.abilityInfo->launchMode = AppExecFwk::LaunchMode::SPECIFIED;
     sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info3, specificCallback);
     ASSERT_NE(sceneSession2, nullptr);
