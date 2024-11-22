@@ -70,6 +70,8 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
         isAnco = abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
             abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
     } else {
+        TLOGI(WmsLogTag::WMS_LIFE, "applicationInfo already in appInfoMap_, codePath: %{public}s",
+            abilityInfo->applicationInfo.codePath.c_str());
         isAnco = iter->second.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
             iter->second.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
     }

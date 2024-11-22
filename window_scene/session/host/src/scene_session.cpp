@@ -3840,9 +3840,9 @@ bool SceneSession::DisallowActivationFromPendingBackground(bool isPcOrPadEnableA
     bool foregroundInteractiveStatus = GetForegroundInteractiveStatus();
     TLOGI(WmsLogTag::WMS_LIFE, "session state:%{public}d, isFoundationCall:%{public}u, "
         "canStartAbilityFromBackground:%{public}u, foregroundInteractiveStatus:%{public}u, "
-        "isPendingToBackgroundState:%{public}u",
+        "isPendingToBackgroundState:%{public}u, isFromAncoAndToAnco:%{public}u",
         GetSessionState(), isFoundationCall, canStartAbilityFromBackground, foregroundInteractiveStatus,
-        isPendingToBackgroundState);
+        isPendingToBackgroundState, isFromAncoAndToAnco);
     bool isSessionForeground = GetSessionState() == SessionState::STATE_FOREGROUND ||
         GetSessionState() == SessionState::STATE_ACTIVE;
     if (isSessionForeground) {
