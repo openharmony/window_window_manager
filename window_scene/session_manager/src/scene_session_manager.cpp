@@ -3425,7 +3425,6 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
             MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
         }
-        AbilityInfoManager::GetInstance().Init(bundleMgr_);
         AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
         RegisterSecSurfaceInfoListener();
         return WSError::WS_OK;
