@@ -1912,6 +1912,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     info.bundleName_ = "HandleCompatibleModeMoveDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
@@ -1967,6 +1968,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, Function | SmallTest | Leve
     info.bundleName_ = "HandleCompatibleModeDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {2, 1, 1, 1};
