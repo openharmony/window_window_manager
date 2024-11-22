@@ -2768,17 +2768,9 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool statusBarEnable = false;
-    bool naviBarEnable = false;
-    if (!GetSystemBarStatus(env, info, statusBarEnable, naviBarEnable)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask =
-        [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, statusBarEnable, naviBarEnable] {
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, info] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
@@ -2787,7 +2779,11 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
         }
         std::map<WindowType, SystemBarProperty> systemBarProperties;
         std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-        SetSystemBarStatus(weakWindow, statusBarEnable, naviBarEnable, systemBarProperties, systemBarPropertyFlags);
+        if (!GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, env, info, weakWindow)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+            return;
+        }
         UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakWindow);
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
             SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, weakWindow));
@@ -2815,14 +2811,13 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     bool statusBarEnable = false;
     bool naviBarEnable = false;
-    if (argc < INDEX_ONE || !GetSystemBarStatus(env, info, statusBarEnable, naviBarEnable)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "invalid param or argc:%{public}zu", argc);
+    if (argc < INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid argc:%{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask =
-        [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, statusBarEnable, naviBarEnable] {
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, info] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
@@ -2831,7 +2826,11 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
         }
         std::map<WindowType, SystemBarProperty> systemBarProperties;
         std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-        SetSystemBarStatus(weakWindow, statusBarEnable, naviBarEnable, systemBarProperties, systemBarPropertyFlags);
+        if (!GetSystemBarStatus(systemBarProperties, systemBarPropertyFlags, env, info, weakWindow)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+            return;
+        }
         UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, weakWindow);
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
             SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, weakWindow));
