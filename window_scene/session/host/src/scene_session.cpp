@@ -2788,12 +2788,10 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
-    if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
-        if (reason == SizeChangeReason::DRAG_END) {
-            HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
-        } else {
-            HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
-        }
+    if (isCompatibleModeInPc && !IsFreeMultiWindowMode() && reason == SizeChangeReason::DRAG_END) {
+        HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
+    } else if (isCompatibleModeInPc && !IsFreeMultiWindowMode() && reason != SizeChangeReason::DRAG_END) {
+        HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
     } else if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode() && isMainWindow) {
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
