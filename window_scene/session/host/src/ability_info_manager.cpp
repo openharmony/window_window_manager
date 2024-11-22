@@ -19,8 +19,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-}
 
 AbilityInfoManager& AbilityInfoManager::GetInstance()
 {
@@ -63,5 +61,11 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
     }
     return abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
         abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
+}
+
+void AbilityInfoManager::RefreshAppInfo(const std::string& bundleName)
+{
+    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
+    appInfoMap_.erase(bundleName);
 }
 } // namespace OHOS::Rosen

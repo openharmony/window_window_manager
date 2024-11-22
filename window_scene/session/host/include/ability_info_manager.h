@@ -16,12 +16,15 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_ABILITY_INFO_MANAGER_H
 #define OHOS_ROSEN_WINDOW_SCENE_ABILITY_INFO_MANAGER_H
 
-#include <cstdint>
 #include <string>
+#include <cstdint>
 #include <refbase.h>
+#include <shared_mutex>
+#include <unordered_map>
 
 namespace OHOS::AppExecFwk {
 class IBundleMgr;
+struct ApplicationInfo;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS::Rosen {
@@ -30,9 +33,12 @@ public:
     static AbilityInfoManager& GetInstance();
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
     void SetCurrentUserId(int32_t userId);
+    void RefreshAppInfo(const std::string& bundleName);
     bool IsAnco(const std::string& bundleName, const std::string& abilityName, const std::string& moduleName);
 
 private:
+    std::shared_mutex appInfoMutex_;
+    std::unordered_map<std::string, AppExecFwk::ApplicationInfo> appInfoMap_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     int32_t userId_ = 0;
 };
