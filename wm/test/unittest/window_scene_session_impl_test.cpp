@@ -1670,7 +1670,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetLayoutFullScreen(false));
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetLayoutFullScreen(false));
     window->property_->SetPersistentId(1);
@@ -1683,6 +1683,8 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest
     ASSERT_EQ(false, window->IsLayoutFullScreen());
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
     ASSERT_EQ(true, window->IsLayoutFullScreen());
+    window->property_->SetWindowModeSupportType(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
 }
 
 /**
@@ -1740,18 +1742,28 @@ HWTEST_F(WindowSceneSessionImplTest, SetFullScreen, Function | SmallTest | Level
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowName("SetFullScreen");
+    window->property_->SetWindowName("SetLayoutFullScreen01");
     window->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(false));
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowModeSupportType(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
+    window->property_->SetWindowModeSupportType(1);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetFullScreen(false));
     window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetFullScreen(false));
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
+    window->state_ = WindowState::STATE_SHOWN;
     window->hostSession_ = session;
-
     ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(false));
-    ASSERT_EQ(false, window->IsFullScreen());
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(true));
+    ASSERT_EQ(true, window->IsLayoutFullScreen());
 }
 
 /**

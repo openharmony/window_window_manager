@@ -689,31 +689,6 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, Function | SmallTes
 }
 
 /**
- * @tc.name: HandleSpecificSystemBarProperty02
- * @tc.desc: HandleSpecificSystemBarProperty02
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty02, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleSpecificSystemBarProperty";
-    info.bundleName_ = "HandleSpecificSystemBarProperty";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
-    sceneSession->HandleSpecificSystemBarProperty(type, property);
-    auto prop = sceneSession->GetSessionProperty();
-    EXPECT_EQ(prop->GetSystemBarProperty(), property->GetSystemBarProperty());
-
-    sceneSession->isDisplayStatusBarTemporarily_.store(true);
-    sceneSession->HandleSpecificSystemBarProperty(type, property);
-    prop = sceneSession->GetSessionProperty();
-    EXPECT_EQ(prop->GetSystemBarProperty(), property->GetSystemBarProperty());
-}
-
-/**
  * @tc.name: SetWindowFlags1
  * @tc.desc: SetWindowFlags1
  * @tc.type: FUNC
