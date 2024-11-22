@@ -1614,7 +1614,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     return sceneSession;
 }
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSessionByIdentityInfo(const SessionInfo& sessionInfo)
+sptr<SceneSession> SceneSessionManager::SearchSceneSessionByIdentityInfo(const SessionInfo& sessionInfo)
 {
     if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
         TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
@@ -1649,7 +1649,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 TLOGD(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
                 return session;
             }
-            session = RequestSceneSessionByIdentityInfo(sessionInfo);
+            session = SearchSceneSessionByIdentityInfo(sessionInfo);
             if (session != nullptr) {
                 return session;
             }

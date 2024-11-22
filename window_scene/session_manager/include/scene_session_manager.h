@@ -156,7 +156,7 @@ public:
     bool IsSessionVisibleForeground(const sptr<SceneSession>& session);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
-    sptr<SceneSession> RequestSceneSessionByIdentityInfo(const SessionInfo& sessionInfo);
+    sptr<SceneSession> SearchSceneSessionByIdentityInfo(const SessionInfo& sessionInfo);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
