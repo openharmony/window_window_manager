@@ -1770,7 +1770,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionBySessionInfo, Function | Smal
     info3.persistentId_ = 2;
     info3.isPersistentRecover_ = false;
     info3.windowType_ = 1;
-    info3.bundleName_ = "GetSceneSessionBySessionInfooBundle2";
+    info3.bundleName_ = "GetSceneSessionBySessionInfoBundle2";
     info3.abilityName_ = "GetSceneSessionBySessionInfoAbility2";
     info3.appInstanceKey_ = "";
     info3.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
