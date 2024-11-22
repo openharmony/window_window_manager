@@ -45,9 +45,9 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
     const std::string& moduleName)
 {
     bool isAnco = false;
-    std::unique_lock<std::mutex> lock(codePathMutex_);
-    auto iter = codePathMap_.find(bundleName);
-    if (iter == codePathMap_.end()) {
+    std::unique_lock<std::mutex> lock(applicationInfoMutex_);
+    auto iter = applicationInfoMap_.find(bundleName);
+    if (iter == applicationInfoMap_.end()) {
         if (bundleMgr_ == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr!");
             return isAnco;
@@ -64,12 +64,12 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
             TLOGE(WmsLogTag::WMS_LIFE, "Get ability info from BMS failed!");
             return isAnco;
         }
-        codePathMap_[bundleName] = abilityInfo.applicationInfo.codePath;
+        applicationInfoMap_[bundleName] = abilityInfo.applicationInfo.codePath;
         TLOGI(WmsLogTag::WMS_LIFE, "codePath: %{public}s", abilityInfo.applicationInfo.codePath.c_str());
         isAnco = abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
             abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
     } else {
-        TLOGI(WmsLogTag::WMS_LIFE, "applicationInfo already in codePathMap_, codePath: %{public}s",
+        TLOGI(WmsLogTag::WMS_LIFE, "applicationInfo already in applicationInfoMap_, codePath: %{public}s",
             iter->second.c_str());
         isAnco = iter->second == std::to_string(CollaboratorType::RESERVE_TYPE) ||
             iter->second == std::to_string(CollaboratorType::OTHERS_TYPE);
@@ -79,7 +79,7 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
 
 void AbilityInfoManager::RefreshAppInfo(const std::string& bundleName)
 {
-    std::unique_lock<std::mutex> lock(codePathMutex_);
-    codePathMap_.erase(bundleName);
+    std::unique_lock<std::mutex> lock(applicationInfoMutex_);
+    applicationInfoMap_.erase(bundleName);
 }
 } // namespace OHOS::Rosen
