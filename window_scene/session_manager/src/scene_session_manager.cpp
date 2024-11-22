@@ -15,6 +15,8 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
+#include <regex>
+
 #include <ability_context.h>
 #include <ability_manager_client.h>
 #include <application_context.h>
@@ -185,7 +187,7 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
 
 bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t callingTokenId)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: boundName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: bundleName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
           element.GetBundleName().c_str(), element.GetModuleName().c_str(), element.GetAbilityName().c_str());
 
     static const std::vector<std::tuple<std::string, std::string, std::string>> whitelist = {
@@ -1450,9 +1452,16 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
 uint32_t SceneSessionManager::GetLockScreenZorder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (auto& [persistentId, session] : sceneSessionMap_) {
+    for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (session && (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD)) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
+            static const std::regex pattern(R"(^SCBScreenLock[0-9]+$)");
+            auto& bundleName = session->GetSessionInfo().bundleName_;
+            if (!std::regex_match(bundleName, pattern)) {
+                TLOGD(WmsLogTag::WMS_UIEXT, " bundleName: %{public}s", bundleName.c_str());
+                continue;
+            }
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d, bundleName: %{public}s", persistentId,
+                bundleName.c_str());
             return session->GetZOrder();
         }
     }

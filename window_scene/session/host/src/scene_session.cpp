@@ -199,9 +199,9 @@ WSError SceneSession::ReconnectInner(sptr<WindowSessionProperty> property)
     return ret;
 }
 
-bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZorder)
+bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: lockScreenZorder: %{public}d, zOrder_: %{public}d", lockScreenZorder,
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: lockScreenZOrder: %{public}d, zOrder_: %{public}d", lockScreenZOrder,
         zOrder_);
 
     // must be default screen
@@ -218,8 +218,8 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZorder)
     }
 
     // current window on lock screen jurded by zorder
-    if (zOrder_ > lockScreenZorder) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is bigger");
+    if (zOrder_ >= lockScreenZOrder) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is no more than lockScreenZOrder");
         return true;
     }
 
