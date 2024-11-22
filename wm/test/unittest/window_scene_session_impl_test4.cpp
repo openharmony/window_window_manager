@@ -770,13 +770,13 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, Function | Sma
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
     SystemBarProperty prop = SystemBarProperty();
-    prop.settingFlag_ = SystemBarPropertyFlag::COLOR_SETTING;
+    prop.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     windowSceneSessionImpl->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    window->hostSession_ = session;
+    windowSceneSessionImpl->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowSceneSessionImpl->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop));
     auto prop2 = windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     ASSERT_EQ(prop2, prop);
