@@ -53,6 +53,7 @@
 #include "singleton_container.h"
 #include "screen_session_manager/include/screen_session_manager_client.h"
 #include "fold_screen_state_internel.h"
+#include "session/host/include/ability_info_manager.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -3235,6 +3236,9 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
             return WSError::WS_ERROR_NULLPTR;
         }
+        bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
+            abilitySessionInfo->want.GetElement().GetBundleName(),
+            abilitySessionInfo->want.GetElement().GetAbilityName(), abilitySessionInfo->want.GetModuleName());
         if (!session->IsPcOrPadEnableActivation() && WindowHelper::IsMainWindow(session->GetWindowType())) {
             SessionState sessionState = session->GetSessionState();
             TLOGI(WmsLogTag::WMS_LIFE, "sceneSession state:%{public}d, isFoundationCall:%{public}u, "
@@ -3247,7 +3251,8 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
                 TLOGW(WmsLogTag::WMS_LIFE, "start ability invalid, sceneSession in a non interactive state");
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }
-            if (!isSessionForeground && !(isFoundationCall && abilitySessionInfo->canStartAbilityFromBackground)) {
+            if (!isSessionForeground && !isFromAncoAndToAnco &&
+                !(isFoundationCall && abilitySessionInfo->canStartAbilityFromBackground)) {
                 TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from Background");
                 return WSError::WS_ERROR_INVALID_OPERATION;
             }

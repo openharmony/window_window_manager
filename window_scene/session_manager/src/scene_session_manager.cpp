@@ -62,6 +62,8 @@
 #include "dms_reporter.h"
 #include "res_sched_client.h"
 #include "anomaly_detection.h"
+#include "session/host/include/ability_info_manager.h"
+
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
@@ -245,6 +247,9 @@ void SceneSessionManager::Init()
         this->NotifyWindowStateErrorFromMMI(pid, persistentId);
     });
     TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
+
+    AbilityInfoManager::GetInstance().Init(bundleMgr_);
+    AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
     UpdateDarkColorModeToRS();
 }
 
@@ -1525,16 +1530,15 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     return sceneSession;
 }
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
-    sptr<WindowSessionProperty> property)
+sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo)
 {
     if (sessionInfo.persistentId_ != 0 && !sessionInfo.isPersistentRecover_) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
-            NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             TLOGI(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
+    
         if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
             TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
                 "abilityName: %{public}s, appIndex: %{public}d",
@@ -1546,19 +1550,27 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
                 sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
             if (isSingleStart) {
-                NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
                 TLOGD(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
                     sessionInfo.persistentId_);
                 return sceneSession;
             }
         }
     }
+    return nullptr;
+}
 
+sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
+    sptr<WindowSessionProperty> property)
+{
     const char* const where = __func__;
     auto task = [this, sessionInfo, property, where] {
-        TLOGI(WmsLogTag::WMS_LIFE, "RequestSceneSession, appName: [%{public}s %{public}s %{public}s]"
+        if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
+            NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
+            return session;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: appName: [%{public}s %{public}s %{public}s] "
             "appIndex %{public}d, type %{public}u system %{public}u, isPersistentRecover %{public}u",
-            sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
+            where, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
             sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_,
             static_cast<uint32_t>(sessionInfo.isSystem_), static_cast<uint32_t>(sessionInfo.isPersistentRecover_));
         sptr<SceneSession> sceneSession = CreateSceneSession(sessionInfo, property);
@@ -3194,6 +3206,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         }
         currentUserId_ = userId;
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
+        AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
         RegisterSecSurfaceInfoListener();
         return WSError::WS_OK;
     };
@@ -3209,6 +3222,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
         if (isUserActive) { // switch to current user
             SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
+            AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
             // notify screenSessionManager to recover current user
             ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
             FlushWindowInfoToMMI(true);
@@ -10899,5 +10913,10 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
     }
     isLayoutFinished = isRootSceneLastFrameLayoutFinishedFunc_();
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::RemoveAppInfo(const std::string& bundleName)
+{
+    AbilityInfoManager::GetInstance().RemoveAppInfo(bundleName);
 }
 } // namespace OHOS::Rosen
