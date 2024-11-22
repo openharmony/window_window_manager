@@ -51,8 +51,8 @@
 #include "screen_manager.h"
 #include "screen.h"
 #include "fold_screen_state_internel.h"
-#include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/ability_info_manager.h"
+#include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/pc_fold_screen_controller.h"
 
 #ifdef POWER_MANAGER_ENABLE
