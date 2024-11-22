@@ -706,6 +706,10 @@ HWTEST_F(SceneSessionManagerTest3, ChangeUIAbilityVisibilityBySCB, Function | Sm
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
     EXPECT_EQ(ret, 2097202);
+    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, false);
+    EXPECT_EQ(ret, 2097202);
+    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, true);
+    EXPECT_EQ(ret, 2097202);
 }
 
 /**
