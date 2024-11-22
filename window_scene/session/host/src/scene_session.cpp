@@ -1264,7 +1264,7 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             if (rect.width_ == 0 && rect.height_ == 0) {
                 reason = SizeChangeReason::MOVE;
             }
-            session->sessionRectChangeFunc_(rect, reason, session->DISPLAY_ID_INVALID, rectAnimationConfig);
+            session->sessionRectChangeFunc_(rect, reason, session->GetDisplayId(), rectAnimationConfig);
         }
         return WSError::WS_OK;
     };
@@ -1405,7 +1405,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         }
         SetSessionRequestRect(newRequestRect);
         SetSessionRequestRectAnimationConfig(rectAnimationConfig);
-        NotifySessionRectChange(newRequestRect, newReason, session->DISPLAY_ID_INVALID, rectAnimationConfig);
+        NotifySessionRectChange(newRequestRect, newReason, DISPLAY_ID_INVALID, rectAnimationConfig);
     } else {
         if (!Session::IsScbCoreEnabled()) {
             SetSessionRect(rect);
