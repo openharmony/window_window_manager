@@ -1744,7 +1744,7 @@ HWTEST_F(SceneSessionManagerTest6, SearchSceneSessionByIdentityInfo, Function | 
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
     SessionInfo info1;
     info1.persistentId_ = 1;
-    info1.inPersistentRecover = false;
+    info1.inPersistentRecover_ = false;
     info1.windowType_ = 1000;
     info1.appInstanceKey_ = "";
     ASSERT_EQ(ssm_->SearchSceneSessionByIdentityInfo(info1), nullptr);
@@ -1765,7 +1765,7 @@ HWTEST_F(SceneSessionManagerTest6, SearchSceneSessionByIdentityInfo, Function | 
     sptr<SceneSession> getSceneSession = ssm_->SearchSceneSessionByIdentityInfo(info2);
     ASSERT_EQ(sceneSession, getSceneSession);
 
-    SessionInfo3 info3;
+    SessionInfo info3;
     info3.persistentId_ = 2;
     info3.isPersistentRecover_ = false;
     info3.windowType_ = 1;
@@ -1773,7 +1773,7 @@ HWTEST_F(SceneSessionManagerTest6, SearchSceneSessionByIdentityInfo, Function | 
     info3.abilityName_ = "SearchSceneSessionByIdentityInfoAbility2";
     info3.appInstanceKey_ = "";
     info3.abilityInfo->launchMode = AppExecFwk::LaunchMode::SPECIFIED;
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info3 specificCallback);
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info3, specificCallback);
     ASSERT_NE(sceneSession2, nullptr);
     ssm_->sceneSessionMap_.insert({2, sceneSession2});
     ASSERT_EQ(ssm_->SearchSceneSessionByIdentityInfo(info3), nullptr);
