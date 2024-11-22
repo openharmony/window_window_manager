@@ -28,8 +28,6 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
-constexpr size_t INDEX_ZERO = 0;
-constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 }
 
