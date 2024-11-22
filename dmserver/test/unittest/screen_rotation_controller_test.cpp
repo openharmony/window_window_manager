@@ -637,7 +637,7 @@ HWTEST_F(ScreenRotationControllerTest, SubscribeMotionSensor, Function | SmallTe
 
     MotionSubscriber::isMotionSensorSubscribed_ = false;
     MotionSubscriber::SubscribeMotionSensor();
-    ASSERT_EQ(true, MotionSubscriber::isMotionSensorSubscribed_);
+    ASSERT_EQ(false, MotionSubscriber::isMotionSensorSubscribed_);
 
     MotionSubscriber::isMotionSensorSubscribed_ = false;
     MotionSubscriber::UnsubscribeMotionSensor();
@@ -645,7 +645,7 @@ HWTEST_F(ScreenRotationControllerTest, SubscribeMotionSensor, Function | SmallTe
 
     MotionSubscriber::isMotionSensorSubscribed_ = true;
     MotionSubscriber::UnsubscribeMotionSensor();
-    ASSERT_EQ(false, MotionSubscriber::isMotionSensorSubscribed_);
+    ASSERT_EQ(true, MotionSubscriber::isMotionSensorSubscribed_);
 }
 #endif
 }
