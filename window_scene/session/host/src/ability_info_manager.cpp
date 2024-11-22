@@ -37,7 +37,7 @@ void AbilityInfoManager::Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr)
 
 void AbilityInfoManager::SetCurrentUserId(int32_t userId)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "set userId %{public}d", userId);
+    TLOGI(WmsLogTag::WMS_LIFE, "userId: %{public}d", userId);
     userId_ = userId;
 }
 
@@ -45,11 +45,11 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
     const std::string& moduleName)
 {
     bool isAnco = false;
-    auto iter = appInfoMap_.find(bundleName);
-    if (iter == appInfoMap_.end()) {
-        std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-        if (abilityInfo == nullptr || bundleMgr_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "abilityInfo or bundleMgr is nullptr!");
+    std::unique_lock<std::mutex> lock(codePathMutex_);
+    auto iter = codePathMap_.find(bundleName);
+    if (iter == codePathMap_.end()) {
+        if (bundleMgr_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "bundleMgr is nullptr!");
             return isAnco;
         }
         AAFwk::Want want;
@@ -60,27 +60,28 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
         TLOGI(WmsLogTag::WMS_LIFE, "bundleName: %{public}s, abilityName: %{public}s, moduleName: %{public}s, "
             "userId: %{public}d, abilityInfoFlag: %{public}d", bundleName.c_str(), abilityName.c_str(),
             moduleName.c_str(), userId_, abilityInfoFlag);
-        bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, userId_, *abilityInfo);
+        AppExecFwk::AbilityInfo abilityInfo;
+        bool ret = bundleMgr_->QueryAbilityInfo(want, abilityInfoFlag, userId_, abilityInfo);
         if (!ret) {
             TLOGE(WmsLogTag::WMS_LIFE, "Get ability info from BMS failed!");
             return isAnco;
         }
-        appInfoMap_[bundleName] = abilityInfo->applicationInfo;
+        codePathMap_[bundleName] = abilityInfo->applicationInfo.codePath;
         TLOGI(WmsLogTag::WMS_LIFE, "codePath: %{public}s", abilityInfo->applicationInfo.codePath.c_str());
         isAnco = abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
             abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
     } else {
-        TLOGI(WmsLogTag::WMS_LIFE, "applicationInfo already in appInfoMap_, codePath: %{public}s",
-            abilityInfo->applicationInfo.codePath.c_str());
-        isAnco = iter->second.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
-            iter->second.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
+        TLOGI(WmsLogTag::WMS_LIFE, "applicationInfo already in codePathMap_, codePath: %{public}s",
+            iter->second.c_str());
+        isAnco = iter->second == std::to_string(CollaboratorType::RESERVE_TYPE) ||
+            iter->second == std::to_string(CollaboratorType::OTHERS_TYPE);
     }
     return isAnco;
 }
 
 void AbilityInfoManager::RefreshAppInfo(const std::string& bundleName)
 {
-    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
+    std::unique_lock<std::mutex> lock(codePathMutex_);
     appInfoMap_.erase(bundleName);
 }
 } // namespace OHOS::Rosen

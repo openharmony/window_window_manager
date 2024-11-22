@@ -37,8 +37,8 @@ public:
     bool IsAnco(const std::string& bundleName, const std::string& abilityName, const std::string& moduleName);
 
 private:
-    std::shared_mutex appInfoMutex_;
-    std::unordered_map<std::string, AppExecFwk::ApplicationInfo> appInfoMap_;
+    std::mutex codePathMutex_;
+    std::unordered_map<std::string, std::string> codePathMap_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     int32_t userId_ = 0;
 };
