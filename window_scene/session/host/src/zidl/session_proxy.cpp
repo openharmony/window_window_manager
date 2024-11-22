@@ -300,7 +300,16 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         }
         property->SetCollaboratorType(reply.ReadInt32());
         property->SetFullScreenStart(reply.ReadBool());
-        property->SetWindowModeSupportType(reply.ReadUint32());
+        uint32_t size = reply.ReadUint32();
+        if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+            std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+            supportWindowModes.reserve(size);
+            for (uint32_t i = 0; i < size; i++) {
+                supportWindowModes.push_back(
+                    static_cast<AppExecFwk::SupportWindowMode>(reply.ReadInt32()));
+            }
+            property->SetSupportWindowModes(supportWindowModes);
+        }
         property->SetCompatibleModeInPc(reply.ReadBool());
         property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
                                               reply.ReadInt32(), reply.ReadInt32());
