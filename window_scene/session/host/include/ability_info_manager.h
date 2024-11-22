@@ -36,10 +36,13 @@ public:
     // Locks codePathMutex_
     void RefreshAppInfo(const std::string& bundleName);
     bool IsAnco(const std::string& bundleName, const std::string& abilityName, const std::string& moduleName);
+    // Above guarded by codePathMutex_
 
 private:
     std::mutex codePathMutex_;
     std::unordered_map<std::string, std::string> codePathMap_;
+    // Above guarded by codePathMutex_
+
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     int32_t userId_ = 0;
 };
