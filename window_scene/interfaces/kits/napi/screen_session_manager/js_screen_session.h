@@ -27,7 +27,7 @@ namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
 public:
     JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession);
-    virtual ~JsScreenSession() = default;
+    virtual ~JsScreenSession();
 
     static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession);
     static void Finalizer(napi_env env, void* data, void* hint);
@@ -45,6 +45,7 @@ private:
     napi_value OnSetTouchEnabled(napi_env env, napi_callback_info info);
     void CallJsCallback(const std::string& callbackType);
     void RegisterScreenChangeListener();
+    void UnRegisterScreenChangeListener();
 
     void OnConnect(ScreenId screenId) override;
     void OnDisconnect(ScreenId screenId) override;
