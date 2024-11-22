@@ -176,10 +176,10 @@ HWTEST_F(SceneSessionManagerTest, GerPrivacyBundleListTwoWindow, Function | Smal
     ssm_->GetSceneSessionPrivacyModeBundles(1, privacyBundleList);
     EXPECT_EQ(privacyBundleList.size(), 1);
 }
- 
+
 /**
  * @tc.name: SetWindowFlags01
- * @tc.desc: SceneSesionManager01 set window flags
+ * @tc.desc: SceneSesionManager set window flags
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, SetWindowFlags01, Function | SmallTest | Level3)
@@ -196,8 +196,7 @@ HWTEST_F(SceneSessionManagerTest, SetWindowFlags01, Function | SmallTest | Level
 
 /**
  * @tc.name: SetWindowFlags02
- * @tc.desc: SceneSesionManager02
-  set window flags
+ * @tc.desc: SceneSesionManager set window flags
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, SetWindowFlags02, Function | SmallTest | Level3)
@@ -207,15 +206,14 @@ HWTEST_F(SceneSessionManagerTest, SetWindowFlags02, Function | SmallTest | Level
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     property->SetWindowFlags(flags);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     WSError result02 = ssm_->SetWindowFlags(sceneSession, property);
     EXPECT_EQ(result02, WSError::WS_ERROR_NOT_SYSTEM_APP);
 }
 
 /**
  * @tc.name: SetWindowFlags03
- * @tc.desc: SceneSesionManager03
-  set window flags
+ * @tc.desc: SceneSesionManager set window flags
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, SetWindowFlags03, Function | SmallTest | Level3)
@@ -225,11 +223,12 @@ HWTEST_F(SceneSessionManagerTest, SetWindowFlags03, Function | SmallTest | Level
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     property->SetWindowFlags(flags);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     property->SetSystemCalling(true);
     WSError result03 = ssm_->SetWindowFlags(sceneSession, property);
     ASSERT_EQ(result03, WSError::WS_OK);
 }
+
 /**
  * @tc.name: NotifyWaterMarkFlagChangedResult
  * @tc.desc: SceneSesionManager notify water mark flag changed result
@@ -273,9 +272,9 @@ HWTEST_F(SceneSessionManagerTest, UnRegisterSessionListener, Function | SmallTes
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
-/** 
+/**
  * @tc.name: GetSessionInfos01
- * @tc.desc: SceneSesionManager01 get session infos
+ * @tc.desc: SceneSesionManager get session infos
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, GetSessionInfos01, Function | SmallTest | Level3)
@@ -291,15 +290,14 @@ HWTEST_F(SceneSessionManagerTest, GetSessionInfos01, Function | SmallTest | Leve
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
 }
 
-/** 
+/**
  * @tc.name: GetSessionInfos02
- * @tc.desc: SceneSesionManager02 get session infos
+ * @tc.desc: SceneSesionManager get session infos
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, GetSessionInfos02, Function | SmallTest | Level3)
 {
     std::string deviceId = "1245";
-    int32_t numMax = 1024;
     AAFwk::MissionInfo infoFrist;
     infoFrist.label = "fristBundleName";
     AAFwk::MissionInfo infoSecond;
@@ -310,6 +308,7 @@ HWTEST_F(SceneSessionManagerTest, GetSessionInfos02, Function | SmallTest | Leve
     int result01 = ssm_->GetRemoteSessionInfo(deviceId, persistentId, sessionInfo);
     ASSERT_NE(result01, ERR_OK);
 }
+
 /**
  * @tc.name: GetMainWindowStatesByPid
  * @tc.desc: SceneSesionManager get main window states
@@ -351,7 +350,7 @@ HWTEST_F(SceneSessionManagerTest, CheckIsRemote02, Function | SmallTest | Level3
 
 /**
  * @tc.name: AnonymizeDeviceId01
- * @tc.desc: SceneSesionManager01 anonymize deviceId
+ * @tc.desc: SceneSesionManager anonymize deviceId
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, AnonymizeDeviceId01, Function | SmallTest | Level3)
@@ -360,9 +359,10 @@ HWTEST_F(SceneSessionManagerTest, AnonymizeDeviceId01, Function | SmallTest | Le
     std::string result(ssm_->AnonymizeDeviceId(deviceId));
     EXPECT_EQ(result, EMPTY_DEVICE_ID);
 }
+
 /**
  * @tc.name: AnonymizeDeviceId02
- * @tc.desc: SceneSesionManager02 anonymize deviceId
+ * @tc.desc: SceneSesionManager anonymize deviceId
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, AnonymizeDeviceId02, Function | SmallTest | Level3)
@@ -372,9 +372,10 @@ HWTEST_F(SceneSessionManagerTest, AnonymizeDeviceId02, Function | SmallTest | Le
     std::string result01 = "100964******";
     ASSERT_EQ(ssm_->AnonymizeDeviceId(deviceId), result01);
 }
+
 /**
  * @tc.name: TerminateSessionNew01
- * @tc.desc: SceneSesionManager01 terminate session new
+ * @tc.desc: SceneSesionManager terminate session new
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, TerminateSessionNew01, Function | SmallTest | Level3)
@@ -384,18 +385,20 @@ HWTEST_F(SceneSessionManagerTest, TerminateSessionNew01, Function | SmallTest | 
     WSError result01 = ssm_->TerminateSessionNew(info, needStartCaller);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, result01);
 }
+
 /**
  * @tc.name: TerminateSessionNew02
- * @tc.desc: SceneSesionManager02 terminate session new
+ * @tc.desc: SceneSesionManager terminate session new
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, TerminateSessionNew, Function | SmallTest | Level3)
 {
     bool needStartCaller = true;
-    sptr<AAFwk::SessionInfo> info = new (std::nothrow) AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> info = new AAFwk::SessionInfo();
     WSError result02 = ssm_->TerminateSessionNew(info, needStartCaller);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, result02);
 }
+
 /**
  * @tc.name: RegisterSessionListener01
  * @tc.desc: SceneSesionManager register session listener
@@ -411,7 +414,7 @@ HWTEST_F(SceneSessionManagerTest, RegisterSessionListener01, Function | SmallTes
 
 /**
  * @tc.name: ClearDisplayStatusBarTemporarilyFlags01
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags01
+ * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags01, Function | SmallTest | Level3)
@@ -423,9 +426,10 @@ HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags01, Funct
     sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
 }
+
 /**
  * @tc.name: ClearDisplayStatusBarTemporarilyFlags02
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags02
+ * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags02, Function | SmallTest | Level3)
@@ -438,9 +442,10 @@ HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags02, Funct
     sceneSession->SetIsDisplayStatusBarTemporarily(true);
     ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
 }
+
 /**
  * @tc.name: ClearDisplayStatusBarTemporarilyFlags03
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags03
+ * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags03, Function | SmallTest | Level3)
@@ -454,6 +459,7 @@ HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags03, Funct
     ssm_->ClearDisplayStatusBarTemporarilyFlags();
     ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
 }
+
 /**
  * @tc.name: RequestSceneSessionByCall01
  * @tc.desc: SceneSesionManager request scene session by call
@@ -465,6 +471,7 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall01, Function | SmallT
     WSError result01 = ssm_->RequestSceneSessionByCall(nullptr);
     EXPECT_EQ(result01, WSError::WS_OK);
 }
+
 /**
  * @tc.name: RequestSceneSessionByCall02
  * @tc.desc: SceneSesionManager request scene session by call
@@ -475,10 +482,11 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall02, Function | SmallT
     sptr<SceneSession> sceneSession = nullptr;
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = new SceneSession(info, nullptr);
     WSError result02 = ssm_->RequestSceneSessionByCall(sceneSession);
     ASSERT_EQ(result02, WSError::WS_OK);
 }
+
 /**
  * @tc.name: StartAbilityBySpecified
  * @tc.desc: SceneSesionManager start ability by specified
@@ -521,16 +529,14 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken01, Function | SmallTes
  */
 HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken02, Function | SmallTest | Level3)
 {
-    sptr<IRemoteObject> targetToken = new(std::nothrow) IRemoteObjectMocker();
-    uint64_t persistentId = 1423;
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     info.moduleName_ = "test3";
     info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
     ASSERT_NE(nullptr, property);
 }
 
@@ -541,15 +547,15 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken02, Function | SmallTes
  */
 HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken03, Function | SmallTest | Level3)
 {
-    sptr<IRemoteObject> targetToken = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> targetToken = new IRemoteObjectMocker();
     uint64_t persistentId = 1423;
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     info.moduleName_ = "test3";
     info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
     sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     persistentId = 1;
@@ -560,6 +566,7 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken03, Function | SmallTes
     WSError result03 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
     EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_PARAM);
 }
+
 /**
  * @tc.name: UpdateParentSessionForDialog001
  * @tc.desc: SceneSesionManager update parent session for dialog
@@ -634,10 +641,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], sceneSession);
@@ -660,10 +667,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
@@ -686,10 +693,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
@@ -809,7 +816,7 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap01, Function | Small
     SessionInfo info;
     info.abilityName_ = "GetPixelMap";
     info.bundleName_ = "GetPixelMap1";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
 
     int32_t persistentId = 65535;
@@ -828,7 +835,7 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap02, Function | Small
     SessionInfo info;
     info.abilityName_ = "GetPixelMap";
     info.bundleName_ = "GetPixelMap1";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
 
     float scaleValue = 0.5f;
@@ -2316,6 +2323,8 @@ HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest 
     std::string key = "com.example.recposentryEntryAbility";
     bool enabled = false;
     ssm_->SetIsWindowRectAutoSave(key, enabled);
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
+    ASSERT_EQ(result, WMError::WM_OK);
 }
 
 /**
