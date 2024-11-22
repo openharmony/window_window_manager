@@ -370,14 +370,15 @@ void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displ
     SuperFoldStatus status, SuperFoldStatus prevStatus)
 {
     std::unique_lock<std::mutex> lock(callbackMutex_);
-    for (const auto& [persistentId, weakCallback] : foldScreenStatusChangeCallbacks_) {
-        auto callback = weakCallback.lock();
+    for (auto iter = foldScreenStatusChangeCallbacks_.begin(); iter != foldScreenStatusChangeCallbacks_.end();) {
+        auto callback = iter->second.lock();
         if (callback == nullptr) {
-            TLOGW(WmsLogTag::WMS_LAYOUT, "callback invalid, id: %{public}d", persistentId);
-            foldScreenStatusChangeCallbacks_.erase(persistentId);
+            TLOGW(WmsLogTag::WMS_LAYOUT, "callback invalid, id: %{public}d", iter->first);
+            iter = foldScreenStatusChangeCallbacks_.erase(iter);
             continue;
         }
         (*callback)(displayId, status, prevStatus);
+        iter++;
     }
 }
 
