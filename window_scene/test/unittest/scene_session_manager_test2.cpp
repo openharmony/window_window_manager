@@ -2071,7 +2071,7 @@ HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest |
     Rect reqRect = { 0, 0, 10, 10 };
     property->SetRequestRect(reqRect);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    ASSERT_EQ(false, ssm_->isEnablePiPCreate(property));
+    ASSERT_EQ(false, ssm_->(property));
 }
 
 /**
