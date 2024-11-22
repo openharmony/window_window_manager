@@ -2797,7 +2797,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "JsWindow::set systemBar enabled failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "set failed"));
     }
@@ -2841,7 +2841,7 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "JsWindow::set systemBar enabled failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "set failed"));
     }
