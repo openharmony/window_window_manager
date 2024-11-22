@@ -54,9 +54,7 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
         }
         AAFwk::Want want;
         want.SetElementName("", bundleName, abilityName, moduleName);
-        auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
-            AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION |
-            AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_METADATA);
+        auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION;
         TLOGI(WmsLogTag::WMS_LIFE, "bundleName: %{public}s, abilityName: %{public}s, moduleName: %{public}s, "
             "userId: %{public}d, abilityInfoFlag: %{public}d", bundleName.c_str(), abilityName.c_str(),
             moduleName.c_str(), userId_, abilityInfoFlag);
@@ -66,10 +64,10 @@ bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string
             TLOGE(WmsLogTag::WMS_LIFE, "Get ability info from BMS failed!");
             return isAnco;
         }
-        codePathMap_[bundleName] = abilityInfo->applicationInfo.codePath;
-        TLOGI(WmsLogTag::WMS_LIFE, "codePath: %{public}s", abilityInfo->applicationInfo.codePath.c_str());
-        isAnco = abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
-            abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
+        codePathMap_[bundleName] = abilityInfo.applicationInfo.codePath;
+        TLOGI(WmsLogTag::WMS_LIFE, "codePath: %{public}s", abilityInfo.applicationInfo.codePath.c_str());
+        isAnco = abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE) ||
+            abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE);
     } else {
         TLOGI(WmsLogTag::WMS_LIFE, "applicationInfo already in codePathMap_, codePath: %{public}s",
             iter->second.c_str());
