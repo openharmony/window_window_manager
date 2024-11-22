@@ -396,12 +396,14 @@ HWTEST_F(SceneSessionManagerTest6, IsScreenLocked, Function | SmallTest | Level3
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->SetScreenLocked(true);
+    sleep(1);
     ASSERT_NE(nullptr, ssm_);
     EXPECT_TRUE(ssm_->IsScreenLocked());
     ASSERT_NE(nullptr, ssm_);
     ssm_->ProcessWindowModeType();
     ASSERT_NE(nullptr, ssm_);
     ssm_->SetScreenLocked(false);
+    sleep(1);
     ASSERT_NE(nullptr, ssm_);
     EXPECT_FALSE(ssm_->IsScreenLocked());
     ASSERT_NE(nullptr, ssm_);
@@ -1586,6 +1588,7 @@ HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, Function | SmallTest |
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->SetScreenLocked(true);
+    sleep(1);
     EXPECT_EQ(true, ssm_->isScreenLocked_);
     ssm_->sceneSessionMap_.clear();
     ASSERT_NE(nullptr, ssm_);
