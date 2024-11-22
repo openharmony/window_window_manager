@@ -1735,6 +1735,51 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: SearchSceneSessionByIdentityInfo
+ * @tc.desc: SearchSceneSessionByIdentityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SearchSceneSessionByIdentityInfo, Function | SmallTest | Level3)
+{
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    SessionInfo info1;
+    info1.persistentId_ = 1;
+    info1.inPersistentRecover = false;
+    info1.windowType_ = 1000;
+    info1.appInstanceKey_ = "";
+    ASSERT_EQ(ssm_->SearchSceneSessionByIdentityInfo(info1), nullptr);
+
+    SessionInfo info2;
+    info2.persistentId_ = 1;
+    info2.isPersistentRecover_ = false;
+    info2.windowType_ = 1;
+    info2.bundleName_ = "SearchSceneSessionByIdentityInfoBundle";
+    info2.abilityName_ = "SearchSceneSessionByIdentityInfoAbility";
+    info2.appInstanceKey_ = "";
+    info2.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(nullptr, info2.abilityInfo);
+    info2.abilityInfo->launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info2, specificCallback);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    sptr<SceneSession> getSceneSession = ssm_->SearchSceneSessionByIdentityInfo(info2);
+    ASSERT_EQ(sceneSession, getSceneSession);
+
+    SessionInfo3 info3;
+    info3.persistentId_ = 2;
+    info3.isPersistentRecover_ = false;
+    info3.windowType_ = 1;
+    info3.bundleName_ = "SearchSceneSessionByIdentityInfoBundle2";
+    info3.abilityName_ = "SearchSceneSessionByIdentityInfoAbility2";
+    info3.appInstanceKey_ = "";
+    info3.abilityInfo->launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info3 specificCallback);
+    ASSERT_NE(sceneSession2, nullptr);
+    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    ASSERT_EQ(ssm_->SearchSceneSessionByIdentityInfo(info3), nullptr);
+}
+
+/**
  * @tc.name: IsKeyboardForeground
  * @tc.desc: IsKeyboardForeground
  * @tc.type: FUNC
