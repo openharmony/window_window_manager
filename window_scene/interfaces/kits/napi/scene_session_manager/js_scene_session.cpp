@@ -16,8 +16,8 @@
 #include "js_scene_utils.h"
 #include "js_scene_session.h"
 
-#include "session/host/include/session.h"
 #include "session/host/include/ability_info_manager.h"
+#include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 #include "common/include/session_permission.h"
