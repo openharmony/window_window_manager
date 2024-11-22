@@ -72,7 +72,7 @@ public:
     // inherits from window
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "");
-    WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy() override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);

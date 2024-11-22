@@ -1060,7 +1060,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
     uiContent->PreLayout();
 }
 
-WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, property is nullptr");
@@ -1117,6 +1117,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation)
         return ret;
     }
     UpdateTitleButtonVisibility();
+    property_->SetFocusableOnShow(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
