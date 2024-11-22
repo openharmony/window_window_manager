@@ -819,9 +819,11 @@ public:
      *
      * @param reason Reason for window state change.
      * @param withAnimation True means window show with animation, false means window show without animation.
+     * @param withFocus True means window can get focus when it shows to foreground, false means the opposite.
      * @return WM_OK means window show success, others means failed.
      */
-    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) { return WMError::WM_OK; }
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
+                         bool withFocus = true) { return WMError::WM_OK; }
     /**
      * @brief Hide window
      *
@@ -2060,7 +2062,7 @@ public:
      */
     virtual WMError RegisterSwitchFreeMultiWindowListener(
         const sptr<ISwitchFreeMultiWindowListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
- 
+
     /**
      * @brief Unregister switch free multi-window listener.
      *
@@ -2271,7 +2273,7 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
- 
+
     /**
      * @brief Get whether to enable gesture back.
      * @param enable the value true means to enable gesture back, and false means the opposite.

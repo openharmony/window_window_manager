@@ -220,7 +220,7 @@ HWTEST_F(WindowSceneSessionImplTest3, CheckParmAndPermission01, Function | Small
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
     windowSceneSessionImpl->surfaceNode_ = nullptr;
-    
+
     auto ret = windowSceneSessionImpl->CheckParmAndPermission();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     ret = windowSceneSessionImpl->SetCornerRadius(1.0f);
@@ -1273,6 +1273,29 @@ HWTEST_F(WindowSceneSessionImplTest3, Show, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = windowSceneSessionImpl->Minimize();
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+}
+
+/**
+ * @tc.name: Show02
+ * @tc.desc: Show  withFocus params
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, Show02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Show02");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    auto ret = windowSceneSessionImpl->Show(0, false, true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = windowSceneSessionImpl->Show(0, false, false);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

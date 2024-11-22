@@ -464,7 +464,7 @@ WMError WindowImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     return WMError::WM_OK;
 }
