@@ -23,14 +23,14 @@
 #include <event_handler.h>
 
 #include "interfaces/include/ws_common.h"
+#include "occupied_area_change_info.h"
+#include "pattern_detach_callback_interface.h"
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "session/host/include/scene_persistence.h"
-#include "wm_common.h"
-#include "occupied_area_change_info.h"
-#include "window_visibility_info.h"
-#include "pattern_detach_callback_interface.h"
 #include "vsync_station.h"
+#include "window_visibility_info.h"
+#include "wm_common.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -88,7 +88,7 @@ using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const bool isVisible,
     const bool newIsVisible)>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
-using RequestVsyncFunc = std::function<void(std::shared_ptr<VsyncCallback>& callback)>;
+using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
 
 class ILifecycleListener {
 public:
@@ -204,6 +204,7 @@ public:
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) { return WSError::WS_OK; }
 
     int32_t GetPersistentId() const;
+    void SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
@@ -244,8 +245,6 @@ public:
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
-    void SetClientRect(const WSRect& rect);
-    WSRect GetClientRect() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
@@ -395,8 +394,8 @@ public:
     bool IsTerminated() const;
     bool IsSessionForeground() const;
     virtual bool IsAnco() const { return false; }
-    virtual void SetBlankFlag(bool isAddBlank) {};
-    virtual bool GetBlankFlag() const { return false; }
+    virtual void SetBlank(bool isAddBlank) {};
+    virtual bool GetBlank() const { return false; }
     virtual bool GetBufferAvailableCallbackEnable() const { return false; }
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
@@ -513,8 +512,6 @@ public:
     void SetUIStateDirty(bool dirty);
     void SetMainSessionUIStateDirty(bool dirty);
     bool GetUIStateDirty() const;
-    void ResetDirtyFlags();
-    void ResetDragDirtyFlags();
     static bool IsScbCoreEnabled();
     static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
@@ -542,8 +539,13 @@ public:
     /**
      * Window Layout
      */
+    void SetClientRect(const WSRect& rect);
+    WSRect GetClientRect() const;
+    void ResetDirtyFlags();
+    void ResetDragDirtyFlags();
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
+    std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -603,6 +605,7 @@ protected:
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
+    mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     mutable std::mutex snapshotMutex_;
     std::shared_ptr<Media::PixelMap> snapshot_;
@@ -611,11 +614,6 @@ protected:
     std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
     bool isActive_ = false;
     bool isSystemActive_ = false;
-    WSRect winRect_;
-    WSRect clientRect_; // rect saved when prelayout or notify client to update rect
-    WSRect lastLayoutRect_; // rect saved when go background
-    WSRect layoutRect_; // rect of root view
-    WSRect globalRect_; // globalRect include translate
     mutable std::mutex globalRectMutex_;
     WSRectF bounds_;
     Rotation rotation_;
@@ -623,9 +621,7 @@ protected:
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;
     bool isVisible_ = false;
-    SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
 
-    NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
@@ -668,8 +664,6 @@ protected:
      */
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
 
-    RequestVsyncFunc requestNextVsyncFunc_;
-
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
@@ -678,6 +672,14 @@ protected:
     /**
      * Window Layout
      */
+    RequestVsyncFunc requestNextVsyncFunc_;
+    WSRect winRect_;
+    WSRect clientRect_;     // rect saved when prelayout or notify client to update rect
+    WSRect lastLayoutRect_; // rect saved when go background
+    WSRect layoutRect_;     // rect of root view
+    WSRect globalRect_;     // globalRect include translate
+    SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
+    NotifySessionRectChangeFunc sessionRectChangeFunc_;
     float clientScaleX_ = 1.0f;
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;

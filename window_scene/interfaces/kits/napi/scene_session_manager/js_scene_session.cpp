@@ -348,7 +348,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetCompatibleModeInPc);
     BindNativeFunction(env, objValue, "setUniqueDensityDpiFromSCB", moduleName,
         JsSceneSession::SetUniqueDensityDpiFromSCB);
-    BindNativeFunction(env, objValue, "setBlankFlag", moduleName, JsSceneSession::SetBlankFlag);
+    BindNativeFunction(env, objValue, "setBlank", moduleName, JsSceneSession::SetBlank);
     BindNativeFunction(env, objValue, "removeBlank", moduleName, JsSceneSession::RemoveBlank);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
         JsSceneSession::SetBufferAvailableCallbackEnable);
@@ -372,6 +372,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetFrameGravity);
     BindNativeFunction(env, objValue, "setUseStartingWindowAboveLocked", moduleName,
         JsSceneSession::SetUseStartingWindowAboveLocked);
+    BindNativeFunction(env, objValue, "saveSnapshotSync", moduleName,
+        JsSceneSession::SaveSnapshotSync);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2023,24 +2025,24 @@ napi_value JsSceneSession::SetUniqueDensityDpiFromSCB(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnSetUniqueDensityDpiFromSCB(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetBlankFlag(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::SetBlank(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetBlankFlag(env, info) : nullptr;
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetBlank(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::RemoveBlank(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnRemoveBlank(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
-    JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetBufferAvailableCallbackEnable(env, info) : nullptr;
 }
 
@@ -2147,6 +2149,13 @@ napi_value JsSceneSession::SetUseStartingWindowAboveLocked(napi_env env, napi_ca
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetUseStartingWindowAboveLocked(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SaveSnapshotSync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSaveSnapshotSync(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -4826,7 +4835,7 @@ napi_value JsSceneSession::OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callb
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnSetBlankFlag(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnSetBlank(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
@@ -4852,7 +4861,7 @@ napi_value JsSceneSession::OnSetBlankFlag(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SetBlankFlag(isAddBlank);
+    session->SetBlank(isAddBlank);
     return NapiGetUndefined(env);
 }
 
@@ -5299,6 +5308,17 @@ napi_value JsSceneSession::OnSetUseStartingWindowAboveLocked(napi_env env, napi_
         return NapiGetUndefined(env);
     }
     session->SetUseStartingWindowAboveLocked(useStartingWindowAboveLocked);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSaveSnapshotSync(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SaveSnapshot(false);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

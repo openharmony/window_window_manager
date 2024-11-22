@@ -22,7 +22,6 @@
 namespace OHOS {
 namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
-sptr<SettingObserver> ScreenSettingHelper::extendDpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
@@ -48,21 +47,6 @@ void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc
     }
 }
 
-void ScreenSettingHelper::RegisterExtendSettingDpiObserver(SettingObserver::UpdateFunc func)
-{
-    if (extendDpiObserver_) {
-        TLOGD(WmsLogTag::DMS, "setting extend dpi observer is registered");
-        return;
-    }
-    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    extendDpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY_EXTEND, func);
-    ErrCode ret = provider.RegisterObserver(extendDpiObserver_);
-    if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
-        extendDpiObserver_ = nullptr;
-    }
-}
-
 void ScreenSettingHelper::UnregisterSettingDpiObserver()
 {
     if (dpiObserver_ == nullptr) {
@@ -75,20 +59,6 @@ void ScreenSettingHelper::UnregisterSettingDpiObserver()
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     dpiObserver_ = nullptr;
-}
-
-void ScreenSettingHelper::UnregisterExtendSettingDpiObserver()
-{
-    if (extendDpiObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS, "extendDpiObserver_ is nullptr");
-        return;
-    }
-    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = provider.UnregisterObserver(extendDpiObserver_);
-    if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
-    }
-    extendDpiObserver_ = nullptr;
 }
 
 bool ScreenSettingHelper::GetSettingDpi(uint32_t& dpi, const std::string& key)
@@ -298,7 +268,7 @@ bool ScreenSettingHelper::GetSettingRecoveryResolutionString(std::vector<std::st
 {
     std::string value;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetStringValue(key, value);
+    ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "get setting recovery resolution failed, ret=%{public}d", ret);
         return false;
@@ -347,7 +317,7 @@ bool ScreenSettingHelper::GetSettingScreenModeString(std::vector<std::string>& s
 {
     std::string value;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetStringValue(key, value);
+    ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "get setting screen mode failed, ret=%{public}d", ret);
         return false;
@@ -394,7 +364,7 @@ bool ScreenSettingHelper::GetSettingRelativePositionString(std::vector<std::stri
 {
     std::string value;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetStringValue(key, value);
+    ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "get setting relative position failed, ret=%{public}d", ret);
         return false;
