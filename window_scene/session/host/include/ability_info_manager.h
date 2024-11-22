@@ -24,7 +24,6 @@
 
 namespace OHOS::AppExecFwk {
 class IBundleMgr;
-struct ApplicationInfo;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS::Rosen {
@@ -33,6 +32,8 @@ public:
     static AbilityInfoManager& GetInstance();
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
     void SetCurrentUserId(int32_t userId);
+
+    // Locks codePathMutex_
     void RefreshAppInfo(const std::string& bundleName);
     bool IsAnco(const std::string& bundleName, const std::string& abilityName, const std::string& moduleName);
 
