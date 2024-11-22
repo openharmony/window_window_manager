@@ -33,15 +33,15 @@ public:
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
     void SetCurrentUserId(int32_t userId);
 
-    // Locks codePathMutex_
+    // Locks applicationInfoMutex_
     void RefreshAppInfo(const std::string& bundleName);
     bool IsAnco(const std::string& bundleName, const std::string& abilityName, const std::string& moduleName);
-    // Above guarded by codePathMutex_
+    // Above guarded by applicationInfoMutex_
 
 private:
-    std::mutex codePathMutex_;
-    std::unordered_map<std::string, std::string> codePathMap_;
-    // Above guarded by codePathMutex_
+    std::mutex applicationInfoMutex_;
+    std::unordered_map<std::string, std::string> applicationInfoMap_;
+    // Above guarded by applicationInfoMutex_
 
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     int32_t userId_ = 0;
