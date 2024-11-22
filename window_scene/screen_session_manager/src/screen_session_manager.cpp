@@ -5185,6 +5185,10 @@ bool ScreenSessionManager::IsFoldable()
         return false;
     }
 
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return true;
+    }
+
     if (!g_foldScreenFlag) {
         return false;
     }
