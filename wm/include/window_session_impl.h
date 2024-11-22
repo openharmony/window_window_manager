@@ -419,9 +419,13 @@ protected:
     bool interactive_ = true;
 
     /**
-     * Window Layout
+     * Window Pattern
      */
     void FlushLayoutSize(int32_t width, int32_t height) override;
+
+    /**
+     * Window Layout
+     */
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
