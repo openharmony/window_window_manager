@@ -2575,7 +2575,9 @@ void SceneSession::HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reaso
     const int32_t compatibleInPcLandscapeWidth = sessionProperty->GetCompatibleInPcLandscapeWidth();
     const int32_t compatibleInPcLandscapeHeight = sessionProperty->GetCompatibleInPcLandscapeHeight();
     const int32_t compatibleInPcDragLimit = compatibleInPcLandscapeWidth - compatibleInPcPortraitWidth;
-    WSRect windowRect = GetSessionRect();
+    WSRect windowRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
+            MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
+            MoveDragController::TargetRectCoordinate::GLOBAL);
     auto windowWidth = windowRect.width_;
     auto windowHeight = windowRect.height_;
 
@@ -2794,7 +2796,11 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
     if (isCompatibleModeInPc && !IsFreeMultiWindowMode()) {
-        HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
+        if (reason == SizeChangeReason::DRAG_END) {
+            HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
+        } else {
+            HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
+        }
     } else if (reason == SizeChangeReason::DRAG && IsFreeMultiWindowMode() && isMainWindow) {
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
