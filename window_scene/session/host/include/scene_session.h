@@ -557,6 +557,12 @@ public:
     void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
     void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
 
+    /**
+     * system keyboard
+     */
+    void SetIsSystemKeyboard(bool isSystemKeyboard);
+    bool IsSystemKeyboard() const;
+
 protected:
     void NotifySessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);

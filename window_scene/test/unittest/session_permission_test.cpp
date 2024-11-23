@@ -234,6 +234,17 @@ HWTEST_F(SessionPermissionTest, IsFoundationCall, Function | SmallTest | Level1)
     ASSERT_EQ(false, result);
 }
 
+/**
+ * @tc.name: IsStartedBySystemKeyboard
+ * @tc.desc: test function :  IsStartedBySystemKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionPermissionTest, IsStartedBySystemKeyboard, Function | SmallTest | Level1)
+{
+    bool result = SessionPermission::IsStartedBySystemKeyboard();
+    ASSERT_EQ(false, result);
+}
+
 } // namespacecd
 } // namespace Rosen
 } // namespace OHOS
