@@ -1987,12 +1987,13 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             "%{public}s Window [%{public}u, %{public}s] resize with animation end, err = %{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
-    complete = [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+    complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
             task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
         if (*errCodePtr == WmErrorCode::WM_OK) {
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s window resize success", where);
             task.Resolve(env, NapiGetUndefined(env));
         } else {
             task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
