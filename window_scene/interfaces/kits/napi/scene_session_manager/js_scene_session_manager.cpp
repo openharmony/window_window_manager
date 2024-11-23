@@ -2166,39 +2166,29 @@ napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env,
     size_t argc = DEFAULT_ARG_COUNT;
     napi_value argv[DEFAULT_ARG_COUNT] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    WSErrorCode errCode = WSErrorCode::WS_OK;
-    if (argc < 1) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Argc is invalid: %{public}zu", argc);
-        errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-    }
-
-    sptr<SceneSession> sceneSession = nullptr;
-    if (errCode == WSErrorCode::WS_OK) {
-        napi_value nativeObj = argv[ARG_INDEX_ZERO];
-        if (nativeObj == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert object to session info");
-            errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-        } else {
-            void* pointerResult = nullptr;
-            napi_unwrap(env, nativeObj, &pointerResult);
-            auto jsSceneSession = static_cast<JsSceneSession*>(pointerResult);
-            if (jsSceneSession == nullptr) {
-                errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
-            } else {
-                sceneSession = jsSceneSession->GetNativeSession();
-            }
-        }
-    }
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]sceneSession is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
-            "sceneSession is nullptr"));
+    if (argc < 1 || argv[ARG_INDEX_ZERO] == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu or nativeObj is nullptr", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
+    napi_value nativeObj = argv[ARG_INDEX_ZERO];
+    void* pointerResult = nullptr;
+    napi_unwrap(env, nativeObj, &pointerResult);
+    auto jsSceneSession = static_cast<JsSceneSession*>(pointerResult);
+    if (jsSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is nullptr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
+            "jsSceneSession is nullptr"));
+        return NapiGetUndefined(env);
+    }
+
+    sptr<SceneSession> sceneSession = jsSceneSession->GetNativeSession();
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
         return NapiGetUndefined(env);
     }
 
