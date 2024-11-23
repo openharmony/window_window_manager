@@ -49,7 +49,7 @@ class RSTransaction;
 class RSSyncTransactionController;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
-    SizeChangeReason reason, DisplayId displayId, const WSRectAnimationConfig& rectAnimationConfig)>;
+    SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
@@ -242,8 +242,8 @@ public:
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
-    void SetSessionRequestRectAnimationConfig(const WSRectAnimationConfig& rectAnimationConfig);
-    WSRectAnimationConfig GetSessionRequestRectAnimationConfig() const;
+    void SetSessionRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
+    RectAnimationConfig GetSessionRequestRectAnimationConfig() const;
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
