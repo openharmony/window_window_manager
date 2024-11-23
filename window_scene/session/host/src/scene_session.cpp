@@ -1264,7 +1264,12 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             if (rect.width_ == 0 && rect.height_ == 0) {
                 reason = SizeChangeReason::MOVE;
             }
-            session->sessionRectChangeFunc_(rect, reason, session->GetDisplayId(), rectAnimationConfig);
+            DisplayId displayId = DISPLAY_ID_INVALID;
+            auto sessionProperty = session->GetSessionProperty();
+            if (sessionProperty != nullptr) {
+                displayId = sessionProperty->GetDisplayId();
+            }
+            session->sessionRectChangeFunc_(rect, reason, displayId, rectAnimationConfig);
         }
         return WSError::WS_OK;
     };
@@ -1376,6 +1381,11 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
 {
     auto newWinRect = winRect_;
     auto newRequestRect = GetSessionRequestRect();
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        displayId = sessionProperty->GetDisplayId();
+    }
     SizeChangeReason newReason = reason;
     if (reason == SizeChangeReason::MOVE || reason == SizeChangeReason::MOVE_WITH_ANIMATION) {
         newWinRect.posX_ = rect.posX_;
@@ -1387,7 +1397,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         }
         SetSessionRequestRect(newRequestRect);
         SetSessionRequestRectAnimationConfig(rectAnimationConfig);
-        NotifySessionRectChange(newRequestRect, reason, moveConfiguration.displayId, rectAnimationConfig);
+        NotifySessionRectChange(newRequestRect, reason, displayId, rectAnimationConfig);
     } else if (reason == SizeChangeReason::RESIZE || reason == SizeChangeReason::RESIZE_WITH_ANIMATION) {
         bool needUpdateInputMethod = UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
         if (needUpdateInputMethod) {
@@ -1405,7 +1415,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         }
         SetSessionRequestRect(newRequestRect);
         SetSessionRequestRectAnimationConfig(rectAnimationConfig);
-        NotifySessionRectChange(newRequestRect, newReason, DISPLAY_ID_INVALID, rectAnimationConfig);
+        NotifySessionRectChange(newRequestRect, newReason, displayId, rectAnimationConfig);
     } else {
         if (!Session::IsScbCoreEnabled()) {
             SetSessionRect(rect);
