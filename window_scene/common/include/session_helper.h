@@ -79,28 +79,6 @@ public:
         return r;
     }
 
-    static inline WSRectAnimationConfig TransferToWSRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig)
-    {
-        WSRectAnimationConfig r;
-        r.duration_ = rectAnimationConfig.duration_;
-        r.x1_ = rectAnimationConfig.x1_;
-        r.y1_ = rectAnimationConfig.y1_;
-        r.x2_ = rectAnimationConfig.x2_;
-        r.y2_ = rectAnimationConfig.y2_;
-        return r;
-    }
-
-    static inline RectAnimationConfig TransferToRectAnimationConfig(const WSRectAnimationConfig& rectAnimationConfig)
-    {
-        RectAnimationConfig r;
-        r.duration_ = rectAnimationConfig.duration_;
-        r.x1_ = rectAnimationConfig.x1_;
-        r.y1_ = rectAnimationConfig.y1_;
-        r.x2_ = rectAnimationConfig.x2_;
-        r.y2_ = rectAnimationConfig.y2_;
-        return r;
-    }
-
     static inline bool IsBelowSystemWindow(WindowType type)
     {
         return (type >= WindowType::BELOW_APP_SYSTEM_WINDOW_BASE && type < WindowType::BELOW_APP_SYSTEM_WINDOW_END);
