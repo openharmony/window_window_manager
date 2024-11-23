@@ -3018,10 +3018,12 @@ DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<Screen
         return DMError::DM_ERROR_NULLPTR;
     }
     defaultScreen->groupSmsId_ = 1;
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    auto iter = smsScreenGroupMap_.find(defaultScreen->groupSmsId_);
-    if (iter != smsScreenGroupMap_.end()) {
-        smsScreenGroupMap_.erase(iter);
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        auto iter = smsScreenGroupMap_.find(defaultScreen->groupSmsId_);
+        if (iter != smsScreenGroupMap_.end()) {
+            smsScreenGroupMap_.erase(iter);
+        }
     }
     DMError uniqueSwitchRet = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(defaultScreen, screenIds);
     TLOGI(WmsLogTag::DMS, "virtual screen unique switch result: %{public}d", uniqueSwitchRet);
