@@ -78,6 +78,7 @@ const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 const std::string SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
 const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
+const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -142,6 +143,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {PRIVACY_MODE_CHANGE_CB,           ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
     {SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB, ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB},
     {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
+    {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -2408,6 +2410,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB):
             ProcessSetWindowRectAutoSaveRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_APP_USE_CONTROL_CB):
+            ProcessUpdateAppUseControllRegister();
             break;
         default:
             break;
@@ -5328,6 +5333,8 @@ napi_value JsSceneSession::OnSetFrameGravity(napi_env env, napi_callback_info in
     session->SetFrameGravity(gravity);
     return NapiGetUndefined(env);
 }
+
+void JsSceneSession::ProcessUpdateAppUseControllRegister() {}
 
 napi_value JsSceneSession::OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info)
 {
