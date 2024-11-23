@@ -1540,14 +1540,13 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
 
     CheckMoveConfiguration(moveConfiguration);
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
-    WSRectAnimationConfig wsRectAnimationConfig = SessionHelper::TransferToWSRectAnimationConfig(rectAnimationConfig);
     auto hostSession = GetHostSession();
     SizeChangeReason reason = SizeChangeReason::MOVE;
     if (rectAnimationConfig.duration_ > 0) {
         reason = SizeChangeReason::MOVE_WITH_ANIMATION;
     }
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true, moveConfiguration);
+    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, true, rectAnimationConfig);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetMoveToLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -1757,12 +1756,11 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
     property_->SetRectAnimationConfig(rectAnimationConfig);
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
-    WSRectAnimationConfig wsRectAnimationConfig = SessionHelper::TransferToWSRectAnimationConfig(rectAnimationConfig);
     auto hostSession = GetHostSession();
     SizeChangeReason reason = rectAnimationConfig.duration_ > 0 ? SizeChangeReason::RESIZE_WITH_ANIMATION :
         SizeChangeReason::RESIZE;
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, true, wsRectAnimationConfig);
+    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, true, rectAnimationConfig);
     return static_cast<WMError>(ret);
 }
 
