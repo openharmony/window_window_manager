@@ -729,7 +729,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     MoveConfiguration moveConfiguration;
     moveConfiguration.displayId = static_cast<DisplayId>(displayId);
 
-    WSRectAnimationConfig rectAnimationConfig = {};
+    RectAnimationConfig rectAnimationConfig = {};
     if (reason == SizeChangeReason::MOVE_WITH_ANIMATION || reason == SizeChangeReason::RESIZE_WITH_ANIMATION) {
         if (!data.ReadUint32(rectAnimationConfig.duration_) || !data.ReadFloat(rectAnimationConfig.x1_) ||
             !data.ReadFloat(rectAnimationConfig.y1_) || !data.ReadFloat(rectAnimationConfig.x2_) ||
