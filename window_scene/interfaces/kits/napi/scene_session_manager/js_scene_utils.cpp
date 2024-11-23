@@ -1318,7 +1318,7 @@ napi_value CreateJsSessionRect(napi_env env, const T& rect)
     return objValue;
 }
 
-napi_value CreateJsAnimationConfig(napi_env env, const WSRectAnimationConfig& rectAnimationConfig)
+napi_value CreateJsAnimationConfig(napi_env env, const RectAnimationConfig& rectAnimationConfig)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
