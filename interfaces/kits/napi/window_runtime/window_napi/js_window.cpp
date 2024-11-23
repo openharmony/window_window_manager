@@ -1,3 +1,20 @@
+const char* const where = __func__;
+TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
+TLOGI
+TLOGD
+TLOGE
+const RectAnimationConfig& rectAnimationConfig
+
+user.name=s00844345
+user.email=sunyalei@huawei.com
+
+git config --global user.name s00844345
+git config --global user.email sunyalei@huawei.com
+
+git config --global user.name song
+git config --global user.email songjianping9@huawei.com
+
+
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -209,14 +226,6 @@ napi_value JsWindow::GetGlobalScaledRect(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetGlobalScaledRect(env, info) : nullptr;
-}
-
-/** @note @window.layout */
-napi_value JsWindow::MoveWindowToWithAnimation(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT, "MoveTo");
-    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnMoveWindowToWithAnimation(env, info) : nullptr;
 }
 
 /** @note @window.layout */
@@ -1649,12 +1658,13 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     return result;
 }
 
-static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback& execute,
-    NapiAsyncTask::CompleteCallback& complete, const wptr<Window>& weakToken,
-    int32_t x, int32_t y, MoveConfiguration moveConfiguration)
+static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback &execute,
+    NapiAsyncTask::CompleteCallback &complete, wptr<Window> weakToken, const Rect& rect,
+    RectAnimationConfig& rectAnimationConfig)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    execute = [weakToken, errCodePtr, x, y, moveConfiguration] {
+    const char* const where = __func__;
+    execute = [weakToken, errCodePtr, rect, rectAnimationConfig, where] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -1663,11 +1673,16 @@ static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback& execu
         }
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
+<<<<<<< HEAD
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(x, y, moveConfiguration));
+=======
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(rect.posX_, rect.poxY_,
+            rectAnimationConfig));
+>>>>>>> 53c905805... update interfaces/kits/napi/window_runtime/window_napi/js_window.cpp.
         TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] move end, err = %{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
@@ -1705,6 +1720,7 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+<<<<<<< HEAD
     MoveConfiguration moveConfiguration;
     size_t lastParamIndex = INDEX_TWO;
     if (argc > 2 && argv[INDEX_TWO] != nullptr && GetType(env, argv[INDEX_TWO]) == napi_object) { // 2: x/y params num
@@ -1721,6 +1737,30 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
     napi_value lastParam = (argc <= lastParamIndex) ? nullptr :
         ((argv[lastParamIndex] != nullptr && GetType(env, argv[lastParamIndex]) == napi_function) ?
          argv[lastParamIndex] : nullptr);
+=======
+
+    napi_value nativeObj = argv[2];
+    RectAnimationConfig rectAnimationConfig;
+    if ((argc == 3 && nativeObj != nullptr && GetType(env，argv[3]) != napi_function) || argc == 4) {
+        if (nativeObj == nullptr) {
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+        if (!ParseAnimationConfig(env, nativeObj, rectAnimationConfig)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::ExecuteCallback execute;
+    NapiAsyncTask::CompleteCallback complete;
+    Rect rect = { x, y, 0, 0 };
+    SetMoveWindowToGlobalAsyncTask(execute, complete, weakToken, rect, rectAnimationConfig);
+ 
+    // argc: params num; argc: index of callback
+    napi_value lastParam = (argc <= 2 || argc > 4) ? nullptr :
+        ((argv[argc] != nullptr && GetType(env, argv[argc]) == napi_function) ? argv[argc] : nullptr);
+>>>>>>> 53c905805... update interfaces/kits/napi/window_runtime/window_napi/js_window.cpp.
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnMoveWindowToGlobal",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
@@ -1747,91 +1787,6 @@ napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return globalScaledRectObj;
-}
-
-static void SetMoveWindowToWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback& execute,
-    NapiAsyncTask::CompleteCallback& complete, wptr<Window> weakToken, const Rect& rect,
-    RectAnimationConfig& rectAnimationConfig)
-{
-    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    const char* const where = __func__;
-    execute = [weakToken, errCodePtr, rect, rectAnimationConfig, where] {
-        if (errCodePtr == nullptr) {
-            return;
-        }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
-            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            return;
-        }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(rect.posX_, rect.posY_,
-            rectAnimationConfig));
-        TLOGNI(WmsLogTag::WMS_LAYOUT,
-            "%{public}s Window [%{public}u, %{public}s] move end, err = %{public}d",
-            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
-    };
-    complete = [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
-        if (errCodePtr == nullptr) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-            return;
-        }
-        if (*errCodePtr == WmErrorCode::WM_OK) {
-            task.Resolve(env, NapiGetUndefined(env));
-        } else {
-            task.Reject(env, JsErrUtils::CreateJsError(
-                env, *errCodePtr, "JsWindow::OnMoveWindowToWithAnimation failed"));
-        }
-    };
-}
-
-/** @note @window.layout */
-napi_value JsWindow::OnMoveWindowToWithAnimation(napi_env env, napi_callback_info info)
-{
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    size_t argc = 4; // 4: number of arg
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 3) { // 3: minimum param num
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    int32_t x = 0;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], x)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    int32_t y = 0;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[1], y)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    napi_value nativeObj = argv[2];
-    if (nativeObj == nullptr) {
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-    RectAnimationConfig rectAnimationConfig;
-    if (!ParseAnimationConfig(env, nativeObj, rectAnimationConfig)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-
-    wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::ExecuteCallback execute;
-    NapiAsyncTask::CompleteCallback complete;
-    Rect rect = { x, y, 0, 0 };
-    SetMoveWindowToWithAnimationAsyncTask(execute, complete, weakToken, rect, rectAnimationConfig);
-
-    // 3: params num; 3: index of callback
-    napi_value lastParam = (argc <= 3) ? nullptr :
-        ((argv[3] != nullptr && GetType(env, argv[3]) == napi_function) ? argv[3] : nullptr);
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnMoveWindowToWithAnimation",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
-    return result;
 }
 
 /** @note @window.layout */
@@ -6382,6 +6337,10 @@ bool JsWindow::ParseAnimationConfig(napi_env env, napi_value jsObject, RectAnima
     double data = 0.0f;
     uint32_t duration = 0;
     if (ParseJsValue(jsObject, env, "duration", duration)) {
+        if (data <= 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "RectAnimationConfig duration invalid");
+            return false;
+        }
         rectAnimationConfig.duration_ = duration;
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
@@ -7420,8 +7379,6 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "moveWindowToAsync", moduleName, JsWindow::MoveWindowToAsync);
     BindNativeFunction(env, object, "moveWindowToGlobal", moduleName, JsWindow::MoveWindowToGlobal);
     BindNativeFunction(env, object, "getGlobalRect", moduleName, JsWindow::GetGlobalScaledRect);
-    BindNativeFunction(env, object, "moveWindowToWithAnimation",
-        moduleName, JsWindow::MoveWindowToWithAnimation);
     BindNativeFunction(env, object, "resetSize", moduleName, JsWindow::Resize);
     BindNativeFunction(env, object, "resize", moduleName, JsWindow::ResizeWindow);
     BindNativeFunction(env, object, "resizeAsync", moduleName, JsWindow::ResizeWindowAsync);
