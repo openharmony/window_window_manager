@@ -1075,6 +1075,19 @@ ohos_unittest("ws_multi_instance_manager_test") {
   ]
 }
 
+ohos_unittest("ws_pc_fold_screen_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "pc_fold_screen_controller.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_session_proxy_test") {
   module_out_path = module_out_path
 
