@@ -2709,16 +2709,12 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         // some system types could be created by normal app
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_FLOAT) {
+    if (type == WindowType::WINDOW_TYPE_FLOAT &&
+        SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
-            (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
-            systemConfig_.supportTypeFloatWindow_)) {
-            WLOGFI("check float permission success.");
+        if (systemConfig_.supportTypeFloatWindow_) {
+            WLOGFD("check create float window permission success on 2in1 device.");
             return true;
-        } else {
-            WLOGFE("check float permission failed.");
-            return false;
         }
     }
     if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
