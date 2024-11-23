@@ -63,6 +63,7 @@ public:
     MOCK_CONST_METHOD0(GetConfiguration, std::shared_ptr<AppExecFwk::Configuration>());
     MOCK_CONST_METHOD0(GetBaseDir, std::string());
     MOCK_CONST_METHOD0(GetDeviceType, Global::Resource::DeviceType());
+    MOCK_METHOD1(CreateAreaModeContext, std::shared_ptr<Context>(int areaMode));
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
