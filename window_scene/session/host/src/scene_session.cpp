@@ -1372,7 +1372,7 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
 
 /** @note @window.layout */
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-    MoveConfiguration moveConfiguration)
+    MoveConfiguration moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
 {
     auto newWinRect = winRect_;
     auto newRequestRect = GetSessionRequestRect();
@@ -1420,8 +1420,13 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
 
 /** @note @window.layout */
 WSError SceneSession::UpdateSessionRect(
+<<<<<<< HEAD
     const WSRect& rect, SizeChangeReason reason, bool isGlobal,
     bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
+=======
+    const WSRect &rect, SizeChangeReason reason, bool isGlobal, bool isFromMoveToGlobal,
+    const RectAnimationConfig& rectAnimationConfig)
+>>>>>>> acb29510b... update window_scene/session/host/src/scene_session.cpp.
 {
     bool moveAndResize = reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE ||
         reason == SizeChangeReason::MOVE_WITH_ANIMATION || reason == SizeChangeReason::RESIZE_WITH_ANIMATION;
@@ -2431,7 +2436,7 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 
 /** @note @window.layout */
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
-    SizeChangeReason reason, DisplayId displayId, const WSRectAnimationConfig& rectAnimationConfig)
+    SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)
 {
     auto task = [weakThis = wptr(this), rect, reason, displayId, rectAnimationConfig] {
         auto session = weakThis.promote();
