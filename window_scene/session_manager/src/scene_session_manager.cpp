@@ -1976,7 +1976,7 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abili
     return AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo, isColdStart);
 }
 
-int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSession,
+int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession,
     bool visibility, bool isFromClient)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
