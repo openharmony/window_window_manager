@@ -281,7 +281,7 @@ public:
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
-    void NotifyAvailableAreaChanged(DMRect area);
+    void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
     bool GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId);

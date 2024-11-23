@@ -5779,7 +5779,7 @@ int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam
     return 0;
 }
 
-void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
+void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area, DisplayId displayId)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
     TLOGI(WmsLogTag::DMS, "entry, agent size: %{public}u", static_cast<uint32_t>(agents.size()));
@@ -5790,7 +5790,7 @@ void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
         int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
         if (!IsFreezed(agentPid,
             DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER)) {
-            agent->NotifyAvailableAreaChanged(area);
+            agent->NotifyAvailableAreaChanged(area, displayId);
         }
     }
 }
@@ -5826,7 +5826,7 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
     if (!screenSession->UpdateAvailableArea(area)) {
         return;
     }
-    NotifyAvailableAreaChanged(area);
+    NotifyAvailableAreaChanged(area, screenId);
 }
 
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
