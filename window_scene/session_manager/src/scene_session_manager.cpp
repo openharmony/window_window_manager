@@ -1516,6 +1516,27 @@ void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& wi
     taskScheduler_->PostSyncTask(task, "OnNotifyAboveLockScreen");
 }
 
+sptr<SceneSession> SceneSessionManager::RequestKeyboardPanelSession(std::string& panelName, uint64_t displayId)
+{
+    SessionInfo panelInfo = {
+        .bundleName_ = panelName,
+        .moduleName_ = panelName,
+        .abilityName_ = panelName,
+        .isSystem_ = true,
+        .sceneType_ = SceneType::SYSTEM_WINDOW_SCENE,
+        .windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL),
+        .screenId_ = displayId,
+        .isRotable_ = true,
+    };
+    if (systemConfig_.IsPcWindow()) {
+        panelInfo.sceneType_ = SceneType::INPUT_SCENE;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel canvasNode");
+    } else {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel surfaceNode");
+    }
+    return RequestSceneSession(panelInfo, nullptr);
+}
+
 void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession)
 {
     if (!isKeyboardPanelEnabled_) {
@@ -1531,38 +1552,38 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         TLOGE(WmsLogTag::WMS_KEYBOARD, "sessionProperty is null");
         return;
     }
+
     DisplayId displayId = sessionProperty->GetDisplayId();
     const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL, displayId);
     sptr<SceneSession> panelSession;
-    if (panelVec.size() > 1) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Error size of keyboardPanel, size: %{public}zu", panelVec.size());
-        return;
-    } else if (panelVec.size() == 1) {
-        panelSession = panelVec.front();
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanel is created, panelId:%{public}d", panelSession->GetPersistentId());
-    } else {
-        SessionInfo panelInfo = {
-            .bundleName_ = "SCBKeyboardPanel",
-            .moduleName_ = "SCBKeyboardPanel",
-            .abilityName_ = "SCBKeyboardPanel",
-            .isSystem_ = true,
-            .sceneType_ = SceneType::SYSTEM_WINDOW_SCENE,
-            .windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL),
-            .screenId_ = static_cast<uint64_t>(displayId),
-            .isRotable_ = true,
-        };
-        if (systemConfig_.IsPcWindow()) {
-            panelInfo.sceneType_ = SceneType::INPUT_SCENE;
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel canvasNode");
-        } else {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel surfaceNode");
+    for (auto& tempPanelSession : panelVec) {
+        if (tempPanelSession && tempPanelSession->IsSystemKeyboard() == keyboardSession->IsSystemKeyboard()) {
+            panelSession = tempPanelSession;
+            break;
         }
-        panelSession = RequestSceneSession(panelInfo, nullptr);
+    }
+
+    if (panelSession == nullptr) {
+        if (panelVec.size() >= 2) { // 2 is max number of keyboard panel, one input method and one system keyboard
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Error size of keyboardPanel, size: %{public}zu", panelVec.size());
+            return;
+        }
+        if (keyboardSession->IsSystemKeyboard()) {
+            std::string panelName = "SCBSystemKeyboardPanel";
+            panelSession = RequestKeyboardPanelSession(panelName, static_cast<uint64_t>(displayId));
+        } else {
+            std::string panelName = "SCBKeyboardPanel";
+            panelSession = RequestKeyboardPanelSession(panelName, static_cast<uint64_t>(displayId));
+        }
         if (panelSession == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "PanelSession is nullptr");
             return;
         }
+    } else {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanel is created, panelId: %{public}d",
+            panelSession->GetPersistentId());
     }
+    panelSession->SetIsSystemKeyboard(keyboardSession->IsSystemKeyboard());
     keyboardSession->BindKeyboardPanelSession(panelSession);
     panelSession->BindKeyboardSession(keyboardSession);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "success, panelId:%{public}d, keyboardId:%{public}d",
@@ -1586,6 +1607,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     } else if (property != nullptr && property->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb = CreateKeyboardSessionCallback();
         sceneSession = new KeyboardSession(sessionInfo, specificCb, keyboardCb);
+        if (sceneSession && property) {
+            sceneSession->SetIsSystemKeyboard(property->IsSystemKeyboard());
+        }
         CreateKeyboardPanelSession(sceneSession);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Create KeyboardSession, type: %{public}d", property->GetWindowType());
     } else if (property != nullptr && SessionHelper::IsSystemWindow(property->GetWindowType())) {
@@ -2700,16 +2724,24 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         // type is not system
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
-        // WINDOW_TYPE_INPUT_METHOD_FLOAT could be created by input method app
-        if (SessionPermission::IsStartedByInputMethod()) {
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "check permission success, input method app create input method window.");
+
+    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && (property && property->IsSystemKeyboard())) {
+        // system keyboard window can be create by virtual keyboard service only
+        if (SessionPermission::IsStartedBySystemKeyboard()) {
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "create system keyboard, permission check sucess.");
             return true;
-        } else {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "check permission failed.");
-            return false;
         }
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "create system keyboard, permission cehck failed.");
+        return false;
     }
+
+    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)
+        && SessionPermission::IsStartedByInputMethod()) {
+        // WINDOW_TYPE_INPUT_METHOD_FLOAT could be created by input method app
+        WLOGD("check create permission success, input method app create input method window.");
+        return true;
+    }
+
     if (type == WindowType::WINDOW_TYPE_DIALOG || type == WindowType::WINDOW_TYPE_PIP) {
         // some system types could be created by normal app
         return true;

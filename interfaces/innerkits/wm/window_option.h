@@ -492,6 +492,20 @@ public:
      */
     bool GetIsUIExtAnySubWindow() const;
 
+    /**
+     * @brief Set whether this window is a system keyboard
+     *
+     * @param isSystemKeyboard true means the window is a system keyboard.
+     */
+    void SetIsSystemKeyboard(bool isSystemKeyboard);
+
+    /**
+     * @brief Check whether this window is a system keyboard.
+     *
+     * @return true - this window is a system keyboard, false - this window is not a system keyboard.
+     */
+    bool IsSystemKeyboard() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -522,6 +536,7 @@ private:
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
+    bool isSystemKeyboard_ = false;
 
     /*
      * UIExtension

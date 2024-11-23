@@ -191,6 +191,39 @@ HWTEST_F(KeyboardSessionTest, Disconnect, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Disconnect01
+ * @tc.desc: test system keyboard disconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, DisConnect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "DisConnect01";
+    info.bundleName_ = "DisConnect01";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(nullptr, keyboardSession);
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(nullptr));
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->Disconnect());
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(property));
+    keyboardSession->isActive_ = true;
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->Disconnect());
+
+    SessionInfo panelInfo;
+    panelInfo.abilityName_ = "systemKeyboardPanel";
+    panelInfo.bundleName_ = "systemKeyboardPanel";
+    sptr<SystemSession> panelSession = new (std::nothrow) SystemSession(panelInfo, nullptr);
+    ASSERT_NE(nullptr, panelSession);
+    keyboardSession->BindKeyboardPanelSession(panelSession);
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->Disconnect());
+    panelSession->SetIsSystemKeyboard(true);
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->Disconnect());
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect
  * @tc.type: FUNC

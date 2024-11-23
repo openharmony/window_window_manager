@@ -517,6 +517,20 @@ HWTEST_F(WindowOptionTest, SetWindowTopmost, Function | SmallTest | Level3)
     option->SetWindowTopmost(false);
     ASSERT_EQ(false, option->GetWindowTopmost());
 }
+
+/**
+ * @tc.name: SetAndIsSystemKeyboard
+ * @tc.desc: test SetIsSystemKeyboard and IsSystemKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    ASSERT_EQ(false, option->IsSystemKeyboard());
+    option->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, option->IsSystemKeyboard());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

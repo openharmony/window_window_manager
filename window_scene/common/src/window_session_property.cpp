@@ -1069,7 +1069,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
-        parcel.WriteString(appInstanceKey_);
+        parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1146,6 +1146,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
     property->SetAppInstanceKey(parcel.ReadString());
+    property->SetIsSystemKeyboard(parcel.ReadBool());
     return property;
 }
 
@@ -1198,6 +1199,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
     appInstanceKey_ = property->appInstanceKey_;
+    isSystemKeyboard_ = property->isSystemKeyboard_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1652,6 +1654,16 @@ void WindowSessionProperty::SetAppInstanceKey(const std::string& appInstanceKey)
 std::string WindowSessionProperty::GetAppInstanceKey() const
 {
     return appInstanceKey_;
+}
+
+void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
+{
+    isSystemKeyboard_ = isSystemKeyboard;
+}
+
+bool WindowSessionProperty::IsSystemKeyboard() const
+{
+    return isSystemKeyboard_;
 }
 } // namespace Rosen
 } // namespace OHOS
