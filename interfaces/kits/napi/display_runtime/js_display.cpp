@@ -358,8 +358,7 @@ DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
         it->second->RemoveAllCallback();
         if (type == EVENT_AVAILABLE_AREA_CHANGED) {
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
-            auto displayId = display_->GetId();
-            ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener, displayId);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
         } else {
             ret = DMError::DM_ERROR_INVALID_PARAM;
         }
@@ -383,8 +382,10 @@ DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::st
         if (isEquals) {
             it->second->RemoveCallback(env, type, value);
             if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+                auto displayId = display_->GetId();
                 sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
-                ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener,
+                    displayId);
             } else {
                 ret = DMError::DM_ERROR_INVALID_PARAM;
             }
