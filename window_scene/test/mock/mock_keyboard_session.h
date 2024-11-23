@@ -46,7 +46,8 @@ public:
     ~KSSceneSessionMocker() {}
 
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
-        bool isFromMoveToGlobal = false, MoveConfiguration moveConfiguration = {}) override
+        bool isFromMoveToGlobal = false, MoveConfiguration moveConfiguration = {},
+        const RectAnimationConfig& rectAnimationConfig = {}) override
     {
         updateRectCallback_(rect, reason);
         return WSError::WS_OK;
