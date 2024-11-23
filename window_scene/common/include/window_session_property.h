@@ -108,7 +108,7 @@ public:
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
-    RectAnimationConfig GetRequestRectAnimationConfig() const;
+    RectAnimationConfig GetRectAnimationConfig() const;
     WindowType GetWindowType() const;
     bool GetFocusable() const;
     bool GetFocusableOnShow() const;
@@ -293,6 +293,7 @@ private:
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     mutable std::mutex requestRectMutex_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
+    mutable std::mutex rectAnimationConfigMutex_;
     RectAnimationConfig rectAnimationConfig_ { 0, 0.0f, 0.0f, 0.0f, 0.0f };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool focusable_ { true };
