@@ -2657,8 +2657,9 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea03, Function | SmallTest |
 HWTEST_F(ScreenSessionManagerTest, NotifyAvailableAreaChanged01, Function | SmallTest | Level3)
 {
     DMRect area = DMRect{};
+    DisplayId displayId = 0;
     ASSERT_NE(ssm_, nullptr);
-    ssm_->NotifyAvailableAreaChanged(area);
+    ssm_->NotifyAvailableAreaChanged(area, displayId);
 }
 
 /**
