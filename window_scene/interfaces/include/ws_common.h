@@ -589,14 +589,6 @@ struct WindowAnimationConfig {
     float opacity_ = 0;
 };
 
-struct WSRectAnimationConfig {
-    uint32_t duration_ = 0;
-    float x1_ = 0.0f;
-    float y1_ = 0.0f;
-    float x2_ = 0.0f;
-    float y2_ = 0.0f;
-};
-
 struct StartingWindowInfo {
     int32_t startingWindowBackgroundId_;
     int32_t startingWindowIconId_;
