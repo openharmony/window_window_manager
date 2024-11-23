@@ -494,11 +494,11 @@ private:
  * @brief Window RectAnimationConfig
  */
 struct RectAnimationConfig {
-    uint32_t duration_ = 0;
-    float x1_ = 0.0f;
-    float y1_ = 0.0f;
-    float x2_ = 0.0f;
-    float y2_ = 0.0f;
+    uint32_t duration = 0; // Duartion of the animation, in milliseconds.
+    float x1 = 0.0f;       // X coordinate of the first point on the Bezier curve.
+    float y1 = 0.0f;       // Y coordinate of the first point on the Bezier curve.
+    float x2 = 0.0f;       // X coordinate of the second point on the Bezier curve.
+    float y2 = 0.0f;       // Y coordinate of the second point on the Bezier curve.
 };
 
 /**

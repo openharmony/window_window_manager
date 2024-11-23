@@ -822,11 +822,11 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
     }
 
     if (reason == SizeChangeReason::MOVE_WITH_ANIMATION || reason == SizeChangeReason::RESIZE_WITH_ANIMATION) {
-        if (!((data.WriteUint32(static_cast<uint32_t>(rectAnimationConfig.duration_))) &&
-            (data.WriteFloat(static_cast<float>(rectAnimationConfig.x1_))) &&
-            (data.WriteFloat(static_cast<float>(rectAnimationConfig.y1_))) &&
-            (data.WriteFloat(static_cast<float>(rectAnimationConfig.x2_))) &&
-            (data.WriteFloat(static_cast<float>(rectAnimationConfig.y2_))))) { return WSError::WS_ERROR_IPC_FAILED; }
+        if (!data.WriteUint32(static_cast<uint32_t>(rectAnimationConfig.duration)) ||
+            !data.WriteFloat(static_cast<float>(rectAnimationConfig.x1)) ||
+            !data.WriteFloat(static_cast<float>(rectAnimationConfig.y1)) ||
+            !data.WriteFloat(static_cast<float>(rectAnimationConfig.x2)) ||
+            !data.WriteFloat(static_cast<float>(rectAnimationConfig.y2))) { return WSError::WS_ERROR_IPC_FAILED; }
     }
 
     sptr<IRemoteObject> remote = Remote();

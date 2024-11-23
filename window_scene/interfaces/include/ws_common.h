@@ -431,7 +431,8 @@ enum class SizeChangeReason : uint32_t {
 
 inline bool IsMoveToOrDragMove(SizeChangeReason reason)
 {
-    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE ||
+        reason == SizeChangeReason::MOVE_WITH_ANIMATION;
 }
 
 enum class SessionEvent : uint32_t {

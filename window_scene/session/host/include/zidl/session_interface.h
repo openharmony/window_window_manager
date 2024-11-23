@@ -123,7 +123,7 @@ public:
      */
     virtual WSError UpdateSessionRect(
         const WSRect& rect, SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false,
-        MoveConfiguration moveConfiguration = {}, const RectAnimationConfig& rectAnimationConfig = {}) { return WSError::WS_OK; }
+        const RectAnimationConfig& rectAnimationConfig = {})
     {
         return WSError::WS_OK;
     }

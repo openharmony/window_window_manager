@@ -1542,7 +1542,7 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     SizeChangeReason reason = SizeChangeReason::MOVE;
-    if (rectAnimationConfig.duration_ > 0) {
+    if (rectAnimationConfig.duration > 0) {
         reason = SizeChangeReason::MOVE_WITH_ANIMATION;
     }
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
@@ -1757,10 +1757,10 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
-    SizeChangeReason reason = rectAnimationConfig.duration_ > 0 ? SizeChangeReason::RESIZE_WITH_ANIMATION :
+    SizeChangeReason reason = rectAnimationConfig.duration > 0 ? SizeChangeReason::RESIZE_WITH_ANIMATION :
         SizeChangeReason::RESIZE;
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, true, rectAnimationConfig);
+    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, false, rectAnimationConfig);
     return static_cast<WMError>(ret);
 }
 
