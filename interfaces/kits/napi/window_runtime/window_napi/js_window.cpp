@@ -1,20 +1,3 @@
-const char* const where = __func__;
-TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
-TLOGI
-TLOGD
-TLOGE
-const RectAnimationConfig& rectAnimationConfig
-
-user.name=s00844345
-user.email=sunyalei@huawei.com
-
-git config --global user.name s00844345
-git config --global user.email sunyalei@huawei.com
-
-git config --global user.name song
-git config --global user.email songjianping9@huawei.com
-
-
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
