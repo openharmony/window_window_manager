@@ -2173,10 +2173,9 @@ napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env,
         return NapiGetUndefined(env);
     }
 
-    napi_value nativeObj = argv[ARG_INDEX_ZERO];
-    void* pointerResult = nullptr;
-    napi_unwrap(env, nativeObj, &pointerResult);
-    auto jsSceneSession = static_cast<JsSceneSession*>(pointerResult);
+    void* result = nullptr;
+    napi_unwrap(env, argv[ARG_INDEX_ZERO], &result);
+    auto jsSceneSession = static_cast<JsSceneSession*>(result);
     if (jsSceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is nullptr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
