@@ -1041,9 +1041,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
         parcel.WriteUint32(requestRect_.height_) &&
-        parcel.WriteUint32(rectAnimationConfig_.duration_) && parcel.WriteFloat(rectAnimationConfig_.x1_) &&
-        parcel.WriteFloat(rectAnimationConfig_.y1_) && parcel.WriteFloat(rectAnimationConfig_.x2_) &&
-        parcel.WriteFloat(rectAnimationConfig_.y2_) &&
+        parcel.WriteUint32(rectAnimationConfig_.duration) && parcel.WriteFloat(rectAnimationConfig_.x1) &&
+        parcel.WriteFloat(rectAnimationConfig_.y1) && parcel.WriteFloat(rectAnimationConfig_.x2) &&
+        parcel.WriteFloat(rectAnimationConfig_.y2) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&

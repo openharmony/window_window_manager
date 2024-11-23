@@ -1327,11 +1327,11 @@ napi_value CreateJsAnimationConfig(napi_env env, const RectAnimationConfig& rect
         return NapiGetUndefined(env);
     }
 
-    napi_set_named_property(env, objValue, "duration_", CreateJsValue(env, rectAnimationConfig.duration_));
-    napi_set_named_property(env, objValue, "x1_", CreateJsValue(env, rectAnimationConfig.x1_));
-    napi_set_named_property(env, objValue, "y1_", CreateJsValue(env, rectAnimationConfig.y1_));
-    napi_set_named_property(env, objValue, "x2_", CreateJsValue(env, rectAnimationConfig.x2_));
-    napi_set_named_property(env, objValue, "y2_", CreateJsValue(env, rectAnimationConfig.y2_));
+    napi_set_named_property(env, objValue, "duration", CreateJsValue(env, rectAnimationConfig.duration));
+    napi_set_named_property(env, objValue, "x1", CreateJsValue(env, rectAnimationConfig.x1));
+    napi_set_named_property(env, objValue, "y1", CreateJsValue(env, rectAnimationConfig.y1));
+    napi_set_named_property(env, objValue, "x2", CreateJsValue(env, rectAnimationConfig.x2));
+    napi_set_named_property(env, objValue, "y2", CreateJsValue(env, rectAnimationConfig.y2));
     return objValue;
 }
 

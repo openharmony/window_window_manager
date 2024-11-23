@@ -237,7 +237,7 @@ napi_value JsWindow::ResizeWindowAsync(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::ResizeWindowWithAnimation(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Resize");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "InResizeWithAnimation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResizeWindowWithAnimation(env, info) : nullptr;
 }
@@ -1654,20 +1654,15 @@ static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback &execu
         if (*errCodePtr != WmErrorCode::WM_OK) {
             return;
         }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-<<<<<<< HEAD
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(x, y, moveConfiguration));
-=======
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(rect.posX_, rect.poxY_,
-            rectAnimationConfig));
->>>>>>> 53c905805... update interfaces/kits/napi/window_runtime/window_napi/js_window.cpp.
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->MoveWindowToGlobal(rect.posX_, rect.poxY_,
         TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] move end, err = %{public}d",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+            window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
@@ -1703,32 +1698,15 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-<<<<<<< HEAD
-    MoveConfiguration moveConfiguration;
-    size_t lastParamIndex = INDEX_TWO;
-    if (argc > 2 && argv[INDEX_TWO] != nullptr && GetType(env, argv[INDEX_TWO]) == napi_object) { // 2: x/y params num
-        lastParamIndex = INDEX_THREE; // MoveConfiguration is optional param
-        if (!GetMoveConfigurationFromJsValue(env, argv[INDEX_TWO], moveConfiguration)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to moveConfiguration");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-        }
-    }
-    NapiAsyncTask::ExecuteCallback execute;
-    NapiAsyncTask::CompleteCallback complete;
-    SetMoveWindowToGlobalAsyncTask(execute, complete, wptr<Window>(windowToken_), x, y, moveConfiguration);
- 
-    napi_value lastParam = (argc <= lastParamIndex) ? nullptr :
-        ((argv[lastParamIndex] != nullptr && GetType(env, argv[lastParamIndex]) == napi_function) ?
-         argv[lastParamIndex] : nullptr);
-=======
 
-    napi_value nativeObj = argv[2];
     RectAnimationConfig rectAnimationConfig;
-    if ((argc == 3 && nativeObj != nullptr && GetType(env，argv[3]) != napi_function) || argc == 4) {
-        if (nativeObj == nullptr) {
+    // 3: params num;
+    if ((argc == 3 && argv[INDEX_TWO] != nullptr && GetType(env, argv[INDEX_TWO]) != napi_function) ||
+        argc == FOUR_PARAMS_SIZE) {
+        if (argv[INDEX_TWO] == nullptr) {
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
-        if (!ParseAnimationConfig(env, nativeObj, rectAnimationConfig)) {
+        if (!ParseAnimationConfig(env, argv[INDEX_TWO], rectAnimationConfig)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
@@ -1740,10 +1718,9 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
     Rect rect = { x, y, 0, 0 };
     SetMoveWindowToGlobalAsyncTask(execute, complete, weakToken, rect, rectAnimationConfig);
  
-    // argc: params num; argc: index of callback
-    napi_value lastParam = (argc <= 2 || argc > 4) ? nullptr :
+    // 2: params num;
+    napi_value lastParam = (argc <= 2 || argc > FOUR_PARAMS_SIZE) ? nullptr :
         ((argv[argc] != nullptr && GetType(env, argv[argc]) == napi_function) ? argv[argc] : nullptr);
->>>>>>> 53c905805... update interfaces/kits/napi/window_runtime/window_napi/js_window.cpp.
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnMoveWindowToGlobal",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
@@ -1974,18 +1951,18 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
         if (errCodePtr == nullptr) {
             return;
         }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
-            weakWindow->ResizeAsync(static_cast<uint32_t>(rect.width_), static_cast<uint32_t>(rect.height_),
+            window->ResizeAsync(static_cast<uint32_t>(rect.width_), static_cast<uint32_t>(rect.height_),
             rectAnimationConfig));
         TLOGNI(WmsLogTag::WMS_LAYOUT,
             "%{public}s Window [%{public}u, %{public}s] resize with animation end, err = %{public}d",
-            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+            where, window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
@@ -2005,52 +1982,47 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
 /** @note @window.layout */
 napi_value JsWindow::OnResizeWindowWithAnimation(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = 4; // 4: number of arg
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 3) { // 3: minimum param num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t width = 0;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], width)) {
+    if (!ConvertFromJsValue(env, argv[0], width)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to width");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t height = 0;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[1], height)) {
+    if (!ConvertFromJsValue(env, argv[1], height)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to height");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (width <= 0 || height <= 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "width or height should greater than 0!");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_value nativeObj = argv[2];
-    if (nativeObj == nullptr) {
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+    if (argv[INDEX_TWO] == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     RectAnimationConfig rectAnimationConfig;
-    if (!ParseAnimationConfig(env, nativeObj, rectAnimationConfig)) {
+    if (!ParseAnimationConfig(env, argv[INDEX_TWO], rectAnimationConfig)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
     Rect rect = { 0, 0, width, height };
-    SetResizeWindowWithAnimationAsyncTask(execute, complete, weakToken, rect, rectAnimationConfig);
+    SetResizeWindowWithAnimationAsyncTask(execute, complete, wptr<Window>(windowToken_), rect,
+        rectAnimationConfig);
 
-    // 3: params num; 3: index of callback
+    // 3: params num;
     napi_value lastParam = (argc <= 3) ? nullptr :
-        ((argv[3] != nullptr && GetType(env, argv[3]) == napi_function) ? argv[3] : nullptr);
+        ((argv[INDEX_THREE] != nullptr && GetType(env, argv[INDEX_THREE]) == napi_function) ?
+        argv[INDEX_THREE] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnResizeWindowWithAnimation",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
@@ -6318,38 +6290,38 @@ NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(
 /** @note @window.layout */
 bool JsWindow::ParseAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig)
 {
-    double data = 0.0f;
+    double data = 0.0;
     uint32_t duration = 0;
     if (ParseJsValue(jsObject, env, "duration", duration)) {
         if (data <= 0) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "RectAnimationConfig duration invalid");
             return false;
         }
-        rectAnimationConfig.duration_ = duration;
+        rectAnimationConfig.duration = duration;
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
         return false;
     }
     if (ParseJsValue(jsObject, env, "x1", data)) {
-        rectAnimationConfig.x1_ = std::clamp(data, 0.0, 1.0);
+        rectAnimationConfig.x1 = std::clamp(data, 0.0, 1.0);
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
         return false;
     }
     if (ParseJsValue(jsObject, env, "y1", data)) {
-        rectAnimationConfig.y1_ = data;
+        rectAnimationConfig.y1 = data;
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
         return false;
     }
     if (ParseJsValue(jsObject, env, "x2", data)) {
-        rectAnimationConfig.x2_ = std::clamp(data, 0.0, 1.0);
+        rectAnimationConfig.x2 = std::clamp(data, 0.0, 1.0);
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
         return false;
     }
     if (ParseJsValue(jsObject, env, "y2", data)) {
-        rectAnimationConfig.y2_ = data;
+        rectAnimationConfig.y2 = data;
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig");
         return false;

@@ -1264,12 +1264,7 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             if (rect.width_ == 0 && rect.height_ == 0) {
                 reason = SizeChangeReason::MOVE;
             }
-            DisplayId displayId = DISPLAY_ID_INVALID;
-            auto sessionProperty = session->GetSessionProperty();
-            if (sessionProperty != nullptr) {
-                displayId = sessionProperty->GetDisplayId();
-            }
-            session->sessionRectChangeFunc_(rect, reason, displayId, rectAnimationConfig);
+            session->sessionRectChangeFunc_(rect, reason, DISPLAY_ID_INVALID, rectAnimationConfig);
         }
         return WSError::WS_OK;
     };
@@ -1386,6 +1381,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
     if (sessionProperty != nullptr) {
         displayId = sessionProperty->GetDisplayId();
     }
+    TLOGNI(WmsLogTag::WMS_LAYOUT, "Get displayID: %{public}" PRIu64, displayId);
     SizeChangeReason newReason = reason;
     if (reason == SizeChangeReason::MOVE || reason == SizeChangeReason::MOVE_WITH_ANIMATION) {
         newWinRect.posX_ = rect.posX_;
@@ -1430,17 +1426,12 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
 
 /** @note @window.layout */
 WSError SceneSession::UpdateSessionRect(
-<<<<<<< HEAD
-    const WSRect& rect, SizeChangeReason reason, bool isGlobal,
-    bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
-=======
-    const WSRect &rect, SizeChangeReason reason, bool isGlobal, bool isFromMoveToGlobal,
+    const WSRect& rect, SizeChangeReason reason, bool isGlobal, bool isFromMoveToGlobal,
     const RectAnimationConfig& rectAnimationConfig)
->>>>>>> acb29510b... update window_scene/session/host/src/scene_session.cpp.
 {
-    bool moveAndResize = reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE ||
+    bool isMoveOrResize = reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE ||
         reason == SizeChangeReason::MOVE_WITH_ANIMATION || reason == SizeChangeReason::RESIZE_WITH_ANIMATION;
-    if (moveAndResize && GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
+    if (isMoveOrResize && GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         return WSError::WS_DO_NOTHING;
     }
     WSRect newRect = rect;
@@ -1468,7 +1459,7 @@ WSError SceneSession::UpdateSessionRect(
         }
     }
     Session::RectCheckProcess();
-    auto task = [weakThis = wptr(this), newRect, reason, moveConfiguration]() {
+    auto task = [weakThis = wptr(this), newRect, reason, rectAnimationConfig] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");

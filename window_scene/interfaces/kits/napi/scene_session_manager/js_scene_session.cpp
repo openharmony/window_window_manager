@@ -2901,7 +2901,7 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason re
         return;
     }
     WLOGFD("[NAPI]");
-        auto task = [weakThis = wptr(this), persistentId = persistentId_, rect, displayId, reason,
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, rect, displayId, reason,
         rectAnimationConfig, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
