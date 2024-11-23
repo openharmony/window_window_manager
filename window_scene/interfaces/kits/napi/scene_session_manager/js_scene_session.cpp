@@ -1004,7 +1004,7 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
 {
     NotifySessionRectChangeFunc func = [weakThis = wptr(this)](const WSRect& rect,
         SizeChangeReason reason, DisplayId displayId = DISPLAY_ID_INVALID,
-        const WSRectAnimationConfig& rectAnimationConfig = {}) {
+        const RectAnimationConfig& rectAnimationConfig = {}) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionRectChangeRegister jsSceneSession is null");
@@ -2894,7 +2894,7 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
 
 /** @note @window.layout */
 void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId,
-    const WSRectAnimationConfig& rectAnimationConfig)
+    const RectAnimationConfig& rectAnimationConfig)
 {
     if (!IsMoveToOrDragMove(reason) && reason != SizeChangeReason::PIP_RESTORE && rect.IsEmpty()) {
         WLOGFD("Rect is empty, there is no need to notify");
