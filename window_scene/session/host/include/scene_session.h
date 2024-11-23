@@ -565,9 +565,6 @@ public:
     void ActivateKeyboardAvoidArea(bool active);
 
 protected:
-    void NotifySessionRectChange(const WSRect& rect,
-        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
-        const RectAnimationConfig& rectAnimationConfig = {});
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -718,8 +715,6 @@ private:
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-        const RectAnimationConfig& rectAnimationConfig);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -821,7 +816,6 @@ private:
     void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
     WSError UpdateRectForDrag(const WSRect& rect);
 
     /**

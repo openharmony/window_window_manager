@@ -997,7 +997,7 @@ public:
      * @return WMError
      */
     virtual WMError MoveWindowToGlobal(int32_t x, int32_t y,
-        const RectAnimationConfig& rectAnimationConfig = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+        MoveConfiguration moveConfiguration) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get window global scaled rect.

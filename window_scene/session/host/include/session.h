@@ -242,8 +242,8 @@ public:
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
-    void SetSessionRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
-    RectAnimationConfig GetSessionRequestRectAnimationConfig() const;
+    void SetRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
+    RectAnimationConfig GetRequestRectAnimationConfig() const;
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;

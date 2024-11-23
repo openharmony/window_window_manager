@@ -1247,6 +1247,11 @@ struct KeyboardAnimationConfig {
 
 struct MoveConfiguration {
     DisplayId displayId = DISPLAY_ID_INVALID;
+    uint32_t duration = 0; // Duartion of the animation, in milliseconds.
+    float x1 = 0.0f;       // X coordinate of the first point on the Bezier curve.
+    float y1 = 0.0f;       // Y coordinate of the first point on the Bezier curve.
+    float x2 = 0.0f;       // X coordinate of the second point on the Bezier curve.
+    float y2 = 0.0f;       // Y coordinate of the second point on the Bezier curve.
     std::string ToString() const
     {
         std::string str;

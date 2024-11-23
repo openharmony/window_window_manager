@@ -720,6 +720,13 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isFromMoveToGlobal failed");
         return ERR_INVALID_DATA;
     }
+    uint64_t displayId = DISPLAY_ID_INVALID;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    MoveConfiguration moveConfiguration;
+    moveConfiguration.displayId = static_cast<DisplayId>(displayId);
     RectAnimationConfig rectAnimationConfig;
     if (reason == SizeChangeReason::MOVE_WITH_ANIMATION || reason == SizeChangeReason::RESIZE_WITH_ANIMATION) {
         if (!data.ReadUint32(rectAnimationConfig.duration) || !data.ReadFloat(rectAnimationConfig.x1) ||
@@ -729,10 +736,11 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
             return ERR_INVALID_DATA;
         }
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig:[%{public}u, %{public}f, %{public}f, %{public}f, %{public}f]",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig:[%{public}u, %{public}f, %{public}f, %{public}f, %{public}f]",
         rectAnimationConfig.duration, rectAnimationConfig.x1, rectAnimationConfig.y1, rectAnimationConfig.x2,
         rectAnimationConfig.y2);
-    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal, rectAnimationConfig);
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal, moveConfiguration,
+        rectAnimationConfig);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

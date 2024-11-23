@@ -173,6 +173,7 @@ void WindowSessionProperty::SetRequestRect(const Rect& requestRect)
 
 void WindowSessionProperty::SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig)
 {
+    std::lock_guard<std::mutex> lock(rectAnimationConfigMutex_);
     rectAnimationConfig_ = rectAnimationConfig;
 }
 
@@ -288,8 +289,9 @@ Rect WindowSessionProperty::GetRequestRect() const
     return requestRect_;
 }
 
-RectAnimationConfig WindowSessionProperty::GetRequestRectAnimationConfig() const
+RectAnimationConfig WindowSessionProperty::GetRectAnimationConfig() const
 {
+    std::lock_guard<std::mutex> lock(rectAnimationConfigMutex_);
     return rectAnimationConfig_;
 }
 

@@ -2998,7 +2998,7 @@ bool Session::UseStartingWindowAboveLocked() const
     return useStartingWindowAboveLocked_;
 }
 
-void Session::SetSessionRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig)
+void Session::SetRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig)
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
@@ -3010,7 +3010,7 @@ void Session::SetSessionRequestRectAnimationConfig(const RectAnimationConfig& re
         rectAnimationConfig.duration);
 }
 
-RectAnimationConfig Session::GetSessionRequestRectAnimationConfig() const
+RectAnimationConfig Session::GetRequestRectAnimationConfig() const
 {
     RectAnimationConfig rectAnimationConfig;
     auto property = GetSessionProperty();
@@ -3018,7 +3018,7 @@ RectAnimationConfig Session::GetSessionRequestRectAnimationConfig() const
         TLOGE(WmsLogTag::WMS_LAYOUT, "id: %{public}d property is nullptr", persistentId_);
         return rectAnimationConfig;
     }
-    rectAnimationConfig = property->GetRequestRectAnimationConfig();
+    rectAnimationConfig = property->GetRectAnimationConfig();
     TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, animation duration: [%{public}u]", persistentId_,
         rectAnimationConfig.duration);
     return rectAnimationConfig;

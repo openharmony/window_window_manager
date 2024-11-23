@@ -739,7 +739,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         windowSizeChanged_ = true;
     }
     property_->SetWindowRect(wmRect);
-    RectAnimationConfig rectAnimationConfig = property_->GetRequestRectAnimationConfig();
     property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
@@ -753,7 +752,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config);
     } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "duration_:%{public}d", rectAnimationConfig.duration);
+        RectAnimationConfig rectAnimationConfig = property_->GetRectAnimationConfig();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig.duration: %{public}d", rectAnimationConfig.duration);
         postTaskDone_ = false;
         UpdateRectForResizeWithAnimation(wmRect, preRect, wmReason, rectAnimationConfig, config.rsTransaction_);
     } else {
@@ -905,7 +905,7 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForResizeWithAnimation");
         auto window = weakThis.promote();
         if (!window) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, 'window is null, updateRectForResizeWithAnimation failed');
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null, updateRectForResizeWithAnimation failed");
             return;
         }
         if (rsTransaction) {
@@ -917,7 +917,7 @@ void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, con
         auto curve = RSAnimationTimingCurve::CreateCubicCurve(rectAnimationConfig.x1,
             rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2);
         RSNode::OpenImplicitAnimation(protocol, curve, nullptr);
-        if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
+        if (wmRect != preRect || wmReason != window->lastSizeChangeReason_) {
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
         }

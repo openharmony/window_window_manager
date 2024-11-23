@@ -1541,12 +1541,12 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
     CheckMoveConfiguration(moveConfiguration);
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
-    SizeChangeReason reason = SizeChangeReason::MOVE;
-    if (rectAnimationConfig.duration > 0) {
-        reason = SizeChangeReason::MOVE_WITH_ANIMATION;
-    }
+    RectAnimationConfig rectAnimationConfig = { moveConfiguration.duration, moveConfiguration.x1,
+        moveConfiguration.y1, moveConfiguration.x2, moveConfiguration.y2 };
+    SizeChangeReason reason = rectAnimationConfig.duration > 0 ? SizeChangeReason::MOVE_WITH_ANIMATION :
+        SizeChangeReason::MOVE;
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, true, rectAnimationConfig);
+    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, true, moveConfiguration, rectAnimationConfig);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetMoveToLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(

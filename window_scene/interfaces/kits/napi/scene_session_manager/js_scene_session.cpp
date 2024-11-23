@@ -2917,8 +2917,8 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason re
         napi_value jsSessionRect = CreateJsSessionRect(env, rect);
         napi_value jsSizeChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
         napi_value jsDisplayId = CreateJsValue(env, static_cast<int32_t>(displayId));
-        napi_value jsAnimationConfigObj = CreateJsAnimationConfig(env, rectAnimationConfig);
-        napi_value argv[] = {jsSessionRect, jsSizeChangeReason, jsDisplayId, jsAnimationConfigObj};
+        napi_value jsAnimationConfigObj = CreateJsRectAnimationConfig(env, rectAnimationConfig);
+        napi_value argv[] = { jsSessionRect, jsSizeChangeReason, jsDisplayId, jsAnimationConfigObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     std::string rectInfo = "OnSessionRectChange [" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_)
