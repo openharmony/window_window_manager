@@ -167,7 +167,8 @@ public:
     virtual WMError Destroy() override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
-    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
     float GetVirtualPixelRatio() override;
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
