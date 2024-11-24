@@ -2194,7 +2194,7 @@ napi_value JsSceneSessionManager::OnChangeUIAbilityVisibilityBySCB(napi_env env,
     bool visibility = true;
     ConvertFromJsValue(env, argv[ARG_INDEX_ONE], visibility);
     bool isFromClient = true;
-    ConvertFromJsValue(env, argv[ARG_INDEX_TWO], visibility);
+    ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isFromClient);
 
     SceneSessionManager::GetInstance().ChangeUIAbilityVisibilityBySCB(sceneSession, visibility, isFromClient);
     return NapiGetUndefined(env);
