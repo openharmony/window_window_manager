@@ -310,6 +310,16 @@ Rotation ScreenProperty::GetScreenRotation() const
     return screenRotation_;
 }
 
+void ScreenProperty::UpdateDeviceRotation(Rotation rotation)
+{
+    deviceRotation_ = rotation;
+}
+
+Rotation ScreenProperty::GetDeviceRotation() const
+{
+    return deviceRotation_;
+}
+
 void ScreenProperty::SetOrientation(Orientation orientation)
 {
     orientation_ = orientation;
@@ -338,6 +348,16 @@ void ScreenProperty::SetDisplayOrientation(DisplayOrientation displayOrientation
 DisplayOrientation ScreenProperty::GetDisplayOrientation() const
 {
     return displayOrientation_;
+}
+
+void ScreenProperty::SetDeviceOrientation(DisplayOrientation displayOrientation)
+{
+    deviceOrientation_ = displayOrientation;
+}
+
+DisplayOrientation ScreenProperty::GetDeviceOrientation() const
+{
+    return deviceOrientation_;
 }
 
 void ScreenProperty::UpdateXDpi()
