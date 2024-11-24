@@ -720,7 +720,14 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isFromMoveToGlobal failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal);
+    uint64_t displayId = DISPLAY_ID_INVALID;
+    MoveConfiguration moveConfiguration;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    moveConfiguration.displayId_ = static_cast<DisplayId>(displayId);
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal, moveConfiguration);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

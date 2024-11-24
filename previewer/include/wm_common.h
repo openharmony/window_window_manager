@@ -16,7 +16,9 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
+#include "dm_common.h"
 #include <parcel.h>
+#include <sstream>
 #include <map>
 #include <float.h>
 
@@ -795,6 +797,16 @@ public:
 struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveIn;
     KeyboardAnimationCurve curveOut;
+};
+
+struct MoveConfiguration {
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "[" << displayId_ << "]";
+        return ss.str();
+    }
 };
 
 enum class MaximizePresentation {
