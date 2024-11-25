@@ -239,7 +239,7 @@ private:
     void ProcessDefaultDensityEnabledRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
-
+    void ProcessUpdateAppUseControlRegister();    
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
@@ -287,7 +287,8 @@ private:
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void NotifyFrameLayoutFinish();
-
+    void OnUpdateAppUseControll(ControlAppType type, bool isNeedControl);
+    
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
     napi_env env_;

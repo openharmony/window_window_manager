@@ -262,4 +262,9 @@ WMError SceneSessionManagerLite::GetCurrentPiPWindowInfo(std::string& bundleName
 {
     return SceneSessionManager::GetInstance().GetCurrentPiPWindowInfo(bundleName);
 }
+WSError SceneSessionManagerLite::NotifyAppUseControlList(
+    ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)
+{
+    return SceneSessionManager::GetInstance().NotifyAppUseControlList(type, userId, controlList);
+}
 } // namespace OHOS::Rosen

@@ -578,6 +578,34 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
+void SceneSession::SetUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->onUpdateAppUseControlFunc_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
+void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl)
+{
+    auto task = [weakThis = wptr(this), type, isNeedControl] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::DEFAULT, "session is null");
+            return;
+        }
+        if (session->onUpdateAppUseControlFunc_) {
+            session->onUpdateAppUseControlFunc_(type, isNeedControl);
+        }
+    };
+    PostTask(task, __func__);
+}
+
 void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
 {
     auto task = [weakThis = wptr(this), callback = std::move(callback)] {
