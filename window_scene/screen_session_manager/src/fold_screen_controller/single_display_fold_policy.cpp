@@ -238,12 +238,12 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
         return;
     }
+    RSInterfaces::GetInstance().SetScreenSwitching(true);
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
 #endif
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
-        RSInterfaces::GetInstance().SetScreenSwitching(true);
         ReportFoldStatusChangeBegin(static_cast<int32_t>(SCREEN_ID_FULL),
             static_cast<int32_t>(SCREEN_ID_MAIN));
         auto taskScreenOnMain = [=] {
@@ -290,12 +290,12 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> 
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
         return;
     }
+    RSInterfaces::GetInstance().SetScreenSwitching(true);
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_FULL);
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, FULL_TP.c_str());
 #endif
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
-        RSInterfaces::GetInstance().SetScreenSwitching(true);
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
         auto taskScreenOnFull = [=] {
             // off main screen
