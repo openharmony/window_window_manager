@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include "../dm/dm_common.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1218,10 +1219,13 @@ struct MoveConfiguration {
     DisplayId displayId = DISPLAY_ID_INVALID;
     std::string ToString() const
     {
-        constexpr int32_t bufferSize = 10;
-        char buffer[bufferSize];
-        snprintf(buffer, bufferSize, "[%lu]", displayId);
-        return buffer;
+        std::string str;
+        constexpr int BUFFER_SIZE = 11;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, BUFFER_SIZE, BUFFER_SIZE - 1, "[%llu]", displayId) > 0) {
+            str.append(buffer);
+        }
+        return str;
     }
 };
 
