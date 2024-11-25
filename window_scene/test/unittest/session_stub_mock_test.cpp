@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stub.h"

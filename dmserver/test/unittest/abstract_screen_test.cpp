@@ -88,6 +88,7 @@ HWTEST_F(AbstractScreenTest, GetScreenMode, Function | SmallTest | Level3)
     ASSERT_EQ(mode0, (absScreen_->GetAbstractScreenModes())[0]);
     ASSERT_EQ(mode1, (absScreen_->GetAbstractScreenModes())[1]);
 }
+
 /**
  * @tc.name: ConvertToScreenInfo
  * @tc.desc: Convert to screen info
@@ -97,6 +98,7 @@ HWTEST_F(AbstractScreenTest, ConvertToScreenInfo, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, absScreen_->ConvertToScreenInfo());
 }
+
 /**
  * @tc.name: RSTree
  * @tc.desc: RS tree
@@ -134,7 +136,6 @@ HWTEST_F(AbstractScreenTest, RSTree, Function | SmallTest | Level3)
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
     absScreen_->rsDisplayNode_ = nullptr;
 }
-
 
 /**
  * @tc.name: InitRSDisplayNode
@@ -204,6 +205,7 @@ HWTEST_F(AbstractScreenTest, ColorGamut, Function | SmallTest | Level3)
     gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION;
     ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, absScreen0->GetScreenGamutMap(gamutMap));
 }
+
 /**
  * @tc.name: FillScreenInfo
  * @tc.desc: Fill screen info
@@ -223,6 +225,7 @@ HWTEST_F(AbstractScreenTest, FillScreenInfo, Function | SmallTest | Level3)
     absScreen_->FillScreenInfo(info);
     ASSERT_EQ(2.f, info->virtualPixelRatio_);
 }
+
 /**
  * @tc.name: CalcRotation
  * @tc.desc: Calc rotation
@@ -414,7 +417,6 @@ HWTEST_F(AbstractScreenTest, GetChildPosition, Function | SmallTest | Level3)
     absScreenGroup_->GetChildPosition(screenId);
     ASSERT_EQ(screenId, 1);
 }
-
 
 /**
  * @tc.name: AddChild01

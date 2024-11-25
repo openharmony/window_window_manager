@@ -209,8 +209,8 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y,
     bool isMoveToGlobal, MoveConfiguration moveConfiguration)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d xy %{public}d %{public}d isMoveToGlobal %{public}d"
-        " moveConfiguration %{public}s", property_->GetPersistentId(), x, y, isMoveToGlobal,
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d xy %{public}d %{public}d isMoveToGlobal %{public}d "
+        "moveConfiguration %{public}s", property_->GetPersistentId(), x, y, isMoveToGlobal,
         moveConfiguration.ToString().c_str());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
@@ -1247,7 +1247,7 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
 
 void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "notify extension asynchronously, notifyEvent:%{public}d", notifyEvent);
+    TLOGI(WmsLogTag::WMS_UIEXT, "notifyEvent:%{public}d", notifyEvent);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window session invalid.");
         return;

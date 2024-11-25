@@ -634,7 +634,6 @@ HWTEST_F(MoveDragControllerTest, ConsumeMoveEvent, Function | SmallTest | Level1
     moveDragController->isStartDrag_ = preStratDragFlag;
 }
 
-
 /**
  * @tc.name: ProcessWindowDragHotAreaFunc
  * @tc.desc: test function : ProcessWindowDragHotAreaFunc

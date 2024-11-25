@@ -24,6 +24,14 @@ namespace Rosen {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
+namespace {
+#ifdef TP_FEATURE_ENABLE
+const int32_t TP_TYPE = 12;
+const char* KEYBOARD_ON_CONFIG = "version:3+main";
+const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
+#endif
+}
+
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeFolded()");
@@ -41,14 +49,60 @@ void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents ev
 
 void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
+    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
+        GetDefaultScreenSession();
+    if (meScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        return;
+    }
+    auto screenProperty = meScreenSession->GetScreenProperty();
+    auto screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
+
+    OHOS::Rect rectCur{
+        .x = 0,
+        .y = 0,
+        .w = static_cast<int>(screenWidth),
+        .h = static_cast<int>(screenHeight),
+    };
+    // SCREEN_ID_FULL = 0
+    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(true);
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOn()");
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
+        KEYBOARD_ON_CONFIG, TpFeatureConfigType::AFT_TP_FEATURE);
+#endif
+    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
+        screenWidth, screenHeight, static_cast<long>(response));
 }
 
 void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
+    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
+        GetDefaultScreenSession();
+    if (meScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        return;
+    }
+    auto screenProperty = meScreenSession->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    
+    OHOS::Rect rectCur{
+        .x = 0,
+        .y = 0,
+        .w = static_cast<int>(screenWidth),
+        .h = static_cast<int>(screenHeight),
+    };
+    // SCREEN_ID_FULL = 0
+    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(false);
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoKeyboardOff()");
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
+        KEYBOARD_OFF_CONFIG, TpFeatureConfigType::DEFAULT_TP_FEATURE);
+#endif
+    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
+        screenWidth, screenHeight, static_cast<long>(response));
 }
 
 void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event)
@@ -56,12 +110,7 @@ void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents eve
     TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoFoldedToHalfFolded()");
 }
 
-void SuperFoldStateManager::DoExpandedToKeyboard(SuperFoldStatusChangeEvents event)
-{
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoExpandedToKeyboard()");
-}
-
-SuperFoldStateManager::SuperFoldStateManager()
+void SuperFoldStateManager::InitSuperFoldStateManagerMap()
 {
     AddStateManagerMap(SuperFoldStatus::HALF_FOLDED,
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED,
@@ -88,15 +137,49 @@ SuperFoldStateManager::SuperFoldStateManager()
         SuperFoldStatus::KEYBOARD,
         &SuperFoldStateManager::DoKeyboardOn);
 
-    AddStateManagerMap(SuperFoldStatus::EXPANDED,
-        SuperFoldStatusChangeEvents::KEYBOARD_ON,
-        SuperFoldStatus::HALF_FOLDED,
-        &SuperFoldStateManager::DoExpandedToKeyboard);
-
     AddStateManagerMap(SuperFoldStatus::KEYBOARD,
         SuperFoldStatusChangeEvents::KEYBOARD_OFF,
         SuperFoldStatus::HALF_FOLDED,
         &SuperFoldStateManager::DoKeyboardOff);
+
+    // 开机状态自检
+    AddStateManagerMap(SuperFoldStatus::UNKNOWN,
+        SuperFoldStatusChangeEvents::KEYBOARD_ON,
+        SuperFoldStatus::KEYBOARD,
+        [&](SuperFoldStatusChangeEvents events) {});
+
+    AddStateManagerMap(SuperFoldStatus::UNKNOWN,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED,
+        SuperFoldStatus::HALF_FOLDED,
+        [&](SuperFoldStatusChangeEvents events) {});
+
+    AddStateManagerMap(SuperFoldStatus::UNKNOWN,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED,
+        SuperFoldStatus::EXPANDED,
+        [&](SuperFoldStatusChangeEvents events) {});
+
+    AddStateManagerMap(SuperFoldStatus::UNKNOWN,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED,
+        SuperFoldStatus::FOLDED,
+        [&](SuperFoldStatusChangeEvents events) {});
+}
+
+SuperFoldStateManager::SuperFoldStateManager()
+{
+    InitSuperFoldStateManagerMap();
+    ScreenId screenIdFull = 0;
+    int32_t superFoldCreaseRegionPosX = 0;
+    int32_t superFoldCreaseRegionPosY = 1624;
+    int32_t superFoldCreaseRegionPosWidth = 2472;
+    int32_t superFoldCreaseRegionPosHeight = 48;
+
+    std::vector<DMRect> rect = {
+        {
+            superFoldCreaseRegionPosX, superFoldCreaseRegionPosY,
+            superFoldCreaseRegionPosWidth, superFoldCreaseRegionPosHeight
+        }
+    };
+    currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
 SuperFoldStateManager::~SuperFoldStateManager() = default;
@@ -172,6 +255,12 @@ void SuperFoldStateManager::SetCurrentStatus(SuperFoldStatus curState)
     curState_.store(curState);
 }
 
+sptr<FoldCreaseRegion> SuperFoldStateManager::GetCurrentFoldCreaseRegion()
+{
+    TLOGI(WmsLogTag::DMS, "GetCurrentFoldCreaseRegion()");
+    return currentSuperFoldCreaseRegion_;
+}
+
 void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent)
 {
     TLOGI(WmsLogTag::DMS, "changeEvent: %{public}d", static_cast<uint32_t>(changeEvent));
@@ -210,11 +299,8 @@ void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents chan
 
 void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSession> screenSession)
 {
-    ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    uint32_t screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
-    uint32_t screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
-    screenSession->UpdatePropertyByResolution(screenWidth, screenHeight);
     screenSession->UpdatePropertyByFakeInUse(true);
+    screenSession->SetIsBScreenHalf(true);
     ScreenSessionManager::GetInstance().NotifyDisplayChanged(
         screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::SUPER_FOLD_RESOLUTION_CHANGED);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
@@ -226,11 +312,8 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
 
 void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession)
 {
-    ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    uint32_t screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
-    uint32_t screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
-    screenSession->UpdatePropertyByResolution(screenWidth, screenHeight * HALF_SCREEN_PARAM);
     screenSession->UpdatePropertyByFakeInUse(false);
+    screenSession->SetIsBScreenHalf(false);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
     if (fakeDisplayInfo == nullptr) {
@@ -249,6 +332,7 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession)
 {
     screenSession->UpdatePropertyByFakeInUse(false);
+    screenSession->SetIsBScreenHalf(true);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
     if (fakeDisplayInfo == nullptr) {
@@ -264,6 +348,7 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> sc
 void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession)
 {
     screenSession->UpdatePropertyByFakeInUse(true);
+    screenSession->SetIsBScreenHalf(true);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     ScreenSessionManager::GetInstance().NotifyDisplayCreate(
         fakeScreenSession->ConvertToDisplayInfo());

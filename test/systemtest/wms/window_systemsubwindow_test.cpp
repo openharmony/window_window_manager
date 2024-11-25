@@ -343,6 +343,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, Function | MediumTest | L
     ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
 }
+
 /**
  * @tc.name: SystemSubWindow07
  * @tc.desc: create sub windows with dialog

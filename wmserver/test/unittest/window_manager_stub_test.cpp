@@ -315,7 +315,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest13, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -551,6 +551,26 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest23, Function | SmallTest | Level2
         IWindowManager::WindowManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest24
+ * @tc.desc: test TRANS_ID_GET_SNAPSHOT success
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerStubTest, OnRemoteRequest24, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
+    uint32_t writeValue = 0;
+    data.WriteInt32(writeValue);
+    uint32_t code = static_cast<uint32_t>(
+        IWindowManager::WindowManagerMessage::TRANS_ID_GET_SNAPSHOT);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 }
 }

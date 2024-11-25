@@ -400,7 +400,6 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin10, Function | SmallTest | Level3)
     EXPECT_EQ(DMError::DM_OK, ssm_->UnregisterDisplayManagerAgent(displayManagerAgent, type));
 }
 
-
 /**
  * @tc.name: SuspendBegin
  * @tc.desc: SuspendBegin test
@@ -1059,7 +1058,6 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenSession, Function | SmallTest | Leve
     ssm_->DestroyVirtualScreen(screenId);
 }
 
-
 /**
  * @tc.name: GetDefaultScreenSession
  * @tc.desc: GetDefaultScreenSession virtual screen
@@ -1237,7 +1235,6 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayEvent, Function | SmallTest | Le
     ssm_->NotifyDisplayEvent(event);
     ASSERT_EQ(ssm_->gotScreenlockFingerprint_, true);
 }
-
 
 /**
  * @tc.name: GetScreenInfoByDisplayId
@@ -1921,7 +1918,6 @@ HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId, Function | Small
     ssm_->screenIdManager_.DeleteScreenId(screenId);
     ASSERT_EQ(false, ssm_->ConvertScreenIdToRsScreenId(screenId, tmpRsScreenId));
 }
-
 
 /**
  * @tc.name: DisableMirror
@@ -3109,6 +3105,7 @@ HWTEST_F(ScreenSessionManagerTest, OnTentModeChanged, Function | SmallTest | Lev
     ssm_->OnTentModeChanged(isTentMode);
     ASSERT_EQ(ssm_->GetTentMode(), false);
 }
+
 /**
  * @tc.name: GetScreenCapture
  * @tc.desc: GetScreenCapture

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "screen_manager_lite.h"
 #include <cinttypes>
 #include "display_manager_adapter_lite.h"

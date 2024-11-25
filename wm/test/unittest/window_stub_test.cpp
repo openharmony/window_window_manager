@@ -195,7 +195,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
     EXPECT_EQ(res, 0);
 }
 
-
 /**
  * @tc.name: OnRemoteRequest07
  * @tc.desc: test TRANS_ID_NOTIFY_CLIENT_POINT_UP success
@@ -354,7 +353,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
     EXPECT_NE(res, 10);
 }
 
-
 /**
  * @tc.name: OnRemoteRequest13
  * @tc.desc: test TRANS_ID_UPDATE_WINDOW_RECT success
@@ -457,6 +455,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
+    data.WriteUint32(1);
 
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);

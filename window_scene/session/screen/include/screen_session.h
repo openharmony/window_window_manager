@@ -209,6 +209,8 @@ public:
     bool GetIsCurrentInUse() const;
     void SetIsFakeInUse(bool isFakeInUse);
     bool GetIsFakeInUse() const;
+    void SetIsBScreenHalf(bool isBScreenHalf);
+    bool GetIsBScreenHalf() const;
 
     bool isPrimary_ { false };
     bool isInternal_ { false };
@@ -249,6 +251,7 @@ public:
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
     void SetPhysicalRotation(int rotation, FoldStatus foldStatus);
+    void SetScreenComponentRotation(int rotation);
     void SetStartPosition(uint32_t startX, uint32_t startY);
     void SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion);
     std::pair<ScreenId, DMRect> GetMirrorScreenRegion();
@@ -263,7 +266,8 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
     bool hasPrivateWindowForeground_ = false;
-    bool isFakeInUse_ = false;
+    bool isFakeInUse_ = false;  // is fake session in use
+    bool isBScreenHalf_ = false;
     bool isPhysicalMirrorSwitch_ = false;
     mutable std::shared_mutex displayNodeMutex_;
     std::atomic<bool> touchEnabled_ { true };

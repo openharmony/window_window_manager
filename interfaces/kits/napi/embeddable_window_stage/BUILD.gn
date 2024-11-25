@@ -72,6 +72,12 @@ config("embeddable_window_stage_kit_config") {
   ]
 }
 
+config("embeddablewindowstage_kit_public_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [ "../embeddable_window_stage" ]
+}
+
 ohos_shared_library("embeddablewindowstage_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -87,6 +93,7 @@ ohos_shared_library("embeddablewindowstage_kit") {
     "../../../../resources/config/build:coverage_flags",
   ]
 
+  public_configs = [ ":embeddablewindowstage_kit_public_config" ]
   include_dirs = [ "embeddable_window_stage" ]
   deps = [
     "../../../../utils:libwmutil",

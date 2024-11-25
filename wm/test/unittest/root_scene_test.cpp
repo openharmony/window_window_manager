@@ -285,17 +285,17 @@ HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: GetSessionRectByType
- * @tc.desc: GetSessionRectByType Test err
+ * @tc.name: GetAvoidAreaByType
+ * @tc.desc: GetAvoidAreaByType Test err
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, GetSessionRectByTypeErr, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
-    WSRect rect = WSRectT<int32_t>{0, 0, 0, 0};
+    AvoidArea avoidArea;
 
-    auto ret = rootScene.GetSessionRectByType(type, rect);
+    auto ret = rootScene.GetAvoidAreaByType(type, avoidArea);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 }

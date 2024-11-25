@@ -1372,6 +1372,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetDividerRect, Function | SmallTest | Level2)
     Rect rect{0, 0, 0, 0};
     ASSERT_NE(result, rect);
 }
+
 /**
  * @tc.name: AdjustFixedOrientationRSSurfaceNode
  * @tc.desc: test AdjustFixedOrientationRSSurfaceNode
@@ -1438,6 +1439,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | 
     auto result = PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO);
     ASSERT_EQ(false, result);
 }
+
 /**
  * @tc.name: FixWindowRectWithinDisplay
  * @tc.desc: test FixWindowRectWithinDisplay
@@ -1451,6 +1453,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowRectWithinDisplay, Function | SmallTes
     auto displayInfo = display->GetDisplayInfo();
     EXPECT_EQ(displayInfo->GetWaterfallDisplayCompressionStatus(), false);
 }
+
 /**
  * @tc.name: IsNeedAnimationSync
  * @tc.desc: test IsNeedAnimationSync
