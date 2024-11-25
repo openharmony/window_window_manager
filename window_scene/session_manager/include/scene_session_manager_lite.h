@@ -77,6 +77,8 @@ public:
     WMError CloseTargetFloatWindow(const std::string& bundleName) override;
     WMError CloseTargetPiPWindow(const std::string& bundleName) override;
     WMError GetCurrentPiPWindowInfo(std::string& bundleName) override;
+    WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
+        const std::vector<ControlAppInfo>& controlList) override;
 
 protected:
     SceneSessionManagerLite() = default;
