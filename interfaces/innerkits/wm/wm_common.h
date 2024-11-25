@@ -364,6 +364,11 @@ enum class WindowSizeChangeReason : uint32_t {
     END,
 };
 
+inline bool isMoveToOrDragMove(WindowSizeChangeReason reason)
+{
+    return reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE;
+}
+
 /**
  * @brief Enumerates layout mode of window.
  */
