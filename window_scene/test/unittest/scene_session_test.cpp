@@ -996,6 +996,39 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetSystemBarProperty02
+ * @tc.desc: SetSystemBarProperty02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSystemBarProperty02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->property_ = nullptr;
+    SystemBarProperty statusBarProperty;
+    sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty);
+    ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
+              WSError::WS_ERROR_NULLPTR);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
+              WSError::WS_OK);
+    auto propMap = sceneSession->property_->GetSystemBarProperty();
+    ASSERT_EQ(statusBarProperty, propMap[WindowType::WINDOW_TYPE_STATUS_BAR]);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
+              WSError::WS_OK);
+}
+
+/**
  * @tc.name: OnShowWhenLocked
  * @tc.desc: OnShowWhenLocked
  * @tc.type: FUNC ok
