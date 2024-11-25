@@ -952,7 +952,7 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
 void SceneSessionManager::ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationConfig& animationIn,
     KeyboardSceneAnimationConfig& animationOut)
 {
-    if (!(systemConfig_.animationIn_.curveType_.empty() && systemConfig_.animationOut_.curveType_.empty())) {
+    if (!systemConfig_.animationIn_.curveType_.empty() && !systemConfig_.animationOut_.curveType_.empty()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "product config, curveIn:[%{public}s, %{public}u], "
             "curveOut:[%{public}s, %{public}u]", systemConfig_.animationIn_.curveType_.c_str(),
             systemConfig_.animationIn_.duration_, systemConfig_.animationOut_.curveType_.c_str(),
@@ -968,28 +968,34 @@ void SceneSessionManager::ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationC
     constexpr float CTRLX2 = 342.0f;
     constexpr float CTRLY2 = 37.0f;
     constexpr uint32_t DURATION = 150;
-    std::vector<float> in = { IN_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
-    std::vector<float> out = { OUT_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
+    
+    if (systemConfig_.animationIn_.curveType_.empty()) {
+        std::vector<float> in = { IN_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
+        // update system config for client
+        systemConfig_.animationIn_ = KeyboardAnimationCurve(CURVETYPE, in, DURATION);
+        // update app config for server
+        animationIn.curveType_ = CURVETYPE;
+        animationIn.ctrlX1_ = in[0]; // 0: ctrl x1 index
+        animationIn.ctrlY1_ = in[1]; // 1: ctrl y1 index
+        animationIn.ctrlX2_ = in[2]; // 2: ctrl x2 index
+        animationIn.ctrlY2_ = in[3]; // 3: ctrl y2 index
+        animationIn.duration_ = DURATION;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "config default animationIn");
+    }
 
-    // update system config for client
-    systemConfig_.animationIn_ = KeyboardAnimationCurve(CURVETYPE, in, DURATION);
-    systemConfig_.animationOut_ = KeyboardAnimationCurve(CURVETYPE, out, DURATION);
-
-    // update app config for server
-    animationIn.curveType_ = CURVETYPE;
-    animationIn.ctrlX1_ = in[0]; // 0: ctrl x1 index
-    animationIn.ctrlY1_ = in[1]; // 1: ctrl y1 index
-    animationIn.ctrlX2_ = in[2]; // 2: ctrl x2 index
-    animationIn.ctrlY2_ = in[3]; // 3: ctrl y2 index
-    animationIn.duration_ = DURATION;
-
-    animationOut.curveType_ = CURVETYPE;
-    animationOut.ctrlX1_ = out[0]; // 0: ctrl x1 index
-    animationOut.ctrlY1_ = out[1]; // 1: ctrl y1 index
-    animationOut.ctrlX2_ = out[2]; // 2: ctrl x2 index
-    animationOut.ctrlY2_ = out[3]; // 3: ctrl y2 index
-    animationOut.duration_ = DURATION;
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "use default config");
+    if (systemConfig_.animationOut_.curveType_.empty()) {
+        std::vector<float> out = { OUT_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
+        // update system config for client
+        systemConfig_.animationOut_ = KeyboardAnimationCurve(CURVETYPE, out, DURATION);
+        // update app config for server
+        animationOut.curveType_ = CURVETYPE;
+        animationOut.ctrlX1_ = out[0]; // 0: ctrl x1 index
+        animationOut.ctrlY1_ = out[1]; // 1: ctrl y1 index
+        animationOut.ctrlX2_ = out[2]; // 2: ctrl x2 index
+        animationOut.ctrlY2_ = out[3]; // 3: ctrl y2 index
+        animationOut.duration_ = DURATION;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "config default animationOut");
+    }
 }
 
 void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig)
