@@ -782,8 +782,9 @@ WSError SessionProxy::OnRestoreMainWindow()
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
     bool isGlobal, bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u] isGlobal %{public}d "
+        "isFromMoveToGlobal %{public}d moveConfiguration %{public}s", rect.posX_, rect.posY_,
+        rect.width_, rect.height_, isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);

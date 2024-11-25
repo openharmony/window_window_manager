@@ -209,7 +209,9 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
 WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y,
     bool isMoveToGlobal, MoveConfiguration moveConfiguration)
 {
-    WLOGFD("Id:%{public}d xy %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d xy %{public}d %{public}d isMoveToGlobal %{public}d"
+        " moveConfiguration %{public}s", property_->GetPersistentId(), x, y, isMoveToGlobal,
+        moveConfiguration.ToString().c_str());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_INVALID_WINDOW;

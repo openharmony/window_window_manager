@@ -1053,9 +1053,9 @@ bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConf
     napi_value jsConfig = nullptr;
     napi_get_named_property(env, jsObject, "displayId", &jsConfig);
     if (GetType(env, jsConfig) != napi_undefined) {
-        int64_t displayId = DISPLAY_ID_INVALID；
+        int64_t displayId = DISPLAY_ID_INVALID;
         if (!ConvertFromJsValue(env, jsConfig, displayId)) {
-            TLOGE(WmsLogTag::WmsLogTag, "Failed to converrt parameter to displayId");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
             return false;
         }
         moveConfiguration.displayId_ = displayId;
