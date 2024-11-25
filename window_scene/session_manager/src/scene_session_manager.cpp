@@ -6539,7 +6539,7 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label)
 {
-    WLOGFI("label: %{public}s", label.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "Enter");
     auto task = [this, &token, &label]() {
         auto sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {

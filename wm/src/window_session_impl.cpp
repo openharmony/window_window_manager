@@ -1842,7 +1842,6 @@ WMError WindowSessionImpl::SetAPPWindowLabel(const std::string& label)
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->SetAppWindowTitle(label);
-    WLOGFI("label: %{public}s", label.c_str());
     return WMError::WM_OK;
 }
 
