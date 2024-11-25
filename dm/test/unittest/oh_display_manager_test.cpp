@@ -16,8 +16,10 @@
 #include <gtest/gtest.h>
 #include "display.h"
 #include "display_info.h"
+#include "oh_display_capture.h"
 #include "oh_display_manager.h"
 #include "oh_display_manager_inner.h"
+#include "pixelmap_native_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,6 +30,8 @@ class OHDisplayManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    static void FoldDisplayModeChangeCallback(NativeDisplayManager_FoldDisplayMode displayMode);
+    static void DisplayChangeCallback(uint64_t displayId);
     void SetUp() override;
     void TearDown() override;
 };
@@ -49,6 +53,13 @@ void OHDisplayManagerTest::TearDown()
 {
 }
 
+void OHDisplayManagerTest::FoldDisplayModeChangeCallback(NativeDisplayManager_FoldDisplayMode displayMode)
+{
+}
+
+void OHDisplayManagerTest::DisplayChangeCallback(uint64_t displayId)
+{
+}
 namespace {
 
 /**
@@ -368,6 +379,96 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetFoldDisplayMode02, Fun
     } else {
         EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORTED);
     }
+}
+
+/**
+ * @tc.name: FoldDisplayModeChangeListener
+ * @tc.desc: register and unregister
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, FoldDisplayModeChangeListener, Function | SmallTest | Level2)
+{
+    uint32_t testIndex;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_RegisterFoldDisplayModeChangeListener(
+        FoldDisplayModeChangeCallback, &testIndex);
+    if (OH_NativeDisplayManager_IsFoldable()) {
+        EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+        NativeDisplayManager_ErrorCode ret1 = OH_NativeDisplayManager_UnregisterFoldDisplayModeChangeListener(
+            testIndex);
+        EXPECT_EQ(ret1, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    } else {
+        EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_DEVICE_NOT_SUPPORTED);
+    }
+}
+
+/**
+ * @tc.name: DisplayChangeListener
+ * @tc.desc: register and unregister
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, DisplayChangeListener, Function | SmallTest | Level2)
+{
+    uint32_t testIndex;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_RegisterDisplayChangeListener(
+        DisplayChangeCallback, &testIndex);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    ret = OH_NativeDisplayManager_UnregisterDisplayChangeListener(testIndex);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+}
+
+/**
+ * @tc.name: AllDisplays
+ * @tc.desc: create and destroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, CreateAndDestroyAllDisplays, Function | SmallTest | Level2)
+{
+    NativeDisplayManager_DisplaysInfo *displayInfo = nullptr;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreateAllDisplays(&displayInfo);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    ASSERT_NE(displayInfo, nullptr);
+    
+    OH_NativeDisplayManager_DestroyAllDisplays(displayInfo);
+}
+
+/**
+ * @tc.name: CreateAndDestroyDisplayById
+ * @tc.desc: CreateAndDestroyDisplayById
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, CreateAndDestroyDisplayById, Function | SmallTest | Level2)
+{
+    uint32_t testDisplayId = 0;
+    NativeDisplayManager_DisplayInfo *testPtr = nullptr;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreateDisplayById(testDisplayId, &testPtr);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    
+    OH_NativeDisplayManager_DestroyDisplay(testPtr);
+}
+
+/**
+ * @tc.name: CreatePrimaryDisplay
+ * @tc.desc: CreatePrimaryDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, CreatePrimaryDisplay, Function | SmallTest | Level2)
+{
+    NativeDisplayManager_DisplayInfo *testPtr = nullptr;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreatePrimaryDisplay(&testPtr);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+}
+
+/**
+ * @tc.name: CaptureScreenPixelmap
+ * @tc.desc: CaptureScreenPixelmap
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, CaptureScreenPixelmap, Function | SmallTest | Level2)
+{
+    uint32_t testDisplayId = 1001;
+    OH_PixelmapNative *pixelMap = nullptr;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CaptureScreenPixelmap(testDisplayId, &pixelMap);
+    EXPECT_NE(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_NO_PERMISSION);
 }
 }
 } // namespace Rosen
