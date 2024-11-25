@@ -235,5 +235,24 @@ void RootScene::RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&
 {
     updateRootSceneRectCallback_ = std::move(callback);
 }
+
+void RootScene::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_) {
+        TLOGD(WmsLogTag::WMS_IMMS, "root scene window: %{public}s", GetWindowName().c_str());
+        uiContent_->UpdateThemeConfiguration(configuration);
+        return;
+    }
+    TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, root scene win: %{public}s", GetWindowName().c_str());
+}
+
+void RootScene::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (staticRootScene_) {
+        staticRootScene_->UpdateThemeConfiguration(configuration);
+        return;
+    }
+    TLOGE(WmsLogTag::WMS_IMMS, "root scene is null, winId: %{public}s", GetWindowName().c_str());
+}
 } // namespace Rosen
 } // namespace OHOS

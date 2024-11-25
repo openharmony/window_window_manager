@@ -241,5 +241,18 @@ void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configu
         WindowImpl::UpdateConfigurationForAll(configuration);
     }
 }
+
+void Window::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "scb enabled, win: %{public}s", GetWindowName().c_str());
+        WindowSceneSessionImpl::UpdateThemeConfigurationForAll(configuration);
+        RootScene::UpdateThemeConfigurationForAll(configuration);
+        WindowExtensionSessionImpl::UpdateThemeConfigurationForAll(configuration);
+    } else {
+        TLOGD(WmsLogTag::WMS_IMMS, "scb disabled, win: %{public}s", GetWindowName().c_str());
+        WindowImpl::UpdateThemeConfigurationForAll(configuration);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

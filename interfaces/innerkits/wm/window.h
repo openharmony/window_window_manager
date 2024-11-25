@@ -621,6 +621,12 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
     /**
+     * @brief Update theme configuration for all windows
+     * @param configuration configuration for app
+     */
+    static void UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+    /**
      * @brief Get surface node from RS
      *
      * @return Surface node from RS
@@ -2641,6 +2647,12 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+
+    /*
+     * @brief Update theme configuration.
+     * @param configuration Window configuration.
+     */
+    virtual void UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 };
 }
 }

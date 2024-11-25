@@ -180,6 +180,12 @@ public:
     WMError SetGestureBackEnabled(bool enable) override;
     WMError GetGestureBackEnabled(bool& enable) override;
 
+    /*
+     * Window Property
+     */
+    static void UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    virtual void UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);

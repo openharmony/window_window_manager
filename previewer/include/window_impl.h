@@ -59,6 +59,7 @@ public:
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parantId);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
@@ -173,6 +174,7 @@ public:
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     virtual int64_t GetVSyncPeriod() override;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    virtual void UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
 

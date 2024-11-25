@@ -4315,5 +4315,30 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
 }
+
+void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ != nullptr) {
+        TLOGD(WmsLogTag::WMS_IMMS, "window: %{public}s", GetWindowName().c_str());
+        uiContent_->UpdateThemeConfiguration(configuration);
+    }
+    auto numSubWindow = subWindowMap_.count(GetWindowId();
+    TLOGD(WmsLogTag::WMS_IMMS, "subWindow num: %{public}u", numSubWindow);
+    if (numSubWindow == 0) {
+        return;
+    }
+    for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        subWindow->UpdateThemeConfiguration(configuration);
+    }
+}
+
+void WindowImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "window: %{public}s", GetWindowName().c_str());
+    for (const auto& winPair : windowMap_) {
+        auto window = winPair.second.second;
+        window->UpdateThemeConfiguration(configuration);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
