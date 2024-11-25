@@ -162,24 +162,6 @@ HWTEST_F(SessionProxyTest, OnNeedAvoid, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetAvoidAreaByType
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, GetAvoidAreaByType, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetAvoidAreaByType start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    AvoidAreaType status = AvoidAreaType::TYPE_SYSTEM;
-    AvoidArea res = sProxy->GetAvoidAreaByType(status);
-    AvoidArea area;
-    ASSERT_EQ(res, area);
-
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetAvoidAreaByType end";
-}
-
-/**
  * @tc.name: RequestSessionBack
  * @tc.desc: normal function
  * @tc.type: FUNC

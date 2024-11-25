@@ -128,6 +128,29 @@ public:
     int sendRequestResult_ = 0;
     int count_ = 0;
 };
+
+class RemoteObjectMocker : public IRemoteObject {
+public:
+    RemoteObjectMocker() : IRemoteObject{u"RemoteObjectMocker"}
+    {
+    }
+    ~RemoteObjectMocker()
+    {
+    }
+
+    MOCK_METHOD(int32_t, GetObjectRefCount, (), (override));
+    MOCK_METHOD(int, SendRequest, (uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option),
+        (override));
+    MOCK_METHOD(bool, IsProxyObject, (), (const, override));
+    MOCK_METHOD(bool, IsObjectDead, (), (const, override));
+    MOCK_METHOD(std::u16string, GetInterfaceDescriptor, (), (override));
+    MOCK_METHOD(bool, CheckObjectLegality, (), (const, override));
+    MOCK_METHOD(bool, AddDeathRecipient, (const sptr<DeathRecipient>& recipient), (override));
+    MOCK_METHOD(bool, RemoveDeathRecipient, (const sptr<DeathRecipient>& recipient), (override));
+    MOCK_METHOD(bool, Marshalling, (Parcel& parcel), (const, override));
+    MOCK_METHOD(sptr<IRemoteBroker>, AsInterface, (), (override));
+    MOCK_METHOD(int, Dump, (int fd, const std::vector<std::u16string>& args, (override));
+}
 }
 }
 
