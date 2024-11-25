@@ -769,7 +769,7 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, Function | Sma
     option->SetWindowName("GetSystemBarPropertyByType");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-    SystemBarProperty prop = SystemBarProperty();
+    SystemBarProperty prop;
     prop.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
     windowSceneSessionImpl->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
