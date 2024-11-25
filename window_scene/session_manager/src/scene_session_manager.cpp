@@ -197,10 +197,6 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.ohos.sceneboard", "com.ohos.sceneboard.MetaBallsAbility", "metaBallsTurbo"),
         std::make_tuple("com.huawei.hmos.motiongesture", "IntentUIExtensionAbility", "entry"),
         std::make_tuple("com.ohos.useriam.authwidget", "userauthuiextensionability", "entry"),
-    };
-
-    auto it = std::find_if(whitelist.begin(), whitelist.end(), [&element](const auto& item) {
-        auto& [bundleName, abilityName, _] = item;
         return (element.GetBundleName() == bundleName && element.GetAbilityName() == abilityName);
     });
     if (it != whitelist.end()) {

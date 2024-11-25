@@ -48,6 +48,10 @@ public:
     WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
+
+    /**
+     * Window Layout
+     */
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
     WMError MoveToAsync(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
@@ -55,6 +59,7 @@ public:
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
+
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
     void PerformBack() override;

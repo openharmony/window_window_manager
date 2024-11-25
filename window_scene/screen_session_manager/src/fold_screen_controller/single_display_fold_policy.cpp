@@ -236,6 +236,7 @@ void SingleDisplayFoldPolicy::ReportFoldStatusChangeBegin(int32_t offScreen, int
 void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
     DisplayModeChangeReason reason)
 {
+    RSInterfaces::GetInstance().SetScreenSwitching(true);
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
         return;
@@ -289,6 +290,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
 void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
     DisplayModeChangeReason reason)
 {
+    RSInterfaces::GetInstance().SetScreenSwitching(true);
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
         return;
