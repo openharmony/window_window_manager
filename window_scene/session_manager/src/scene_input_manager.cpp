@@ -333,7 +333,7 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
 bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& displayInfos,
     const std::vector<MMI::WindowInfo>& windowInfoList)
 {
-    int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
+    int32_t focusId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusId != lastFocusId_) {
         lastFocusId_ = focusId;
         lastDisplayInfos_ = displayInfos;
@@ -380,7 +380,7 @@ void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
 
 void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
 {
-    auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(windowInfo.id);
+    auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowInfo.id);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
         return;
@@ -410,7 +410,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     if (windowEventID == UINT32_MAX) {
         windowEventID = 0;
     }
-    focusedSessionId_ = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
+    focusedSessionId_ = SceneSessionManager::GetInstance().GetFocusedSessionId();
     std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {

@@ -116,6 +116,20 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnPropertyChanged, Function | Smal
 }
 
 /**
+ * @tc.name: OnSuperFoldStatusChanged
+ * @tc.desc: OnSuperFoldStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnSuperFoldStatusChanged, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnSuperFoldStatusChanged(screenId, superFoldStatus);
+}
+
+/**
  * @tc.name: OnPowerStatusChanged
  * @tc.desc: OnPowerStatusChanged test
  * @tc.type: FUNC

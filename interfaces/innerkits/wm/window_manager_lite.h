@@ -48,6 +48,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+
     /**
      * @brief Unregister focus changed listener.
      *
@@ -55,6 +56,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+
     /**
      * @brief Register visibility changed listener.
      *
@@ -62,6 +64,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+
     /**
      * @brief Unregister visibility changed listener.
      *
@@ -69,6 +72,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+
     /**
      * @brief Get visibility window info.
      *
@@ -76,6 +80,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
+
     /**
      * @brief Get focus window.
      *
@@ -83,6 +88,7 @@ public:
      * @return FocusChangeInfo object about focus window.
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+
     /**
      * @brief Register drawingcontent changed listener.
      *
@@ -98,6 +104,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener);
+
     /**
      * @brief Register window mode listener.
      *
@@ -105,6 +112,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+
     /**
      * @brief Unregister window mode listener.
      *
@@ -178,7 +186,7 @@ public:
      * @return WM_OK if raise success
      */
     WMError RaiseWindowToTop(int32_t persistentId);
-    
+
     /**
      * @brief Register WMS connection status changed listener.
      * @attention Callable only by u0 system user. A process only supports successful registration once.
@@ -205,6 +213,7 @@ public:
      * @return WM_OK means register success, others means unregister failed.
      */
     WMError RegisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+
     /**
      * @brief Unregister WindowStyle changed listener.
      *
@@ -212,6 +221,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
+
     /**
      * @brief Get window style type.
      *
@@ -283,7 +293,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
-    
+
     /**
      * @brief Unregister window updated listener.
      *

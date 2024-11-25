@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 #include "window_scene.h"
 #include "ability_context_impl.h"
@@ -164,7 +165,6 @@ HWTEST_F(WindowSceneTest, Init06, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR,
         scene->Init(displayId, abilityContext, listener, optionTest, iSession, identityToken));
 }
-
 
 /**
  * @tc.name: Create01

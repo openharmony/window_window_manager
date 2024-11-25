@@ -109,6 +109,7 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionForeground, Function | Sma
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifySessionForeground(reason, withAnimation);
 }
+
 /**
  * @tc.name: NotifySessionBackground
  * @tc.desc: test function : NotifySessionBackground

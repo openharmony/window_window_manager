@@ -80,7 +80,6 @@ HWTEST_F(ScreenSceneTest, Destroy01, Function | SmallTest | Level3)
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
 
-
 /**
  * @tc.name: UpdateViewportConfig01
  * @tc.desc: UpdateViewportConfig Test
@@ -143,6 +142,73 @@ HWTEST_F(ScreenSceneTest, FlushFrameRate, Function | SmallTest | Level3)
     uint32_t rate = 120;
     int32_t animatorExpectedFrameRate = -1;
     screenScene.FlushFrameRate(rate, animatorExpectedFrameRate);
+    ASSERT_EQ(1, screenScene.GetWindowId());
+}
+
+/**
+ * @tc.name: OnBundleUpdated
+ * @tc.desc: OnBundleUpdated Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, OnBundleUpdated, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    std::string bundleName = "test";
+    screenScene.OnBundleUpdated(bundleName);
+    ASSERT_EQ(1, screenScene.GetWindowId());
+}
+
+/**
+ * @tc.name: GetDisplayId & SetDisplayId
+ * @tc.desc: GetDisplayId & SetDisplayId Test01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, DisplayIdTest01, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    DisplayId setDisplayId = 0;
+    screenScene.SetDisplayId(setDisplayId);
+    screenScene.GetDisplayId();
+    ASSERT_EQ(1, screenScene.GetWindowId());
+}
+
+/**
+ * @tc.name: GetDisplayId & SetDisplayId
+ * @tc.desc: GetDisplayId & SetDisplayId Test02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, DisplayIdTest02, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    DisplayId setDisplayId = 100;
+    screenScene.SetDisplayId(setDisplayId);
+    screenScene.GetDisplayId();
+    ASSERT_EQ(1, screenScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetDisplayOrientation
+ * @tc.desc: SetDisplayOrientation Test01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, SetDisplayOrientation01, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    int32_t orientation = 0;
+    screenScene.SetDisplayOrientation(orientation);
+    ASSERT_EQ(1, screenScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetDisplayOrientation
+ * @tc.desc: SetDisplayOrientation Test02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, SetDisplayOrientation02, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    int32_t orientation = 100;
+    screenScene.SetDisplayOrientation(orientation);
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
 

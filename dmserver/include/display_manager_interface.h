@@ -137,6 +137,11 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) = 0;
+    virtual DMError MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+        DMRect mainScreenRegion, ScreenId& screenGroupId)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode)
     {
@@ -242,6 +247,12 @@ public:
 
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo()
     {
+        return nullptr;
+    }
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr)
+    {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
     }
 };

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_window_utils.h"
 #include <iomanip>
 #include <regex>
@@ -83,6 +84,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
     napi_set_named_property(env, objValue, "TYPE_HANDWRITE", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_HANDWRITE)));
+    napi_set_named_property(env, objValue, "TYPE_SCREEN_CONTROL", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
 
     return objValue;
 }
@@ -563,6 +566,7 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
     napi_set_named_property(env, objValue, "windowStatusType",
         CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    napi_set_named_property(env, objValue, "isFocused", CreateJsValue(env, info->IsFocused()));
     return objValue;
 }
 

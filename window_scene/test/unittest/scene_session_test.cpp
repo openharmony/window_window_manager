@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "window_helper.h"
 #include "display_manager.h"
 #include "pointer_event.h"
@@ -359,7 +360,6 @@ HWTEST_F(SceneSessionTest, SetDefaultRequestedOrientation, Function | SmallTest 
     Orientation ret = sceneSession->GetRequestedOrientation();
     ASSERT_EQ(orientation, ret);
 }
-
 
 /**
  * @tc.name: IsKeepScreenOn
@@ -886,11 +886,11 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: FixRectByAspectRatio
- * @tc.desc: FixRectByAspectRatio
+ * @tc.name: AdjustRectByAspectRatio
+ * @tc.desc: AdjustRectByAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, FixRectByAspectRatio, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, AdjustRectByAspectRatio, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "Background01";
@@ -904,7 +904,7 @@ HWTEST_F(SceneSessionTest, FixRectByAspectRatio, Function | SmallTest | Level2)
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     WSRect originalRect_ = { 0, 0, 0, 0 };
-    ASSERT_EQ(false, sceneSession->FixRectByAspectRatio(originalRect_));
+    ASSERT_EQ(false, sceneSession->AdjustRectByAspectRatio(originalRect_));
 }
 
 /**
@@ -1113,7 +1113,7 @@ HWTEST_F(SceneSessionTest, TransferPointerEvent, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     ASSERT_EQ(sceneSession->TransferPointerEvent(pointerEvent), WSError::WS_ERROR_NULLPTR);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
@@ -1912,6 +1912,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     info.bundleName_ = "HandleCompatibleModeMoveDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
@@ -1967,6 +1968,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, Function | SmallTest | Leve
     info.bundleName_ = "HandleCompatibleModeDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {2, 1, 1, 1};

@@ -41,6 +41,7 @@ enum class ListenerFunctionType : uint32_t {
     GESTURE_NAVIGATION_ENABLED_CHANGE_CB,
     CLOSE_TARGET_FLOAT_WINDOW_CB,
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
+    START_PIP_FAILED_CB,
 };
 
 class JsSceneSessionManager final {
@@ -101,6 +102,7 @@ public:
     static napi_value NotifySwitchingUser(napi_env env, napi_callback_info info);
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
+    static napi_value GetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
     static napi_value GetCustomDecorHeight(napi_env env, napi_callback_info info);
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
@@ -113,9 +115,13 @@ public:
     static napi_value IsScbCoreEnabled(napi_env env, napi_callback_info info);
     static napi_value RefreshPcZOrder(napi_env env, napi_callback_info info);
     static napi_value GetWindowPid(napi_env env, napi_callback_info info);
+    static napi_value UpdatePcFoldScreenStatus(napi_env env, napi_callback_info info);
+    static napi_value ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
+    static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
+    static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
 
     /*
-     * Multi instance
+     * Multi Instance
      */
     static napi_value GetMaxInstanceCount(napi_env env, napi_callback_info info);
     static napi_value GetInstanceCount(napi_env env, napi_callback_info info);
@@ -173,6 +179,7 @@ private:
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
+    napi_value OnGetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
     napi_value OnGetCustomDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnSwitchFreeMultiWindow(napi_env env, napi_callback_info info);
     napi_value OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
@@ -185,9 +192,13 @@ private:
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
     napi_value OnRefreshPcZOrder(napi_env env, napi_callback_info info);
     napi_value OnGetWindowPid(napi_env env, napi_callback_info info);
+    napi_value OnUpdatePcFoldScreenStatus(napi_env env, napi_callback_info info);
+    napi_value OnResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
+    napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
+    napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
 
     /*
-     * multi instance
+     * Multi Instance
      */
     napi_value OnGetMaxInstanceCount(napi_env env, napi_callback_info info);
     napi_value OnGetInstanceCount(napi_env env, napi_callback_info info);
@@ -225,6 +236,12 @@ private:
     void OnAbilityManagerCollaboratorRegistered();
     void RegisterRootSceneCallbacksOnSSManager();
     void RegisterSSManagerCallbacksOnRootScene();
+
+    /*
+     * PiP Window
+     */
+    void OnStartPiPFailed();
+    void ProcessStartPiPFailedRegister();
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

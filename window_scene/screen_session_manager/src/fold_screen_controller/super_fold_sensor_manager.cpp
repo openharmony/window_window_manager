@@ -32,6 +32,7 @@ namespace {
 constexpr float ANGLE_MIN_VAL = 30.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr float ANGLE_FLAT_THRESHOLD = 150.0F;
+constexpr float ANGLE_SENSOR_THRESHOLD = 177.0F;
 constexpr float ANGLE_HALF_FOLD_THRESHOLD = 135.0F;
 constexpr uint16_t HALL_HAVE_KEYBOARD_THRESHOLD = 0B0100;
 constexpr uint16_t HALL_REMOVE_KEYBOARD_THRESHOLD = 0B0000;
@@ -101,8 +102,8 @@ void SuperFoldSensorManager::RegisterHallCallback()
 
 void SuperFoldSensorManager::UnregisterHallCallback()
 {
-    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
-    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
+    int32_t deactivateRet = DeactivateSensor(SENSOR_TYPE_ID_HALL, &hallUser);
+    int32_t unsubscribeRet = UnsubscribeSensor(SENSOR_TYPE_ID_HALL, &hallUser);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
         TLOGI(WmsLogTag::DMS, "UnRegisterHallCallback success.");
     }
@@ -128,22 +129,23 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
         TLOGI(WmsLogTag::DMS, "Invalid value, angle value is: %{public}f.", curAngle_);
         return;
     }
-    TLOGI(WmsLogTag::DMS, "angle value is: %{public}f.", curAngle_);
+    TLOGD(WmsLogTag::DMS, "angle value is: %{public}f.", curAngle_);
     NotifyFoldAngleChanged(curAngle_);
 }
 
 void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
 {
+    SuperFoldStatusChangeEvents events;
     if (std::isgreaterequal(foldAngle, ANGLE_FLAT_THRESHOLD)) {
         TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Expanded");
-        events_ = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
+        events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
     } else if (std::isless(foldAngle, ANGLE_HALF_FOLD_THRESHOLD) &&
         std::isgreater(foldAngle, ANGLE_MIN_VAL)) {
         TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Half Folded");
-        events_ = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
+        events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
     } else if (std::islessequal(foldAngle, ANGLE_MIN_VAL)) {
         TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Folded");
-        events_ = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
+        events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
     } else {
         TLOGI(WmsLogTag::DMS, "Angle Don't Change!");
         return;
@@ -152,7 +154,7 @@ void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
     std::vector<float> foldAngles;
     foldAngles.push_back(foldAngle);
     ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(foldAngles);
-    HandleSuperSensorChange();
+    HandleSuperSensorChange(events);
 }
 
 void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
@@ -184,24 +186,29 @@ void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
 
 void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 {
+    SuperFoldStatusChangeEvents events;
     if (Hall == HALL_REMOVE_KEYBOARD_THRESHOLD) {
         TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard off!");
-        events_ = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
+        events = SuperFoldStatusChangeEvents::KEYBOARD_OFF;
     } else if (Hall == HALL_HAVE_KEYBOARD_THRESHOLD) {
         TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Keyboard on!");
-        events_ = SuperFoldStatusChangeEvents::KEYBOARD_ON;
+        events = SuperFoldStatusChangeEvents::KEYBOARD_ON;
+        HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
     } else {
         TLOGI(WmsLogTag::DMS, "NotifyHallChanged: Invalid Hall Value!");
         return;
     }
     // notify
-    HandleSuperSensorChange();
+    HandleSuperSensorChange(events);
+    if (std::isgreater(curAngle_, ANGLE_SENSOR_THRESHOLD)) {
+        HandleSuperSensorChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    }
 }
 
-void SuperFoldSensorManager::HandleSuperSensorChange()
+void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents events)
 {
     // trigger events
-    SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events_);
+    SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
 }
 
 SuperFoldSensorManager::SuperFoldSensorManager() {}

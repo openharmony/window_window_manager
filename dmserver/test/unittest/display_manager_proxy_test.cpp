@@ -77,6 +77,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDefaultDisplayInfo01, Function | SmallTest 
     auto displayInfo3 = proxy2.GetDefaultDisplayInfo();
     ASSERT_EQ(nullptr, displayInfo3);
 }
+
 /**
  * @tc.name: GetDisplayInfoById01
  * @tc.desc: test DisplayManagerProxy::GetDisplayInfoById
@@ -100,6 +101,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoById01, Function | SmallTest | L
     auto displayInfo3 = proxy2.GetDisplayInfoById(0);
     ASSERT_EQ(nullptr, displayInfo3);
 }
+
 /**
  * @tc.name: GetDisplayInfoByScreen01
  * @tc.desc: test DisplayManagerProxy::GetDisplayInfoByScreen
@@ -123,6 +125,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplayInfoByScreen01, Function | SmallTest
     auto displayInfo3 = proxy2.GetDisplayInfoByScreen(0);
     ASSERT_EQ(nullptr, displayInfo3);
 }
+
 /**
  * @tc.name: CreateVirtualScreen01
  * @tc.desc: test DisplayManagerProxy::CreateVirtualScreen
@@ -152,6 +155,7 @@ HWTEST_F(DisplayManagerProxyTest, CreateVirtualScreen01, Function | SmallTest | 
     auto screenId3 = proxy2.CreateVirtualScreen(virtualOption2, displayManagerAgent2);
     ASSERT_EQ(SCREEN_ID_INVALID, screenId3);
 }
+
 /**
  * @tc.name: DestroyVirtualScreen01
  * @tc.desc: test DisplayManagerProxy::DestroyVirtualScreen
@@ -175,6 +179,7 @@ HWTEST_F(DisplayManagerProxyTest, DestroyVirtualScreen01, Function | SmallTest |
     auto result3 = proxy2.DestroyVirtualScreen(0);
     ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
 }
+
 /**
  * @tc.name: SetVirtualScreenSurface01
  * @tc.desc: test DisplayManagerProxy::SetVirtualScreenSurface
@@ -201,6 +206,7 @@ HWTEST_F(DisplayManagerProxyTest, SetVirtualScreenSurface01, Function | SmallTes
     auto result4 = proxy2.SetVirtualScreenSurface(0, surface->GetProducer());
     ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, result4);
 }
+
 /**
  * @tc.name: SetOrientation01
  * @tc.desc: test DisplayManagerProxy::SetOrientation
@@ -224,6 +230,7 @@ HWTEST_F(DisplayManagerProxyTest, SetOrientation01, Function | SmallTest | Level
     auto result3 = proxy2.SetOrientation(0, Orientation::VERTICAL);
     ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
 }
+
 /**
  * @tc.name: GetDisplaySnapshot01
  * @tc.desc: test DisplayManagerProxy::GetDisplaySnapshot
@@ -246,6 +253,7 @@ HWTEST_F(DisplayManagerProxyTest, GetDisplaySnapshot01, Function | SmallTest | L
     auto result3 = proxy2.GetDisplaySnapshot(0);
     ASSERT_EQ(nullptr, result3);
 }
+
 /**
  * @tc.name: GetScreenSupportedColorGamuts01
  * @tc.desc: test DisplayManagerProxy::GetScreenSupportedColorGamuts
@@ -269,6 +277,7 @@ HWTEST_F(DisplayManagerProxyTest, GetScreenSupportedColorGamuts01, Function | Sm
     auto result3 = proxy2.GetScreenSupportedColorGamuts(0, gamutVector);
     ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, result3);
 }
+
 /**
  * @tc.name: GetScreenColorGamut01
  * @tc.desc: test DisplayManagerProxy::GetScreenColorGamut

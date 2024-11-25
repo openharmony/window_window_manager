@@ -155,6 +155,7 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
+    virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
@@ -261,8 +262,8 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
-    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) = 0;
-    virtual uint32_t GetRequestModeSupportInfo() const = 0;
+    virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) = 0;
+    virtual uint32_t GetRequestWindowModeSupportType() const = 0;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
     virtual bool IsMainHandlerAvailable() const = 0;
@@ -273,6 +274,7 @@ public:
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual void StartMove() = 0;
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }
     virtual WMError Close() = 0;
@@ -314,9 +316,9 @@ public:
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
-    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; };
-    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; }
+    virtual WMError GetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_OK; }
+    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -354,8 +356,20 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
     /**
-     * @brief Set the modality of window.
+     * @brief Set the application modality of main window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetWindowModal(bool isModal)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set the modality of sub window.
      *
      * @param isModal bool.
      * @param modalityType ModalityType.
@@ -365,7 +379,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
+    virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual WMError Maximize(MaximizePresentation present) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 

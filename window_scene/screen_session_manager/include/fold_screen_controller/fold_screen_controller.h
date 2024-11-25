@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_CONTROLLER_H
 #define OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_CONTROLLER_H
 
@@ -39,6 +40,7 @@ public:
 
     void BootAnimationFinishPowerInit();
     void SetDisplayMode(const FoldDisplayMode displayMode);
+    void RecoverDisplayMode();
     FoldDisplayMode GetDisplayMode();
     bool IsFoldable();
     FoldStatus GetFoldStatus();

@@ -1446,8 +1446,12 @@ HWTEST_F(WindowSessionTest2, DrawingCompleted, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, RemoveStartingWindow, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    auto result = session_->RemoveStartingWindow();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    session_->RegisterLifecycleListener(lifecycleListener_);
+    session_->RemoveStartingWindow();
+    uint64_t screenId = 0;
+    session_->SetScreenId(screenId);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    ASSERT_EQ(0, session_->sessionInfo_.screenId_);
 }
 
 /**
@@ -1677,6 +1681,7 @@ HWTEST_F(WindowSessionTest2, SetShowRecent004, Function | SmallTest | Level2)
 {
     session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->SetScreenLocked(false);
+    sleep(1);
 
     session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -2015,16 +2020,14 @@ HWTEST_F(WindowSessionTest2, UpdateSizeChangeReason, Function | SmallTest | Leve
 HWTEST_F(WindowSessionTest2, SetPendingSessionActivationEventListener, Function | SmallTest | Level2)
 {
     int resultValue = 0;
-    NotifyPendingSessionActivationFunc callback = [&resultValue](const SessionInfo& info) {
+    session_->SetPendingSessionActivationEventListener([&resultValue](const SessionInfo& info) {
         resultValue = 1;
-    };
-
-    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
-    session_->SetPendingSessionActivationEventListener(callback);
-    NotifyTerminateSessionFunc callback1 = [&resultValue](const SessionInfo& info) {
+    });
+    usleep(WAIT_SYNC_IN_NS);
+    session_->SetTerminateSessionListener([&resultValue](const SessionInfo& info) {
         resultValue = 2;
-    };
-    session_->SetTerminateSessionListener(callback1);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     LifeCycleTaskType taskType = LifeCycleTaskType{0};
     session_->RemoveLifeCycleTask(taskType);
     ASSERT_EQ(resultValue, 0);
@@ -2066,10 +2069,8 @@ HWTEST_F(WindowSessionTest2, SetSessionIcon, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, SetSessionExceptionListener, Function | SmallTest | Level2)
 {
     session_->SetSessionExceptionListener(nullptr, true);
-
-    NotifySessionExceptionFunc func = [](const SessionInfo& info, bool needRemoveSession) {};
-    session_->SetSessionExceptionListener(func, true);
-
+    session_->SetSessionExceptionListener([](const SessionInfo& info, bool removeSession, bool startFail) {}, true);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);
 }
 
@@ -2194,11 +2195,13 @@ HWTEST_F(WindowSessionTest2, SetOffset, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, SetBackPressedListenser, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    WLOGFI("SetBackPressedListenser begin!");
-
-    session_->SetBackPressedListenser(session_->backPressedFunc_);
-
-    WLOGFI("SetBackPressedListenser end!");
+    int32_t result = 0;
+    session_->SetBackPressedListenser([&result](const bool needMoveToBackground) {
+        result = 1;
+    });
+    usleep(WAIT_SYNC_IN_NS);
+    session_->backPressedFunc_(true);
+    ASSERT_EQ(result, 1);
 }
 
 /**
@@ -2308,16 +2311,19 @@ HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level
 {
     session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->SetScreenLocked(true);
+    sleep(1);
     bool ret = session_->IsSupportDetectWindow(true);
     ASSERT_EQ(ret, false);
 
     ssm_->SetScreenLocked(false);
+    sleep(1);
     session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = session_->IsSupportDetectWindow(true);
     ASSERT_EQ(ret, false);
 
     ssm_->SetScreenLocked(false);
+    sleep(1);
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     session_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = session_->IsSupportDetectWindow(false);

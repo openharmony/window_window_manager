@@ -1087,6 +1087,7 @@ HWTEST_F(WindowPairTest, ClearPairSnapshot01, Function | SmallTest | Level2)
     windowPair->status_ = WindowPairStatus::PRIMARY_AND_SECONDARY;
     ASSERT_EQ(false, windowPair->TakePairSnapshot());
 }
+
 /**
  * @tc.name: ExitSplitMode
  * @tc.desc: Exit Split Mode
@@ -1108,6 +1109,7 @@ HWTEST_F(WindowPairTest, ExitSplitMode01, Function | SmallTest | Level2)
     windowPair->ExitSplitMode();
     ASSERT_EQ(nullptr, windowPair->divider_);
 }
+
 /**
  * @tc.name: ExitSplitMode
  * @tc.desc: Exit Split Mode
@@ -1148,6 +1150,7 @@ HWTEST_F(WindowPairTest, ExitSplitMode02, Function | SmallTest | Level2)
     ASSERT_EQ(0, vec2.size());
     windowPair->Clear();
 }
+
 /**
  * @tc.name: ExitSplitMode
  * @tc.desc: Exit Split Mode
@@ -1187,7 +1190,6 @@ HWTEST_F(WindowPairTest, ExitSplitMode03, Function | SmallTest | Level2)
     ASSERT_EQ(0, vec2.size());
     windowPair->Clear();
 }
-
 
 /**
  * @tc.name: IsDuringSplit

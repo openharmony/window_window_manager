@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OH_WINDOW_EVENT_FILTER_H
 #define OH_WINDOW_EVENT_FILTER_H
 
-#include "foundation/multimodalinput/input/interfaces/kits/c/input/oh_input_manager.h"
+#include "oh_input_manager.h"
 #include "key_event.h"
 #include "oh_window_comm.h"
 #include "stdint.h"

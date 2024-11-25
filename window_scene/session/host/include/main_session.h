@@ -39,6 +39,9 @@ public:
     bool IsTopmost() const override;
     WSError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
+    WSError OnMainSessionModalTypeChange(bool isModal) override;
+    bool IsModal() const override;
+    bool IsApplicationModal() const override;
 
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
@@ -49,6 +52,7 @@ public:
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
+    WSError OnSetWindowRectAutoSave(bool enabled) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

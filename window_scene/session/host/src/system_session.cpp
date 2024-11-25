@@ -17,11 +17,10 @@
 
 #include "common/include/session_permission.h"
 #include "key_event.h"
-#include "session/host/include/session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "parameters.h"
 #include "pointer_event.h"
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SystemSession" };
@@ -185,7 +184,7 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         }
     }
     if (type == WindowType::WINDOW_TYPE_DIALOG) {
-        Session::ProcessClickModalSpecificWindowOutside(posX, posY);
+        Session::ProcessClickModalWindowOutside(posX, posY);
         auto sessionProperty = GetSessionProperty();
         if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
             RaiseToAppTopForPointDown();

@@ -368,6 +368,8 @@ HWTEST_F(SessionListenerControllerTest, OnListenerDied, Function | SmallTest | L
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | SmallTest | Level2)
 {
+#ifndef SUPPORT_GRAPHICS
+#define SUPPORT_GRAPHICS
     int32_t persistentId = -1;
 
     int32_t pixelMapWidth = 4;
@@ -380,13 +382,20 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
     pixelMap->SetImageInfo(info);
     std::shared_ptr<OHOS::Media::PixelMap> icon = std::move(pixelMap);
     slController->NotifySessionIconChanged(persistentId, icon);
+    sptr<MyMissionListener> myListener = new MyMissionListener();
+    EXPECT_NE(myListener, nullptr);
+    bool res = myListener->IsMissionIconUpdated();
+    EXPECT_EQ(res, false);
 
     persistentId = 1;
+    sptr<ISessionListener> listener = new MyMissionListener();
+    EXPECT_NE(listener, nullptr);
+    slController->sessionListeners_.push_back(listener);
     slController->NotifySessionIconChanged(persistentId, icon);
-    ASSERT_EQ(persistentId, 1);
-
-    slController->NotifySessionIconChanged(persistentId, icon);
-    EXPECT_EQ(1, persistentId);
+    res = myListener->IsMissionIconUpdated();
+    EXPECT_EQ(res, true);
+    slController->sessionListeners_.clear();
+#endif
 }
 
 /**

@@ -86,6 +86,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_KEYBOARD_PANEL,
     WINDOW_TYPE_SCB_DEFAULT,
     WINDOW_TYPE_TRANSPARENT_VIEW,
+    WINDOW_TYPE_SCREEN_CONTROL,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -202,7 +203,7 @@ enum class WMError : int32_t {
     WM_ERROR_NO_REMOTE_ANIMATION,
     WM_ERROR_INVALID_DISPLAY,
     WM_ERROR_INVALID_PARENT,
-    WM_ERROR_OPER_FULLSCREEN_FAILED,
+    WM_ERROR_INVALID_OP_IN_CUR_STATUS,
     WM_ERROR_REPEAT_OPERATION,
     WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_CALLING,
@@ -243,7 +244,7 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_START_ABILITY_FAILED = 1300007,
     WM_ERROR_INVALID_DISPLAY = 1300008,
     WM_ERROR_INVALID_PARENT = 1300009,
-    WM_ERROR_OPER_FULLSCREEN_FAILED = 1300010,
+    WM_ERROR_INVALID_OP_IN_CUR_STATUS = 1300010,
     WM_ERROR_PIP_DESTROY_FAILED = 1300011,
     WM_ERROR_PIP_STATE_ABNORMALLY = 1300012,
     WM_ERROR_PIP_CREATE_FAILED = 1300013,
@@ -291,6 +292,14 @@ enum class WindowUIType : uint8_t {
 };
 
 /**
+ * @brief Enumerates flag of ControlAppType.
+ */
+enum class ControlAppType : uint8_t {
+    APP_LOCK = 1,
+    CONTROL_APP_TYPE_END,
+};
+
+/**
  * @brief Used to map from WMError to WmErrorCode.
  */
 extern const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP;
@@ -305,9 +314,9 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
-    WINDOW_FLAG_HANDWRITING = 1 << 7,
-    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
     WINDOW_FLAG_END = 1 << 9,
 };
 
@@ -712,6 +721,11 @@ struct Rect {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
     }
 
+    bool IsUninitializedSize() const
+    {
+        return width_ == 0 && height_ == 0;
+    }
+
     bool IsInsideOf(const Rect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
@@ -1060,8 +1074,8 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = INT32_MAX;
-    uint32_t maxHeight_ = INT32_MAX;
+    uint32_t maxWidth_ = UINT32_MAX;
+    uint32_t maxHeight_ = UINT32_MAX;
     uint32_t minWidth_ = 1;
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;

@@ -504,10 +504,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], sceneSession);
@@ -530,10 +530,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
@@ -556,10 +556,10 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    NotifyTerminateSessionFuncNew callback = [](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+    sceneSession->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         ssm_->sceneSessionMap_.erase(info.persistentId_);
-    };
-    sceneSession->SetTerminateSessionListenerNew(callback);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ssm_->ClearAllCollaboratorSessions();
     ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
@@ -994,6 +994,7 @@ HWTEST_F(SceneSessionManagerTest, SetScreenLocked001, Function | SmallTest | Lev
     sceneSession->handler_->PostTask(task, taskName, delayTime);
     int32_t beforeTaskNum = GetTaskCount(sceneSession);
     ssm_->SetScreenLocked(true);
+    sleep(1);
     ASSERT_EQ(beforeTaskNum - 1, GetTaskCount(sceneSession));
     ASSERT_EQ(DetectTaskState::NO_TASK, sceneSession->detectTaskInfo_.taskState);
     ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, sceneSession->detectTaskInfo_.taskWindowMode);
@@ -1429,16 +1430,16 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsEnablePiPCreate start";
     ssm_->isScreenLocked_ = true;
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     ssm_->isScreenLocked_ = false;
     Rect reqRect = { 0, 0, 0, 0 };
     property->SetRequestRect(reqRect);
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     reqRect = { 0, 0, 10, 0 };
     property->SetRequestRect(reqRect);
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     reqRect = { 0, 0, 10, 10 };
     property->SetRequestRect(reqRect);
@@ -1452,20 +1453,20 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sceneSession->pipTemplateInfo_ = {0, 100, {}};
     ssm_->sceneSessionMap_.insert({0, sceneSession});
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
     ssm_->sceneSessionMap_.clear();
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     property->SetParentPersistentId(100);
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ASSERT_TRUE(!ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     ssm_->sceneSessionMap_.clear();
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ASSERT_TRUE(ssm_->isEnablePiPCreate(property));
+    ASSERT_TRUE(ssm_->IsEnablePiPCreate(property));
 }
 
 /**
@@ -2149,6 +2150,33 @@ HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, Function | Small
 }
 
 /**
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: IsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | Level3)
+{
+    std::string key = "com.example.recposentryEntryAbilityabc";
+    bool enabled = false;
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetIsWindowRectAutoSave
+ * @tc.desc: SetIsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest | Level3)
+{
+    std::string key = "com.example.recposentryEntryAbility";
+    bool enabled = false;
+    ssm_->SetIsWindowRectAutoSave(key, enabled);
+    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
  * @tc.name: GetDisplayIdByWindowId
  * @tc.desc: test function : GetDisplayIdByWindowId
  * @tc.type: FUNC
@@ -2159,8 +2187,10 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
     info.abilityName_ = "test";
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession1);
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();

@@ -159,7 +159,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | L
  */
 HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, Function | SmallTest | Level1)
 {
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
     SessionInfo info;
     info.abilityName_ = "CheckPointerEventDispatch";
     info.bundleName_ = "CheckPointerEventDispatchBundleName";

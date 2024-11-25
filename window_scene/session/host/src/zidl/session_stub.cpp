@@ -66,6 +66,10 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "Read callingTokenId failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadInt32(abilitySessionInfo->tmpSpecifiedId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read tmpSpecifiedId failed.");
+        return ERR_INVALID_DATA;
+    }
     if (!data.ReadBool(abilitySessionInfo->reuse)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read reuse failed.");
         return ERR_INVALID_DATA;
@@ -218,6 +222,12 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetGestureBackEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MODAL_TYPE_CHANGE):
             return HandleSessionModalTypeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_SESSION_MODAL_TYPE_CHANGE):
+            return HandleMainSessionModalTypeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE):
+            return HandleSetWindowRectAutoSave(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY):
+            return HandleNotifyExtensionDetachToDisplay(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -371,6 +381,17 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(winRect.height_);
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
+        std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+        property->GetSupportWindowModes(supportWindowModes);
+        auto size = supportWindowModes.size();
+        if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+            reply.WriteUint32(static_cast<uint32_t>(size));
+            for (decltype(size) i = 0; i < size; i++) {
+                reply.WriteInt32(static_cast<int32_t>(supportWindowModes[i]));
+            }
+        } else {
+            reply.WriteUint32(0);
+        }
         reply.WriteBool(property->GetCompatibleModeInPc());
         reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
@@ -422,7 +443,7 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
     if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
-        eventId > static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
+        eventId >= static_cast<uint32_t>(SessionEvent::EVENT_END)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
     }
@@ -650,6 +671,14 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
         abilitySessionInfo->startWindowOption.reset(startWindowOption);
     }
+    uint32_t size = data.ReadUint32();
+    if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        abilitySessionInfo->supportWindowModes.reserve(size);
+        for (uint32_t i = 0; i < size; i++) {
+            abilitySessionInfo->supportWindowModes.push_back(
+                static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
+        }
+    }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -700,12 +729,12 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
 int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
-    Rect tempRect;
-    WMError errorCode = GetGlobalScaledRect(tempRect);
-    reply.WriteInt32(tempRect.posX_);
-    reply.WriteInt32(tempRect.posY_);
-    reply.WriteUint32(tempRect.width_);
-    reply.WriteUint32(tempRect.height_);
+    Rect globalScaledRect;
+    WMError errorCode = GetGlobalScaledRect(globalScaledRect);
+    reply.WriteInt32(globalScaledRect.posX_);
+    reply.WriteInt32(globalScaledRect.posY_);
+    reply.WriteUint32(globalScaledRect.width_);
+    reply.WriteUint32(globalScaledRect.height_);
     reply.WriteInt32(static_cast<int32_t>(errorCode));
     return ERR_NONE;
 }
@@ -716,15 +745,15 @@ int SessionStub::HandleUpdateClientRect(MessageParcel& data, MessageParcel& repl
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
     int32_t posX = 0;
     int32_t posY = 0;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+    int32_t width = 0;
+    int32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadInt32(width) || !data.ReadInt32(height)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
         return ERR_INVALID_DATA;
     }
     WSRect rect = { posX, posY, width, height };
     WSError errCode = UpdateClientRect(rect);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -1198,6 +1227,13 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    NotifyExtensionDetachToDisplay();
+    return ERR_NONE;
+}
+
 int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "in");
@@ -1242,6 +1278,31 @@ int SessionStub::HandleSessionModalTypeChange(MessageParcel& data, MessageParcel
     TLOGD(WmsLogTag::WMS_HIERARCHY, "subWindowModalType: %{public}u", subWindowModalType);
     WSError errCode = OnSessionModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleMainSessionModalTypeChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isModal = false;
+    if (!data.ReadBool(isModal)) {
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "isModal: %{public}d", isModal);
+    WSError errCode = OnMainSessionModalTypeChange(isModal);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply)
+{
+    bool enabled = true;
+    if (!data.ReadBool(enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
+    WSError errCode = OnSetWindowRectAutoSave(enabled);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

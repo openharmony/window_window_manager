@@ -461,9 +461,9 @@ void CheckWindowImplFunctionsPart3(sptr<WindowImpl> window, const uint8_t* data,
     startPos += GetObject(mode, data + startPos, size - startPos);
     window->UpdateMode(mode);
 
-    uint32_t modeSupportInfo;
-    startPos += GetObject(modeSupportInfo, data + startPos, size - startPos);
-    window->UpdateModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType;
+    startPos += GetObject(windowModeSupportType, data + startPos, size - startPos);
+    window->UpdateWindowModeSupportType(windowModeSupportType);
 
     WindowState windowState;
     startPos += GetObject(windowState, data + startPos, size - startPos);
@@ -596,7 +596,7 @@ void CheckWindowImplFunctionsPart6(sptr<WindowImpl> window, const uint8_t* data,
     uint32_t uint32Val[2];
     startPos += GetObject(uint32Val[0], data + startPos, size - startPos);
     startPos += GetObject(uint32Val[1], data + startPos, size - startPos);
-    window->SetModeSupportInfo(uint32Val[0]);
+    window->SetWindowModeSupportType(uint32Val[0]);
 
     float floatVal;
     startPos += GetObject(floatVal, data + startPos, size - startPos);
@@ -660,9 +660,9 @@ void CheckWindowImplFunctionsPart7(sptr<WindowImpl> window, const uint8_t* data,
     window->UnregisterDialogDeathRecipientListener(dialogDeathRecipientListener);
     sptr<IAceAbilityHandler> aceAbilityHandler = new AceAbilityHandler();
     window->SetAceAbilityHandler(aceAbilityHandler);
-    uint32_t modeSupportInfo;
-    startPos += GetObject<uint32_t>(modeSupportInfo, data + startPos, size - startPos);
-    window->SetRequestModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType;
+    startPos += GetObject<uint32_t>(windowModeSupportType, data + startPos, size - startPos);
+    window->SetRequestWindowModeSupportType(windowModeSupportType);
     float ratio;
     startPos += GetObject<float>(ratio, data + startPos, size - startPos);
     window->SetAspectRatio(ratio);

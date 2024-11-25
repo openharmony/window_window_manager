@@ -706,6 +706,10 @@ HWTEST_F(SceneSessionManagerTest3, ChangeUIAbilityVisibilityBySCB, Function | Sm
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
     EXPECT_EQ(ret, 2097202);
+    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, false);
+    EXPECT_EQ(ret, 2097202);
+    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, true);
+    EXPECT_EQ(ret, 2097202);
 }
 
 /**
@@ -1369,7 +1373,7 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, Function 
     property->SetFloatingWindowAppType(true);
     ssm_->UpdateForceHideState(sceneSession, property, true);
     ssm_->UpdateForceHideState(sceneSession, property, false);
-    uint32_t result = property->GetModeSupportInfo();
+    uint32_t result = property->GetWindowModeSupportType();
     ASSERT_EQ(result, WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
 }
 
@@ -1689,8 +1693,10 @@ HWTEST_F(SceneSessionManagerTest3, IsScreenLocked, Function | SmallTest | Level3
 {
     ssm_->sceneSessionMap_.clear();
     ssm_->SetScreenLocked(true);
+    sleep(1);
     EXPECT_TRUE(ssm_->IsScreenLocked());
     ssm_->SetScreenLocked(false);
+    sleep(1);
     EXPECT_FALSE(ssm_->IsScreenLocked());
 }
 

@@ -86,6 +86,7 @@ private:
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleMainSessionModalTypeChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -97,12 +98,16 @@ private:
     int HandleTriggerBindModalUIExtension(MessageParcel& data, MessageParcel& reply);
     int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply);
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
+
+    // PC Window
+    int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

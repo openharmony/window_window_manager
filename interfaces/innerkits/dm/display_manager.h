@@ -552,12 +552,28 @@ public:
     DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
 
     /**
+     * @brief Register a listener for the event of available  area changed.
+     *
+     * @param listener IAvailableAreaListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
+
+    /**
      * @brief UnRegister a listener for the event of available  area changed.
      *
      * @param listener IAvailableAreaListener.
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+
+    /**
+     * @brief UnRegister a listener for the event of available  area changed.
+     *
+     * @param listener IAvailableAreaListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
 
     /**
      * @brief Add a surface node to the target display.
@@ -742,6 +758,28 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
 
+    /**
+     * @brief Get screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param rect Rect of screenshot.
+     * @param size Size of screenshot.
+     * @param rotation Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
+        const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
 private:
     DisplayManager();
     ~DisplayManager();
