@@ -815,8 +815,8 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteUint64(static_cast<uint64_t>(moveConfiguration.displayId_))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write SessionDisplayId failed");
+    if (!data.WriteUint64(static_cast<uint64_t>(moveConfiguration.displayId))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write Session displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 

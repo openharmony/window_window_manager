@@ -1402,7 +1402,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
             SetSessionRect(newWinRect);
         }
         SetSessionRequestRect(newRequestRect);
-        NotifySessionRectChange(newRequestRect, reason, moveConfiguration.displayId_);
+        NotifySessionRectChange(newRequestRect, reason, moveConfiguration.displayId);
     } else if (reason == SizeChangeReason::RESIZE) {
         bool needUpdateInputMethod = UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
         if (needUpdateInputMethod) {
@@ -1434,7 +1434,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
 
 /** @note @window.layout */
 WSError SceneSession::UpdateSessionRect(
-    const WSRect &rect, SizeChangeReason reason, bool isGlobal,
+    const WSRect& rect, SizeChangeReason reason, bool isGlobal,
     bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
 {
     if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&

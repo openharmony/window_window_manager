@@ -16,11 +16,10 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include "dm_common.h"
-#include <parcel.h>
-#include <sstream>
-#include <map>
 #include <float.h>
+#include <parcel.h>
+#include <map>
+#include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -800,12 +799,13 @@ struct KeyboardAnimationConfig {
 };
 
 struct MoveConfiguration {
-    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    DisplayId displayId = DISPLAY_ID_INVALID;
     std::string ToString() const
     {
-        std::stringstream ss;
-        ss << "[" << displayId_ << "]";
-        return ss.str();
+        constexpr int32_t bufferSize = 10;
+        char buffer[bufferSize];
+        snprintf(buffer, bufferSize, "[%lu]", displayId);
+        return buffer;
     }
 };
 

@@ -60,9 +60,11 @@ public:
     MOCK_METHOD3(CreateSystemHspModuleResourceManager, int32_t(const std::string& bundleName,
         const std::string& moduleName, std::shared_ptr<Global::Resource::ResourceManager>& ResourceManager));
     MOCK_METHOD0(GetArea, int());
+    MOCK_METHOD0(GetProcessName, std::string());
     MOCK_CONST_METHOD0(GetConfiguration, std::shared_ptr<AppExecFwk::Configuration>());
     MOCK_CONST_METHOD0(GetBaseDir, std::string());
     MOCK_CONST_METHOD0(GetDeviceType, Global::Resource::DeviceType());
+    MOCK_METHOD1(CreateAreaModeContext, std::shared_ptr<Context>(int areaMode));
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

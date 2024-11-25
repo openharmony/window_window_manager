@@ -191,14 +191,19 @@ public:
      * Window Layout
      */
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
-    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
-    void SetNeedSyncSessionRect(bool needSync);
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false, MoveConfiguration moveConfiguration = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
+    void UpdateRectForDrag(WSRect& rect);
+    void UpdateSessionState(SessionState state) override;
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) override;
 
+    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
+    void SetNeedSyncSessionRect(bool needSync);
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
         bool isKeyboardShow, bool isRotating) {}
@@ -212,8 +217,6 @@ public:
     WSError NotifySessionExceptionInner(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false,
         bool isFromClient = false, bool startFail = false);
-    WSError NotifyClientToUpdateRect(const std::string& updateReason,
-        std::shared_ptr<RSTransaction> rsTransaction) override;
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true) override;
@@ -445,7 +448,6 @@ public:
     void SetDefaultDisplayIdIfNeed();
 
     void SetSessionState(SessionState state) override;
-    void UpdateSessionState(SessionState state) override;
     void SetForceHideState(ForceHideState forceHideState);
     ForceHideState GetForceHideState() const;
     bool IsTemporarilyShowWhenLocked() const;
@@ -652,7 +654,6 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
-
     /**
      * Window Layout
      */

@@ -970,26 +970,34 @@ public:
      *
      * @param x
      * @param y
-     * @param the optional move configuration
+     * @param isMoveToGlobal Indicates move global flag
+     * @param moveConfiguration Indicates the optional move configuration
      * @return WMError
      */
-    virtual WMError MoveToAsync(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {})
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) { return WMError::WM_OK; }
+
+    /**
+     * @brief move the window to (x, y)
+     *
+     * @param x
+     * @param y
+     * @param moveConfiguration Indicates the optional move configuration
+     * @return WMError
+     */
+    virtual WMError MoveToAsync(int32_t x, int32_t y,
+        MoveConfiguration moveConfiguration = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief move the window to global (x, y)
      *
      * @param x
      * @param y
-     * @param the optional move configuration
+     * @param moveConfiguration Indicates the optional move configuration
      * @return WMError
      */
-    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y,
+        MoveConfiguration moveConfiguration) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get window global scaled rect.

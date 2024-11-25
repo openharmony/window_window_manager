@@ -122,7 +122,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
-        const WSRect &rect, SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false,
+        const WSRect& rect, SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }

@@ -1047,7 +1047,7 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
 bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration)
 {
     if (jsObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to MoveConfiguration");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "jsObject is null");
         return false;
     }
     napi_value jsConfig = nullptr;
@@ -1058,7 +1058,7 @@ bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConf
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
             return false;
         }
-        moveConfiguration.displayId_ = displayId;
+        moveConfiguration.displayId = displayId;
         return true;
     }
     return true;
