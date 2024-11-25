@@ -310,7 +310,6 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
     DisplayModeChangeReason reason)
 {
-    RSInterfaces::GetInstance().SetScreenSwitching(true);
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
@@ -321,6 +320,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
 #endif
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         ChangeScreenDisplayModeToMainWhenFoldScreenOn(screenSession);
+        RSInterfaces::GetInstance().SetScreenSwitching(true);
     } else { // When the screen is off and folded, it is not powered on
         ChangeScreenDisplayModeToMainWhenFoldScreenOff(screenSession);
     }
@@ -329,7 +329,6 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
     DisplayModeChangeReason reason)
 {
-    RSInterfaces::GetInstance().SetScreenSwitching(true);
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
@@ -341,6 +340,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSes
 #endif
     if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
         TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
+        RSInterfaces::GetInstance().SetScreenSwitching(true);
         auto taskScreenOnFull = [=] {
             // off main screen
             TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is true, screenIdMain OFF.");
