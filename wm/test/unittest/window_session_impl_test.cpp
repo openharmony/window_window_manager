@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
@@ -809,7 +810,6 @@ HWTEST_F(WindowSessionImplTest, RequestVsyncSucc, Function | SmallTest | Level2)
     window->vsyncStation_ = nullptr;
     window->RequestVsync(vsyncCallback);
 }
-
 
 /**
  * @tc.name: RequestVsyncErr
@@ -1878,18 +1878,39 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("SetRaiseByClickEnabled01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
+
     WMError retCode = window->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_PARENT);
+
+    option->SetWindowName("SetRaiseByClickForFloatWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSessionImpl> floatWindow = new(std::nothrow) WindowSessionImpl(option);
+    floatWindow->property_->SetParentPersistentId(1);
+    ASSERT_NE(nullptr, floatWindow);
+
+    retCode = floatWindow->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_CALLING);
+
+    option->SetWindowName("SetRaiseByClickForSubWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> subWindow = new(std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, subWindow);
+
+    subWindow->property_->SetParentPersistentId(1);
+    subWindow->Hide();
+    retCode = subWindow->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    retCode = subWindow->SetRaiseByClickEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    window->state_ = WindowState::STATE_CREATED;
-    window->SetRaiseByClickEnabled(true);
-    ASSERT_NE(nullptr, session);
+    
+    subWindow->property_->SetParentPersistentId(2);
+    subWindow->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(subWindow->property_->GetRaiseEnabled(), true);
 }
 
 /**
@@ -2135,6 +2156,20 @@ HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest
     ASSERT_NE(nullptr, window);
     window->NotifySetUIContentComplete();
     EXPECT_EQ(window->setUIContentCompleted_.load(), false);
+}
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: GetStatusBarHeight test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetStatusBarHeight");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_EQ(0, window->GetStatusBarHeight());
 }
 }
 } // namespace Rosen

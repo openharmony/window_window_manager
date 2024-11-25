@@ -103,6 +103,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest01, Function | SmallTest | Level2)
     MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::SPLIT_REPLACE);
     MinimizeApp::ExecuteMinimizeAll();
 }
+
 /**
  * @tc.name: MinimizeAppTest02
  * @tc.desc: add, find and clear
@@ -119,6 +120,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest02, Function | SmallTest | Level2)
 
     MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_ALL);
 }
+
 /**
  * @tc.name: MinimizeAppTest03
  * @tc.desc: add and find
@@ -135,6 +137,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest03, Function | SmallTest | Level2)
 
     MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
 }
+
 /**
  * @tc.name: MinimizeAppTest04
  * @tc.desc: add and recover
@@ -150,6 +153,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest04, Function | SmallTest | Level2)
 
     MinimizeApp::ClearNodesWithReason(MinimizeReason::LAYOUT_TILE);
 }
+
 /**
  * @tc.name: MinimizeAppTest05
  * @tc.desc: insert nullptr to needMinimizeAppNodes_
@@ -168,6 +172,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest05, Function | SmallTest | Level2)
 
     MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_ALL);
 }
+
 /**
  * @tc.name: IsNodeNeedMinimizeWithReason
  * @tc.desc: check node need minimize or not
@@ -189,6 +194,7 @@ HWTEST_F(MinimizeAppTest, IsNodeNeedMinimizeWithReason01, Function | SmallTest |
     MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_ALL);
     MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_BUTTON);
 }
+
 /**
  * @tc.name: ClearNodesWithReason
  * @tc.desc: clear node with reason
@@ -206,6 +212,7 @@ HWTEST_F(MinimizeAppTest, ClearNodesWithReason01, Function | SmallTest | Level2)
     MinimizeApp::ClearNodesWithReason(MinimizeReason::GESTURE_ANIMATION);
     ASSERT_EQ(1, MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_BUTTON).size());
 }
+
 /**
  * @tc.name: GetRecoverdNodeFromMinimizeList
  * @tc.desc: Get recoverd node from list
@@ -219,6 +226,7 @@ HWTEST_F(MinimizeAppTest, GetRecoverdNodeFromMinimizeList01, Function | SmallTes
     ASSERT_EQ(nullptr, MinimizeApp::GetRecoverdNodeFromMinimizeList());
     MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_BUTTON);
 }
+
 /**
  * @tc.name: IsNodeNeedMinimize
  * @tc.desc: check node need minize or not
@@ -228,6 +236,7 @@ HWTEST_F(MinimizeAppTest, IsNodeNeedMinimize01, Function | SmallTest | Level2)
 {
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(nullptr));
 }
+
 /**
  * @tc.name: ExecuteMinimizeTargetReasons
  * @tc.desc: Execute Minimize With TargetReason

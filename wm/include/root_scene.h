@@ -35,7 +35,8 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
-using GetSessionRectCallback = std::function<WSRect(AvoidAreaType)>;
+using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
+using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 
 class RootScene : public Window {
 public:
@@ -57,16 +58,14 @@ public:
      */
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
+    void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
-
-    void SetGetSessionRectCallback(GetSessionRectCallback&& callback)
-    {
-        getSessionRectCallback_ = std::move(callback);
-    }
 
     void SetDisplayDensity(float density)
     {
@@ -107,15 +106,12 @@ public:
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
-    WMError GetSessionRectByType(AvoidAreaType type, WSRect& rect);
-
     static sptr<RootScene> staticRootScene_;
 
 private:
     void RegisterInputEventListener();
 
     std::unique_ptr<Ace::UIContent> uiContent_;
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
     int32_t orientation_ = 0;
@@ -126,7 +122,11 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
-    GetSessionRectCallback getSessionRectCallback_ = nullptr;
+    /**
+     * Window Immersive
+     */
+    GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
+    UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

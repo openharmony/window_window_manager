@@ -222,7 +222,7 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Leve
     WMError ret = windowManager.GetSnapshotByWindowId(windowId, pixelMap);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    }else {
+    } else {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     }
 }
@@ -1480,8 +1480,8 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
 }
 
 /**
- * @tc.name: SetProcessWatermark
- * @tc.desc: check SetProcessWatermark
+ * @tc.name: GetDisplayIdByWindowId
+ * @tc.desc: check GetDisplayIdByWindowId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)

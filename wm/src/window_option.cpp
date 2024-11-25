@@ -353,6 +353,16 @@ bool WindowOption::GetWindowTopmost() const
     return isTopmost_;
 }
 
+void WindowOption::SetIsSystemKeyboard(bool isSystemKeyboard)
+{
+    isSystemKeyboard_ = isSystemKeyboard;
+}
+
+bool WindowOption::IsSystemKeyboard() const
+{
+    return isSystemKeyboard_;
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

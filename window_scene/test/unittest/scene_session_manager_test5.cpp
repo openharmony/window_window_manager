@@ -146,7 +146,6 @@ HWTEST_F(SceneSessionManagerTest5, DestroyAndDisconnectSpecificSessionInner, Fun
     ssm_->DestroyAndDisconnectSpecificSessionInner(1);
 }
 
-
 /**
  * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
  * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
@@ -203,11 +202,13 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage01, Function | SmallTest | Leve
     info.bundleName_ = "test2";
     std::string path;
     uint32_t bgColor = 0x00000000;
+
     /**
      * @tc.steps: step2. Set bundleMgr_ to nullptr.
      */
     sptr<AppExecFwk::IBundleMgr> tempBundleMgr = ssm_->bundleMgr_;
     ssm_->bundleMgr_ = nullptr;
+
     /**
      * @tc.steps: step3. Test and check result.
      */
@@ -234,6 +235,7 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage02, Function | SmallTest | Leve
     sessionInfo.bundleName_ = "bundleName";
     uint32_t bgColor = 0x00000000;
     std::string path;
+
     /**
      * @tc.steps: step2. Cache info.
      */
@@ -248,6 +250,7 @@ HWTEST_F(SceneSessionManagerTest5, GetStartupPage02, Function | SmallTest | Leve
     };
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
     ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
+
     /**
      * @tc.steps: step3. Test and check result.
      */
@@ -276,6 +279,7 @@ HWTEST_F(SceneSessionManagerTest5, CacheStartingWindowInfo01, Function | SmallTe
     abilityInfo.startWindowIconId = 2;
     std::string path = "cachedPath";
     uint32_t bgColor = 0xff000000;
+
     /**
      * @tc.steps: step2. Cache info and check result.
      */
@@ -311,6 +315,7 @@ HWTEST_F(SceneSessionManagerTest5, CacheStartingWindowInfo02, Function | SmallTe
     abilityInfo.startWindowIconId = 2;
     std::string path = "cachedPath";
     uint32_t bgColor = 0xff000000;
+
     /**
      * @tc.steps: step2. Insert one item.
      */
@@ -323,6 +328,7 @@ HWTEST_F(SceneSessionManagerTest5, CacheStartingWindowInfo02, Function | SmallTe
     };
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
     ssm_->startingWindowMap_.insert({abilityInfo.bundleName, startingWindowInfoMap});
+
     /**
      * @tc.steps: step3. Execute and check result.
      */
@@ -366,6 +372,7 @@ HWTEST_F(SceneSessionManagerTest5, OnBundleUpdated, Function | SmallTest | Level
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
     ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
     ASSERT_NE(ssm_->startingWindowMap_.size(), 0);
+
     /**
      * @tc.steps: step2. On bundle updated and check map.
      */
@@ -402,6 +409,7 @@ HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, Function | SmallTest 
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, startingWindowInfo }};
     ssm_->startingWindowMap_.insert({sessionInfo.bundleName_, startingWindowInfoMap});
     ASSERT_NE(ssm_->startingWindowMap_.size(), 0);
+
     /**
      * @tc.steps: step2. On configuration updated and check map.
      */
@@ -1009,7 +1017,6 @@ HWTEST_F(SceneSessionManagerTest5, CheckFocusIsDownThroughBlockingType, Function
     bool ret = ssm_->CheckFocusIsDownThroughBlockingType(sceneSession1, sceneSession2, true);
     ASSERT_EQ(ret, false);
 }
-
 
 /**
  * @tc.name: CheckFocusIsDownThroughBlockingType
@@ -1730,7 +1737,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, Function | S
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionInfoPersistentId(0);
     ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
-    
+
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);

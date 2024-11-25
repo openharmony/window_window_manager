@@ -29,16 +29,19 @@ public:
      * @brief Default construct of FocusChangeInfo
      */
     FocusChangeInfo() = default;
+
     /**
      * @brief Construct of FocusChangeInfo
      */
     FocusChangeInfo(uint32_t winId, DisplayId displayId, int32_t pid, int32_t uid, WindowType type,
         const sptr<IRemoteObject>& abilityToken): windowId_(winId), displayId_(displayId), pid_(pid), uid_(uid),
         windowType_(type),  abilityToken_(abilityToken) {};
+
     /**
      * @brief Deconstruct of FocusChangeInfo
      */
     ~FocusChangeInfo() = default;
+
     /**
      * @brief Marshalling FocusChangeInfo.
      *

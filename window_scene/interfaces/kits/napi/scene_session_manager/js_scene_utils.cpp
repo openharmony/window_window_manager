@@ -894,6 +894,22 @@ JsSessionType GetApiType(WindowType type)
     }
 }
 
+static napi_value CreateSupportWindowModes(napi_env env,
+    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, supportWindowModes.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+    int32_t index = 0;
+    for (const auto supportWindowMode : supportWindowModes) {
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(supportWindowMode)));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
 {
     napi_value objValue = nullptr;
@@ -942,6 +958,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.errorReason));
     napi_set_named_property(env, objValue, "isFromIcon", CreateJsValue(env, sessionInfo.isFromIcon_));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
+    napi_set_named_property(env, objValue, "supportWindowModes",
+        CreateSupportWindowModes(env, sessionInfo.supportWindowModes));
     return objValue;
 }
 
@@ -1065,6 +1083,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::DRAG)));
     napi_set_named_property(env, objValue, "DRAG_START", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::DRAG_START)));
+    napi_set_named_property(env, objValue, "DRAG_MOVE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::DRAG_MOVE)));
     napi_set_named_property(env, objValue, "DRAG_END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::DRAG_END)));
     napi_set_named_property(env, objValue, "RESIZE", CreateJsValue(env,
@@ -1502,6 +1522,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_KEYBOARD_PANEL", JsSessionType::TYPE_KEYBOARD_PANEL);
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
+    SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     return objValue;
 }
 
@@ -1568,20 +1589,14 @@ MainThreadScheduler::MainThreadScheduler(napi_env env)
 
 inline void MainThreadScheduler::GetMainEventHandler()
 {
-    if (handler_ != nullptr) {
-        return;
-    }
     auto runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
-    if (runner == nullptr) {
-        return;
-    }
     handler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
 }
 
 void MainThreadScheduler::PostMainThreadTask(Task&& localTask, std::string traceInfo, int64_t delayTime)
 {
-    GetMainEventHandler();
-    auto task = [env = env_, localTask, traceInfo, envChecker = std::weak_ptr<int>(envChecker_)]() {
+    auto task = [env = env_, localTask = std::move(localTask), traceInfo,
+                 envChecker = std::weak_ptr<int>(envChecker_)] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SCBCb:%s", traceInfo.c_str());
         if (envChecker.expired()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "post task expired because of invalid scheduler");

@@ -370,7 +370,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_BIND_DIALOG_TARGET: {
             uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
-                TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 windowId");
+                TLOGE(WmsLogTag::DEFAULT, "Failed to read windowId");
                 return ERR_INVALID_DATA;
             }
             sptr<IRemoteObject> targetToken = data.ReadRemoteObject();

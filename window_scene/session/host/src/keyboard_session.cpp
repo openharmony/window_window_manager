@@ -285,6 +285,9 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
         session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_));
+        if (session->adjustKeyboardLayoutFunc_) {
+            session->adjustKeyboardLayoutFunc_(params);
+        }
         session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
@@ -292,9 +295,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
             params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
             params.PortraitPanelRect_.ToString().c_str(), session->GetSessionRequestRect().ToString().c_str());
-        if (session->adjustKeyboardLayoutFunc_) {
-            session->adjustKeyboardLayoutFunc_(params);
-        }
         return WSError::WS_OK;
     };
     PostTask(task, "AdjustKeyboardLayout");
@@ -375,7 +375,8 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
         (WindowHelper::IsSubWindow(callingSession->GetWindowType()) && callingSession->GetParentSession() != nullptr &&
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
-    if (isCallingSessionFloating && isMainOrParentFloating &&
+    bool isMidScene = callingSession->GetIsMidScene();
+    if (isCallingSessionFloating && isMainOrParentFloating && !isMidScene &&
         (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !isFreeMultiWindowMode))) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window.");
         return false;
@@ -427,7 +428,9 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
         newRect.posY_ = std::max(keyboardPanelRect.posY_ - newRect.height_, statusHeight);
         newRect.posY_ = std::min(oriPosYBeforeRaisedByKeyboard, newRect.posY_);
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
-        callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+        if (!IsSystemKeyboard()) {
+            callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+        }
     } else {
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
     }
@@ -456,7 +459,9 @@ void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>
         }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "oriPosYBeforeRaisedByKeyboard: %{public}d, sessionMode: %{public}d",
             oriPosYBeforeRaisedByKeyboard, callingSession->GetWindowMode());
-        callingSession->UpdateSessionRect(callingSessionRestoringRect, SizeChangeReason::UNDEFINED);
+        if (!IsSystemKeyboard()) {
+            callingSession->UpdateSessionRect(callingSessionRestoringRect, SizeChangeReason::UNDEFINED);
+        }
     }
     callingSession->SetOriPosYBeforeRaisedByKeyboard(0); // 0: default value
 }
@@ -532,15 +537,21 @@ void KeyboardSession::RelayoutKeyBoard()
 
 void KeyboardSession::OpenKeyboardSyncTransaction()
 {
-    if (isKeyboardSyncTransactionOpen_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard sync transaction is already open");
-        return;
-    }
-    isKeyboardSyncTransactionOpen_ = true;
-    auto task = []() {
+    auto task = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->isKeyboardSyncTransactionOpen_) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "Keyboard sync transaction is already open");
+            return WSError::WS_OK;
+        }
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Open keyboard sync");
+        session->isKeyboardSyncTransactionOpen_ = true;
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
-            transactionController->OpenSyncTransaction();
+            transactionController->OpenSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
     };
@@ -550,15 +561,14 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
 void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
     bool isKeyboardShow, bool isRotating)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanelRect: %{public}s, isKeyboardShow: %{public}d, isRotating: %{public}d",
-        keyboardPanelRect.ToString().c_str(), isKeyboardShow, isRotating);
     auto task = [weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, isRotating]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, isKeyboardShow: %{public}d, isRotating: %{public}d",
+            isKeyboardShow, isRotating);
         std::shared_ptr<RSTransaction> rsTransaction = nullptr;
         if (!isRotating && session->isKeyboardSyncTransactionOpen_) {
             rsTransaction = session->GetRSTransaction();
@@ -582,7 +592,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         session->isKeyboardSyncTransactionOpen_ = false;
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
-            transactionController->CloseSyncTransaction();
+            transactionController->CloseSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
     };

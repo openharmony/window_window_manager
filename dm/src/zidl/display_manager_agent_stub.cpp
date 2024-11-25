@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "zidl/display_manager_agent_stub.h"
 
 #include <vector>
@@ -277,11 +278,12 @@ int32_t DisplayManagerAgentStub::ProcDisplayModechanged(MessageParcel& data)
 int32_t DisplayManagerAgentStub::ProcAvailableAreaChanged(MessageParcel& data)
 {
     DMRect rect;
+    DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
     rect.posX_ = data.ReadInt32();
     rect.posY_ = data.ReadInt32();
     rect.width_ = data.ReadUint32();
     rect.height_ = data.ReadUint32();
-    NotifyAvailableAreaChanged(rect);
+    NotifyAvailableAreaChanged(rect, displayId);
     return 0;
 }
 

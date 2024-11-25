@@ -159,6 +159,7 @@ HWTEST_F(WindowOptionTest, WindowMode06, Function | SmallTest | Level2)
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, option->GetWindowMode());
 }
+
 /**
  * @tc.name: Focusable01
  * @tc.desc: SetFocusable/GetFocusable
@@ -515,6 +516,20 @@ HWTEST_F(WindowOptionTest, SetWindowTopmost, Function | SmallTest | Level3)
     ASSERT_EQ(true, option->GetWindowTopmost());
     option->SetWindowTopmost(false);
     ASSERT_EQ(false, option->GetWindowTopmost());
+}
+
+/**
+ * @tc.name: SetAndIsSystemKeyboard
+ * @tc.desc: test SetIsSystemKeyboard and IsSystemKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    ASSERT_EQ(false, option->IsSystemKeyboard());
+    option->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, option->IsSystemKeyboard());
 }
 }
 } // namespace Rosen

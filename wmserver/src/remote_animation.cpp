@@ -155,10 +155,10 @@ bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo, const 
 
     // check support window mode when one app starts another app
     if ((dstNode != nullptr && dstInfo != nullptr) &&
-        !WindowHelper::CheckSupportWindowMode(dstNode->GetWindowMode(), dstNode->GetModeSupportInfo(), dstInfo)) {
+        !WindowHelper::CheckSupportWindowMode(dstNode->GetWindowMode(), dstNode->GetWindowModeSupportType(), dstInfo)) {
         WLOGFE("RSWindowAnimation: the mode of dstNode isn't supported, winId: %{public}u, mode: %{public}u, "
-            "modeSupportInfo: %{public}u", dstNode->GetWindowId(), dstNode->GetWindowMode(),
-            dstNode->GetModeSupportInfo());
+            "windowModeSupportType: %{public}u", dstNode->GetWindowId(), dstNode->GetWindowMode(),
+            dstNode->GetWindowModeSupportType());
         return false;
     }
 

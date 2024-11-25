@@ -24,6 +24,7 @@ namespace PermissionConstants {
 constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIONS";
 constexpr const char* PERMISSION_KILL_APP_PROCESS = "ohos.permission.KILL_APP_PROCESSES";
 constexpr const char* PERMISSION_MAIN_WINDOW_TOPMOST = "ohos.permission.WINDOW_TOPMOST";
+constexpr const char* PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN = "ohos.permission.CALLED_UIEXTENSION_ON_LOCK_SCREEN";
 }
 class SessionPermission {
 public:
@@ -34,6 +35,7 @@ public:
     static bool IsShellCall();
     static bool IsStartByHdcd();
     static bool IsStartedByInputMethod();
+    static bool IsStartedBySystemKeyboard();
     static bool IsSACalling();
     static bool VerifyCallingPermission(const std::string& permissionName);
     static bool VerifyPermissionByCallerToken(const uint32_t callerToken, const std::string& permissionName);

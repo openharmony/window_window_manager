@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "transaction/rs_uiextension_data.h"
 #include "input_manager.h"
 #include "session_manager/include/scene_session_dirty_manager.h"
@@ -20,6 +21,7 @@
 #include <parameters.h>
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
+#include "session/host/include/sub_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "transaction/rs_uiextension_data.h"
 
@@ -476,7 +478,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap02, Function | SmallTe
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SubSession> sceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);

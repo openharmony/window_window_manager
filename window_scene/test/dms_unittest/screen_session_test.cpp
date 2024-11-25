@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "screen_session.h"
 #include <gtest/gtest.h>
 #include "screen_session_manager/include/screen_session_manager.h"
@@ -383,6 +384,47 @@ HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetPhysicalRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetPhysicalRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetPhysicalRotation start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    int rotation = 0;
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    screenSession->SetPhysicalRotation(rotation, foldStatus);
+    GTEST_LOG_(INFO) << "SetPhysicalRotation end";
+}
+
+/**
+ * @tc.name: SetScreenComponentRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenComponentRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetScreenComponentRotation start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    int rotation = 0;
+    screenSession->SetScreenComponentRotation(rotation);
+    GTEST_LOG_(INFO) << "SetScreenComponentRotation end";
+}
+
+/**
  * @tc.name: UpdateToInputManager
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -399,13 +441,14 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, screenSession);
     RRect bounds;
     int rotation = 90;
+    int deviceRotation = 90;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::FULL;
-    screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     rotation = 0;
     foldDisplayMode = FoldDisplayMode::MAIN;
-    screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     GTEST_LOG_(INFO) << "UpdateToInputManager end";
 }
 
@@ -455,6 +498,35 @@ HWTEST_F(ScreenSessionTest, ReportNotifyModeChange, Function | SmallTest | Level
     displayOrientation = DisplayOrientation::PORTRAIT_INVERTED;
     screenSession->ReportNotifyModeChange(displayOrientation);
     GTEST_LOG_(INFO) << "ReportNotifyModeChange end";
+}
+
+/**
+ * @tc.name: SuperFoldStatusChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SuperFoldStatusChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SuperFoldStatusChange start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    ScreenId screenId = 0;
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::EXPANDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::FOLDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::KEYBOARD;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    superFoldStatus = SuperFoldStatus::HALF_FOLDED;
+    screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
+    GTEST_LOG_(INFO) << "SuperFoldStatusChange end";
 }
 
 /**
@@ -1614,6 +1686,7 @@ HWTEST_F(ScreenSessionTest, SetUpdateToInputManagerCallback, Function | SmallTes
 
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateToInputManagerCallbackend";
 }
+
 /**
  * @tc.name: SetScreenRotationLocked
  * @tc.desc: normal function

@@ -466,22 +466,22 @@ void WindowManagerService::ConfigDecor(const WindowManagerConfig::ConfigItem& de
         std::vector<std::string> supportedModes;
         item = decorConfig["supportedMode"];
         if (item.IsStrings()) {
-            systemConfig_.decorModeSupportInfo_ = 0;
+            systemConfig_.decorWindowModeSupportType_ = 0;
             supportedModes = *item.stringsValue_;
         }
         for (auto mode : supportedModes) {
             if (mode == "fullscreen") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+                systemConfig_.decorWindowModeSupportType_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
             } else if (mode == "floating") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+                systemConfig_.decorWindowModeSupportType_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
             } else if (mode == "pip") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
+                systemConfig_.decorWindowModeSupportType_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_PIP;
             } else if (mode == "split") {
-                systemConfig_.decorModeSupportInfo_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                systemConfig_.decorWindowModeSupportType_ |= WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                     WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
             } else {
                 WLOGFW("Invalid supporedMode");
-                systemConfig_.decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+                systemConfig_.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
                 break;
             }
         }
@@ -1371,7 +1371,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
             WMError res = windowController_->UpdateProperty(windowProperty, action);
             if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
-                windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+                (IsMoveToOrDragMove(windowProperty->GetWindowSizeChangeReason()))) {
                 dragController_->UpdateDragInfo(windowProperty->GetWindowId());
             }
         };
@@ -1383,7 +1383,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
         WMError res = windowController_->UpdateProperty(windowProperty, action);
         if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
-            windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+            IsMoveToOrDragMove(windowProperty->GetWindowSizeChangeReason())) {
             dragController_->UpdateDragInfo(windowProperty->GetWindowId());
         }
         return res;

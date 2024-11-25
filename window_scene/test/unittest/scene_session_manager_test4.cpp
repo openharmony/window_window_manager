@@ -772,7 +772,6 @@ HWTEST_F(SceneSessionManagerTest4, GetProcessDrawingState, Function | SmallTest 
     ASSERT_NE(nullptr, ssm_);
     uint64_t windowId = 10;
     int32_t pid = 1;
-    bool currentDrawingContentState = true;
     SessionInfo info;
     info.abilityName_ = "SetBrightness";
     sptr<SceneSession> sceneSession01 = nullptr;
@@ -793,7 +792,7 @@ HWTEST_F(SceneSessionManagerTest4, GetProcessDrawingState, Function | SmallTest 
     sceneSession03->SetCallingPid(pid);
     sceneSession03->surfaceNode_ = nullptr;
     sceneSession04->SetCallingPid(6);
-    auto result = ssm_->GetProcessDrawingState(windowId, pid, currentDrawingContentState);
+    auto result = ssm_->GetProcessDrawingState(windowId, pid);
     EXPECT_EQ(result, true);
 }
 
@@ -807,7 +806,7 @@ HWTEST_F(SceneSessionManagerTest4, GetPreWindowDrawingState, Function | SmallTes
     ASSERT_NE(nullptr, ssm_);
     uint64_t surfaceId = 0;
     int32_t pid = 10;
-    bool result = ssm_->GetPreWindowDrawingState(surfaceId, pid, true);
+    bool result = ssm_->GetPreWindowDrawingState(surfaceId, true, pid);
     EXPECT_EQ(result, false);
 
     SessionInfo info;
@@ -820,7 +819,7 @@ HWTEST_F(SceneSessionManagerTest4, GetPreWindowDrawingState, Function | SmallTes
     ASSERT_NE(sceneSession01->surfaceNode_, nullptr);
     sceneSession01->surfaceNode_->id_ = 10;
     surfaceId = 10;
-    result = ssm_->GetPreWindowDrawingState(surfaceId, pid, true);
+    result = ssm_->GetPreWindowDrawingState(surfaceId, true, pid);
     EXPECT_EQ(result, false);
 }
 
@@ -856,6 +855,28 @@ HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo, Function |
     sceneSession->SetCallingPid(2);
     result = ssm_->GetWindowDrawingContentChangeInfo(currDrawingContentData);
     EXPECT_NE(result, currDrawingContentData);
+}
+
+/**
+ * @tc.name: GetWindowDrawingContentChangeInfo02
+ * @tc.desc: GetWindowDrawingContentChangeInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetWindowDrawingContentChangeInfo02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "GetWindowDrawingContentChangeInfo02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
+
+    std::vector<std::pair<uint64_t, bool>> currDrawingContentData;
+    currDrawingContentData.push_back(std::make_pair(0, false));
+    currDrawingContentData.push_back(std::make_pair(1, true));
+
+    auto result = ssm_->GetWindowDrawingContentChangeInfo(currDrawingContentData);
+    EXPECT_EQ(result, currDrawingContentData);
 }
 
 /**
@@ -898,7 +919,7 @@ HWTEST_F(SceneSessionManagerTest4, GetSubSceneSession, Function | SmallTest | Le
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
-    info.abilityName_ = "SetBrightness";
+    info.abilityName_ = "GetSubSceneSession";
     sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<SceneSession> sceneSession03 = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -909,16 +930,25 @@ HWTEST_F(SceneSessionManagerTest4, GetSubSceneSession, Function | SmallTest | Le
     ASSERT_NE(sceneSession03, nullptr);
     ASSERT_NE(session04, nullptr);
     ASSERT_NE(session05, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
-    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
-    int32_t parentWindowId = INVALID_SESSION_ID;
-    sceneSession01->parentSession_ = session04;
-    sceneSession02->parentSession_ = session05;
+    sceneSession01->persistentId_ = 1;
+    sceneSession02->persistentId_ = 2;
+    sceneSession03->persistentId_ = 3;
+    session04->persistentId_ = 4;
     session05->persistentId_ = 5;
-    std::vector<sptr<SceneSession>> subSessions = ssm_->GetSubSceneSession(parentWindowId);
-    EXPECT_EQ(subSessions.size(), 1);
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, nullptr));
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession01->GetPersistentId(), sceneSession01));
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession02->GetPersistentId(), sceneSession02));
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession03->GetPersistentId(), sceneSession03));
+    session04->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession01->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession01->parentSession_ = session04;
+    session05->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession02->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession02->parentSession_ = session05;
+    sceneSession03->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession03->parentSession_ = sceneSession01;
+    std::vector<sptr<SceneSession>> subSessions = ssm_->GetSubSceneSession(session04->GetPersistentId());
+    EXPECT_EQ(subSessions.size(), 2);
 }
 
 /**

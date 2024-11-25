@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "display_group_controller.h"
 
 #include "window_helper.h"
@@ -269,7 +270,7 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
         }
         case WindowUpdateType::WINDOW_UPDATE_ACTIVE: {
             // MoveTo can be called by user, calculate rect in display group if the reason is move
-            if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+            if (IsMoveToOrDragMove(node->GetWindowSizeChangeReason())) {
                 ChangeToRectInDisplayGroup(node, defaultDisplayId_);
             }
             WLOGFD("preprocess node when update window");

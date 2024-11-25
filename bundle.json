@@ -21,7 +21,8 @@
         "window_manager_feature_coverage",
         "window_manager_dayu210_resource_config",
         "window_manager_feature_subscribe_motion",
-        "window_manager_feature_tp_enable"
+        "window_manager_feature_tp_enable",
+        "window_manager_feature_virtual_keyboard"
       ],
       "adapted_system_type": [ "standard" ],
       "rom": "8000KB",
@@ -64,6 +65,7 @@
           "resource_management",
           "resource_schedule_service",
           "imf",
+          "virtual_keyboard_service",
           "frame_aware_sched",
           "memmgr",
           "data_share",
@@ -72,8 +74,7 @@
           "libjpeg-turbo",
           "libxml2",
           "bounds_checking_function",
-          "device_status",
-          "ets_frontend"
+          "device_status"
         ],
         "third_party": [
         ]

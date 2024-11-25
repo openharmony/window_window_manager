@@ -147,6 +147,7 @@ HWTEST_F(WindowNodeContainerTest, AddWindowNodeOnWindowTree03, Function | SmallT
     subNode->SetWindowProperty(subProperty);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->AddWindowNodeOnWindowTree(subNode, nullptr));
 }
+
 /**
  * @tc.name: MinimizeAppNodeExceptOptions
  * @tc.desc: minimize app node
@@ -172,6 +173,7 @@ HWTEST_F(WindowNodeContainerTest, MinimizeAppNodeExceptOptions, Function | Small
     ASSERT_EQ(WMError::WM_OK, container_->MinimizeAppNodeExceptOptions(MinimizeReason::OTHER_WINDOW,
         exceptionalIds, exceptionalModes));
 }
+
 /**
  * @tc.name: DropShowWhenLockedWindowIfNeeded
  * @tc.desc: drop show when locken window
@@ -186,6 +188,7 @@ HWTEST_F(WindowNodeContainerTest, DropShowWhenLockedWindowIfNeeded, Function | S
     node->SetWindowProperty(property);
     container_->DropShowWhenLockedWindowIfNeeded(node);
 }
+
 /**
  * @tc.name: GetModeChangeHotZones
  * @tc.desc: get mode change hot zones
@@ -200,6 +203,7 @@ HWTEST_F(WindowNodeContainerTest, GetModeChangeHotZones, Function | SmallTest | 
     ASSERT_EQ(hotZones.primary_.width_, 20);
     ASSERT_EQ(hotZones.secondary_.width_, 30);
 }
+
 /**
  * @tc.name: UpdateCameraFloatWindowStatus
  * @tc.desc: update camera float window status
@@ -214,6 +218,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
     node->SetWindowProperty(property);
     container_->UpdateCameraFloatWindowStatus(node, true);
 }
+
 /**
  * @tc.name: UpdateWindowNode
  * @tc.desc: preprocess node and update RSTree
@@ -833,6 +838,7 @@ HWTEST_F(WindowNodeContainerTest, TakeWindowPairSnapshot, Function | SmallTest |
     ASSERT_TRUE(!container->TakeWindowPairSnapshot(defaultDisplay_->GetId()));
     container->ClearWindowPairSnapshot(defaultDisplay_->GetId());
 }
+
 /**
  * @tc.name: Destroy
  * @tc.desc: clear vector cache completely, swap with empty vector
@@ -842,6 +848,7 @@ HWTEST_F(WindowNodeContainerTest, Destroy, Function | SmallTest | Level2)
 {
     ASSERT_EQ(0, container_->Destroy().size());
 }
+
 /**
  * @tc.name: UpdatePrivateStateAndNotify
  * @tc.desc: update private window count
@@ -867,6 +874,7 @@ HWTEST_F(WindowNodeContainerTest, UpdatePrivateStateAndNotify, Function | SmallT
     container_->UpdatePrivateStateAndNotify();
     ASSERT_EQ(0, container_->privateWindowCount_);
 }
+
 /**
  * @tc.name: MinimizeOldestMainFloatingWindow
  * @tc.desc: check function MinimizeOldestMainFloatingWindow

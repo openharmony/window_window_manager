@@ -308,7 +308,6 @@ HWTEST_F(WindowImplTest, FindWindow05, Function | SmallTest | Level2)
     ASSERT_EQ(nullptr, WindowImpl::Find("FindWindow05"));
 }
 
-
 /**
  * @tc.name: RequestVsyncSucc
  * @tc.desc: RequestVsync Test Succ
@@ -326,7 +325,6 @@ HWTEST_F(WindowImplTest, RequestVsyncSucc, Function | SmallTest | Level2)
     window->RequestVsync(vsyncCallback);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-
 
 /**
  * @tc.name: RequestVsyncErr
@@ -1152,7 +1150,6 @@ HWTEST_F(WindowImplTest, SetTurnScreenOn01, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-
 
 /**
  * @tc.name: SetTurnScreenOn02
