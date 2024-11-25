@@ -896,7 +896,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreatePrimaryDisplay(
     }
     sptr<Display> display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[DMNDK] get primary display id[%{public}" PRIu64"] null.", display->GetId());
+        TLOGE(WmsLogTag::DMS, "[DMNDK] get primary display is null.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
     TLOGI(WmsLogTag::DMS, "[DMNDK] get primary display id[%{public}" PRIu64"].", display->GetId());
