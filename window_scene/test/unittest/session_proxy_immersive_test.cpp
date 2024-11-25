@@ -154,8 +154,8 @@ HWTEST_F(SessionProxyImmersiveTest, GetAllAvoidAreasWithInvalidArea, Function | 
     EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _)).WillOnce(Invoke(
         [](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             reply.WriteUint32(1); // avoidArea num
-            reply.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM)); 
-            reply.WriteUint32(2234); // invalid area 
+            reply.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
+            reply.WriteUint32(2234); // invalid area
             reply.WriteUint32(0); // error code
             return 0;
         }
@@ -233,7 +233,7 @@ HWTEST_F(SessionProxyImmersiveTest, GetAvoidAreaByTypeWithAreaNormal, Function |
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
     EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _)).WillOnce(Invoke(
         [](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
-             AvoidArea tmpArea;
+            AvoidArea tmpArea;
             tmpArea.topRect_ = {0, 0, 1200, 127};
             reply.WriteParcelable(&tmpArea);
             return 0;
