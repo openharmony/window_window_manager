@@ -203,6 +203,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WSError NotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList) override
+    {
+        return WSError::WS_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {

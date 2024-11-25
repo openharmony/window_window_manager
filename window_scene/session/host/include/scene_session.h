@@ -95,6 +95,7 @@ using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
+using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -458,6 +459,8 @@ public:
     static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
+    void SetUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
+    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
 
     /**
      * Window Decor
@@ -641,6 +644,10 @@ protected:
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
 
+    /*
+     * app control
+     */
+    UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();

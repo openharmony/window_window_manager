@@ -2379,7 +2379,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             ProcessSetWindowRectAutoSaveRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_APP_USE_CONTROL_CB):
-            ProcessUpdateAppUseControllRegister();
+            ProcessUpdateAppUseControlRegister();
             break;
         default:
             break;
@@ -5252,6 +5252,48 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
+void JsSceneSession::ProcessUpdateAppUseControlRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetUpdateAppUseControlCallback([weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::DEFAULT, "%{pubilc}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnUpdateAppUseControll(type, isNeedControl);
+    });
+    TLOGI(WmsLogTag::WMS_MAIN, "success");
+}
+
+void JsSceneSession::OnUpdateAppUseControll(ControlAppType type, bool isNeedControl)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, type, isNeedControl, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_APP_USE_CONTROL_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsTypeArgv = CreateJsValue(env, static_cast<uint8_t>(type));
+        napi_value jsIsNeedControlArgv = CreateJsValue(env, isNeedControl);
+        napi_value argv[] = {jsTypeArgv, jsIsNeedControlArgv};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
 napi_value JsSceneSession::OnSetFrameGravity(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -5278,8 +5320,6 @@ napi_value JsSceneSession::OnSetFrameGravity(napi_env env, napi_callback_info in
     session->SetFrameGravity(gravity);
     return NapiGetUndefined(env);
 }
-
-void JsSceneSession::ProcessUpdateAppUseControllRegister() {}
 
 napi_value JsSceneSession::OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info)
 {

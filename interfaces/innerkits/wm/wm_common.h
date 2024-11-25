@@ -295,6 +295,7 @@ enum class WindowUIType : uint8_t {
  * @brief Enumerates flag of ControlAppType.
  */
 enum class ControlAppType : uint8_t {
+    CONTROL_APP_TYPE_BEGIN = 0,
     APP_LOCK = 1,
     CONTROL_APP_TYPE_END,
 };

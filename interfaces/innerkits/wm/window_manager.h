@@ -281,7 +281,7 @@ public:
      * @param parcel Package of ControlAppInfo.
      * @return True means marshall success, false means marshall failed.
      */
-    virtual bool Marshalling(Parcel &parcel) const override
+    virtual bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteString(bundleName_) &&
                parcel.WriteInt32(appIndex_) &&
@@ -294,15 +294,12 @@ public:
      * @param parcel Package of ControlAppInfo.
      * @return ControlAppInfo object.
      */
-    static ControlAppInfo *Unmarshalling(Parcel &parcel)
+    static ControlAppInfo* Unmarshalling(Parcel& parcel)
     {
-        auto info = new (std::nothrow) ControlAppInfo();
-        if (info == nullptr) {
-            return nullptr;
-        }
-        bool res = parcel.ReadString(info->bundleName_) && parcel.ReadInt32(info->appIndex_) &&
-            parcel.ReadBool(info->isNeedControl_);
-        if (!res) {
+        auto info = new ControlAppInfo();
+        if (!(parcel.ReadString(info->bundleName_) &&
+              parcel.ReadInt32(info->appIndex_) &&
+              parcel.ReadBool(info->isNeedControl_))) {
             delete info;
             return nullptr;
         }
