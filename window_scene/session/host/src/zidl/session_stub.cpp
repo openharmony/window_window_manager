@@ -115,8 +115,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSendPointerEvenForMoveDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
             return HandleUpdateClientRect(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_SESSION_GRAVITY):
-            return HandleSetKeyboardSessionGravity(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID):
             return HandleSetCallingSessionId(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT):
@@ -825,16 +823,6 @@ int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, M
     bool isRegister = data.ReadBool();
     WSError errCode = UpdateRectChangeListenerRegistered(isRegister);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleSetKeyboardSessionGravity(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "run HandleSetKeyboardSessionGravity!");
-    SessionGravity gravity = static_cast<SessionGravity>(data.ReadUint32());
-    uint32_t percent = data.ReadUint32();
-    WSError ret = SetKeyboardSessionGravity(gravity, percent);
-    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 
