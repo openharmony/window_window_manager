@@ -17,6 +17,7 @@
 
 #include <hitrace_meter.h>
 #include <js_runtime_utils.h>
+#include <ui_content.h>
 
 #include "interfaces/include/ws_common.h"
 #include "js_screen_utils.h"
@@ -40,6 +41,7 @@ const std::string ON_SCREEN_EXTEND_CHANGE = "screenExtendChange";
 const std::string ON_HOVER_STATUS_CHANGE_CALLBACK = "hoverStatusChange";
 const std::string ON_SCREEN_CAPTURE_NOTIFY = "screenCaptureNotify";
 const std::string ON_SUPER_FOLD_STATUS_CHANGE_CALLBACK = "superFoldStatusChange";
+const std::string ON_CAMERA_FOLD_STATUS_CHANGE_CALLBACK = "cameraStatusChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -68,6 +70,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "setTouchEnabled", moduleName,
         JsScreenSession::SetTouchEnabled);
     BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
+    BindNativeFunction(env, objValue, "getScreenUIContext", moduleName,
+        JsScreenSession::GetScreenUIContext);
     return objValue;
 }
 
@@ -105,6 +109,11 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
         };
         screenSession_->SetScreenSceneDestroyListener(destroyFunc);
     }
+}
+
+JsScreenSession::~JsScreenSession()
+{
+    WLOGI("~JsScreenSession");
 }
 
 napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
@@ -274,6 +283,17 @@ void JsScreenSession::RegisterScreenChangeListener()
     WLOGFI("register screen change listener success.");
 }
 
+void JsScreenSession::UnRegisterScreenChangeListener()
+{
+    if (screenSession_ == nullptr) {
+        WLOGFE("Failed to unregister screen change listener, session is null!");
+        return;
+    }
+
+    screenSession_->UnregisterScreenChangeListener(this);
+    WLOGFI("unregister screen change listener success.");
+}
+
 napi_value JsScreenSession::RegisterCallback(napi_env env, napi_callback_info info)
 {
     WLOGD("Register callback.");
@@ -322,6 +342,45 @@ napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info 
     return NapiGetUndefined(env);
 }
 
+napi_value JsScreenSession::GetScreenUIContext(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnGetScreenUIContext(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnGetScreenUIContext(napi_env env, napi_callback_info info)
+{
+    WLOGI("[NAPI]OnGetScreenUIContext");
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 0) { // 0: params num
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+
+    if (screenScene_ == nullptr) {
+        WLOGFE("screenScene_ is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    const auto& uiContent = screenScene_->GetUIContent();
+    if (uiContent == nullptr) {
+        WLOGFE("uiContent is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    napi_value uiContext = uiContent->GetUINapiContext();
+    if (uiContext == nullptr) {
+        WLOGFE("uiContext obtained from jsEngine is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+    WLOGI("success");
+    return uiContext;
+}
+
 void JsScreenSession::CallJsCallback(const std::string& callbackType)
 {
     WLOGI("Call js callback: %{public}s.", callbackType.c_str());
@@ -329,7 +388,10 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         WLOGFE("Callback is unregistered!");
         return;
     }
-
+    if (callbackType == ON_DISCONNECTION_CALLBACK) {
+        WLOGFE("Call js callback %{public}s start", callbackType.c_str());
+        UnRegisterScreenChangeListener();
+    }
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, env = env_]() {

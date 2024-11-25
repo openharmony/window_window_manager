@@ -185,6 +185,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleIsPcOrPadFreeMultiWindowMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID):
             return HandleGetDisplayIdByWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE):
+            return HandleIsWindowRectAutoSave(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -370,7 +372,7 @@ int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel& dat
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    WLOGFI("run HandleRegisterWindowManagerAgent!, type=%{public}u", typeId);
+    TLOGI(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -388,7 +390,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    WLOGFI("run HandleUnregisterWindowManagerAgent!, type=%{public}u", typeId);
+    TLOGI(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -1077,7 +1079,7 @@ int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, Mess
 {
     int32_t sourcePersistentId = 0;
     int32_t targetPersistentId = 0;
-    if (!data.ReadInt32(sourcePersistentId) ||!data.ReadInt32(targetPersistentId)) {
+    if (!data.ReadInt32(sourcePersistentId) || !data.ReadInt32(targetPersistentId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read sourcePersistentId or targetPersistentId failed");
         return ERR_INVALID_DATA;
     }
@@ -1460,23 +1462,42 @@ int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, M
     }
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     WMError errCode = GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
-
     if (!reply.WriteInt32(static_cast<int32_t>(windowDisplayIdMap.size()))) {
         TLOGE(WmsLogTag::DEFAULT, "Write windowDisplayIdMap size faild");
         return ERR_INVALID_DATA;
     }
     for (auto it = windowDisplayIdMap.begin(); it != windowDisplayIdMap.end(); ++it) {
         if (!reply.WriteUint64(it->first)) {
-            TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
+            TLOGE(WmsLogTag::DEFAULT, "Write windowId failed");
             return ERR_INVALID_DATA;
         }
         if (!reply.WriteUint64(it->second)) {
-            TLOGE(WmsLogTag::DEFAULT, "Write [it->second] failed");
+            TLOGE(WmsLogTag::DEFAULT, "Write displayId failed");
             return ERR_INVALID_DATA;
         }
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::DEFAULT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply)
+{
+    std::string key;
+    if (!data.ReadString(key)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read key failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool enabled = false;
+    WMError errCode = IsWindowRectAutoSave(key, enabled);
+    if (!reply.WriteBool(enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write enabled failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

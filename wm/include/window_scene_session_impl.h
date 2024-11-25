@@ -149,7 +149,7 @@ public:
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 
-    /*
+    /**
      * PC Window
      */
     bool IsPcOrPadCapabilityEnabled() const override;
@@ -157,8 +157,10 @@ public:
     WMError Restore() override;
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
+    WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError IsWindowRectAutoSave(bool& enabled) override;
 
-    /*
+    /**
      * Free Multi Window
      */
     WSError SwitchFreeMultiWindow(bool enable) override;
@@ -167,13 +169,12 @@ public:
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
-    uint32_t GetStatusBarHeight() override;
     void NotifySessionFullScreen(bool fullScreen) override;
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtFirstSubWindow() const override;
     bool GetIsUIExtAnySubWindow() const override;
 
-    /*
+    /**
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;
@@ -257,12 +258,12 @@ private:
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
 
-    /*
+    /**
      * Gesture Back
      */
     bool gestureBackEnabled_ = true;
 
-    /*
+    /**
      * Window Property.
      */
     void InitSystemSessionDragEnable();

@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_SESSION_DISPLAY_POWER_CONTROLLER_H
 #define OHOS_ROSEN_SESSION_DISPLAY_POWER_CONTROLLER_H
 
+#include <atomic>
 #include <map>
 #include <mutex>
 #include <refbase.h>
@@ -29,8 +30,8 @@ class SessionDisplayPowerController : public RefBase {
 using SessionDisplayStateChangeListener = std::function<void(DisplayId, sptr<DisplayInfo>,
     const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType)>;
 public:
-    SessionDisplayPowerController(std::recursive_mutex& mutex, SessionDisplayStateChangeListener listener)
-        : mutex_(mutex), displayStateChangeListener_(listener)
+    SessionDisplayPowerController(SessionDisplayStateChangeListener listener)
+        : displayStateChangeListener_(listener)
     {
     }
     virtual ~SessionDisplayPowerController() = default;
@@ -48,8 +49,7 @@ public:
 private:
     void WaitScreenOffNotify(DisplayState& state);
     void SetDisplayStateToOn(DisplayState& state);
-    DisplayState displayState_ { DisplayState::UNKNOWN };
-    std::recursive_mutex& mutex_;
+    std::atomic<DisplayState> displayState_ { DisplayState::UNKNOWN };
     SessionDisplayStateChangeListener displayStateChangeListener_;
 };
 }

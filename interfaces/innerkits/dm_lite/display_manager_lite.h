@@ -67,6 +67,16 @@ public:
         virtual void OnDisplayModeChanged([[maybe_unused]]FoldDisplayMode displayMode) {}
     };
 
+    class IScreenMagneticStateListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen magnetic state changed.
+         *
+         * @param screenMagneticState ScreenMagneticState.
+         */
+        virtual void OnScreenMagneticStateChanged([[maybe_unused]]bool isMagneticState) {}
+    };
+
     /**
      * @brief Register a display listener.
      *
@@ -114,6 +124,22 @@ public:
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+
+    /**
+     * @brief Register a listener for the event of screen magnetic state changed.
+     *
+     * @param listener IScreenMagneticStateListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of screen magnetic state changed.
+     *
+     * @param listener IScreenMagneticStateListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
 
     /**
      * @brief Get the default display object.
@@ -225,7 +251,7 @@ public:
      * @return State of display.
      */
     DisplayState GetDisplayState(DisplayId displayId);
-    
+
     /**
      * @brief Try to cancel screenoff action before display power off.
      *

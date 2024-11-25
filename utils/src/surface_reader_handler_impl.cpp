@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "surface_reader_handler_impl.h"
 #include "window_manager_hilog.h"
 

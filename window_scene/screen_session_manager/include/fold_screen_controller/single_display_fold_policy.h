@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_FOLD_POLICY_H
 #define OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_FOLD_POLICY_H
 
@@ -28,7 +29,8 @@ public:
     SingleDisplayFoldPolicy(std::recursive_mutex& displayInfoMutex,
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
     ~SingleDisplayFoldPolicy() = default;
-    void ChangeScreenDisplayMode(FoldDisplayMode displayMode) override;
+    void ChangeScreenDisplayMode(FoldDisplayMode displayMode,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT) override;
     void SendSensorResult(FoldStatus foldStatus) override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void LockDisplayStatus(bool locked) override;
@@ -36,14 +38,16 @@ public:
     void UpdateForPhyScreenPropertyChange() override;
     void ExitCoordination() override {};
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override {};
+    FoldDisplayMode GetModeMatchStatus() override;
 private:
-    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
+    void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenId screenId, ScreenPowerStatus screenPowerStatus);
     void RecoverWhenBootAnimationExit();
-    FoldDisplayMode GetModeMatchStatus();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,

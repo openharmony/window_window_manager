@@ -50,8 +50,8 @@ public:
     /**
      * @brief Receive session event from application.
      *
-     * This function provides the ability for applications to move window.\n
-     * This interface will take effect after touch down event.\n
+     * This function provides the ability for applications to move window.
+     * This interface will take effect after touch down event.
      *
      * @param event Indicates the {@link SessionEvent}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
@@ -201,6 +201,7 @@ public:
     virtual void NotifyAsyncOn() {}
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
      * @brief Close pip window while stopPip is called.
@@ -213,8 +214,8 @@ public:
      * @brief Update the required params to system.
      *
      * Update the required rect and reason to determine the final size of pip window. Called when start pip,
-     * show pip window, update pip size and pip restore.\n
-     * Make sure the caller's process is same with the process which created pip window.\n
+     * show pip window, update pip size and pip restore.
+     * Make sure the caller's process is same with the process which created pip window.
      *
      * @param rect Indicates the {@link Rect} structure containing required size and position.
      * @param reason Indicates the {@link SizeChangeReason} reason.
@@ -225,8 +226,8 @@ public:
     /**
      * @brief Update the pip control status to pip control panel.
      *
-     * Called when the specified component's status needs to be updated.\n
-     * Make sure the caller's process is same with the process which created pip window.\n
+     * Called when the specified component's status needs to be updated.
+     * Make sure the caller's process is same with the process which created pip window.
      *
      * @param controlType Indicates the {@link WsPiPControlType} component in pip control panel.
      * @param status Indicates the {@link WsPiPControlStatus} status of specified component.
@@ -273,7 +274,7 @@ public:
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual int32_t GetStatusBarHeight() { return 0; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
-
+    virtual void NotifyExtensionDetachToDisplay() {}
     /**
      * @brief Request to get focus or lose focus.
      *
@@ -282,7 +283,6 @@ public:
      */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
 
-    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {};
     /**
      * @brief Callback for session modal type changes.
      *
@@ -290,6 +290,22 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for main session modal type changes.
+     *
+     * @param isModal Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnMainSessionModalTypeChange(bool isModal) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for setting to automatically save the window rect.
+     *
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetWindowRectAutoSave(bool enabled) { return WSError::WS_OK; }
 
     /**
      *  Gesture Back

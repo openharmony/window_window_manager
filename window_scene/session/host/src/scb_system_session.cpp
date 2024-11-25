@@ -16,7 +16,6 @@
 #include "session/host/include/scb_system_session.h"
 
 #include <hisysevent.h>
-#include "key_event.h"
 #include "pointer_event.h"
 #include <ui/rs_surface_node.h>
 #include "window_manager_hilog.h"
@@ -209,15 +208,6 @@ void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         return WSError::WS_OK;
     };
     PostTask(task, "SetSkipSelf");
-}
-
-std::shared_ptr<RSSurfaceNode> SCBSystemSession::GetSurfaceNode()
-{
-    if (!surfaceNode_) {
-        TLOGE(WmsLogTag::WMS_SCB, "surfaceNode_ is null");
-        return nullptr;
-    }
-    return surfaceNode_;
 }
 
 bool SCBSystemSession::IsVisibleForeground() const

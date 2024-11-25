@@ -167,6 +167,25 @@ HWTEST_F(PictureInPictureManagerTest, GetPipControllerInfo, Function | SmallTest
 }
 
 /**
+ * @tc.name: GetActiveController
+ * @tc.desc: GetActiveController
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, GetActiveController, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = new (std::nothrow) PipOption();
+    ASSERT_NE(nullptr, option);
+    sptr<PictureInPictureController> pipController =
+        new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::SetActiveController(pipController);
+    ASSERT_EQ(pipController, PictureInPictureManager::GetActiveController());
+
+    PictureInPictureManager::SetActiveController(nullptr);
+    ASSERT_EQ(nullptr, PictureInPictureManager::GetActiveController());
+}
+
+/**
  * @tc.name: AttachAutoStartController
  * @tc.desc: AttachAutoStartController
  * @tc.type: FUNC
@@ -257,7 +276,7 @@ HWTEST_F(PictureInPictureManagerTest, GetCurrentWindow, Function | SmallTest | L
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     ASSERT_EQ(nullptr, PictureInPictureManager::GetCurrentWindow());
-    
+
     sptr<Window> window = nullptr;
     ASSERT_EQ(window, pipController->window_);
     PictureInPictureManager::SetActiveController(pipController);
@@ -435,7 +454,7 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoDestroy();
     ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STARTED);
-    
+
     PictureInPictureManager::activeController_ = pipController;
     ASSERT_TRUE(PictureInPictureManager::HasActiveController());
     pipController->window_ = mw;

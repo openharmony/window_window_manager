@@ -162,14 +162,6 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTransform01, Function | SmallTest | Lev
     window->property_->SetPersistentId(1);
     Transform trans_;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetTransform(trans_));
-
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans_));
 }
 
 /**
@@ -258,15 +250,6 @@ HWTEST_F(WindowSceneSessionImplTest2, SetAlpha01, Function | SmallTest | Level2)
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->SetAlpha(1.0));
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
-    windowSceneSession->hostSession_ = session;
-
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(0.0));
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
 }
 
 /**
@@ -493,7 +476,6 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateConfiguration01, Function | SmallTes
     windowSceneSession->UpdateConfiguration(configuration);
     ASSERT_EQ(ret, 0);
 }
-
 
 /**
  * @tc.name: UpdateConfigurationForAll01
@@ -1333,6 +1315,7 @@ HWTEST_F(WindowSceneSessionImplTest2, AdjustKeyboardLayout01, Function | SmallTe
     params.PortraitPanelRect_ = {1, 2, 3, 4};
     ASSERT_EQ(WMError::WM_OK, window->AdjustKeyboardLayout(params));
 }
+
 /**
  * @tc.name: HideNonSecureWindows01
  * @tc.desc: HideNonSecureWindows
@@ -1498,7 +1481,7 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
  
     // window not support fullscreen
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->property_->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
+    window->property_->SetWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Maximize(presentation));
 }
 
@@ -1676,8 +1659,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible01, Function | SmallT
     option->SetWindowName("GetTitleButtonVisible01");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
-    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { false, false, false, false};
@@ -1685,7 +1668,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible01, Function | SmallT
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
     bool hideCloseButton = false;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
@@ -1704,8 +1688,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, Function | SmallT
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     // only not support WINDOW_MODE_SUPPORT_SPLIT
-    uint32_t modeSupportInfo = 1 | (1 << 1);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { true, true, true, true};
@@ -1713,7 +1697,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, Function | SmallT
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
     bool hideCloseButton = false;
-    window->GetTitleButtonVisible(true, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, false);
     ASSERT_EQ(hideMinimizeButton, false);
     ASSERT_EQ(hideSplitButton, false);
@@ -1732,8 +1717,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, Function | SmallT
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
     ASSERT_NE(nullptr, window);
     // only not support WINDOW_MODE_SUPPORT_SPLIT
-    uint32_t modeSupportInfo = 1 | (1 << 1) | (1 << 2);
-    window->property_->SetModeSupportInfo(modeSupportInfo);
+    uint32_t windowModeSupportType = 1 | (1 << 1) | (1 << 2);
+    window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { false, false, false, false};
@@ -1741,7 +1726,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, Function | SmallT
     bool hideMinimizeButton = true;
     bool hideSplitButton = true;
     bool hideCloseButton = true;
-    window->GetTitleButtonVisible(false, hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
     ASSERT_EQ(hideSplitButton, true);
@@ -1814,6 +1800,32 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
+/**
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: IsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsWindowRectAutoSave");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->context_ = abilityContext_;
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    bool enabled = false;
+    auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

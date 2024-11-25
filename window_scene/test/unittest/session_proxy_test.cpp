@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "session_proxy.h"
 #include "iremote_object_mocker.h"
 #include <gtest/gtest.h>
@@ -661,6 +662,39 @@ HWTEST_F(SessionProxyTest, NotifyAsyncOn, Function | SmallTest | Level2)
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sProxy->NotifyAsyncOn();
     MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: OnSetWindowRectAutoSave
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnSetWindowRectAutoSave start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WSError res = sProxy->OnSetWindowRectAutoSave(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnSetWindowRectAutoSave end";
+}
+
+/**
+ * @tc.name: OnMainSessionModalTypeChange
+ * @tc.desc: OnMainSessionModalTypeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnMainSessionModalTypeChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnMainSessionModalTypeChange start";
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(sProxy->OnMainSessionModalTypeChange(true), WSError::WS_ERROR_IPC_FAILED);
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sProxy->OnMainSessionModalTypeChange(true), WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnMainSessionModalTypeChange end";
 }
 } // namespace
 } // namespace Rosen

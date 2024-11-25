@@ -28,6 +28,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
+const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
@@ -70,7 +71,8 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]OnSizeChange, [%{public}u, %{public}u], reason=%{public}u",
         rect.width_, rect.height_, reason);
-    if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason != WindowSizeChangeReason::DRAG_END) {
+    if (currRect_.width_ == rect.width_ && currRect_.height_ == rect.height_ &&
+        reason != WindowSizeChangeReason::DRAG_END) {
         TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]no need to change size");
         return;
     }
@@ -111,8 +113,56 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
         eventHandler_->PostTask(jsCallback, "wms:JsExtensionWindowListener::OnSizeChange", 0,
                                 AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
-    currentWidth_ = rect.width_;
-    currentHeight_ = rect.height_;
+    currRect_ = rect;
+}
+
+void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
+{
+    if (currRect_ == rect && reason == WindowSizeChangeReason::UNDEFINED) {
+        TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]Skip redundant rect update");
+        return;
+    }
+    RectChangeReason rectChangeReason = RectChangeReason::UNDEFINED;
+    if (JS_SIZE_CHANGE_REASON.count(reason) != 0 &&
+        !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
+        rectChangeReason = JS_SIZE_CHANGE_REASON.at(reason);
+    }
+    if (currentRectChangeReason_ != RectChangeReason::DRAG && rectChangeReason == RectChangeReason::DRAG_END) {
+        rectChangeReason = RectChangeReason::MOVE;
+    }
+    // js callback should run in js thread
+    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::OnRectChange");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "[NAPI]This listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to create js object");
+            return;
+        }
+        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
+        if (rectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to create rect js object");
+            return;
+        }
+        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_set_named_property(env, objValue, "reason", CreateJsValue(env, rectChangeReason));
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(jsCallback, "wms:JsExtensionWindowListener::OnRectChange", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    currRect_ = rect;
+    currentRectChangeReason_ = rectChangeReason;
 }
 
 void JsExtensionWindowListener::OnModeChange(WindowMode mode, bool hasDeco)

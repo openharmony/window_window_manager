@@ -1360,7 +1360,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UnregisterOccupiedAreaChangeListener, F
     ASSERT_EQ(WMError::WM_OK, window_->UnregisterOccupiedAreaChangeListener(nullptr));
 }
 
-
 /**
  * @tc.name: GetAvoidAreaByType01
  * @tc.desc: NotifyExecuteAction Test
@@ -1704,7 +1703,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | Smal
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(true));
     ASSERT_TRUE(window_->extensionWindowFlags_.hideNonSecureWindowsFlag);
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows02
  * @tc.desc: HideNonSecureWindows Test
@@ -1726,7 +1725,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | Smal
 
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows03
  * @tc.desc: HideNonSecureWindows Test
@@ -1737,7 +1736,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | Smal
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->HideNonSecureWindows(true));
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows04
  * @tc.desc: HideNonSecureWindows Test
@@ -1778,7 +1777,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, Function | SmallTes
     ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(true));
     ASSERT_TRUE(window_->extensionWindowFlags_.waterMarkFlag);
 }
- 
+
 /**
  * @tc.name: SetWaterMarkFlag02
  * @tc.desc: SetWaterMarkFlag Test
@@ -2121,11 +2120,10 @@ HWTEST_F(WindowExtensionSessionImplTest, ReportModalUIExtensionMayBeCovered, Fun
  */
 HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventAsync, Function | SmallTest | Level3)
 {
-    ASSERT_NE(nullptr, window_->property_);
     window_->NotifyExtensionEventAsync(0);
 
     SessionInfo sessionInfo;
-    window_->hostSession_ = new(std::nothrow) SessionMocker(sessionInfo);
+    window_->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, window_->hostSession_);
     window_->property_->SetPersistentId(1);
     window_->NotifyExtensionEventAsync(0);

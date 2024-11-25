@@ -61,7 +61,7 @@ void WindowProperty::SetWindowType(WindowType type)
 
 void WindowProperty::SetWindowMode(WindowMode mode)
 {
-    if (!WindowHelper::IsValidWindowMode(mode) || !WindowHelper::IsWindowModeSupported(modeSupportInfo_, mode)) {
+    if (!WindowHelper::IsValidWindowMode(mode) || !WindowHelper::IsWindowModeSupported(windowModeSupportType_, mode)) {
         return;
     }
     if (!WindowHelper::IsSplitWindowMode(mode_)) {
@@ -72,7 +72,7 @@ void WindowProperty::SetWindowMode(WindowMode mode)
 
 void WindowProperty::SetLastWindowMode(WindowMode mode)
 {
-    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo_, mode)) {
+    if (!WindowHelper::IsWindowModeSupported(windowModeSupportType_, mode)) {
         return;
     }
     lastMode_ = mode;
@@ -331,8 +331,8 @@ WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 void WindowProperty::ResumeLastWindowMode()
 {
     // if lastMode isn't supported, get supported mode from supportModeInfo
-    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo_, lastMode_)) {
-        auto mode = WindowHelper::GetWindowModeFromModeSupportInfo(modeSupportInfo_);
+    if (!WindowHelper::IsWindowModeSupported(windowModeSupportType_, lastMode_)) {
+        auto mode = WindowHelper::GetWindowModeFromWindowModeSupportType(windowModeSupportType_);
         if (!WindowHelper::IsSplitWindowMode(mode)) {
             mode_ = mode;
         }
@@ -481,14 +481,14 @@ void WindowProperty::SetTokenState(bool hasToken)
     tokenState_ = hasToken;
 }
 
-void WindowProperty::SetModeSupportInfo(uint32_t modeSupportInfo)
+void WindowProperty::SetWindowModeSupportType(uint32_t windowModeSupportType)
 {
-    modeSupportInfo_ = modeSupportInfo;
+    windowModeSupportType_ = windowModeSupportType;
 }
 
-void WindowProperty::SetRequestModeSupportInfo(uint32_t requestModeSupportInfo)
+void WindowProperty::SetRequestWindowModeSupportType(uint32_t requestWindowModeSupportType)
 {
-    requestModeSupportInfo_ = requestModeSupportInfo;
+    requestWindowModeSupportType_ = requestWindowModeSupportType;
 }
 
 uint32_t WindowProperty::GetWindowId() const
@@ -511,14 +511,14 @@ uint32_t WindowProperty::GetAnimationFlag() const
     return animationFlag_;
 }
 
-uint32_t WindowProperty::GetModeSupportInfo() const
+uint32_t WindowProperty::GetWindowModeSupportType() const
 {
-    return modeSupportInfo_;
+    return windowModeSupportType_;
 }
 
-uint32_t WindowProperty::GetRequestModeSupportInfo() const
+uint32_t WindowProperty::GetRequestWindowModeSupportType() const
 {
-    return requestModeSupportInfo_;
+    return requestWindowModeSupportType_;
 }
 
 bool WindowProperty::GetTokenState() const
@@ -729,7 +729,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
         parcel.WriteUint32(callingWindow_) && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
-        parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(requestModeSupportInfo_) &&
+        parcel.WriteUint32(windowModeSupportType_) && parcel.WriteUint32(requestWindowModeSupportType_) &&
         parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
         parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_) &&
@@ -777,8 +777,8 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
-    property->SetModeSupportInfo(parcel.ReadUint32());
-    property->SetRequestModeSupportInfo(parcel.ReadUint32());
+    property->SetWindowModeSupportType(parcel.ReadUint32());
+    property->SetRequestWindowModeSupportType(parcel.ReadUint32());
     property->SetDragType(static_cast<DragType>(parcel.ReadUint32()));
     uint32_t w = parcel.ReadUint32();
     uint32_t h = parcel.ReadUint32();
@@ -843,7 +843,7 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
             ret = ret && parcel.WriteFloat(brightness_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
-            ret = ret && parcel.WriteUint32(modeSupportInfo_);
+            ret = ret && parcel.WriteUint32(windowModeSupportType_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
             ret = ret && MarshallingTouchHotAreas(parcel);
@@ -921,7 +921,7 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             SetBrightness(parcel.ReadFloat());
             break;
         case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
-            SetModeSupportInfo(parcel.ReadUint32());
+            SetWindowModeSupportType(parcel.ReadUint32());
             break;
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
             UnmarshallingTouchHotAreas(parcel, this);
@@ -990,8 +990,8 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     requestedOrientation_ = property->requestedOrientation_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
-    modeSupportInfo_ = property->modeSupportInfo_;
-    requestModeSupportInfo_ = property->requestModeSupportInfo_;
+    windowModeSupportType_ = property->windowModeSupportType_;
+    requestWindowModeSupportType_ = property->requestWindowModeSupportType_;
     dragType_ = property->dragType_;
     originRect_ = property->originRect_;
     isStretchable_ = property->isStretchable_;

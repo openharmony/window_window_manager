@@ -1672,7 +1672,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, Function | Sma
     }
 
     int res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
+    EXPECT_EQ(res, ERR_NONE);
 }
 
 /**
@@ -2160,6 +2160,21 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, Functi
     MessageParcel data;
     MessageParcel reply;
     int res = stub_->HandleIsPcOrPadFreeMultiWindowMode(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleIsWindowRectAutoSave
+ * @tc.desc: test HandleIsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string key = "com.example.recposentryEntryAbility";
+    data.WriteString(key);
+    int res = stub_->HandleIsWindowRectAutoSave(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 

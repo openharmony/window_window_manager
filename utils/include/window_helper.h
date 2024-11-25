@@ -38,6 +38,11 @@ public:
         return (IsMainWindow(type) && state != WindowState::STATE_SHOWN);
     }
 
+    static inline bool IsModalMainWindow(WindowType type, uint32_t windowFlags)
+    {
+        return IsMainWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    }
+
     static inline bool IsSubWindow(WindowType type)
     {
         return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
@@ -203,19 +208,19 @@ public:
             static_cast<uint32_t>(x_end - x_begin), static_cast<uint32_t>(y_end - y_begin) };
     }
 
-    static bool IsWindowModeSupported(uint32_t modeSupportInfo, WindowMode mode)
+    static bool IsWindowModeSupported(uint32_t windowModeSupportType, WindowMode mode)
     {
         switch (mode) {
             case WindowMode::WINDOW_MODE_FULLSCREEN:
-                return WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN & modeSupportInfo;
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN & windowModeSupportType;
             case WindowMode::WINDOW_MODE_FLOATING:
-                return WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING & modeSupportInfo;
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING & windowModeSupportType;
             case WindowMode::WINDOW_MODE_SPLIT_PRIMARY:
-                return WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY & modeSupportInfo;
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY & windowModeSupportType;
             case WindowMode::WINDOW_MODE_SPLIT_SECONDARY:
-                return WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY & modeSupportInfo;
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY & windowModeSupportType;
             case WindowMode::WINDOW_MODE_PIP:
-                return WindowModeSupport::WINDOW_MODE_SUPPORT_PIP & modeSupportInfo;
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_PIP & windowModeSupportType;
             case WindowMode::WINDOW_MODE_UNDEFINED:
                 return false;
             default:
@@ -223,10 +228,10 @@ public:
         }
     }
 
-    static WindowMode GetWindowModeFromModeSupportInfo(uint32_t modeSupportInfo)
+    static WindowMode GetWindowModeFromWindowModeSupportType(uint32_t windowModeSupportType)
     {
         // get the binary number consists of the last 1 and 0 behind it
-        uint32_t windowModeSupport = modeSupportInfo & (~modeSupportInfo + 1);
+        uint32_t windowModeSupport = windowModeSupportType & (~windowModeSupportType + 1);
 
         switch (windowModeSupport) {
             case WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN:
@@ -244,20 +249,20 @@ public:
         }
     }
 
-    static uint32_t ConvertSupportModesToSupportInfo(const std::vector<AppExecFwk::SupportWindowMode>& supportModes)
+    static uint32_t ConvertSupportModesToSupportType(const std::vector<AppExecFwk::SupportWindowMode>& supportModes)
     {
-        uint32_t modeSupportInfo = 0;
+        uint32_t windowModeSupportType = 0;
         for (auto& mode : supportModes) {
             if (mode == AppExecFwk::SupportWindowMode::FULLSCREEN) {
-                modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+                windowModeSupportType |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
             } else if (mode == AppExecFwk::SupportWindowMode::SPLIT) {
-                modeSupportInfo |= (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                windowModeSupportType |= (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                                     WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
             } else if (mode == AppExecFwk::SupportWindowMode::FLOATING) {
-                modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+                windowModeSupportType |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
             }
         }
-        return modeSupportInfo;
+        return windowModeSupportType;
     }
 
     static bool IsPointInTargetRect(int32_t pointPosX, int32_t pointPosY, const Rect& targetRect)
@@ -517,11 +522,11 @@ public:
         return false;
     }
 
-    static bool IsOnlySupportSplitAndShowWhenLocked(bool isShowWhenLocked, uint32_t modeSupportInfo)
+    static bool IsOnlySupportSplitAndShowWhenLocked(bool isShowWhenLocked, uint32_t windowModeSupportType)
     {
-        uint32_t splitModeInfo = (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-                                  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
-        if (isShowWhenLocked && (splitModeInfo == modeSupportInfo)) {
+        uint32_t splitMode = (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                              WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+        if (isShowWhenLocked && (splitMode == windowModeSupportType)) {
             return true;
         }
         return false;
@@ -536,15 +541,15 @@ public:
         return false;
     }
 
-    static bool CheckSupportWindowMode(WindowMode winMode, uint32_t modeSupportInfo,
+    static bool CheckSupportWindowMode(WindowMode winMode, uint32_t windowModeSupportType,
         const sptr<WindowTransitionInfo>& info)
     {
         if (!WindowHelper::IsMainWindow(info->GetWindowType())) {
             return true;
         }
 
-        if ((!IsWindowModeSupported(modeSupportInfo, winMode)) ||
-            (IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
+        if (!IsWindowModeSupported(windowModeSupportType, winMode) ||
+            IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), windowModeSupportType)) {
             return false;
         }
         return true;

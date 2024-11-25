@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "display_manager_proxy.h"
 #include "display_manager_adapter.h"
 #include "display_manager.h"
@@ -218,12 +219,13 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged, Function | Sm
 {
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+    DisplayId displayId = 0;
 
     DMRect rect = {2, 2, 2, 2};
     int resultValue = 0;
     std::function<void()> func = [&]()
     {
-        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect);
+        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect, displayId);
         resultValue = 1;
     };
     func();
@@ -239,12 +241,13 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged01, Function | 
 {
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+    DisplayId displayId = 0;
 
     DMRect rect = {1, 1, 1, 1};
     int resultValue = 0;
     std::function<void()> func = [&]()
     {
-        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect);
+        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect, displayId);
         resultValue = 1;
     };
     func();
@@ -260,12 +263,13 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged02, Function | 
 {
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+    DisplayId displayId = 0;
 
     DMRect rect = {3, 3, 3, 3};
     int resultValue = 0;
     std::function<void()> func = [&]()
     {
-        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect);
+        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect, displayId);
         resultValue = 1;
     };
     func();
@@ -317,7 +321,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect01, Function | SmallTest |
     func();
     ASSERT_EQ(resultValue, 1);
 }
-
 
 /**
  * @tc.name: OnScreenDisconnect
@@ -522,7 +525,6 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange01, Function | SmallTest |
     func();
     ASSERT_EQ(resultValue, 1);
 }
-
 
 /**
  * @tc.name: OnScreenshot
