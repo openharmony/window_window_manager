@@ -1954,6 +1954,9 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
 
     sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
+
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE, false, false);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::DRAG_MOVE);
 }
 
 /**
@@ -1973,22 +1976,22 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, Function | SmallTest | Leve
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {2, 1, 1, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 2, 1, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 }
 

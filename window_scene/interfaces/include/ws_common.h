@@ -422,8 +422,15 @@ enum class SizeChangeReason : uint32_t {
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
+    UPDATE_DPI_SYNC,
+    DRAG_MOVE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(SizeChangeReason reason)
+{
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
+}
 
 enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE = 100,

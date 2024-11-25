@@ -101,6 +101,8 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
+    session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RESIZE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RECOVER);
@@ -121,6 +123,9 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     EXPECT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
+    session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 }
@@ -828,7 +833,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     reason = SizeChangeReason::DRAG_END;
     session->OnMoveDragCallback(reason);
 
-    reason = SizeChangeReason::MOVE;
+    reason = SizeChangeReason::DRAG_MOVE;
     session->OnMoveDragCallback(reason);
 
     reason = SizeChangeReason::DRAG_START;
@@ -1633,7 +1638,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, Function | SmallTest | Le
 
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
-    session->HandleMoveDragSurfaceNode(SizeChangeReason::MOVE);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
 }
 
