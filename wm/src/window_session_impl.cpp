@@ -3489,6 +3489,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         if (FilterKeyEvent(keyEvent)) return;
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
+            IsPcOrPadFreeMultiWindowMode() &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
             GetImmersiveModeEnabledState() &&
             keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
