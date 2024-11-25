@@ -17,8 +17,9 @@
 #define OHOS_ROSEN_WM_COMMON_H
 
 #include <float.h>
-#include <parcel.h>
 #include <map>
+#include <parcel.h>
+#include <sstream>
 #include "dm_common.h"
 
 namespace OHOS {
@@ -800,10 +801,9 @@ struct MoveConfiguration {
     DisplayId displayId = DISPLAY_ID_INVALID;
     std::string ToString() const
     {
-        constexpr int32_t bufferSize = 10;
-        char buffer[bufferSize];
-        snprintf(buffer, bufferSize, "[%llu]", displayId);
-        return buffer;
+        std::ostringstream oss;
+        oss << "[" << displayId << "]"
+        return oss.str();
     }
 };
 
