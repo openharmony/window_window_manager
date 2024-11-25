@@ -82,6 +82,7 @@ public:
         TRANS_ID_GET_MAIN_WINDOW_STATES_BY_PID,
         TRANS_ID_GET_ROOT_MAIN_WINDOW_ID,
         TRANS_ID_UI_EXTENSION_CREATION_CHECK,
+        TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -116,6 +117,23 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
+
+    /**
+     * @brief Application Control SA Notification Window Control Application Information
+     *
+     * The application control SA notifies whether the window application is controlled or not.\n
+     * When the window main program starts, the application control information is fully notified,\n
+     * and only incremental information is notified after full notification.\n
+     *
+     * @param type controls the application type (caller), such as application lock
+     * @param userId User ID
+     * @param controlList Control Application Information List
+     * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
+     * @permission application requires SA permission
+     */
+    virtual WSError NotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList) = 0;
+
     /**
      * @brief Obtains main window state list by pid
      * @caller SA

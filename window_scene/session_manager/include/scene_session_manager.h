@@ -126,6 +126,8 @@ using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
+using NotifySCBManagerAppUseControlListFunc =
+    std::function<void(ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -177,6 +179,8 @@ public:
     void PostFlushWindowInfoTask(FlushWindowInfoTask&& task, const std::string& taskName, const int delayTime);
 
     sptr<SceneSession> GetSceneSessionByIdentityInfo(const SessionIdentityInfo& info);
+    void GetMainWindowSceneSessionByBundleNameAndAppIndex(
+        const std::string& bundleName, const int32_t appIndex, std::vector<sptr<SceneSession>>& findSceneSessions);
     sptr<SceneSession> GetSceneSessionByType(WindowType type);
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
@@ -440,6 +444,9 @@ public:
      */
     WMError ReleaseForegroundSessionScreenLock() override;
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
+    WSError NotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList);
+    void SetNotifySCBManagerAppUseControlListFunc(NotifySCBManagerAppUseControlListFunc&& func);
 
     /**
      * Free Multi Window
@@ -813,6 +820,7 @@ private:
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
+    NotifySCBManagerAppUseControlListFunc notifySCBManagerAppUseControlListFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
 

@@ -272,7 +272,7 @@ private:
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
-    void ProcessUpdateAppUseControllRegister();
+    void ProcessUpdateAppUseControlRegister();
     
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -331,6 +331,7 @@ private:
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
     void OnSetWindowRectAutoSave(bool enabled);
+    void OnUpdateAppUseControll(ControlAppType type, bool isNeedControl);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 
