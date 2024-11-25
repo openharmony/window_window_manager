@@ -1682,7 +1682,7 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
     MoveConfiguration moveConfiguration;
     size_t lastParamIndex = INDEX_TWO;
     if (argc > 2 && argv[INDEX_TWO] != nullptr) { // 2: x/y params num
-        if (GetTYpe(env, argv[INDEX_TWO]) == napi_object) { // MoveConfiguration is optional param
+        if (GetType(env, argv[INDEX_TWO]) == napi_object) { // MoveConfiguration is optional param
             lastParamIndex = INDEX_THREE;
             if (!GetMoveConfigurationFromJsValue(env, argv[INDEX_TWO], moveConfiguration)) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to moveConfiguration");
