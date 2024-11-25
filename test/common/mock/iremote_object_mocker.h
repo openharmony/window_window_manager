@@ -149,7 +149,7 @@ public:
     MOCK_METHOD(bool, RemoveDeathRecipient, (const sptr<DeathRecipient>& recipient), (override));
     MOCK_METHOD(bool, Marshalling, (Parcel& parcel), (const, override));
     MOCK_METHOD(sptr<IRemoteBroker>, AsInterface, (), (override));
-    MOCK_METHOD(int, Dump, (int fd, const std::vector<std::u16string>& args, (override));
+    MOCK_METHOD(int, Dump, (int fd, const std::vector<std::u16string>& args), (override));
 }
 }
 }
