@@ -1204,10 +1204,9 @@ struct MoveConfiguration {
     DisplayId displayId = DISPLAY_ID_INVALID;
     std::string ToString() const
     {
-        constexpr int32_t bufferSize = 10;
-        char buffer[bufferSize];
-        snprintf(buffer, bufferSize, "[%llu]", displayId);
-        return buffer;
+        std::ostringstream oss;
+        oss << "[" << displayId << "]"
+        return oss.str();
     }
 };
 
