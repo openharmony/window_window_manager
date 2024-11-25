@@ -552,8 +552,6 @@ public:
     void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
 
 protected:
-    void NotifySessionRectChange(const WSRect& rect,
-        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -640,6 +638,10 @@ protected:
      * Window Layout
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
+    virtual void NotifySessionRectChange(const WSRect& rect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
+    virtual void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
+        const MoveConfiguration& moveConfiguration);
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -702,7 +704,6 @@ private:
     /**
      * Window Layout
      */
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
     void UpdateRectForDrag(WSRect& rect);
 
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
