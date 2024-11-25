@@ -800,9 +800,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetSecComponentWindowInfo(const SecSur
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return {};
     }
-    MMI::WindowInfo windowinfo;
     const auto& secRectInfo = secSurfaceInfo.uiExtensionRectInfo;
-    windowinfo = MakeWindowInfoFormHostWindow(hostWindowinfo);
+    MMI::WindowInfo windowinfo = MakeWindowInfoFormHostWindow(hostWindowinfo);
     windowinfo.id = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(secSurfaceInfo.uiExtensionNodeId);
     if (windowinfo.id == 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "GetUIExtPersistentId ERROR");
