@@ -690,7 +690,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     /*
      *  if requestRect of systemBar equals to winRect, not need to resize. This may happen when rotate display
      */
-    bool isMove = reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE;
+    bool isMove = isMoveToOrDragMove(reason);
     if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
         if ((isMove || reason == WindowSizeChangeReason::RESIZE) && rect == node->GetWindowRect()) {
             return WMError::WM_OK;
@@ -1451,8 +1451,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             ret = ResizeRectAndFlush(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
             if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && ret == WMError::WM_OK &&
                 callingWindowId_ == windowId && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
-                if (property->GetWindowSizeChangeReason() != WindowSizeChangeReason::MOVE &&
-                    property->GetWindowSizeChangeReason() != WindowSizeChangeReason::DRAG_MOVE) {
+                if (!isMoveToOrDragMove(property->GetWindowSizeChangeReason())) {
                     callingWindowId_ = 0u;
                     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
                 } else {
