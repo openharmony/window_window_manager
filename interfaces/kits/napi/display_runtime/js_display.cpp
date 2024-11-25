@@ -357,8 +357,9 @@ DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
         if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+            auto displayId = display_->GetId();
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
-            ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener, displayId);
         } else {
             ret = DMError::DM_ERROR_INVALID_PARAM;
         }
