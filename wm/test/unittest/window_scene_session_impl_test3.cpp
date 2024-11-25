@@ -174,6 +174,8 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateTitleInTargetPos, Function | SmallTe
     ASSERT_NE(nullptr, session);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->windowSessionMap_.insert(std::make_pair(windowSceneSessionImpl->GetWindowName(),
+        std::make_pair(windowSceneSessionImpl->GetWindowId(), windowSceneSessionImpl)));
     ret = windowSceneSessionImpl->SwitchFreeMultiWindow(true);
     EXPECT_EQ(WSError::WS_OK, ret);
     ret = windowSceneSessionImpl->SwitchFreeMultiWindow(false);
@@ -191,6 +193,7 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateTitleInTargetPos, Function | SmallTe
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
     ret = windowSceneSessionImpl->UpdateTitleInTargetPos(false, 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+    windowSceneSessionImpl->windowSessionMap_.erase(windowSceneSessionImpl->GetWindowName());
 }
 
 /**
@@ -999,6 +1002,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize, Function | SmallTest | Level2)
     ret = windowSceneSessionImpl->Resize(100, 100);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
+
 /**
  * @tc.name: Resize01
  * @tc.desc: Resize
@@ -1166,7 +1170,7 @@ HWTEST_F(WindowSceneSessionImplTest3, MaximizeFloating, Function | SmallTest | L
     ret = windowSceneSessionImpl->MaximizeFloating();
     EXPECT_EQ(WMError::WM_OK, ret);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetModeSupportInfo(WINDOW_MODE_SUPPORT_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowModeSupportType(WINDOW_MODE_SUPPORT_FLOATING);
     ret = windowSceneSessionImpl->MaximizeFloating();
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     ret1 = windowSceneSessionImpl->GetGlobalMaximizeMode();

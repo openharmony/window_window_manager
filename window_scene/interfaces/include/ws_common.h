@@ -32,12 +32,14 @@ class StartWindowOption;
 }
 namespace OHOS::AppExecFwk {
 struct AbilityInfo;
+enum class SupportWindowMode;
 }
 
 namespace OHOS::Rosen {
 class RSTransaction;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
+constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -196,78 +198,97 @@ enum class FocusChangeReason {
      * default focus change reason
      */
     DEFAULT = 0,
+
     /**
      * focus change for move up
      */
     MOVE_UP,
+
     /**
      * focus change for click
      */
     CLICK,
+
     /**
      * focus change for foreground
      */
     FOREGROUND,
+
     /**
      * focus change for background
      */
     BACKGROUND,
+
     /**
      * focus change for split screen.5
      */
     SPLIT_SCREEN,
+
     /**
      * focus change for full screen
      */
     FULL_SCREEN,
+
     /**
      * focus change for global search
      */
     SCB_SESSION_REQUEST,
+
     /**
      * focus change for floating scene
      */
     FLOATING_SCENE,
+
     /**
      * focus change for losing focus
      */
     SCB_SESSION_REQUEST_UNFOCUS,
+
     /**
      * focus change for client requerst.10
      */
     CLIENT_REQUEST,
+
     /**
      * focus change for wind
      */
     WIND,
+
     /**
      * focus change for app foreground
      */
     APP_FOREGROUND,
+
     /**
      * focus change for app background
      */
     APP_BACKGROUND,
+
     /**
      * focus change for recent,Multitasking
      */
     RECENT,
+
     /**
      * focus change for inner app.
      */
     SCB_START_APP,
+
     /**
      * focus for setting focuable.
      */
     FOCUSABLE,
+
     /**
      * select last focused app when requestSessionUnFocus.
      */
     LAST_FOCUSED_APP,
+
     /**
      * focus for zOrder pass through VOICE_INTERACTION.
      */
     VOICE_INTERACTION,
+
     /**
      * focus change max.
      */
@@ -347,6 +368,7 @@ struct SessionInfo {
     bool isPcOrPadEnableActivation_ = false;
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
+    int32_t specifiedId = 0;
 
     /**
      * UIExtension
@@ -358,10 +380,16 @@ struct SessionInfo {
     SessionViewportConfig config_;
 
     /**
-     * Multi instance
+     * Multi Instance
      */
     bool isNewAppInstance_ = false;
     std::string appInstanceKey_;
+
+    /**
+     * PC Window
+     */
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+    uint32_t windowModeSupportType = 0;
 };
 
 enum class SessionFlag : uint32_t {

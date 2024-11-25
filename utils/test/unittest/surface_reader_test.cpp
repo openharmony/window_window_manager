@@ -42,6 +42,7 @@ HWTEST_F(SurfaceReaderTest, Init, Function | SmallTest | Level2)
     delete reader;
     GTEST_LOG_(INFO) << "SurfaceReaderTest: Init end";
 }
+
 /**
  * @tc.name: OnVsync
  * @tc.desc: normal function
@@ -55,6 +56,7 @@ HWTEST_F(SurfaceReaderTest, OnVsync, Function | SmallTest | Level2)
     delete reader;
     ASSERT_EQ(res, true);
 }
+
 /**
  * @tc.name: GetSurface
  * @tc.desc: normal function
@@ -68,6 +70,7 @@ HWTEST_F(SurfaceReaderTest, GetSurface, Function | SmallTest | Level2)
     ASSERT_NE(surface, nullptr);
     delete reader;
 }
+
 /**
  * @tc.name: SetHandler
  * @tc.desc: normal function

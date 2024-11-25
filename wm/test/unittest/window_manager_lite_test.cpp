@@ -765,6 +765,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Lev
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSDisconnected(0, 0);
     EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullptr);
 }
+
 /**
  * @tc.name: RegisterWindowStyleChangedListener
  * @tc.desc: check RegisterWindowStyleChangedListener

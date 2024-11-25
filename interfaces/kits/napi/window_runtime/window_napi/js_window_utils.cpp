@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_window_utils.h"
 #include <iomanip>
 #include <regex>
@@ -565,6 +566,7 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
     napi_set_named_property(env, objValue, "windowStatusType",
         CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    napi_set_named_property(env, objValue, "isFocused", CreateJsValue(env, info->IsFocused()));
     return objValue;
 }
 
@@ -1045,7 +1047,7 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
 bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration)
 {
     if (jsObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to MoveConfiguration");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "jsObject is null");
         return false;
     }
     napi_value jsConfig = nullptr;
@@ -1056,7 +1058,7 @@ bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConf
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
             return false;
         }
-        moveConfiguration.displayId_ = displayId;
+        moveConfiguration.displayId = displayId;
         return true;
     }
     return true;

@@ -322,6 +322,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::SetSystemSceneOcclusionAlpha);
     BindNativeFunction(env, objValue, "setSystemSceneForceUIFirst",
         moduleName, JsSceneSession::SetSystemSceneForceUIFirst);
+    BindNativeFunction(env, objValue, "markSystemSceneUIFirst",
+        moduleName, JsSceneSession::MarkSystemSceneUIFirst);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setIsMidScene", moduleName, JsSceneSession::SetIsMidScene);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
@@ -447,25 +449,25 @@ JsSceneSession::~JsSceneSession()
         return;
     }
     session->UnregisterSessionChangeListeners();
-    SceneSessionManager::GetInstance().UnregisterCreateSubSessionListener(session->GetPersistentId());
+    SceneSessionManager::GetInstance().UnregisterSpecificSessionCreateListener(session->GetPersistentId());
 }
 
 void JsSceneSession::ProcessPendingSceneSessionActivationRegister()
 {
-    NotifyPendingSessionActivationFunc func = [weakThis = wptr(this)](SessionInfo& info) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessPendingSceneSessionActivationRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->PendingSessionActivation(info);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetPendingSessionActivationEventListener(func);
+    const char* const where = __func__;
+    session->SetPendingSessionActivationEventListener([weakThis = wptr(this), where](SessionInfo& info) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->PendingSessionActivation(info);
+    });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
@@ -1016,7 +1018,7 @@ void JsSceneSession::ProcessCreateSubSessionRegister()
 
 void JsSceneSession::ProcessBindDialogTargetRegister()
 {
-    NotifyBindDialogSessionFunc onBindDialogTarget = [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
+    auto onBindDialogTarget = [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
@@ -1029,7 +1031,7 @@ void JsSceneSession::ProcessBindDialogTargetRegister()
         TLOGE(WmsLogTag::WMS_DIALOG, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->RegisterBindDialogSessionCallback(std::move(onBindDialogTarget));
+    SceneSessionManager::GetInstance().RegisterBindDialogTargetListener(session, std::move(onBindDialogTarget));
     TLOGD(WmsLogTag::WMS_DIALOG, "success");
 }
 
@@ -1190,125 +1192,124 @@ void JsSceneSession::ProcessSessionEventRegister()
 void JsSceneSession::ProcessTerminateSessionRegister()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
-    NotifyTerminateSessionFunc func = [weakThis = wptr(this)](const SessionInfo& info) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessTerminateSessionRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->TerminateSession(info);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetTerminateSessionListener(func);
+    const char* const where = __func__;
+    session->SetTerminateSessionListener([weakThis = wptr(this), where](const SessionInfo& info) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->TerminateSession(info);
+    });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessTerminateSessionRegisterNew()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
-    NotifyTerminateSessionFuncNew func = [weakThis = wptr(this)](
-        const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessTerminateSessionRegisterNew jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetTerminateSessionListenerNew(func);
+    const char* const where = __func__;
+    session->SetTerminateSessionListenerNew([weakThis = wptr(this), where](
+        const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
+    });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessTerminateSessionRegisterTotal()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
-    NotifyTerminateSessionFuncTotal func = [weakThis = wptr(this)](
-        const SessionInfo& info, TerminateType terminateType) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessTerminateSessionRegisterTotal jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->TerminateSessionTotal(info, terminateType);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetTerminateSessionListenerTotal(func);
+    const char* const where = __func__;
+    session->SetTerminateSessionListenerTotal([weakThis = wptr(this), where](
+        const SessionInfo& info, TerminateType terminateType) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->TerminateSessionTotal(info, terminateType);
+    });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessPendingSessionToForegroundRegister()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
-    NotifyPendingSessionToForegroundFunc func = [weakThis = wptr(this)](const SessionInfo& info) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessPendingSessionToForegroundRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->PendingSessionToForeground(info);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetPendingSessionToForegroundListener(func);
+    const char* const where = __func__;
+    session->SetPendingSessionToForegroundListener([weakThis = wptr(this), where](const SessionInfo& info) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->PendingSessionToForeground(info);
+    });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
-    NotifyPendingSessionToBackgroundForDelegatorFunc func = [weakThis = wptr(this)](const SessionInfo& info,
-        bool shouldBackToCaller) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->PendingSessionToBackgroundForDelegator(info, shouldBackToCaller);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetPendingSessionToBackgroundForDelegatorListener(func);
+    const char* const where = __func__;
+    session->SetPendingSessionToBackgroundForDelegatorListener([weakThis = wptr(this), where](
+        const SessionInfo& info, bool shouldBackToCaller) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->PendingSessionToBackgroundForDelegator(info, shouldBackToCaller);
+    });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessSessionExceptionRegister()
 {
-    WLOGFD("in");
-    NotifySessionExceptionFunc func = [weakThis = wptr(this)](
-        const SessionInfo& info, bool needRemoveSession, bool startFail) {
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetSessionExceptionListener([weakThis = wptr(this), where](const SessionInfo& info,
+        bool needRemoveSession, bool startFail) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionExceptionRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnSessionException(info, needRemoveSession, startFail);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    session->SetSessionExceptionListener(func, true);
-    WLOGFD("success");
+    }, true);
 }
 
 /** @note @window.hierarchy */
@@ -1497,20 +1498,20 @@ void JsSceneSession::OnSessionEvent(uint32_t eventId, const SessionEventParam& p
 
 void JsSceneSession::ProcessBackPressedRegister()
 {
-    NotifyBackPressedFunc func = [weakThis = wptr(this)](bool needMoveToBackground) {
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetBackPressedListenser([weakThis = wptr(this), where](bool needMoveToBackground) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessBackPressedRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnBackPressed(needMoveToBackground);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    session->SetBackPressedListenser(func);
+    });
 }
 
 void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
@@ -1645,20 +1646,19 @@ void JsSceneSession::OnForceHideChange(bool hide)
 
 void JsSceneSession::ProcessTouchOutsideRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    sessionchangeCallback->OnTouchOutside_ = [weakThis = wptr(this)] {
+    session->RegisterTouchOutsideCallback([weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessTouchOutsideRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnTouchOutside();
-    };
-    WLOGFD("success");
+    });
 }
 
 void JsSceneSession::OnTouchOutside()
@@ -1809,6 +1809,13 @@ napi_value JsSceneSession::SetSystemSceneForceUIFirst(napi_env env, napi_callbac
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSystemSceneForceUIFirst(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::MarkSystemSceneUIFirst(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnMarkSystemSceneUIFirst(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetFocusable(napi_env env, napi_callback_info info)
@@ -2480,6 +2487,40 @@ napi_value JsSceneSession::OnSetSystemSceneForceUIFirst(napi_env env, napi_callb
     }
     session->SetSystemSceneForceUIFirst(forceUIFirst);
     TLOGD(WmsLogTag::DEFAULT, "[NAPI] end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnMarkSystemSceneUIFirst(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isForced = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isForced)) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isForced");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isUIFirstEnabled = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isUIFirstEnabled)) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isUIFirstEnabled");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->MarkSystemSceneUIFirst(isForced, isUIFirstEnabled);
     return NapiGetUndefined(env);
 }
 
@@ -3302,8 +3343,9 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse);
+        "appIndex %{public}d, reuse %{public}d, specifiedId %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(),
+        info.abilityName_.c_str(), info.appIndex_, info.reuse, info.specifiedId);
     auto sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
@@ -3343,8 +3385,9 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 
 void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
 {
+    const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, weakSession = weakSession_,
-        sessionInfo, env = env_] {
+        sessionInfo, env = env_, where] {
         auto session = weakSession.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]session is nullptr");
@@ -3375,8 +3418,9 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGNI(WmsLogTag::WMS_LIFE, "[NAPI]PendingSessionActivationInner task success, id:%{public}d",
-            sessionInfo->persistentId_);
+        TLOGNI(WmsLogTag::WMS_LIFE, "[NAPI]%{public}s task success, "
+            "id:%{public}d, specifiedId:%{public}d",
+            where, sessionInfo->persistentId_, sessionInfo->specifiedId);
         napi_call_function(env, NapiGetUndefined(env),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
@@ -4978,7 +5022,6 @@ napi_value JsSceneSession::OnSetWindowEnableDragBySystem(napi_env env, napi_call
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),

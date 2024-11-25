@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "window_helper.h"
 #include "display_manager.h"
 #include "pointer_event.h"
@@ -359,7 +360,6 @@ HWTEST_F(SceneSessionTest, SetDefaultRequestedOrientation, Function | SmallTest 
     Orientation ret = sceneSession->GetRequestedOrientation();
     ASSERT_EQ(orientation, ret);
 }
-
 
 /**
  * @tc.name: IsKeepScreenOn

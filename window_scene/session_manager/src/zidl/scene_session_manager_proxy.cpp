@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef SUPPORT_SCREEN
 #define SUPPORT_SCREEN
 #endif
@@ -2478,7 +2479,7 @@ WMError SceneSessionManagerProxy::GetDisplayIdByWindowId(const std::vector<uint6
         TLOGE(WmsLogTag::DEFAULT, "Fail to read mapSize");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    for (int i = 0; i < mapSize; i++) {
+    for (int32_t i = 0; i < mapSize; i++) {
         uint64_t windowId;
         if (!reply.ReadUint64(windowId)) {
             TLOGE(WmsLogTag::DEFAULT, "Fail to read windowId");

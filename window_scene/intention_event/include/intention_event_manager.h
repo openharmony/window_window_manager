@@ -32,8 +32,7 @@ class IntentionEventManager {
     DECLARE_DELAYED_SINGLETON(IntentionEventManager);
 public:
     DISALLOW_COPY_AND_MOVE(IntentionEventManager);
-    bool EnableInputEventListener(Ace::UIContent* uiContent,
-        std::shared_ptr<AppExecFwk::EventHandler>);
+    bool EnableInputEventListener(Ace::UIContent* uiContent);
 
 private:
 class InputEventListener : public MMI::IInputEventConsumer {

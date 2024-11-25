@@ -85,6 +85,7 @@ HWTEST_F(UtilsAllTest, ADROnRemoteDied01, Function | SmallTest | Level2)
     deathRecipient->OnRemoteDied(remoteObj);
     ASSERT_EQ(1, remoteObj->count_);
 }
+
 /**
  * @tc.name: PRCount01
  * @tc.desc: test PerformReporter::count
@@ -100,6 +101,7 @@ HWTEST_F(UtilsAllTest, PRCount01, Function | SmallTest | Level2)
     reporter.timeSplitCount_.clear();
     ASSERT_EQ(1, reporter.totalCount_);
 }
+
 /**
  * @tc.name: SCAddSingleton01
  * @tc.desc: test SingletonContainer::AddSingleton
@@ -151,6 +153,7 @@ HWTEST_F(UtilsAllTest, SCSetSingleton01, Function | SmallTest | Level2)
     singletonContainer.stringMap.erase("test");
     delete testObj;
 }
+
 /**
  * @tc.name: SCDependOn01
  * @tc.desc: test SingletonContainer::DependOn
@@ -177,6 +180,7 @@ HWTEST_F(UtilsAllTest, SCDependOn01, Function | SmallTest | Level2)
     singletonContainer.stringMap.erase("test");
     id = singletonContainer.dependencySetMap.erase(id);
 }
+
 /**
  * @tc.name: SRHOnImageAvailable01
  * @tc.desc: test SurfaceReaderHandlerImpl::OnImageAvailable
@@ -192,6 +196,7 @@ HWTEST_F(UtilsAllTest, SRHOnImageAvailable, Function | SmallTest | Level2)
     surfaceReaderHandlerImpl->OnImageAvailable(nullptr);
     ASSERT_EQ(true, surfaceReaderHandlerImpl->flag_);
 }
+
 /**
  * @tc.name: SRHGetPixelMap01
  * @tc.desc: test SurfaceReaderHandlerImpl::GetPixelMap
@@ -206,6 +211,7 @@ HWTEST_F(UtilsAllTest, SRHGetPixelMap, Function | SmallTest | Level2)
     surfaceReaderHandlerImpl->flag_ = true;
     surfaceReaderHandlerImpl->GetPixelMap();
 }
+
 /**
  * @tc.name: SysCapUtilGetClientName
  * @tc.desc: test SysCapUtil::GetClientName

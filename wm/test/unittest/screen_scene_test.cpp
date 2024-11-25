@@ -80,7 +80,6 @@ HWTEST_F(ScreenSceneTest, Destroy01, Function | SmallTest | Level3)
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
 
-
 /**
  * @tc.name: UpdateViewportConfig01
  * @tc.desc: UpdateViewportConfig Test
