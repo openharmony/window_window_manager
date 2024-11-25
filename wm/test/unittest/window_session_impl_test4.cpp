@@ -2187,27 +2187,27 @@ HWTEST_F(WindowSessionImplTest4, FlushLayoutSize, Function | SmallTest | Level2)
 {
 #undef private
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: FlushLayoutSize start";
-    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
-    option_->SetWindowName("FlushLayoutSize");
-    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
-    window_->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("FlushLayoutSize");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     int32_t width = 1320;
     int32_t height = 2710;
     WSRect rect = { 0, 0, width, height };
-    window_->FlushLayoutSize(width, height);
+    window->FlushLayoutSize(width, height);
 
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window_->windowSizeChanged_ = true;
-    window_->FlushLayoutSize(width, height);
-    ASSERT_EQ(window_->windowSizeChanged_, false);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSizeChanged_ = true;
+    window->FlushLayoutSize(width, height);
+    ASSERT_EQ(window->windowSizeChanged_, false);
 
-    window_->layoutRect_ = { 0, 0, 2710, 1320 };
-    window_->FlushLayoutSize(width, height);
-    ASSERT_EQ(window_->layoutRect_, rect);
+    window->layoutRect_ = { 0, 0, 2710, 1320 };
+    window->FlushLayoutSize(width, height);
+    ASSERT_EQ(window->layoutRect_, rect);
     
-    window_->enableFrameLayoutFinishCb_ = true;
-    window_->FlushLayoutSize(width, height);
-    ASSERT_EQ(window_->windowSizeChanged_, false);
+    window->enableFrameLayoutFinishCb_ = true;
+    window->FlushLayoutSize(width, height);
+    ASSERT_EQ(window->enableFrameLayoutFinishCb_, false);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: FlushLayoutSize end";
 }

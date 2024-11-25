@@ -683,10 +683,10 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
-    property_->SetWindowRect(wmRect);
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
     }
+    property_->SetWindowRect(wmRect);
     property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
@@ -863,7 +863,10 @@ void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
         return;
     }
     WSRect rect = { 0, 0, width, height };
-    if (windowSizeChanged_ || layoutRect_ != rect || enableFrameLayoutFinishCb_) {
+    bool windowSizeChanged = true;
+    bool enableFrameLayoutFinishCb = true;
+    if (windowSizeChanged_.compare_exchange_strong(windowSizeChanged, false) ||
+        enableFrameLayoutFinishCb_.compare_exchange_strong(enableFrameLayoutFinishCb, false) || layoutRect_ != rect) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
             "NotifyFrameLayoutFinishFromApp, id: %u, rect: %s, notifyListener: %d",
             GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
@@ -873,7 +876,6 @@ void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
         if (auto session = GetHostSession()) {
             session->NotifyFrameLayoutFinishFromApp(enableFrameLayoutFinishCb_, rect);
         }
-        windowSizeChanged_ = false;
         layoutRect_ = rect;
         enableFrameLayoutFinishCb_ = false;
     }
