@@ -3127,7 +3127,6 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         if (session->visibilityChangedDetectFunc_) {
             session->visibilityChangedDetectFunc_(session->GetCallingPid(), beforeVisible, visible);
         }
-        session->isVisible_ = visible;
         if (session->specificCallback_ == nullptr) {
             WLOGFW("specific callback is null.");
             return;
