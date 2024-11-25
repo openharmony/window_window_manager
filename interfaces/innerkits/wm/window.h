@@ -893,6 +893,8 @@ public:
      *
      * @param x
      * @param y
+     * @param move global flag
+     * @param the optional move configuration
      * @return WMError
      */
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false, MoveConfiguration moveConfiguration = {})
@@ -905,6 +907,7 @@ public:
      *
      * @param x
      * @param y
+     * @param the optional move configuration
      * @return WMError
      */
     virtual WMError MoveToAsync(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {})
@@ -917,6 +920,7 @@ public:
      *
      * @param x
      * @param y
+     * @param the optional move configuration
      * @return WMError
      */
     virtual WMError MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration)
