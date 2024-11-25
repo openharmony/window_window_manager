@@ -1206,10 +1206,7 @@ struct MoveConfiguration {
     {
         constexpr int32_t bufferSize = 10;
         char buffer[bufferSize];
-        int32_t ret = snprintf_s(buffer, bufferSize, "[%llu]", displayId);
-        if (ret < 0) {
-            return {};
-        }
+        snprintf(buffer, bufferSize, "[%llu]", displayId);
         return buffer;
     }
 };
