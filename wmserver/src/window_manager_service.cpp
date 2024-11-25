@@ -1371,8 +1371,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
             WMError res = windowController_->UpdateProperty(windowProperty, action);
             if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
-                (windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE ||
-                 windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_MOVE)) {
+                (isMoveToOrDragMove(windowProperty->GetWindowSizeChangeReason()))) {
                 dragController_->UpdateDragInfo(windowProperty->GetWindowId());
             }
         };
@@ -1384,8 +1383,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
         WMError res = windowController_->UpdateProperty(windowProperty, action);
         if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
-            (windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE ||
-             windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_MOVE)) {
+            isMoveToOrDragMove(windowProperty->GetWindowSizeChangeReason())) {
             dragController_->UpdateDragInfo(windowProperty->GetWindowId());
         }
         return res;
