@@ -5826,7 +5826,7 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session or onSetWindowRectAutoSaveFunc is null");
-            return ;
+            return;
         }
         session->onSetWindowRectAutoSaveFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where,
