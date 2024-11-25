@@ -1649,7 +1649,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 {
     const char* const where = __func__;
     auto task = [this, sessionInfo, property, where] {
-        if (auto session = GetSceneSessionBySessionInfo(sessionInfo) != nullptr) {
+        if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
             NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             return session;
         }
