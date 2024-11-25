@@ -4341,7 +4341,6 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
         if (visibleWindowCountMap_[pid] == 0) {
             visibleWindowCountMap_.erase(pid);
         }
-
         if (beforeCount == 0 && currentCount == 1) {
             TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
             windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::VISIBILITY_STATE;
