@@ -3119,16 +3119,15 @@ void SceneSession::UpdateNativeVisibility(bool visible)
             return;
         }
         int32_t persistentId = session->GetPersistentId();
-        WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
+        TLOGNI(WmsLogTag::WMS_SCB, "name: %{public}s, id: %{public}u, visible: %{public}u",
             session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
-
         bool oldVisibleState = session->isVisible_;
         session->isVisible_ = visible;
         if (session->visibilityChangedDetectFunc_) {
             session->visibilityChangedDetectFunc_(session->GetCallingPid(), oldVisibleState, visible);
         }
         if (session->specificCallback_ == nullptr) {
-            WLOGFW("specific callback is null.");
+            TLOGNW(WmsLogTag::WMS_SCB, "specific callback is null.");
             return;
         }
 
