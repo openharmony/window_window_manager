@@ -574,7 +574,7 @@ public:
     bool IsSystemKeyboard() const;
 
 protected:
-    void NotifySessionRectChange(const WSRect& rect,
+    virtual void NotifySessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -668,6 +668,8 @@ protected:
      * Window Layout
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
+    virtual void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
+        MoveConfiguration moveConfiguration);
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -829,7 +831,6 @@ private:
     void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
     WSError UpdateRectForDrag(const WSRect& rect);
 
     /**

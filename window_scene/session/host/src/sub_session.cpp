@@ -54,6 +54,9 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
+        if (session->shouldFollow_.load()) {
+            session->CheckParentDisplayIdAndMove();
+        }
         // use property from client
         auto sessionProperty = session->GetSessionProperty();
         if (property && property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM) &&
@@ -66,6 +69,37 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     };
     PostTask(task, "Show");
     return WSError::WS_OK;
+}
+
+void SubSession::CheckParentDisplayIdAndMove()
+{
+    auto parentSession = GetParentSession();
+    if (parentSession) {
+        auto parentDisplayId = parentSession->GetSessionProperty()->GetDisplayId();
+        if (parentDisplayId == GetSessionProperty()->GetDisplayId()) {
+            return;
+        }
+        SetScreenId(parentDisplayId);
+        GetSessionProperty()->SetDisplayId(parentDisplayId);
+        SceneSession::NotifySessionRectChange(GetSessionRect(), SizeChangeReason::UNDEFINED, parentDisplayId);
+    }
+}
+
+void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId)
+{
+    if (reason == SizeChangeReason::DRAG_END) {
+        shouldFollow_.store(false);
+    }
+    SceneSession::NotifySessionRectChange(rect, reason, displayId);
+}
+
+void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
+    MoveConfiguration moveConfiguration)
+{
+    if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
+        shouldFollow_.store(false);
+    }
+    SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration);
 }
 
 WSError SubSession::Hide()

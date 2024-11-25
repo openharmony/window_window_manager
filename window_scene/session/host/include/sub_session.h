@@ -37,6 +37,10 @@ public:
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
+    void NotifySessionRectChange(const WSRect& rect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID) override;
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
+        MoveConfiguration moveConfiguration) override;
 
     /*
      * Window Hierarchy
@@ -44,6 +48,10 @@ protected:
     bool IsTopmost() const override;
     bool IsModal() const override;
     bool IsApplicationModal() const override;
+
+private:
+    void CheckParentDisplayIdAndMove();
+    std::atomic<bool> shouldFollow_ = true;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H

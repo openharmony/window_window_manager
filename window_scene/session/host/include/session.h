@@ -229,7 +229,7 @@ public:
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
     DisplayId GetScreenId() const;
-    void SetScreenId(uint64_t screenId);
+    virtual void SetScreenId(uint64_t screenId);
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
