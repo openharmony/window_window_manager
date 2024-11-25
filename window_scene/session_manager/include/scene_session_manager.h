@@ -156,7 +156,6 @@ public:
     bool IsSessionVisibleForeground(const sptr<SceneSession>& session);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
-    sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
     WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
@@ -587,6 +586,11 @@ private:
     void ProcessFocusZOrderChange(uint32_t dirty);
     void PostProcessFocus();
     void PostProcessProperty(uint32_t dirty);
+
+    /**
+     * Window  Lifecycle
+     */
+    sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
 
     /**
      * Window Focus

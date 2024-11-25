@@ -1741,8 +1741,6 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | L
  */
 HWTEST_F(SceneSessionManagerTest6, GetSceneSessionBySessionInfo, Function | SmallTest | Level3)
 {
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-
     SessionInfo info1;
     info1.persistentId_ = 1;
     info1.isPersistentRecover_ = false;
@@ -1760,7 +1758,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionBySessionInfo, Function | Smal
     info2.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(nullptr, info2.abilityInfo);
     info2.abilityInfo->launchMode = AppExecFwk::LaunchMode::SINGLETON;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info2, specificCallback);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info2, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     sptr<SceneSession> getSceneSession = ssm_->GetSceneSessionBySessionInfo(info2);
@@ -1775,7 +1773,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionBySessionInfo, Function | Smal
     info3.appInstanceKey_ = "";
     info3.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     info3.abilityInfo->launchMode = AppExecFwk::LaunchMode::SPECIFIED;
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info3, specificCallback);
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info3, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
     ssm_->sceneSessionMap_.insert({2, sceneSession2});
     info3.persistentId_ = 1000;
