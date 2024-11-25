@@ -239,11 +239,6 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         mainScreenWidth = displayInfos[0].width;
         mainScreenHeight = displayInfos[0].height;
     }
-    if (sceneSessionDirty_ == nullptr) {
-        WLOGFE("scene session dirty is null");
-        return;
-    }
-
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = mainScreenWidth,
         .height = mainScreenHeight,
