@@ -260,6 +260,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::ROTATION,              RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::DRAG,                  RectChangeReason::DRAG       },
     { WindowSizeChangeReason::DRAG_START,            RectChangeReason::DRAG_START },
+    { WindowSizeChangeReason::DRAG_MOVE,             RectChangeReason::MOVE       },
     { WindowSizeChangeReason::DRAG_END,              RectChangeReason::DRAG_END   },
     { WindowSizeChangeReason::RESIZE,                RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MOVE,                  RectChangeReason::MOVE       },

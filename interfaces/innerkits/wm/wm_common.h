@@ -368,8 +368,14 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
+    DRAG_MOVE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(WindowSizeChangeReason reason)
+{
+    return reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE;
+}
 
 /**
  * @brief Enumerates layout mode of window.
