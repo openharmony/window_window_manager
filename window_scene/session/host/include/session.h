@@ -534,6 +534,7 @@ protected:
     void HandlePointDownDialog(int32_t pointAction);
     void NotifySessionInfoChange();
 
+    std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
     void PostExportTask(Task&& task, const std::string& name = "sessionExportTask", int64_t delayTime = 0);
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
