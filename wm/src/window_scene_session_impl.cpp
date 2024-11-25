@@ -4474,5 +4474,30 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
     return WMError::WM_OK;
 }
 
+void WindowSceneSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "scene window: %{public}s", GetWindowName().c_str());
+        uiContent->UpdateThemeConfiguration(configuration);
+    }
+    auto numSubSession = subWindowSessionMap_.count(GetPersistentId());
+    TLOGD(WmsLogTag::WMS_IMMS, "scene subSession num: %{public}lu", numSubSession);
+    if (numSubSession == 0) {
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+        subWindowSession->UpdateThemeConfiguration(configuration);
+    }
+}
+
+void WindowSceneSessionImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "scene");
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        auto window = winPair.second.second;
+        window->UpdateThemeConfiguration(configuration);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

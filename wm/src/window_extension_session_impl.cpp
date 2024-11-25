@@ -1281,5 +1281,24 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     }
     return isPcOrPadFreeMultiWindowMode;
 }
+
+void WindowExtensionSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "extension win: %{public}s", GetWindowName().c_str());
+        uiContent->UpdateThemeConfiguration(configuration);
+        return;
+    }
+    TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, extension win: %{public}s", GetWindowName().c_str());
+}
+
+void WindowExtensionSessionImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "extension");
+    std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+    for (const auto& window : windowExtensionSessionSet_) {
+        window->UpdateThemeConfiguration(configuration);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
