@@ -3122,10 +3122,10 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
             session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
 
-        bool beforeVisible = session->isVisible_;
+        bool oldVisibleState = session->isVisible_;
         session->isVisible_ = visible;
         if (session->visibilityChangedDetectFunc_) {
-            session->visibilityChangedDetectFunc_(session->GetCallingPid(), beforeVisible, visible);
+            session->visibilityChangedDetectFunc_(session->GetCallingPid(), oldVisibleState, visible);
         }
         if (session->specificCallback_ == nullptr) {
             WLOGFW("specific callback is null.");
