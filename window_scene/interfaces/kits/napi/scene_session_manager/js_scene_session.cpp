@@ -16,6 +16,7 @@
 #include "js_scene_utils.h"
 #include "js_scene_session.h"
 
+#include "session/host/include/ability_info_manager.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
@@ -3455,8 +3456,10 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
             TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]session is nullptr");
             return;
         }
+        bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
+            sessionInfo->bundleName_, sessionInfo->abilityName_, sessionInfo->moduleName_);
         if (session->DisallowActivationFromPendingBackground(sessionInfo->isPcOrPadEnableActivation_,
-            sessionInfo->isFoundationCall_, sessionInfo->canStartAbilityFromBackground_)) {
+            sessionInfo->isFoundationCall_, sessionInfo->canStartAbilityFromBackground_, isFromAncoAndToAnco)) {
             return;
         }
         auto jsSceneSession = weakThis.promote();
