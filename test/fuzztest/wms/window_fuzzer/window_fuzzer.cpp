@@ -745,7 +745,9 @@ void CheckWindowImplFunctionsPart9(sptr<WindowImpl> window, const uint8_t* data,
     sptr<IWindowVisibilityChangedListener> visibilityChangeListener = new WindowVisibilityChangeListener();
     window->RegisterWindowVisibilityChangeListener(visibilityChangeListener);
     window->UnregisterWindowVisibilityChangeListener(visibilityChangeListener);
+    size_t startPos = 0;
     AAFwk::Want want;
+    startPos += GetObject<AAFwk::Want>(want, data + startPos, size - startPos);
     window->OnNewWant(want);
 }
 
