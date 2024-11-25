@@ -428,7 +428,7 @@ enum class SizeChangeReason : uint32_t {
     END,
 };
 
-inline bool isMoveToOrDragMove(SizeChangeReason reason)
+inline bool IsMoveToOrDragMove(SizeChangeReason reason)
 {
     return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
 }

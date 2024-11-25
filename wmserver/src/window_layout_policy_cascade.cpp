@@ -316,7 +316,7 @@ void WindowLayoutPolicyCascade::ComputeRectByAspectRatio(const sptr<WindowNode>&
 {
     float aspectRatio = node->GetAspectRatio();
     if (!WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode()) ||
-        isMoveToOrDragMove(node->GetWindowSizeChangeReason()) || MathHelper::NearZero(aspectRatio)) {
+        IsMoveToOrDragMove(node->GetWindowSizeChangeReason()) || MathHelper::NearZero(aspectRatio)) {
         return;
     }
 
@@ -381,7 +381,7 @@ void WindowLayoutPolicyCascade::ComputeDecoratedRequestRect(const sptr<WindowNod
     }
 
     if (!property->GetDecorEnable() || property->GetDecoStatus() ||
-        isMoveToOrDragMove(node->GetWindowSizeChangeReason())) {
+        IsMoveToOrDragMove(node->GetWindowSizeChangeReason())) {
         return;
     }
 

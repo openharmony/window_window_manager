@@ -2909,7 +2909,7 @@ void JsSceneSession::OnBufferAvailableChange(const bool isBufferAvailable)
 /** @note @window.layout */
 void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId)
 {
-    if (!isMoveToOrDragMove(reason) && reason != SizeChangeReason::PIP_RESTORE && rect.IsEmpty()) {
+    if (!IsMoveToOrDragMove(reason) && reason != SizeChangeReason::PIP_RESTORE && rect.IsEmpty()) {
         WLOGFD("Rect is empty, there is no need to notify");
         return;
     }
