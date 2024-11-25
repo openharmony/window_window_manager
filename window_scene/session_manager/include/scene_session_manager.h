@@ -584,6 +584,11 @@ private:
     void PostProcessProperty(uint32_t dirty);
 
     /**
+     * Window  Lifecycle
+     */
+    sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
+
+    /**
      * Window Focus
      */
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
