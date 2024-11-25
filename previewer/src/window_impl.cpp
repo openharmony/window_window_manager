@@ -1155,5 +1155,25 @@ bool WindowImpl::GetImmersiveModeEnabledState() const
 {
     return true;
 }
+
+void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, previewer win: %{public}s", GetWindowName().c_str);
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "previewer win: %{public}s", GetWindowName().c_str());
+    uiContent_->UpdateThemeConfiguration(configuration);
+}
+
+void WindowImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "previewer win: %{public}s", GetWindowName().c_str());
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    for (const auto& winPair : windowMap_) {
+        auto window = winPair.second.second;
+        window->UpdateThemeConfiguration(configuration);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -128,6 +128,7 @@ public:
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parentId);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;
@@ -434,6 +435,12 @@ public:
      * @return WMError
      */
     virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /*
+     * @brief Update theme configuration.
+     * @param configuration Window configuration.
+     */
+    virtual void UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
 };
 }
 }
