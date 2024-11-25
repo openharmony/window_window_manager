@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "window_helper.h"
 #include "display_manager.h"
 #include "pointer_event.h"
@@ -974,7 +975,7 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "NotifyTouchOutside";
     info.bundleName_ = "NotifyTouchOutside";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
     sceneSession->sessionStage_ = new SessionStageMocker();
     EXPECT_NE(nullptr, sceneSession->sessionStage_);
@@ -985,44 +986,62 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     auto func = [sceneSession]() {
         sceneSession->SaveUpdatedIcon(nullptr);
     };
-    sceneSession->sessionChangeCallback_->OnTouchOutside_ = func;
+    sceneSession->onTouchOutside_ = func;
     EXPECT_NE(nullptr, &func);
     sceneSession->sessionStage_ = nullptr;
     sceneSession->NotifyTouchOutside();
 
-    sceneSession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
+    sceneSession->onTouchOutside_ = nullptr;
     sceneSession->sessionStage_ = nullptr;
     sceneSession->NotifyTouchOutside();
 }
 
 /**
- * @tc.name: CheckOutTouchOutsideRegister
- * @tc.desc: CheckOutTouchOutsideRegister
+ * @tc.name: CheckTouchOutsideCallbackRegistered
+ * @tc.desc: CheckTouchOutsideCallbackRegistered
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, CheckOutTouchOutsideRegister, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "CheckOutTouchOutsideRegister";
-    info.bundleName_ = "CheckOutTouchOutsideRegister";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    info.abilityName_ = "CheckTouchOutsideCallbackRegistered";
+    info.bundleName_ = "CheckTouchOutsideCallbackRegistered";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
     auto func = [sceneSession]() {
         sceneSession->NotifyWindowVisibility();
     };
-    sceneSession->sessionChangeCallback_->OnTouchOutside_ = func;
-    bool result = sceneSession->CheckOutTouchOutsideRegister();
+    sceneSession->onTouchOutside_ = func;
+    bool result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(true, result);
 
-    sceneSession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
-    result = sceneSession->CheckOutTouchOutsideRegister();
+    sceneSession->onTouchOutside_ = nullptr;
+    result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(false, result);
 
     sceneSession->sessionChangeCallback_ = nullptr;
-    result = sceneSession->CheckOutTouchOutsideRegister();
+    result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(false, result);
+}
+
+/**
+ * @tc.name: RegisterTouchOutsideCallback
+ * @tc.desc: test RegisterTouchOutsideCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, RegisterTouchOutsideCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterTouchOutsideCallback";
+    info.bundleName_ = "RegisterTouchOutsideCallback";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sceneSession->onTouchOutside_ = nullptr;
+    NotifyTouchOutsideFunc func = []() {};
+    sceneSession->RegisterTouchOutsideCallback(std::move(func));
+
+    ASSERT_NE(sceneSession->onTouchOutside_, nullptr);
 }
 
 /**
@@ -1319,7 +1338,7 @@ HWTEST_F(SceneSessionTest2, SetPipActionEvent, Function | SmallTest | Level2)
     ASSERT_EQ(res, WSError::WS_OK);
 }
 
-/*
+/**
  * @tc.name: SetPiPControlEvent
  * @tc.desc: SetPiPControlEvent
  * @tc.type: FUNC
@@ -1629,7 +1648,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     float ratio = 0.0;
     bool isDecor = true;
     float vpr = 0.0;
-    sceneSession->FixRectByLimits(limits, rect, ratio, isDecor, vpr);
+    sceneSession->AdjustRectByLimits(limits, ratio, isDecor, vpr, rect);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
 
     auto property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1641,7 +1660,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    sceneSession->FixRectByLimits(limits, rect, ratio, false, vpr);
+    sceneSession->AdjustRectByLimits(limits, ratio, false, vpr, rect);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
 
@@ -1724,8 +1743,8 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
     sceneSession->TerminateSession(abilitySessionInfo);
 
     bool needRemoveSession = true;
-    session.sessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
-    session.jsSceneSessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
+    session.sessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
+    session.jsSceneSessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
     sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
 
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
@@ -1906,13 +1925,10 @@ HWTEST_F(SceneSessionTest2, SetSessionModalTypeChangeCallback, Function | SmallT
     info.bundleName_ = "SetSessionModalTypeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    NotifySessionModalTypeChangeFunc func = [](SubWindowModalType subWindowModalType) {
-        return WSError::WS_OK;
-    };
-    sceneSession->SetSessionModalTypeChangeCallback(func);
-    EXPECT_NE(sceneSession->sessionChangeCallback_->onSessionModalTypeChange_, nullptr);
+    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
 }
 
 /**
@@ -1927,14 +1943,29 @@ HWTEST_F(SceneSessionTest2, OnSessionModalTypeChange, Function | SmallTest | Lev
     info.bundleName_ = "OnSessionModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    NotifySessionModalTypeChangeFunc func = [](SubWindowModalType subWindowModalType) {
-        return WSError::WS_OK;
-    };
-    sceneSession->SetSessionModalTypeChangeCallback(func);
-    EXPECT_NE(sceneSession->sessionChangeCallback_->onSessionModalTypeChange_, nullptr);
+    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
     EXPECT_EQ(sceneSession->OnSessionModalTypeChange(SubWindowModalType::TYPE_WINDOW_MODALITY), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetMainSessionModalTypeChangeCallback
+ * @tc.desc: SetMainSessionModalTypeChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetMainSessionModalTypeChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMainSessionModalTypeChangeCallback";
+    info.bundleName_ = "SetMainSessionModalTypeChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
 }
 
 /**
@@ -1999,10 +2030,7 @@ HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    sceneSession->sessionChangeCallback_->onWindowAnimationFlagChange_ = [](
-        bool isNeedDefaultAnimationFlag) {};
+    sceneSession->onWindowAnimationFlagChange_ = [](bool isNeedDefaultAnimationFlag) {};
     sceneSession->SetWindowAnimationFlag(true);
     ASSERT_EQ(true, sceneSession->needDefaultAnimationFlag_);
 }

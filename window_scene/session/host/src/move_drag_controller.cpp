@@ -314,7 +314,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         return false;
     }
 
-    SizeChangeReason reason = SizeChangeReason::MOVE;
+    SizeChangeReason reason = SizeChangeReason::DRAG_MOVE;
     bool ret = true;
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
@@ -322,7 +322,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
                 MoveDragInterrupted();
                 return true;
             }
-            reason = SizeChangeReason::MOVE;
+            reason = SizeChangeReason::DRAG_MOVE;
             uint32_t oldWindowDragHotAreaType = windowDragHotAreaType_;
             UpdateHotAreaType(pointerEvent);
             ProcessWindowDragHotAreaFunc(oldWindowDragHotAreaType != windowDragHotAreaType_, reason);
@@ -823,7 +823,7 @@ void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> proper
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     isDecorEnable_ = (isMainWindow || ((isSubWindow || isDialogWindow) && property->IsDecorEnable())) &&
         sysConfig.isSystemDecorEnable_ &&
-        WindowHelper::IsWindowModeSupported(sysConfig.decorModeSupportInfo_, property->GetWindowMode());
+        WindowHelper::IsWindowModeSupported(sysConfig.decorWindowModeSupportType_, property->GetWindowMode());
 }
 
 void MoveDragController::ProcessSessionRectChange(SizeChangeReason reason)
@@ -976,7 +976,7 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
     TLOGI(WmsLogTag::WMS_LAYOUT, "first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
         targetRect.posY_, targetRect.width_, targetRect.height_);
     moveDragProperty_.targetRect_ = targetRect;
-    ProcessSessionRectChange(SizeChangeReason::MOVE);
+    ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
 }
 
 bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,

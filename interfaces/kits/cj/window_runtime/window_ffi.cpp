@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "window_ffi.h"
 #include <transaction/rs_interfaces.h>
 #include "pixel_map_impl.h"

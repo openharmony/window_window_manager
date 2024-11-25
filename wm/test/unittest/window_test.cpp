@@ -1577,30 +1577,30 @@ HWTEST_F(WindowTest, GetRequestedOrientation, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetRequestModeSupportInfo
+ * @tc.name: SetRequestWindowModeSupportType
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, SetRequestModeSupportInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, SetRequestWindowModeSupportType, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    uint32_t modeSupportInfo = 0;
-    window->SetRequestModeSupportInfo(modeSupportInfo);
-    ASSERT_EQ(static_cast<uint32_t>(Orientation::UNSPECIFIED), modeSupportInfo);
+    uint32_t windowModeSupportType = 0;
+    window->SetRequestWindowModeSupportType(windowModeSupportType);
+    ASSERT_EQ(static_cast<uint32_t>(Orientation::UNSPECIFIED), windowModeSupportType);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
- * @tc.name: GetRequestModeSupportInfo
+ * @tc.name: GetRequestWindowModeSupportType
  * @tc.desc: get
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetRequestModeSupportInfo, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetRequestWindowModeSupportType, Function | SmallTest | Level2)
 {
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
-    uint32_t ret = window->GetRequestModeSupportInfo();
+    uint32_t ret = window->GetRequestWindowModeSupportType();
     ASSERT_EQ(true, ret == 0);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

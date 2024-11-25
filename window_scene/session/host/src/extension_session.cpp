@@ -459,7 +459,7 @@ WSError ExtensionSession::Background(bool isFromClient, const std::string& ident
 
 void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Received extension event asynchronously, notifyEvent: %{public}d", notifyEvent);
+    TLOGI(WmsLogTag::WMS_UIEXT, "notifyEvent: %{public}d", notifyEvent);
     if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
         extSessionEventCallback_->notifyExtensionEventFunc_(notifyEvent);
     }
@@ -467,7 +467,7 @@ void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
 
 WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Notify dump, persistenId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "Notify dump, persistenId=%{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -476,5 +476,14 @@ WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params,
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyDumpInfo(params, info);
+}
+
+int32_t ExtensionSession::GetStatusBarHeight()
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId=%{public}d", GetPersistentId());
+    if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->getStatusBarHeightFunc_ != nullptr) {
+        return extSessionEventCallback_->getStatusBarHeightFunc_();
+    }
+    return 0;
 }
 } // namespace OHOS::Rosen

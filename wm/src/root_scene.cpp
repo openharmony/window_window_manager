@@ -108,6 +108,10 @@ void RootScene::SetDisplayOrientation(int32_t orientation)
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
+    if (updateRootSceneRectCallback_ != nullptr) {
+        updateRootSceneRectCallback_(rect);
+    }
+
     if (uiContent_ == nullptr) {
         WLOGFE("uiContent_ is nullptr!");
         return;
@@ -150,20 +154,7 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
 
 void RootScene::RegisterInputEventListener()
 {
-    auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
-    if (mainEventRunner) {
-        WLOGFD("MainEventRunner is available");
-        eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
-    } else {
-        WLOGFD("MainEventRunner is not available");
-        eventHandler_ = AppExecFwk::EventHandler::Current();
-        if (!eventHandler_) {
-            eventHandler_ =
-                std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
-        }
-    }
-    if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(
-        uiContent_.get(), eventHandler_))) {
+    if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uiContent_.get()))) {
         WLOGFE("EnableInputEventListener fail");
     }
     InputTransferStation::GetInstance().MarkRegisterToMMI();
@@ -224,14 +215,25 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-WMError RootScene::GetSessionRectByType(AvoidAreaType type, WSRect& rect)
+WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
-    if (getSessionRectCallback_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "getSessionRectCallback is nullptr");
+    if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    rect = getSessionRectCallback_(type);
+    avoidArea = getSessionAvoidAreaByTypeCallback_(type);
+    TLOGI(WmsLogTag::WMS_IMMS, "root scene type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
     return WMError::WM_OK;
+}
+
+void RootScene::RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback)
+{
+    getSessionAvoidAreaByTypeCallback_ = std::move(callback);
+}
+
+void RootScene::RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback)
+{
+    updateRootSceneRectCallback_ = std::move(callback);
 }
 } // namespace Rosen
 } // namespace OHOS

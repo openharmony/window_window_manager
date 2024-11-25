@@ -77,13 +77,10 @@ namespace {
 HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, Function | MediumTest | Level2)
 {
     bool enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
-        EnableInputEventListener(nullptr, nullptr);
+        EnableInputEventListener(nullptr);
     EXPECT_EQ(false, enable);
     enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
-        EnableInputEventListener(uIContent_.get(), nullptr);
-    EXPECT_EQ(false, enable);
-    enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
-        EnableInputEventListener(uIContent_.get(), eventHandler_);
+        EnableInputEventListener(uIContent_.get());
     EXPECT_EQ(true, enable);
 }
 

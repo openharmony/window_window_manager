@@ -513,7 +513,7 @@ void DisplayManagerAgentProxy::NotifyScreenMagneticStateChanged(bool isMagneticS
     }
 }
 
-void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area)
+void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area, DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -526,6 +526,10 @@ void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area)
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write DisplayId failed");
         return;
     }
     if (!data.WriteInt32(area.posX_) || !data.WriteInt32(area.posY_) || !data.WriteUint32(area.width_)

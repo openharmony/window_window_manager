@@ -28,6 +28,8 @@ group("unittest") {
     ":ws_hidumper_controller_test",
     ":ws_intention_event_manager_test",
     ":ws_keyboard_session_test",
+    ":ws_keyboard_session_test2",
+    ":ws_keyboard_session_test3",
     ":ws_main_session_lifecycle_test",
     ":ws_main_session_test",
     ":ws_move_drag_controller_test",
@@ -172,7 +174,32 @@ ohos_unittest("ws_keyboard_session_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("ws_keyboard_session_test2") {
+  module_out_path = module_out_path
+
+  sources = [ "keyboard_session_test2.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_keyboard_session_test3") {
+  module_out_path = module_out_path
+
+  sources = [ "keyboard_session_test3.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 

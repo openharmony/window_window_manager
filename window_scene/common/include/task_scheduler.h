@@ -22,7 +22,7 @@
 
 namespace OHOS::Rosen {
 
-void StartTraceForSyncTask(std::string name);
+void StartTraceForSyncTask(const std::string& name);
 void FinishTraceForSyncTask();
 
 class TaskScheduler {
@@ -31,11 +31,12 @@ public:
     ~TaskScheduler() = default;
 
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler();
+
     using Task = std::function<void()>;
-    void PostAsyncTask(Task&& task, const std::string& name = "ssmTask", int64_t delayTime = 0);
-    void PostVoidSyncTask(Task&& task, const std::string& name = "ssmTask");
+    void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime = 0);
     void PostTask(Task&& task, const std::string& name, int64_t delayTime = 0);
     void RemoveTask(const std::string& name);
+    void PostVoidSyncTask(Task&& task, const std::string& name = "ssmTask");
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task, const std::string& name = "ssmTask")
     {
@@ -46,7 +47,7 @@ public:
             FinishTraceForSyncTask();
             return ret;
         }
-        auto syncTask = [this, &ret, task = std::move(task), name] {
+        auto syncTask = [this, &ret, &task, &name] {
             StartTraceForSyncTask(name);
             ret = task();
             FinishTraceForSyncTask();

@@ -85,9 +85,10 @@ private:
         const Matrix3f hostTransform) const;
     MMI::WindowInfo GetHostComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
         const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const;
-    MMI::WindowInfo MakeWindowInfoFormHostWindow(const SecRectInfo& secRectInfo,
-        const MMI::WindowInfo& hostWindowinfo) const;
+    MMI::WindowInfo MakeWindowInfoFormHostWindow(const MMI::WindowInfo& hostWindowinfo) const;
     void ResetFlushWindowInfoTask();
+    void CheckIfUpdatePointAreas(WindowType windowType, const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& windowSessionProperty, std::vector<int32_t>& pointerChangeAreas) const;
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
     FlushWindowInfoCallback flushWindowInfoCallback_;

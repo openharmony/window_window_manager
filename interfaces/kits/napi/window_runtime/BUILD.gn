@@ -46,6 +46,12 @@ config("window_native_kit_public_config") {
   include_dirs = [ "window_napi" ]
 }
 
+config("windowstage_kit_public_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [ "window_stage_napi" ]
+}
+
 ohos_shared_library("window_native_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -170,6 +176,7 @@ ohos_shared_library("windowstage_kit") {
     "../../../../resources/config/build:coverage_flags",
   ]
 
+  public_configs = [ ":windowstage_kit_public_config" ]
   include_dirs = [ "window_stage_napi" ]
   deps = [
     ":window_native_kit",

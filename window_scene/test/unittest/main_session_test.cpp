@@ -159,7 +159,6 @@ HWTEST_F(MainSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, mainSession_->TransferKeyEvent(keyEvent));
 }
 
-
 /**
  * @tc.name: ProcessPointDownSession01
  * @tc.desc: check func ProcessPointDownSession
@@ -171,6 +170,7 @@ HWTEST_F(MainSessionTest, ProcessPointDownSession01, Function | SmallTest | Leve
     mainSession_->ClearDialogVector();
     EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(10, 20));
 }
+
 /**
  * @tc.name: ProcessPointDownSession02
  * @tc.desc: check func ProcessPointDownSession
@@ -192,6 +192,7 @@ HWTEST_F(MainSessionTest, SetTopmost01, Function | SmallTest | Level1)
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(false));
 }
+
 /**
  * @tc.name: SetTopmost02
  * @tc.desc: check func SetTopmost
@@ -322,6 +323,7 @@ HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Leve
     bool ret = mainSession_->IsExitSplitOnBackground();
     ASSERT_EQ(false, ret);
 }
+
 /**
  * @tc.name: NotifyClientToUpdateInteractive01
  * @tc.desc: check func NotifyClientToUpdateInteractive
@@ -332,6 +334,7 @@ HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive01, Function | SmallTes
     mainSession_->NotifyClientToUpdateInteractive(true);
     ASSERT_TRUE(true); // exec success
 }
+
 /**
  * @tc.name: NotifyClientToUpdateInteractive02
  * @tc.desc: check func NotifyClientToUpdateInteractive
@@ -403,7 +406,7 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
     session->onRestoreMainWindowFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
-    NotifyRestoreMainWindowFunc func = []() {
+    NotifyRestoreMainWindowFunc func = [] {
         return;
     };
     session->onRestoreMainWindowFunc_ = func;
@@ -432,6 +435,65 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
     };
     session->onSetWindowRectAutoSaveFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+}
+
+/**
+ * @tc.name: OnMainSessionModalTypeChange
+ * @tc.desc: OnMainSessionModalTypeChange function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnMainSessionModalTypeChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnMainSessionModalTypeChange";
+    info.bundleName_ = "OnMainSessionModalTypeChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
+    EXPECT_EQ(WSError::WS_OK, sceneSession->OnMainSessionModalTypeChange(true));
+}
+
+/**
+ * @tc.name: IsModal
+ * @tc.desc: IsModal function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, IsModal, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsModal";
+    info.bundleName_ = "IsModal";
+    sptr<MainSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    EXPECT_EQ(sceneSession->IsModal(), false);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    sceneSession->SetSessionProperty(property);
+    EXPECT_EQ(sceneSession->IsModal(), true);
+}
+
+/**
+ * @tc.name: IsApplicationModal
+ * @tc.desc: IsApplicationModal function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, IsApplicationModal, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsApplicationModal";
+    info.bundleName_ = "IsApplicationModal";
+    sptr<MainSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    EXPECT_EQ(sceneSession->IsApplicationModal(), false);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    sceneSession->SetSessionProperty(property);
+    EXPECT_EQ(sceneSession->IsApplicationModal(), true);
 }
 }
 }

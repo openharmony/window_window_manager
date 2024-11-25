@@ -44,21 +44,6 @@ void TaskScheduler::PostAsyncTask(Task&& task, const std::string& name, int64_t 
     handler_->PostTask(std::move(localTask), "wms:" + name, delayTime, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void TaskScheduler::PostVoidSyncTask(Task&& task, const std::string& name)
-{
-    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
-        task();
-        return;
-    }
-    auto localTask = [this, task = std::move(task), name] {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
-        task();
-        ExecuteExportTask();
-    };
-    handler_->PostSyncTask(std::move(localTask), "wms:" + name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
-}
-
 void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delayTime)
 {
     PostAsyncTask(std::move(task), name, delayTime);
@@ -67,6 +52,26 @@ void TaskScheduler::PostTask(Task&& task, const std::string& name, int64_t delay
 void TaskScheduler::RemoveTask(const std::string& name)
 {
     handler_->RemoveTask("wms:" + name);
+}
+
+void TaskScheduler::PostVoidSyncTask(Task&& task, const std::string& name)
+{
+    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
+        task();
+        return;
+    }
+    auto localTask = [this, &task, &name] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
+        task();
+        ExecuteExportTask();
+    };
+    handler_->PostSyncTask(std::move(localTask), "wms:" + name, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void TaskScheduler::SetExportHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler)
+{
+    exportHandler_ = handler;
 }
 
 void TaskScheduler::AddExportTask(std::string taskName, Task&& task)
@@ -78,17 +83,9 @@ void TaskScheduler::AddExportTask(std::string taskName, Task&& task)
     }
 }
 
-void TaskScheduler::SetExportHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler)
-{
-    exportHandler_ = handler;
-}
-
 void TaskScheduler::ExecuteExportTask()
 {
-    if (exportFuncMap_.empty()) {
-        return;
-    }
-    if (!exportHandler_) {
+    if (!exportHandler_ || exportFuncMap_.empty()) {
         return;
     }
     auto task = [funcMap = std::move(exportFuncMap_)] {
@@ -98,10 +95,10 @@ void TaskScheduler::ExecuteExportTask()
         }
     };
     exportFuncMap_.clear();
-    exportHandler_->PostTask(task, "wms:exportTask");
+    exportHandler_->PostTask(std::move(task), "wms:exportTask");
 }
 
-void StartTraceForSyncTask(std::string name)
+void StartTraceForSyncTask(const std::string& name)
 {
     StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
 }

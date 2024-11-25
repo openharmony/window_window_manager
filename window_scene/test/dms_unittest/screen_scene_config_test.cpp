@@ -193,7 +193,6 @@ HWTEST_F(ScreenSceneConfigTest, ReadIntNumbersConfigInfo, Function | SmallTest |
     xmlFreeDoc(docPtr);
 }
 
-
 /**
  * @tc.name: ReadEnableConfigInfo
  * @tc.desc: test function : ReadEnableConfigInfo

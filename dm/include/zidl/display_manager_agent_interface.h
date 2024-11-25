@@ -87,7 +87,7 @@ public:
     virtual void NotifyCaptureStatusChanged(bool isCapture) = 0;
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) = 0;
     virtual void NotifyDisplayModeChanged(FoldDisplayMode) = 0;
-    virtual void NotifyAvailableAreaChanged(DMRect) = 0;
+    virtual void NotifyAvailableAreaChanged(DMRect, DisplayId displayId) = 0;
     virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) = 0;
 };
 } // namespace Rosen
