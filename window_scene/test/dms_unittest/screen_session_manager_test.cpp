@@ -3152,6 +3152,105 @@ HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo, Function | SmallTest |
     ASSERT_NE(ssm_, nullptr);
     ASSERT_NE(ssm_->GetPrimaryDisplayInfo(), nullptr);
 }
+
+/**
+ * @tc.name: TransferTypeToString
+ * @tc.desc: TransferTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TransferTypeToString1, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    std::string screenType = ssm->TransferTypeToString(ScreenType::REAL);
+    std::string expectType = "REAL";
+    ASSERT_EQ(screenType, expectType);
+}
+
+/**
+ * @tc.name: TransferTypeToString
+ * @tc.desc: TransferTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TransferTypeToString2, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    std::string screenType = ssm->TransferTypeToString(ScreenType::VIRTUAL);
+    std::string expectType = "VIRTUAL";
+    ASSERT_EQ(screenType, expectType);
+}
+
+/**
+ * @tc.name: TransferTypeToString
+ * @tc.desc: TransferTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TransferTypeToString3, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    std::string screenType = ssm->TransferTypeToString(ScreenType::UNDEFINED);
+    std::string expectType = "UNDEFINED";
+    ASSERT_EQ(screenType, expectType);
+}
+
+/**
+ * @tc.name: TransferPropertyChangeTypeToString
+ * @tc.desc: TransferPropertyChangeTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString1, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    std::string screenType = ssm->TransferPropertyChangeTypeToString(ScreenPropertyChangeType::UNSPECIFIED);
+    std::string expectType = "UNSPECIFIED";
+    ASSERT_EQ(screenType, expectType);
+}
+
+/**
+ * @tc.name: TransferPropertyChangeTypeToString
+ * @tc.desc: TransferPropertyChangeTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString2, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    std::string screenType = ssm->TransferPropertyChangeTypeToString(ScreenPropertyChangeType::ROTATION_BEGIN);
+    std::string expectType = "ROTATION_BEGIN";
+    ASSERT_EQ(screenType, expectType);
+}
+
+/**
+ * @tc.name: TransferPropertyChangeTypeToString
+ * @tc.desc: TransferPropertyChangeTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString3, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    std::string screenType = ssm->TransferPropertyChangeTypeToString(ScreenPropertyChangeType::ROTATION_END);
+    std::string expectType = "ROTATION_END";
+    ASSERT_EQ(screenType, expectType);
+}
+
+/**
+ * @tc.name: TransferPropertyChangeTypeToString
+ * @tc.desc: TransferPropertyChangeTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString4, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    std::string screenType = ssm->TransferPropertyChangeTypeToString(
+        ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
+    std::string expectType = "ROTATION_UPDATE_PROPERTY_ONLY";
+    ASSERT_EQ(screenType, expectType);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
