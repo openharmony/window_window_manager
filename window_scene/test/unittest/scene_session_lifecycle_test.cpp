@@ -950,8 +950,7 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTe
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     sceneSession->SetSessionProperty(property);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
@@ -984,8 +983,7 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Lev
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     sceneSession->SetSessionProperty(property);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
@@ -1039,8 +1037,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException, Function | SmallTest
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    uint32_t p = 10;
-    property->SetKeyboardSessionGravity(SessionGravity::SESSION_GRAVITY_BOTTOM, p);
+    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     sceneSession->SetSessionProperty(property);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();

@@ -497,18 +497,6 @@ void WindowSessionProperty::SetWindowState(WindowState state)
     windowState_ = state;
 }
 
-void WindowSessionProperty::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
-{
-    sessionGravity_ = gravity;
-    sessionGravitySizePercent_ = percent;
-}
-
-void WindowSessionProperty::GetSessionGravity(SessionGravity& gravity, uint32_t& percent)
-{
-    gravity = sessionGravity_;
-    percent = sessionGravitySizePercent_;
-}
-
 void WindowSessionProperty::SetKeyboardLayoutParams(const KeyboardLayoutParams& params)
 {
     keyboardLayoutParams_.gravity_ = params.gravity_;
@@ -1004,7 +992,6 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingPiPTemplateInfo(parcel) &&
         parcel.WriteBool(isFloatingWindowAppType_) && MarshallingTouchHotAreas(parcel) &&
         parcel.WriteBool(isSystemCalling_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(sessionGravity_)) && parcel.WriteUint32(sessionGravitySizePercent_) &&
         parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
         parcel.WriteBool(isNeedUpdateWindowMode_) && parcel.WriteUint32(callingSessionId_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowState_)) &&
@@ -1069,7 +1056,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFloatingWindowAppType(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
     property->SetSystemCalling(parcel.ReadBool());
-    property->SetKeyboardSessionGravity(static_cast<SessionGravity>(parcel.ReadUint32()), parcel.ReadUint32());
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
     property->SetIsNeedUpdateWindowMode(parcel.ReadBool());
@@ -1128,8 +1114,6 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     maximizeMode_ = property->maximizeMode_;
     windowMode_ = property->windowMode_;
     limits_ = property->limits_;
-    sessionGravity_ = property->sessionGravity_;
-    sessionGravitySizePercent_ = property->sessionGravitySizePercent_;
     modeSupportInfo_ = property->modeSupportInfo_;
     sysBarPropMap_ = property->sysBarPropMap_;
     isDecorEnable_ = property->isDecorEnable_;

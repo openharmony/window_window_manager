@@ -3586,22 +3586,6 @@ WMError WindowSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetWindowGravity(WindowGravity gravity, uint32_t percent)
-{
-    auto sessionGravity = static_cast<SessionGravity>(gravity);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Set window gravity: %{public}u, percent: %{public}u", sessionGravity, percent);
-    if (property_ != nullptr) {
-        property_->SetKeyboardSessionGravity(sessionGravity, percent);
-    }
-
-    auto hostSession = GetHostSession();
-    if (hostSession != nullptr) {
-        return static_cast<WMError>(hostSession->SetKeyboardSessionGravity(
-            static_cast<SessionGravity>(gravity), percent));
-    }
-    return WMError::WM_OK;
-}
-
 WMError WindowSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     return WMError::WM_OK;
