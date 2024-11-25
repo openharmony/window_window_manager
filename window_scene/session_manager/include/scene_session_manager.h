@@ -112,6 +112,8 @@ using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& 
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
+using NotifySCBManagerAppUseControlListFunc =
+    std::function<void(ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -687,6 +689,7 @@ private:
      * Multi Window
      */
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
+    NotifySCBManagerAppUseControlListFunc notifySCBManagerAppUseControlListFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
     RotateAnimationConfig rotateAnimationConfig_;

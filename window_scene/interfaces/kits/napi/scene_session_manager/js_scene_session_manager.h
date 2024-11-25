@@ -42,6 +42,7 @@ enum class ListenerFunctionType : uint32_t {
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
     CLOSE_TARGET_FLOAT_WINDOW_CB,
     START_PIP_FAILED_CB,
+    UPDATE_APP_USE_CONTROL_CB
 };
 
 class JsSceneSessionManager final {
@@ -208,6 +209,9 @@ private:
     void OnAbilityManagerCollaboratorRegistered();
     void RegisterRootSceneCallbacksOnSSManager();
     void RegisterSSManagerCallbacksOnRootScene();
+    void OnUpdateAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList);
+    void ProcessUpdateAppUseControlList();
 
     /*
      * PiP Window

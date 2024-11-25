@@ -89,6 +89,7 @@ using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 
 class SceneSession : public Session {
 public:
@@ -407,6 +408,9 @@ public:
     static uint32_t GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
+    void SetUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
+    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+
     int32_t GetCustomDecorHeight() override
     {
         return customDecorHeight_;
@@ -531,6 +535,11 @@ protected:
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
 
+    /*
+     * app control
+     */
+    UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
+    
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();
