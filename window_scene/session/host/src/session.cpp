@@ -3343,4 +3343,9 @@ void Session::SetScbCoreEnabled(bool enabled)
     TLOGI(WmsLogTag::WMS_PIPELINE, "%{public}d", enabled);
     isScbCoreEnabled_ = enabled;
 }
+
+std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
+{
+    return handler_;
+}
 } // namespace OHOS::Rosen
