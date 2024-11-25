@@ -1649,16 +1649,15 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     return sceneSession;
 }
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
-    sptr<WindowSessionProperty> property)
+sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo)
 {
     if (sessionInfo.persistentId_ != 0 && !sessionInfo.isPersistentRecover_) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
-            NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             TLOGD(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
+    
         if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
             TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
                 "abilityName: %{public}s, appIndex: %{public}d",
@@ -1671,16 +1670,24 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
                 sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
             if (isSingleStart) {
-                NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
                 TLOGD(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
                     sessionInfo.persistentId_);
                 return sceneSession;
             }
         }
     }
+    return nullptr;
+}
 
+sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
+    sptr<WindowSessionProperty> property)
+{
     const char* const where = __func__;
     auto task = [this, sessionInfo, property, where] {
+        if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
+            NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
+            return session;
+        }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: appName: [%{public}s %{public}s %{public}s] "
             "appIndex %{public}d, type %{public}u system %{public}u, isPersistentRecover %{public}u",
             where, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
