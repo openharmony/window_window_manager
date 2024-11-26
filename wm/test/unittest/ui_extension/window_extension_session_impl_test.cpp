@@ -2148,6 +2148,20 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | 
     ret = window_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
+
+/**
+ * @tc.name: UpdateThemeConfigurationForAll
+ * @tc.desc: UpdateThemeConfigurationForAll Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateThemeConfigurationForAll, Function | SmallTest | Level3)
+{
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, window_);
+    window_->windowExtensionSessionSet_.insert(window_);
+    window_->UpdateThemeConfigurationForAll(configuration);
+    window_->windowExtensionSessionSet_.erase(window_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
