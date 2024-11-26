@@ -2030,7 +2030,10 @@ HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->onWindowAnimationFlagChange_ = [](bool isNeedDefaultAnimationFlag) {};
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
+    sceneSession->sessionChangeCallback_->onWindowAnimationFlagChange_ = [](
+        bool isNeedDefaultAnimationFlag) {};
     sceneSession->SetWindowAnimationFlag(true);
     ASSERT_EQ(true, sceneSession->needDefaultAnimationFlag_);
 }

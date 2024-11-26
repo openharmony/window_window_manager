@@ -851,13 +851,16 @@ void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimat
     auto task = [weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return;
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->onWindowAnimationFlagChange_ = std::move(callback);
-        session->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
+        if (session->sessionChangeCallback_) {
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_ = std::move(callback);
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
+        }
+        return WSError::WS_OK;
     };
-    PostTask(task, __func__);
+    PostTask(task, "RegisterDefaultAnimationFlagChangeCallback");
 }
 
 void SceneSession::RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback)
@@ -3355,26 +3358,26 @@ void SceneSession::MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled)
 
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
-    auto task = [weakThis = wptr(this), needDefaultAnimationFlag] {
+    auto task = [weakThis = wptr(this), needDefaultAnimationFlag]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->needDefaultAnimationFlag_ = needDefaultAnimationFlag;
-        if (session->onWindowAnimationFlagChange_) {
-            session->onWindowAnimationFlagChange_(needDefaultAnimationFlag);
+        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onWindowAnimationFlagChange_) {
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_(needDefaultAnimationFlag);
         }
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, __func__);
+    return PostSyncTask(task, "UpdateWindowAnimationFlag");
 }
 
 void SceneSession::SetWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     needDefaultAnimationFlag_ = needDefaultAnimationFlag;
-    if (onWindowAnimationFlagChange_) {
-        onWindowAnimationFlagChange_(needDefaultAnimationFlag);
+    if (sessionChangeCallback_ && sessionChangeCallback_->onWindowAnimationFlagChange_) {
+        sessionChangeCallback_->onWindowAnimationFlagChange_(needDefaultAnimationFlag);
     }
     return;
 }
@@ -5741,6 +5744,7 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
+            session->sessionChangeCallback_->onWindowAnimationFlagChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
         }
