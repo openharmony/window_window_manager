@@ -292,7 +292,7 @@ private:
     /**
      * PC Fold Screen
      */
-    bool isFullScreenWaterfallMode_ { false };
+    std::atomic_bool isFullScreenWaterfallMode_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS

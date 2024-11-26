@@ -4472,17 +4472,9 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
 
 WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 {
-    const char* const funcName = __func__;
-    handler_->PostTask([weakThis = wptr(this), isWaterfallMode, funcName]() {
-        auto window = weakThis.promote();
-        if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
-            return;
-        }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s prev: %{public}d, curr: %{public}d",
-            funcName, window->isFullScreenWaterfallMode_, isWaterfallMode);
-        window->isFullScreenWaterfallMode_ = isWaterfallMode;
-    });
+    TLOGI(WmsLogTag::WMS_LAYOUT, "prev: %{public}d, curr: %{public}d",
+        isFullScreenWaterfallMode_.load(), isWaterfallMode);
+    isFullScreenWaterfallMode_.store(isWaterfallMode);
     return WSError::WS_OK;
 }
 } // namespace Rosen
