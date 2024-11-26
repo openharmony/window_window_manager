@@ -1734,6 +1734,23 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificDisplayId01, Function | SmallTe
     globalSearchWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     ASSERT_EQ(globalSearchWindow->property_->GetDisplayId(), globalSearchDisplayId);
 }
+
+/**
+ * @tc.name: SetFullScreenWaterfallMode
+ * @tc.desc: test SetFullScreenWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetFullScreenWaterfallMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFullScreenWaterfallMode");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(true));
+    ASSERT_TRUE(window->isFullScreenWaterfallMode_.load());
+    ASSERT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(false));
+    ASSERT_FALSE(window->isFullScreenWaterfallMode_.load());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
