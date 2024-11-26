@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_TEST_COMMON_MOCK_IREMOTE_OBJECT_MOCKER
 
 #include <iremote_object.h>
+#include <gmock/gmock.h>
 
 namespace OHOS {
 namespace Rosen {
