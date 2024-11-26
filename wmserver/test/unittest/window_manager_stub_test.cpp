@@ -77,14 +77,23 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest02, Function | SmallTest | Level2
     MessageParcel reply;
     MessageOption option;
 
-    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
-
-    data.WriteUint32(1);
-
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_REMOVE_WINDOW);
 
+    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
+    data.WriteUint32(1);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
+
+    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
+    data.WriteBool(false);
+    res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
+
+    data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
+    data.WriteUint32(1);
+    data.WriteBool(false);
+    res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -248,12 +257,12 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest10, Function | SmallTest | Level2
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
-    data.WriteUint32(0);
+    data.WriteUint64(0);
 
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_MINIMIZE_ALL_APP_WINDOWS);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
