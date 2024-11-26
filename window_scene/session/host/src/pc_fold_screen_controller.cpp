@@ -551,6 +551,17 @@ void PcFoldScreenController::ExecuteFullScreenWaterfallModeChangeCallback()
         return;
     }
     fullScreenWaterfallModeChangeCallback_(isFullScreenWaterfallMode_);
+    // notify client
+    auto sceneSession = weakSceneSession_.promote();
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
+        return;
+    }
+    if (sceneSession->sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is nullptr, id: %{public}d", GetPersistentId());
+        return;
+    }
+    sceneSession->sessionStage_->SetFullScreenWaterfallMode(isFullScreenWaterfallMode_);
 }
 
 int32_t PcFoldScreenController::GetPersistentId() const
