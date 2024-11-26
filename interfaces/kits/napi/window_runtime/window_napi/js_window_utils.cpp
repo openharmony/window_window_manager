@@ -622,7 +622,7 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info, bool& statusEnabe
     return true;
 }
 
-void SetSystemBarStatus(sptr<Window>& window, bool statusEnabe, bool naviEnable
+void SetSystemBarStatus(sptr<Window>& window, bool statusEnabe, bool naviEnable,
     std::map<WindowType, SystemBarProperty>& systemBarProperties,
     std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
@@ -641,7 +641,6 @@ void SetSystemBarStatus(sptr<Window>& window, bool statusEnabe, bool naviEnable
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableFlag = true;
-    return true;
 }
 
 bool ParseAndCheckRect(napi_env env, napi_value jsObject,
