@@ -697,6 +697,8 @@ static void NativeDisplayManager_SetDisplayInfo(NativeDisplayManager_DisplayInfo
     displayInfo->refreshRate = info->GetRefreshRate();
     displayInfo->availableWidth = info->GetAvailableWidth();
     displayInfo->availableHeight = info->GetAvailableHeight();
+    displayInfo->physicalWidth = info->GetPhysicalWidth();
+    displayInfo->physicalHeight = info->GetPhysicalHeight();
     displayInfo->densityDPI = info->GetVirtualPixelRatio() * DOT_PER_INCH;
     displayInfo->densityPixels = info->GetVirtualPixelRatio();
     displayInfo->scaledDensity = info->GetVirtualPixelRatio();
