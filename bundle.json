@@ -65,7 +65,6 @@
           "resource_management",
           "resource_schedule_service",
           "imf",
-          "virtual_keyboard_service",
           "frame_aware_sched",
           "memmgr",
           "data_share",
