@@ -623,8 +623,8 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info, bool& statusEnabe
 }
 
 void SetSystemBarStatus(sptr<Window>& window, bool statusEnabe, bool naviEnable
-    std::map<WindowType, SystemBarProperty>& properties,
-    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
