@@ -17,8 +17,10 @@
 #define OHOS_ROSEN_WM_COMMON_H
 
 #include <float.h>
-#include <parcel.h>
+
 #include <map>
+
+#include <parcel.h>
 #include "dm_common.h"
 #include "securec.h"
 

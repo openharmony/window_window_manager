@@ -1545,7 +1545,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
 }
 
 static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
-    wptr<Window> weakToken, int32_t x, int32_t y, MoveConfiguration moveConfiguration)
+    const wptr<Window>& weakToken, int32_t x, int32_t y, MoveConfiguration moveConfiguration)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     execute = [weakToken, errCodePtr, x, y, moveConfiguration] {
@@ -1620,8 +1620,8 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     return result;
 }
 
-static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback &execute,
-    NapiAsyncTask::CompleteCallback &complete, wptr<Window> weakToken,
+static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback& execute,
+    NapiAsyncTask::CompleteCallback& complete, const wptr<Window>& weakToken,
     int32_t x, int32_t y, MoveConfiguration moveConfiguration)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);

@@ -196,14 +196,10 @@ public:
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false, MoveConfiguration moveConfiguration = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
-    void UpdateRectForDrag(WSRect& rect);
     void UpdateSessionState(SessionState state) override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
 
-    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
-    void SetNeedSyncSessionRect(bool needSync);
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
         bool isKeyboardShow, bool isRotating) {}
@@ -497,6 +493,8 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
 
     // WMSPipeline-related: only accessed on SSM thread
+    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
+    void SetNeedSyncSessionRect(bool needSync);
     uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
     uint32_t UpdateUIParam();   // update invisible session, return dirty flags
     void SetPostProcessFocusState(PostProcessFocusState state);
@@ -713,6 +711,13 @@ private:
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
+
+    /**
+     * Window Layout
+     */
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
+    void UpdateRectForDrag(WSRect& rect);
+
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
