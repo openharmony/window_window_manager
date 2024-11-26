@@ -1225,7 +1225,7 @@ struct MoveConfiguration {
         std::string str;
         constexpr int BUFFER_SIZE = 11;
         char buffer[BUFFER_SIZE] = { 0 };
-        if (snprintf_s(buffer, BUFFER_SIZE, BUFFER_SIZE - 1, "[%llu]", displayId) > 0) {
+        if (snprintf_s(buffer, sizeof(bufferr), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
             str.append(buffer);
         }
         return str;
