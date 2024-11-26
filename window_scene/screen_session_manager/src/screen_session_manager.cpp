@@ -325,11 +325,6 @@ void ScreenSessionManager::Init()
         screenEventTracker_.RecordEvent("Dms subscribed to sensor successfully.");
     }
 
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
-        SuperFoldSensorManager::GetInstance().RegisterHallCallback();
-        SetSensorSubscriptionEnabled();
-    }
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
@@ -626,6 +621,13 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
+    }
+
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
+        SuperFoldSensorManager::GetInstance().RegisterHallCallback();
+        SetSensorSubscriptionEnabled();
+        screenEventTracker_.RecordEvent("Dms subscribed to sensor successfully.");
     }
 
     if (foldScreenController_ != nullptr) {
