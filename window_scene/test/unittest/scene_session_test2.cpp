@@ -1793,8 +1793,8 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
     sceneSession->TerminateSession(abilitySessionInfo);
 
     bool needRemoveSession = true;
-    session.sessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
-    session.jsSceneSessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
+    session.sessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
+    session.jsSceneSessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
     sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
 
     sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();

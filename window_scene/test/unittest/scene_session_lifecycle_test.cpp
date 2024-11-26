@@ -1194,9 +1194,9 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | Smal
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
     ASSERT_EQ(res, WSError::WS_OK);
 
-    sceneSession->sessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
+    sceneSession->sessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
     ASSERT_NE(nullptr, sceneSession->sessionExceptionFunc_);
-    sceneSession->jsSceneSessionExceptionFunc_ = std::make_shared<NotifySessionExceptionFunc>();
+    sceneSession->jsSceneSessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
     ASSERT_NE(nullptr, sceneSession->jsSceneSessionExceptionFunc_);
     res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
     ASSERT_EQ(res, WSError::WS_OK);
