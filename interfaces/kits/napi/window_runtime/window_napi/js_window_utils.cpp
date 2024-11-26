@@ -1044,6 +1044,26 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
     return true;
 }
 
+bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "jsObject is null");
+        return false;
+    }
+    napi_value jsConfig = nullptr;
+    napi_get_named_property(env, jsObject, "displayId", &jsConfig);
+    if (GetType(env, jsConfig) != napi_undefined) {
+        int64_t displayId = DISPLAY_ID_INVALID;
+        if (!ConvertFromJsValue(env, jsConfig, displayId)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
+            return false;
+        }
+        moveConfiguration.displayId = static_cast<DisplayId>(displayId);
+        return true;
+    }
+    return true;
+}
+
 napi_value ExtensionWindowAttributeInit(napi_env env)
 {
     if (env == nullptr) {

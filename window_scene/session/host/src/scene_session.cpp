@@ -1357,7 +1357,8 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
 }
 
 /** @note @window.layout */
-void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason)
+void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
+    MoveConfiguration moveConfiguration)
 {
     auto newWinRect = winRect_;
     auto newRequestRect = GetSessionRequestRect();
@@ -1371,7 +1372,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
             SetSessionRect(newWinRect);
         }
         SetSessionRequestRect(newRequestRect);
-        NotifySessionRectChange(newRequestRect, reason);
+        NotifySessionRectChange(newRequestRect, reason, moveConfiguration.displayId);
     } else if (reason == SizeChangeReason::RESIZE) {
         bool needUpdateInputMethod = UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
         if (needUpdateInputMethod) {
@@ -1395,14 +1396,16 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         }
         NotifySessionRectChange(rect, reason);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d newReason:%{public}d rect:%{public}s "
-        "newRequestRect:%{public}s newWinRect:%{public}s", GetPersistentId(), reason,
-        newReason, rect.ToString().c_str(), newRequestRect.ToString().c_str(), newWinRect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d newReason:%{public}d moveConfiguration:%{public}s "
+        "rect:%{public}s newRequestRect:%{public}s newWinRect:%{public}s", GetPersistentId(), reason, newReason,
+        moveConfiguration.ToString().c_str(), rect.ToString().c_str(), newRequestRect.ToString().c_str(),
+        newWinRect.ToString().c_str());
 }
 
 /** @note @window.layout */
 WSError SceneSession::UpdateSessionRect(
-    const WSRect &rect, SizeChangeReason reason, bool isGlobal, bool isFromMoveToGlobal)
+    const WSRect& rect, SizeChangeReason reason, bool isGlobal,
+    bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
 {
     if ((reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE) &&
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
@@ -1433,13 +1436,13 @@ WSError SceneSession::UpdateSessionRect(
         }
     }
     Session::RectCheckProcess();
-    auto task = [weakThis = wptr(this), newRect, reason]() {
+    auto task = [weakThis = wptr(this), newRect, reason, moveConfiguration]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->UpdateSessionRectInner(newRect, reason);
+        session->UpdateSessionRectInner(newRect, reason, moveConfiguration);
         return WSError::WS_OK;
     };
     PostTask(task, "UpdateSessionRect" + GetRectInfo(rect));

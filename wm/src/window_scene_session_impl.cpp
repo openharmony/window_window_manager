@@ -1453,9 +1453,11 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
 }
 
 /** @note @window.layout */
-WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
+WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfiguration moveConfiguration)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d isMoveToGlobal %{public}d "
+        "moveConfiguration %{public}s", property_->GetPersistentId(), x, y, isMoveToGlobal,
+        moveConfiguration.ToString().c_str());
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1489,11 +1491,11 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, isMoveToGlobal);
+    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, isMoveToGlobal, false, moveConfiguration);
     return static_cast<WMError>(ret);
 }
 
-WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
+WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d", property_->GetPersistentId(), x, y);
     if (IsWindowSessionInvalid()) {
@@ -1526,7 +1528,7 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true);
+    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true, moveConfiguration);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetMoveToLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -1543,7 +1545,7 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
+WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y, MoveConfiguration moveConfiguration)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
@@ -1555,7 +1557,7 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y)
             GetWindowId(), GetMode());
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-    auto ret = MoveTo(x, y);
+    auto ret = MoveTo(x, y, false, moveConfiguration);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetMoveToLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
