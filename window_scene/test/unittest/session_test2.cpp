@@ -2052,6 +2052,7 @@ HWTEST_F(WindowSessionTest2, SetSessionExceptionListener, Function | SmallTest |
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);
 }
+
 /**
  * @tc.name: SetRaiseToAppTopForPointDownFunc
  * @tc.desc: SetRaiseToAppTopForPointDownFunc Test

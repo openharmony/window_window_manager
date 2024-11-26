@@ -3909,6 +3909,9 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
         }
         return WSError::WS_OK;
     };
+    PostLifeCycleTask(task, "NotifySessionExceptionInner", LifeCycleTaskType::STOP);
+    return WSError::WS_OK;
+}
 
 WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
 {

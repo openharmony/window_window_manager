@@ -1384,6 +1384,7 @@ void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
     };
     PostTask(task, where);
 }
+
 void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
 {
     std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
@@ -1493,6 +1494,7 @@ void Session::SetTerminateSessionListenerNew(NotifyTerminateSessionFuncNew&& fun
     };
     PostTask(task, where);
 }
+
 WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySessionInfo, TerminateType terminateType)
 {
     if (abilitySessionInfo == nullptr) {
@@ -1652,6 +1654,7 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
     };
     PostTask(task, where);
 }
+
 WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",

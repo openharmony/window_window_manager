@@ -142,7 +142,6 @@ public:
     WSError Hide() override;
     WSError DrawingCompleted() override;
     void ResetSessionConnectState();
-
     WSError PendingSessionToForeground();
     WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);

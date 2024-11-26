@@ -3915,11 +3915,11 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                 return;
             }
             if (listenerController_ == nullptr) {
-                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d is system", where, session->GetPersistentId());
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s listenerController_ is nullptr", where);
                 return;
             }
             if (scnSession->GetSessionInfo().isSystem_) {
-                TLOGW(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, id: %{public}d is system",
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d is system", where,
                     scnSession->GetPersistentId());
                 return;
             }
@@ -3934,7 +3934,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         };
         taskScheduler_->PostVoidSyncTask(task, "sessionException");
     }, false);
-    TLOGD(WmsLogTag::WMS_LIFE, "RegisterSessionExceptionFunc success, id: %{public}d", sceneSession->GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "success, id: %{public}d", sceneSession->GetPersistentId());
 }
 
 void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession)
