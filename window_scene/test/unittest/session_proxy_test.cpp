@@ -806,7 +806,7 @@ HWTEST_F(SessionProxyTest, Show, Function | SmallTest | Level2)
     WSError ret = sProxy->Show(property);
     ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 
-    //property is nullptr
+    // property is nullptr
     ret = sProxy->Show(nullptr);
     ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
     GTEST_LOG_(INFO) << "SessionProxyTest: Show end";
@@ -844,7 +844,7 @@ HWTEST_F(SessionProxyTest, Disconnect, Function | SmallTest | Level2)
     WSError ret = sProxy->Disconnect(isFromClient, identityToken);
     ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
 
-    //isFromClient is false
+    // isFromClient is false
     isFromClient = false;
     ret = sProxy->Disconnect(isFromClient, identityToken);
     ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
