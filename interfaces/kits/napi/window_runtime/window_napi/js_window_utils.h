@@ -305,7 +305,7 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
         std::map<WindowType, SystemBarProperty>& properties,
         std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool GetSystemBarStatus(napi_env env, napi_callback_info info, bool& statusEnabe, bool& naviEnable);
-    void SetSystemBarStatus(sptr<Window>& window, bool statusEnabe, bool naviEnable
+    void SetSystemBarStatus(sptr<Window>& window, bool statusEnabe, bool naviEnable,
         std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags);
     bool ParseAndCheckRect(napi_env env, napi_value jsObject, const Rect& windowRect, Rect& touchableRect);
