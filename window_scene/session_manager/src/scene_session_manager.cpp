@@ -8908,8 +8908,9 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
         auto avoidArea = sceneSession->GetAvoidAreaByType(type);
         if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
             isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "window %{public}d is navigation indicator type, but not on the bottom, "
-                "no need update", persistentId);
+            TLOGNI(WmsLogTag::WMS_IMMS, "window %{public}d  AIbar check false, visible: %{public}d,"
+                "avoidarea: %{public}s, rect: %{public}s", persistentId, isAINavigationBarVisible_,
+                avoidArea.ToString().c_str(), sceneSession->GetSessionRect().ToString().c_str());
             return;
         }
         UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, type);
@@ -8995,8 +8996,7 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "isVisible: %{public}u, "
-        "area{%{public}d,%{public}d,%{public}d,%{public}d}, displayId: %{public}" PRIu64,
-        isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_, displayId);
+        "area: %{public}s, displayId: %{public}" PRIu64, isVisible, barArea.ToString().c_str(), displayId);
     auto task = [this, isVisible, barArea, displayId]() {
         bool isNeedUpdate = true;
         {
@@ -9010,13 +9010,13 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 currAINavigationBarAreaMap_[displayId] = barArea;
             }
             if (isNeedUpdate && !isVisible && !barArea.IsEmpty()) {
-                TLOGNI(WmsLogTag::WMS_IMMS, "NotifyAINavigationBar: barArea should be empty if invisible");
+                TLOGNI(WmsLogTag::WMS_IMMS, "barArea should be empty if invisible");
                 currAINavigationBarAreaMap_[displayId] = WSRect();
             }
         }
         if (isNeedUpdate) {
-            WLOGFI("NotifyAINavigationBar inner: %{public}u, {%{public}d,%{public}d,%{public}d,%{public}d}",
-                isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
+            TLOGNI(WmsLogTag::WMS_IMMS, "inner: %{public}u, bar area: %{public}s",
+                isVisible, barArea.ToString().c_str());
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionAINavigationBarChange(persistentId);
             }
