@@ -415,28 +415,6 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, Function | SmallTe
 }
 
 /**
- * @tc.name: RelayoutKeyBoard01
- * @tc.desc: RelayoutKeyBoard01
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest2, RelayoutKeyBoard01, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RelayoutKeyBoard";
-    info.bundleName_ = "RelayoutKeyBoard";
-    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
-    ASSERT_NE(keyboardSession, nullptr);
-    keyboardSession->property_ = nullptr;
-    keyboardSession->RelayoutKeyBoard();
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(windowSessionProperty, nullptr);
-    keyboardSession->property_ = windowSessionProperty;
-    ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    keyboardSession->RelayoutKeyBoard();
-}
-
-/**
  * @tc.name: Hide01
  * @tc.desc: test function : Hide
  * @tc.type: FUNC

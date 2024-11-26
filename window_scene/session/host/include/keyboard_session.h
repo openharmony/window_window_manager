@@ -56,7 +56,6 @@ private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
     int32_t GetFocusedSessionId();
 
-    WSError SetKeyboardSessionGravity(SessionGravity gravity);
     void SetCallingSessionId(uint32_t callingSessionId) override;
 
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
@@ -67,7 +66,6 @@ private:
     void UpdateKeyboardAvoidArea();
     void UseFocusIdIfCallingSessionIdInvalid();
     void UpdateCallingSessionIdAndPosition(uint32_t callingSessionId);
-    void RelayoutKeyBoard();
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
