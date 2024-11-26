@@ -1471,6 +1471,24 @@ HWTEST_F(WindowImplTest2, NotifyWindowTransition, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Close());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: UpdateThemeConfigurationForAll
+ * @tc.desc: UpdateThemeConfigurationForAll Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest2, UpdateThemeConfigurationForAll, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    sptr<Window>(window)->UpdateThemeConfigurationForAll(configuration);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

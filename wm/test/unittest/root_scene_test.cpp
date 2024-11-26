@@ -298,6 +298,25 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
     auto ret = rootScene.GetAvoidAreaByType(type, avoidArea);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
+
+/**
+ * @tc.name: UpdateThemeConfigurationForAll
+ * @tc.desc: UpdateThemeConfigurationForAll Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateThemeConfigurationForAll, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    auto prevStaticRootScene = RootScene::staticRootScene_;
+    rootScene.UpdateThemeConfigurationForAll(configuration);
+
+    sptr<RootScene> staticRootScene;
+    RootScene::staticRootScene_ = staticRootScene;
+    rootScene.UpdateThemeConfigurationForAll(configuration);
+
+    RootScene::staticRootScene_ = prevStaticRootScene;
+}
 }
 } // namespace Rosen
 } // namespace OHOS
