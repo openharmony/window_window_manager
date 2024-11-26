@@ -4470,5 +4470,20 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
     return WMError::WM_OK;
 }
 
+WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
+{
+    const char* const funcName = __func__;
+    handler_->PostTask([weakThis = wptr(this), isWaterfallMode, funcName]() {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s prev: %{public}d, curr: %{public}d",
+            funcName, window->isFullScreenWaterfallMode_, isWaterfallMode);
+        window->isFullScreenWaterfallMode_ = isWaterfallMode;
+    });
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
