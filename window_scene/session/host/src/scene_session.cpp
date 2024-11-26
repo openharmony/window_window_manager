@@ -213,11 +213,6 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
         return false;
     }
 
-    if (!GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED)) {
-        TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
-        return false;
-    }
-
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
         TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is no more than lockScreenZOrder");
