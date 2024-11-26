@@ -1744,13 +1744,13 @@ void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
 
 WMError WindowSessionImpl::SetAPPWindowLabel(const std::string& label)
 {
+    TLOGI(WmsLogTag::DEFAULT, "Enter");
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFE("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->SetAppWindowTitle(label);
-    WLOGI("Set app window label success, label : %{public}s", label.c_str());
     return WMError::WM_OK;
 }
 
