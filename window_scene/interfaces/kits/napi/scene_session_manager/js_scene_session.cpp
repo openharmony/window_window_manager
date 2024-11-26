@@ -1027,7 +1027,7 @@ void JsSceneSession::ProcessTerminateSessionRegister()
 
 void JsSceneSession::ProcessTerminateSessionRegisterNew()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    TLOGD(WmsLogTag::WMS_LIFE, "begin");
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
@@ -1048,7 +1048,7 @@ void JsSceneSession::ProcessTerminateSessionRegisterNew()
 
 void JsSceneSession::ProcessTerminateSessionRegisterTotal()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    TLOGD(WmsLogTag::WMS_LIFE, "begin");
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
