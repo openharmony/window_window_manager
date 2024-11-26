@@ -1545,10 +1545,10 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
 }
 
 static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTask::CompleteCallback& complete,
-    wptr<Window> weakToken, int32_t x, int32_t y)
+    const wptr<Window>& weakToken, int32_t x, int32_t y, MoveConfiguration moveConfiguration)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    execute = [weakToken, errCodePtr, x, y] {
+    execute = [weakToken, errCodePtr, x, y, moveConfiguration] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -1561,7 +1561,7 @@ static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveToAsync(x, y));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveToAsync(x, y, moveConfiguration));
         TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] move end, err = %{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
@@ -1581,47 +1581,51 @@ static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
 /** @note @window.layout */
 napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    size_t argc = 4; // 4: number of arg
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: minimum param num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    int32_t x = 0;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], x)) {
-        WLOGFE("Failed to convert parameter to x");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    int32_t y = 0;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[1], y)) {
-        WLOGFE("Failed to convert parameter to y");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
-    wptr<Window> weakToken(windowToken_);
+    int32_t x = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t y = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    MoveConfiguration moveConfiguration;
+    size_t lastParamIndex = INDEX_TWO;
+    if (argc > 2 && argv[INDEX_TWO] != nullptr && GetType(env, argv[INDEX_TWO]) == napi_object) { // 2: x/y params num
+        lastParamIndex = INDEX_THREE; // MoveConfiguration is optional param
+        if (!GetMoveConfigurationFromJsValue(env, argv[INDEX_TWO], moveConfiguration)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to moveConfiguration");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+    }
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
-    SetMoveWindowToAsyncTask(execute, complete, weakToken, x, y);
+    SetMoveWindowToAsyncTask(execute, complete, wptr<Window>(windowToken_), x, y, moveConfiguration);
 
-    // 2: params num; 2: index of callback
-    napi_value lastParam = (argc <= 2) ? nullptr :
-        ((argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr);
+    napi_value lastParam = (argc <= lastParamIndex) ? nullptr :
+        ((argv[lastParamIndex] != nullptr && GetType(env, argv[lastParamIndex]) == napi_function) ?
+         argv[lastParamIndex] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnMoveWindowToAsync",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
-static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback &execute,
-    NapiAsyncTask::CompleteCallback &complete, wptr<Window> weakToken, int32_t x, int32_t y)
+static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback& execute,
+    NapiAsyncTask::CompleteCallback& complete, const wptr<Window>& weakToken,
+    int32_t x, int32_t y, MoveConfiguration moveConfiguration)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    execute = [weakToken, errCodePtr, x, y] {
+    execute = [weakToken, errCodePtr, x, y, moveConfiguration] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -1634,7 +1638,7 @@ static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback &execu
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(x, y));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveWindowToGlobal(x, y, moveConfiguration));
         TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] move end, err = %{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
@@ -1655,36 +1659,39 @@ static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback &execu
 /** @note @window.layout */
 napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
 {
-    WmErrorCode errCode = WmErrorCode::WM_OK;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2:minimum param num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    int32_t x = 0;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], x)) {
-        WLOGFE("Failed to convert parameter to x");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    int32_t y = 0;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[1], y)) {
-        WLOGFE("Failed to convert parameter to y");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
-    wptr<Window> weakToken(windowToken_);
+    int32_t x = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t y = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    MoveConfiguration moveConfiguration;
+    size_t lastParamIndex = INDEX_TWO;
+    if (argc > 2 && argv[INDEX_TWO] != nullptr && GetType(env, argv[INDEX_TWO]) == napi_object) { // 2: x/y params num
+        lastParamIndex = INDEX_THREE; // MoveConfiguration is optional param
+        if (!GetMoveConfigurationFromJsValue(env, argv[INDEX_TWO], moveConfiguration)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to moveConfiguration");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+    }
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
-    SetMoveWindowToGlobalAsyncTask(execute, complete, weakToken, x, y);
+    SetMoveWindowToGlobalAsyncTask(execute, complete, wptr<Window>(windowToken_), x, y, moveConfiguration);
  
-    // 2: params num; 2: index of callback
-    napi_value lastParam = (argc <= 2) ? nullptr :
-        ((argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr);
+    napi_value lastParam = (argc <= lastParamIndex) ? nullptr :
+        ((argv[lastParamIndex] != nullptr && GetType(env, argv[lastParamIndex]) == napi_function) ?
+         argv[lastParamIndex] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnMoveWindowToGlobal",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));

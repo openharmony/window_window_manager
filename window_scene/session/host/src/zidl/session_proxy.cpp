@@ -771,10 +771,11 @@ WSError SessionProxy::OnRestoreMainWindow()
 
 /** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
-    bool isGlobal, bool isFromMoveToGlobal)
+    bool isGlobal, bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u] isGlobal %{public}d "
+        "isFromMoveToGlobal %{public}d moveConfiguration %{public}s", rect.posX_, rect.posY_,
+        rect.width_, rect.height_, isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -802,6 +803,11 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
 
     if (!data.WriteBool(isFromMoveToGlobal)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write bool failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint64(static_cast<uint64_t>(moveConfiguration.displayId))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write session displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
