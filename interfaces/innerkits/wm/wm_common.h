@@ -16,14 +16,15 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <float.h>
-
 #include <map>
-#include <vector>
-
-#include <parcel.h>
 #include <sstream>
 #include <string>
+#include <vector>
+
+#include <float.h>
+
+#include <parcel.h>
+
 #include "../dm/dm_common.h"
 #include "securec.h"
 
