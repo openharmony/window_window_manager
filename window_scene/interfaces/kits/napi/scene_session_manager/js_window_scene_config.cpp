@@ -188,4 +188,19 @@ napi_value JsWindowSceneConfig::CreateFreeMultiWindowConfig(napi_env env, const 
         config.freeMultiWindowConfig_.defaultWindowMode_));
     return objValue;
 }
+
+napi_value JsWindowSceneConfig::CreateSystemConfig(napi_env env, const SystemSessionConfig& config)
+{
+    TLOGI(WmsLogTag::DEFAULT, "in");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "maxMidSceneNum", CreateJsValue(env,
+        config.maxMidSceneNum_));
+    return objValue;
+}
 } // namespace OHOS::Rosen
