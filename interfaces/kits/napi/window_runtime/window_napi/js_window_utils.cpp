@@ -590,9 +590,7 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
     return objValue;
 }
 
-bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-                        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
-                        napi_env env, napi_callback_info info, sptr<Window>& window)
+bool GetSystemBarStatus(napi_env env, napi_callback_info info, bool& statusEnabe, bool& naviEnable)
 {
     napi_value nativeArray = nullptr;
     uint32_t size = 0;
@@ -607,18 +605,6 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
         }
         napi_get_array_length(env, nativeArray, &size);
     }
-    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-    statusProperty.enable_ = false;
-    navProperty.enable_ = false;
-    navIndicatorProperty.enable_ = false;
-    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
-    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
-    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarPropertyFlag();
     for (uint32_t i = 0; i < size; i++) {
         std::string name;
         napi_value getElementValue = nullptr;
@@ -628,12 +614,30 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
             return false;
         }
         if (name.compare("status") == 0) {
-            systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
-            systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = true;
+            statusEnabe = true;
         } else if (name.compare("navigation") == 0) {
-            systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
+            naviEnable = true;
         }
     }
+    return true;
+}
+
+void SetSystemBarStatus(sptr<Window>& window, bool statusEnabe, bool naviEnable
+    std::map<WindowType, SystemBarProperty>& properties,
+    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+{
+    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    statusProperty.enable_ = statusEnabe;
+    navProperty.enable_ = naviEnable;
+    navIndicatorProperty.enable_ = statusEnabe;
+    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
+    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarPropertyFlag();
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableFlag = true;
