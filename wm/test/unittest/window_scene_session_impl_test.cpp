@@ -1276,9 +1276,11 @@ HWTEST_F(WindowSceneSessionImplTest, NotifySpecificWindowSessionProperty, Functi
 HWTEST_F(WindowSceneSessionImplTest, LimitCameraFloatWindowMininumSize, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     option->SetWindowName("LimitCameraFloatWindowMininumSize");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
     uint32_t width = 33;
     uint32_t height = 31;
     float vpr = 0.0f;
