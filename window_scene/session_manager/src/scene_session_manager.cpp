@@ -1455,15 +1455,8 @@ uint32_t SceneSessionManager::GetLockScreenZorder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
-        if (session && (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD)) {
-            static const std::regex pattern(R"(^SCBScreenLock[0-9]+$)");
-            auto& bundleName = session->GetSessionInfo().bundleName_;
-            if (!std::regex_match(bundleName, pattern)) {
-                TLOGD(WmsLogTag::WMS_UIEXT, " bundleName: %{public}s", bundleName.c_str());
-                continue;
-            }
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d, bundleName: %{public}s", persistentId,
-                bundleName.c_str());
+        if (session && session->IsScreenLockWindow()) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
             return session->GetZOrder();
         }
     }
@@ -1482,6 +1475,11 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         pid = sceneSession->GetCallingPid();
+
+        if (!sceneSession->GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED)) {
+            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            return WMError::WM_OK;
+        }
 
         // 1. check window whether can show on main window
         if (!sceneSession->IsShowOnLockScreen(GetLockScreenZorder())) {
