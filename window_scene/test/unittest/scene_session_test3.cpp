@@ -129,7 +129,8 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(property);
     WindowLimits limits;
     limits.maxHeight_ = 10;
-    limits.minWidth_ = 0;
+    limits.minWidth_ = 1;
+    limits.minHeight_ = 1;
     property->SetWindowLimits(limits);
     auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
