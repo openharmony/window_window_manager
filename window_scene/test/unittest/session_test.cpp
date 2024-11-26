@@ -1171,8 +1171,7 @@ HWTEST_F(WindowSessionTest, SetTerminateSessionListener, Function | SmallTest | 
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    NotifyTerminateSessionFunc func = nullptr;
-    session_->SetTerminateSessionListener(func);
+    session_->SetTerminateSessionListener(nullptr);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
@@ -1186,8 +1185,7 @@ HWTEST_F(WindowSessionTest, SetTerminateSessionListenerTotal, Function | SmallTe
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    NotifyTerminateSessionFuncTotal func = nullptr;
-    session_->SetTerminateSessionListenerTotal(func);
+    session_->SetTerminateSessionListenerTotal(nullptr);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
@@ -1230,8 +1228,7 @@ HWTEST_F(WindowSessionTest, SetPendingSessionToForegroundListener, Function | Sm
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    NotifyPendingSessionToForegroundFunc func = nullptr;
-    session_->SetPendingSessionToForegroundListener(func);
+    session_->SetPendingSessionToForegroundListener(nullptr);
 
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
