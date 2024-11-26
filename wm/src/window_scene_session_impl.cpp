@@ -4470,5 +4470,12 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
     return WMError::WM_OK;
 }
 
+WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "prev: %{public}d, curr: %{public}d",
+        isFullScreenWaterfallMode_.load(), isWaterfallMode);
+    isFullScreenWaterfallMode_.store(isWaterfallMode);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
