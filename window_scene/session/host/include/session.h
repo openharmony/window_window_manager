@@ -519,6 +519,11 @@ public:
      */
     std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
 
+    /**
+     * Screen Lock
+     */
+    bool IsScreenLockWindow() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -801,6 +806,11 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+
+    /**
+     * Screen Lock
+     */
+    bool isScreenLockWindow_ { false };
 };
 } // namespace OHOS::Rosen
 

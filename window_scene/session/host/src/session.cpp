@@ -15,6 +15,8 @@
 
 #include "session/host/include/session.h"
 
+#include <regex>
+
 #include "ability_info.h"
 #include "ability_start_setting.h"
 #include "input_manager.h"
@@ -99,6 +101,12 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
         TLOGI(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
         SetFocusedOnShow(focusedOnShow);
+    }
+
+    static const std::regex pattern(R"(^SCBScreenLock[0-9]+$)");
+    if (std::regex_match(info.bundleName_, pattern)) {
+        TLOGD(WmsLogTag::DEFAULT, "bundleName: %{public}s", info.bundleName_.c_str());
+        isScreenLockWindow_ = true;
     }
 }
 
@@ -1324,6 +1332,11 @@ void Session::SetClientDragEnable(bool dragEnable)
 std::optional<bool> Session::GetClientDragEnable() const
 {
     return clientDragEnable_;
+}
+
+bool Session::IsScreenLockWindow() const
+{
+    return isScreenLockWindow_;
 }
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
