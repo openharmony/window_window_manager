@@ -1058,7 +1058,7 @@ bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConf
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
             return false;
         }
-        moveConfiguration.displayId = displayId;
+        moveConfiguration.displayId = static_cast<DisplayId>(displayId);
         return true;
     }
     return true;
