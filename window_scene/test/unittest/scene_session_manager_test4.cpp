@@ -315,17 +315,58 @@ HWTEST_F(SceneSessionManagerTest4, GetWindowStatus, Function | SmallTest | Level
     ASSERT_NE(property, nullptr);
     auto result = ssm_->GetWindowStatus(mode, sessionState, nullptr);
     EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_UNDEFINED);
+}
 
+/**
+ * @tc.name: GetWindowStatus02
+ * @tc.desc: GetWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetWindowStatus02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    SessionState sessionState = SessionState::STATE_FOREGROUND;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    auto result = ssm_->GetWindowStatus(mode, sessionState, nullptr);
     property->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
     result = ssm_->GetWindowStatus(mode, sessionState, property);
     EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_MAXIMIZE);
+}
 
+/**
+ * @tc.name: GetWindowStatus03
+ * @tc.desc: GetWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetWindowStatus03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    SessionState sessionState = SessionState::STATE_FOREGROUND;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    auto result = ssm_->GetWindowStatus(mode, sessionState, nullptr);
     property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
     result = ssm_->GetWindowStatus(mode, sessionState, property);
     EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_FLOATING);
+}
 
+/**
+ * @tc.name: GetWindowStatus04
+ * @tc.desc: GetWindowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetWindowStatus04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    SessionState sessionState = SessionState::STATE_FOREGROUND;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
     mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-    result = ssm_->GetWindowStatus(mode, sessionState, property);
+    auto result = ssm_->GetWindowStatus(mode, sessionState, property);
     EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_SPLITSCREEN);
 }
 
@@ -385,7 +426,18 @@ HWTEST_F(SceneSessionManagerTest4, IsVectorSame, Function | SmallTest | Level3)
     lastInfo.push_back(num);
     EXPECT_EQ(false, ssm_->IsVectorSame(lastInfo, currentInfo));
     lastInfo.clear();
+}
 
+/**
+ * @tc.name: IsVectorSame01
+ * @tc.desc: IsVectorSame
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, IsVectorSame01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<VisibleWindowNumInfo> lastInfo;
+    std::vector<VisibleWindowNumInfo> currentInfo;
     lastInfo.reserve(2);
     VisibleWindowNumInfo oneNum;
     oneNum.displayId = 0;
@@ -393,14 +445,38 @@ HWTEST_F(SceneSessionManagerTest4, IsVectorSame, Function | SmallTest | Level3)
     lastInfo.push_back(oneNum);
     currentInfo.push_back(oneNum);
     EXPECT_EQ(true, ssm_->IsVectorSame(lastInfo, currentInfo));
+}
 
+/**
+ * @tc.name: IsVectorSame03
+ * @tc.desc: IsVectorSame
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, IsVectorSame03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<VisibleWindowNumInfo> lastInfo;
+    std::vector<VisibleWindowNumInfo> currentInfo;
+    lastInfo.clear();
     currentInfo.clear();
     VisibleWindowNumInfo twoNum;
     twoNum.displayId = 0;
     twoNum.visibleWindowNum = 2;
     currentInfo.push_back(twoNum);
     EXPECT_EQ(false, ssm_->IsVectorSame(lastInfo, currentInfo));
+}
 
+/**
+ * @tc.name: IsVectorSame04
+ * @tc.desc: IsVectorSame
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, IsVectorSame04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<VisibleWindowNumInfo> lastInfo;
+    std::vector<VisibleWindowNumInfo> currentInfo;
+    VisibleWindowNumInfo twoNum;
     currentInfo.clear();
     twoNum.displayId = 1;
     twoNum.visibleWindowNum = 3;
