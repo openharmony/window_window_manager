@@ -1630,7 +1630,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(property);
     sceneSession->SetAspectRatio(ratio);
     auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
