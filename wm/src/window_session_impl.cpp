@@ -58,12 +58,13 @@ constexpr int32_t FORCE_SPLIT_MODE = 5;
 
 /*************  ✨ Codeium Command ⭐  *************/
 /**
- * @brief Converts a BackupAndRestoreType to an Ace::ContentInfoType.
+ * @brief Get the corresponding content info type for the given backup and restore type.
  *
- * @param type A BackupAndRestoreType.
- * @return An Ace::ContentInfoType.
+ * @param[in] type The type of backup and restore.
+ *
+ * @return The corresponding content info type.
  */
-/******  45c1229f-28da-42e7-97f0-3d1540daf649  *******/
+/******  ec1b49f1-a936-45ab-8f38-14ea61d5e974  *******/
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
     auto contentInfoType = Ace::ContentInfoType::NONE;
@@ -3381,11 +3382,9 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
 
 WMError WindowSessionImpl::RegisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
 {
-    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u",
-        GetWindowName().c_str(), GetPersistentId());
+    TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::recursive_mutex> lockListener(windowDisplayIdChangeListenerMutex_);
-        return RegisterListener(windowDisplayIdChangeListeners_[GetPersistentId()], listener);
-    }
+    return RegisterListener(windowDisplayIdChangeListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::UnregisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
