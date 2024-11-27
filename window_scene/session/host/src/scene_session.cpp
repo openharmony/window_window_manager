@@ -578,7 +578,7 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
     sessionChangeCallback_ = sessionChangeCallback;
 }
 
-void SceneSession::SetUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback)
+void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback)
 {
     auto task = [weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
@@ -587,6 +587,9 @@ void SceneSession::SetUpdateAppUseControlCallback(UpdateAppUseControlFunc&& call
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
+        for (const auto& [type, isNeedControl] : session->appUseControlMap_) {
+            session->onUpdateAppUseControlFunc_(type, isNeedControl);
+        }
     };
     PostTask(task, __func__);
 }
@@ -596,9 +599,10 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, bool isNeedCon
     auto task = [weakThis = wptr(this), type, isNeedControl] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::DEFAULT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
+        session->appUseControlMap_[type] = isNeedControl;
         if (session->onUpdateAppUseControlFunc_) {
             session->onUpdateAppUseControlFunc_(type, isNeedControl);
         }

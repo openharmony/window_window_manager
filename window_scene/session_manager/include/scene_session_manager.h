@@ -112,8 +112,8 @@ using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& 
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
-using NotifySCBManagerAppUseControlListFunc =
-    std::function<void(ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)>;
+using NotifyAppUseControlListFunc =
+    std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -438,6 +438,11 @@ public:
      * Window Lifecycle
      */
     void RemoveAppInfo(const std::string& bundleName);
+    void GetMainSessionByBundleNameAndAppIndex(
+        const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
+    WSError NotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
+    void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
 
 protected:
     SceneSessionManager();
@@ -689,7 +694,6 @@ private:
      * Multi Window
      */
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
-    NotifySCBManagerAppUseControlListFunc notifySCBManagerAppUseControlListFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
     RotateAnimationConfig rotateAnimationConfig_;
@@ -892,6 +896,11 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
+
+    /**
+     * Window Lifecycle
+     */
+    NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
 };
 } // namespace OHOS::Rosen
 
