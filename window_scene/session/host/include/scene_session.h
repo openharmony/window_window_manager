@@ -309,6 +309,7 @@ public:
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
+    void MarkAvoidAreaAsDirty();
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
