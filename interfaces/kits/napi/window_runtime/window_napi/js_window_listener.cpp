@@ -467,6 +467,10 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 void JsWindowListener::OnWindowDisplayIdChangedCallback(DisplayId displayId)
 {
     TLOGI(WmsLogTag::DEFAULT, "CALLED");
+    if (displayId > std::numeric_limits<int64_t>::max()) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid displayId");
+        return;
+    }
     int64_t displayIdValue = static_cast<int64_t>(displayId);
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
         [self = weakRef_, displayIdValue, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
