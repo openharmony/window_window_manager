@@ -1176,7 +1176,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
-            "isplayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
+            "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
             "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
             rotation, deviceRotation, transformHint, virtualPixelRatio_);
     } else {
