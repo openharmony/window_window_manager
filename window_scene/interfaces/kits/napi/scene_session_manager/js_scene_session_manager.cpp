@@ -128,6 +128,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsSceneSessionManager::RegisterCallback);
     BindNativeFunction(env, exportObj, "getWindowSceneConfig", moduleName,
         JsSceneSessionManager::GetWindowSceneConfig);
+    BindNativeFunction(env, exportObj, "getSystemConfig", moduleName,
+        JsSceneSessionManager::GetSystemConfig);
     BindNativeFunction(env, exportObj, "updateRotateAnimationConfig", moduleName,
         JsSceneSessionManager::UpdateRotateAnimationConfig);
     BindNativeFunction(env, exportObj, "processBackEvent", moduleName, JsSceneSessionManager::ProcessBackEvent);
@@ -804,6 +806,13 @@ napi_value JsSceneSessionManager::GetWindowSceneConfig(napi_env env, napi_callba
     return (me != nullptr) ? me->OnGetWindowSceneConfig(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::GetSystemConfig(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetSystemConfig(env, info) : nullptr;
+}
+
 napi_value JsSceneSessionManager::UpdateRotateAnimationConfig(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
@@ -1339,7 +1348,7 @@ static napi_value CreateWindowModes(napi_env env,
     }
     return arrayValue;
 }
- 
+
 static napi_value CreateWindowSize(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo)
 {
     napi_value objValue = nullptr;
@@ -1356,7 +1365,7 @@ static napi_value CreateWindowSize(napi_env env, const AppExecFwk::AbilityInfo& 
     napi_set_named_property(env, objValue, "minWindowHeight", CreateJsValue(env, abilityInfo.minWindowHeight));
     return objValue;
 }
- 
+
 static napi_value CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo)
 {
     napi_value objValue = nullptr;
@@ -1385,7 +1394,7 @@ static napi_value CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityI
         CreateJsValue(env, abilityInfo.preferMultiWindowOrientation));
     return objValue;
 }
- 
+
 static napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAbilityInfo)
 {
     napi_value objValue = nullptr;
@@ -1399,7 +1408,7 @@ static napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAb
     napi_set_named_property(env, objValue, "codePath", CreateJsValue(env, scbAbilityInfo.codePath_));
     return objValue;
 }
- 
+
 static napi_value CreateAbilityInfos(napi_env env, const std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
     napi_value arrayValue = nullptr;
@@ -2220,6 +2229,19 @@ napi_value JsSceneSessionManager::OnGetWindowSceneConfig(napi_env env, napi_call
             static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
     }
     return jsWindowSceneConfigObj;
+}
+
+napi_value JsSceneSessionManager::OnGetSystemConfig(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    const SystemSessionConfig& systemConfig = SceneSessionManager::GetInstance().GetSystemSessionConfig();
+    napi_value jsSystemConfigObj = JsWindowSceneConfig::CreateSystemConfig(env, systemConfig);
+    if (jsSystemConfigObj == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "jsSystemConfigObj is nullptr");
+        napi_throw(env, CreateJsError(env,
+            static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY), "System is abnormal"));
+    }
+    return jsSystemConfigObj;
 }
 
 napi_value JsSceneSessionManager::OnUpdateRotateAnimationConfig(napi_env env, napi_callback_info info)
@@ -3431,7 +3453,7 @@ napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_cal
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
- 
+
     std::vector<int32_t> windowIds;
     if (!ConvertInt32ArrayFromJs(env, argv[0], windowIds)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to convert windowIds");

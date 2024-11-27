@@ -66,6 +66,7 @@ public:
     static napi_value ChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetWindowSceneConfig(napi_env env, napi_callback_info info);
+    static napi_value GetSystemConfig(napi_env env, napi_callback_info info);
     static napi_value UpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
     static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
@@ -127,7 +128,7 @@ public:
     static napi_value GetInstanceCount(napi_env env, napi_callback_info info);
     static napi_value GetLastInstanceKey(napi_env env, napi_callback_info info);
     static napi_value RefreshAppInfo(napi_env env, napi_callback_info info);
-    
+
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
@@ -143,6 +144,7 @@ private:
     napi_value OnStartUIAbilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSceneConfig(napi_env env, napi_callback_info info);
+    napi_value OnGetSystemConfig(napi_env env, napi_callback_info info);
     napi_value OnUpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnProcessBackEvent(napi_env env, napi_callback_info info);
     napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
