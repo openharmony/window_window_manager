@@ -2717,7 +2717,7 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
         if (session->IsDirtyDragWindow()) {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
             funcName, session->GetPersistentId(), session->winRect_.ToString().c_str());
-                session->ResetDragDirtyFlags();
+            git session->ResetDragDirtyFlags();
         }
     });
 }
