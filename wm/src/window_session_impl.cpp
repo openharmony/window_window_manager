@@ -56,15 +56,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 
-/*************  ✨ Codeium Command ⭐  *************/
-/**
- * @brief Get the corresponding content info type for the given backup and restore type.
- *
- * @param[in] type The type of backup and restore.
- *
- * @return The corresponding content info type.
- */
-/******  ec1b49f1-a936-45ab-8f38-14ea61d5e974  *******/
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
     auto contentInfoType = Ace::ContentInfoType::NONE;
@@ -3394,7 +3385,7 @@ WMError WindowSessionImpl::UnregisterWindowDisplayIdChangeListener(const IWindow
     return UnregisterListener(windowDisplayIdChangeListeners_[GetPersistentId()], listener);
 }
 
-WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowDisplayIdChangeListenerSptr& listener)
+WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
 {
     WLOGFD("in");
     std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
