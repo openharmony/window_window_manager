@@ -407,12 +407,15 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
- * @class IWindowDisplayIdChangedListener
+ * @class IWindowDisplayIdChangeListener
  *
  * @brief Listener to observe one window displayId changed.
  */
-class IWindowDisplayIdChangedListener : virtual public RefBase {
+class IWindowDisplayIdChangeListener : virtual public RefBase {
 public:
+    /**
+     * @brief Notify caller when window displayId changed.
+     */
     virtual void OnWindowDisplayIdChangedCallback(uint64_t displayId) {};
 };
 using IWindowDisplayIdChangedListenerSptr = sptr<IWindowDisplayIdChangedListener>;
