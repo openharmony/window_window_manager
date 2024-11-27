@@ -56,10 +56,9 @@ sptr<SceneSession> KeyboardSession::GetKeyboardPanelSession() const
 SessionGravity KeyboardSession::GetKeyboardGravity() const
 {
     SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
-    uint32_t percent = 0;
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty) {
-        sessionProperty->GetSessionGravity(gravity, percent);
+        gravity = static_cast<SessionGravity>(sessionProperty->GetKeyboardLayoutParams().gravity_);
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}d", gravity);
     return gravity;
@@ -217,16 +216,11 @@ void KeyboardSession::OnCallingSessionUpdated()
     TLOGI(WmsLogTag::WMS_KEYBOARD, "callSession Rect: %{public}s", callingSessionRect.ToString().c_str());
 }
 
-WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity, uint32_t percent)
+WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardId: %{public}d, gravity: %{public}d, percent: %{public}d",
-        GetPersistentId(), gravity, percent);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardId: %{public}d, gravity: %{public}d", GetPersistentId(), gravity);
     if (keyboardGravityChangeFunc_) {
         keyboardGravityChangeFunc_(gravity);
-    }
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        sessionProperty->SetKeyboardSessionGravity(gravity, percent);
     }
     RelayoutKeyBoard();
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
@@ -308,7 +302,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
-        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_), 0);
+        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_));
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
         }
@@ -546,10 +540,7 @@ void KeyboardSession::RelayoutKeyBoard()
     }
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
-    SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
-    uint32_t percent = 0;
-    sessionProperty->GetSessionGravity(gravity, percent);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Gravity: %{public}d, percent: %{public}d", gravity, percent);
+    SessionGravity gravity = GetKeyboardGravity();
     if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
         return;
     }
@@ -561,10 +552,6 @@ void KeyboardSession::RelayoutKeyBoard()
     if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) {
         requestRect.width_ = screenWidth;
         requestRect.posX_ = 0;
-        if (percent != 0) {
-            // 100: for calc percent.
-            requestRect.height_ = static_cast<uint32_t>(screenHeight) * percent / 100u;
-        }
     }
     requestRect.posY_ = static_cast<int32_t>(screenHeight - requestRect.height_);
     sessionProperty->SetRequestRect(requestRect);

@@ -132,7 +132,6 @@ public:
     WMError RequestFocusByClient(bool isFocused) const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override;
-    WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
 
