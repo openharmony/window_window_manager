@@ -4322,8 +4322,8 @@ void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Conf
         TLOGD(WmsLogTag::WMS_IMMS, "window: %{public}s", GetWindowName().c_str());
         uiContent_->UpdateThemeConfiguration(configuration);
     }
-    auto numSubWindow = subWindowMap_.count(GetWindowId());
-    TLOGD(WmsLogTag::WMS_IMMS, "subWindow num: %{public}lu", numSubWindow);
+    uint32_t numSubWindow = subWindowMap_.count(GetWindowId());
+    TLOGD(WmsLogTag::WMS_IMMS, "subWindow num: %{public}u", numSubWindow);
     if (numSubWindow == 0) {
         return;
     }
