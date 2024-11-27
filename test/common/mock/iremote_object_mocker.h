@@ -132,12 +132,8 @@ public:
 
 class RemoteObjectMocker : public IRemoteObject {
 public:
-    RemoteObjectMocker() : IRemoteObject{u"RemoteObjectMocker"}
-    {
-    }
-    ~RemoteObjectMocker()
-    {
-    }
+    RemoteObjectMocker() : IRemoteObject{u"RemoteObjectMocker"} {}
+    ~RemoteObjectMocker() {}
 
     MOCK_METHOD(int32_t, GetObjectRefCount, (), (override));
     MOCK_METHOD(int, SendRequest, (uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option),

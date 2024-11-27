@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "session_proxy.h"
 #include "iremote_object_mocker.h"
-#include <gtest/gtest.h>
-#include "ws_common.h"
 #include "session_ipc_interface_code.h"
+#include "session_proxy.h"
+#include "ws_common.h"
+#include <gtest/gtest.h>
 
 using namespace testing;
 using namespace testing::ext;
