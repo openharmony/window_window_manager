@@ -56,6 +56,14 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 
+/*************  ✨ Codeium Command ⭐  *************/
+/**
+ * @brief Get content info type for Ace from BackupAndRestoreType.
+ *
+ * @param[in] type BackupAndRestoreType
+ * @return Ace::ContentInfoType
+ */
+/******  f6258427-8eb0-45d8-a272-3c639a0bab53  *******/
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
     auto contentInfoType = Ace::ContentInfoType::NONE;
@@ -3373,14 +3381,14 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
 
 WMError WindowSessionImpl::RegisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
 {
-    TLOGD(WmsLogTag::WMS_DEFAULT, "window: name=%{public}s, id=%{public}u",
+    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::recursive_mutex> lockListener(windowDisplayIdChangeListenerMutex_);
     const int32_t limitSize = 1;
     if (windowDisplayIdChangeListeners_[GetPersistentId()].size() < limitSize) {
         return RegisterListener(windowDisplayIdChangeListeners_[GetPersistentId()], listener);
     } else {
-        TLOGE(WmsLogTag::WMS_DEFAULT, "Duplicate registration, window: name=%{public}s, id=%{public}u",
+        TLOGE(WmsLogTag::DEFAULT, "Duplicate registration, window: name=%{public}s, id=%{public}u",
             GetWindowName().c_str(), GetPersistentId())
         return WMError::WM_OK;
     }
