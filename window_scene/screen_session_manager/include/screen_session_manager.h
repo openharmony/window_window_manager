@@ -548,6 +548,7 @@ private:
     void ExitCoordination(const std::string& reason);
     void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
     void SetExtendPixelRatio(const float& dpi);
+    void CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
 
 private:
