@@ -3750,9 +3750,6 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
             }
             break;
         }
-        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
-            TLOGI(WmsLogTag::DEFAULT, "permission temporarily allowed! action: %{public}u", action);
-            return false;
         default:
             break;
     }
