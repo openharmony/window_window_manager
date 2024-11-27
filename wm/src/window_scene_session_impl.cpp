@@ -2213,7 +2213,8 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool enable = isValidWindow && windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
     bool isCompatibleModeInPc = property_->GetCompatibleModeInPc();
-    if (isCompatibleModeInPc && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+    if (isCompatibleModeInPc && GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN && !isLayoutFullScreen) {
         enable = false;
     }
     if ((isSubWindow || isDialogWindow) && property_->GetIsPcAppInPad() && property_->IsDecorEnable()) {
@@ -2271,10 +2272,6 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     if (!windowSystemConfig_.IsPcWindow() && !IsFreeMultiWindowMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WMError::WM_OK;
-    }
-    if (property_->GetCompatibleModeInPc()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");
-        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     titleHoverShowEnabled_ = true;
     dockHoverShowEnabled_ = true;
