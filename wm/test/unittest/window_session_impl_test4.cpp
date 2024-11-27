@@ -2291,7 +2291,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowDisplayIdChange01, Function | Small
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessioninfo);
     ASSERT_NE(session, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    displayId = 12;
+    DisplayId displayId = 12;
     ret = window->NotifyWindowDisplayIdChange(displayId);
     ASSERT_EQ(WSError::WS_OK, ret);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
