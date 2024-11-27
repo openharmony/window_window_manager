@@ -210,6 +210,37 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus02, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: PostProcessFocus03
+ * @tc.desc: test function : PostProcessFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, PostProcessFocus03, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "PostProcessFocus03";
+    sessionInfo.abilityName_ = "PostProcessFocus03";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->persistentId_ = 1;
+
+    sceneSession->SetFocusedOnShow(false);
+    PostProcessFocusState state = {true, true, true, FocusChangeReason::FOREGROUND};
+    sceneSession->SetPostProcessFocusState(state);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    ssm_->PostProcessFocus();
+    EXPECT_EQ(sceneSession->IsFocusedOnShow(), false);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->isVisible_ = true;
+    state = {true, true, true, FocusChangeReason::FOREGROUND};
+    sceneSession->SetPostProcessFocusState(state);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    ssm_->PostProcessFocus();
+    EXPECT_EQ(sceneSession->IsFocusedOnShow(), true);
+}
+
+/**
  * @tc.name: PostProcessProperty
  * @tc.desc: test function : PostProcessProperty
  * @tc.type: FUNC
