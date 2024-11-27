@@ -1999,16 +1999,14 @@ HWTEST_F(WindowSessionTest2, UpdateSizeChangeReason, Function | SmallTest | Leve
 HWTEST_F(WindowSessionTest2, SetPendingSessionActivationEventListener, Function | SmallTest | Level2)
 {
     int resultValue = 0;
-    NotifyPendingSessionActivationFunc callback = [&resultValue](const SessionInfo& info) {
+    session_->SetPendingSessionActivationEventListener([&resultValue](const SessionInfo& info) {
         resultValue = 1;
-    };
-
-    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
-    session_->SetPendingSessionActivationEventListener(callback);
-    NotifyTerminateSessionFunc callback1 = [&resultValue](const SessionInfo& info) {
+    });
+    usleep(WAIT_SYNC_IN_NS);
+    session_->SetTerminateSessionListener([&resultValue](const SessionInfo& info) {
         resultValue = 2;
-    };
-    session_->SetTerminateSessionListener(callback1);
+    });
+    usleep(WAIT_SYNC_IN_NS);
     LifeCycleTaskType taskType = LifeCycleTaskType{0};
     session_->RemoveLifeCycleTask(taskType);
     ASSERT_EQ(resultValue, 0);
@@ -2050,10 +2048,8 @@ HWTEST_F(WindowSessionTest2, SetSessionIcon, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, SetSessionExceptionListener, Function | SmallTest | Level2)
 {
     session_->SetSessionExceptionListener(nullptr, true);
-
-    NotifySessionExceptionFunc func = [](const SessionInfo& info, bool needRemoveSession, bool startFail) {};
-    session_->SetSessionExceptionListener(func, true);
-
+    session_->SetSessionExceptionListener([](const SessionInfo& info, bool removeSession, bool startFail) {}, true);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);
 }
 
@@ -2178,11 +2174,13 @@ HWTEST_F(WindowSessionTest2, SetOffset, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, SetBackPressedListenser, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    WLOGFI("SetBackPressedListenser begin!");
-
-    session_->SetBackPressedListenser(session_->backPressedFunc_);
-
-    WLOGFI("SetBackPressedListenser end!");
+    int32_t result = 0;
+    session_->SetBackPressedListenser([&result](const bool needMoveToBackground) {
+        result = 1;
+    });
+    usleep(WAIT_SYNC_IN_NS);
+    session_->backPressedFunc_(true);
+    ASSERT_EQ(result, 1);
 }
 
 /**
