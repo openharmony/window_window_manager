@@ -1154,8 +1154,6 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "config[%{public}u,%{public}u,%{public}u,%{public}f]",
-        rotation, deviceRotation, transformHint, virtualPixelRatio_);
     auto config = FillViewportConfig(rect, density, orientation, transformHint);
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
@@ -1177,13 +1175,15 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
-            "%{public}u,%{public}u] displayOrientation:%{public}d",
-            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,%{public}u,"
+            "%{public}u] displayOrientation:%{public}d, config[%{public}u,%{public}u,%{public}u,%{public}f]",
+            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation,
+            rotation, deviceRotation, transformHint, virtualPixelRatio_);
     } else {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
-            "%{public}u,%{public}u] displayOrientation:%{public}d",
-            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,%{public}u,"
+            "%{public}u] displayOrientation:%{public}d, config[%{public}u,%{public}u,%{public}u,%{public}f]",
+            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation,
+            rotation, deviceRotation, transformHint, virtualPixelRatio_);
     }
 }
 
