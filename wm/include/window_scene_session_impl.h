@@ -227,6 +227,7 @@ private:
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
+    void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,

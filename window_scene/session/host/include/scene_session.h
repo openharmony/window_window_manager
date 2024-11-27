@@ -652,6 +652,7 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
+
     /**
      * Window Layout
      */
@@ -711,13 +712,6 @@ private:
     bool IsFullScreenMovable();
     bool IsMovable();
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
-
-    /**
-     * Window Layout
-     */
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
-    void UpdateRectForDrag(WSRect& rect);
-
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTurnScreenOn(const sptr<WindowSessionProperty>& property,
@@ -819,7 +813,7 @@ private:
     void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason);
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
     WSError UpdateRectForDrag(const WSRect& rect);
 
     /**
