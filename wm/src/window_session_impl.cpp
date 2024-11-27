@@ -3444,6 +3444,10 @@ WSError WindowSessionImpl::NotifyWindowDisplayIdChange(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, displayId=%{public}" PRIu64,
         GetWindowName().c_str(), GetPersistentId(), displayId);
+    if (displayId > std::numeric_limits<int64_t>::max()) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid displayId");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
     std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
     auto windowDisplayIdChangeListeners = GetListeners<IWindowDisplayIdChangeListener>();
     for (auto& listener : windowDisplayIdChangeListeners) {
@@ -3458,10 +3462,6 @@ WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
 {
     TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, isVisible:%{public}d",
         GetWindowName().c_str(), GetPersistentId(), isVisible);
-    if (displayId > std::numeric_limits<int64_t>::max()) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid displayId");
-        return WSError::WS_ERROR_INVALID_OPERATION;
-    }
     std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
     auto windowVisibilityListeners = GetListeners<IWindowVisibilityChangedListener>();
     for (auto& listener : windowVisibilityListeners) {
