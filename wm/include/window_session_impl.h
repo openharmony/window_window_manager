@@ -186,6 +186,8 @@ public:
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
+    WMError RegisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener) override;
+    WMError UnregisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
@@ -229,6 +231,7 @@ public:
     WSError NotifyTouchOutside() override;
     WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WSError NotifyWindowVisibility(bool isVisible) override;
+    WSError NotifyWindowDisplayIdChange(DisplayId displayId);
     WSError NotifyNoInteractionTimeout(const IWindowNoInteractionListenerSptr& listener);
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
@@ -457,6 +460,8 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IWindowDisplayIdChangeListener, std::vector<IWindowDisplayIdChangeListenerSptr>> GetListeners();
+    template<typename T>
     EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowTitleButtonRectChangedListener,
@@ -520,6 +525,7 @@ private:
     static std::recursive_mutex screenshotListenerMutex_;
     static std::recursive_mutex touchOutsideListenerMutex_;
     static std::recursive_mutex windowVisibilityChangeListenerMutex_;
+    static std::recursive_mutex windowDisplayIdChangeListenerMutex_;
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
     static std::recursive_mutex windowTitleButtonRectChangeListenerMutex_;
@@ -538,6 +544,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
+    static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowDisplayIdChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>

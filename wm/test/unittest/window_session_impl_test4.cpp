@@ -2211,6 +2211,88 @@ HWTEST_F(WindowSessionImplTest4, FlushLayoutSize, Function | SmallTest | Level2)
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: FlushLayoutSize end";
 }
+
+/**
+ * @tc.name: RegisterWindowDisplayIdChangeListener01
+ * @tc.desc: RegisterWindowDisplayIdChangeListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, RegisterWindowDisplayIdChangeListener01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("RegisterWindowDisplayIdChangeListener01");
+
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<WindowDisplayIdChangeListener> listener = nullptr;
+    WMError ret = window->RegisterWindowDisplayIdChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<WindowDisplayIdChangeListener>::MakeSptr();
+    vector<sptr<IWindowDisplayIdChangeListener>> holder;
+    window->windowDisplayIdChangeListeners_[window->property_->GetPersistentId()] = holder;
+    res = window->RegisterWindowDisplayIdChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
+    holder = window->windowDisplayIdChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_NE(existsListener, holder.end());
+
+    res = window->RegisterWindowDisplayIdChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterWindowDisplayIdChangeListener01
+ * @tc.desc: UnregisterWindowDisplayIdChangeListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UnregisterWindowDisplayIdChangeListener01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterWindowDisplayIdChangeListener01");
+
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    sptr<WindowDisplayIdChangeListener> listener = nullptr;
+    WMError ret = window->UnregisterWindowDisplayIdChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<WindowDisplayIdChangeListener>::MakeSptr();
+    vector<sptr<IWindowDisplayIdChangeListener>> holder;
+    window->windowDisplayIdChangeListeners_[window->property_->GetPersistentId()] = holder;
+    res = window->UnregisterWindowDisplayIdChangeListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
+    holder = window->windowDisplayIdChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_NE(existsListener, holder.end());
+}
+
+/**
+ * @tc.name: NotifyWindowDisplayIdChange01
+ * @tc.desc: NotifyWindowDisplayIdChange01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyWindowDisplayIdChange01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyWindowDisplayIdChange01");
+
+    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    
+    SessionInfo sessioninfo = {"CreateTestBundle", "CreateTestModule",
+                                "CreateTestAbility"};
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessioninfo);
+    ASSERT_NE(session, nullptr);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    DisplayId displayId = 12;
+    WSMError ret = window->NotifyWindowDisplayIdChange(displayId);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
