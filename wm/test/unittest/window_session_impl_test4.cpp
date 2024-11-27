@@ -2225,21 +2225,21 @@ HWTEST_F(WindowSessionImplTest4, RegisterWindowDisplayIdChangeListener01, Functi
 
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    sptr<WindowDisplayIdChangeListener> listener = nullptr;
+    sptr<IWindowDisplayIdChangeListener> listener = nullptr;
     WMError ret = window->RegisterWindowDisplayIdChangeListener(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
-    listener = sptr<WindowDisplayIdChangeListener>::MakeSptr();
+    listener = sptr<IWindowDisplayIdChangeListener>::MakeSptr();
     vector<sptr<IWindowDisplayIdChangeListener>> holder;
     window->windowDisplayIdChangeListeners_[window->property_->GetPersistentId()] = holder;
-    res = window->RegisterWindowDisplayIdChangeListener(listener);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ret = window->RegisterWindowDisplayIdChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
     holder = window->windowDisplayIdChangeListeners_[window->property_->GetPersistentId()];
     auto existsListener = std::find(holder.begin(), holder.end(), listener);
     ASSERT_NE(existsListener, holder.end());
 
-    res = window->RegisterWindowDisplayIdChangeListener(listener);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ret = window->RegisterWindowDisplayIdChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -2255,17 +2255,17 @@ HWTEST_F(WindowSessionImplTest4, UnregisterWindowDisplayIdChangeListener01, Func
 
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    sptr<WindowDisplayIdChangeListener> listener = nullptr;
+    sptr<IWindowDisplayIdChangeListener> listener = nullptr;
     WMError ret = window->UnregisterWindowDisplayIdChangeListener(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
-    listener = sptr<WindowDisplayIdChangeListener>::MakeSptr();
+    listener = sptr<IWindowDisplayIdChangeListener>::MakeSptr();
     vector<sptr<IWindowDisplayIdChangeListener>> holder;
     window->windowDisplayIdChangeListeners_[window->property_->GetPersistentId()] = holder;
     window->UnregisterWindowDisplayIdChangeListener(listener);
 
-    res = window->UnregisterWindowDisplayIdChangeListener(listener);
-    ASSERT_EQ(res, WMError::WM_OK);
+    ret = window->UnregisterWindowDisplayIdChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
 
     holder = window->windowDisplayIdChangeListeners_[window->property_->GetPersistentId()];
     auto existsListener = std::find(holder.begin(), holder.end(), listener);
@@ -2291,12 +2291,12 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowDisplayIdChange01, Function | Small
     sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessioninfo);
     ASSERT_NE(session, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    DisplayId displayId = std::numeric_limits<int64_t>::max() + 1;
-    WSMError ret = window->NotifyWindowDisplayIdChange(displayId);
+    uint64_t displayId = std::numeric_limits<int64_t>::max() + 1;
+    Auto ret = window->NotifyWindowDisplayIdChange(displayId);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, ret);
-    DisplayId displayId = 12;
-    WSMError ret = window->NotifyWindowDisplayIdChange(displayId);
-    ASSERT_EQ(WSError::WM_OK, ret);
+    displayId = 12;
+    ret = window->NotifyWindowDisplayIdChange(displayId);
+    ASSERT_EQ(WSError::WS_OK, ret);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 }
