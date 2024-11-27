@@ -56,6 +56,14 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 
+/*************  ✨ Codeium Command ⭐  *************/
+/**
+ * @brief Converts a BackupAndRestoreType to an Ace::ContentInfoType.
+ *
+ * @param type A BackupAndRestoreType.
+ * @return An Ace::ContentInfoType.
+ */
+/******  45c1229f-28da-42e7-97f0-3d1540daf649  *******/
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
     auto contentInfoType = Ace::ContentInfoType::NONE;
