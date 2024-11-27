@@ -547,6 +547,11 @@ public:
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
 
+    /**
+     * Screen Lock
+     */
+    bool IsScreenLockWindow() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -842,6 +847,11 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+
+    /**
+     * Screen Lock
+     */
+    bool isScreenLockWindow_ { false };
 };
 } // namespace OHOS::Rosen
 

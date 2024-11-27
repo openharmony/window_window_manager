@@ -697,6 +697,8 @@ static void NativeDisplayManager_SetDisplayInfo(NativeDisplayManager_DisplayInfo
     displayInfo->refreshRate = info->GetRefreshRate();
     displayInfo->availableWidth = info->GetAvailableWidth();
     displayInfo->availableHeight = info->GetAvailableHeight();
+    displayInfo->physicalWidth = info->GetPhysicalWidth();
+    displayInfo->physicalHeight = info->GetPhysicalHeight();
     displayInfo->densityDPI = info->GetVirtualPixelRatio() * DOT_PER_INCH;
     displayInfo->densityPixels = info->GetVirtualPixelRatio();
     displayInfo->scaledDensity = info->GetVirtualPixelRatio();
@@ -896,7 +898,7 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreatePrimaryDisplay(
     }
     sptr<Display> display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
     if (display == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[DMNDK] get primary display id[%{public}" PRIu64"] null.", display->GetId());
+        TLOGE(WmsLogTag::DMS, "[DMNDK] get primary display is null.");
         return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
     }
     TLOGI(WmsLogTag::DMS, "[DMNDK] get primary display id[%{public}" PRIu64"].", display->GetId());

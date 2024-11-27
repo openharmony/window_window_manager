@@ -233,49 +233,18 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, Function | SmallTest
     std::string bundleName = "OpenKeyboardSyncTransaction";
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
 
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    bool isKeyboardShow = true;
+    bool isRotating = false;
+
     // isKeyBoardSyncTransactionOpen_ is false
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
     keyboardSession->OpenKeyboardSyncTransaction();
 
     // isKeyBoardSyncTransactionOpen_ is true
-    keyboardSession->OpenKeyboardSyncTransaction();
-}
-
-/**
- * @tc.name: CloseKeyboardSyncTransaction1
- * @tc.desc: CloseKeyboardSyncTransaction1
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction1, Function | SmallTest | Level1)
-{
-    std::string abilityName = "CloseKeyboardSyncTransaction1";
-    std::string bundleName = "CloseKeyboardSyncTransaction1";
-    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
-
-    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
-    bool isKeyboardShow = true;
-    bool isRotating = false;
-
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
-}
-
-/**
- * @tc.name: CloseKeyboardSyncTransaction2
- * @tc.desc: CloseKeyboardSyncTransaction2
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction2, Function | SmallTest | Level1)
-{
-    std::string abilityName = "CloseKeyboardSyncTransaction2";
-    std::string bundleName = "CloseKeyboardSyncTransaction2";
-    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
-
-    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
-    bool isKeyboardShow = true;
-    bool isRotating = false;
-
-    // isKeyBoardSyncTransactionOpen_ is true
     keyboardSession->OpenKeyboardSyncTransaction();
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
 }
 
 /**

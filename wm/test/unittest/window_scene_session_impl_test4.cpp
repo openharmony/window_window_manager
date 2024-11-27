@@ -777,8 +777,17 @@ HWTEST_F(WindowSceneSessionImplTest4, GetSystemBarPropertyByType, Function | Sma
     option->SetWindowName("GetSystemBarPropertyByType");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty prop;
+    prop.settingFlag_ = SystemBarSettingFlag::COLOR_SETTING;
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, windowSceneSessionImpl->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, prop));
+    auto prop2 = windowSceneSessionImpl->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    ASSERT_EQ(prop2, prop);
 }
 
 /**
@@ -1724,6 +1733,23 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificDisplayId01, Function | SmallTe
     ASSERT_EQ(floatWindow->property_->GetDisplayId(), displayId);
     globalSearchWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     ASSERT_EQ(globalSearchWindow->property_->GetDisplayId(), globalSearchDisplayId);
+}
+
+/**
+ * @tc.name: SetFullScreenWaterfallMode
+ * @tc.desc: test SetFullScreenWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetFullScreenWaterfallMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetFullScreenWaterfallMode");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(true));
+    ASSERT_TRUE(window->isFullScreenWaterfallMode_.load());
+    ASSERT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(false));
+    ASSERT_FALSE(window->isFullScreenWaterfallMode_.load());
 }
 
 /**

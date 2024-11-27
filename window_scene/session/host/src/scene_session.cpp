@@ -213,11 +213,6 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
         return false;
     }
 
-    if (!GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED)) {
-        TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
-        return false;
-    }
-
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
         TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is no more than lockScreenZOrder");
@@ -3120,14 +3115,15 @@ void SceneSession::UpdateNativeVisibility(bool visible)
             return;
         }
         int32_t persistentId = session->GetPersistentId();
-        WLOGFI("[WMSSCB] name: %{public}s, id: %{public}u, visible: %{public}u",
+        TLOGNI(WmsLogTag::WMS_SCB, "name: %{public}s, id: %{public}u, visible: %{public}u",
             session->sessionInfo_.bundleName_.c_str(), persistentId, visible);
-        if (session->visibilityChangedDetectFunc_) {
-            session->visibilityChangedDetectFunc_(session->GetCallingPid(), session->isVisible_, visible);
-        }
+        bool oldVisibleState = session->isVisible_;
         session->isVisible_ = visible;
+        if (session->visibilityChangedDetectFunc_) {
+            session->visibilityChangedDetectFunc_(session->GetCallingPid(), oldVisibleState, visible);
+        }
         if (session->specificCallback_ == nullptr) {
-            WLOGFW("specific callback is null.");
+            TLOGNW(WmsLogTag::WMS_SCB, "specific callback is null.");
             return;
         }
 
@@ -5838,7 +5834,7 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session or onSetWindowRectAutoSaveFunc is null");
-            return ;
+            return;
         }
         session->onSetWindowRectAutoSaveFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where,
