@@ -4141,10 +4141,9 @@ WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    auto session = weakThis.promote();
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
-        TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, raiseenabled: %{public}d", session->GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, raiseenabled: %{public}d", GetPersistentId(),
             property->GetRaiseEnabled());
         sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
     }
