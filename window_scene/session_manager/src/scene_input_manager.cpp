@@ -187,23 +187,20 @@ void SceneInputManager::Init()
 void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)
 {
     std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.empty()) {
         TLOGE(WmsLogTag::WMS_EVENT, "screensProperties is empty");
         return;
     }
-    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
-    for (auto& iter: screensProperties) {
-        auto screenId = iter.first;
-        auto& screenProperty = iter.second;
-        auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    for (auto& [screenId, screenProperty] : screensProperties) {
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
         auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
         auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
         auto transform = Matrix3f::IDENTITY;
         Vector2f scale(screenProperty.GetScaleX(), screenProperty.GetScaleY());
         transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
-            screenProperty.GetPivotY() * screenHeight);
-        transform = transform.Inverse();
+            screenProperty.GetPivotY() * screenHeight).Inverse();
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
