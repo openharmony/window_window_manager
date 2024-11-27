@@ -418,7 +418,7 @@ public:
      */
     virtual void OnWindowDisplayIdChangedCallback(uint64_t displayId) {};
 };
-using IWindowDisplayIdChangenvListenerSptr = sptr<IWindowDisplayIdChangeListener>;
+using IWindowDisplayIdChangeListenerSptr = sptr<IWindowDisplayIdChangeListener>;
 
 /**
  * @class IWindowNoInteractionListenerSptr
