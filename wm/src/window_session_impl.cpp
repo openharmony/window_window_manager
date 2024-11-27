@@ -3442,7 +3442,7 @@ EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionLi
 
 WSError WindowSessionImpl::NotifyWindowDisplayIdChange(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, displayId=%{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, displayId=%{public}u",
         GetWindowName().c_str(), GetPersistentId(), displayId);
     std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
     auto windowDisplayIdChangeListeners = GetListeners<IWindowDisplayIdChangeListener>();
