@@ -2052,12 +2052,12 @@ public:
     }
 
     /**
-     * @brief Unregister window visibility change listener.
+     * @brief Unregister window displayId change listener.
      *
-     * @param listener IWindowVisibilityChangedListener.
+     * @param listener IWindowDisplayIdChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
+    virtual WMError UnregisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
