@@ -418,7 +418,7 @@ public:
      */
     virtual void OnWindowDisplayIdChangedCallback(uint64_t displayId) {};
 };
-using IWindowDisplayIdChangedListenerSptr = sptr<IWindowDisplayIdChangedListener>;
+using IWindowDisplayIdChangenvListenerSptr = sptr<IWindowDisplayIdChangeListener>;
 
 /**
  * @class IWindowNoInteractionListenerSptr
@@ -2057,7 +2057,7 @@ public:
      * @param listener IWindowVisibilityChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener)
+    virtual WMError UnregisterWindowVisibilityChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
