@@ -2247,6 +2247,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
     if (foldScreenController_ != nullptr) {
         CallRsSetScreenPowerStatusSyncForFold(status);
+        CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
         TryToRecoverFoldDisplayMode(status);
     } else {
         for (auto screenId : screenIds) {
@@ -2264,6 +2265,17 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 
     return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
+}
+
+void ScreenSessionManager::CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds,
+    ScreenPowerStatus status)
+{
+    for (auto screenId : screenIds) {
+        auto session = GetScreenSession(screenId);
+        if (session && session->GetScreenProperty().GetScreenType() == ScreenType::REAL && !session->isInternal_) {
+            CallRsSetScreenPowerStatusSync(screenId, status);
+        }
+    }
 }
 
 void ScreenSessionManager::SetScreenPowerForFold(ScreenPowerStatus status)
