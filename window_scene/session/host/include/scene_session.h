@@ -372,6 +372,12 @@ public:
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
+    /*
+     * Window Lifecycle
+     */
+    void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback);
+    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    
     void ClearSpecificSessionCbMap();
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
@@ -408,9 +414,6 @@ public:
     static uint32_t GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
-    void SetUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
-    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
-
     int32_t GetCustomDecorHeight() override
     {
         return customDecorHeight_;
@@ -535,12 +538,9 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
-
-    /*
-     * app control
-     */
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
-    
+    std::unordered_map<ControlAppType, bool> appUseControlMap_;
+
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();
