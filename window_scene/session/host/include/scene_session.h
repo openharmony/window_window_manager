@@ -539,7 +539,7 @@ protected:
      * app control
      */
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
-    
+
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();
@@ -732,6 +732,11 @@ private:
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
+
+    /**
+     * Window property
+     */
+    std::map<ControlAppType, bool> appUseControlMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
