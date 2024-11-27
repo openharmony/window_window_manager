@@ -1452,6 +1452,22 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
 }
 
 /** @note @window.layout */
+void WindowSceneSessionImpl::CheckMoveConfiguration(MoveConfiguration& moveConfiguration)
+{
+    std::vector<DisplayId> displayIds = SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
+    DisplayId targetDisplayId = DISPLAY_ID_INVALID;
+    for (DisplayId displayId : displayIds) {
+        if (moveConfiguration.displayId == displayId) {
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d find displayId moveConfiguration %{public}s",
+                property_->GetPersistentId(), moveConfiguration.ToString().c_str());
+            targetDisplayId = displayId;
+            break;
+        }
+    }
+    moveConfiguration.displayId = targetDisplayId;
+}
+
+/** @note @window.layout */
 WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfiguration moveConfiguration)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d MoveTo %{public}d %{public}d isMoveToGlobal %{public}d "
@@ -1486,6 +1502,8 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
+
+    CheckMoveConfiguration(moveConfiguration);
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
@@ -1523,6 +1541,8 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
+
+    CheckMoveConfiguration(moveConfiguration);
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();

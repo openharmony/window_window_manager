@@ -523,13 +523,6 @@ public:
     void RegisterBindDialogTargetListener(const sptr<SceneSession>& session, NotifyBindDialogSessionFunc&& func);
     void UnregisterSpecificSessionCreateListener(int32_t persistentId);
 
-    /*
-     * Specific Window
-     */
-    void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
-    void RegisterBindDialogTargetListener(const sptr<SceneSession>& session, NotifyBindDialogSessionFunc&& func);
-    void UnregisterSpecificSessionCreateListener(int32_t persistentId);
-
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();

@@ -310,7 +310,6 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
     DisplayModeChangeReason reason)
 {
-    RSInterfaces::GetInstance().SetScreenSwitching(true);
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
@@ -330,7 +329,6 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
     DisplayModeChangeReason reason)
 {
-    RSInterfaces::GetInstance().SetScreenSwitching(true);
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);

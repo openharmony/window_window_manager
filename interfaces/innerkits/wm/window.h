@@ -956,20 +956,6 @@ public:
      *
      * @param x
      * @param y
-     * @param move global flag
-     * @param the optional move configuration
-     * @return WMError
-     */
-    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false, MoveConfiguration moveConfiguration = {})
-    {
-        return WMError::WM_OK;
-    }
-
-    /**
-     * @brief move the window to (x, y)
-     *
-     * @param x
-     * @param y
      * @param isMoveToGlobal Indicates move global flag
      * @param moveConfiguration Indicates the optional move configuration
      * @return WMError
