@@ -99,6 +99,7 @@ std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionI
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
+std::map<int32_t, std::vector<IWindowDisplayIdChangeListenerSptr>> WindowSessionImpl::windowDisplayIdChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
@@ -115,6 +116,7 @@ std::recursive_mutex WindowSessionImpl::occupiedAreaChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::screenshotListenerMutex_;
 std::recursive_mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::windowDisplayIdChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
@@ -2562,6 +2564,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
     }
     {
+        std::lock_guard<std::recursive_mutex> lockListener(windowDisplayIdChangeListenerMutex_);
+        ClearUselessListeners(windowDisplayIdChangeListeners_, persistentId);
+    }
+    {
         std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
         ClearUselessListeners(windowNoInteractionListeners_, persistentId);
     }
@@ -3365,7 +3371,30 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
     return ret;
 }
 
-WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
+WMError WindowSessionImpl::RegisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
+{
+    TLOGD(WmsLogTag::WMS_DEFAULT, "window: name=%{public}s, id=%{public}u",
+        GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::recursive_mutex> lockListener(windowDisplayIdChangeListenerMutex_);
+    const int32_t limitSize = 1;
+    if (windowDisplayIdChangeListeners_[GetPersistentId()].size() < limitSize) {
+        return RegisterListener(windowDisplayIdChangeListeners_[GetPersistentId()], listener);
+    } else {
+        TLOGE(WmsLogTag::WMS_DEFAULT, "Duplicate registration, window: name=%{public}s, id=%{public}u",
+            GetWindowName().c_str(), GetPersistentId())
+        return WMError::WM_OK;
+    }
+}
+
+WMError WindowSessionImpl::UnregisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
+{
+    TLOGD(WmsLogTag::WMS_DEFAULT, "window: name=%{public}s, id=%{public}u",
+        GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::recursive_mutex> lockListener(windowDisplayIdChangeListenerMutex_);
+    return UnregisterListener(windowDisplayIdChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowDisplayIdChangeListenerSptr& listener)
 {
     WLOGFD("in");
     std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
@@ -3400,6 +3429,17 @@ EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityL
 }
 
 template<typename T>
+EnableIfSame<T, IWindowDisplayIdChangeListener,
+    std::vector<IWindowDisplayIdChangeListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    std::vector<IWindowDisplayIdChangeListenerSptr> windowDisplayIdChangeListeners;
+    for (auto& listener : windowDisplayIdChangeListeners_[GetPersistentId()]) {
+        windowDisplayIdChangeListeners.push_back(listener);
+    }
+    return windowDisplayIdChangeListeners;
+}
+
+template<typename T>
 EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::GetListeners()
 {
     std::vector<IWindowNoInteractionListenerSptr> noInteractionListeners;
@@ -3407,6 +3447,20 @@ EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionLi
         noInteractionListeners.push_back(listener);
     }
     return noInteractionListeners;
+}
+
+WSError WindowSessionImpl::NotifyWindowDisplayIdChange(DisplayId displayId)
+{
+    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, displayId=%{public}d",
+        GetWindowName().c_str(), GetPersistentId(), displayId);
+    std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
+    auto windowDisplayIdChangeListeners = GetListeners<IWindowDisplayIdChangeListener>();
+    for (auto& listener : windowDisplayIdChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowDisplayIdChangedCallback(displayId);
+        }
+    }
+    return WSError::WS_OK;
 }
 
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
