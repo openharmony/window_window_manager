@@ -2957,7 +2957,7 @@ WSRect Session::GetSessionRequestRect() const
 void Session::SetClientRect(const WSRect& rect)
 {
     clientRect_ = rect;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
         GetPersistentId(), rect.ToString().c_str());
 }
 

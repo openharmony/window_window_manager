@@ -1177,12 +1177,12 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
-            "%{public}u,%{public}u] displayOrientation:%{public}d",
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,%{public}u"
+            "%{public}u] displayOrientation:%{public}d, config[%{public}u,%{public}u,%{public}u,%{public}f]",
             GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
     } else {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
-            "%{public}u,%{public}u] displayOrientation:%{public}d",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,%{public}u"
+            "%{public}u] displayOrientation:%{public}d, config[%{public}u,%{public}u,%{public}u,%{public}f]",
             GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
     }
 }
