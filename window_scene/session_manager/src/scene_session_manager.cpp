@@ -7484,7 +7484,9 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
     i = j = 0;
     for (; i < lastVisibleData_.size() && j < currVisibleData.size();) {
         if (lastVisibleData_[i].first < currVisibleData[j].first) {
-            visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+            if (lastVisibleData_[i].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+                visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+            }
             i++;
         } else if (lastVisibleData_[i].first > currVisibleData[j].first) {
             if (currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
@@ -7500,7 +7502,9 @@ std::vector<std::pair<uint64_t, WindowVisibilityState>> SceneSessionManager::Get
         }
     }
     for (; i < lastVisibleData_.size(); ++i) {
-        visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+        if (lastVisibleData_[i].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+            visibilityChangeInfo.emplace_back(lastVisibleData_[i].first, WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+        }
     }
     for (; j < currVisibleData.size(); ++j) {
         if (currVisibleData[j].second != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
