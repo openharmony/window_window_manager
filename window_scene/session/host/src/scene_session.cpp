@@ -5875,4 +5875,9 @@ bool SceneSession::IsSystemKeyboard() const
     }
     return sessionProperty->IsSystemKeyboard();
 }
+
+void SceneSession::MarkAvoidAreaAsDirty()
+{
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+}
 } // namespace OHOS::Rosen
