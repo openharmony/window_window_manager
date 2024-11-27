@@ -73,6 +73,7 @@ group("unittest") {
     ":ws_session_manager_service_recover_proxy_test",
     ":ws_session_manager_test",
     ":ws_session_permission_test",
+    ":ws_session_proxy_immersive_test",
     ":ws_session_proxy_lifecycle_test",
     ":ws_session_proxy_mock_test",
     ":ws_session_proxy_test",
@@ -1129,6 +1130,25 @@ ohos_unittest("ws_session_proxy_mock_test") {
     "../mock/mock_message_parcel.cpp",
     "session_proxy_mock_test.cpp",
   ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/session:screen_session",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "c_utils:utils",
+  ]
+}
+
+ohos_unittest("ws_session_proxy_immersive_test") {
+  module_out_path = module_out_path
+
+  include_dirs =
+      [ "${window_base_path}/window_scene/session/host/include/zidl" ]
+  sources = [ "session_proxy_immersive_test.cpp" ]
 
   deps = [
     ":ws_unittest_common",
