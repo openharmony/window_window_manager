@@ -501,6 +501,12 @@ HWTEST_F(SessionProxyTest, GetGlobalScaledRect, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    res = sProxy->GetGlobalScaledRect(rect);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
     res = sProxy->GetGlobalScaledRect(rect);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetGlobalScaledRect end";
