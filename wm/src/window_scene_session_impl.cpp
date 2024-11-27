@@ -4480,8 +4480,8 @@ void WindowSceneSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppE
         TLOGD(WmsLogTag::WMS_IMMS, "scene window: %{public}s", GetWindowName().c_str());
         uiContent->UpdateThemeConfiguration(configuration);
     }
-    auto numSubSession = subWindowSessionMap_.count(GetPersistentId());
-    TLOGD(WmsLogTag::WMS_IMMS, "scene subSession num: %{public}lu", numSubSession);
+    uint32_t numSubSession = subWindowSessionMap_.count(GetPersistentId());
+    TLOGD(WmsLogTag::WMS_IMMS, "scene subSession num: %{public}u", numSubSession);
     if (numSubSession == 0) {
         return;
     }
