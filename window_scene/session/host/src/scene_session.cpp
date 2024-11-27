@@ -1362,11 +1362,6 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
 /** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "raise to app top for public permission temporarily allowed!");
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "raise to app top for system permission already allowed!");
-    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -4146,12 +4141,6 @@ WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property raiseEnabled for public permission temporarily allowed!");
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "Update property raiseEnabled for system permission already allowed!");
-    }
-
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
