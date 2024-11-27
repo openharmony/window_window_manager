@@ -4108,7 +4108,7 @@ WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
     property_->SetDisplayId(displayId);
     NotifyDisplayInfoChange();
     if (lastDisplayId != displayId) {
-        NotifyDisplayIdChange(displayId);
+        NotifyWindowDisplayIdChange(displayId);
     }
     return WSError::WS_OK;
 }

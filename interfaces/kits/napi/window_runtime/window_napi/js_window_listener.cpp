@@ -482,7 +482,7 @@ void JsWindowListener::OnWindowDisplayIdChangedCallback(DisplayId displayId)
 
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnWindowVisibilityChangedCallback", env_,
+    NapiAsyncTask::Schedule("JsWindowListener::OnWindowDisplayIdChangedCallback", env_,
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
