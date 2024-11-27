@@ -3902,40 +3902,39 @@ static bool IsValidDigitString(const std::string& windowIdStr)
 void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFE("session is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    NotifySessionExceptionFunc sessionExceptionFunc = [this](
+    const char* const where = __func__;
+    sceneSession->SetSessionExceptionListener([this, where](
         const SessionInfo& info, bool needRemoveSession = false, bool startFail = false) {
-        auto task = [this, info]() {
+        auto task = [this, info, where] {
             auto scnSession = GetSceneSession(info.persistentId_);
             if (scnSession == nullptr) {
-                TLOGW(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, Not found session, id: %{public}d",
-                    info.persistentId_);
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s Not found session, id:%{public}d", where, info.persistentId_);
                 return;
             }
             if (listenerController_ == nullptr) {
-                TLOGW(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, listenerController_ is nullptr");
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s listenerController_ is nullptr", where);
                 return;
             }
             if (scnSession->GetSessionInfo().isSystem_) {
-                TLOGW(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, id: %{public}d is system",
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d is system", where,
                     scnSession->GetPersistentId());
                 return;
             }
-            TLOGI(WmsLogTag::WMS_LIFE, "NotifySessionExceptionFunc, errorCode: %{public}d, id: %{public}d",
-                info.errorCode, info.persistentId_);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s errorCode: %{public}d, id: %{public}d",
+                where, info.errorCode, info.persistentId_);
             if (info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT) ||
                 info.errorCode == static_cast<int32_t>(AAFwk::ErrorLifecycleState::ABILITY_STATE_FOREGROUND_TIMEOUT)) {
-                TLOGD(WmsLogTag::WMS_LIFE, "NotifySessionClosed when ability load timeout "
+                TLOGND(WmsLogTag::WMS_LIFE, "NotifySessionClosed when ability load timeout "
                     "or foreground timeout, id: %{public}d", info.persistentId_);
                 listenerController_->NotifySessionClosed(info.persistentId_);
             }
         };
         taskScheduler_->PostVoidSyncTask(task, "sessionException");
-    };
-    sceneSession->SetSessionExceptionListener(sessionExceptionFunc, false);
-    TLOGD(WmsLogTag::WMS_LIFE, "RegisterSessionExceptionFunc success, id: %{public}d", sceneSession->GetPersistentId());
+    }, false);
+    TLOGD(WmsLogTag::WMS_LIFE, "success, id: %{public}d", sceneSession->GetPersistentId());
 }
 
 void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession)
@@ -6038,8 +6037,7 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label)
 {
-    WLOGFI("Enter label: %{public}s", label.c_str());
-
+    TLOGI(WmsLogTag::WMS_LIFE, "Enter");
     auto task = [this, &token, &label]() {
         auto sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {
