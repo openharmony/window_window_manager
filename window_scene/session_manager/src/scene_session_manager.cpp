@@ -196,6 +196,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.ohos.sceneboard", "PoweroffAbility", "phone_sceneboard"),
         std::make_tuple("com.ohos.sceneboard", "com.ohos.sceneboard.MetaBallsAbility", "metaBallsTurbo"),
         std::make_tuple("com.huawei.hmos.motiongesture", "IntentUIExtensionAbility", "entry"),
+        std::make_tuple("com.ohos.useriam.authwidget", "userauthuiextensionability", "entry"),
     };
 
     auto it = std::find_if(whitelist.begin(), whitelist.end(), [&element](const auto& item) {
@@ -952,7 +953,7 @@ void SceneSessionManager::ConfigKeyboardAnimation(const WindowSceneConfig::Confi
 void SceneSessionManager::ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationConfig& animationIn,
     KeyboardSceneAnimationConfig& animationOut)
 {
-    if (!(systemConfig_.animationIn_.curveType_.empty() && systemConfig_.animationOut_.curveType_.empty())) {
+    if (!systemConfig_.animationIn_.curveType_.empty() && !systemConfig_.animationOut_.curveType_.empty()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "product config, curveIn:[%{public}s, %{public}u], "
             "curveOut:[%{public}s, %{public}u]", systemConfig_.animationIn_.curveType_.c_str(),
             systemConfig_.animationIn_.duration_, systemConfig_.animationOut_.curveType_.c_str(),
@@ -968,28 +969,34 @@ void SceneSessionManager::ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationC
     constexpr float CTRLX2 = 342.0f;
     constexpr float CTRLY2 = 37.0f;
     constexpr uint32_t DURATION = 150;
-    std::vector<float> in = { IN_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
-    std::vector<float> out = { OUT_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
+    
+    if (systemConfig_.animationIn_.curveType_.empty()) {
+        std::vector<float> in = { IN_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
+        // update system config for client
+        systemConfig_.animationIn_ = KeyboardAnimationCurve(CURVETYPE, in, DURATION);
+        // update app config for server
+        animationIn.curveType_ = CURVETYPE;
+        animationIn.ctrlX1_ = in[0]; // 0: ctrl x1 index
+        animationIn.ctrlY1_ = in[1]; // 1: ctrl y1 index
+        animationIn.ctrlX2_ = in[2]; // 2: ctrl x2 index
+        animationIn.ctrlY2_ = in[3]; // 3: ctrl y2 index
+        animationIn.duration_ = DURATION;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "config default animationIn");
+    }
 
-    // update system config for client
-    systemConfig_.animationIn_ = KeyboardAnimationCurve(CURVETYPE, in, DURATION);
-    systemConfig_.animationOut_ = KeyboardAnimationCurve(CURVETYPE, out, DURATION);
-
-    // update app config for server
-    animationIn.curveType_ = CURVETYPE;
-    animationIn.ctrlX1_ = in[0]; // 0: ctrl x1 index
-    animationIn.ctrlY1_ = in[1]; // 1: ctrl y1 index
-    animationIn.ctrlX2_ = in[2]; // 2: ctrl x2 index
-    animationIn.ctrlY2_ = in[3]; // 3: ctrl y2 index
-    animationIn.duration_ = DURATION;
-
-    animationOut.curveType_ = CURVETYPE;
-    animationOut.ctrlX1_ = out[0]; // 0: ctrl x1 index
-    animationOut.ctrlY1_ = out[1]; // 1: ctrl y1 index
-    animationOut.ctrlX2_ = out[2]; // 2: ctrl x2 index
-    animationOut.ctrlY2_ = out[3]; // 3: ctrl y2 index
-    animationOut.duration_ = DURATION;
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "use default config");
+    if (systemConfig_.animationOut_.curveType_.empty()) {
+        std::vector<float> out = { OUT_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
+        // update system config for client
+        systemConfig_.animationOut_ = KeyboardAnimationCurve(CURVETYPE, out, DURATION);
+        // update app config for server
+        animationOut.curveType_ = CURVETYPE;
+        animationOut.ctrlX1_ = out[0]; // 0: ctrl x1 index
+        animationOut.ctrlY1_ = out[1]; // 1: ctrl y1 index
+        animationOut.ctrlX2_ = out[2]; // 2: ctrl x2 index
+        animationOut.ctrlY2_ = out[3]; // 3: ctrl y2 index
+        animationOut.duration_ = DURATION;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "config default animationOut");
+    }
 }
 
 void SceneSessionManager::ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig)
@@ -1449,15 +1456,8 @@ uint32_t SceneSessionManager::GetLockScreenZorder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
-        if (session && (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD)) {
-            static const std::regex pattern(R"(^SCBScreenLock[0-9]+$)");
-            auto& bundleName = session->GetSessionInfo().bundleName_;
-            if (!std::regex_match(bundleName, pattern)) {
-                TLOGD(WmsLogTag::WMS_UIEXT, " bundleName: %{public}s", bundleName.c_str());
-                continue;
-            }
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d, bundleName: %{public}s", persistentId,
-                bundleName.c_str());
+        if (session && session->IsScreenLockWindow()) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
             return session->GetZOrder();
         }
     }
@@ -1476,6 +1476,11 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         pid = sceneSession->GetCallingPid();
+
+        if (!sceneSession->GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED)) {
+            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            return WMError::WM_OK;
+        }
 
         // 1. check window whether can show on main window
         if (!sceneSession->IsShowOnLockScreen(GetLockScreenZorder())) {
@@ -1643,16 +1648,15 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     return sceneSession;
 }
 
-sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
-    sptr<WindowSessionProperty> property)
+sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo)
 {
     if (sessionInfo.persistentId_ != 0 && !sessionInfo.isPersistentRecover_) {
         auto session = GetSceneSession(sessionInfo.persistentId_);
         if (session != nullptr) {
-            NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             TLOGD(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
+    
         if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
             TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
                 "abilityName: %{public}s, appIndex: %{public}d",
@@ -1665,16 +1669,24 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
                 sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
             if (isSingleStart) {
-                NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
                 TLOGD(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
                     sessionInfo.persistentId_);
                 return sceneSession;
             }
         }
     }
+    return nullptr;
+}
 
+sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& sessionInfo,
+    sptr<WindowSessionProperty> property)
+{
     const char* const where = __func__;
     auto task = [this, sessionInfo, property, where] {
+        if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
+            NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
+            return session;
+        }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: appName: [%{public}s %{public}s %{public}s] "
             "appIndex %{public}d, type %{public}u system %{public}u, isPersistentRecover %{public}u",
             where, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
@@ -4330,37 +4342,33 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible,
-        const bool newIsVisible) {
+    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible, const bool newIsVisible) {
         if (isVisible == newIsVisible || pid == -1) {
             return;
         }
         sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
         windowPidVisibilityInfo->pid_ = pid;
-        int32_t count = 0;
+        int32_t currentCount = 0;
         int32_t beforeCount = 0;
-        {
-            std::unique_lock<std::mutex> lock(visibleWindowCountMapMutex_);
-            if (visibleWindowCountMap_.find(pid) != visibleWindowCountMap_.end()) {
-                beforeCount = visibleWindowCountMap_[pid];
-            }
-            count = newIsVisible ? beforeCount + 1 : beforeCount - 1;
+        if (visibleWindowCountMap_.find(pid) != visibleWindowCountMap_.end()) {
+            beforeCount = visibleWindowCountMap_[pid];
         }
-        if (beforeCount == 0 && count == 1) {
+        currentCount = newIsVisible ? beforeCount + 1 : beforeCount - 1;
+        visibleWindowCountMap_[pid] = currentCount;
+        if (visibleWindowCountMap_[pid] == 0) {
+            visibleWindowCountMap_.erase(pid);
+        }
+        if (beforeCount == 0 && currentCount == 1) {
             TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to visibility.", pid);
             windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::VISIBILITY_STATE;
-            visibleWindowCountMap_[pid] = count;
             SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
-        } else if (beforeCount == 1 && count == 0) {
+        } else if (beforeCount == 1 && currentCount == 0) {
             TLOGI(WmsLogTag::WMS_LIFE, "The windows of pid %{public}d change to invisibility.", pid);
             windowPidVisibilityInfo->visibilityState_ = WindowPidVisibilityState::INVISIBILITY_STATE;
-            visibleWindowCountMap_.erase(pid);
             SessionManagerAgentController::GetInstance().NotifyWindowPidVisibilityChanged(windowPidVisibilityInfo);
-        } else if (beforeCount < 0 || count < 0) {
+        } else if (beforeCount < 0 || currentCount < 0) {
             TLOGE(WmsLogTag::WMS_LIFE, "The count of visible windows in same pid:%{public}d is less than 0.", pid);
             RecoveryVisibilityPidCount(pid);
-        } else {
-            visibleWindowCountMap_[pid] = count;
         }
     };
     sceneSession->SetVisibilityChangedDetectFunc(func);
@@ -6120,7 +6128,6 @@ static bool IsSmallFoldProduct()
 {
     static const std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", "");
     if (foldScreenType.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "foldScreenType is empty");
         return false;
     }
     return foldScreenType[0] == SMALL_FOLD_PRODUCT_TYPE;
@@ -6526,7 +6533,7 @@ void SceneSessionManager::NotifySessionMovedToFront(int32_t persistentId)
 
 WSError SceneSessionManager::SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label)
 {
-    WLOGFI("label: %{public}s", label.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "Enter");
     auto task = [this, &token, &label]() {
         auto sceneSession = FindSessionByToken(token);
         if (sceneSession == nullptr) {

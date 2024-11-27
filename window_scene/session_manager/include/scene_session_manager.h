@@ -584,6 +584,11 @@ private:
     void PostProcessProperty(uint32_t dirty);
 
     /**
+     * Window  Lifecycle
+     */
+    sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
+
+    /**
      * Window Focus
      */
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
@@ -772,7 +777,6 @@ private:
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     std::map<int32_t, sptr<SceneSession>> systemTopSceneSessionMap_;
     std::map<int32_t, sptr<SceneSession>> nonSystemFloatSceneSessionMap_;
-    std::mutex visibleWindowCountMapMutex_;
     std::map<int32_t, int32_t> visibleWindowCountMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;

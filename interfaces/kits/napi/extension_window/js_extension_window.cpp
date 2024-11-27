@@ -53,7 +53,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
-    if (env == nullptr || window == nullptr) {
+    if (env == nullptr || window == nullptr || objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "JsExtensionWindow env or window is nullptr");
         return nullptr;
     }
@@ -89,7 +89,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
-    if (env == nullptr || window == nullptr) {
+    if (env == nullptr || window == nullptr || objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "JsExtensionWindow env or window is nullptr");
         return nullptr;
     }
