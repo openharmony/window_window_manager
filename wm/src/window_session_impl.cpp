@@ -1175,14 +1175,14 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,%{public}u,"
-            "%{public}u] displayOrientation:%{public}d, config[%{public}u,%{public}u,%{public}u,%{public}f]",
-            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation,
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
+            "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
+            "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
             rotation, deviceRotation, transformHint, virtualPixelRatio_);
     } else {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,%{public}u,"
-            "%{public}u] displayOrientation:%{public}d, config[%{public}u,%{public}u,%{public}u,%{public}f]",
-            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation,
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
+            "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
+            "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
             rotation, deviceRotation, transformHint, virtualPixelRatio_);
     }
 }
