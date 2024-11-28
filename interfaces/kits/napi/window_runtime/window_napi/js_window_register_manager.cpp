@@ -245,6 +245,7 @@ WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(sptr<JsWindo
 {
     TLOGD(WmsLogTag::DEFAULT, "called");
     if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listener == nullptr) {

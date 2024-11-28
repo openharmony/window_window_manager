@@ -479,10 +479,9 @@ void JsWindowListener::OnDisplayIdChangedCallback(DisplayId displayId)
         }
     );
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnDisplayIdChangedCallback", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    if (napi_status::napi_ok != napi_send_event(env_, complete, napi_eprio_immediate)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
