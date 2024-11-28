@@ -474,7 +474,7 @@ void JsWindowListener::OnDisplayIdChangedCallback(DisplayId displayId)
                 WLOGFE("This listener or eng is nullptr");
                 return;
             }
-            napi_value argv[] = { CreateJsValue(eng, static_cast<int64_t>(displayId);) };
+            napi_value argv[] = { CreateJsValue(eng, static_cast<int64_t>(displayId)) };
             thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
