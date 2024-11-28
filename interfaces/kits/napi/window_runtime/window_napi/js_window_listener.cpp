@@ -467,19 +467,18 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DEFAULT, "in");
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [self = weakRef_, displayId, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("This listener or eng is nullptr");
-                return;
-            }
-            napi_value argv[] = { CreateJsValue(eng, static_cast<int64_t>(displayId)) };
-            thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    auto jsCallback = [self = weakRef_, displayId, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "[NAPI]this listener or env is nullptr");
+            return;
         }
-    );
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
+        thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
 
-    if (napi_status::napi_ok != napi_send_event(env_, complete, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
     }
 }
