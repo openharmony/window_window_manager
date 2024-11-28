@@ -306,6 +306,22 @@ WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<Win
     return WMError::WM_OK;
 }
 
+static void SetPropertySessionInfo(SessionInfo& info, std::shared_ptr<AbilityRuntime::Context> context)
+{
+    if (context == nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "contex is null");
+        return;
+    }
+    info.moduleName_ = context->GetHapModuleInfo() ? context->GetHapModuleInfo()->moduleName : "";
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext && abilityContext->GetAbilityInfo()) {
+        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
+        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+    } else {
+         info.bundleName_ = context_->GetBundleName();
+    }
+}
+
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -316,18 +332,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     if (token) {
         property_->SetTokenState(true);
     }
+
+    SetPropertySessionInfo(property_->EditSessionInfo(), context_);
+    
     const WindowType& type = GetType();
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    auto info = property_->GetSessionInfo();
-    if (abilityContext && abilityContext->GetAbilityInfo()) {
-        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
-        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-    } else if (context_) {
-        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
-        info.bundleName_ = context_->GetBundleName();
-    }
-    property_->SetSessionInfo(info);
 
     bool isToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
     bool isUiExtSubWindowFlag = property_->GetIsUIExtAnySubWindow();
