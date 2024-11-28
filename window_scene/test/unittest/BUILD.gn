@@ -81,6 +81,7 @@ group("unittest") {
     ":ws_session_stage_proxy_test",
     ":ws_session_stage_stub_lifecycle_test",
     ":ws_session_stage_stub_test",
+    ":ws_session_stub_immersive_test",
     ":ws_session_stub_lifecycle_test",
     ":ws_session_stub_mock_test",
     ":ws_session_stub_test",
@@ -1350,6 +1351,21 @@ ohos_unittest("ws_session_stub_mock_test") {
   defines = [ "ENABLE_MOCK_READ_INT64" ]
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  public_external_deps = [ "accessibility:accessibility_interface" ]
+}
+
+ohos_unittest("ws_session_stub_immersive_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_stub_immersive_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
