@@ -376,6 +376,7 @@ public:
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
     void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
+    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -408,8 +409,6 @@ public:
     static uint32_t GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
-    void SetUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
-    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
 
     int32_t GetCustomDecorHeight() override
     {
@@ -534,10 +533,6 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
-
-    /*
-     * app control
-     */
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
 
 private:

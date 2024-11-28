@@ -4529,39 +4529,39 @@ void JsSceneSession::ProcessUpdateAppUseControlRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     const char* const where = __func__;
-    session->SetUpdateAppUseControlCallback([weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
+    session->RegisterUpdateAppUseControlCallback([weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{pubilc}s: jsSceneSession is null", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{pubilc}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnUpdateAppUseControll(type, isNeedControl);
+        jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
     });
-    TLOGI(WmsLogTag::WMS_MAIN, "success");
+    TLOGI(WmsLogTag::WMS_LIFE, "success");
 }
 
-void JsSceneSession::OnUpdateAppUseControll(ControlAppType type, bool isNeedControl)
+void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedControl)
 {
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, type, isNeedControl, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
                 where, persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_APP_USE_CONTROL_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s: jsCallBack is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
         napi_value jsTypeArgv = CreateJsValue(env, static_cast<uint8_t>(type));
         napi_value jsIsNeedControlArgv = CreateJsValue(env, isNeedControl);
-        napi_value argv[] = {jsTypeArgv, jsIsNeedControlArgv};
+        napi_value argv[] = { jsTypeArgv, jsIsNeedControlArgv };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

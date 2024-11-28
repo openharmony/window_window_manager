@@ -287,7 +287,7 @@ private:
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void NotifyFrameLayoutFinish();
-    void OnUpdateAppUseControll(ControlAppType type, bool isNeedControl);
+    void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 

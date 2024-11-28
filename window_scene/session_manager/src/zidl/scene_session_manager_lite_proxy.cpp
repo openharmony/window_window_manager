@@ -1286,47 +1286,47 @@ WMError SceneSessionManagerLiteProxy::GetCurrentPiPWindowInfo(std::string& bundl
 WSError SceneSessionManagerLiteProxy::NotifyAppUseControlList(
     ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)
 {
-    TLOGI(WmsLogTag::DEFAULT, "run");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
     if (!data.WriteUint8(static_cast<uint8_t>(type))) {
-        TLOGE(WmsLogTag::DEFAULT, "Write type failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write type failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
     if (!data.WriteInt32(userId)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write userId failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write userId failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
     if (!data.WriteInt32(static_cast<int32_t>(controlList.size()))) {
-        TLOGE(WmsLogTag::DEFAULT, "Write controlList failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write controlList size failed");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
 
     for (const auto& control : controlList) {
         if (!(data.WriteString(control.bundleName_) && data.WriteInt32(control.appIndex_) &&
               data.WriteBool(control.isNeedControl_))) {
-            TLOGE(WmsLogTag::DEFAULT, "Write controlList failed");
+            TLOGE(WmsLogTag::WMS_LIFE, "Write controlList failed");
             return WSError::WS_ERROR_INVALID_PARAM;
         }
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerLiteMessage::TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
