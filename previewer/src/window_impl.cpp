@@ -1159,7 +1159,7 @@ bool WindowImpl::GetImmersiveModeEnabledState() const
 void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ == nullptr) {
-        TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, previewer win: %{public}s", GetWindowName().c_str);
+        TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, previewer win: %{public}s", GetWindowName().c_str());
         return;
     }
     TLOGD(WmsLogTag::WMS_IMMS, "previewer win: %{public}s", GetWindowName().c_str());
@@ -1168,7 +1168,7 @@ void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Conf
 
 void WindowImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "previewer");
+    TLOGD(WmsLogTag::WMS_IMMS, "previewer, config: %{public}s", configuration->GetName().c_str());
     std::lock_guard<std::mutex> lock(globalMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
