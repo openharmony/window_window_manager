@@ -542,7 +542,7 @@ HWTEST_F(WindowOptionTest, SetDensity, Function | SmallTest | Level3)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     ASSERT_EQ(1.0f, option->GetDensity());
-    float density = 5.0f
+    float density = 5.0f;
     option->SetDensity(density);
     ASSERT_EQ(density, option->GetDensity());
 }
