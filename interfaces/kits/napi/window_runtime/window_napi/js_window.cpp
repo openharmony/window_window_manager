@@ -2757,9 +2757,10 @@ static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPrope
 
 napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
 {
+    std::shared_ptr<WMError> errCodePtr = std::make_shared<WMError>(WMError::WM_OK);
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "window is null");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        *errCodePtr = WMError::WM_ERROR_NULLPTR;
     }
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -2768,27 +2769,35 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
     bool naviEnable = false;
     if (argc > INDEX_TWO || !GetSystemBarStatus(env, info, statusEnabe, naviEnable)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        *errCodePtr = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    napi_value lastParam = nullptr;
+    if (argc > INDEX_ZERO && GetType(env, argv[INDEX_ZERO]) == napi_function) {
+        lastParam = argv[INDEX_ZERO];
+    } else if (argc > INDEX_ONE && GetType(env, argv[INDEX_ONE]) == napi_function) {
+        lastParam = argv[INDEX_ONE];
     }
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, statusEnabe, naviEnable] {
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask,
+        statusEnabe, naviEnable, errCodePtr] {
         auto window = weakToken.promote();
-        if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        if (errCodePtr == nullptr || window == nullptr) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            return;
+        } else if (*errCodePtr != WMError::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
             return;
         }
         std::map<WindowType, SystemBarProperty> systemBarProperties;
         std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
         SetSystemBarStatus(window, statusEnabe, naviEnable, systemBarProperties, systemBarPropertyFlags);
         UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window);
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, window));
-        if (ret == WmErrorCode::WM_OK) {
+        *errCodePtr = SetSystemBarPropertiesByFlags(systemBarPropertyFlags, systemBarProperties, window);
+        if (*errCodePtr == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "JsWindow::OnSetSystemBarEnable failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "JsWindow::OnSetSystemBarEnable failed"));
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -2812,6 +2821,12 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
     if (argc < INDEX_ONE || !GetSystemBarStatus(env, info, statusEnabe, naviEnable)) {
         TLOGE(WmsLogTag::WMS_IMMS, "invalid argc:%{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value lastParam = nullptr;
+    if (argc >= INDEX_ONE && argv[INDEX_ZERO] != nullptr && GetType(env, argv[INDEX_ZERO]) == napi_function) {
+        lastParam = argv[INDEX_ZERO];
+    } else if (argc >= INDEX_TWO && argv[INDEX_ONE] != nullptr && GetType(env, argv[INDEX_ONE]) == napi_function) {
+        lastParam = argv[INDEX_ONE];
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
