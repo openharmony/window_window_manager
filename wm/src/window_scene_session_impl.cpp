@@ -1455,16 +1455,12 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
 void WindowSceneSessionImpl::CheckMoveConfiguration(MoveConfiguration& moveConfiguration)
 {
     std::vector<DisplayId> displayIds = SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
-    DisplayId targetDisplayId = DISPLAY_ID_INVALID;
-    for (DisplayId displayId : displayIds) {
-        if (moveConfiguration.displayId == displayId) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d find displayId moveConfiguration %{public}s",
-                property_->GetPersistentId(), moveConfiguration.ToString().c_str());
-            targetDisplayId = displayId;
-            break;
-        }
+    auto findDisplayId = std::find(displayIds.begin(), displayIds.end(), moveConfiguration.displayId);
+    if (findDisplayId == displayIds.end()) { // need find in displayIds, otherwise the value is DISPLAY_ID_INVALID
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d not find displayId moveConfiguration %{public}s",
+            property_->GetPersistentId(), moveConfiguration.ToString().c_str());
+        moveConfiguration.displayId = DISPLAY_ID_INVALID;
     }
-    moveConfiguration.displayId = targetDisplayId;
 }
 
 /** @note @window.layout */
