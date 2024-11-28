@@ -9796,7 +9796,7 @@ void SceneSessionManager::PostProcessFocus()
         }
         if (!session->IsFocusedOnShow() &&
             (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP ||
-            session->GetPostProcessFocusState().reason_ == FocusChangeReason::FOREGROUND)) {
+             session->GetPostProcessFocusState().reason_ == FocusChangeReason::FOREGROUND)) {
             if (IsSessionVisibleForeground(session)) {
                 session->SetFocusedOnShow(true);
             }
