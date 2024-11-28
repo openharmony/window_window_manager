@@ -76,6 +76,16 @@ HWTEST_F(WmMathTest, MathHalper, Function | SmallTest | Level2)
         ASSERT_EQ(true, MathHelper::Clamp(b, a, c) == b);
         ASSERT_EQ(true, MathHelper::Clamp(c, a, b) == b);
     }
+    {
+        float a = 0.0001f, b = -0.0001f;
+        EXPECT_TRUE(MathHelper::NearZero(MathHelper::NonZero(a) - MathHelper::POS_ZERO));
+        EXPECT_TRUE(MathHelper::NearZero(MathHelper::NonZero(b) - MathHelper::NAG_ZERO));
+    }
+    {
+        float a = 2.5f;
+        EXPECT_EQ(MathHelper::Floor(a), int32_t(2));
+        EXPECT_EQ(MathHelper::Ceil(a), int32_t(3));
+    }
 }
 
 /**
