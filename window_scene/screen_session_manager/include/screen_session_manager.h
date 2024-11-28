@@ -342,6 +342,7 @@ protected:
 
 private:
     void OnStart() override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void Init();
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
