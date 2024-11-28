@@ -468,7 +468,7 @@ void JsWindowListener::OnDisplayIdChangedCallback(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DEFAULT, "CALLED");
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
-        [self = weakRef_, displayIdValue, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
+        [self = weakRef_, displayId, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("This listener or eng is nullptr");
