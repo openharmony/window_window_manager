@@ -477,7 +477,6 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
         napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
         thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
     }
