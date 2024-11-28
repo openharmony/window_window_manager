@@ -1927,7 +1927,7 @@ HWTEST_F(SceneSessionTest, GetDockHeight, Function | SmallTest | Level1)
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback()>::MakeSptr();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
@@ -1946,7 +1946,7 @@ HWTEST_F(SceneSessionTest, GetDockHeight, Function | SmallTest | Level1)
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
     sceneSession->isVisible_ = true;
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
-    sceneSession->property_->windowName_ = "SCBSmarkDock";
+    sceneSession->property_->windowName_ = "SCBSmartDock";
     ASSERT_EQ(sceneSession->GetDockHeight(), 112);
 }
 
