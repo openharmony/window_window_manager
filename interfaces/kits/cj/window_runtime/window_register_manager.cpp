@@ -58,7 +58,7 @@ CjWindowRegisterManager::CjWindowRegisterManager()
             {return this->ProcessWindowTitleButtonRectChangeRegister(listener, window, isRegister); } },
         {WINDOW_VISIBILITY_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
             {return this->ProcessWindowVisibilityChangeRegister(listener, window, isRegister); } },
-        {WINDOW_DISPLAYID_CHANGE_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+        {WINDOW_DISPLAYID_CHANGE_CB, [this](const sptr<CjWindowListener>& listener, const sptr<Window>& window, bool isRegister)
             { return this->ProcessDisplayIdChangeRegister(listener, window, isRegister); } },
     };
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -180,7 +180,7 @@ WmErrorCode CjWindowRegisterManager::ProcessWindowVisibilityChangeRegister(
 }
 
 WmErrorCode CjWindowRegisterManager::ProcessDisplayIdChangeRegister(
-    sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
+    const sptr<CjWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     return WmErrorCode::WM_OK;
 }
