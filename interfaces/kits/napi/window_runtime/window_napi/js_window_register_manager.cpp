@@ -243,22 +243,15 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
 WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
-    TLOGD(WmsLogTag::DEFAULT, "called");
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "window is nullptr");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    }
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "listener is nullptr");
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    if (window == nullptr || listener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "window or listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     IDisplayIdChangeListenerSptr thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener));
-    } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
-    }
+    WmErrorCode ret = isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
     return ret;
 }
 

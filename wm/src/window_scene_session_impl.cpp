@@ -4104,10 +4104,10 @@ void WindowSceneSessionImpl::NotifyKeyboardPanelInfoChange(const KeyboardPanelIn
 
 WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
 {
-    DisplayId lastDisplayId = property_->GetDisplayId();
+    bool displayIdChanged = property_->GetDisplayId() != displayId;
     property_->SetDisplayId(displayId);
     NotifyDisplayInfoChange();
-    if (lastDisplayId != displayId) {
+    if (displayIdChanged) {
         NotifyDisplayIdChange(displayId);
     }
     return WSError::WS_OK;

@@ -2230,7 +2230,7 @@ HWTEST_F(WindowSessionImplTest4, RegisterDisplayIdChangeListener01, Function | S
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     listener = sptr<IDisplayIdChangeListener>::MakeSptr();
-    vector<sptr<IDisplayIdChangeListener>> holder;
+    std::vector<sptr<IDisplayIdChangeListener>> holder;
     window->displayIdChangeListeners_[window->property_->GetPersistentId()] = holder;
     ret = window->RegisterDisplayIdChangeListener(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
@@ -2260,7 +2260,7 @@ HWTEST_F(WindowSessionImplTest4, UnregisterDisplayIdChangeListener01, Function |
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     listener = sptr<IDisplayIdChangeListener>::MakeSptr();
-    vector<sptr<IDisplayIdChangeListener>> holder;
+    std::vector<sptr<IDisplayIdChangeListener>> holder;
     window->displayIdChangeListeners_[window->property_->GetPersistentId()] = holder;
     window->UnregisterDisplayIdChangeListener(listener);
 
@@ -2285,10 +2285,9 @@ HWTEST_F(WindowSessionImplTest4, NotifyDisplayIdChange01, Function | SmallTest |
 
     sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    
-    SessionInfo sessioninfo = {"CreateTestBundle", "CreateTestModule",
-                                "CreateTestAbility"};
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessioninfo);
+
+    SessionInfo sessioninfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new SessionMocker(sessioninfo);
     ASSERT_NE(session, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     DisplayId displayId = 12;

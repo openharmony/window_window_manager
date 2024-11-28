@@ -416,7 +416,7 @@ public:
     /**
      * @brief Notify caller when window displayId changed.
      */
-    virtual void OnDisplayIdChangedCallback(uint64_t displayId) {};
+    virtual void OnDisplayIdChanged(DisplayId displayId) {}
 };
 using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
 
@@ -2046,10 +2046,8 @@ public:
      * @param listener IDisplayIdChangedListener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    virtual WMError RegisterDisplayIdChangeListener(
+        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Unregister window displayId change listener.
@@ -2057,10 +2055,8 @@ public:
      * @param listener IDisplayIdChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    virtual WMError UnregisterDisplayIdChangeListener(
+        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the window limits of current window.
