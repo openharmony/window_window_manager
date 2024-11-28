@@ -168,7 +168,7 @@ bool SessionPermission::IsShellCall()
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFI("TokenType is Shell, verify success");
+        WLOGFD("TokenType is Shell, verify success");
         return true;
     }
     TLOGI(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
@@ -270,7 +270,7 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
     }
 
     if (bundleInfo.signatureInfo.appIdentifier == appIdentifier) {
-        TLOGI(WmsLogTag::DEFAULT, "verify app success");
+        TLOGD(WmsLogTag::DEFAULT, "verify app success");
         return true;
     }
 
