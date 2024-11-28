@@ -2564,7 +2564,7 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
     }
     {
-        std::lock_guard<std::recursive_mutex> lockListener(displayIdChangeListenerMutex_);
+        std::lock_guard<std::mutex> lockListener(displayIdChangeListenerMutex_);
         ClearUselessListeners(displayIdChangeListeners_, persistentId);
     }
     {
@@ -3374,14 +3374,14 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
 WMError WindowSessionImpl::RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
 {
     TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
-    std::lock_guard<std::recursive_mutex> lockListener(displayIdChangeListenerMutex_);
+    std::lock_guard<std::mutex> lockListener(displayIdChangeListenerMutex_);
     return RegisterListener(displayIdChangeListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
 {
     TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
-    std::lock_guard<std::recursive_mutex> lockListener(displayIdChangeListenerMutex_);
+    std::lock_guard<std::mutex> lockListener(displayIdChangeListenerMutex_);
     return UnregisterListener(displayIdChangeListeners_[GetPersistentId()], listener);
 }
 
@@ -3439,7 +3439,7 @@ EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionLi
 WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 {
     TLOGD(WmsLogTag::DEFAULT, "id=%{public}u, displayId=%{public}" PRIu64, GetPersistentId(), displayId);
-    std::lock_guard<std::recursive_mutex> lock(displayIdChangeListenerMutex_);
+    std::lock_guard<std::mutex> lock(displayIdChangeListenerMutex_);
     auto displayIdChangeListeners = GetListeners<IDisplayIdChangeListener>();
     for (auto& listener : displayIdChangeListeners) {
         if (listener != nullptr) {
