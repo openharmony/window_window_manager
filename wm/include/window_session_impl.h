@@ -231,7 +231,6 @@ public:
     WSError NotifyTouchOutside() override;
     WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     WSError NotifyWindowVisibility(bool isVisible) override;
-    WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyNoInteractionTimeout(const IWindowNoInteractionListenerSptr& listener);
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
@@ -302,6 +301,11 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
+
+    /**
+     * Window Property
+     */
+    WSError NotifyDisplayIdChange(DisplayId displayId);
 
 protected:
     WMError Connect();
@@ -525,7 +529,6 @@ private:
     static std::recursive_mutex screenshotListenerMutex_;
     static std::recursive_mutex touchOutsideListenerMutex_;
     static std::recursive_mutex windowVisibilityChangeListenerMutex_;
-    static std::recursive_mutex displayIdChangeListenerMutex_;
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
     static std::recursive_mutex windowTitleButtonRectChangeListenerMutex_;
@@ -544,6 +547,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
+    static std::mutex displayIdChangeListenerMutex_;
     static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;

@@ -99,7 +99,7 @@ public:
     napi_value CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
-    void OnDisplayIdChangedCallback(const DisplayId displayId) override;
+    void OnDisplayIdChanged(DisplayId displayId) override;
 
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowNoInteractionCallback() override;
