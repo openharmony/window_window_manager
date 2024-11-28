@@ -65,7 +65,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener,
                          public IWindowVisibilityChangedListener,
-                         public IWindowDisplayIdChangeListener,
+                         public IDisplayIdChangeListener,
                          public IWindowTitleButtonRectChangedListener,
                          public IWindowStatusChangeListener,
                          public IWindowNoInteractionListener,
@@ -99,7 +99,7 @@ public:
     napi_value CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
-    void OnWindowDisplayIdChangedCallback(const DisplayId displayId) override;
+    void OnDisplayIdChangedCallback(const DisplayId displayId) override;
 
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowNoInteractionCallback() override;

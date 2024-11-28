@@ -99,7 +99,7 @@ std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionI
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
-std::map<int32_t, std::vector<IWindowDisplayIdChangeListenerSptr>> WindowSessionImpl::windowDisplayIdChangeListeners_;
+std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
@@ -116,7 +116,7 @@ std::recursive_mutex WindowSessionImpl::occupiedAreaChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::screenshotListenerMutex_;
 std::recursive_mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
-std::recursive_mutex WindowSessionImpl::windowDisplayIdChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
@@ -2564,8 +2564,8 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         ClearUselessListeners(windowTitleButtonRectChangeListeners_, persistentId);
     }
     {
-        std::lock_guard<std::recursive_mutex> lockListener(windowDisplayIdChangeListenerMutex_);
-        ClearUselessListeners(windowDisplayIdChangeListeners_, persistentId);
+        std::lock_guard<std::recursive_mutex> lockListener(displayIdChangeListenerMutex_);
+        ClearUselessListeners(displayIdChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
@@ -3371,18 +3371,18 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
     return ret;
 }
 
-WMError WindowSessionImpl::RegisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
+WMError WindowSessionImpl::RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
 {
     TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
-    std::lock_guard<std::recursive_mutex> lockListener(windowDisplayIdChangeListenerMutex_);
-    return RegisterListener(windowDisplayIdChangeListeners_[GetPersistentId()], listener);
+    std::lock_guard<std::recursive_mutex> lockListener(displayIdChangeListenerMutex_);
+    return RegisterListener(displayIdChangeListeners_[GetPersistentId()], listener);
 }
 
-WMError WindowSessionImpl::UnregisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
+WMError WindowSessionImpl::UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
 {
     TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
-    std::lock_guard<std::recursive_mutex> lockListener(windowDisplayIdChangeListenerMutex_);
-    return UnregisterListener(windowDisplayIdChangeListeners_[GetPersistentId()], listener);
+    std::lock_guard<std::recursive_mutex> lockListener(displayIdChangeListenerMutex_);
+    return UnregisterListener(displayIdChangeListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
@@ -3420,14 +3420,14 @@ EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityL
 }
 
 template<typename T>
-EnableIfSame<T, IWindowDisplayIdChangeListener,
-    std::vector<IWindowDisplayIdChangeListenerSptr>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IDisplayIdChangeListener,
+    std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
-    std::vector<IWindowDisplayIdChangeListenerSptr> windowDisplayIdChangeListeners;
-    for (auto& listener : windowDisplayIdChangeListeners_[GetPersistentId()]) {
-        windowDisplayIdChangeListeners.push_back(listener);
+    std::vector<IDisplayIdChangeListenerSptr> displayIdChangeListeners;
+    for (auto& listener : displayIdChangeListeners_[GetPersistentId()]) {
+        displayIdChangeListeners.push_back(listener);
     }
-    return windowDisplayIdChangeListeners;
+    return displayIdChangeListeners;
 }
 
 template<typename T>
@@ -3440,19 +3440,14 @@ EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionLi
     return noInteractionListeners;
 }
 
-WSError WindowSessionImpl::NotifyWindowDisplayIdChange(DisplayId displayId)
+WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, displayId=%{public}" PRIu64,
-        GetWindowName().c_str(), GetPersistentId(), displayId);
-    if (displayId > std::numeric_limits<int64_t>::max()) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid displayId");
-        return WSError::WS_ERROR_INVALID_OPERATION;
-    }
-    std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
-    auto windowDisplayIdChangeListeners = GetListeners<IWindowDisplayIdChangeListener>();
-    for (auto& listener : windowDisplayIdChangeListeners) {
+    TLOGD(WmsLogTag::DEFAULT, "id=%{public}u, displayId=%{public}" PRIu64, GetPersistentId(), displayId);
+    std::lock_guard<std::recursive_mutex> lockListener(displayIdChangeListenerMutex_);
+    auto displayIdChangeListeners = GetListeners<IDisplayIdChangeListener>();
+    for (auto& listener : displayIdChangeListeners) {
         if (listener != nullptr) {
-            listener->OnWindowDisplayIdChangedCallback(displayId);
+            listener->OnDisplayIdChangedCallback(displayId);
         }
     }
     return WSError::WS_OK;

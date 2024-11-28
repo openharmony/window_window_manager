@@ -52,7 +52,7 @@ private:
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,
         bool isRegister);
-    WmErrorCode ProcessWindowDisplayIdChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,
+    WmErrorCode ProcessDisplayIdChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,
         bool isRegister);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,
         bool isRegister);

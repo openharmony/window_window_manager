@@ -407,18 +407,18 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
- * @class IWindowDisplayIdChangeListener
+ * @class IDisplayIdChangeListener
  *
  * @brief Listener to observe one window displayId changed.
  */
-class IWindowDisplayIdChangeListener : virtual public RefBase {
+class IDisplayIdChangeListener : virtual public RefBase {
 public:
     /**
      * @brief Notify caller when window displayId changed.
      */
-    virtual void OnWindowDisplayIdChangedCallback(uint64_t displayId) {};
+    virtual void OnDisplayIdChangedCallback(uint64_t displayId) {};
 };
-using IWindowDisplayIdChangeListenerSptr = sptr<IWindowDisplayIdChangeListener>;
+using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
 
 /**
  * @class IWindowNoInteractionListenerSptr
@@ -2043,10 +2043,10 @@ public:
     /**
      * @brief Register window displayId change listener.
      *
-     * @param listener IWindowDisplayIdChangedListener.
+     * @param listener IDisplayIdChangedListener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
+    virtual WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2054,10 +2054,10 @@ public:
     /**
      * @brief Unregister window displayId change listener.
      *
-     * @param listener IWindowDisplayIdChangedListener.
+     * @param listener IDisplayIdChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterWindowDisplayIdChangeListener(const IWindowDisplayIdChangeListenerSptr& listener)
+    virtual WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
