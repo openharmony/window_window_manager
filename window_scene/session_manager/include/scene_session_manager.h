@@ -432,6 +432,11 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
+    /**
+     * Window Lifecycle
+     */
+    void RemoveAppInfo(const std::string& bundleName);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -490,6 +495,11 @@ private:
     void ProcessFocusZOrderChange(uint32_t dirty);
     void PostProcessFocus();
     void PostProcessProperty(uint32_t dirty);
+
+    /**
+     * Window Lifecycle
+     */
+    sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
 
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);

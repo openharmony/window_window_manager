@@ -200,6 +200,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdateAppHookDisplayInfo);
     BindNativeFunction(env, exportObj, "isScbCoreEnabled", moduleName,
         JsSceneSessionManager::IsScbCoreEnabled);
+    BindNativeFunction(env, exportObj, "removeAppInfo", moduleName,
+        JsSceneSessionManager::RemoveAppInfo);
     return NapiGetUndefined(env);
 }
 
@@ -1043,6 +1045,16 @@ napi_value JsSceneSessionManager::IsScbCoreEnabled(napi_env env, napi_callback_i
     TLOGD(WmsLogTag::WMS_PIPELINE, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnIsScbCoreEnabled(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::RemoveAppInfo(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    if (me == nullptr) {
+        TLOGW(WmsLogTag::WMS_LIFE, "me is null");
+        return nullptr;
+    }
+    return me->OnRemoveAppInfo(env, info);
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3259,5 +3271,27 @@ void JsSceneSessionManager::ProcessCloseTargetFloatWindow()
         this->OnCloseTargetFloatWindow(bundleName);
     };
     SceneSessionManager::GetInstance().SetCloseTargetFloatWindowFunc(func);
+}
+
+napi_value JsSceneSessionManager::OnRemoveAppInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to bundleName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().RemoveAppInfo(bundleName);
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
