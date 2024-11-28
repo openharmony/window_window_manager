@@ -841,7 +841,7 @@ napi_value JsSceneSessionManager::GetAllWindowVisibilityInfos(napi_env env, napi
 
 napi_value JsSceneSessionManager::SetSystemAnimatedScenes(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    WLOGFD("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetSystemAnimatedScenes(env, info) : nullptr;
 }

@@ -65,7 +65,7 @@ std::string SysCapUtil::GetBundleName()
     if (iBundleMgr->GetBundleInfoForSelf(0, bundleInfo) == ERR_OK) {
         bundleName = bundleInfo.name;
     } else {
-        WLOGFW("Call for GetBundleInfoForSelf failed");
+        WLOGFD("Call for GetBundleInfoForSelf failed");
     }
     return StringUtil::Trim(bundleName);
 }
