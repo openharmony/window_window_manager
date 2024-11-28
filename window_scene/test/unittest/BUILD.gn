@@ -1087,6 +1087,11 @@ ohos_unittest("ws_session_proxy_test") {
     "session_proxy_test.cpp",
   ]
 
+  defines = [
+    "ENABLE_MOCK_READ_UINT32",
+    "ENABLE_MOCK_READ_INT32",
+  ]
+
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/window_scene/session:screen_session",
