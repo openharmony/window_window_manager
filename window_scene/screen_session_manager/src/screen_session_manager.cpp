@@ -4700,6 +4700,14 @@ DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWin
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
+    if (id == DISPLAY_ID_FAKE) {
+        auto displayInfo = GetDefaultDisplayInfo();
+        if (displayInfo) {
+            id = displayInfo->GetDisplayId();
+            TLOGI(WmsLogTag::DMS, "change displayId: %{public}" PRIu64" to displayId: %{public}" PRIu64,
+                DISPLAY_ID_FAKE, id);
+        }
+    }
     std::vector<ScreenId> screenIds = GetAllScreenIds();
     auto iter = std::find(screenIds.begin(), screenIds.end(), id);
     if (iter == screenIds.end()) {
