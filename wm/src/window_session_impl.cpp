@@ -3455,7 +3455,7 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
 {
-    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, isVisible:%{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, isVisible=%{public}d",
         GetWindowName().c_str(), GetPersistentId(), isVisible);
     std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
     auto windowVisibilityListeners = GetListeners<IWindowVisibilityChangedListener>();
