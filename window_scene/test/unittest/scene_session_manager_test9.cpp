@@ -353,6 +353,30 @@ HWTEST_F(SceneSessionManagerTest9, ProcessFocusWhenForeground, Function | SmallT
 }
 
 /**
+ * @tc.name: ProcessFocusWhenForeground01
+ * @tc.desc: ProcessFocusWhenForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, ProcessFocusWhenForeground01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
+    sessionInfo.abilityName_ = "ProcessFocusWhenForeground";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->persistentId_ = 1;
+    ssm_->focusedSessionId_ = 2;
+    sceneSession->SetFocusedOnShow(false);
+    ssm_->ProcessFocusWhenForeground(sceneSession);
+    EXPECT_EQ(sceneSession->IsFocusedOnShow(), false);
+
+    sceneSession->isVisible_ = true;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->ProcessFocusWhenForeground(sceneSession);
+    EXPECT_EQ(sceneSession->IsFocusedOnShow(), true);
+}
+
+/**
  * @tc.name: ProcessSubSessionForeground03
  * @tc.desc: ProcessSubSessionForeground
  * @tc.type: FUNC

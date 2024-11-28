@@ -969,7 +969,7 @@ void SceneSessionManager::ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationC
     constexpr float CTRLX2 = 342.0f;
     constexpr float CTRLY2 = 37.0f;
     constexpr uint32_t DURATION = 150;
-    
+
     if (systemConfig_.animationIn_.curveType_.empty()) {
         std::vector<float> in = { IN_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
         // update system config for client
@@ -1656,7 +1656,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
             TLOGD(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
-    
+
         if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
             TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
                 "abilityName: %{public}s, appIndex: %{public}d",
@@ -6087,7 +6087,9 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
             NotifyFocusStatus(sceneSession, true);
         }
     } else if (!sceneSession->IsFocusedOnShow()) {
-        sceneSession->SetFocusedOnShow(true);
+        if (IsSessionVisibleForeground(sceneSession)) {
+            sceneSession->SetFocusedOnShow(true);
+        }
     } else {
         if (Session::IsScbCoreEnabled()) {
             ProcessFocusWhenForegroundScbCore(sceneSession);
@@ -9796,6 +9798,16 @@ void SceneSessionManager::PostProcessFocus()
             session->ResetPostProcessFocusState();
             continue;
         }
+        if (!session->IsFocusedOnShow() &&
+            (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP ||
+             session->GetPostProcessFocusState().reason_ == FocusChangeReason::FOREGROUND)) {
+            if (IsSessionVisibleForeground(session)) {
+                session->SetFocusedOnShow(true);
+            }
+            session->ResetPostProcessFocusState();
+            continue;
+        }
+
         WSError ret = WSError::WS_DO_NOTHING;
         if (session->GetPostProcessFocusState().isFocused_) {
             if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP) {
