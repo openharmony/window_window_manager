@@ -68,7 +68,7 @@ const std::string CALLING_WINDOW_ID_CHANGE_CB = "callingWindowIdChange";
 const std::string CLOSE_TARGET_FLOAT_WINDOW_CB = "closeTargetFloatWindow";
 const std::string ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB = "abilityManagerCollaboratorRegistered";
 const std::string START_PIP_FAILED_CB = "startPiPFailed";
-const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
+const std::string NOTIFY_APP_USE_CONTROL_LIST_CB = "updateAppUseControl";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -84,7 +84,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CLOSE_TARGET_FLOAT_WINDOW_CB, ListenerFunctionType::CLOSE_TARGET_FLOAT_WINDOW_CB},
     {ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB, ListenerFunctionType::ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB},
     {START_PIP_FAILED_CB,          ListenerFunctionType::START_PIP_FAILED_CB},
-    {UPDATE_APP_USE_CONTROL_CB, ListenerFunctionType::UPDATE_APP_USE_CONTROL_CB},
+    {NOTIFY_APP_USE_CONTROL_LIST_CB, ListenerFunctionType::NOTIFY_APP_USE_CONTROL_LIST_CB},
 };
 } // namespace
 
@@ -1280,8 +1280,8 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         case ListenerFunctionType::START_PIP_FAILED_CB:
             ProcessStartPiPFailedRegister();
             break;
-        case ListenerFunctionType::UPDATE_APP_USE_CONTROL_CB:
-            ProcessUpdateAppUseControlList();
+        case ListenerFunctionType::NOTIFY_APP_USE_CONTROL_LIST_CB:
+            ProcessNotifyAppUseControlListRegister();
             break;
         default:
             break;
@@ -3710,7 +3710,7 @@ void JsSceneSessionManager::ProcessCloseTargetFloatWindow()
     SceneSessionManager::GetInstance().SetCloseTargetFloatWindowFunc(func);
 }
 
-static napi_value CreateControlAppInfos(
+static napi_value CreateAppUseControlInfos(
     napi_env env, const std::vector<ControlAppInfo>& controlList)
 {
     napi_value arrayValue = nullptr;
@@ -3723,6 +3723,10 @@ static napi_value CreateControlAppInfos(
     for (const auto& controlAppInfo : controlList) {
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "failed to create napi object");
+            return NapiGetUndefined(env);
+        }
         napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, controlAppInfo.bundleName_));
         napi_set_named_property(env, objValue, "appIndex", CreateJsValue(env, controlAppInfo.appIndex_));
         napi_set_named_property(env, objValue, "isNeedControl", CreateJsValue(env, controlAppInfo.isNeedControl_));
@@ -3731,28 +3735,28 @@ static napi_value CreateControlAppInfos(
     return arrayValue;
 }
 
-void JsSceneSessionManager::ProcessUpdateAppUseControlList()
+void JsSceneSessionManager::ProcessNotifyAppUseControlListRegister()
 {
-    TLOGNI(WmsLogTag::DEFAULT, "scb manager register notify appUseControlListFunc");
-    SceneSessionManager::GetInstance().SetNotifySCBManagerAppUseControlListFunc(
+    TLOGI(WmsLogTag::WMS_LIFE, "register callback");
+    SceneSessionManager::GetInstance().RegisterNotifyAppUseControlListCallback(
         [this](ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList) {
-            this->OnUpdateAppUseControlList(type, userId, controlList);
+            this->OnNotifyAppUseControlList(type, userId, controlList);
         });
 }
 
-void JsSceneSessionManager::OnUpdateAppUseControlList(
+void JsSceneSessionManager::OnNotifyAppUseControlList(
     ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[NAPI]");
-    auto task = [this, type, userId, controlList, jsCallBack = GetJSCallback(UPDATE_APP_USE_CONTROL_CB), env = env_]() {
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
+    auto task = [this, type, userId, controlList, jsCallBack = GetJSCallback(NOTIFY_APP_USE_CONTROL_LIST_CB), env = env_] {
         if (jsCallBack == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value typeValue = CreateJsValue(env, static_cast<uint8_t>(type));
         napi_value userIdValue = CreateJsValue(env, userId);
-        napi_value controlListValue = CreateControlAppInfos(env, controlList);
-        napi_value argv[] = {typeValue, userIdValue, controlListValue};
+        napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
+        napi_value argv[] = { typeValue, userIdValue, controlListValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

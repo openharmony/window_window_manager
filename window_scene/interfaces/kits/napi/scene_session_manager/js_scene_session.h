@@ -331,7 +331,7 @@ private:
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
     void OnSetWindowRectAutoSave(bool enabled);
-    void OnUpdateAppUseControll(ControlAppType type, bool isNeedControl);
+    void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 
