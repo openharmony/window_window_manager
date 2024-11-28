@@ -77,7 +77,9 @@ HWTEST_F(WindowInnerWindowTest, CreatePlaceHolderWindow01, Function | SmallTest 
 
     holderWindow_->Destroy();
 
-    ASSERT_EQ(true, true);
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    auto ret = inputEventConsumer_->OnInputEvent(keyEvent);
+    ASSERT_EQ(ret, true);
 }
 
 /**
@@ -90,7 +92,9 @@ HWTEST_F(WindowInnerWindowTest, PlaceholderWindowListener01, Function | SmallTes
     windowListener_->OnTouchOutside();
     windowListener_->AfterUnfocused();
 
-    ASSERT_EQ(true, true);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    auto ret = inputEventConsumer_->OnInputEvent(pointerEvent);
+    ASSERT_EQ(ret, true);
 }
 
 /**
@@ -100,15 +104,9 @@ HWTEST_F(WindowInnerWindowTest, PlaceholderWindowListener01, Function | SmallTes
  */
 HWTEST_F(WindowInnerWindowTest, PlaceholderInputEventConsumer01, Function | SmallTest | Level2)
 {
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
-
-    inputEventConsumer_->OnInputEvent(keyEvent);
-    inputEventConsumer_->OnInputEvent(pointerEvent);
-    inputEventConsumer_->OnInputEvent(axisEvent);
-
-    ASSERT_EQ(true, true);
+    auto ret = inputEventConsumer_->OnInputEvent(axisEvent);
+    ASSERT_EQ(ret, false);
 }
 }
 }
