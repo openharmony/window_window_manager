@@ -2829,7 +2829,7 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
         lastParam = argv[INDEX_ONE];
     }
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, statusEnabe, naviEnable] {
         auto window = weakToken.promote();
         if (window == nullptr) {
