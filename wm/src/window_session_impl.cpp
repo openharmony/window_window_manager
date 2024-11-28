@@ -678,31 +678,38 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect) {
+bool WindowSessionImpl::isUpdateSuperFoldRect() {
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() || isFullScreenWaterfallMode_.load() ||
         SingletonContainer::Get<DisplayManager>().GetFoldStatus() != FoldStatus::HALF_FOLD) {
-        return rect;
+        return false;
+    }
+    return true;
+}
+
+int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect) {
+    if (!isUpdateSuperFoldRect()) {
+        return rect.posY_;
     }
     auto curAllDisplayIds = SingletonContainer::Get<DisplayManager>().GetAllDisplayIds();
     auto it = std::find(curAllDisplayIds.begin(), curAllDisplayIds.end(), SUPER_FOLD_LOWER_DISPLAY_ID);
     if (it == curAllDisplayIds.end()) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "KEYBOARD");
-        return rect;
+        return rect.posY_;
     }
     auto FoldCreaseRegionVec = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion()->GetCreaseRect();
-    if (FoldCreaseRegionVec != 1) {
+    if (FoldCreaseRegionVec.size() != 1) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Get FoldCreaseRegionVec Error");
-        return rect;
+        return rect.posY_;
     }
     auto FoldCreaseRegion = FoldCreaseRegionVec.front();
     int32_t avoidPosY = FoldCreaseRegionVec.posY_;
     if (rect.posY_ <= avoidPosY) {
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
-        return rect;
+        return rect.posY_;
     }
     int32_t lowerScreenPosY = FoldCreaseRegion.posY_ + FoldCreaseRegion.height_; // 1689
     if (rect.posY_ < lowerScreenPosY) {
-        return rect;
+        return rect.posY_;
     }
     property_->SetDisplayId(SUPER_FOLD_LOWER_DISPLAY_ID);
     return rect.posY_ - lowerScreenPosY;
