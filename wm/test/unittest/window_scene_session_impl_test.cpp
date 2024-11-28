@@ -339,6 +339,60 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession08
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function | SmallTest | Level2)
+{
+    const int parentId = 10000;
+    const int displayId = 100;
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowName("CreateAndConnectSpecificSession08");
+    option->SetParentId(parentId);
+
+    // scene session manager processing
+    option->SetIsUIExtFirstSubWindow(true);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->Create(abilityContext_, nullptr);
+    ASSERT_EQ(windowSceneSession->property_->GetParentPersistentId(), option->GetParentId());
+    // scene session manager processing
+    option->SetIsUIExtFirstSubWindow(false);
+    option->SetIsUIExtAnySubWindow(true);
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->Create(abilityContext_, nullptr);
+    ASSERT_EQ(windowSceneSession->property_->GetParentPersistentId(), option->GetParentId());
+
+    sptr<WindowOption> mainOption = new (std::nothrow) WindowOption();
+    mainOption->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    mainOption->SetDisplayId(displayId);
+    sptr<WindowSceneSessionImpl> mainWindow = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->property_->SetPersistentId(parentId);
+    // window processing
+    option->SetIsUIExtFirstSubWindow(false);
+    option->SetIsUIExtAnySubWindow(true);
+    option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->windowSessionMap_["mainWindow"] = {parentId, mainWindow};
+    windowSceneSession->Create(abilityContext_, nullptr);
+    ASSERT_EQ(windowSceneSession->property_->GetDisplayId(), mainWindow->property_->GetDisplayId());
+    // window processing
+    option->SetIsUIExtAnySubWindow(false);
+    windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->windowSessionMap_["mainWindow"] = {parentId, mainWindow};
+    windowSceneSession->Create(abilityContext_, nullptr);
+    ASSERT_EQ(windowSceneSession->property_->GetDisplayId(), mainWindow->property_->GetDisplayId());
+}
+
+/**
  * @tc.name: RecoverAndReconnectSceneSession
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
@@ -1909,6 +1963,30 @@ HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenClose, Function | Small
 
     window->property_->SetCompatibleModeInPc(true);
     ASSERT_EQ(WSError::WS_OK, window->CompatibleFullScreenClose());
+}
+
+/**
+ * @tc.name: SetPropertySessionInfo01
+ * @tc.desc: SetPropertySessionInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetPropertySessionInfo01, Function | SmallTest | Level2)
+{
+    const std::string bundleName = "setPropertSessionInfoTest";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->property_->sessionInfo_.bundleName_ = bundleName;
+
+    windowSceneSession->context_ = nullptr;
+    windowSceneSession->CreateAndConnectSpecificSession();
+    ASSERT_EQ(windowSceneSession->property_->sessionInfo_.bundleName_, bundleName);
+
+    windowSceneSession->context_ = abilityContext_;
+    windowSceneSession->property_->sessionInfo_.bundleName_ = bundleName;
+    windowSceneSession->CreateAndConnectSpecificSession();
+    ASSERT_EQ(windowSceneSession->property_->sessionInfo_.bundleName_, abilityContext_->GetBundleName());
 }
 }
 } // namespace Rosen
