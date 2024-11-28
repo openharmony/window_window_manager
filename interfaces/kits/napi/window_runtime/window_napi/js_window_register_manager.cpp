@@ -240,7 +240,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
     return ret;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(sptr<JsWindowListener> listener,
+WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<JsWindowListener>& listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     TLOGD(WmsLogTag::DEFAULT, "in");
