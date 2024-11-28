@@ -1491,6 +1491,9 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
         return this->GetFocusedSessionId();
     };
     keyboardCb->onCallingSessionIdChange_ = callingSessionIdChangeFunc_;
+    keyboardCb->onSystemKeyboardAvoidChange_ = [this](DisplayId displayId, SystemKeyboardAvoidChangeReason reason) {
+        this->HandleKeyboardAvoidChange(nullptr, displayId, reason);
+    };
     return keyboardCb;
 }
 
@@ -1587,6 +1590,103 @@ void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& wi
     taskScheduler_->PostSyncTask(task, "OnNotifyAboveLockScreen");
 }
 
+sptr<SceneSession> SceneSessionManager::GetKeyboardSession(DisplayId displayId, bool isSystemKeyboard)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "displayId is invalid.");
+        return nullptr;
+    }
+    sptr<SceneSession> keyboardSession = nullptr;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession && sceneSession->GetScreenId() == displayId &&
+            sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+            sceneSession->IsSystemKeyboard() == isSystemKeyboard) {
+            keyboardSession = sceneSession;
+            break;
+        }
+    }
+    return keyboardSession;
+}     
+
+void SceneSessionManager::HandleKeyboardAvoidChange(sptr<SceneSession> sceneSession, DisplayId displayId,
+    SystemKeyboardAvoidChangeReason reason)
+{
+    if (!(systemConfig_.IsPcWindow())) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "this device is not pc.");
+        return;
+    }
+    switch (reason) {
+        // if the system keyboard's avoid area is active first, deactivate the other keyboard's avoid area
+        case SystemKeyboardAvoidChangeReason::KEYBOARD_CREATED: {
+            if (!sceneSession || sceneSession->IsSystemKeyboard()) {
+                return;
+            }
+            sptr<SceneSession> systemKeyboardSession = GetKeyboardSession(displayId, true);
+            if (systemKeyboardSession && systemKeyboardSession->IsSessionForeground() &&
+                systemKeyboardSession->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+                sceneSession->ActivateKeyboardAvoidArea(false, false);
+            }
+            break;
+        }
+        /**
+         * activate the system keyboard's avoid area, while it is showing or it's gravity is bottom
+         * and deactivate other keyboard's avoid area
+         */
+        case SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW:
+        case SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM: {
+            UpdateKeyboardAvoidAreaActive(displayId, true);
+            break;
+        }
+
+        /**
+         * when the system keyboard is hiden, disconnect or it's gravity is float
+         * check for whether other keyboard can be avoided: if yes, avoids the other keyboard
+         *                                                  if no, restores the system keyboard
+         */                                                
+        case SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE:
+        case SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT:
+        case SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT: {
+            sptr<SceneSession> keyboardSession = GetKeyboardSession(displayId, false);
+            bool keyboardRecalculate = false;
+            if (keyboardSession) {
+                if (keyboardSession->IsSessionForeground() &&
+                    keyboardSession->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+                    keyboardRecalculate = true;
+                }
+                keyboardSession->ActivateKeyboardAvoidArea(true, keyboardRecalculate);
+            }
+            sptr<SceneSession> sysKeyboardSession = GetKeyboardSession(displayId, true);
+            if (sysKeyboardSession) {
+                sysKeyboardSession->ActivateKeyboardAvoidArea(false, !keyboardRecalculate);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void SceneSessionManager::UpdateKeyboardAvoidAreaActive(DisplayId displayId, bool sysKeyAvoidAreaActive)
+{
+    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayId);
+    if (keyboardSessionVec.empty()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "there is no keyboard window in the map");
+        return;
+    }
+
+    for (const auto& tempKeyboardSession : keyboardSessionVec) {
+        if (!tempKeyboardSession) {
+            continue;
+        }
+        if (tempKeyboardSession->IsSystemKeyboard()) {
+            tempKeyboardSession->ActivateKeyboardAvoidArea(sysKeyAvoidAreaActive, false);
+        } else {
+            tempKeyboardSession->ActivateKeyboardAvoidArea(!sysKeyAvoidAreaActive, false);
+        }
+    }
+}
+
 sptr<SceneSession> SceneSessionManager::RequestKeyboardPanelSession(const std::string& panelName, uint64_t displayId)
 {
     SessionInfo panelInfo = {
@@ -1634,8 +1734,8 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
     }
 
     // only 2 scenarios of panelSession is nullptr:
-    // 1: neither keyboard panel session or systemkeyboard keyboard panel session is crated.
-    // 2: one panel session has been created already, but it's isSystemKeyboard is not match with keyboardSesion's
+    // 1: neither keyboard panel session or systemkeyboard keyboard panel session is created.
+    // 2: a panel session has been created already, but it's isSystemKeyboard is not match with keyboardSesion's
     if (panelSession == nullptr) {
         if (panelVec.size() >= 2) { // 2 is max number of keyboard panel, one input method and one system keyboard
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Error size of keyboardPanel, size: %{public}zu", panelVec.size());
@@ -1677,6 +1777,8 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession = new KeyboardSession(sessionInfo, specificCb, keyboardCb);
         sceneSession->SetIsSystemKeyboard(property->IsSystemKeyboard());
         CreateKeyboardPanelSession(sceneSession);
+        HandleKeyboardAvoidChange(sceneSession, sceneSession->GetScreenId(),
+            SystemKeyboardAvoidChangeReason::KEYBOARD_CREATED);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Create KeyboardSession, type: %{public}d", property->GetWindowType());
     } else if (property != nullptr && SessionHelper::IsSystemWindow(property->GetWindowType())) {
         sceneSession = new SystemSession(sessionInfo, specificCb);
@@ -2915,7 +3017,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
             TLOGD(WmsLogTag::WMS_KEYBOARD, "create system keyboard, permission check sucess.");
             return true;
         }
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "create system keyboard, permission cehck failed.");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "create system keyboard, permission check failed.");
         return false;
     }
 
