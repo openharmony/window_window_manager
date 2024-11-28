@@ -479,7 +479,7 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
         }
     );
 
-    if (napi_status::napi_ok != napi_send_event(eng_, complete, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, complete, napi_eprio_immediate)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
     }
 }
