@@ -211,23 +211,6 @@ void KeyboardSession::OnCallingSessionUpdated()
         GetPersistentId(), callingSessionRect.ToString().c_str());
 }
 
-WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity)
-{
-    if (keyboardGravityChangeFunc_) {
-        keyboardGravityChangeFunc_(gravity);
-    }
-    RelayoutKeyBoard();
-    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-        SetWindowAnimationFlag(false);
-        if (IsSessionForeground()) {
-            RestoreCallingSession();
-        }
-    } else {
-        SetWindowAnimationFlag(true);
-    }
-    return WSError::WS_OK;
-}
-
 void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
 {
     auto task = [weakThis = wptr(this), callingSessionId]() mutable {
@@ -277,6 +260,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        // set keyboard layout params
         auto sessionProperty = session->GetSessionProperty();
         if (sessionProperty == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is null");
@@ -284,7 +268,16 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
-        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_));
+        // handle keyboard gravity change
+        if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
+            session->SetWindowAnimationFlag(false);
+            if (session->IsSessionForeground()) {
+                session->RestoreCallingSession();
+            }
+        } else {
+            session->SetWindowAnimationFlag(true);
+        }
+        // notify keyboard layout param
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
         }
@@ -504,35 +497,6 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
     } else {
         sessionProperty->SetCallingSessionId(callingSessionId);
     }
-}
-
-void KeyboardSession::RelayoutKeyBoard()
-{
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is nullptr, relayout keyboard failed");
-        return;
-    }
-
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    SessionGravity gravity = GetKeyboardGravity();
-    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-        return;
-    }
-    if (!GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight)) {
-        return;
-    }
-
-    auto requestRect = sessionProperty->GetRequestRect();
-    if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) {
-        requestRect.width_ = screenWidth;
-        requestRect.posX_ = 0;
-    }
-    requestRect.posY_ = static_cast<int32_t>(screenHeight - requestRect.height_);
-    sessionProperty->SetRequestRect(requestRect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, gravity: %{public}d", GetPersistentId(),
-        SessionHelper::TransferToWSRect(requestRect).ToString().c_str(), gravity);
 }
 
 void KeyboardSession::OpenKeyboardSyncTransaction()

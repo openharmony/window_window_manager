@@ -69,7 +69,6 @@ const std::string SESSIONINFO_LOCKEDSTATE_CHANGE_CB = "sessionInfoLockedStateCha
 const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";
 const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
 const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
-const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
@@ -133,7 +132,6 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {PREPARE_CLOSE_PIP_SESSION,             ListenerFuncType::PREPARE_CLOSE_PIP_SESSION},
     {LANDSCAPE_MULTI_WINDOW_CB,             ListenerFuncType::LANDSCAPE_MULTI_WINDOW_CB},
     {CONTEXT_TRANSPARENT_CB,                ListenerFuncType::CONTEXT_TRANSPARENT_CB},
-    {KEYBOARD_GRAVITY_CHANGE_CB,            ListenerFuncType::KEYBOARD_GRAVITY_CHANGE_CB},
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
@@ -609,48 +607,6 @@ void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
     };
     taskScheduler_->PostMainThreadTask(task,
         "SetLandscapeMultiWindow, isLandscapeMultiWindow:" + std::to_string(isLandscapeMultiWindow));
-}
-
-void JsSceneSession::ProcessKeyboardGravityChangeRegister()
-{
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    NotifyKeyboardGravityChangeFunc func = [weakThis = wptr(this)](SessionGravity gravity) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessKeyboardGravityChangeRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnKeyboardGravityChange(gravity);
-    };
-    session->SetKeyboardGravityChangeCallback(func);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "success");
-}
-
-void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
-{
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, gravity, env = env_] {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnKeyboardGravityChange jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
-            return;
-        }
-        auto jsCallBack = jsSceneSession->GetJSCallback(KEYBOARD_GRAVITY_CHANGE_CB);
-        if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
-            return;
-        }
-        napi_value gravityObj = CreateJsValue(env, gravity);
-        napi_value argv[] = {gravityObj};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Napi call gravity success, gravity: %{public}u", gravity);
-    };
-    taskScheduler_->PostMainThreadTask(task, "OnKeyboardGravityChange: gravity " +
-        std::to_string(static_cast<int>(gravity)));
 }
 
 void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
@@ -2389,9 +2345,6 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::CONTEXT_TRANSPARENT_CB):
             ProcessContextTransparentRegister();
-            break;
-        case static_cast<uint32_t>(ListenerFuncType::KEYBOARD_GRAVITY_CHANGE_CB):
-            ProcessKeyboardGravityChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB):
             ProcessAdjustKeyboardLayoutRegister();
