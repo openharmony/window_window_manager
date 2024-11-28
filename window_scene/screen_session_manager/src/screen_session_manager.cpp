@@ -348,8 +348,34 @@ void ScreenSessionManager::OnStart()
         TLOGE(WmsLogTag::DMS, "Publish DMS failed");
         return;
     }
+    TLOGI(WmsLogTag::DMS, "DMS SA AddSystemAbilityListener");
+    (void)AddSystemAbilityListener(SENSOR_SERVICE_ABILITY_ID);
     TLOGI(WmsLogTag::DMS, "end");
     screenEventTracker_.RecordEvent("Dms onstart end.");
+}
+
+void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "OnAddSystemAbility: %d", systemAbilityId);
+    TLOGI(WmsLogTag::DMS, "receive sa add:%{public}d", systemAbilityId);
+    if (systemAbilityId == SENSOR_SERVICE_ABILITY_ID) {
+#ifdef SENSOR_ENABLE
+        if (!g_foldScreenFlag) {
+            TLOGI(WmsLogTag::DMS, "current device is not fold phone.");
+            return;
+        }
+        if (!foldScreenController_) {
+            return;
+        }
+        if (GetDisplayState(foldScreenController_->GetCurrentScreenId()) == DisplayState::ON) {
+            FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            TLOGI(WmsLogTag::DMS, "Recover Posture sensor finished");
+        }
+
+        FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+        TLOGI(WmsLogTag::DMS, "Recover Hall sensor finished");
+#endif
+    }
 }
 
 DMError ScreenSessionManager::CheckDisplayMangerAgentTypeAndPermission(
