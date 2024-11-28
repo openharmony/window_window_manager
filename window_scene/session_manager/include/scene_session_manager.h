@@ -988,8 +988,16 @@ private:
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
+
+    /*
+     * keyboard Window
+     */
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     sptr<SceneSession> RequestKeyboardPanelSession(const std::string& panelName, uint64_t displayId);
+    sptr<SceneSession> GetKeyboardSession(DisplayId displayId, bool isSystemKeyboard);
+    void HandleKeyboardAvoidChange(sptr<SceneSession> sceneSession, DisplayId displayId,
+        SystemKeyboardAvoidChangeReason reason);
+    void UpdateKeyboardAvoidAreaActive(DisplayId displayId, bool sysKeyAvoidAreaActive);
 
     /*
      * Specific Window
