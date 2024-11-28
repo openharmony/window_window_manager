@@ -86,7 +86,7 @@ private:
         sptr<Window> window, bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
-    WmErrorCode ProcessDisplayIdChangeRegister(const sptr<JsWindowListener>& listener, sptr<Window> window,
+    WmErrorCode ProcessDisplayIdChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
