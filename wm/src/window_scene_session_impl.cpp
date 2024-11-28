@@ -4055,7 +4055,7 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
 
     auto preRect = GetRect();
     UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED, nullptr, info);
-    WLOGFI("[%{public}d, %{public}d, %{public}u, %{public}u]",
+    WLOGFD("[%{public}d, %{public}d, %{public}u, %{public}u]",
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
 }
 

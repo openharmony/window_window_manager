@@ -96,7 +96,7 @@ __attribute__((no_sanitize("cfi"))) void WindowInputChannel::HandleKeyEvent(
         };
         auto ret = MiscServices::InputMethodController::GetInstance()->DispatchKeyEvent(keyEvent, callback);
         if (ret != 0) {
-            WLOGFE("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d", ret, keyEvent->GetId());
+            WLOGFD("DispatchKeyEvent failed, ret:%{public}d, id:%{public}d", ret, keyEvent->GetId());
             DispatchKeyEventCallback(keyEvent, false);
         }
         return;
