@@ -3083,7 +3083,7 @@ void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 
 void JsSceneSession::OnSessionTouchableChange(bool touchable)
 {
-    WLOGFI("[NAPI]state: %{public}u", touchable);
+    WLOGFD("[NAPI]state: %{public}u", touchable);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, touchable, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {

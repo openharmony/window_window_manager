@@ -928,7 +928,7 @@ WindowLimits WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
         systemLimits.minWidth_ = static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr);
         systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr);
     }
-    WLOGFI("[System SizeLimits] [maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
         "minHeight: %{public}u]", systemLimits.maxWidth_, systemLimits.minWidth_,
         systemLimits.maxHeight_, systemLimits.minHeight_);
     return systemLimits;
