@@ -431,6 +431,12 @@ protected:
      */
     uint32_t GetStatusBarHeight() override;
 
+    /**
+     * PC Fold Screen
+     */
+    std::atomic_bool isFullScreenWaterfallMode_ { false };
+    int32_t UpdateSuperFoldRect(const WSRect& rect);
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);

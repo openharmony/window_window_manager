@@ -46,6 +46,7 @@
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 #include "parameters.h"
+#include "common/include/fold_screen_state_internel.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -55,6 +56,8 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
+constexpr DisplayId SUPER_FOLD_UPPER_DISPLAY_ID = 0;
+constexpr DisplayId SUPER_FOLD_LOWER_DISPLAY_ID = 999;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -675,13 +678,44 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
+int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect) {
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() || isFullScreenWaterfallMode_.load() ||
+        SingletonContainer::Get<DisplayManager>().GetFoldStatus() != FoldStatus::HALF_FOLD) {
+        return rect;
+    }
+    auto curAllDisplayIds = SingletonContainer::Get<DisplayManager>().GetAllDisplayIds();
+    auto it = std::find(curAllDisplayIds.begin(), curAllDisplayIds.end(), SUPER_FOLD_LOWER_DISPLAY_ID);
+    if (it == curAllDisplayIds.end()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "KEYBOARD");
+        return rect;
+    }
+    auto FoldCreaseRegionVec = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion()->GetCreaseRect();
+    if (FoldCreaseRegionVec != 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Get FoldCreaseRegionVec Error");
+        return rect;
+    }
+    auto FoldCreaseRegion = FoldCreaseRegionVec.front();
+    int32_t avoidPosY = FoldCreaseRegionVec.posY_;
+    if (rect.posY_ <= avoidPosY) {
+        property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
+        return rect;
+    }
+    int32_t lowerScreenPosY = FoldCreaseRegion.posY_ + FoldCreaseRegion.height_; // 1689
+    if (rect.posY_ < lowerScreenPosY) {
+        return rect;
+    }
+    property_->SetDisplayId(SUPER_FOLD_LOWER_DISPLAY_ID);
+    return rect.posY_ - lowerScreenPosY;
+}
+
 /** @note @window.layout */
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const SceneAnimationConfig& config)
 {
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
-    Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+    auto updatedPosY = UpdateSuperFoldRect(rect);
+    Rect wmRect = { rect.posX_, updatedPosY, rect.width_, rect.height_ };
     auto preRect = GetRect();
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
