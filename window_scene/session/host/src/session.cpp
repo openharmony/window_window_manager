@@ -700,7 +700,7 @@ bool Session::GetTouchable() const
 void Session::SetForceTouchable(bool forceTouchable)
 {
     if (forceTouchable != forceTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d forceTouchable:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d: %{public}d", GetPersistentId(),
             static_cast<int>(forceTouchable));
     }
     forceTouchable_ = forceTouchable;
@@ -709,7 +709,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d systemTouchable_:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d: %{public}d", GetPersistentId(),
             static_cast<int>(touchable));
     }
     systemTouchable_ = touchable;
@@ -2145,8 +2145,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     } else {
-        WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
-            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+        TLOGI(WmsLogTag::DMS, "Session TransferPointEvent, eventId:%{public}d, action:%{public}s, "
+            "persistentId:%{public}d, bundleName:%{public}s, pid:%{public}d",
+            pointerEvent->GetId(), pointerEvent->DumpPointerAction()
             persistentId_, callingBundleName_.c_str(), callingPid_);
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
