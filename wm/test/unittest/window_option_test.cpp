@@ -531,6 +531,35 @@ HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, Function | SmallTest | Level3
     option->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, option->IsSystemKeyboard());
 }
+
+/**
+ * @tc.name: SetDensity
+ * @tc.desc: test SetDensity and GetDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetDensity, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    ASSERT_EQ(1.0f, option->GetDensity());
+    float density = 5.0f
+    option->SetDensity(density);
+    ASSERT_EQ(density, option->GetDensity());
+}
+
+/**
+ * @tc.name: SetIsDensityFollowHost
+ * @tc.desc: test SetIsDensityFollowHost and GetIsDensityFollowHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    ASSERT_EQ(false, option->GetIsDensityFollowHost());
+    option->SetIsDensityFollowHost(true);
+    ASSERT_EQ(true, option->GetIsDensityFollowHost());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
