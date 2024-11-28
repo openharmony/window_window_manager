@@ -714,8 +714,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 {
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
-    auto updatedPosY = UpdateSuperFoldRect(rect);
-    Rect wmRect = { rect.posX_, updatedPosY, rect.width_, rect.height_ };
+    Rect wmRect = { rect.posX_, UpdateSuperFoldRect(rect), rect.width_, rect.height_ };
     auto preRect = GetRect();
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
