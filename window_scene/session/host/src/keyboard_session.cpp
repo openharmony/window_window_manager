@@ -166,6 +166,10 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 
 void KeyboardSession::UpdateKeyboardAvoidArea()
 {
+    if (!keyboardAvoidAreaActive_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "no need to update keyboard avoid area");
+        return;
+    }
     if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
         return;
@@ -388,6 +392,10 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
 void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (!keyboardAvoidAreaActive_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "no need to raise calling session for inactive avoid area.");
+        return;
+    }
     if (!IsSessionForeground() || (needCheckVisible && !IsVisibleForeground())) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
