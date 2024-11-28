@@ -636,7 +636,7 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
     displayNode = nullptr;
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
-        TLOGI(WmsLogTag::DMS, "FreeDisplayMirrorNodeInner free displayNode");
+        TLOGI(WmsLogTag::DMS, "free displayNode");
         transactionProxy->FlushImplicitTransaction();
     }
 }
@@ -669,7 +669,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
 
 void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
 {
-    TLOGI(WmsLogTag::DMS, "SendCastEvent entry isPlugIn:%{public}d", isPlugIn);
+    TLOGI(WmsLogTag::DMS, "isPlugIn:%{public}d", isPlugIn);
     if (!ScreenCastConnection::GetInstance().CastConnectExtension(static_cast<int32_t>(isPlugIn))) {
         TLOGE(WmsLogTag::DMS, "CastConnectionExtension failed");
         return;
@@ -4721,7 +4721,7 @@ void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<
 
 void ScreenSessionManager::NotifyPrivateWindowListChanged(DisplayId id, std::vector<std::string> privacyWindowList)
 {
-    TLOGI(WmsLogTag::DMS, "Notify displayid: %{public}" PRIu64" PrivateWindowListChanged", id);
+    TLOGI(WmsLogTag::DMS, "Notify displayid: %{public}" PRIu64"", id);
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LIST_LISTENER);
     if (agents.empty()) {
         return;
