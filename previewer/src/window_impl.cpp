@@ -1168,7 +1168,7 @@ void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Conf
 
 void WindowImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "previewer, config: %{public}s", configuration->GetName().c_str());
+    TLOGD(WmsLogTag::WMS_IMMS, "previewer");
     std::lock_guard<std::mutex> lock(globalMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
