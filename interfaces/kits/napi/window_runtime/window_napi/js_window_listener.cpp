@@ -464,14 +464,9 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnWindowDisplayIdChangedCallback(DisplayId displayId)
+void JsWindowListener::OnDisplayIdChangedCallback(DisplayId displayId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "CALLED");
-    if (displayId > std::numeric_limits<int64_t>::max()) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid displayId");
-        return;
-    }
-    int64_t displayIdValue = static_cast<int64_t>(displayId);
+    TLOGD(WmsLogTag::DEFAULT, "CALLED");
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
         [self = weakRef_, displayIdValue, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
@@ -479,14 +474,14 @@ void JsWindowListener::OnWindowDisplayIdChangedCallback(DisplayId displayId)
                 WLOGFE("This listener or eng is nullptr");
                 return;
             }
-            napi_value argv[] = { CreateJsValue(eng, displayIdValue) };
+            napi_value argv[] = { CreateJsValue(eng, static_cast<int64_t>(displayId);) };
             thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
 
     napi_ref callback = nullptr;
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnWindowDisplayIdChangedCallback", env_,
+    NapiAsyncTask::Schedule("JsWindowListener::OnDisplayIdChangedCallback", env_,
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 

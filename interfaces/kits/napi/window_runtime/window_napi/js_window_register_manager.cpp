@@ -240,10 +240,10 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
     return ret;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessWindowDisplayIdChangeRegister(sptr<JsWindowListener> listener,
+WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
-    TLOGI(WmsLogTag::DEFAULT, "called");
+    TLOGD(WmsLogTag::DEFAULT, "called");
     if (window == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
@@ -251,12 +251,12 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowDisplayIdChangeRegister(sptr<J
         TLOGE(WmsLogTag::DEFAULT, "listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    IWindowDisplayIdChangeListenerSptr thisListener(listener);
+    IDisplayIdChangeListenerSptr thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowDisplayIdChangeListener(thisListener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowDisplayIdChangeListener(thisListener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
     }
     return ret;
 }
@@ -464,7 +464,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
                 return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB):
-                return ProcessWindowDisplayIdChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+                return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
                 return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
