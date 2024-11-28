@@ -500,23 +500,20 @@ HWTEST_F(MoveDragControllerTest, CalcFixedAspectRatioTranslateLimits01, Function
 {
     moveDragController->limits_ = { 30, 60, 30, 60, 2.0, 2.0 };
     moveDragController->aspectRatio_ = 1.0f;
-    MoveDragController::AxisType axis = MoveDragController::AxisType::X_AXIS;
     AreaType type = AreaType::RIGHT;
     ASSERT_TRUE((moveDragController != nullptr));
     moveDragController->isDecorEnable_ = true;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type, axis);
+    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
     moveDragController->isDecorEnable_ = false;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type, axis);
+    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
     moveDragController->limits_ = { 60, 60, 60, 60, 2.0, 2.0 };
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type, axis);
+    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
     type = AreaType::LEFT;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type, axis);
-    axis = MoveDragController::AxisType::Y_AXIS;
+    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
     type = AreaType::BOTTOM;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type, axis);
-    axis = MoveDragController::AxisType::X_AXIS;
+    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
     type = AreaType::TOP;
-    moveDragController->CalcFixedAspectRatioTranslateLimits(type, axis);
+    moveDragController->CalcFixedAspectRatioTranslateLimits(type);
 }
 
 /**

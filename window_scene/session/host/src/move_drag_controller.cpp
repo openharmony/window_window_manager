@@ -665,7 +665,6 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
     int32_t posY = originalRect.posY_;
     int32_t width = static_cast<int32_t>(originalRect.width_);
     int32_t height = static_cast<int32_t>(originalRect.height_);
-    FixTranslateByLimits(tranX, tranY);
     if (mainMoveAxis_ == AxisType::UNDEFINED) {
         if (!InitMainAxis(type, tranX, tranY)) {
             return originalRect;
@@ -673,6 +672,7 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
     }
 
     ConvertXYByAspectRatio(tranX, tranY, aspectRatio);
+    FixTranslateByLimits(tranX, tranY);
     switch (type) {
         case AreaType::LEFT_TOP: {
             return {posX + tranX, posY + tranY, width - tranX, height - tranY};
@@ -726,7 +726,7 @@ void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
     }
 }
 
-void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type, AxisType axis)
+void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type)
 {
     int32_t minW = static_cast<int32_t>(limits_.minWidth_);
     int32_t maxW = static_cast<int32_t>(limits_.maxWidth_);
@@ -735,43 +735,51 @@ void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type, Axis
     if (isDecorEnable_) {
         if (SessionUtils::ToLayoutWidth(minW, vpr_) < SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_) {
             minW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(minH, vpr_) * aspectRatio_, vpr_);
+            minH = SessionUtils::ToLayoutHeight(minH, vpr_);
         } else {
             minH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(minW, vpr_) / aspectRatio_, vpr_);
+            minW = SessionUtils::ToLayoutWidth(minW, vpr_);
         }
         if (SessionUtils::ToLayoutWidth(maxW, vpr_) < SessionUtils::ToLayoutHeight(maxH, vpr_) * aspectRatio_) {
-            maxH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(maxW, vpr_) * aspectRatio_, vpr_);
+            maxH = SessionUtils::ToWinHeight(SessionUtils::ToLayoutWidth(maxW, vpr_) / aspectRatio_, vpr_);
+            maxW = SessionUtils::ToLayoutWidth(maxW, vpr_);
         } else {
-            maxW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(maxH, vpr_) / aspectRatio_, vpr_);
+            maxW = SessionUtils::ToWinWidth(SessionUtils::ToLayoutHeight(maxH, vpr_) * aspectRatio_, vpr_);
+            maxH = SessionUtils::ToLayoutHeight(maxH, vpr_);
         }
     } else {
+        // width = height * aspectRatio
         if (minW < minH * aspectRatio_) {
             minW = minH * aspectRatio_;
         } else {
             minH = minW / aspectRatio_;
         }
         if (maxW < maxH * aspectRatio_) {
-            maxH = maxW * aspectRatio_;
+            maxH = maxW / aspectRatio_;
         } else {
-            maxW = maxH / aspectRatio_;
+            maxW = maxH * aspectRatio_;
         }
     }
-
-    if (axis == AxisType::X_AXIS) {
-        if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
-            minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
-            maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
-        } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT)) {
-            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-        }
-    } else if (axis == AxisType::Y_AXIS) {
-        if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
-            minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
-            maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
-        } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
-            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        }
+    if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
+        minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
+        maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
+        minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+        maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+    } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT)) {
+        minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+        maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+        minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+        maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+    } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
+        minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+        maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+        minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
+        maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
+    } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
+        minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+        maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+        minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+        maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
     }
 }
 
@@ -800,7 +808,7 @@ bool MoveDragController::InitMainAxis(AreaType type, int32_t tranX, int32_t tran
     } else {
         mainMoveAxis_ = (std::abs(tranX) > std::abs(tranY)) ? AxisType::X_AXIS : AxisType::Y_AXIS;
     }
-    CalcFixedAspectRatioTranslateLimits(type, mainMoveAxis_);
+    CalcFixedAspectRatioTranslateLimits(type);
     return true;
 }
 
