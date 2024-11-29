@@ -39,6 +39,7 @@ enum class DisplayManagerAgentType : uint32_t {
     FOLD_ANGLE_CHANGED_LISTENER,
     CAPTURE_STATUS_CHANGED_LISTENER,
     PRIVATE_WINDOW_LIST_LISTENER,
+    SCREEN_MODE_CHANGE_EVENT_LISTENER,
     // add listener before
     DISPLAY_MANAGER_MAX_AGENT_TYPE,
 };
@@ -66,6 +67,7 @@ public:
         TRANS_ID_ON_FOLD_ANGLE_CHANGED,
         TRANS_ID_ON_CAPTURE_STATUS_CHANGED,
         TRANS_ID_ON_PRIVATE_WINDOW_LIST,
+        TRANS_ID_ON_SCREEN_MODE_CHANGED,
     };
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
     virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) = 0;
@@ -86,6 +88,7 @@ public:
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) = 0;
     virtual void NotifyDisplayModeChanged(FoldDisplayMode) = 0;
     virtual void NotifyAvailableAreaChanged(DMRect) = 0;
+    virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
