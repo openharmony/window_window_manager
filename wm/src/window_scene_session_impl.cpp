@@ -1980,8 +1980,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        isFullScreenWaterfallMode_.load() ? hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_WATERFALL)
-                                          : hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        hostSession->OnSessionEvent(isFullScreenWaterfallMode_.load() ? SessionEvent::EVENT_MAXIMIZE_WATERFALL
+                                                                      : SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
 
