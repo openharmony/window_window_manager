@@ -255,10 +255,16 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    /**
+     * Window Decor
+     */
     virtual WMError SetDecorVisible(bool isVisible) override;
     virtual WMError SetWindowTitleMoveEnabled(bool enable) override;
     virtual WMError SetDecorHeight(int32_t decorHeight) override;
     virtual WMError GetDecorHeight(int32_t& height) override;
+    virtual WMError SetDecorButtonStyle(DecorButtonStyle decorButtonStyle) override;
+    virtual WMError GetDecorButtonStyle(DecorButtonStyle& decorButtonStyle) override;
+
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     virtual WMError RegisterWindowTitleButtonRectChangeListener(
@@ -572,6 +578,7 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+    DecorButtonStyle decorButtonStyle_;
 
     /**
      * Multi Window

@@ -478,6 +478,84 @@ HWTEST_F(WindowSessionImplTest4, GetDecorHeight, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetDecorButtonStyle
+ * @tc.desc: GetDecorButtonStyle and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetDecorButtonStyle, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorButtonStyle start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDecorButtonStyle");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+
+    // check window type
+    DecorButtonStyle style;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    WMError res = window->GetDecorButtonStyle(style);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+
+    // check default set
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    res = window->GetDecorButtonStyle(style);
+    ASSERT_EQ(style.buttonBackgroundSize, DEFAULT_BUTTON_BACKGROUND_SIZE);
+    ASSERT_EQ(style.closeButtonRightMargin, DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN);
+    ASSERT_EQ(style.spacingBetweenButtons, DEFAULT_SPACING_BETWEEN_BUTTONS);
+    ASSERT_EQ(style.colorMode, DEFAULT_COLOR_MODE);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetDecorButtonStyle
+ * @tc.desc: SetDecorButtonStyle and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetDecorButtonStyle, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetDecorButtonStyle start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetDecorButtonStyle");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    // check window type
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+
+    // check window type
+    DecorButtonStyle style;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    WMError res = window->SetDecorButtonStyle(style);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+
+    //check get value
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    style.buttonBackgroundSize = -1;
+    res = window->SetDecorButtonStyle(style);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    //check uiContent is null
+    style.buttonBackgroundSize = 24;
+    res = window->SetDecorButtonStyle(style);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    //check same style data
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->SetDecorButtonStyle(style);
+    ASSERT_EQ(res, WMError::WM_OK);
+    DecorButtonStyle styleRes;
+    res = window->GetDecorButtonStyle(styleRes);
+    ASSERT_EQ(styleRes.buttonBackgroundSize, style.buttonBackgroundSize);
+}
+
+/**
  * @tc.name: GetTitleButtonArea
  * @tc.desc: GetTitleButtonArea and check the retCode
  * @tc.type: FUNC
