@@ -678,7 +678,8 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect) {
+int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
+{
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() ||
         SingletonContainer::Get<DisplayManager>().GetFoldStatus() != FoldStatus::HALF_FOLD) {
         return false;
@@ -700,7 +701,7 @@ int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect) {
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
         return rect.posY_;
     }
-    int32_t lowerScreenPosY = FoldCreaseRegion.posY_ + FoldCreaseRegion.height_; // 1689
+    int32_t lowerScreenPosY = FoldCreaseRegion.posY_ + FoldCreaseRegion.height_;
     if (rect.posY_ < lowerScreenPosY) {
         return rect.posY_;
     }
