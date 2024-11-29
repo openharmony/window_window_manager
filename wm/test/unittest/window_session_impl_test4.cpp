@@ -241,7 +241,7 @@ HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetDecorVisible");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
@@ -487,7 +487,7 @@ HWTEST_F(WindowSessionImplTest4, GetDecorButtonStyle, Function | SmallTest | Lev
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorButtonStyle start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetDecorButtonStyle");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = new sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -520,7 +520,7 @@ HWTEST_F(WindowSessionImplTest4, SetDecorButtonStyle, Function | SmallTest | Lev
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetDecorButtonStyle start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetDecorButtonStyle");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     // check window type
     window->property_->SetPersistentId(1);
