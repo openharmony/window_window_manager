@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-#include "ipc_types.h"
 #include "mock/mock_session_stub.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
-#include "session/host/include/zidl/session_stub.h"
-#include "ws_common.h"
 #include <gtest/gtest.h>
 
 using namespace testing;
@@ -34,7 +31,7 @@ public:
     void TearDown() override;
 
 private:
-    sptr <SessionStub> session_ = nullptr;
+    sptr<SessionStubMocker> session_ = nullptr;
 };
 
 void SessionStubImmersiveTest::SetUpTestCase() {}
@@ -45,6 +42,12 @@ void SessionStubImmersiveTest::SetUp()
 {
     session_ = new (std::nothrow) SessionStubMocker();
     EXPECT_NE(nullptr, session_);
+
+    EXPECT_CALL(*session_, OnRemoteRequest(_, _, _, _)).WillOnce(Invoke(
+        [&](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+            return session_->SessionStub::OnRemoteRequest(code, data, reply, option);
+        }
+    ))
 }
 
 void SessionStubImmersiveTest::TearDown()
@@ -69,7 +72,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, Func
     data.WriteUint32(1111); // invalid type
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA);
     int ret = session_->OnRemoteRequest(code, data, reply, option);
-    ASSERT_EQ(ret, -1);
+    ASSERT_EQ(ret, 5);
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAvoidAreaByTypeWithInvalidType end";
 }
 
@@ -84,7 +87,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
     AvoidArea mockArea;
     mockArea.topRect_.width_ = 1200;
     mockArea.topRect_.height_ = 127;
-    EXPECT_CALL(*session, GetAvoidAreaByType, (_)).WillOnce(Return(mockArea));
+    EXPECT_CALL(*session_, GetAvoidAreaByType, (_)).WillOnce(Return(mockArea));
 
     MessageParcel data;
     MessageParcel reply;
@@ -97,8 +100,8 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
     ASSERT_EQ(ret, 0);
     sptr<AvoidArea> retArea = reply.ReadParcelable<AvoidArea>();
     ASSERT_TRUE(retArea != nullptr);
-    ASSERT_EQ(retArea.topRect_.width_, 1200);
-    ASSERT_EQ(retArea.topRect_.height_, 127);
+    ASSERT_EQ(retArea->topRect_.width_, 1200);
+    ASSERT_EQ(retArea->topRect_.height_, 127);
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAvoidAreaByTypeWithSystemType end";
 }
 
@@ -110,17 +113,17 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
 HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasNormal start";
-    EXPECT_CALL(*session, GetAllAvoidAreas, (_)).WillOnce(Invock(
+    EXPECT_CALL(*session_, GetAllAvoidAreas, (_)).WillOnce(Invock(
         [](std::map<AvoidAreaType, AvoidArea>& avoidAreas) -> WSError {
             AvoidArea mockArea;
             mockArea.topRect_.width_ = 1200;
             mockArea.topRect_.height_ = 127;
-            avoidAreas.push_back({AvoidAreaType::TYPE_SYSTEM, mockArea});
+            avoidAreas[AvoidAreaType::TYPE_SYSTEM] = mockArea;
 
             AvoidArea indArea;
             indArea.bottomRect_.width_ = 500;
             indArea.bottomRect_.height_ = 10;
-            avoidAreas.push_back({AvoidAreaType::TYPE_NAVIGATION_INDICATOR, indArea});
+            avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR] = indArea;
             return WSError::WS_OK; 
         }
     ));
@@ -129,7 +132,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
-    data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_START)); 
+    data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM)); 
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS);
 
     int ret = session_->OnRemoteRequest(code, data, reply, option);
@@ -145,8 +148,8 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
         sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
         ASSERT_TRUE(area != nullptr);
     }
-    uint32_t ret = reply.ReadUint32();
-    ASSERT_EQ(ret, 0);
+    uint32_t errCode = reply.ReadUint32();
+    ASSERT_EQ(errCode, 0);
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasNormal end";
 }
 
@@ -158,7 +161,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
 HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasEmpty start";
-    EXPECT_CALL(*session, GetAllAvoidAreas, (_)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*session_, GetAllAvoidAreas, (_)).WillOnce(Return(WSError::WS_OK));
 
     MessageParcel data;
     MessageParcel reply;
@@ -172,8 +175,8 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, Function | Small
 
     uint32_t areasNum = reply.ReadUint32();
     ASSERT_EQ(areasNum, 0);
-    uint32_t ret = reply.ReadUint32();
-    ASSERT_EQ(ret, 0);
+    uint32_t errCode = reply.ReadUint32();
+    ASSERT_EQ(errCode, 0);
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasEmpty end";
 }
 }
