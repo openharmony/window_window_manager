@@ -458,6 +458,10 @@ public:
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId);
+    WMError SetGlobalDragResizeType(const DragResizeType& dragResizeType) override;
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
+    WMError SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName) override;
+    WMError GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName) override;
 
     /**
      * Multi Window
@@ -1108,6 +1112,8 @@ private:
      */
     std::mutex isWindowRectAutoSaveMapMutex_;
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
+    std::shared_mutex appDragResizeTypeMapMutex_;
+    std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
 
     /*
      * Specific Window

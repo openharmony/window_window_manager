@@ -1328,6 +1328,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
     napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
+    napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType_));
     return objValue;
 }
 

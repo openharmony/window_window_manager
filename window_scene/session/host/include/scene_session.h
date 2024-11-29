@@ -526,6 +526,12 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible);
 
+    static DragResizeType globalDragResizeType_;
+    void setAppDragResizeType(const DragResizeType& dragResizeType) { appDragResizeType_ = dragResizeType; };
+    void getAppDragResizeType(DragResizeType& dragResizeType) { dragResizeType = appDragResizeType_; };
+    DragResizeType GetDefaultDragResizeType() const;
+    DragResizeType GetDragResizeType() const;
+
     /**
      * Window Layout
      */
@@ -684,6 +690,7 @@ private:
      */
     void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
+    bool IsPCOnMoveDragCallbackEnd(SizeChangeReason reason, WSRect rect);
     void InitializeCrossMoveDrag();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
         bool isGlobal, bool needFlush);
@@ -791,7 +798,7 @@ private:
     std::vector<sptr<SceneSession>> toastSession_;
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
-    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0 };
+    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
@@ -856,6 +863,13 @@ private:
      */
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
+    DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    void SetDragResizeTypeDuringDrag(const DragResizeType& dragResizeType)
+    {
+        dragResizeTypeDuringDrag_ = dragResizeType;
+    };
+    DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; };
 
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
