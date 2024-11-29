@@ -680,11 +680,11 @@ WSError WindowSessionImpl::SetActive(bool active)
 
 int32_t WindowSessionImpl::UpdateSuperFoldRectPosY(const WSRect& rect)
 {
-    // isHopper
+    // isSuperFoldDisplayDevice
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         return rect.posY_;
     }
-    
+
     // Non-fold staus
     property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
     auto superFoldStatus = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
