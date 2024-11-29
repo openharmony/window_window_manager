@@ -584,7 +584,7 @@ private:
     void PostProcessProperty(uint32_t dirty);
 
     /**
-     * Window  Lifecycle
+     * Window Lifecycle
      */
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
 
