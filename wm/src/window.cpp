@@ -245,12 +245,12 @@ void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configu
 void Window::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "scb enabled, config: %{public}s", configuration->GetName().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "scb enabled, config: %{public}s", configuration->GetName().c_str());
         WindowSceneSessionImpl::UpdateThemeConfigurationForAll(configuration);
         RootScene::UpdateThemeConfigurationForAll(configuration);
         WindowExtensionSessionImpl::UpdateThemeConfigurationForAll(configuration);
     } else {
-        TLOGD(WmsLogTag::WMS_IMMS, "scb disabled, config: %{public}s", configuration->GetName().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "scb disabled, config: %{public}s", configuration->GetName().c_str());
         WindowImpl::UpdateThemeConfigurationForAll(configuration);
     }
 }

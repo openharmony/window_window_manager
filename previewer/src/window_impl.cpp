@@ -1162,13 +1162,13 @@ void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Conf
         TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, previewer win: %{public}s", GetWindowName().c_str());
         return;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "previewer win: %{public}s", GetWindowName().c_str());
+    TLOGI(WmsLogTag::WMS_IMMS, "previewer win: %{public}s", GetWindowName().c_str());
     uiContent_->UpdateThemeConfiguration(configuration);
 }
 
 void WindowImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "previewer");
+    TLOGI(WmsLogTag::WMS_IMMS, "previewer");
     std::lock_guard<std::mutex> lock(globalMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
