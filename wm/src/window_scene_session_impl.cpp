@@ -4479,7 +4479,8 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 
 WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventName, const std::string& value)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "DBTB event: %{public}s, value: %{public}s", eventName.c_str(), value.c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, DBTB event: %{public}s, value: %{public}s",
+        GetPersistentId(), eventName.c_str(), value.c_str());
     if (eventName == WATERFALL_WINDOW_EVENT) {
         isFullScreenWaterfallMode_.store(true);
         auto ret = Maximize();
