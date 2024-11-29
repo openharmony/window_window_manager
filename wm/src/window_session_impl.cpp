@@ -706,7 +706,7 @@ int32_t WindowSessionImpl::CalcSuperFoldRectPosY(const WSRect& rect)
         return rect.posY_;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(SUPER_FOLD_UPPER_DISPLAY_ID);
-    if (display == nullptr || display->GetDisplayInfo()) {
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
         return rect.posY_;
     }
