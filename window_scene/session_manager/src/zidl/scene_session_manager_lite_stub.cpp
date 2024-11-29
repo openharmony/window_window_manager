@@ -853,7 +853,6 @@ int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& da
         return ERR_INVALID_DATA;
     }
 
-
     int32_t size = 0;
     if (!data.ReadInt32(size) || size < 0 || size > MAX_CONTROL_APP_INFO) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read controlList failed");
