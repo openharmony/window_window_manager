@@ -59,7 +59,7 @@ namespace {
 
 /**
  * @tc.name: HandleGetAvoidAreaByTypeWithInvalidType
- * @tc.desc: GetAvoidAreaByType with invalid type 
+ * @tc.desc: GetAvoidAreaByType with invalid type
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, Function | SmallTest | Level2)
@@ -78,7 +78,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithInvalidType, Func
 
 /**
  * @tc.name: HandleGetAvoidAreaByTypeWithSystemType
- * @tc.desc: GetAvoidAreaByType with system type 
+ * @tc.desc: GetAvoidAreaByType with system type
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Function | SmallTest | Level2)
@@ -107,7 +107,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
 
 /**
  * @tc.name: HandleGetAllAvoidAreasNormal
- * @tc.desc: GetAllAvoidAreas return two Areas 
+ * @tc.desc: GetAllAvoidAreas return two Areas
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | SmallTest | Level2)
@@ -124,7 +124,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
             indArea.bottomRect_.width_ = 500;
             indArea.bottomRect_.height_ = 10;
             avoidAreas[AvoidAreaType::TYPE_NAVIGATION_INDICATOR] = indArea;
-            return WSError::WS_OK; 
+            return WSError::WS_OK;
         }
     ));
 
@@ -142,7 +142,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
     ASSERT_EQ(areasNum, 2);
     for (uint32_t i = 0; i < 2; i++) {
         uint32_t type = reply.ReadUint32();
-        ASSERT_TRUE((static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_SYSTEM) 
+        ASSERT_TRUE((static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_SYSTEM)
             || (static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
         
         sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
@@ -155,7 +155,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
 
 /**
  * @tc.name: HandleGetAllAvoidAreasEmpty
- * @tc.desc: GetAllAvoidAreas return empty 
+ * @tc.desc: GetAllAvoidAreas return empty
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, Function | SmallTest | Level2)
@@ -167,7 +167,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, Function | Small
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
-    data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM)); 
+    data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS);
 
     int ret = session_->OnRemoteRequest(code, data, reply, option);
