@@ -56,6 +56,7 @@ public:
     DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
     DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
     void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event);
+    void NotifyScreenModeChange();
 
     DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut) override;
     DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx) override;

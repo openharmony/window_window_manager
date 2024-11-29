@@ -19,6 +19,7 @@
 #include <refbase.h>
 #include "dm_common.h"
 #include "wm_single_instance.h"
+#include "screen_info.h"
 
 namespace OHOS::Rosen {
 class ScreenManagerLite : public RefBase {
@@ -45,6 +46,31 @@ public:
          */
         virtual void OnChange(ScreenId) = 0;
     };
+
+    class IScreenModeChangeListener : public virtual RefBase {
+    public:
+
+        /**
+         * @brief Notify when state of the screenMode is changed.
+         */
+        virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>&) = 0;
+    };
+
+    /**
+     * @brief Register screen mode change listener.
+     *
+     * @param listener IScreenModeChangeListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener);
+
+    /**
+     * @brief Unregister screen listener.
+     *
+     * @param listener IScreenModeChangeListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener);
 
     /**
      * @brief Register screen listener.
