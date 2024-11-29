@@ -1813,6 +1813,18 @@ HWTEST_F(WindowSessionTest2, ResetSessionConnectState, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: ResetIsActive
+ * @tc.desc: ResetIsActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, ResetIsActive, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->ResetIsActive();
+    ASSERT_EQ(session_->isActive_, false);
+}
+
+/**
  * @tc.name: PostExportTask02
  * @tc.desc: PostExportTask
  * @tc.type: FUNC
