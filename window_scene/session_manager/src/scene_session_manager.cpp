@@ -7623,7 +7623,7 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         TLOGW(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    if (currentUserId_ != userId) {
+    if (currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) {
         TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_, userId);
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
@@ -7639,6 +7639,7 @@ WSError SceneSessionManager::NotifyAppUseControlList(
                 continue;
             }
             for (const auto& session : mainSessions) {
+                session->SetAppUseControlMapValue(type, controlAppInfo.isNeedControl_);
                 session->NotifyUpdateAppUseControl(type, controlAppInfo.isNeedControl_);
             }
             mainSessions.clear();

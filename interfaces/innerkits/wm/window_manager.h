@@ -244,18 +244,8 @@ public:
  *
  * @brief Window info used for ControlAppInfo.
  */
-class ControlAppInfo : public Parcelable {
+struct ControlAppInfo : public Parcelable {
 public:
-    /**
-     * @brief Default construct of ControlAppInfo.
-     */
-    ControlAppInfo() = default;
-
-    /**
-     * @brief Default deconstruct of ControlAppInfo.
-     */
-    ~ControlAppInfo() = default;
-
     /**
      * @brief Marshalling ControlAppInfo.
      *

@@ -4533,13 +4533,14 @@ void JsSceneSession::ProcessUpdateAppUseControlRegister()
         return;
     }
     const char* const where = __func__;
-    session->RegisterUpdateAppUseControlCallback([weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{pubilc}s: jsSceneSession is null", where);
-            return;
-        }
-        jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
+    session->RegisterUpdateAppUseControlCallback(
+        [weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
+            auto jsSceneSession = weakThis.promote();
+            if (!jsSceneSession) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "%{pubilc}s: jsSceneSession is null", where);
+                return;
+            }
+            jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
     });
     TLOGI(WmsLogTag::WMS_LIFE, "success");
 }

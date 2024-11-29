@@ -587,6 +587,9 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
+        for (const auto& pair : session->GetAppUseControlMap()) {
+            session->onUpdateAppUseControlFunc_(pair.first, pair.second);
+        }
     };
     PostTask(task, __func__);
 }
@@ -4990,5 +4993,15 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
 void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+}
+
+void SceneSession::SetAppUseControlMapValue(ControlAppType type, bool isControl)
+{
+    appUseControlMap_[type] = isControl;
+}
+
+std::map<ControlAppType, bool>& SceneSession::GetAppUseControlMap()
+{
+    return appUseControlMap_;
 }
 } // namespace OHOS::Rosen
