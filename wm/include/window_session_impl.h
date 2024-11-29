@@ -434,7 +434,6 @@ protected:
     /**
      * PC Fold Screen
      */
-    std::atomic_bool isFullScreenWaterfallMode_ { false };
     int32_t UpdateSuperFoldRect(const WSRect& rect);
 
 private:
