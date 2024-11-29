@@ -49,7 +49,7 @@ WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     const auto& type = GetWindowType();
-    TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "id: %{public}d, type: %{public}d", id, type);
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id: %{public}d, type: %{public}d", id, type);
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
