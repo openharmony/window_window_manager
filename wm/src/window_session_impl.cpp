@@ -678,7 +678,7 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-int32_t WindowSessionImpl::UpdateSuperFoldRectPosY(const WSRect& rect)
+int32_t WindowSessionImpl::CalcSuperFoldRectPosY(const WSRect& rect)
 {
     // isSuperFoldDisplayDevice
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -733,7 +733,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 {
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
-    Rect wmRect = { rect.posX_, UpdateSuperFoldRectPosY(rect), rect.width_, rect.height_ };
+    Rect wmRect = { rect.posX_, CalcSuperFoldRectPosY(rect), rect.width_, rect.height_ };
     auto preRect = GetRect();
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
