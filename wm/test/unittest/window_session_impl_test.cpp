@@ -1284,10 +1284,16 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     res = window->UnregisterWindowVisibilityChangeListener(listener8);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    sptr<IWindowTitleButtonRectChangedListener> listener9 = nullptr;
-    res = window->RegisterWindowTitleButtonRectChangeListener(listener9);
+    IDisplayIdChangeListenerSptr listener9 = nullptr;
+    res = window->RegisterDisplayIdChangeListener(listener9);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterWindowTitleButtonRectChangeListener(listener9);
+    res = window->UnregisterDisplayIdChangeListener(listener9);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IWindowTitleButtonRectChangedListener> listener10 = nullptr;
+    res = window->RegisterWindowTitleButtonRectChangeListener(listener10);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowTitleButtonRectChangeListener(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";

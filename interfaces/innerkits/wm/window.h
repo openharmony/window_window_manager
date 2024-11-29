@@ -407,6 +407,20 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IDisplayIdChangeListener
+ *
+ * @brief Listener to observe one window displayId changed.
+ */
+class IDisplayIdChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window displayId changed.
+     */
+    virtual void OnDisplayIdChanged(DisplayId displayId) {}
+};
+using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
+
+/**
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
@@ -2025,6 +2039,24 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Register window displayId change listener.
+     *
+     * @param listener IDisplayIdChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterDisplayIdChangeListener(
+        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister window displayId change listener.
+     *
+     * @param listener IDisplayIdChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterDisplayIdChangeListener(
+        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the window limits of current window.
