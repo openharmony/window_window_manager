@@ -2199,24 +2199,18 @@ public:
      /**
      * @brief Set decor button style of window.
      *
-     * @param decorStyle Decor style of the window
+     * @param style Decor style of the window
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SetDecorButtonStyle(DecorButtonStyle decorButtonStyle)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    virtual WMError SetDecorButtonStyle(DecorButtonStyle style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get decor button style of window.
      *
-     * @param decorStyle Decor style of the window
+     * @param style Decor style of the window
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError GetDecorButtonStyle(DecorButtonStyle& decorButtonStyle)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+    virtual WMError GetDecorButtonStyle(DecorButtonStyle& style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the title buttons area of window.
