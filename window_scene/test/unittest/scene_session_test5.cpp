@@ -1743,6 +1743,48 @@ HWTEST_F(SceneSessionTest5, SetAndIsSystemKeyboard, Function | SmallTest | Level
     session->SetIsSystemKeyboard(true);
     ASSERT_EQ(false, session->IsSystemKeyboard());
 }
+
+/**
+ * @tc.name: MoveUnderInteriaAndNotifyRectChange
+ * @tc.desc: test func: MoveUnderInteriaAndNotifyRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "MoveUnderInteriaAndNotifyRectChange";
+    info.bundleName_ = "MoveUnderInteriaAndNotifyRectChange";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(mainSession, nullptr);
+    ASSERT_NE(mainSession->pcFoldScreenController_, nullptr);
+    auto controller = mainSession->pcFoldScreenController_;
+    WSRect rect = { 0, 0, 100, 100 };
+    EXPECT_FALSE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    PcFoldScreenManager::GetInstance().vpr_ = 1.7f;
+    
+    WSRect rect0 = { 100, 100, 400, 400 };
+    WSRect rect1 = { 100, 500, 400, 400 };
+
+    // throw
+    controller->RecordStartMoveRect(rect0, false);
+    controller->RecordMoveRects(rect0);
+    usleep(10000);
+    rect = rect1;
+    controller->RecordMoveRects(rect);
+    EXPECT_FALSE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
+
+    // throw full screen
+    usleep(100000);
+    controller->RecordStartMoveRect(rect0, true);
+    controller->RecordMoveRects(rect0);
+    usleep(10000);
+    rect = rect1;
+    controller->RecordMoveRects(rect);
+    EXPECT_TRUE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
+}
 }
 }
 }
