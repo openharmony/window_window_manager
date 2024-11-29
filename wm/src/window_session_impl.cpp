@@ -683,7 +683,9 @@ int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         return rect.posY_;
     }
-    if (SingletonContainer::Get<DisplayManager>().GetFoldStatus() != FoldStatus::HALF_FOLD) {
+    auto superFoldStatus = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "superFoldStatus: %{public}u", superFoldStatus);
+    if (superFoldStatus != FoldStatus::HALF_FOLD) {
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
         return rect.posY_;
     }
