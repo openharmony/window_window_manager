@@ -132,7 +132,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
-    data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM)); 
+    data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_ALL_AVOID_AREAS);
 
     int ret = session_->OnRemoteRequest(code, data, reply, option);
