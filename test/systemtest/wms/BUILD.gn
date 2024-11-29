@@ -458,6 +458,13 @@ ohos_systemtest("wms_window_app_floating_window_test") {
 
   sources = [ "window_app_floating_window_test.cpp" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
   deps = [
     ":wms_systemtest_common",
     "${window_base_path}/test/common/utils:libtestutil",
