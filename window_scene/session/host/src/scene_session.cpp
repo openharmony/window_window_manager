@@ -3365,7 +3365,7 @@ bool SceneSession::IsAppSession() const
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         return true;
     }
-    if (GetParentSession() && GetParentSession()->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+    if (GetMainSession()) {
         return true;
     }
     return false;
