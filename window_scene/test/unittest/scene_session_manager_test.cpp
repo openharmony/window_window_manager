@@ -2354,6 +2354,62 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     ASSERT_EQ(ssm_->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap), WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetGlobalDragResizeType
+ * @tc.desc: test function : SetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetGlobalDragResizeType, Function | SmallTest | Level3)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetGlobalDragResizeType
+ * @tc.desc: test function : GetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetGlobalDragResizeType, Function | SmallTest | Level3)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->GetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetAppDragResizeType
+ * @tc.desc: test function : SetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppDragResizeType, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->SetAppDragResizeType(dragResizeType, info.bundleName_), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetAppDragResizeType
+ * @tc.desc: test function : GetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetAppDragResizeType, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    ASSERT_EQ(ssm_->GetAppDragResizeType(dragResizeType, info.bundleName_), WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
