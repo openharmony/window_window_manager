@@ -3314,7 +3314,7 @@ static napi_value CreateAppUseControlInfos(
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "failed to create napi object");
+            TLOGE(WmsLogTag::WMS_LIFE, "failed to create napi object");
             return NapiGetUndefined(env);
         }
         napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, controlAppInfo.bundleName_));
@@ -3338,7 +3338,8 @@ void JsSceneSessionManager::OnNotifyAppUseControlList(
     ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
-    auto task = [this, type, userId, controlList, jsCallBack = GetJSCallback(NOTIFY_APP_USE_CONTROL_LIST_CB), env = env_] {
+    auto task = [this, type, userId, controlList,
+        jsCallBack = GetJSCallback(NOTIFY_APP_USE_CONTROL_LIST_CB), env = env_] {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
             return;
