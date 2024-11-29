@@ -384,9 +384,6 @@ HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition01, Function | S
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->property_->SetCallingSessionId(-1);
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
-    keyboardSession->UpdateCallingSessionIdAndPosition(0);
-    keyboardSession->state_ = SessionState::STATE_CONNECT;
     keyboardSession->UpdateCallingSessionIdAndPosition(0);
     keyboardSession->UpdateCallingSessionIdAndPosition(-1);
     keyboardSession->property_->SetCallingSessionId(0);
