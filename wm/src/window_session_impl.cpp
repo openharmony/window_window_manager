@@ -424,14 +424,14 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
 
 void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    TLOGD(WmsLogTag::DEFAULT, "in");
     auto displayId = property_->GetDisplayId();
     if (displayId == DISPLAY_ID_INVALID) {
         auto defaultDisplayId = SingletonContainer::IsDestroyed() ? DISPLAY_ID_INVALID :
             SingletonContainer::Get<DisplayManager>().GetDefaultDisplayId();
         defaultDisplayId = (defaultDisplayId == DISPLAY_ID_INVALID) ? 0 : defaultDisplayId;
         property_->SetDisplayId(defaultDisplayId);
-        TLOGI(WmsLogTag::WMS_LIFE, "Reset displayId to %{public}" PRIu64, defaultDisplayId);
+        TLOGI(WmsLogTag::DEFAULT, "Reset displayId to %{public}" PRIu64, defaultDisplayId);
     }
 }
 
