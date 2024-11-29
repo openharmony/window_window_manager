@@ -65,7 +65,7 @@ private:
     void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateKeyboardAvoidArea();
     void UseFocusIdIfCallingSessionIdInvalid();
-    void UpdateCallingSessionIdAndPosition(uint32_t callingSessionId);
+    void UpdateCallingSessionIdAndPosition(uint32_t newCallingSessionId);
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
