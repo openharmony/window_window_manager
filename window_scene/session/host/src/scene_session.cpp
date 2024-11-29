@@ -2779,11 +2779,6 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         WLOGE("moveDragController_ is null");
         return;
     }
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "property is null");
-        return;
-    }
     if (reason == SizeChangeReason::DRAG_START) {
         InitializeCrossMoveDrag();
     }
@@ -2811,6 +2806,11 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
 
 bool SceneSession::IsPCOnMoveDragCallbackEnd(SizeChangeReason reason, WSRect rect)
 {
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "property is null");
+        return true;
+    }
     bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
     bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
     WSRect globalRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
@@ -2820,7 +2820,7 @@ bool SceneSession::IsPCOnMoveDragCallbackEnd(SizeChangeReason reason, WSRect rec
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
         WindowHelper::IsMainWindow(property->GetWindowType());
-    bool isDragResizeWhenEnd = SizeChangeReason::DRAG && isPcOrPcModeMainWindow &&
+    bool isDragResizeWhenEnd = (reason == SizeChangeReason::DRAG) && isPcOrPcModeMainWindow &&
         (GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END);
     TLOGD(WmsLogTag::WMS_LAYOUT, "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
         isCompatibleModeInPc, isSupportDragInPcCompatibleMode);
