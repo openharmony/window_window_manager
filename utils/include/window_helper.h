@@ -590,6 +590,16 @@ public:
         return false;
     }
 
+    static bool CheckButtonStyleValid(DecorButtonStyle decorButtonStyle)
+    {
+        return decorButtonStyle.buttonBackgroundSize >= MIN_BUTTON_BACKGROUND_SIZE &&
+            decorButtonStyle.buttonBackgroundSize <= MAX_BUTTON_BACKGROUND_SIZE &&
+            decorButtonStyle.closeButtonRightMargin >= MIN_CLOSE_BUTTON_RIGHT_MARGIN &&
+            decorButtonStyle.closeButtonRightMargin <= MAX_CLOSE_BUTTON_RIGHT_MARGIN &&
+            decorButtonStyle.spacingBetweenButtons >= MIN_SPACING_BETWEEN_BUTTONS &&
+            decorButtonStyle.spacingBetweenButtons <= MAX_SPACING_BETWEEN_BUTTONS;
+    }
+
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;

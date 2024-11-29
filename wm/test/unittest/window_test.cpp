@@ -2830,6 +2830,34 @@ HWTEST_F(WindowTest, Marshalling, Function | SmallTest | Level2)
     auto ret = info->Marshalling(parcel);
     EXPECT_EQ(true, ret);
 }
+
+/**
+ * @tc.name: SetDecorButtonStyle
+ * @tc.desc: SetDecorButtonStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetDecorButtonStyle, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(nullptr, window);
+    DecorButtonStyle style;
+    WMError res = window->SetDecorButtonStyle(style);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
+}
+
+/**
+ * @tc.name: GetDecorButtonStyle
+ * @tc.desc: GetDecorButtonStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetDecorButtonStyle, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(nullptr, window);
+    DecorButtonStyle style;
+    WMError res = window->GetDecorButtonStyle(style);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
