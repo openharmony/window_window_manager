@@ -50,8 +50,6 @@ public:
 
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
-    void InitSuperFoldStateManagerMap();
-
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 
     SuperFoldStatus GetCurrentStatus();
@@ -69,6 +67,12 @@ private:
 
     using transEvent = std::pair<SuperFoldStatus, SuperFoldStatusChangeEvents>;
     std::map<transEvent, Transition> stateManagerMap_;
+
+    bool isParamsValid(std::vector<std::string>& params);
+
+    void InitSuperFoldStateManagerMap();
+
+    void InitSuperFoldCreaseRegionParams();
 
     static void DoAngleChangeFolded(SuperFoldStatusChangeEvents event);
 
