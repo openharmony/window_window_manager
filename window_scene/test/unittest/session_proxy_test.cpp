@@ -162,24 +162,6 @@ HWTEST_F(SessionProxyTest, OnNeedAvoid, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetAvoidAreaByType
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, GetAvoidAreaByType, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetAvoidAreaByType start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    AvoidAreaType status = AvoidAreaType::TYPE_SYSTEM;
-    AvoidArea res = sProxy->GetAvoidAreaByType(status);
-    AvoidArea area;
-    ASSERT_EQ(res, area);
-
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetAvoidAreaByType end";
-}
-
-/**
  * @tc.name: RequestSessionBack
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -501,6 +483,12 @@ HWTEST_F(SessionProxyTest, GetGlobalScaledRect, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    res = sProxy->GetGlobalScaledRect(rect);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
     res = sProxy->GetGlobalScaledRect(rect);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetGlobalScaledRect end";
@@ -695,6 +683,176 @@ HWTEST_F(SessionProxyTest, OnMainSessionModalTypeChange, Function | SmallTest | 
     sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_EQ(sProxy->OnMainSessionModalTypeChange(true), WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnMainSessionModalTypeChange end";
+}
+
+/**
+ * @tc.name: Foreground
+ * @tc.desc: Foreground test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, Foreground, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    bool isFromClient = true;
+    std::string identityToken = "foregroundTest";
+    WSError ret = sProxy->Foreground(property, isFromClient, identityToken);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground end";
+}
+
+/**
+ * @tc.name: Foreground02
+ * @tc.desc: Foreground test property is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, Foreground02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground02 start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool isFromClient = true;
+    std::string identityToken = "foregroundTest";
+    WSError ret = sProxy->Foreground(nullptr, isFromClient, identityToken);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground02 end";
+}
+
+/**
+ * @tc.name: Foreground03
+ * @tc.desc: Foreground test isFromClient is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, Foreground03, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground03 start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    bool isFromClient = false;
+    std::string identityToken = "foregroundTest";
+    WSError ret = sProxy->Foreground(property, isFromClient, identityToken);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: Foreground03 end";
+}
+
+/**
+ * @tc.name: Background
+ * @tc.desc: Background test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, Background, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: Background start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool isFromClient = true;
+    std::string identityToken = "backgroundTest";
+    WSError ret = sProxy->Background(isFromClient, identityToken);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: Background end";
+}
+
+/**
+ * @tc.name: Background02
+ * @tc.desc: Background test isFromClient is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, Background02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: Background02 start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool isFromClient = false;
+    std::string identityToken = "backgroundTest";
+    WSError ret = sProxy->Background(isFromClient, identityToken);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: Background02 end";
+}
+
+/**
+ * @tc.name: Show
+ * @tc.desc: Show Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, Show, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: Show start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    WSError ret = sProxy->Show(property);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    // property is nullptr
+    ret = sProxy->Show(nullptr);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: Show end";
+}
+
+/**
+ * @tc.name: Hide
+ * @tc.desc: Hide Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, Hide, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: Hide start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    WSError ret = sProxy->Hide();
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: Hide end";
+}
+
+/**
+ * @tc.name: Disconnect
+ * @tc.desc: Disconnect Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, Disconnect, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: Disconnect start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool isFromClient = true;
+    std::string identityToken = "disconnectTest";
+    WSError ret = sProxy->Disconnect(isFromClient, identityToken);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    // isFromClient is false
+    isFromClient = false;
+    ret = sProxy->Disconnect(isFromClient, identityToken);
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: Disconnect end";
+}
+
+/**
+ * @tc.name: DrawingCompleted
+ * @tc.desc: DrawingCompleted Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, DrawingCompleted, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    WSError ret = sProxy->DrawingCompleted();
+    ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted end";
 }
 } // namespace
 } // namespace Rosen

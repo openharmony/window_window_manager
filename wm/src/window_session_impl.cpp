@@ -199,6 +199,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     property_->SetIsUIExtAnySubWindow(option->GetIsUIExtAnySubWindow());
+    property_->SetIsSystemKeyboard(option->IsSystemKeyboard());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
@@ -261,7 +262,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
             rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
             break;
         case WindowType::WINDOW_TYPE_UI_EXTENSION:
-            TLOGI(WmsLogTag::WMS_LIFE, "uiExtensionUsage = %{public}u", property_->GetUIExtensionUsage());
+            TLOGI(WmsLogTag::WMS_UIEXT, "uiExtensionUsage = %{public}u", property_->GetUIExtensionUsage());
             if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
                 rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_SECURE_NODE;
             } else {
@@ -682,6 +683,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
+    if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
+        windowSizeChanged_ = true;
+    }
     property_->SetWindowRect(wmRect);
     property_->SetRequestRect(wmRect);
 
@@ -812,7 +816,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         }
         if (wmReason == WindowSizeChangeReason::DRAG) {
             window->UpdateRectForOtherReasonTask(window->GetRect(), preRect, wmReason, rsTransaction);
-            window->isDragTaskUpdateDone_ = true;
+            window->isDragTaskPostDone_.store(true);
         } else {
             window->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
         }
@@ -821,9 +825,9 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         }
     };
     if (wmReason == WindowSizeChangeReason::DRAG) {
-        if (isDragTaskUpdateDone_) {
+        bool isDragTaskPostDone = true;
+        if (isDragTaskPostDone_.compare_exchange_strong(isDragTaskPostDone, false)) {
             handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
-            isDragTaskUpdateDone_ = false;
         }
     } else {
         handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
@@ -859,7 +863,10 @@ void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
         return;
     }
     WSRect rect = { 0, 0, width, height };
-    if (layoutRect_ != rect || enableFrameLayoutFinishCb_) {
+    bool windowSizeChanged = true;
+    bool enableFrameLayoutFinishCb = true;
+    if (windowSizeChanged_.compare_exchange_strong(windowSizeChanged, false) ||
+        enableFrameLayoutFinishCb_.compare_exchange_strong(enableFrameLayoutFinishCb, false) || layoutRect_ != rect) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
             "NotifyFrameLayoutFinishFromApp, id: %u, rect: %s, notifyListener: %d",
             GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
@@ -1147,8 +1154,6 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "config[%{public}u,%{public}u,%{public}u,%{public}f]",
-        rotation, deviceRotation, transformHint, virtualPixelRatio_);
     auto config = FillViewportConfig(rect, density, orientation, transformHint);
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
@@ -1170,13 +1175,15 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate);
 
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
-            "%{public}u,%{public}u] displayOrientation:%{public}d",
-            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
+            "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
+            "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
+            rotation, deviceRotation, transformHint, virtualPixelRatio_);
     } else {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
-            "%{public}u,%{public}u] displayOrientation:%{public}d",
-            GetPersistentId(), reason, rect.posX_, rect.posY_, rect.width_, rect.height_, orientation);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, windowRect: %{public}s, "
+            "displayOrientation: %{public}d, config[%{public}u, %{public}u, %{public}u, "
+            "%{public}f]", GetPersistentId(), reason, rect.ToString().c_str(), orientation,
+            rotation, deviceRotation, transformHint, virtualPixelRatio_);
     }
 }
 
@@ -1829,13 +1836,13 @@ void WindowSessionImpl::OnNewWant(const AAFwk::Want& want)
 
 WMError WindowSessionImpl::SetAPPWindowLabel(const std::string& label)
 {
+    TLOGI(WmsLogTag::DEFAULT, "Enter");
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFE("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->SetAppWindowTitle(label);
-    WLOGFI("label: %{public}s", label.c_str());
     return WMError::WM_OK;
 }
 
@@ -3537,6 +3544,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         if (FilterKeyEvent(keyEvent)) return;
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
+            IsPcOrPadFreeMultiWindowMode() &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
             GetImmersiveModeEnabledState() &&
             keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
@@ -3704,7 +3712,6 @@ WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 sptr<Window> WindowSessionImpl::Find(const std::string& name)
 {
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    TLOGI(WmsLogTag::DEFAULT, "Try to find window %{public}s", name.c_str());
     auto iter = windowSessionMap_.find(name);
     if (iter == windowSessionMap_.end()) {
         TLOGE(WmsLogTag::DEFAULT, "Can not find window %{public}s", name.c_str());

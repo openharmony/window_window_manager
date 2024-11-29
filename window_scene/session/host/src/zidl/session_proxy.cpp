@@ -300,7 +300,16 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         }
         property->SetCollaboratorType(reply.ReadInt32());
         property->SetFullScreenStart(reply.ReadBool());
-        property->SetWindowModeSupportType(reply.ReadUint32());
+        uint32_t size = reply.ReadUint32();
+        if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+            std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+            supportWindowModes.reserve(size);
+            for (uint32_t i = 0; i < size; i++) {
+                supportWindowModes.push_back(
+                    static_cast<AppExecFwk::SupportWindowMode>(reply.ReadInt32()));
+            }
+            property->SetSupportWindowModes(supportWindowModes);
+        }
         property->SetCompatibleModeInPc(reply.ReadBool());
         property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
                                               reply.ReadInt32(), reply.ReadInt32());
@@ -839,15 +848,24 @@ WMError SessionProxy::GetGlobalScaledRect(Rect& globalScaledRect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    globalScaledRect = { reply.ReadInt32(), reply.ReadInt32(), reply.ReadUint32(), reply.ReadUint32() };
-    int32_t ret = reply.ReadInt32();
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    int32_t ret = 0;
+    if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) ||
+        !reply.ReadUint32(width) || !reply.ReadUint32(height) || !reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    globalScaledRect = { posX, posY, width, height };
     return static_cast<WMError>(ret);
 }
 
 /** @note @window.layout */
 WSError SessionProxy::UpdateClientRect(const WSRect& rect)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     MessageParcel data;
     MessageParcel reply;
@@ -856,10 +874,10 @@ WSError SessionProxy::UpdateClientRect(const WSRect& rect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!((data.WriteInt32(static_cast<int32_t>(rect.posX_))) &&
-          (data.WriteInt32(static_cast<int32_t>(rect.posY_))) &&
-          (data.WriteUint32(static_cast<uint32_t>(rect.width_))) &&
-          (data.WriteUint32(static_cast<uint32_t>(rect.height_))))) {
+    if (!data.WriteInt32(rect.posX_) ||
+        !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) ||
+        !data.WriteInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write rect failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

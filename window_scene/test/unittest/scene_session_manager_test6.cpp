@@ -396,12 +396,14 @@ HWTEST_F(SceneSessionManagerTest6, IsScreenLocked, Function | SmallTest | Level3
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->SetScreenLocked(true);
+    sleep(1);
     ASSERT_NE(nullptr, ssm_);
     EXPECT_TRUE(ssm_->IsScreenLocked());
     ASSERT_NE(nullptr, ssm_);
     ssm_->ProcessWindowModeType();
     ASSERT_NE(nullptr, ssm_);
     ssm_->SetScreenLocked(false);
+    sleep(1);
     ASSERT_NE(nullptr, ssm_);
     EXPECT_FALSE(ssm_->IsScreenLocked());
     ASSERT_NE(nullptr, ssm_);
@@ -1586,6 +1588,7 @@ HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, Function | SmallTest |
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->SetScreenLocked(true);
+    sleep(1);
     EXPECT_EQ(true, ssm_->isScreenLocked_);
     ssm_->sceneSessionMap_.clear();
     ASSERT_NE(nullptr, ssm_);
@@ -1732,6 +1735,62 @@ HWTEST_F(SceneSessionManagerTest6, RequestSceneSession, Function | SmallTest | L
     ssm_->sceneSessionMap_.insert({2, sceneSession2});
     sptr<SceneSession> getSceneSession2 = ssm_->RequestSceneSession(info2, windowSessionProperty);
     ASSERT_NE(info2.bundleName_, getSceneSession2->GetSessionInfo().bundleName_);
+}
+
+/**
+ * @tc.name: GetSceneSessionBySessionInfo
+ * @tc.desc: GetSceneSessionBySessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, GetSceneSessionBySessionInfo, Function | SmallTest | Level3)
+{
+    SessionInfo info1;
+    info1.persistentId_ = 1;
+    info1.isPersistentRecover_ = false;
+    info1.windowType_ = 1000;
+    info1.appInstanceKey_ = "";
+    ASSERT_EQ(ssm_->GetSceneSessionBySessionInfo(info1), nullptr);
+
+    SessionInfo info2;
+    info2.persistentId_ = 1;
+    info2.isPersistentRecover_ = false;
+    info2.windowType_ = 1;
+    info2.bundleName_ = "GetSceneSessionBySessionInfoBundle";
+    info2.abilityName_ = "GetSceneSessionBySessionInfoAbility";
+    info2.appInstanceKey_ = "";
+    info2.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(nullptr, info2.abilityInfo);
+    info2.abilityInfo->launchMode = AppExecFwk::LaunchMode::SINGLETON;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info2, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    sptr<SceneSession> getSceneSession = ssm_->GetSceneSessionBySessionInfo(info2);
+    ASSERT_EQ(sceneSession, getSceneSession);
+
+    SessionInfo info3;
+    info3.persistentId_ = 2;
+    info3.isPersistentRecover_ = false;
+    info3.windowType_ = 1;
+    info3.bundleName_ = "GetSceneSessionBySessionInfoBundle2";
+    info3.abilityName_ = "GetSceneSessionBySessionInfoAbility2";
+    info3.appInstanceKey_ = "";
+    info3.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    info3.abilityInfo->launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info3, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    info3.persistentId_ = 1000;
+    ASSERT_EQ(ssm_->GetSceneSessionBySessionInfo(info3), nullptr);
+
+    SessionInfo info4;
+    info4.persistentId_ = 0;
+    info4.isPersistentRecover_ = false;
+    ASSERT_EQ(ssm_->GetSceneSessionBySessionInfo(info4), nullptr);
+    
+    SessionInfo info5;
+    info5.persistentId_ = 5;
+    info5.isPersistentRecover_ = true;
+    ASSERT_EQ(ssm_->GetSceneSessionBySessionInfo(info5), nullptr);
 }
 
 /**

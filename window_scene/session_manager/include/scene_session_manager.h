@@ -316,6 +316,8 @@ public:
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
+    int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
+        bool isFromClient = true);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -402,7 +404,6 @@ public:
     void FlushWindowInfoToMMI(const bool forceFlush = false);
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
-    int32_t ChangeUIAbilityVisibilityBySCB(sptr<SceneSession>& sceneSessions, bool visibility);
 
     /*
      * UIExtension
@@ -517,8 +518,6 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
-    std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
-
     /*
      * Specific Window
      */
@@ -568,9 +567,6 @@ private:
     void ConfigSnapshotScale();
     void ConfigFreeMultiWindow();
     void LoadFreeMultiWindowConfig(bool enable);
-    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
-    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
-    void InitVsyncStation();
 
     std::tuple<std::string, std::vector<float>> CreateCurve(const WindowSceneConfig::ConfigItem& curveConfig);
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
@@ -597,6 +593,11 @@ private:
     void ProcessFocusZOrderChange(uint32_t dirty);
     void PostProcessFocus();
     void PostProcessProperty(uint32_t dirty);
+
+    /**
+     * Window  Lifecycle
+     */
+    sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
 
     /**
      * Window Focus
@@ -787,7 +788,6 @@ private:
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     std::map<int32_t, sptr<SceneSession>> systemTopSceneSessionMap_;
     std::map<int32_t, sptr<SceneSession>> nonSystemFloatSceneSessionMap_;
-    std::mutex visibleWindowCountMapMutex_;
     std::map<int32_t, int32_t> visibleWindowCountMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
@@ -952,8 +952,16 @@ private:
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property);
     bool CheckModalSubWindowPermission(const sptr<WindowSessionProperty>& property);
+
+    /**
+     * PiP Window
+     */
+    uint64_t pipWindowSurfaceId_ = 0;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
-    bool isEnablePiPCreate(const sptr<WindowSessionProperty>& property);
+    bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
+    bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
+    void NotifyPiPWindowVisibleChange(bool isScreenLocked);
+
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
@@ -966,6 +974,7 @@ private:
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
+    sptr<SceneSession> RequestKeyboardPanelSession(std::string& panelName, uint64_t displayId);
 
     /*
      * Specific Window
@@ -1022,6 +1031,14 @@ private:
     void RemoveProcessWatermarkPid(int32_t pid);
 
     /**
+     * Window Layout
+     */
+    std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    void InitVsyncStation();
+    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+
+    /*
      * Window Snapshot
      */
     std::unordered_set<int32_t> snapshotSkipPidSet_ GUARDED_BY(SCENE_GUARD); // ONLY Accessed on OS_sceneSession thread

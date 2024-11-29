@@ -1083,6 +1083,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::DRAG)));
     napi_set_named_property(env, objValue, "DRAG_START", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::DRAG_START)));
+    napi_set_named_property(env, objValue, "DRAG_MOVE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::DRAG_MOVE)));
     napi_set_named_property(env, objValue, "DRAG_END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::DRAG_END)));
     napi_set_named_property(env, objValue, "RESIZE", CreateJsValue(env,
@@ -1409,6 +1411,8 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
         return nullptr;
     }
 
+    napi_set_named_property(env, objValue, "gravity",
+        CreateJsValue(env, params.gravity_));
     napi_set_named_property(env, objValue, "landscapeKeyboardRect",
         CreateJsSessionRect(env, params.LandscapeKeyboardRect_));
     napi_set_named_property(env, objValue, "portraitKeyboardRect",

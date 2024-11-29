@@ -32,7 +32,7 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
     }
-    pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this));
+    pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
     moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
@@ -278,7 +278,7 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
-            return ;
+            return;
         }
         if (session->onSetWindowRectAutoSaveFunc_) {
             session->onSetWindowRectAutoSaveFunc_(enabled);

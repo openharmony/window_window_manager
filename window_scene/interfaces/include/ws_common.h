@@ -389,7 +389,6 @@ struct SessionInfo {
      * PC Window
      */
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-    uint32_t windowModeSupportType = 0;
 };
 
 enum class SessionFlag : uint32_t {
@@ -423,8 +422,15 @@ enum class SizeChangeReason : uint32_t {
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
+    UPDATE_DPI_SYNC,
+    DRAG_MOVE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(SizeChangeReason reason)
+{
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
+}
 
 enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE = 100,
@@ -441,6 +447,8 @@ enum class SessionEvent : uint32_t {
     EVENT_DRAG_START,
     EVENT_DRAG,
     EVENT_MAXIMIZE_WITHOUT_ANIMATION,
+    EVENT_MAXIMIZE_WATERFALL,
+    EVENT_END
 };
 
 enum class BrokerStates: uint32_t {

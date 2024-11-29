@@ -1648,7 +1648,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     float ratio = 0.0;
     bool isDecor = true;
     float vpr = 0.0;
-    sceneSession->FixRectByLimits(limits, rect, ratio, isDecor, vpr);
+    sceneSession->AdjustRectByLimits(limits, ratio, isDecor, vpr, rect);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
 
     auto property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1660,7 +1660,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    sceneSession->FixRectByLimits(limits, rect, ratio, false, vpr);
+    sceneSession->AdjustRectByLimits(limits, ratio, false, vpr, rect);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
 
