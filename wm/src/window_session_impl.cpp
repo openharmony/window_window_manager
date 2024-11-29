@@ -2094,7 +2094,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         return err;
     }
     height = static_cast<int32_t>(height / vpr);
-    TLOGI(WmsLogTag::DEFAULT, "end, height: %{public}d", height);
+    TLOGD(WmsLogTag::DEFAULT, "end, height: %{public}d", height);
     return WMError::WM_OK;
 }
 
