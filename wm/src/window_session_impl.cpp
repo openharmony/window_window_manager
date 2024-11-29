@@ -678,29 +678,30 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
+int32_t WindowSessionImpl::UpdateSuperFoldRectPosY(const WSRect& rect)
 {
+    // isHopper
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         return rect.posY_;
     }
+    // Non-fold staus
+    property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
     auto superFoldStatus = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "superFoldStatus: %{public}u", superFoldStatus);
     if (superFoldStatus != FoldStatus::HALF_FOLD) {
-        property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "superFoldStatus: %{public}u", superFoldStatus);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "window: %{public}d, superFoldStatus: %{public}u", GetPersistentId(),
+              superFoldStatus);
         return rect.posY_;
     }
     auto curAllDisplayIds = SingletonContainer::Get<DisplayManager>().GetAllDisplayIds();
     auto it = std::find(curAllDisplayIds.begin(), curAllDisplayIds.end(), SUPER_FOLD_LOWER_DISPLAY_ID);
     if (it == curAllDisplayIds.end()) {
-        property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "KEYBOARD");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "window: %{public}d, KEYBOARD status", GetPersistentId());
         return rect.posY_;
     }
-    auto FoldCreaseRegionVec = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion()->GetCreaseRects();
-    if (FoldCreaseRegionVec.size() != 1) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "GetCurrentFoldCreaseRegion Error");
-        property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
+    // Get Hopper's CreaseRects, Calculate coordinates, determine which screen the window is located on, and notify.
+    auto foldCreaseRegionVec = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion()->GetCreaseRects();
+    if (foldCreaseRegionVec.size() != 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "GetCurrentFoldCreaseRegion Error, size: %{public}zu", foldCreaseRegionVec.size());
         return rect.posY_;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(SUPER_FOLD_UPPER_DISPLAY_ID);
@@ -713,13 +714,12 @@ int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null!");
         return rect.posY_;
     }
-    auto FoldCreaseRegion = FoldCreaseRegionVec.front();
-    int32_t upperScreenPosY = displayInfo->GetHeight() - FoldCreaseRegion.height_ / 2;
+    auto foldCreaseRegion = foldCreaseRegionVec.front();
+    int32_t upperScreenPosY = displayInfo->GetHeight() - foldCreaseRegion.height_ / 2;
     if (rect.posY_ <= upperScreenPosY) {
-        property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
         return rect.posY_;
     }
-    int32_t lowerScreenPosY = upperScreenPosY + FoldCreaseRegion.height_;
+    int32_t lowerScreenPosY = upperScreenPosY + foldCreaseRegion.height_;
     if (rect.posY_ < lowerScreenPosY) {
         return rect.posY_;
     }
@@ -733,7 +733,7 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
 {
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
-    Rect wmRect = { rect.posX_, UpdateSuperFoldRect(rect), rect.width_, rect.height_ };
+    Rect wmRect = { rect.posX_, UpdateSuperFoldRectPosY(rect), rect.width_, rect.height_ };
     auto preRect = GetRect();
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;

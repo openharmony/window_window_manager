@@ -434,7 +434,7 @@ protected:
     /**
      * PC Fold Screen
      */
-    int32_t UpdateSuperFoldRect(const WSRect& rect);
+    int32_t UpdateSuperFoldRectPosY(const WSRect& rect);
 
 private:
     //Trans between colorGamut and colorSpace
