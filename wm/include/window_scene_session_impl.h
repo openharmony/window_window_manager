@@ -227,7 +227,6 @@ private:
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
-    void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -253,6 +252,11 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+
+    /**
+     * Window Layout
+     */
+    void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
 
     /**
      * Window Immersive
