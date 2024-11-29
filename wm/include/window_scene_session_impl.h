@@ -184,6 +184,7 @@ public:
      * PC Fold Screen
      */
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
+    WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
