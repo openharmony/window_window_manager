@@ -717,7 +717,7 @@ int32_t WindowSessionImpl::CalcSuperFoldRectPosY(const WSRect& rect)
     if (rect.posY_ <= upperScreenPosY) {
         return rect.posY_;
     }
-    int32_t lowerScreenPosY = upperScreenPosY + static_cast<int32_t> foldCreaseRegion.height_;
+    int32_t lowerScreenPosY = upperScreenPosY + static_cast<int32_t>(foldCreaseRegion.height_);
     if (rect.posY_ < lowerScreenPosY) {
         return rect.posY_;
     }
