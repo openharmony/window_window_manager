@@ -16,6 +16,7 @@
 #include "session/screen/include/screen_session.h"
 #include <hisysevent.h>
 
+#include "screen_cache.h"
 #include <hitrace_meter.h>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
@@ -26,6 +27,7 @@
 #include "fold_screen_state_internel.h"
 #include <parameters.h>
 #include "sys_cap_util.h"
+#include <ipc_skeleton.h>
 
 namespace OHOS::Rosen {
 namespace {
@@ -34,6 +36,9 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_5S = 5;
+const int32_t MAP_SIZE = 80;
+const int32_t NO_EXIT_UID_VERSION = -1;
+ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIT_UID_VERSION);
 }
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
@@ -262,8 +267,14 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     RRect bounds = property_.GetBounds();
     RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
-    uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
-    TLOGD(WmsLogTag::DMS, "client: %{public}s,apiVersion: %{public}d", SysCapUtil::GetClientName().c_str(), apiVersion);
+    int32_t apiVersion = 0;
+    int32_t currentUid = IPCSkeleton::GetCallingUid();
+    apiVersion = g_uidVersionMap.Get(currentUid);
+    if (apiVersion == NO_EXIT_UID_VERSION) {
+        apiVersion = SysCapUtil::GetApiCompatibleVersion();
+        WLOGFI("Get version from IPC");
+        g_uidVersionMap.Set(currentUid, apiVersion);
+    }
     if (isBScreenHalf_) {
         displayInfo->SetWidth(bounds.rect_.GetWidth());
         displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
