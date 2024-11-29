@@ -687,12 +687,14 @@ int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
     TLOGD(WmsLogTag::WMS_LAYOUT, "superFoldStatus: %{public}u", superFoldStatus);
     if (superFoldStatus != FoldStatus::HALF_FOLD) {
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "superFoldStatus: %{public}u", superFoldStatus);
         return rect.posY_;
     }
     auto curAllDisplayIds = SingletonContainer::Get<DisplayManager>().GetAllDisplayIds();
     auto it = std::find(curAllDisplayIds.begin(), curAllDisplayIds.end(), SUPER_FOLD_LOWER_DISPLAY_ID);
     if (it == curAllDisplayIds.end()) {
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "KEYBOARD");
         return rect.posY_;
     }
     auto FoldCreaseRegionVec = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion()->GetCreaseRects();
