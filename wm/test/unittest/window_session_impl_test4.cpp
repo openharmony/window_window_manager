@@ -487,7 +487,7 @@ HWTEST_F(WindowSessionImplTest4, GetDecorButtonStyle, Function | SmallTest | Lev
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorButtonStyle start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetDecorButtonStyle");
-    sptr<WindowSessionImpl> window = new sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
