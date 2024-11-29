@@ -1455,8 +1455,8 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
 void WindowSceneSessionImpl::CheckMoveConfiguration(MoveConfiguration& moveConfiguration)
 {
     std::vector<DisplayId> displayIds = SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
-    auto findDisplayId = std::find(displayIds.begin(), displayIds.end(), moveConfiguration.displayId);
-    if (findDisplayId == displayIds.end()) { // need find in displayIds, otherwise the value is DISPLAY_ID_INVALID
+    if (std::find(displayIds.begin(), displayIds.end(), moveConfiguration.displayId) ==
+        displayIds.end()) { // need to be found in displayIds, otherwise the value is DISPLAY_ID_INVALID
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d not find displayId moveConfiguration %{public}s",
             property_->GetPersistentId(), moveConfiguration.ToString().c_str());
         moveConfiguration.displayId = DISPLAY_ID_INVALID;
@@ -1500,7 +1500,6 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
     property_->SetRequestRect(newRect);
 
     CheckMoveConfiguration(moveConfiguration);
-
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
@@ -1539,7 +1538,6 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
     property_->SetRequestRect(newRect);
 
     CheckMoveConfiguration(moveConfiguration);
-
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
