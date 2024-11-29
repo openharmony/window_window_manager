@@ -486,20 +486,20 @@ HWTEST_F(WindowSessionImplTest, SetActive, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: UpdateSuperFoldRect01
- * @tc.desc: UpdateSuperFoldRect
+ * @tc.name: UpdateSuperFoldRectPosY01
+ * @tc.desc: UpdateSuperFoldRectPosY
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest, UpdateSuperFoldRect01, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest, UpdateSuperFoldRectPosY01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateRect01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     WSRect rect1 = { 0, 10, 10, 10 };
-    auto updatedRect = window->UpdateSuperFoldRect(rect1);
+    auto updatedRect = window->UpdateSuperFoldRectPosY(rect1);
     ASSERT_EQ(updatedRect, 10);
     WSRect rect2 = { 0, 1000, 1000, 10000 };
-    updatedRect = window->UpdateSuperFoldRect(rect2);
+    updatedRect = window->UpdateSuperFoldRectPosY(rect2);
     ASSERT_EQ(updatedRect, 1000);
 }
 

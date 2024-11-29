@@ -695,7 +695,7 @@ int32_t WindowSessionImpl::UpdateSuperFoldRectPosY(const WSRect& rect)
     auto curAllDisplayIds = SingletonContainer::Get<DisplayManager>().GetAllDisplayIds();
     auto it = std::find(curAllDisplayIds.begin(), curAllDisplayIds.end(), SUPER_FOLD_LOWER_DISPLAY_ID);
     if (it == curAllDisplayIds.end()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "window: %{public}d, KEYBOARD status", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "window: %{public}d, KEYBOARD Status", GetPersistentId());
         return rect.posY_;
     }
     // Get Hopper's CreaseRects, Calculate coordinates, determine which screen the window is located on, and notify.
