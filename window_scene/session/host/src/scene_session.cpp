@@ -1769,6 +1769,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
+    if (!keyboardAvoidAreaActive_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "this keyboard avoid area is not active.");
+        return;
+    }
     if (Session::CheckIfNeedKeyboardAvoidAreaEmpty()) {
         TLOGI(WmsLogTag::WMS_IMMS, "Keyboard avoid area need to empty when in floating mode");
         return;
@@ -5850,6 +5854,11 @@ bool SceneSession::IsSystemKeyboard() const
         return false;
     }
     return sessionProperty->IsSystemKeyboard();
+}
+
+void SceneSession::ActivateKeyboardAvoidArea(bool active)
+{
+    keyboardAvoidAreaActive_ = active;
 }
 
 void SceneSession::MarkAvoidAreaAsDirty()

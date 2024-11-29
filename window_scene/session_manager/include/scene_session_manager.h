@@ -963,7 +963,8 @@ private:
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
-    sptr<SceneSession> RequestKeyboardPanelSession(std::string& panelName, uint64_t displayId);
+    sptr<SceneSession> RequestKeyboardPanelSession(const std::string& panelName, uint64_t displayId);
+    void ActivateKeyboardAvoidAreaIfNeed(WindowType windowType, DisplayId displayId);
 
     /*
      * Specific Window
