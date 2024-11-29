@@ -2147,7 +2147,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     } else {
         TLOGI(WmsLogTag::WMS_EVENT, "Session TransferPointEvent, eventId:%{public}d, action:%{public}s, "
             "persistentId:%{public}d, bundleName:%{public}s, pid:%{public}d",
-            pointerEvent->GetId(), pointerEvent->DumpPointerAction()
+            pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
