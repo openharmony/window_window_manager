@@ -534,6 +534,7 @@ public:
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();

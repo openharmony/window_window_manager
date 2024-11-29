@@ -833,6 +833,9 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
+        for (const auto& pair : session->GetAppUseControlMap()) {
+            session->onUpdateAppUseControlFunc_(pair.first, pair.second);
+        }
     };
     PostTask(task, __func__);
 }
@@ -5784,5 +5787,15 @@ bool SceneSession::SetFrameGravity(Gravity gravity)
     TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
     surfaceNode_->SetFrameGravity(gravity);
     return true;
+}
+
+void SceneSession::SetAppUseControlMapValue(ControlAppType type, bool isControl)
+{
+    appUseControlMap_[type] = isControl;
+}
+
+std::map<ControlAppType, bool>& SceneSession::GetAppUseControlMap()
+{
+    return appUseControlMap_;
 }
 } // namespace OHOS::Rosen
