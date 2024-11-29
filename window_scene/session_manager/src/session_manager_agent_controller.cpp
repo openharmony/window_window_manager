@@ -42,6 +42,8 @@ WMError SessionManagerAgentController::RegisterWindowManagerAgent(const sptr<IWi
             std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>> typeAgentMap;
             typeAgentMap.insert(std::map<WindowManagerAgentType,
                 sptr<IWindowManagerAgent>>::value_type(type, windowManagerAgent));
+            TLOGI(WmsLogTag::WMS_SYSTEM, "insert pid: %{public}d, type: %{public}u",
+                pid, static_cast<uint32_t>(type));
             windowManagerPidAgentMap_.insert(std::map<int32_t,
                 std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>>>::value_type(pid, typeAgentMap));
         }
@@ -68,6 +70,8 @@ WMError SessionManagerAgentController::UnregisterWindowManagerAgent(const sptr<I
                 windowManagerAgentPairMap_.erase((typeAgentIter->second)->AsObject());
                 typeAgentMap.erase(type);
                 if (typeAgentMap.empty()) {
+                    TLOGI(WmsLogTag::WMS_SYSTEM, "erase pid: %{public}d, type: %{public}u",
+                        pid, static_cast<uint32_t>(type));
                     windowManagerPidAgentMap_.erase(pid);
                 }
             }
@@ -90,10 +94,13 @@ void SessionManagerAgentController::UpdateCameraFloatWindowStatus(uint32_t acces
 
 void SessionManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool isFocused)
 {
+    TLOGD(WmsLogTag::WMS_FOCUS, "in");
     for (auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS)) {
         if (agent != nullptr) {
             agent->UpdateFocusChangeInfo(focusChangeInfo, isFocused);
+        } else {
+            TLOGE(WmsLogTag::WMS_FOCUS, "agent is invalid");
         }
     }
 }
@@ -187,8 +194,10 @@ void SessionManagerAgentController::DoAfterAgentDeath(const sptr<IRemoteObject>&
         auto pidIter = windowManagerPidAgentMap_.find(pid);
         if (pidIter != windowManagerPidAgentMap_.end()) {
             auto& typeAgentMap = pidIter->second;
+            TLOGI(WmsLogTag::WMS_SYSTEM, "type: %{public}u", static_cast<uint32_t>(type));
             typeAgentMap.erase(type);
             if (typeAgentMap.empty()) {
+                TLOGI(WmsLogTag::WMS_SYSTEM, "pid: %{public}d", pid);
                 windowManagerPidAgentMap_.erase(pid);
             }
         }
