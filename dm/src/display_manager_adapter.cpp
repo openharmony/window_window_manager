@@ -872,7 +872,11 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const C
 sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
-    return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+    } else {
+        return displayManagerServiceProxy_->GetDefaultDisplayInfo();
+    }
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
