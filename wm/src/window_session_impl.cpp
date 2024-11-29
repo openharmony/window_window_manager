@@ -701,13 +701,23 @@ int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
         return rect.posY_;
     }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(SUPER_FOLD_UPPER_DISPLAY_ID);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
+        return;
+    }
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null!");
+        return;
+    }
     auto FoldCreaseRegion = FoldCreaseRegionVec.front();
-    int32_t avoidPosY = FoldCreaseRegion.posY_;
-    if (rect.posY_ <= avoidPosY) {
+    int32_t upperScreenPosY = displayInfo->GetHeight() - FoldCreaseRegion.height_ / 2;
+    if (rect.posY_ <= upperScreenPosY) {
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
         return rect.posY_;
     }
-    int32_t lowerScreenPosY = FoldCreaseRegion.posY_ + FoldCreaseRegion.height_;
+    int32_t lowerScreenPosY = upperScreenPosY + FoldCreaseRegion.height_;
     if (rect.posY_ < lowerScreenPosY) {
         return rect.posY_;
     }
