@@ -680,10 +680,12 @@ WSError WindowSessionImpl::SetActive(bool active)
 
 int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
 {
-    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() ||
-        SingletonContainer::Get<DisplayManager>().GetFoldStatus() != FoldStatus::HALF_FOLD) {
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return rect.posY_;
+    }
+    if (SingletonContainer::Get<DisplayManager>().GetFoldStatus() != FoldStatus::HALF_FOLD) {
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
-        return false;
+        return rect.posY_;
     }
     auto curAllDisplayIds = SingletonContainer::Get<DisplayManager>().GetAllDisplayIds();
     auto it = std::find(curAllDisplayIds.begin(), curAllDisplayIds.end(), SUPER_FOLD_LOWER_DISPLAY_ID);
@@ -694,6 +696,7 @@ int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
     auto FoldCreaseRegionVec = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion()->GetCreaseRects();
     if (FoldCreaseRegionVec.size() != 1) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Get FoldCreaseRegionVec Error");
+        property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
         return rect.posY_;
     }
     auto FoldCreaseRegion = FoldCreaseRegionVec.front();
