@@ -281,7 +281,7 @@ public:
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
-    void NotifyAvailableAreaChanged(DMRect area);
+    void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
     bool GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId);
@@ -327,6 +327,7 @@ public:
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
+    int32_t GetCurrentUserId();
 
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
@@ -341,6 +342,7 @@ protected:
 
 private:
     void OnStart() override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void Init();
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
@@ -547,6 +549,7 @@ private:
     void ExitCoordination(const std::string& reason);
     void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
     void SetExtendPixelRatio(const float& dpi);
+    void CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
 
 private:

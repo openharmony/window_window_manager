@@ -211,23 +211,6 @@ void KeyboardSession::OnCallingSessionUpdated()
         GetPersistentId(), callingSessionRect.ToString().c_str());
 }
 
-WSError KeyboardSession::SetKeyboardSessionGravity(SessionGravity gravity)
-{
-    if (keyboardGravityChangeFunc_) {
-        keyboardGravityChangeFunc_(gravity);
-    }
-    RelayoutKeyBoard();
-    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-        SetWindowAnimationFlag(false);
-        if (IsSessionForeground()) {
-            RestoreCallingSession();
-        }
-    } else {
-        SetWindowAnimationFlag(true);
-    }
-    return WSError::WS_OK;
-}
-
 void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
 {
     auto task = [weakThis = wptr(this), callingSessionId]() mutable {
@@ -277,6 +260,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        // set keyboard layout params
         auto sessionProperty = session->GetSessionProperty();
         if (sessionProperty == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is null");
@@ -284,7 +268,16 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
-        session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_));
+        // handle keyboard gravity change
+        if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
+            session->SetWindowAnimationFlag(false);
+            if (session->IsSessionForeground()) {
+                session->RestoreCallingSession();
+            }
+        } else {
+            session->SetWindowAnimationFlag(true);
+        }
+        // notify keyboard layout param
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
         }
@@ -428,7 +421,9 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
         newRect.posY_ = std::max(keyboardPanelRect.posY_ - newRect.height_, statusHeight);
         newRect.posY_ = std::min(oriPosYBeforeRaisedByKeyboard, newRect.posY_);
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
-        callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+        if (!IsSystemKeyboard()) {
+            callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
+        }
     } else {
         NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
     }
@@ -457,7 +452,9 @@ void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>
         }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "oriPosYBeforeRaisedByKeyboard: %{public}d, sessionMode: %{public}d",
             oriPosYBeforeRaisedByKeyboard, callingSession->GetWindowMode());
-        callingSession->UpdateSessionRect(callingSessionRestoringRect, SizeChangeReason::UNDEFINED);
+        if (!IsSystemKeyboard()) {
+            callingSession->UpdateSessionRect(callingSessionRestoringRect, SizeChangeReason::UNDEFINED);
+        }
     }
     callingSession->SetOriPosYBeforeRaisedByKeyboard(0); // 0: default value
 }
@@ -502,35 +499,6 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t callingSessionI
     }
 }
 
-void KeyboardSession::RelayoutKeyBoard()
-{
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Session property is nullptr, relayout keyboard failed");
-        return;
-    }
-
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    SessionGravity gravity = GetKeyboardGravity();
-    if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
-        return;
-    }
-    if (!GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight)) {
-        return;
-    }
-
-    auto requestRect = sessionProperty->GetRequestRect();
-    if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) {
-        requestRect.width_ = screenWidth;
-        requestRect.posX_ = 0;
-    }
-    requestRect.posY_ = static_cast<int32_t>(screenHeight - requestRect.height_);
-    sessionProperty->SetRequestRect(requestRect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, gravity: %{public}d", GetPersistentId(),
-        SessionHelper::TransferToWSRect(requestRect).ToString().c_str(), gravity);
-}
-
 void KeyboardSession::OpenKeyboardSyncTransaction()
 {
     auto task = [weakThis = wptr(this)]() {
@@ -547,7 +515,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
         session->isKeyboardSyncTransactionOpen_ = true;
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
-            transactionController->OpenSyncTransaction();
+            transactionController->OpenSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
     };
@@ -563,8 +531,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardPanelRect: %{public}s, isKeyboardShow: %{public}d"
-            ", isRotating: %{public}d", keyboardPanelRect.ToString().c_str(), isKeyboardShow, isRotating);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, isKeyboardShow: %{public}d, isRotating: %{public}d",
+            isKeyboardShow, isRotating);
         std::shared_ptr<RSTransaction> rsTransaction = nullptr;
         if (!isRotating && session->isKeyboardSyncTransactionOpen_) {
             rsTransaction = session->GetRSTransaction();
@@ -588,7 +556,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         session->isKeyboardSyncTransactionOpen_ = false;
         auto transactionController = RSSyncTransactionController::GetInstance();
         if (transactionController) {
-            transactionController->CloseSyncTransaction();
+            transactionController->CloseSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
     };

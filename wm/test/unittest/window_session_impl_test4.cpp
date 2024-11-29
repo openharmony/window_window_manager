@@ -2177,6 +2177,40 @@ HWTEST_F(WindowSessionImplTest4, ClearListenersById_switchFreeMultiWindowListene
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_switchFreeMultiWindowListeners end";
 }
+
+/**
+ * @tc.name: FlushLayoutSize
+ * @tc.desc: FlushLayoutSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, FlushLayoutSize, Function | SmallTest | Level2)
+{
+#undef private
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: FlushLayoutSize start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("FlushLayoutSize");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    int32_t width = 1320;
+    int32_t height = 2710;
+    WSRect rect = { 0, 0, width, height };
+    window->FlushLayoutSize(width, height);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSizeChanged_ = true;
+    window->FlushLayoutSize(width, height);
+    ASSERT_EQ(window->windowSizeChanged_, false);
+
+    window->layoutRect_ = { 0, 0, 2710, 1320 };
+    window->FlushLayoutSize(width, height);
+    ASSERT_EQ(window->layoutRect_, rect);
+    
+    window->enableFrameLayoutFinishCb_ = true;
+    window->FlushLayoutSize(width, height);
+    ASSERT_EQ(window->enableFrameLayoutFinishCb_, false);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: FlushLayoutSize end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS

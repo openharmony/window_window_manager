@@ -233,49 +233,18 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction, Function | SmallTest
     std::string bundleName = "OpenKeyboardSyncTransaction";
     sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
 
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    bool isKeyboardShow = true;
+    bool isRotating = false;
+
     // isKeyBoardSyncTransactionOpen_ is false
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
     keyboardSession->OpenKeyboardSyncTransaction();
 
     // isKeyBoardSyncTransactionOpen_ is true
-    keyboardSession->OpenKeyboardSyncTransaction();
-}
-
-/**
- * @tc.name: CloseKeyboardSyncTransaction1
- * @tc.desc: CloseKeyboardSyncTransaction1
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction1, Function | SmallTest | Level1)
-{
-    std::string abilityName = "CloseKeyboardSyncTransaction1";
-    std::string bundleName = "CloseKeyboardSyncTransaction1";
-    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
-
-    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
-    bool isKeyboardShow = true;
-    bool isRotating = false;
-
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
-}
-
-/**
- * @tc.name: CloseKeyboardSyncTransaction2
- * @tc.desc: CloseKeyboardSyncTransaction2
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction2, Function | SmallTest | Level1)
-{
-    std::string abilityName = "CloseKeyboardSyncTransaction2";
-    std::string bundleName = "CloseKeyboardSyncTransaction2";
-    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
-
-    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
-    bool isKeyboardShow = true;
-    bool isRotating = false;
-
-    // isKeyBoardSyncTransactionOpen_ is true
     keyboardSession->OpenKeyboardSyncTransaction();
-    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
+    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
 }
 
 /**
@@ -443,28 +412,6 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, Function | SmallTe
     WSRect keyboardPanelRect = {0, 0, 0, 0};
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, true);
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
-}
-
-/**
- * @tc.name: RelayoutKeyBoard01
- * @tc.desc: RelayoutKeyBoard01
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest2, RelayoutKeyBoard01, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RelayoutKeyBoard";
-    info.bundleName_ = "RelayoutKeyBoard";
-    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
-    ASSERT_NE(keyboardSession, nullptr);
-    keyboardSession->property_ = nullptr;
-    keyboardSession->RelayoutKeyBoard();
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(windowSessionProperty, nullptr);
-    keyboardSession->property_ = windowSessionProperty;
-    ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    keyboardSession->RelayoutKeyBoard();
 }
 
 /**

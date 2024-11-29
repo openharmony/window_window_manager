@@ -15,6 +15,8 @@
 
 #include "session/host/include/session.h"
 
+#include <regex>
+
 #include "ability_info.h"
 #include "input_manager.h"
 #include "key_event.h"
@@ -96,6 +98,12 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         TLOGI(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
         SetFocusedOnShow(focusedOnShow);
     }
+
+    static const std::regex pattern(R"(^SCBScreenLock[0-9]+$)");
+    if (std::regex_match(info.bundleName_, pattern)) {
+        TLOGD(WmsLogTag::DEFAULT, "bundleName: %{public}s", info.bundleName_.c_str());
+        isScreenLockWindow_ = true;
+    }
 }
 
 Session::~Session()
@@ -147,8 +155,15 @@ int32_t Session::GetPersistentId() const
     return persistentId_;
 }
 
+void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    surfaceNode_ = surfaceNode;
+}
+
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
 {
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     return surfaceNode_;
 }
 
@@ -188,7 +203,7 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
 {
     auto movedSurfaceNode = GetLeashWinSurfaceNode();
     if (!movedSurfaceNode) {
-        movedSurfaceNode = surfaceNode_;
+        movedSurfaceNode = GetSurfaceNode();
     }
     return movedSurfaceNode;
 }
@@ -1054,7 +1069,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     }
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
-    surfaceNode_ = surfaceNode;
+    SetSurfaceNode(surfaceNode);
     abilityToken_ = token;
     systemConfig = systemConfig_;
     InitSessionPropertyWhenConnect(property);
@@ -1088,7 +1103,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
-        property->SetWindowModeSupportType(GetSessionInfo().windowModeSupportType);
+        property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
     }
     if (sessionProperty && property) {
         property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
@@ -1147,7 +1162,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
-    surfaceNode_ = surfaceNode;
+    SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
     SetSessionProperty(property);
@@ -1284,7 +1299,12 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     bufferAvailable_ = false;
     isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+        std::shared_ptr<RSSurfaceNode> surfaceNode;
+        {
+            std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+            surfaceNode_.swap(surfaceNode);
+        }
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode)]() mutable {
             surfaceNode.reset();
         });
     }
@@ -1397,6 +1417,11 @@ void Session::SetClientDragEnable(bool dragEnable)
 std::optional<bool> Session::GetClientDragEnable() const
 {
     return clientDragEnable_;
+}
+
+bool Session::IsScreenLockWindow() const
+{
+    return isScreenLockWindow_;
 }
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
@@ -2200,20 +2225,22 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
         scenePersistence_->SetHasSnapshot(false);
         return nullptr;
     }
     scenePersistence_->SetHasSnapshot(true);
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    auto scaleValue = scaleParam == 0.0f ? snapshotScale_ : scaleParam;
+    auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
+        snapshotScale_ : scaleParam;
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = useCurWindow,
     };
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config);
     if (!ret) {
         TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
         return nullptr;
@@ -2707,13 +2734,14 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 
 void Session::UpdateGravityWhenUpdateWindowMode(WindowMode mode)
 {
-    if ((systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode_ != nullptr) {
+    auto surfaceNode = GetSurfaceNode();
+    if ((systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode != nullptr) {
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-            surfaceNode_->SetFrameGravity(Gravity::LEFT);
+            surfaceNode->SetFrameGravity(Gravity::LEFT);
         } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
+            surfaceNode->SetFrameGravity(Gravity::RIGHT);
         } else if (mode == WindowMode::WINDOW_MODE_FLOATING || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+            surfaceNode->SetFrameGravity(Gravity::RESIZE);
         }
     }
 }
@@ -2929,7 +2957,7 @@ WSRect Session::GetSessionRequestRect() const
 void Session::SetClientRect(const WSRect& rect)
 {
     clientRect_ = rect;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
         GetPersistentId(), rect.ToString().c_str());
 }
 
@@ -3658,5 +3686,10 @@ void Session::SetScbCoreEnabled(bool enabled)
 bool Session::IsVisible() const
 {
     return isVisible_;
+}
+
+std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
+{
+    return handler_;
 }
 } // namespace OHOS::Rosen
