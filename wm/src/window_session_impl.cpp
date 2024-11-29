@@ -30,6 +30,7 @@
 #include <transaction/rs_transaction.h>
 
 #include "color_parser.h"
+#include "common/include/fold_screen_state_internel.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
@@ -46,7 +47,6 @@
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 #include "parameters.h"
-#include "common/include/fold_screen_state_internel.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -58,6 +58,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr DisplayId SUPER_FOLD_UPPER_DISPLAY_ID = 0;
 constexpr DisplayId SUPER_FOLD_LOWER_DISPLAY_ID = 999;
+constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -705,21 +706,18 @@ int32_t WindowSessionImpl::CalcSuperFoldRectPosY(const WSRect& rect)
         return rect.posY_;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(SUPER_FOLD_UPPER_DISPLAY_ID);
-    if (display == nullptr) {
+    if (display == nullptr || display->GetDisplayInfo()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
         return rect.posY_;
     }
     sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null!");
-        return rect.posY_;
-    }
     auto foldCreaseRegion = foldCreaseRegionVec.front();
-    int32_t upperScreenPosY = displayInfo->GetHeight() - foldCreaseRegion.height_ / 2;
+    int32_t upperScreenPosY =
+        displayInfo->GetHeight() - static_cast<int32_t>(foldCreaseRegion.height_) / SUPER_FOLD_DIVIDE_FACTOR;
     if (rect.posY_ <= upperScreenPosY) {
         return rect.posY_;
     }
-    int32_t lowerScreenPosY = upperScreenPosY + foldCreaseRegion.height_;
+    int32_t lowerScreenPosY = upperScreenPosY + static_cast<int32_t> foldCreaseRegion.height_;
     if (rect.posY_ < lowerScreenPosY) {
         return rect.posY_;
     }
