@@ -47,7 +47,7 @@ void SessionStubImmersiveTest::SetUp()
         [&](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             return session_->SessionStub::OnRemoteRequest(code, data, reply, option);
         }
-    ))
+    ));
 }
 
 void SessionStubImmersiveTest::TearDown()
@@ -87,7 +87,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
     AvoidArea mockArea;
     mockArea.topRect_.width_ = 1200;
     mockArea.topRect_.height_ = 127;
-    EXPECT_CALL(*session_, GetAvoidAreaByType, (_)).WillOnce(Return(mockArea));
+    EXPECT_CALL(*session_, GetAvoidAreaByType(_)).WillOnce(Return(mockArea));
 
     MessageParcel data;
     MessageParcel reply;
@@ -113,7 +113,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
 HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasNormal start";
-    EXPECT_CALL(*session_, GetAllAvoidAreas, (_)).WillOnce(Invock(
+    EXPECT_CALL(*session_, GetAllAvoidAreas(_)).WillOnce(Invoke(
         [](std::map<AvoidAreaType, AvoidArea>& avoidAreas) -> WSError {
             AvoidArea mockArea;
             mockArea.topRect_.width_ = 1200;
@@ -161,7 +161,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
 HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasEmpty, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionStubImmersiveTest::HandleGetAllAvoidAreasEmpty start";
-    EXPECT_CALL(*session_, GetAllAvoidAreas, (_)).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*session_, GetAllAvoidAreas(_)).WillOnce(Return(WSError::WS_OK));
 
     MessageParcel data;
     MessageParcel reply;
