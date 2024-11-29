@@ -2266,6 +2266,10 @@ HWTEST_F(WindowSessionImplTest4, UnregisterDisplayIdChangeListener01, Function |
 
     ret = window->UnregisterDisplayIdChangeListener(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
+
+    holder = window->displayIdChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_EQ(existsListener, holder.end());
 }
 
 /**
