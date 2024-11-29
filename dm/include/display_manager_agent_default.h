@@ -46,6 +46,7 @@ public:
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override {};
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override {};
     void NotifyAvailableAreaChanged(DMRect area) override {};
+    void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) override {};
 };
 }
 }

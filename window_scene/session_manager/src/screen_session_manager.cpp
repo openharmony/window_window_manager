@@ -632,6 +632,29 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     HandleScreenEvent(screenSession, screenId, screenEvent);
 }
 
+void ScreenSessionManager::NotifyScreenModeChange()
+{
+    auto task = [=] {
+        auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER);
+        if (agents.empty()) {
+            return;
+        }
+        std::vector<sptr<ScreenInfo>> screenInfos;
+        std::vector<ScreenId> screenIds = GetAllScreenIds();
+        for (auto screenId : screenIds) {
+            auto screenSession = GetScreenSession(screenId);
+            screenInfos.emplace_back(screenSession->ConvertToScreenInfo());
+        }
+        for (auto& agent : agents) {
+            int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+            if (!IsFreezed(agentPid, DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER)) {
+                agent->NotifyScreenModeChange(screenInfos);
+            }
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "NotifyScreenModeChange");
+}
+
 void ScreenSessionManager::SendCastEvent(const bool &isPlugIn)
 {
     TLOGI(WmsLogTag::DMS, "SendCastEvent entry isPlugIn:%{public}d", isPlugIn);
@@ -4300,6 +4323,7 @@ void ScreenSessionManager::OnScreenConnect(const sptr<ScreenInfo> screenInfo)
     for (auto& agent : agents) {
         agent->OnScreenConnect(screenInfo);
     }
+    NotifyScreenModeChange();
 }
 
 void ScreenSessionManager::OnScreenDisconnect(ScreenId screenId)
@@ -4313,6 +4337,7 @@ void ScreenSessionManager::OnScreenDisconnect(ScreenId screenId)
     for (auto& agent : agents) {
         agent->OnScreenDisconnect(screenId);
     }
+    NotifyScreenModeChange();
 }
 
 void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
