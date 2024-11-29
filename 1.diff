@@ -1,0 +1,79 @@
+diff --git a/interfaces/innerkits/wm/window.h b/interfaces/innerkits/wm/window.h
+index f2c46bfc93d6a4217cb1d1b07c1ef06c46f05516..4c12db234052a808b9bcb6b268f22cf1ccbe3395 100644
+--- a/interfaces/innerkits/wm/window.h
++++ b/interfaces/innerkits/wm/window.h
+@@ -2641,6 +2641,15 @@ public:
+      * @return WM_OK means get success, others means get failed.
+      */
+     virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
++
++    /**
++     * @brief this interface is invoked by the ACE to the native host.
++     * @param eventName invoking event name, which is used to distinguish different invoking types.
++     * @param value used to transfer parameters.
++     * @return WM_OK means get success, others means get failed.
++     */
++    virtual WMError OnContainerModalEvent(const std::string& eventName,
++        const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+ };
+ }
+ }
+diff --git a/wm/include/window_scene_session_impl.h b/wm/include/window_scene_session_impl.h
+index c4e3eaa3877fb1fb04a20a46e2588d6bda31c051..1e9eea3d556cfddc0579e18dba631bf1f2bd4784 100644
+--- a/wm/include/window_scene_session_impl.h
++++ b/wm/include/window_scene_session_impl.h
+@@ -184,6 +184,7 @@ public:
+      * PC Fold Screen
+      */
+     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
++    WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
+ 
+ protected:
+     WMError CreateAndConnectSpecificSession();
+diff --git a/wm/src/window_scene_session_impl.cpp b/wm/src/window_scene_session_impl.cpp
+index 40dcbc055bea389f1e1390fbb825f43ee651eaf1..1c24d3c20ff1be411a1f355071e834efe46490f6 100644
+--- a/wm/src/window_scene_session_impl.cpp
++++ b/wm/src/window_scene_session_impl.cpp
+@@ -94,6 +94,7 @@ constexpr float MIN_GRAY_SCALE = 0.0f;
+ constexpr float MAX_GRAY_SCALE = 1.0f;
+ constexpr int32_t MAX_POINTERS = 16;
+ constexpr int32_t TOUCH_SLOP_RATIO = 25;
++const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
+ const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
+     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
+     WindowType::WINDOW_TYPE_THEME_EDITOR,
+@@ -1979,7 +1980,11 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
+             return WMError::WM_ERROR_INVALID_WINDOW;
+         }
+         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+-        hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
++        if (isFullScreenWaterfallMode_.load()) {
++            hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_WATERFALL);
++        } else {
++            hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
++        }
+         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+     }
+ 
+@@ -4474,5 +4479,20 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
+     isFullScreenWaterfallMode_.store(isWaterfallMode);
+     return WSError::WS_OK;
+ }
++
++WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventName, const std::string& value)
++{
++    TLOGI(WmsLogTag::WMS_LAYOUT, "DBTB event: %{public}s, value: %{public}s", eventName.c_str(), value.c_str());
++    if (eventName == WATERFALL_WINDOW_EVENT) {
++        isFullScreenWaterfallMode_.store(true);
++        auto ret = Maximize();
++        if (ret != WMError::WM_OK) {
++            TLOGE(WmsLogTag::WMS_LAYOUT, "maximize failed");
++            isFullScreenWaterfallMode_.store(false);
++        }
++        return ret;
++    }
++    return WMError::WM_DO_NOTHING;
++}
+ } // namespace Rosen
+ } // namespace OHOS
+ 
