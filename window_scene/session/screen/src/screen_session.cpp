@@ -1044,6 +1044,9 @@ ScreenSourceMode ScreenSession::GetSourceMode() const
         case ScreenCombination::SCREEN_UNIQUE: {
             return ScreenSourceMode::SCREEN_UNIQUE;
         }
+        case ScreenCombination::SCREEN_EXTEND: {
+            return ScreenSourceMode::SCREEN_EXTEND;
+        }
         default: {
             return ScreenSourceMode::SCREEN_ALONE;
         }

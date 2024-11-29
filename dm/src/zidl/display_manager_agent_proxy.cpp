@@ -541,6 +541,32 @@ void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area, DisplayId
         WLOGFE("SendRequest failed");
     }
 }
+
+void DisplayManagerAgentProxy::NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyScreenModeChange: remote is nullptr");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
+        WLOGFE("Write screenInfos failed");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_ON_SCREEN_MODE_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 
