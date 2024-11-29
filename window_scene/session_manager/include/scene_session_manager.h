@@ -651,7 +651,7 @@ private:
     void UpdateNormalSessionAvoidArea(const int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
-    void UpdateDarkColorModeToRS();
+
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession);
@@ -1096,6 +1096,7 @@ private:
     /**
      * Window Property
      */
+    void UpdateDarkColorModeToRS();
     struct DrawingSessionInfo {
         int32_t pid_ = 0;
         int32_t uid_ = 0;
