@@ -94,6 +94,7 @@ constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
 constexpr int32_t MAX_POINTERS = 16;
 constexpr int32_t TOUCH_SLOP_RATIO = 25;
+const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -1979,7 +1980,8 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-        hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+        hostSession->OnSessionEvent(isFullScreenWaterfallMode_.load() ? SessionEvent::EVENT_MAXIMIZE_WATERFALL
+                                                                      : SessionEvent::EVENT_MAXIMIZE);
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
 
@@ -4477,6 +4479,22 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
         isFullScreenWaterfallMode_.load(), isWaterfallMode);
     isFullScreenWaterfallMode_.store(isWaterfallMode);
     return WSError::WS_OK;
+}
+
+WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventName, const std::string& value)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, DBTB event: %{public}s, value: %{public}s",
+        GetPersistentId(), eventName.c_str(), value.c_str());
+    if (eventName == WATERFALL_WINDOW_EVENT) {
+        isFullScreenWaterfallMode_.store(true);
+        auto ret = Maximize();
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "maximize failed");
+            isFullScreenWaterfallMode_.store(false);
+        }
+        return ret;
+    }
+    return WMError::WM_DO_NOTHING;
 }
 } // namespace Rosen
 } // namespace OHOS

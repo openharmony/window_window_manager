@@ -444,6 +444,11 @@ protected:
      */
     uint32_t GetStatusBarHeight() override;
 
+    /**
+     * PC Screen Manager
+     */
+    int32_t CalcSuperFoldRectPosY(const WSRect& rect);
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);

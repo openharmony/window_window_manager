@@ -2689,6 +2689,15 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief this interface is invoked by the ACE to the native host.
+     * @param eventName invoking event name, which is used to distinguish different invoking types.
+     * @param value used to transfer parameters.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError OnContainerModalEvent(const std::string& eventName,
+        const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
