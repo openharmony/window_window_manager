@@ -700,7 +700,7 @@ bool Session::GetTouchable() const
 void Session::SetForceTouchable(bool forceTouchable)
 {
     if (forceTouchable != forceTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d: %{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(forceTouchable));
     }
     forceTouchable_ = forceTouchable;
@@ -709,7 +709,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d: %{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(touchable));
     }
     systemTouchable_ = touchable;
@@ -2141,11 +2141,11 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
-        WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+        TLOGD(WmsLogTag::WMS_EVENT, "eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
             "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     } else {
-        TLOGD(WmsLogTag::WMS_EVENT, "Session TransferPointEvent, eventId:%{public}d, action:%{public}s, "
+        TLOGD(WmsLogTag::WMS_EVENT, "eventId:%{public}d, action:%{public}s, "
             "persistentId:%{public}d, bundleName:%{public}s, pid:%{public}d",
             pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
