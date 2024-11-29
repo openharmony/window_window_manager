@@ -100,7 +100,7 @@ void SessionManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChange
         if (agent != nullptr) {
             agent->UpdateFocusChangeInfo(focusChangeInfo, isFocused);
         } else {
-            TLOGE(WmsLogTag::WMS_FOCUS, "agent is invalid");
+            TLOGW(WmsLogTag::WMS_FOCUS, "agent is invalid");
         }
     }
 }
