@@ -556,6 +556,41 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
     return arrayValue;
 }
 
+napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButtonStyle)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "colorMode", CreateJsValue(env, decorButtonStyle.colorMode));
+    napi_set_named_property(env, objValue, "buttonBackgroundSize",
+        CreateJsValue(env, decorButtonStyle.buttonBackgroundSize));
+    napi_set_named_property(env, objValue, "spacingBetweenButtons",
+        CreateJsValue(env, decorButtonStyle.spacingBetweenButtons));
+    napi_set_named_property(env, objValue, "closeButtonRightMargin",
+        CreateJsValue(env, decorButtonStyle.closeButtonRightMargin));
+    return objValue;
+}
+
+bool SetDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
+{
+    int32_t colorMode;
+    if (ParseJsValue(jsObject, env, "colorMode", colorMode)) {
+        style.colorMode = colorMode;
+    }
+    uint32_t buttonBackgroundSize;
+    if (ParseJsValue(jsObject, env, "buttonBackgroundSize", buttonBackgroundSize)) {
+        style.buttonBackgroundSize = buttonBackgroundSize;
+    }
+    uint32_t spacingBetweenButtons;
+    if (ParseJsValue(jsObject, env, "spacingBetweenButtons", spacingBetweenButtons)) {
+        style.spacingBetweenButtons = spacingBetweenButtons;
+    }
+    uint32_t closeButtonRightMargin;
+    if (ParseJsValue(jsObject, env, "closeButtonRightMargin", closeButtonRightMargin)) {
+        style.closeButtonRightMargin = closeButtonRightMargin;
+    }
+    return true;
+}
+
 napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
 {
     napi_value objValue = nullptr;
