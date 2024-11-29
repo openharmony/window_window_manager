@@ -168,7 +168,7 @@ bool SessionPermission::IsShellCall()
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFD("TokenType is Shell, verify success");
+        TLOGD(WmsLogTag::DEFAULT, "TokenType is Shell, verify success");
         return true;
     }
     TLOGI(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
