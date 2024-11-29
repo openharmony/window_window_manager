@@ -697,7 +697,7 @@ int32_t WindowSessionImpl::UpdateSuperFoldRect(const WSRect& rect)
     }
     auto FoldCreaseRegionVec = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion()->GetCreaseRects();
     if (FoldCreaseRegionVec.size() != 1) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Get FoldCreaseRegionVec Error");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "GetCurrentFoldCreaseRegion Error");
         property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
         return rect.posY_;
     }
