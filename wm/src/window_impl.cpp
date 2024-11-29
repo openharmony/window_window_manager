@@ -4319,11 +4319,11 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
 void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
-        TLOGD(WmsLogTag::WMS_IMMS, "window: %{public}s", GetWindowName().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "window: %{public}s", GetWindowName().c_str());
         uiContent_->UpdateThemeConfiguration(configuration);
     }
     uint32_t numSubWindow = subWindowMap_.count(GetWindowId());
-    TLOGD(WmsLogTag::WMS_IMMS, "subWindow num: %{public}u", numSubWindow);
+    TLOGI(WmsLogTag::WMS_IMMS, "subWindow num: %{public}u", numSubWindow);
     if (numSubWindow == 0) {
         return;
     }
@@ -4334,7 +4334,7 @@ void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Conf
 
 void WindowImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "windowImpl");
+    TLOGI(WmsLogTag::WMS_IMMS, "windowImpl");
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         window->UpdateThemeConfiguration(configuration);

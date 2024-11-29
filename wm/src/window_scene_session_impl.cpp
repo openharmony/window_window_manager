@@ -4481,11 +4481,11 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 void WindowSceneSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "scene window: %{public}s", GetWindowName().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "scene window: %{public}s", GetWindowName().c_str());
         uiContent->UpdateThemeConfiguration(configuration);
     }
     uint32_t numSubSession = subWindowSessionMap_.count(GetPersistentId());
-    TLOGD(WmsLogTag::WMS_IMMS, "scene subSession num: %{public}u", numSubSession);
+    TLOGI(WmsLogTag::WMS_IMMS, "scene subSession num: %{public}u", numSubSession);
     if (numSubSession == 0) {
         return;
     }
@@ -4496,7 +4496,7 @@ void WindowSceneSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppE
 
 void WindowSceneSessionImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "scene");
+    TLOGI(WmsLogTag::WMS_IMMS, "scene");
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
