@@ -432,7 +432,7 @@ protected:
     uint32_t GetStatusBarHeight() override;
 
     /**
-     * PC Fold Screen
+     * PC Screen Manager
      */
     int32_t CalcSuperFoldRectPosY(const WSRect& rect);
 
