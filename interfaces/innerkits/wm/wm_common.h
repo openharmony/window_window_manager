@@ -25,6 +25,18 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
+    constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
+    constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
+    constexpr int32_t DEFAULT_COLOR_MODE = -1;
+    constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+    constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
+    constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
+    constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
+    constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
+    constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
+}
 using DisplayId = uint64_t;
 /**
  * @brief Enumerates type of window.
@@ -1254,6 +1266,13 @@ struct SubWindowOptions {
     bool isModal = false;
     bool isTopmost = false;
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
+};
+
+struct DecorButtonStyle {
+    int32_t  colorMode = DEFAULT_COLOR_MODE;
+    uint32_t spacingBetweenButtons = DEFAULT_SPACING_BETWEEN_BUTTONS;
+    uint32_t closeButtonRightMargin = DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN;
+    uint32_t buttonBackgroundSize = DEFAULT_BUTTON_BACKGROUND_SIZE;
 };
 
 struct ExtensionWindowConfig {

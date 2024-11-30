@@ -339,6 +339,8 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
     napi_value ModalityTypeInit(napi_env env);
+    napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButtonStyle);
+    bool SetDecorButtonStyleFromJs(napi_env env, napi_value jsObj, DecorButtonStyle& decorButtonStyle);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,

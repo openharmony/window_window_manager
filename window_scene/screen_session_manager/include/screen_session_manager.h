@@ -342,6 +342,7 @@ protected:
 
 private:
     void OnStart() override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void Init();
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
@@ -548,6 +549,7 @@ private:
     void ExitCoordination(const std::string& reason);
     void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
     void SetExtendPixelRatio(const float& dpi);
+    void CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
 
 private:

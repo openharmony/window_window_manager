@@ -338,6 +338,8 @@ public:
     }
     virtual WMError SetDecorHeight(int32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetDecorButtonStyle(DecorButtonStyle style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetDecorButtonStyle(DecorButtonStyle& style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -435,13 +437,13 @@ public:
      */
     virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
-    /*
+    /**
      * @brief Update theme configuration for all windows
      * @param configuration configuration for app
      */
     static void UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
-    /*
+    /**
      * @brief Update theme configuration.
      * @param configuration Window configuration.
      */

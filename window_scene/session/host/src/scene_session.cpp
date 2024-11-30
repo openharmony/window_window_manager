@@ -1059,7 +1059,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         // position change no need to notify client, since frame layout finish will notify
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_) &&
             (session->reason_ != SizeChangeReason::DRAG_MOVE || !session->rectChangeListenerRegistered_)) {
-            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: position change no need notify client id:%{public}d, "
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: position change no need notify client id:%{public}d, "
                 "rect:%{public}s, preRect:%{public}s", funcName,
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
@@ -1283,23 +1283,6 @@ void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopm
     PostTask(task, __func__);
 }
 
-void SceneSession::SetKeyboardGravityChangeCallback(const NotifyKeyboardGravityChangeFunc& func)
-{
-    auto task = [weakThis = wptr(this), func]() {
-        auto session = weakThis.promote();
-        if (!session || !func) {
-            WLOGFE("session or gravityChangeFunc is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        session->keyboardGravityChangeFunc_ = func;
-        session->keyboardGravityChangeFunc_(session->GetKeyboardGravity());
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify gravity change when register, id: %{public}d gravity: %{public}d",
-            session->GetPersistentId(), session->GetKeyboardGravity());
-        return WSError::WS_OK;
-    };
-    PostTask(task, "SetKeyboardGravityChangeCallback");
-}
-
 void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func)
 {
     const char* const funcName = __func__;
@@ -1505,10 +1488,6 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
 /** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        WLOGFE("raise to app top permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
-    }
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1790,6 +1769,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
+    if (!keyboardAvoidAreaActive_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "this keyboard avoid area is not active.");
+        return;
+    }
     if (Session::CheckIfNeedKeyboardAvoidAreaEmpty()) {
         TLOGI(WmsLogTag::WMS_IMMS, "Keyboard avoid area need to empty when in floating mode");
         return;
@@ -2707,14 +2690,16 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
 
 void SceneSession::OnNextVsyncReceivedWhenDrag()
 {
-    PostTask([weakThis = wptr(this)] {
+    const char* const funcName = __func__;
+    PostTask([weakThis = wptr(this), funcName] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
             return;
         }
         if (session->IsDirtyDragWindow()) {
-            TLOGNI(WmsLogTag::WMS_LAYOUT, "OnMoveDragCallback id:%{public}u", session->GetPersistentId());
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
+                funcName, session->GetPersistentId(), session->winRect_.ToString().c_str());
             session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
             session->ResetDragDirtyFlags();
         }
@@ -3950,7 +3935,6 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
-        case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
         case WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
@@ -4398,13 +4382,10 @@ WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property raiseEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, raiseenabled: %{public}d", GetPersistentId(),
+            property->GetRaiseEnabled());
         sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
     }
     return WMError::WM_OK;
@@ -5873,5 +5854,15 @@ bool SceneSession::IsSystemKeyboard() const
         return false;
     }
     return sessionProperty->IsSystemKeyboard();
+}
+
+void SceneSession::ActivateKeyboardAvoidArea(bool active)
+{
+    keyboardAvoidAreaActive_ = active;
+}
+
+void SceneSession::MarkAvoidAreaAsDirty()
+{
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
 }
 } // namespace OHOS::Rosen

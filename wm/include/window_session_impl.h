@@ -186,6 +186,8 @@ public:
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
+    WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
+    WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
@@ -255,10 +257,16 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    /**
+     * Window Decor
+     */
     virtual WMError SetDecorVisible(bool isVisible) override;
     virtual WMError SetWindowTitleMoveEnabled(bool enable) override;
     virtual WMError SetDecorHeight(int32_t decorHeight) override;
     virtual WMError GetDecorHeight(int32_t& height) override;
+    virtual WMError SetDecorButtonStyle(DecorButtonStyle decorButtonStyle) override;
+    virtual WMError GetDecorButtonStyle(DecorButtonStyle& decorButtonStyle) override;
+
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     virtual WMError RegisterWindowTitleButtonRectChangeListener(
@@ -299,6 +307,11 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
+
+    /**
+     * Window Property
+     */
+    WSError NotifyDisplayIdChange(DisplayId displayId);
 
 protected:
     WMError Connect();
@@ -431,6 +444,11 @@ protected:
      */
     uint32_t GetStatusBarHeight() override;
 
+    /**
+     * PC Screen Manager
+     */
+    int32_t CalcSuperFoldRectPosY(const WSRect& rect);
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
@@ -456,6 +474,8 @@ private:
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IDisplayIdChangeListener, std::vector<IDisplayIdChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> GetListeners();
     template<typename T>
@@ -538,6 +558,8 @@ private:
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
+    static std::mutex displayIdChangeListenerMutex_;
+    static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
@@ -572,6 +594,7 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+    DecorButtonStyle decorButtonStyle_;
 
     /**
      * Multi Window

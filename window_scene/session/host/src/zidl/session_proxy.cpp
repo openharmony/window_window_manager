@@ -848,8 +848,17 @@ WMError SessionProxy::GetGlobalScaledRect(Rect& globalScaledRect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    globalScaledRect = { reply.ReadInt32(), reply.ReadInt32(), reply.ReadUint32(), reply.ReadUint32() };
-    int32_t ret = reply.ReadInt32();
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    int32_t ret = 0;
+    if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) ||
+        !reply.ReadUint32(width) || !reply.ReadUint32(height) || !reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    globalScaledRect = { posX, posY, width, height };
     return static_cast<WMError>(ret);
 }
 
