@@ -126,6 +126,8 @@ using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
+using NotifyAppUseControlListFunc =
+    std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -522,6 +524,15 @@ public:
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void RegisterBindDialogTargetListener(const sptr<SceneSession>& session, NotifyBindDialogSessionFunc&& func);
     void UnregisterSpecificSessionCreateListener(int32_t persistentId);
+
+    /**
+     * Window Lifecycle
+     */
+    void GetMainSessionByBundleNameAndAppIndex(
+        const std::string& bundleName, const int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
+    WSError NotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
+    void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
 
 protected:
     SceneSessionManager();
@@ -1122,6 +1133,11 @@ private:
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
     std::unordered_map<int32_t, NotifyBindDialogSessionFunc> bindDialogTargetFuncMap_;
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverDialogSessionCacheMap_;
+
+    /**
+     * Window Lifecycle
+     */
+    NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
 };
 } // namespace OHOS::Rosen
 
