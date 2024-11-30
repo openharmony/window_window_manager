@@ -609,6 +609,23 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
+
+void OnSessionEventWhenDrag(std::shared_ptr<SceneSession> session, SessionEvent event)
+{
+    if (session->moveDragController_ && (event == SessionEvent::EVENT_DRAG ||
+        event == SessionEvent::EVENT_DRAG_START)) {
+        WSRect rect = session->moveDragController_->GetTargetRect(
+            MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+        DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+        if (event == SessionEvent::EVENT_DRAG_START) {
+            dragResizeType = session->GetDragResizeType();
+            session->SetDragResizeTypeDuringDrag(dragResizeType);
+        }
+        session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_,
+            static_cast<uint32_t>(dragResizeType)});
+    }
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     auto task = [weakThis = wptr(this), event]() {
@@ -652,22 +669,6 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     };
     PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<uint32_t>(event)));
     return WSError::WS_OK;
-}
-
-void OnSessionEventWhenDrag(std::shared_ptr<SceneSession> session, SessionEvent event)
-{
-    if (session->moveDragController_ && (event == SessionEvent::EVENT_DRAG ||
-        event == SessionEvent::EVENT_DRAG_START)) {
-        WSRect rect = session->moveDragController_->GetTargetRect(
-            MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-        DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-        if (event == SessionEvent::EVENT_DRAG_START) {
-            dragResizeType = session->GetDragResizeType();
-            session->SetDragResizeTypeDuringDrag(dragResizeType);
-        }
-        session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_,
-            static_cast<uint32_t>(dragResizeType)});
-    }
 }
 
 void SceneSession::UpdateWaterfallMode(SessionEvent event)
