@@ -610,7 +610,7 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
 }
 
 
-void OnSessionEventWhenDrag(std::shared_ptr<SceneSession> session, SessionEvent event)
+void OnSessionEventWhenDrag(sptr<SceneSession> session, SessionEvent event)
 {
     if (session->moveDragController_ && (event == SessionEvent::EVENT_DRAG ||
         event == SessionEvent::EVENT_DRAG_START)) {
