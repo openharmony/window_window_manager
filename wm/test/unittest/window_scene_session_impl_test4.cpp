@@ -1767,15 +1767,15 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent, Function | SmallTes
 }
 
 /**
- * @tc.name: UpdateThemeConfigurationForAll
- * @tc.desc: UpdateThemeConfigurationForAll
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, UpdateThemeConfigurationForAll, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationSyncForAll, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("UpdateThemeConfigurationForAll");
+    option->SetWindowName("UpdateConfigurationSyncForAll");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
@@ -1791,7 +1791,7 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateThemeConfigurationForAll, Function |
     windowSession->property_->SetPersistentId(1);
     windowSession->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, windowSession->Create(abilityContext_, session));
-    windowSceneSessionImpl->UpdateThemeConfigurationForAll(configuration);
+    windowSceneSessionImpl->UpdateConfigurationSyncForAll(configuration);
     ASSERT_EQ(WMError::WM_OK, windowSession->Destroy(true));
 }
 }

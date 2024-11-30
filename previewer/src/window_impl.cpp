@@ -1156,23 +1156,23 @@ bool WindowImpl::GetImmersiveModeEnabledState() const
     return true;
 }
 
-void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ == nullptr) {
         TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, previewer win: %{public}s", GetWindowName().c_str());
         return;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "previewer win: %{public}s", GetWindowName().c_str());
-    uiContent_->UpdateThemeConfiguration(configuration);
+    uiContent_->UpdateConfigurationSyncForAll(configuration);
 }
 
-void WindowImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "previewer");
     std::lock_guard<std::mutex> lock(globalMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
-        window->UpdateThemeConfiguration(configuration);
+        window->UpdateConfigurationSync(configuration);
     }
 }
 } // namespace Rosen

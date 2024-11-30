@@ -72,9 +72,9 @@ void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configu
     return WindowImpl::UpdateConfigurationForAll(configuration);
 }
 
-void Window::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void Window::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    return WindowImpl::UpdateThemeConfigurationForAll(configuration);
+    return WindowImpl::UpdateConfigurationSyncForAll(configuration);
 }
 
 bool OccupiedAreaChangeInfo::Marshalling(Parcel& parcel) const
