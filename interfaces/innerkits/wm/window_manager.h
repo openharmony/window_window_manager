@@ -287,8 +287,8 @@ struct AppUseControlInfo : public Parcelable {
     {
         auto info = new AppUseControlInfo();
         if (!parcel.ReadString(info->bundleName_) ||
-            ！parcel.ReadInt32(info->appIndex_) ||
-            ！parcel.ReadBool(info->isNeedControl_)) {
+            !parcel.ReadInt32(info->appIndex_) ||
+            !parcel.ReadBool(info->isNeedControl_)) {
             delete info;
             return nullptr;
         }

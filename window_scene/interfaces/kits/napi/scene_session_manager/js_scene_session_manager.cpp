@@ -3710,7 +3710,7 @@ static napi_value CreateAppUseControlInfos(
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
         return NapiGetUndefined(env);
     }
-    int32_t index = 0;a
+    int32_t index = 0;
     for (const auto& appUseControlInfo : controlList) {
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);

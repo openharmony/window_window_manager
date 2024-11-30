@@ -936,8 +936,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRootMainWindowId, Function | 
     EXPECT_EQ(ERR_NONE, res);
 }
 
- 
- 
 /**
  * @tc.name: HandleNotifyAppUseControlList
  * @tc.desc: test function : HandleNotifyAppUseControlList

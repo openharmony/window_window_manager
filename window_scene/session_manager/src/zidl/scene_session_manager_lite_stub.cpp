@@ -859,7 +859,7 @@ int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& da
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_LIFE, "app control list size: %{public}d", size);
-    std::vector<ControlAppInfo> controlList;
+    std::vector<AppUseControlInfo> controlList;
     controlList.resize(size);
     for (int32_t i = 0; i < size; i++) {
         if (!(data.ReadString(controlList[i].bundleName_) &&
