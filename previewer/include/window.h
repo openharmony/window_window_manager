@@ -444,13 +444,13 @@ public:
      * @brief Update theme configuration for all windows
      * @param configuration configuration for app
      */
-    static void UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
     /**
      * @brief Update theme configuration.
      * @param configuration Window configuration.
      */
-    virtual void UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
+    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
 };
 }
 }

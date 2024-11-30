@@ -1473,11 +1473,11 @@ HWTEST_F(WindowImplTest2, NotifyWindowTransition, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: UpdateThemeConfigurationForAll
- * @tc.desc: UpdateThemeConfigurationForAll Test
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest2, UpdateThemeConfigurationForAll, Function | SmallTest | Level3)
+HWTEST_F(WindowImplTest2, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
@@ -1485,7 +1485,7 @@ HWTEST_F(WindowImplTest2, UpdateThemeConfigurationForAll, Function | SmallTest |
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     std::shared_ptr<AppExecFwk::Configuration> configuration;
-    sptr<Window>(window)->UpdateThemeConfigurationForAll(configuration);
+    sptr<Window>(window)->UpdateConfigurationSyncForAll(configuration);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
