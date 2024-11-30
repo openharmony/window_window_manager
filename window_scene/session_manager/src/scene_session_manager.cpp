@@ -1655,7 +1655,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
 
 DragResizeType SceneSessionManager::GetEffectiveDragResizeType(const DragResizeType& dragResizeType)
 {
-    let DragResizeType effectiveDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    DragResizeType effectiveDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     GetGlobalDragResizeType(effectiveDragResizeType)
     if (effectiveDragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         dragResizeType = effectiveDragResizeType;
