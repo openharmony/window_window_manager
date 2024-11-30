@@ -4513,7 +4513,8 @@ void WindowSceneSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppE
     }
 }
 
-void WindowSceneSessionImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowSceneSessionImpl::UpdateThemeConfigurationForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "scene");
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
