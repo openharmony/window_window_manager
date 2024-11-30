@@ -461,7 +461,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapter::~BaseAdapter()
 {
-    WLOGFI("BaseAdapter destory!");
+    WLOGFI("destory!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     Clear();
     displayManagerServiceProxy_ = nullptr;
@@ -469,7 +469,7 @@ BaseAdapter::~BaseAdapter()
 
 void BaseAdapter::Clear()
 {
-    WLOGFD("BaseAdapter Clear!");
+    WLOGFD("Clear!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
@@ -872,7 +872,11 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const C
 sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
-    return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+    } else {
+        return displayManagerServiceProxy_->GetDefaultDisplayInfo();
+    }
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOption(const CaptureOption& captureOption,

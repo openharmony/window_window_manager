@@ -71,7 +71,6 @@ enum class ListenerFuncType : uint32_t {
     PREPARE_CLOSE_PIP_SESSION,
     LANDSCAPE_MULTI_WINDOW_CB,
     CONTEXT_TRANSPARENT_CB,
-    KEYBOARD_GRAVITY_CHANGE_CB,
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
@@ -267,7 +266,6 @@ private:
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
     void ProcessContextTransparentRegister();
-    void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
     void ProcessDefaultDensityEnabledRegister();
@@ -326,7 +324,6 @@ private:
     void OnPrepareClosePiPSession();
     void OnContextTransparent();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
-    void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);

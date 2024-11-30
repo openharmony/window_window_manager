@@ -384,9 +384,6 @@ HWTEST_F(KeyboardSessionTest2, UpdateCallingSessionIdAndPosition01, Function | S
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->property_->SetCallingSessionId(-1);
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
-    keyboardSession->UpdateCallingSessionIdAndPosition(0);
-    keyboardSession->state_ = SessionState::STATE_CONNECT;
     keyboardSession->UpdateCallingSessionIdAndPosition(0);
     keyboardSession->UpdateCallingSessionIdAndPosition(-1);
     keyboardSession->property_->SetCallingSessionId(0);
@@ -412,28 +409,6 @@ HWTEST_F(KeyboardSessionTest2, OpenKeyboardSyncTransaction01, Function | SmallTe
     WSRect keyboardPanelRect = {0, 0, 0, 0};
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, true);
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, false);
-}
-
-/**
- * @tc.name: RelayoutKeyBoard01
- * @tc.desc: RelayoutKeyBoard01
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest2, RelayoutKeyBoard01, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RelayoutKeyBoard";
-    info.bundleName_ = "RelayoutKeyBoard";
-    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
-    ASSERT_NE(keyboardSession, nullptr);
-    keyboardSession->property_ = nullptr;
-    keyboardSession->RelayoutKeyBoard();
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(windowSessionProperty, nullptr);
-    keyboardSession->property_ = windowSessionProperty;
-    ASSERT_NE(keyboardSession->property_, nullptr);
-    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    keyboardSession->RelayoutKeyBoard();
 }
 
 /**

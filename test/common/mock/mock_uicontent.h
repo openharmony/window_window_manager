@@ -109,6 +109,7 @@ public:
     MOCK_METHOD4(NotifyExecuteAction, bool(int64_t elementId, const std::map<std::string, std::string>& actionAguments,
         int32_t action, int64_t baseParent));
     MOCK_METHOD2(SetForceSplitEnable, void(bool isForceSplit, const std::string& homePage));
+    MOCK_METHOD1(SetContainerButtonStyle, void(const Rosen::DecorButtonStyle& decorButtonStyle));
     MOCK_METHOD1(UpdateThemeConfiguration, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
 };
 } // namespace Ace

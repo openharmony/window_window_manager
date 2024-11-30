@@ -607,30 +607,6 @@ HWTEST_F(SceneSessionTest3, SetMainWindowTopmostChangeCallback, Function | Small
 }
 
 /**
- * @tc.name: SetKeyboardGravityChangeCallback
- * @tc.desc: SetKeyboardGravityChangeCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, SetKeyboardGravityChangeCallback, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetKeyboardGravityChangeCallback";
-    info.bundleName_ = "SetKeyboardGravityChangeCallback";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
-
-    NotifyKeyboardGravityChangeFunc func;
-    sceneSession->SetKeyboardGravityChangeCallback(func);
-
-    NotifyKeyboardGravityChangeFunc func1 = [sceneSession](SessionGravity gravity) {
-        return;
-    };
-    sceneSession->SetKeyboardGravityChangeCallback(func1);
-    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, sceneSession->GetKeyboardGravity());
-}
-
-/**
  * @tc.name: SetRestoreMainWindowCallback
  * @tc.desc: SetRestoreMainWindowCallback
  * @tc.type: FUNC

@@ -841,7 +841,7 @@ napi_value JsSceneSessionManager::GetAllWindowVisibilityInfos(napi_env env, napi
 
 napi_value JsSceneSessionManager::SetSystemAnimatedScenes(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetSystemAnimatedScenes(env, info) : nullptr;
 }
@@ -883,14 +883,14 @@ napi_value JsSceneSessionManager::PerfRequestEx(napi_env env, napi_callback_info
 
 napi_value JsSceneSessionManager::UpdateWindowMode(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateWindowMode(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::AddWindowDragHotArea(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnAddWindowDragHotArea(env, info) : nullptr;
 }

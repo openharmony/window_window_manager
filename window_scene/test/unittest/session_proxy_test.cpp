@@ -162,24 +162,6 @@ HWTEST_F(SessionProxyTest, OnNeedAvoid, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetAvoidAreaByType
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, GetAvoidAreaByType, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetAvoidAreaByType start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    AvoidAreaType status = AvoidAreaType::TYPE_SYSTEM;
-    AvoidArea res = sProxy->GetAvoidAreaByType(status);
-    AvoidArea area;
-    ASSERT_EQ(res, area);
-
-    GTEST_LOG_(INFO) << "SessionProxyTest: GetAvoidAreaByType end";
-}
-
-/**
  * @tc.name: RequestSessionBack
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -501,6 +483,12 @@ HWTEST_F(SessionProxyTest, GetGlobalScaledRect, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    res = sProxy->GetGlobalScaledRect(rect);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
     res = sProxy->GetGlobalScaledRect(rect);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetGlobalScaledRect end";

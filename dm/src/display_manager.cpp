@@ -529,7 +529,7 @@ void DisplayManager::Impl::ClearDisplayModeCallback()
 
 void DisplayManager::Impl::Clear()
 {
-    WLOGFI("Clear displaymanager listener");
+    WLOGFI("Clear listener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
@@ -563,13 +563,13 @@ DisplayManager::Impl::~Impl()
 
 DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 {
-    WLOGFD("Create displaymanager instance");
+    WLOGFD("Create instance");
     g_dmIsDestroyed = false;
 }
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFI("Destroy displaymanager instance");
+    WLOGFI("Destroy instance");
     g_dmIsDestroyed = true;
 }
 

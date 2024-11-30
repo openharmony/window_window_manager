@@ -197,6 +197,8 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.ohos.sceneboard", "com.ohos.sceneboard.MetaBallsAbility", "metaBallsTurbo"),
         std::make_tuple("com.huawei.hmos.motiongesture", "IntentUIExtensionAbility", "entry"),
         std::make_tuple("com.ohos.useriam.authwidget", "userauthuiextensionability", "entry"),
+        std::make_tuple("com.ohos.sceneboard", "AodStyleAbility", "phone_sceneboard"),
+        std::make_tuple("com.ohos.sceneboard", "HomeThemeComponentExtAbility", "themecomponent"),
     };
 
     auto it = std::find_if(whitelist.begin(), whitelist.end(), [&element](const auto& item) {
@@ -969,7 +971,7 @@ void SceneSessionManager::ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationC
     constexpr float CTRLX2 = 342.0f;
     constexpr float CTRLY2 = 37.0f;
     constexpr uint32_t DURATION = 150;
-    
+
     if (systemConfig_.animationIn_.curveType_.empty()) {
         std::vector<float> in = { IN_CTRLX1, CTRLY1, CTRLX2, CTRLY2 };
         // update system config for client
@@ -1524,7 +1526,7 @@ void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& wi
     taskScheduler_->PostSyncTask(task, "OnNotifyAboveLockScreen");
 }
 
-sptr<SceneSession> SceneSessionManager::RequestKeyboardPanelSession(std::string& panelName, uint64_t displayId)
+sptr<SceneSession> SceneSessionManager::RequestKeyboardPanelSession(const std::string& panelName, uint64_t displayId)
 {
     SessionInfo panelInfo = {
         .bundleName_ = panelName,
@@ -1543,6 +1545,40 @@ sptr<SceneSession> SceneSessionManager::RequestKeyboardPanelSession(std::string&
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Set panel surfaceNode");
     }
     return RequestSceneSession(panelInfo, nullptr);
+}
+
+void SceneSessionManager::ActivateKeyboardAvoidAreaIfNeed(WindowType windowType, DisplayId displayId)
+{
+    if (windowType != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "is not keyboard window.");
+        return;
+    }
+
+    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayId);
+    if (keyboardSessionVec.empty()) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "there is no keyboard window in the map");
+        return;
+    }
+    bool hasSystemKeyboardSession = false;
+    for (const auto& tempKeyboardSession : keyboardSessionVec) {
+        if (!tempKeyboardSession) {
+            continue;
+        }
+        if (tempKeyboardSession->IsSystemKeyboard()) {
+            hasSystemKeyboardSession = true;
+            tempKeyboardSession->ActivateKeyboardAvoidArea(true);
+        } else {
+            tempKeyboardSession->ActivateKeyboardAvoidArea(false);
+        }
+    }
+    if (hasSystemKeyboardSession) {
+        return;
+    }
+    for (const auto& tempKeyboardSession : keyboardSessionVec) {
+        if (tempKeyboardSession) {
+            tempKeyboardSession->ActivateKeyboardAvoidArea(true);
+        }
+    }
 }
 
 void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession)
@@ -1564,25 +1600,23 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
     DisplayId displayId = sessionProperty->GetDisplayId();
     const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL, displayId);
     sptr<SceneSession> panelSession;
-    for (auto& tempPanelSession : panelVec) {
+    for (const auto& tempPanelSession : panelVec) {
         if (tempPanelSession && tempPanelSession->IsSystemKeyboard() == keyboardSession->IsSystemKeyboard()) {
             panelSession = tempPanelSession;
             break;
         }
     }
 
+    // only 2 scenarios of panelSession is nullptr:
+    // 1: neither keyboard panel session or systemkeyboard keyboard panel session is crated.
+    // 2: one panel session has been created already, but it's isSystemKeyboard is not match with keyboardSesion's
     if (panelSession == nullptr) {
         if (panelVec.size() >= 2) { // 2 is max number of keyboard panel, one input method and one system keyboard
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Error size of keyboardPanel, size: %{public}zu", panelVec.size());
             return;
         }
-        if (keyboardSession->IsSystemKeyboard()) {
-            std::string panelName = "SCBSystemKeyboardPanel";
-            panelSession = RequestKeyboardPanelSession(panelName, static_cast<uint64_t>(displayId));
-        } else {
-            std::string panelName = "SCBKeyboardPanel";
-            panelSession = RequestKeyboardPanelSession(panelName, static_cast<uint64_t>(displayId));
-        }
+        std::string panelName = keyboardSession->IsSystemKeyboard() ? "SCBSystemKeyboardPanel" : "SCBKeyboardPanel";
+        panelSession = RequestKeyboardPanelSession(panelName, static_cast<uint64_t>(displayId));
         if (panelSession == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "PanelSession is nullptr");
             return;
@@ -1615,9 +1649,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     } else if (property != nullptr && property->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb = CreateKeyboardSessionCallback();
         sceneSession = new KeyboardSession(sessionInfo, specificCb, keyboardCb);
-        if (sceneSession && property) {
-            sceneSession->SetIsSystemKeyboard(property->IsSystemKeyboard());
-        }
+        sceneSession->SetIsSystemKeyboard(property->IsSystemKeyboard());
         CreateKeyboardPanelSession(sceneSession);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Create KeyboardSession, type: %{public}d", property->GetWindowType());
     } else if (property != nullptr && SessionHelper::IsSystemWindow(property->GetWindowType())) {
@@ -1656,7 +1688,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
             TLOGD(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
-    
+
         if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
             TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
                 "abilityName: %{public}s, appIndex: %{public}d",
@@ -1729,6 +1761,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
                 MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
             }
         }
+        ActivateKeyboardAvoidAreaIfNeed(sceneSession->GetWindowType(), sceneSession->GetScreenId());
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id: %{public}d, type: %{public}d, instanceKey: %{public}s",
@@ -2333,10 +2366,17 @@ void SceneSessionManager::EraseSceneSessionAndMarkDirtyLockFree(int32_t persiste
     }
     sptr<SceneSession> sceneSession = iter->second;
 
-    if (sceneSession != nullptr && sceneSession->IsVisible()) {
-        sessionMapDirty_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
+    DisplayId displayId = INVALID_SESSION_ID;
+    WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    if (sceneSession != nullptr) {
+        if (sceneSession->IsVisible()) {
+            sessionMapDirty_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
+        }
+        displayId = sceneSession->GetScreenId();
+        windowType = sceneSession->GetWindowType();
     }
     sceneSessionMap_.erase(persistentId);
+    ActivateKeyboardAvoidAreaIfNeed(windowType, displayId);
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession,
@@ -2740,7 +2780,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return true;
     }
 
-    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && (property && property->IsSystemKeyboard())) {
+    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && property->IsSystemKeyboard()) {
         // system keyboard window can be create by virtual keyboard service only
         if (SessionPermission::IsStartedBySystemKeyboard()) {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "create system keyboard, permission check sucess.");
@@ -2753,7 +2793,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)
         && SessionPermission::IsStartedByInputMethod()) {
         // WINDOW_TYPE_INPUT_METHOD_FLOAT could be created by input method app
-        WLOGD("check create permission success, input method app create input method window.");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "check create permission success, input method app create input method window.");
         return true;
     }
 
@@ -6087,7 +6127,9 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
             NotifyFocusStatus(sceneSession, true);
         }
     } else if (!sceneSession->IsFocusedOnShow()) {
-        sceneSession->SetFocusedOnShow(true);
+        if (IsSessionVisibleForeground(sceneSession)) {
+            sceneSession->SetFocusedOnShow(true);
+        }
     } else {
         if (Session::IsScbCoreEnabled()) {
             ProcessFocusWhenForegroundScbCore(sceneSession);
@@ -8692,10 +8734,10 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
         "area{%{public}d,%{public}d,%{public}d,%{public}d}, displayId: %{public}" PRIu64,
         isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_, displayId);
     auto task = [this, isVisible, barArea, displayId]() {
-        bool isNeedNotify = isAINavigationBarVisible_ != isVisible;
+        bool isNeedUpdate = true;
         {
             std::unique_lock<std::shared_mutex> lock(currAINavigationBarAreaMapMutex_);
-            bool isNeedUpdate = isAINavigationBarVisible_ != isVisible ||
+            isNeedUpdate = isAINavigationBarVisible_ != isVisible ||
                 currAINavigationBarAreaMap_.count(displayId) == 0 ||
                 currAINavigationBarAreaMap_[displayId] != barArea;
             if (isNeedUpdate) {
@@ -8708,7 +8750,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 currAINavigationBarAreaMap_[displayId] = WSRect();
             }
         }
-        if (isNeedNotify) {
+        if (isNeedUpdate) {
             WLOGFI("NotifyAINavigationBar inner: %{public}u, {%{public}d,%{public}d,%{public}d,%{public}d}",
                 isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
             for (auto persistentId : avoidAreaListenerSessionSet_) {
@@ -8726,17 +8768,23 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
         return;
     }
-    AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
-        sceneSession->GetSessionRect().height_)) {
-        return;
+    bool isLastFrameLayoutFinished = true;
+    IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
+    TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}d] is layout finished: %{public}d",
+        persistentId, isLastFrameLayoutFinished);
+    if (isLastFrameLayoutFinished) {
+        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        if (!CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea,
+            sceneSession->GetSessionRect().height_)) {
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}d] immediate update aibar area %{public}s",
+            persistentId, avoidArea.ToString().c_str());
+        UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
+            AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    } else {
+        sceneSession->MarkAvoidAreaAsDirty();
     }
-    WLOGFI("NotifyAINavigationBarShowStatus: persistentId: %{public}d, "
-        "{%{public}d,%{public}d,%{public}d,%{public}d}", persistentId,
-        avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
-        avoidArea.bottomRect_.width_, avoidArea.bottomRect_.height_);
-    UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
-        AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
 }
 
 WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId)
@@ -8814,8 +8862,7 @@ void SceneSessionManager::UpdateDarkColorModeToRS()
     std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
     bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
-    TLOGI(WmsLogTag::DEFAULT, "SetGlobalDarkColorMode with colorMode: %{public}s, ret: %{public}d",
-        colorMode.c_str(), ret);
+    TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d", colorMode.c_str(), ret);
 }
 
 void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
@@ -9790,6 +9837,16 @@ void SceneSessionManager::PostProcessFocus()
             session->ResetPostProcessFocusState();
             continue;
         }
+        if (!session->IsFocusedOnShow() &&
+            (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP ||
+             session->GetPostProcessFocusState().reason_ == FocusChangeReason::FOREGROUND)) {
+            if (IsSessionVisibleForeground(session)) {
+                session->SetFocusedOnShow(true);
+            }
+            session->ResetPostProcessFocusState();
+            continue;
+        }
+
         WSError ret = WSError::WS_DO_NOTHING;
         if (session->GetPostProcessFocusState().isFocused_) {
             if (session->GetPostProcessFocusState().reason_ == FocusChangeReason::SCB_START_APP) {
@@ -11436,7 +11493,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<
             sceneSession->UpdatePCZOrderAndMarkDirty(i + startZOrder);
         }
         oss << "]";
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "RefreshPcZOrderList:%{public}s", oss.str().c_str());
+        TLOGND(WmsLogTag::WMS_LAYOUT, "RefreshPcZOrderList:%{public}s", oss.str().c_str());
         return WSError::WS_OK;
     };
     taskScheduler_->PostTask(task, __func__);

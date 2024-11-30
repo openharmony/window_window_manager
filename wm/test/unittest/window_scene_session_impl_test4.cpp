@@ -1753,6 +1753,20 @@ HWTEST_F(WindowSceneSessionImplTest4, SetFullScreenWaterfallMode, Function | Sma
 }
 
 /**
+ * @tc.name: OnContainerModalEvent
+ * @tc.desc: test OnContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnContainerModalEvent");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->OnContainerModalEvent("not_waterfall_window_event", ""));
+}
+
+/**
  * @tc.name: UpdateThemeConfigurationForAll
  * @tc.desc: UpdateThemeConfigurationForAll
  * @tc.type: FUNC

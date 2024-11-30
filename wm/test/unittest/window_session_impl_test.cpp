@@ -486,6 +486,24 @@ HWTEST_F(WindowSessionImplTest, SetActive, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: CalcSuperFoldRectPosY01
+ * @tc.desc: CalcSuperFoldRectPosY
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateSuperFoldRectPosY01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateRect01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    WSRect rect1 = { 0, 10, 10, 10 };
+    auto updatedRect = window->CalcSuperFoldRectPosY(rect1);
+    ASSERT_EQ(updatedRect, 10);
+    WSRect rect2 = { 0, 1000, 1000, 10000 };
+    updatedRect = window->CalcSuperFoldRectPosY(rect2);
+    ASSERT_EQ(updatedRect, 1000);
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: UpdateRect
  * @tc.type: FUNC
@@ -1284,10 +1302,16 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     res = window->UnregisterWindowVisibilityChangeListener(listener8);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    sptr<IWindowTitleButtonRectChangedListener> listener9 = nullptr;
-    res = window->RegisterWindowTitleButtonRectChangeListener(listener9);
+    IDisplayIdChangeListenerSptr listener9 = nullptr;
+    res = window->RegisterDisplayIdChangeListener(listener9);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterWindowTitleButtonRectChangeListener(listener9);
+    res = window->UnregisterDisplayIdChangeListener(listener9);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IWindowTitleButtonRectChangedListener> listener10 = nullptr;
+    res = window->RegisterWindowTitleButtonRectChangeListener(listener10);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowTitleButtonRectChangeListener(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
