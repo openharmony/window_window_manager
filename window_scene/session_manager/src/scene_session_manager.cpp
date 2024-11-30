@@ -1653,23 +1653,23 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     return sceneSession;
 }
 
-DragResizeType SceneSessionManager::GetEffectiveDragResizeType(const DragResizeType& dragResizeType)
+void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeType)
 {
     DragResizeType effectiveDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     GetGlobalDragResizeType(effectiveDragResizeType)
     if (effectiveDragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         dragResizeType = effectiveDragResizeType;
-        return effectiveDragResizeType;
+        return;
     }
     if (dragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
-        effectiveDragResizeType = dragResizeType;
-        return effectiveDragResizeType;
+        return;
     }
     if (IsFreeMultiWindowMode()) {
-        return DragResizeType::RESIZE_WHEN_DRAG_END;
+        dragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
     } else {
-        return DragResizeType::RESIZE_EACH_FRAME;
+        dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     }
+    return;
 }
 
 WMError SceneSessionManager::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
