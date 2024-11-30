@@ -110,7 +110,7 @@ public:
         int32_t action, int64_t baseParent));
     MOCK_METHOD2(SetForceSplitEnable, void(bool isForceSplit, const std::string& homePage));
     MOCK_METHOD1(SetContainerButtonStyle, void(const Rosen::DecorButtonStyle& decorButtonStyle));
-    MOCK_METHOD1(UpdateThemeConfiguration, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
+    MOCK_METHOD1(UpdateConfigurationSyncForAll, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
 };
 } // namespace Ace
 } // namespace OHOS

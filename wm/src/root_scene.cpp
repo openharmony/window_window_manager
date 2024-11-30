@@ -236,20 +236,20 @@ void RootScene::RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&
     updateRootSceneRectCallback_ = std::move(callback);
 }
 
-void RootScene::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_) {
         TLOGI(WmsLogTag::WMS_IMMS, "root scene window: %{public}s", GetWindowName().c_str());
-        uiContent_->UpdateThemeConfiguration(configuration);
+        uiContent_->UpdateConfigurationSyncForAll(configuration);
         return;
     }
     TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, root scene win: %{public}s", GetWindowName().c_str());
 }
 
-void RootScene::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void RootScene::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (staticRootScene_) {
-        staticRootScene_->UpdateThemeConfiguration(configuration);
+        staticRootScene_->UpdateConfigurationSync(configuration);
         return;
     }
     TLOGD(WmsLogTag::WMS_IMMS, "root scene is null");

@@ -4513,11 +4513,11 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
     return WMError::WM_DO_NOTHING;
 }
 
-void WindowSceneSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
         TLOGI(WmsLogTag::WMS_IMMS, "scene window: %{public}s", GetWindowName().c_str());
-        uiContent->UpdateThemeConfiguration(configuration);
+        uiContent->UpdateConfigurationSync(configuration);
     }
     uint32_t numSubSession = subWindowSessionMap_.count(GetPersistentId());
     TLOGI(WmsLogTag::WMS_IMMS, "scene subSession num: %{public}u", numSubSession);
@@ -4525,18 +4525,18 @@ void WindowSceneSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppE
         return;
     }
     for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
-        subWindowSession->UpdateThemeConfiguration(configuration);
+        subWindowSession->UpdateConfigurationSync(configuration);
     }
 }
 
-void WindowSceneSessionImpl::UpdateThemeConfigurationForAll(
+void WindowSceneSessionImpl::UpdateConfigurationSyncForAll(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "scene");
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
-        window->UpdateThemeConfiguration(configuration);
+        window->UpdateConfigurationSync(configuration);
     }
 }
 } // namespace Rosen
