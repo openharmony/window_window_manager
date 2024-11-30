@@ -210,8 +210,8 @@ private:
     void RegisterRootSceneCallbacksOnSSManager();
     void RegisterSSManagerCallbacksOnRootScene();
     void OnNotifyAppUseControlList(
-        ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList);
-    void ProcessNotifyAppUseControlListRegister();
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
+    void RegisterNotifyAppUseControlListCallback();
 
     /*
      * PiP Window

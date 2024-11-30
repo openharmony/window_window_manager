@@ -377,8 +377,6 @@ public:
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
     void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
-    void SetAppUseControlMapValue(ControlAppType type, bool isControl);
-    std::map<ControlAppType, bool>& GetAppUseControlMap();
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -536,6 +534,7 @@ protected:
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
+    std::unordered_map<ControlAppType, bool> appUseControlMap_;
 
 private:
     void NotifyAccessibilityVisibilityChange();

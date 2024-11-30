@@ -1201,13 +1201,13 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
 }
 
 void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
-    const std::string& bundleName, const int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions)
+    const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName &&
             sceneSession->GetSessionInfo().appIndex_ == appIndex &&
-            SessionHelper::IsMainWindow(static_cast<WindowType>(sceneSession->GetWindowType()))) {
+            SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
             mainSessions.push_back(sceneSession);
         }
     }
@@ -7614,7 +7614,7 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
 }
 
 WSError SceneSessionManager::NotifyAppUseControlList(
-    ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
 {
     TLOGI(WmsLogTag::WMS_LIFE,
         "controlApptype: %{public}d userId: %{public}d controlList size: %{public}zu",
@@ -7627,20 +7627,19 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_, userId);
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    auto task = [this, type, userId, controlList]() {
+    auto task = [this, type, userId, controlList] {
         if (notifyAppUseControlListFunc_ != nullptr) {
             notifyAppUseControlListFunc_(type, userId, controlList);
         }
 
         std::vector<sptr<SceneSession>> mainSessions;
-        for (const auto& controlAppInfo : controlList) {
-            GetMainSessionByBundleNameAndAppIndex(controlAppInfo.bundleName_, controlAppInfo.appIndex_, mainSessions);
+        for (const auto& appUseControlInfo : controlList) {
+            GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
             if (mainSessions.empty()) {
                 continue;
             }
             for (const auto& session : mainSessions) {
-                session->SetAppUseControlMapValue(type, controlAppInfo.isNeedControl_);
-                session->NotifyUpdateAppUseControl(type, controlAppInfo.isNeedControl_);
+                session->NotifyUpdateAppUseControl(type, appUseControlInfo.isNeedControl_);
             }
             mainSessions.clear();
         }

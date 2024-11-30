@@ -239,7 +239,7 @@ private:
     void ProcessDefaultDensityEnabledRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
-    void ProcessUpdateAppUseControlRegister();    
+    void RegisterUpdateAppUseControlCallback();
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
