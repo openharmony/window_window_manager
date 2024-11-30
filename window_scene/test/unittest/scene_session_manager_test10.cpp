@@ -350,6 +350,27 @@ HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | Sm
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
     ASSERT_EQ(INVALID_SESSION_ID, ssm_->lastFocusedAppSessionId_);
 }
+
+/**
+ * @tc.name: NotifyAppUseControlList
+ * @tc.desc: NotifyAppUseControlList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<AppUseControlInfo> controlList;
+    controlList.emplace_back();
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
+        ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
+ 
+    AppUseControlInfo appUseControlInfo;
+    appUseControlInfo.bundleName_ = "bundleName";
+    appUseControlInfo.appIndex_ = 1;
+    appUseControlInfo.isNeedControl_ = true;
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
+    ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
+}
 }  // namespace
 }
 }

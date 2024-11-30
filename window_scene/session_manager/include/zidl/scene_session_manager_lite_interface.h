@@ -130,7 +130,7 @@ public:
      * @permission application requires SA permission
      */
     virtual WSError NotifyAppUseControlList(
-        ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList) = 0;
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList) = 0;
 
     /**
      * @brief Obtains main window state list by pid

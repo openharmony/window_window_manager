@@ -113,7 +113,7 @@ using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
-    std::function<void(ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)>;
+    std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -445,7 +445,7 @@ public:
     void GetMainSessionByBundleNameAndAppIndex(
         const std::string& bundleName, const int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
     WSError NotifyAppUseControlList(
-        ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList);
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
 
 protected:
