@@ -23,6 +23,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionManagerLiteStub"};
 constexpr uint32_t MAX_VECTOR_SIZE = 100;
 constexpr uint32_t MAX_TOPN_INFO_SIZE = 200;
+constexpr int32_t MAX_CONTROL_APP_INFO = 200;
 }
 
 int SceneSessionManagerLiteStub::OnRemoteRequest(uint32_t code,
@@ -126,6 +127,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetRootMainWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_INFO):
             return HandleGetAccessibilityWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST):
+            return HandleNotifyAppUseControlList(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -830,6 +833,45 @@ int SceneSessionManagerLiteStub::HandleGetAccessibilityWindowInfo(MessageParcel&
         return ERR_TRANSACTION_FAILED;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    uint8_t controlType = 0;
+    if (!data.ReadUint8(controlType) || controlType <= static_cast<uint8_t>(ControlAppType::CONTROL_APP_TYPE_BEGIN) ||
+        controlType >= static_cast<uint8_t>(ControlAppType::CONTROL_APP_TYPE_END)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read controlType");
+        return ERR_INVALID_DATA;
+    }
+    ControlAppType type = static_cast<ControlAppType>(controlType);
+
+    int32_t userId;
+    if (!data.ReadInt32(userId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read userId");
+        return ERR_INVALID_DATA;
+    }
+
+    int32_t size = 0;
+    if (!data.ReadInt32(size) || size < 0 || size > MAX_CONTROL_APP_INFO) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read controlList size failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_LIFE, "app control list size: %{public}d", size);
+    std::vector<AppUseControlInfo> controlList;
+    controlList.resize(size);
+    for (int32_t i = 0; i < size; i++) {
+        if (!(data.ReadString(controlList[i].bundleName_) &&
+              data.ReadInt32(controlList[i].appIndex_) &&
+              data.ReadBool(controlList[i].isNeedControl_))) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Read controlList failed");
+            return ERR_INVALID_DATA;
+        }
+    }
+
+    WSError ret = NotifyAppUseControlList(type, userId, controlList);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
