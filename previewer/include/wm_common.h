@@ -16,9 +16,13 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <parcel.h>
 #include <map>
+
 #include <float.h>
+
+#include <parcel.h>
+#include "dm_common.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -814,6 +818,20 @@ public:
 struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveIn;
     KeyboardAnimationCurve curveOut;
+};
+
+struct MoveConfiguration {
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 11;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
 };
 
 enum class MaximizePresentation {
