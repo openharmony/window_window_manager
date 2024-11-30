@@ -190,13 +190,14 @@ public:
      * Window Layout
      */
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
-    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
-    void SetNeedSyncSessionRect(bool needSync);
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
-    WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
-        bool isGlobal = false, bool isFromMoveToGlobal = false) override;
+    WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
+        bool isFromMoveToGlobal = false, MoveConfiguration moveConfiguration = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+    void UpdateSessionState(SessionState state) override;
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+        std::shared_ptr<RSTransaction> rsTransaction) override;
 
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
@@ -211,8 +212,6 @@ public:
     WSError NotifySessionExceptionInner(
         const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false,
         bool isFromClient = false, bool startFail = false);
-    WSError NotifyClientToUpdateRect(const std::string& updateReason,
-        std::shared_ptr<RSTransaction> rsTransaction) override;
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true) override;
@@ -444,7 +443,6 @@ public:
     void SetDefaultDisplayIdIfNeed();
 
     void SetSessionState(SessionState state) override;
-    void UpdateSessionState(SessionState state) override;
     void SetForceHideState(ForceHideState forceHideState);
     ForceHideState GetForceHideState() const;
     bool IsTemporarilyShowWhenLocked() const;
@@ -494,6 +492,8 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
 
     // WMSPipeline-related: only accessed on SSM thread
+    virtual void SyncScenePanelGlobalPosition(bool needSync) {}
+    void SetNeedSyncSessionRect(bool needSync);
     uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
     uint32_t UpdateUIParam();   // update invisible session, return dirty flags
     void SetPostProcessFocusState(PostProcessFocusState state);
@@ -817,7 +817,7 @@ private:
     void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
-    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason);
+    void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason, MoveConfiguration moveConfiguration);
     WSError UpdateRectForDrag(const WSRect& rect);
 
     /**
