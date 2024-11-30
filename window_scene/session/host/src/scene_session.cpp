@@ -4958,4 +4958,9 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
     };
     PostTask(task, __func__);
 }
+
+void SceneSession::MarkAvoidAreaAsDirty()
+{
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+}
 } // namespace OHOS::Rosen
