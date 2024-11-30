@@ -1282,7 +1282,8 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     return isPcOrPadFreeMultiWindowMode;
 }
 
-void WindowExtensionSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowExtensionSessionImpl::UpdateThemeConfiguration(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
         TLOGI(WmsLogTag::WMS_IMMS, "extension win: %{public}s", GetWindowName().c_str());
@@ -1292,7 +1293,8 @@ void WindowExtensionSessionImpl::UpdateThemeConfiguration(const std::shared_ptr<
     TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, extension win: %{public}s", GetWindowName().c_str());
 }
 
-void WindowExtensionSessionImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowExtensionSessionImpl::UpdateThemeConfigurationForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "extension");
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
