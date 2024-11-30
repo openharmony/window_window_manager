@@ -850,8 +850,8 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
-        for (const auto& pair : session->GetAppUseControlMap()) {
-            session->onUpdateAppUseControlFunc_(pair.first, pair.second);
+        for (const auto& [type, isNeedControl] : session->appUseControlMap_) {
+            session->onUpdateAppUseControlFunc_(type, isNeedControl);
         }
     };
     PostTask(task, __func__);
@@ -865,6 +865,7 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, bool isNeedCon
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
+        session->appUseControlMap_[type] = isNeedControl;
         if (session->onUpdateAppUseControlFunc_) {
             session->onUpdateAppUseControlFunc_(type, isNeedControl);
         }
@@ -5886,15 +5887,5 @@ bool SceneSession::IsSystemKeyboard() const
 void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
-}
-
-void SceneSession::SetAppUseControlMapValue(ControlAppType type, bool isControl)
-{
-    appUseControlMap_[type] = isControl;
-}
-
-std::map<ControlAppType, bool>& SceneSession::GetAppUseControlMap()
-{
-    return appUseControlMap_;
 }
 } // namespace OHOS::Rosen

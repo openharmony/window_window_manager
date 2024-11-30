@@ -279,7 +279,7 @@ WMError SceneSessionManagerLite::GetAccessibilityWindowInfo(std::vector<sptr<Acc
 }
 
 WSError SceneSessionManagerLite::NotifyAppUseControlList(
-    ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
 {
     return SceneSessionManager::GetInstance().NotifyAppUseControlList(type, userId, controlList);
 }

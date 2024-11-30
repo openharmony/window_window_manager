@@ -840,7 +840,7 @@ int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& da
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
     uint8_t controlType = 0;
-    if (!data.ReadUint8(controlType) || controlType < static_cast<uint8_t>(ControlAppType::APP_LOCK) ||
+    if (!data.ReadUint8(controlType) || controlType <= static_cast<uint8_t>(ControlAppType::CONTROL_APP_TYPE_BEGIN) ||
         controlType >= static_cast<uint8_t>(ControlAppType::CONTROL_APP_TYPE_END)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read controlType");
         return ERR_INVALID_DATA;
@@ -855,11 +855,11 @@ int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& da
 
     int32_t size = 0;
     if (!data.ReadInt32(size) || size < 0 || size > MAX_CONTROL_APP_INFO) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read controlList failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Read controlList size failed");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_LIFE, "app control list size: %{public}d", size);
-    auto controlList = std::vector<ControlAppInfo>(size);
+    std::vector<ControlAppInfo> controlList;
     controlList.resize(size);
     for (int32_t i = 0; i < size; i++) {
         if (!(data.ReadString(controlList[i].bundleName_) &&
@@ -871,7 +871,7 @@ int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& da
     }
 
     WSError ret = NotifyAppUseControlList(type, userId, controlList);
-    reply.WriteUint32(static_cast<int32_t>(ret));
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

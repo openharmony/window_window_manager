@@ -204,10 +204,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WMError::WM_OK;
     }
     WSError NotifyAppUseControlList(
-        ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList) override
-    {
-        return WSError::WS_OK;
-    }
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList) override
+    { return WSError::WS_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -935,6 +933,36 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRootMainWindowId, Function | 
     data.WriteInt32(persistentId);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetRootMainWindowId(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+ 
+ 
+/**
+ * @tc.name: HandleNotifyAppUseControlList
+ * @tc.desc: test function : HandleNotifyAppUseControlList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlList, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    uint8_t typeId = 1;
+    int32_t userId = 1;
+    int32_t size = 1;
+    std::string bundleName = "appbundleName";
+    int32_t appIndex = 1;
+    bool isControl = true;
+ 
+    data.WriteUint8(typeId);
+    data.WriteInt32(userId);
+    data.WriteInt32(size);
+    data.WriteString(bundleName);
+    data.WriteInt32(appIndex);
+    data.WriteBool(isControl);
+ 
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

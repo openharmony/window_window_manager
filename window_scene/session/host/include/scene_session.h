@@ -428,8 +428,6 @@ public:
     virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
-    void SetAppUseControlMapValue(ControlAppType type, bool isControl);
-    std::map<ControlAppType, bool>& GetAppUseControlMap();
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -641,6 +639,7 @@ protected:
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
+    std::unordered_map<ControlAppType, bool> appUseControlMap_;
 
     /**
      * PC Fold Screen
@@ -909,11 +908,6 @@ private:
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
-
-    /**
-     * Window Lifecycle
-     */
-    std::map<ControlAppType, bool> appUseControlMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
