@@ -4316,11 +4316,11 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     return WMError::WM_OK;
 }
 
-void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
         TLOGI(WmsLogTag::WMS_IMMS, "window: %{public}s", GetWindowName().c_str());
-        uiContent_->UpdateThemeConfiguration(configuration);
+        uiContent_->UpdateConfigurationSyncForAll(configuration);
     }
     uint32_t numSubWindow = subWindowMap_.count(GetWindowId());
     TLOGI(WmsLogTag::WMS_IMMS, "subWindow num: %{public}u", numSubWindow);
@@ -4328,16 +4328,16 @@ void WindowImpl::UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Conf
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
-        subWindow->UpdateThemeConfiguration(configuration);
+        subWindow->UpdateConfigurationSync(configuration);
     }
 }
 
-void WindowImpl::UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "windowImpl");
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
-        window->UpdateThemeConfiguration(configuration);
+        window->UpdateConfigurationSync(configuration);
     }
 }
 } // namespace Rosen

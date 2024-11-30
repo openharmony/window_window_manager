@@ -300,36 +300,36 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: UpdateThemeConfiguration
- * @tc.desc: UpdateThemeConfiguration Test
+ * @tc.name: UpdateConfigurationSync
+ * @tc.desc: UpdateConfigurationSync Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UpdateThemeConfiguration, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UpdateConfigurationSync, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
 
     rootScene.uiContent_ = nullptr;
-    rootScene.UpdateThemeConfiguration(configuration);
+    rootScene.UpdateConfigurationSync(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 
 /**
- * @tc.name: UpdateThemeConfigurationForAll
- * @tc.desc: UpdateThemeConfigurationForAll Test
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll Test
  * @tc.type: FUNC
  */
-HWTEST_F(RootSceneTest, UpdateThemeConfigurationForAll, Function | SmallTest | Level3)
+HWTEST_F(RootSceneTest, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
 {
     RootScene rootScene;
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
 
     auto prevStaticRootScene = RootScene::staticRootScene_;
-    rootScene.UpdateThemeConfigurationForAll(configuration);
+    rootScene.UpdateConfigurationSyncForAll(configuration);
 
     sptr<RootScene> staticRootScene;
     RootScene::staticRootScene_ = staticRootScene;
-    rootScene.UpdateThemeConfigurationForAll(configuration);
+    rootScene.UpdateConfigurationSyncForAll(configuration);
 
     RootScene::staticRootScene_ = prevStaticRootScene;
     ASSERT_EQ(1, rootScene.GetWindowId());

@@ -121,8 +121,8 @@ public:
     /*
      * Window Property
      */
-    static void UpdateThemeConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
-    void UpdateThemeConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
