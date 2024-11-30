@@ -1378,7 +1378,7 @@ WMError SceneSessionManagerLiteProxy::GetAccessibilityWindowInfo(std::vector<spt
 }
 
 WSError SceneSessionManagerLiteProxy::NotifyAppUseControlList(
-    ControlAppType type, int32_t userId, const std::vector<ControlAppInfo>& controlList)
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
@@ -1405,8 +1405,8 @@ WSError SceneSessionManagerLiteProxy::NotifyAppUseControlList(
     }
 
     for (const auto& control : controlList) {
-        if (!(data.WriteString(control.bundleName_) && data.WriteInt32(control.appIndex_) &&
-              data.WriteBool(control.isNeedControl_))) {
+        if (!data.WriteString(control.bundleName_) || !data.WriteInt32(control.appIndex_) ||
+            !data.WriteBool(control.isNeedControl_)) {
             TLOGE(WmsLogTag::WMS_LIFE, "Write controlList failed");
             return WSError::WS_ERROR_INVALID_PARAM;
         }

@@ -2368,7 +2368,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             ProcessSetWindowRectAutoSaveRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_APP_USE_CONTROL_CB):
-            ProcessUpdateAppUseControlRegister();
+            RegisterUpdateAppUseControlCallback();
             break;
         default:
             break;
@@ -5265,7 +5265,7 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
-void JsSceneSession::ProcessUpdateAppUseControlRegister()
+void JsSceneSession::RegisterUpdateAppUseControlCallback()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -5275,12 +5275,12 @@ void JsSceneSession::ProcessUpdateAppUseControlRegister()
     const char* const where = __func__;
     session->RegisterUpdateAppUseControlCallback(
         [weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
-            auto jsSceneSession = weakThis.promote();
-            if (!jsSceneSession) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "%{pubilc}s: jsSceneSession is null", where);
-                return;
-            }
-            jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{pubilc}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
     });
     TLOGI(WmsLogTag::WMS_LIFE, "success");
 }

@@ -88,7 +88,7 @@ public:
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
-        const std::vector<ControlAppInfo>& controlList) override;
+        const std::vector<AppUseControlInfo>& controlList) override;
 
 private:
     template<typename T>
