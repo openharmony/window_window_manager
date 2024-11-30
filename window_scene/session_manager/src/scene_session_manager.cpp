@@ -1653,6 +1653,25 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
     return sceneSession;
 }
 
+DragResizeType SceneSessionManager::GetEffectiveDragResizeType(const DragResizeType& dragResizeType)
+{
+    let DragResizeType effectiveDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    GetGlobalDragResizeType(effectiveDragResizeType)
+    if (effectiveDragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+        dragResizeType = effectiveDragResizeType;
+        return effectiveDragResizeType;
+    }
+    if (dragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+        effectiveDragResizeType = dragResizeType;
+        return effectiveDragResizeType;
+    }
+    if (IsFreeMultiWindowMode()) {
+        return DragResizeType::RESIZE_WHEN_DRAG_END;
+    } else {
+        return DragResizeType::RESIZE_EACH_FRAME;
+    }
+}
+
 WMError SceneSessionManager::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "SetGlobalResizeType dragResizeType: %{public}d", dragResizeType);
@@ -1663,6 +1682,7 @@ WMError SceneSessionManager::SetGlobalDragResizeType(const DragResizeType& dragR
 WMError SceneSessionManager::GetGlobalDragResizeType(DragResizeType& dragResizeType)
 {
     dragResizeType = SceneSession::globalDragResizeType_;
+    GetEffectiveDragResizeType(dragResizeType);
     TLOGI(WmsLogTag::WMS_LAYOUT, "GetGlobalResizeType dragResizeType: %{public}d", dragResizeType);
     return WMError::WM_OK;
 }
@@ -1704,6 +1724,7 @@ WMError SceneSessionManager::GetAppDragResizeType(DragResizeType& dragResizeType
     if (auto iter = appDragResizeTypeMap_.find(bundleName); iter != appDragResizeTypeMap_.end()) {
         dragResizeType = iter->second;
     }
+    GetEffectiveDragResizeType(dragResizeType);
     TLOGI(WmsLogTag::WMS_LAYOUT, "GetAppResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
     return WMError::WM_OK;

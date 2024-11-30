@@ -462,6 +462,7 @@ public:
     WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName) override;
     WMError GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName) override;
+    DragResizeType SceneSessionManager::GetEffectiveDragResizeType(const DragResizeType& dragResizeType);
 
     /**
      * Multi Window
