@@ -142,8 +142,8 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAllAvoidAreasNormal, Function | Smal
     ASSERT_EQ(areasNum, 2);
     for (uint32_t i = 0; i < 2; i++) {
         uint32_t type = reply.ReadUint32();
-        ASSERT_TRUE((static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_SYSTEM)
-            || (static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+        ASSERT_TRUE((static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_SYSTEM) ||
+            (static_cast<AvoidAreaType>(type) == AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
         
         sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
         ASSERT_TRUE(area != nullptr);
