@@ -568,7 +568,6 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, Function | SmallTest | Level2)
     data.WriteInt32(20);
     data.WriteUint32(30);
     data.WriteUint32(40);
-    data.WriteUint32(22);
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
     data.WriteInt32(10);
     data.WriteInt32(20);
