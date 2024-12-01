@@ -17,6 +17,8 @@
 #define OHOS_ROSEN_WM_COMMON_H
 
 #include <map>
+#include <sstream>
+#include <string>
 
 #include <float.h>
 
@@ -533,6 +535,13 @@ struct Rect {
     bool IsUninitializedSize() const
     {
         return width_ == 0 && height_ == 0;
+    }
+
+    inline std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
+        return ss.str();
     }
 };
 
