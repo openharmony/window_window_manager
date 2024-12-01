@@ -1656,7 +1656,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
 void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeType)
 {
     DragResizeType effectiveDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    GetGlobalDragResizeType(effectiveDragResizeType)
+    GetGlobalDragResizeType(effectiveDragResizeType);
     if (effectiveDragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         dragResizeType = effectiveDragResizeType;
         return;
@@ -1664,7 +1664,7 @@ void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeT
     if (dragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         return;
     }
-    if (IsFreeMultiWindowMode()) {
+    if (systemConfig_.freeMultiWindowSupport_) {
         dragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
     } else {
         dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
