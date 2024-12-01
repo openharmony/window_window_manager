@@ -33,6 +33,11 @@ void WindowOption::SetWindowMode(WindowMode mode)
     mode_ = mode;
 }
 
+void WindowOption::SetWindowRect(const struct Rect& rect)
+{
+    windowRect_ = rect;
+}
+
 void WindowOption::SetWindowType(WindowType type)
 {
     type_ = type;
