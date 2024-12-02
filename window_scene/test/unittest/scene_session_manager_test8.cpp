@@ -635,6 +635,351 @@ HWTEST_F(SceneSessionManagerTest8, TerminateSessionNew, Function | SmallTest | L
     ssm_->TerminateSessionNew(sessionInfo, true, true);
 }
 
+/**
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: test function : IsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, IsWindowRectAutoSave, Function | SmallTest | Level3)
+{
+    std::string key = "IsWindowRectAutoSave";
+    bool enabled = false;
+    bool enabled1 = true;
+    ssm_->isWindowRectAutoSaveMap_.clear();
+    ssm_->SetIsWindowRectAutoSave(key, enabled1);
+    ssm_->SetIsWindowRectAutoSave(key, enabled1);
+    ssm_->IsWindowRectAutoSave(key, enabled1);
+    EXPECT_EQ(true, enabled);
+
+    enabled = true;
+    enabled1 = false;
+    ssm_->SetIsWindowRectAutoSave(key, enabled1);
+    ssm_->SetIsWindowRectAutoSave(key, enabled1);
+    EXPECT_EQ(false, enabled);
+}
+
+/**
+ * @tc.name: IsLastFrameLayoutFinished
+ * @tc.desc: test function : IsLastFrameLayoutFinished
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, IsLastFrameLayoutFinished, Function | SmallTest | Level3)
+{
+    ssm_->closeTargetFloatWindowFunc_ = nullptr;
+    std::string bundleName = "SetCloseTargetFloatWindowFunc";
+    ProcessCloseTargetFloatWindowFunc func = [](const std::string& bundleName1){
+        return ;
+    };
+    ssm_->SetCloseTargetFloatWindowFunc(func);
+
+    IsRootSceneLastFrameLayoutFinishedFunc func1 = [](){
+        return true;
+    }
+    ssm_->isRootSceneLastFrameLayoutFinishedFunc_ = func1;
+    ASSERT_NE(ssm_->isRootSceneLastFrameLayoutFinishedFunc_, nullptr);
+    bool isLayoutFinished = false;
+    auto ret = ssm_->IsLastFrameLayoutFinished(isLayoutFinished);
+    EXPECT_EQ(true, isLayoutFinished);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: ReportScreenFoldStatus
+ * @tc.desc: test function : ReportScreenFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, ReportScreenFoldStatus, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
+    SessionInfo info;
+    info.bundleName_ = "ReportScreenFoldStatus";
+    info.abilityName_ = "ReportScreenFoldStatus";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession1, nullptr);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    ssm_->sceneSessionMAp.insert(std::make_pair(1, sceneSession1));
+    SessionInfo info1;
+    info1.bundleName_ = "ReportScreenFoldStatus1";
+    info1.abilityName_ = "ReportScreenFoldStatus1";
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    sceneSession2->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession2));
+    SessionInfo info2;
+    info2.bundleName_ = "ReportScreenFoldStatus2";
+    info2.abilityName_ = "ReportScreenFoldStatus2";
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ASSERT_NE(sceneSession3, nullptr);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+    ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession3));
+    ssm_->OnScreenshot(1);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
+    ScreenFoldData data;
+    data.currentScreenFoldStatus_ = ScreenFoldData::INVALID_VALUE;
+    auto ret = ssm_->ReportScreenFoldStatus(data);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+}
+
+/**
+ * @tc.name: GetWindowModeType
+ * @tc.desc: test function : GetWindowModeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetWindowModeType, Function | SmallTest | Level3)
+{
+    SessionInfo Info;
+    info.bundleName_ = "GetWindowModeType";
+    info.abilityName_ = "GetWindowModeType";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->NotifySessionBackground(sceneSession, 1, true, true);
+    WindowModeType windowModeType = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
+    auto ret = ssm_->GetWindowModeType(windowModeType);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
+
+/**
+ * @tc.name: GetHostWindowRect
+ * @tc.desc: test function : GetHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, Function | SmallTest | Level3)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 1;
+    listener->ONScreenshot(displayId);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
+    int32_t hostWindowId = 0;
+    Rect rect = {0, 0, 0, 0};
+    SessionInfo info;
+    info.bundleName_ = "GetHostWindowRect";
+    info.abilityName_ = "GetHostWindowRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(hostWiddowId, sceneSession));
+    auto ret = ssm_->GetHostWindowRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: RemoveExtensionWindowStageFromSCB
+ * @tc.desc: test function : RemoveExtensionWindowStageFromSCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level3)
+{
+    sptr<ISessionStage> sessionStage = nullptr;
+    sptr<IRemoteObject> token = nullptr;
+    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
+
+    sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStage, nullptr);
+    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
+
+    token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token,nullptr);
+    sessionStage = nullptr;
+    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
+
+    sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStage, nullptr);
+    ssm_->remoteExtSessionMap_.clear();
+    ssm_->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), nullptr));
+    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
+
+    ssm_->remoteExtSessionMap_.clear();
+    ssm_->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), token));
+    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
+
+    std::string bundleName = "";
+    AppForceLandscapeConfig config = {0, "MainPage"};
+    auto ret = ssm_->SetAppForceLandscapeConfig(bundleName, config);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: NotifyStackEmpty
+ * @tc.desc: test function : NotifyStackEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, NotifyStackEmpty, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyStackEmpty";
+    info.abilityName_ = "NotifyStackEmpty";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMAp.insert(std::make_pair(1, sceneSession));
+    auto ret = ssm_->NotifyStackEmpty(0);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+    ret = ssm_->NotifyStackEmpty(1);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    usleep(NOT_WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: GetAppMainSceneSession
+ * @tc.desc: test function : GetAppMainSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetAppMainSceneSession, Function | SmallTest | Level3)
+{
+    ssm_->isUserBackground_ = true;
+    ssm_->FlushWindowInfoToMMI(true);
+
+    SessionInfo info;
+    info.bundleName_ = "GetAppMainSceneSession";
+    info.abilityName_ = "GetAppMainSceneSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSessionProperty> property = sptr<SceneSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetParentPersistentId(2);
+    sceneSession->property_ = property;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    auto ret = ssm_->GetAppMainSceneSession(sceneSession, 1);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
+}
+
+/**
+ * @tc.name: PostProcessProperty01
+ * @tc.desc: test function : PostProcessProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, PostProcessProperty01, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "PostProcessProperty";
+    info.abilityName_ = "PostProcessProperty";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSessionProperty> property = sptr<SceneSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    sceneSession->postProcessProperty_ = true;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    uint32_t dirty = static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
+    ssm_->PostProcessProperty(dirty);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ssm_->PostProcessProperty(dirty);
+    EXPECT_EQ(false, sceneSession->postProcessProperty_);
+}
+
+/**
+ * @tc.name: SetVmaCacheStatus
+ * @tc.desc: test function : SetVmaCacheStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SetVmaCacheStatus, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "SetVmaCacheStatus";
+    info.abilityName_ = "SetVmaCacheStatus";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSessionProperty> property = sptr<SceneSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->persistentId_ = 1;
+    ssm_->focusedSessionId_ = 1;
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+    ssm_->ProcessFocusWhenForeground(sceneSession);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    ssm_->ProcessPreload(abilityInfo);
+
+    auto ret = ssm_->SetVmaCacheStatus(true);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: IsInDefaultScreen
+ * @tc.desc: test function : IsInDefaultScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, IsInDefaultScreen, Function | SmallTest | Level3)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->ProcessFocusWhenForegroundScbCore(sceneSession);
+
+    SessionInfo info;
+    info.bundleName_ = "IsInDefaultScreen";
+    info.abilityName_ = "IsInDefaultScreen";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_ = nullptr;
+    auto ret = ssm_->IsInDefaultScreen(sceneSession);
+    EXPEXT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: OnSessionStateChange
+ * @tc.desc: test function : OnSessionStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "OnSessionStateChange";
+    info.abilityName_ = "OnSessionStateChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSessionProperty> property = sptr<SceneSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_ = property;
+    SessionState state = SessionState::STATE::DISCONNECT;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(100, sceneSession));
+    ssm_->OnSessionStateChange(100, state);
+
+    ssm_->isRootSceneLastFrameLayoutFinishedFunc_ = nullptr;
+    bool isLayoutFinished = false;
+    auto ret = ssm_->IsLastFrameLayoutFinished(isLayoutFinished);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: OnSessionStateChange01
+ * @tc.desc: test function : OnSessionStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange01, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "OnSessionStateChange01";
+    info.abilityName_ = "OnSessionStateChange01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSessionProperty> property = sptr<SceneSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_ = property;
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(100, sceneSession));
+    ssm_->OnSessionStateChange(100, state);
+
+    auto ret = ssm_->UpdateMaximizeMode(1, true);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
