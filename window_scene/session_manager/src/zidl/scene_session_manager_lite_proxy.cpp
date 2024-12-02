@@ -891,7 +891,7 @@ WMError SceneSessionManagerLiteProxy::CheckWindowId(int32_t windowId, int32_t& p
 }
 
 WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId,
-    const AppExecFwk::ElementName& element, int32_t& pid)
+    const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -908,6 +908,11 @@ WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId,
 
     if (!data.WriteUint32(tokenId)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write tokenId");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(static_cast<int32_t>(extensionAbilityType))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write extensionAbilityType");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
