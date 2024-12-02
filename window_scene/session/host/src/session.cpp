@@ -50,6 +50,8 @@ constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
+constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 const std::string SHELL_BUNDLE_NAME = "com.huawei.shell_assistant";
 const std::string SHELL_APP_IDENTIFIER = "5765880207854632823";
 const std::map<SessionState, bool> ATTACH_MAP = {
@@ -991,6 +993,45 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
+WSError Session::UpdateClientDisplayId(DisplayId updatedDisplayId)
+{
+    if (updatedDisplayId == lastUpdatedDisplayId) {
+        return WSError::WS_DO_NOTHING;
+    }
+    if (sessionStage_ != nullptr) {
+        TLOGI("windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64, GetPersistentId(),
+            updatedDisplayId, lastUpdatedDisplayId);
+        lastUpdatedDisplayId = updatedDisplayId;
+        UpdateDisplayId(updatedDisplayId);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return WSError::WS_OK;
+}
+
+void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "input rect: %{public}s", rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isHalfFolded: %{public}d",
+          PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()));
+    if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
+        return;
+    }
+    std::string logRect = "last: " + rect.ToString() + ", cur: ";
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    DisplayId updatedDisplayId = GetScreenId();
+    auto upperScreenPosY = defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR;
+    if (rect.posY_ >= upperScreenPosY + foldCreaseRect.height_) {
+        updatedDisplayId = VIRTUAL_DISPLAY_ID;
+        rect.posY_ -= upperScreenPosY + foldCreaseRect.height_;
+    }
+    UpdateClientDisplayId(updatedDisplayId);
+    logRect += rect.ToString();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, logRect: %{public}s", GetPersistentId(), logRect.c_str());
+}
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -1006,7 +1047,9 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
-        sessionStage_->UpdateRect(rect, reason, config);
+        WSRect updatedRect = rect;
+        UpdateClientRectPosYAndDisplayId(updatedRect);
+        sessionStage_->UpdateRect(updatedRect, reason, config);
         SetClientRect(rect);
         RectCheckProcess();
     } else {

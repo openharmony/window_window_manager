@@ -198,6 +198,66 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, Function | SmallTest |
 }
 
 /**
+ * @tc.name: UpdateClientDisplayId01
+ * @tc.desc: UpdateClientDisplayId
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(WindowSessionTest, UpdateClientDisplayId01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionStage_ = nullptr;
+    session_->lastUpdatedDisplayId = 0;
+    DisplayId updatedDisplayId = 0;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId);
+    updatedDisplayId = 10;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_ERROR_NULLPTR);
+    EXPECT_NE(updatedDisplayId, session_->lastUpdatedDisplayId);
+
+    ASSERT_NE(mockSessionStage_, nullptr);
+    session_->sessionStage_ = mockSessionStage_;
+    updatedDisplayId = 0;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId);
+    updatedDisplayId = 100;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId);
+}
+
+/**
+ * @tc.name: UpdateClientRectPosYAndDisplayId01
+ * @tc.desc: UpdateClientRectPosYAndDisplayId
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = {0, 0, 0, 0};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = {0, 100, 0, 0};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 100);
+
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+            PcFoldScreenManager::GetInstance().GetDisplayRects();
+    rect = {0, 1000, 100, 100};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 1000);
+    rect = {0, 2000, 100, 100};
+    auto rect2 = rect;
+    EXPECT_EQ(rect.posY_, rect2.PosY_ - defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR);
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: update rect
  * @tc.type: FUNC

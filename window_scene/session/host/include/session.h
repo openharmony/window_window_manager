@@ -546,6 +546,8 @@ public:
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
+    WSError UpdateClientDisplayId(DisplayId updatedDisplayId);
+    void UpdateClientRectPosYAndDisplayId(WSRect& rect);
 
     /**
      * Screen Lock
@@ -690,6 +692,7 @@ protected:
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    DisplayId lastUpdatedDisplayId = 0;
 
     /**
      * Window ZOrder
