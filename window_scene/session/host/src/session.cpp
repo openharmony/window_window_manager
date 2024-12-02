@@ -2792,7 +2792,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
     if (abs(curWidth - minWidth) > 2 || abs(curWidth - maxFloatingWindowSize) > 2 ||
-        abs(curHeight < minHeight) > 2|| abc(curHeight > maxFloatingWindowSize) > 2) {
+        abs(curHeight - minHeight) > 2|| abc(curHeight - maxFloatingWindowSize) > 2) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
         std::ostringstream oss;
