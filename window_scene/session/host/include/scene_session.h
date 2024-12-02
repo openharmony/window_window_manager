@@ -697,7 +697,7 @@ private:
      */
     void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
-    bool IsDragResizeWhenEnd(SizeChangeReason reason, WSRect rect);
+    bool IsDragResizeWhenEnd(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
         bool isGlobal, bool needFlush);
