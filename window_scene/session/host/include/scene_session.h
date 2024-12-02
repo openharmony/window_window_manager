@@ -530,7 +530,6 @@ public:
 
     static DragResizeType globalDragResizeType_;
     void SetAppDragResizeType(const DragResizeType& dragResizeType) { appDragResizeType_ = dragResizeType; };
-    void GetAppDragResizeType(DragResizeType& dragResizeType) { dragResizeType = appDragResizeType_; };
 
     /**
      * Window Layout
@@ -698,7 +697,7 @@ private:
      */
     void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
-    bool isDragResizeWhenEnd(SizeChangeReason reason, WSRect rect);
+    bool IsDragResizeWhenEnd(SizeChangeReason reason, WSRect rect);
     void InitializeCrossMoveDrag();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
         bool isGlobal, bool needFlush);

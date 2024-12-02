@@ -1499,7 +1499,7 @@ HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level
  */
 HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, Function | SmallTest | Level2)
 {
-    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME
+    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     auto ret = WindowManager::GetInstance().SetGlobalDragResizeType(dragResizeType);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
@@ -1511,7 +1511,7 @@ HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, Function | SmallTest | Leve
  */
 HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, Function | SmallTest | Level2)
 {
-    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     auto ret = WindowManager::GetInstance().GetGlobalDragResizeType(dragResizeType);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
@@ -1523,7 +1523,7 @@ HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, Function | SmallTest | Leve
  */
 HWTEST_F(WindowManagerTest, SetAppDragResizeType, Function | SmallTest | Level2)
 {
-    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME
+    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
     auto ret = WindowManager::GetInstance().SetAppDragResizeType(dragResizeType, bundleName);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1536,7 +1536,7 @@ HWTEST_F(WindowManagerTest, SetAppDragResizeType, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
 {
-    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     const std::string bundleName = "test";
     auto ret = WindowManager::GetInstance().GetAppDragResizeType(dragResizeType, bundleName);
     ASSERT_EQ(WMError::WM_OK, ret);
