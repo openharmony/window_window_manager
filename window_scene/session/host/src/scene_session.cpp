@@ -119,13 +119,13 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetCollaboratorType(session->GetCollaboratorType());
             property->SetAppInstanceKey(session->GetAppInstanceKey());
         }
+        session->ResetDefaultStatusBarVisible();
         auto ret = session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
             return ret;
         }
         session->NotifyPropertyWhenConnect();
-        session->isStatusBarVisible_ = true;
         return ret;
     };
     return PostSyncTask(task, "ConnectInner");
@@ -5191,6 +5191,14 @@ void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
 bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 {
     return isDisplayStatusBarTemporarily_.load();
+}
+
+void SceneSession::ResetDefaultStatusBarVisible()
+{
+    auto property = GetSessionProperty();
+    if (property && specificCallback_ && specificCallback_->onGetDefualtStatusBarVisibleOnDisplay_) {
+        isStatusBarVisible_ = specificCallback_->onGetDefualtStatusBarVisibleOnDisplay_(property->GetDisplayId());
+    }
 }
 
 void SceneSession::SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func)
