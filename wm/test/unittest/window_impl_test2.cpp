@@ -1479,13 +1479,13 @@ HWTEST_F(WindowImplTest2, NotifyWindowTransition, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowImplTest2, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowImpl> window = new WindowImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     std::shared_ptr<AppExecFwk::Configuration> configuration;
-    sptr<Window>(window)->UpdateConfigurationSyncForAll(configuration);
+    WindowImpl::UpdateConfigurationSyncForAll(configuration);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

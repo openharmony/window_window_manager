@@ -2879,7 +2879,7 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
 
 void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    auto uiContent = GetUIContentSharedPtr()
+    auto uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
         TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
         uiContent->UpdateConfigurationSyncForAll(configuration);

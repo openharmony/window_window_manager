@@ -165,7 +165,7 @@ void WindowExtensionSessionImpl::UpdateConfigurationForAll(const std::shared_ptr
 void WindowExtensionSessionImpl::UpdateConfigurationSync(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    auto uiContent = GetUIContentSharedPtr()
+    auto uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
         return;
