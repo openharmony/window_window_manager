@@ -269,8 +269,37 @@ void ScreenSessionManager::OnStart()
         TLOGE(WmsLogTag::DMS, "Publish DMS failed");
         return;
     }
+    TLOGI(WmsLogTag::DMS, "DMS SA AddSystemAbilityListener");
+    (void)AddSystemAbilityListener(SENSOR_SERVICE_ABILITY_ID);
+    screenEventTracker_.RecordEvent("Dms AddSystemAbilityListener finished.");
     TLOGI(WmsLogTag::DMS, "DMS SA OnStart end");
     screenEventTracker_.RecordEvent("Dms onstart end.");
+}
+
+void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "OnAddSystemAbility: %d", systemAbilityId);
+    TLOGI(WmsLogTag::DMS, "receive sa add:%{public}d", systemAbilityId);
+    if (systemAbilityId == SENSOR_SERVICE_ABILITY_ID) {
+#ifdef SENSOR_ENABLE
+        if (!g_foldScreenFlag) {
+            TLOGI(WmsLogTag::DMS, "current device is not fold phone.");
+            return;
+        }
+        if (!foldScreenController_ || isFoldScreenOuterScreenReady_) {
+            TLOGI(WmsLogTag::DMS, "foldScreenController_ is null or outer screen is not ready.");
+            return;
+        }
+        if (GetDisplayState(foldScreenController_->GetCurrentScreenId()) == DisplayState::ON) {
+            FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            TLOGI(WmsLogTag::DMS, "Recover Posture sensor finished");
+        }
+
+        FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+        TLOGI(WmsLogTag::DMS, "Recover Hall sensor finished");
+        screenEventTracker_.RecordEvent("Dms recover Posture and Hall sensor finished.");
+#endif
+    }
 }
 
 DMError ScreenSessionManager::RegisterDisplayManagerAgent(
@@ -1264,6 +1293,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         /* folder screen outer screenId is 5 */
         if (screenId == SCREEN_ID_MAIN) {
             SetPostureAndHallSensorEnabled();
+            isFoldScreenOuterScreenReady_ = true;
         }
         if (screenId == SCREEN_ID_MAIN && !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
             TLOGI(WmsLogTag::DMS, "not dual display, skip main screen session create.");
@@ -2213,6 +2243,7 @@ void ScreenSessionManager::SetPostureAndHallSensorEnabled()
     FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
     FoldScreenSensorManager::GetInstance().RegisterHallCallback();
     TLOGI(WmsLogTag::DMS, "subscribe Posture and Hall sensor successful");
+    screenEventTracker_.RecordEvent("Dms subscribe Posture and Hall sensor finished.");
 #endif
 }
 
