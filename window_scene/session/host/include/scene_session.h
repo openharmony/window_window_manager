@@ -664,7 +664,7 @@ protected:
     /**
      * keyboard Window
      */
-    bool keyboardAvoidAreaActive_ = false;
+    bool keyboardAvoidAreaActive_ = true;
 
 private:
     void NotifyAccessibilityVisibilityChange();
