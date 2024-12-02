@@ -2792,7 +2792,7 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
     const uint32_t marginOfError = 2; // Indicates the error value generated during the calculation.
-    if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError||
+    if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError ||
         curHeight + marginOfError < minHeight || curHeight > maxFloatingWindowSize + marginOfError) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
