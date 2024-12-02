@@ -1136,7 +1136,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetGlobalDragResizeType, Function | Small
     ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
     const DragResizeType toDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    SceneSession::globalDragResizeType_ = dragResizeType;
+    SceneSession::globalDragResizeType_ = toDragResizeType;
     sceneSessionManagerProxy->GetGlobalDragResizeType(dragResizeType);
 }
 
