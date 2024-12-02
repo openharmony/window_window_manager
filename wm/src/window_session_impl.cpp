@@ -4282,7 +4282,7 @@ void WindowSessionImpl::SetUIContentComplete()
 
 void WindowSessionImpl::AddSetUIContentTimeoutCheck()
 {
-    const auto timeToBeginCheck = 
+    const auto timeToBeginCheck =
         std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now())
             .time_since_epoch().count();
     auto task = [weakThis = wptr(this), timeToBeginCheck] {
