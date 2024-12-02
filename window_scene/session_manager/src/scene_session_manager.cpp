@@ -6275,14 +6275,17 @@ void SceneSessionManager::NotifyRSSWindowModeTypeUpdate()
 void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFD("session is nullptr");
+        TLOGD(WmsLogTag::WMS_SUB, "session is nullptr");
         return;
     }
     std::vector<sptr<Session>> modalVec = sceneSession->GetDialogVector();
-    for (const auto& subSession : sceneSession->GetSubSession()) {
+    for (auto& subSession : sceneSession->GetSubSession()) {
         if (subSession == nullptr) {
             TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
             continue;
+        }
+        if (!subSession->GetSubSession().empty()) {
+            ProcessSubSessionForeground(subSession);
         }
         if (subSession->IsTopmost()) {
             modalVec.push_back(subSession);
@@ -6399,17 +6402,20 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(sptr<SceneSes
 void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFD("session is nullptr");
+        TLOGD(WmsLogTag::WMS_SUB, "session is nullptr");
         return;
     }
-    for (const auto& subSession : sceneSession->GetSubSession()) {
+    for (auto& subSession : sceneSession->GetSubSession()) {
         if (subSession == nullptr) {
-            WLOGFD("sub session is nullptr");
+            TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
             continue;
+        }
+        if (!subSession->GetSubSession().empty()) {
+            ProcessSubSessionBackground(subSession);
         }
         const auto& state = subSession->GetSessionState();
         if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
-            WLOGFD("sub session is not active");
+            TLOGD(WmsLogTag::WMS_SUB, "sub session is not active");
             continue;
         }
         NotifyWindowInfoChange(subSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
