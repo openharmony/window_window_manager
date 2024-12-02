@@ -85,6 +85,7 @@ group("unittest") {
     ":ws_session_stub_immersive_test",
     ":ws_session_stub_lifecycle_test",
     ":ws_session_stub_mock_test",
+    ":ws_session_stub_property_test",
     ":ws_session_stub_test",
     ":ws_session_test",
     ":ws_sub_session_lifecycle_test",
@@ -1392,6 +1393,21 @@ ohos_unittest("ws_session_stub_immersive_test") {
   module_out_path = module_out_path
 
   sources = [ "session_stub_immersive_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  public_external_deps = [ "accessibility:accessibility_interface" ]
+}
+
+ohos_unittest("ws_session_stub_property_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_stub_property_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
