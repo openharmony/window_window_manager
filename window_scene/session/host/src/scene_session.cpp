@@ -2847,7 +2847,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
     } else if (isCompatibleModeInPc && !IsFreeMultiWindowMode() && reason != SizeChangeReason::DRAG_END) {
         HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
-    } else if (IsDragResizeWhenEnd(reason, rect)) {
+    } else if (IsDragResizeWhenEnd(reason)) {
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
     } else {
@@ -2860,11 +2860,11 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     }
 }
 
-bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason, WSRect rect)
+bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "property is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
         return true;
     }
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
