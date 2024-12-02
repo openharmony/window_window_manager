@@ -854,8 +854,10 @@ bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAn
 
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType)
 {
-    uint32_t dragResizeTypeValue = nullptr;
-    ConvertFromJsValue(env, napi_value, dragResizeTypeValue)
+    uint32_t dragResizeTypeValue;
+    if (!ConvertFromJsValue(env, value, dragResizeTypeValue)) {
+        return false;
+    }
     switch (dragResizeTypeValue) {
         case static_cast<uint32_t>(DragResizeType::RESIZE_TYPE_UNDEFINED):
             dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
