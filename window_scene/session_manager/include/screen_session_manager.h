@@ -299,6 +299,7 @@ protected:
 
 private:
     void OnStart() override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void Init();
     void LoadScreenSceneXml();
     void ConfigureScreenScene();
@@ -413,6 +414,7 @@ private:
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;
     bool isScreenShot_ = false;
+    bool isFoldScreenOuterScreenReady_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
