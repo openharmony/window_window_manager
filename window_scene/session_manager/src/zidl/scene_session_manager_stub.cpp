@@ -741,12 +741,11 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel& data, MessagePa
     }
     std::string dumpInfo;
     WSError errCode = GetSessionDumpInfo(params, dumpInfo);
-    const char* info = dumpInfo.c_str();
-    uint32_t infoSize = static_cast<uint32_t>(strlen(info));
+    uint32_t infoSize = static_cast<uint32_t>(dumpInfo.length());
     WLOGFI("HandleGetSessionDump, infoSize: %{public}d", infoSize);
     reply.WriteUint32(infoSize);
     if (infoSize != 0) {
-        if (!reply.WriteRawData(info, infoSize)) {
+        if (!reply.WriteRawData(dumpInfo.c_str(), infoSize)) {
             WLOGFE("Fail to write dumpInfo");
             return ERR_INVALID_DATA;
         }

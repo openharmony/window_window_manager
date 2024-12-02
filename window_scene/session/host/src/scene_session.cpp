@@ -677,29 +677,6 @@ void SceneSession::UpdateWaterfallMode(SessionEvent event)
     }
 }
 
-WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam& param)
-{
-    const char* const where = __func__;
-    auto task = [weakThis = wptr(this), event, param, where] {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is null", where);
-            return;
-        }
-        if (!(session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_)) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s invalid callback", where);
-            return;
-        }
-        TLOGNI(WmsLogTag::WMS_MAIN,
-            "%{public}s event: %{public}d, param:[%{public}d,%{public}d,%{public}d,%{public}d]",
-            where, static_cast<int32_t>(event),
-            param.pointerX_, param.pointerY_, param.sessionWidth_, param.sessionHeight_);
-        session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), param);
-    };
-    PostTask(task, "OnSessionEvent:" + std::to_string(static_cast<uint32_t>(event)));
-    return WSError::WS_OK;
-}
-
 WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
     if (event != SessionEvent::EVENT_START_MOVE) {
@@ -839,6 +816,38 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
 {
     std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
     sessionChangeCallback_ = sessionChangeCallback;
+}
+
+void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->onUpdateAppUseControlFunc_ = std::move(callback);
+        for (const auto& [type, isNeedControl] : session->appUseControlMap_) {
+            session->onUpdateAppUseControlFunc_(type, isNeedControl);
+        }
+    };
+    PostTask(task, __func__);
+}
+
+void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl)
+{
+    auto task = [weakThis = wptr(this), type, isNeedControl] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->appUseControlMap_[type] = isNeedControl;
+        if (session->onUpdateAppUseControlFunc_) {
+            session->onUpdateAppUseControlFunc_(type, isNeedControl);
+        }
+    };
+    PostTask(task, __func__);
 }
 
 void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
@@ -2656,7 +2665,7 @@ void SceneSession::InitializeCrossMoveDrag()
 void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
     bool isGlobal, bool needFlush)
 {
-    throwSlipFullScreenFlag_.store(false);
+    isThrowSlipToFullScreen_.store(false);
     if (pcFoldScreenController_ && pcFoldScreenController_->IsHalfFolded(GetScreenId())) {
         if (pcFoldScreenController_->NeedFollowHandAnimation()) {
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
@@ -2754,22 +2763,42 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
                 TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
                 return;
             }
-            if (!session->IsVisibleForeground()) {
-                TLOGNW(WmsLogTag::WMS_LAYOUT, "session go background when throw");
-                return;
-            }
-            if (!session->throwSlipFullScreenFlag_.load()) {
-                TLOGNW(WmsLogTag::WMS_LAYOUT, "session moved when throw");
-                return;
-            }
-            session->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_WITHOUT_ANIMATION,
-                SessionEventParam {rect.posX_, rect.posY_, rect.width_, rect.height_});
+            session->NotifyFullScreenAfterThrowSlip(rect);
         };
     }
     auto throwSlipPair = std::make_pair(pcFoldScreenController_->GetThrowSlipTimingProtocol(),
         pcFoldScreenController_->GetThrowSlipTimingCurve());
     SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
     return needSetFullScreen;
+}
+
+void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), rect, where] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+            return;
+        }
+        if (!session->IsVisibleForeground()) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "session go background when throw");
+            return;
+        }
+        if (!session->isThrowSlipToFullScreen_.load()) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "session moved when throw");
+            return;
+        }
+        if (!(session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_)) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s invalid callback", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s rect: %{public}s", where, rect.ToString().c_str());
+        session->sessionChangeCallback_->OnSessionEvent_(
+            static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE_WITHOUT_ANIMATION),
+            SessionEventParam {rect.posX_, rect.posY_, rect.width_, rect.height_});
+    };
+    PostTask(task, __func__);
 }
 
 void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
@@ -3372,7 +3401,7 @@ bool SceneSession::IsAppSession() const
     if (GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         return true;
     }
-    if (GetParentSession() && GetParentSession()->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+    if (GetMainSession()) {
         return true;
     }
     return false;
