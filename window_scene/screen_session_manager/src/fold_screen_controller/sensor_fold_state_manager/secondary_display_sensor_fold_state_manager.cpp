@@ -85,7 +85,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(std::vector<
     mNextStateBC = nextStatePrimary;
 
     state = GetGlobalFoldState(nextStatePrimary, nextStateSecondary);
-    TLOGI(WmsLogTag::DMS, "State: %{public}d.", static_cast<int>(state));
+    TLOGW(WmsLogTag::DMS, "State: %{public}d.", static_cast<int>(state));
     return state;
 }
 
