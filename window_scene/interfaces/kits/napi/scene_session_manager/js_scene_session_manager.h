@@ -104,6 +104,7 @@ public:
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
+    static napi_value SetDragResizeType(napi_env env, napi_callback_info info);
     static napi_value GetCustomDecorHeight(napi_env env, napi_callback_info info);
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
@@ -181,6 +182,7 @@ private:
     napi_value OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
+    napi_value OnSetDragResizeType(napi_env env, napi_callback_info info);
     napi_value OnGetCustomDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnSwitchFreeMultiWindow(napi_env env, napi_callback_info info);
     napi_value OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info);

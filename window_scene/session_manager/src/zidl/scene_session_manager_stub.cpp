@@ -187,6 +187,14 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetDisplayIdByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE):
             return HandleIsWindowRectAutoSave(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_GLOBAL_DRAG_RESIZE_TYPE):
+            return HandleSetGlobalDragResizeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE):
+            return HandleGetGlobalDragResizeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_APP_DRAG_RESIZE_TYPE):
+            return HandleSetAppDragResizeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_APP_DRAG_RESIZE_TYPE):
+            return HandleGetAppDragResizeType(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1497,6 +1505,76 @@ int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, Mes
     }
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t dragResizeType;
+    if (!data.ReadUint32(dragResizeType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetGlobalDragResizeType(static_cast<DragResizeType>(dragResizeType));
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    WMError errCode = GetGlobalDragResizeType(dragResizeType);
+    if (!data.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write dragResizeType failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetAppDragResizeType(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t dragResizeType;
+    if (!data.ReadUint32(dragResizeType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
+        return ERR_INVALID_DATA;
+    }
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read bundleName failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetAppDragResizeType(static_cast<DragResizeType>(dragResizeType), bundleName);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read bundleName failed.");
+        return ERR_INVALID_DATA;
+    }
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    WMError errCode = GetAppDragResizeType(dragResizeType, bundleName);
+    if (!data.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write dragResizeType failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

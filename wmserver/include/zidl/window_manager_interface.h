@@ -249,6 +249,16 @@ public:
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) { return WMError::WM_OK; }
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) { return WMError::WM_OK; }
+    virtual WMError SetGlobalDragResizeType(const DragResizeType& dragResizeType) { return WMError::WM_OK; }
+    virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) { return WMError::WM_OK; }
+    virtual WMError SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

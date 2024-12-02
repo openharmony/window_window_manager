@@ -1455,5 +1455,41 @@ WMError WindowManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windo
     }
     return ret;
 }
+
+WMError WindowManager::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetGlobalDragResizeType(dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::GetGlobalDragResizeType(DragResizeType& dragResizeType)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetGlobalDragResizeType(dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetAppDragResizeType(dragResizeType, bundleName);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAppDragResizeType(dragResizeType, bundleName);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS
