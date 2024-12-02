@@ -503,7 +503,7 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
-    };
+    }
 }
 
 void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
