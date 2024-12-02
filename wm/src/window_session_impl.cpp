@@ -4282,10 +4282,10 @@ void WindowSessionImpl::SetUIContentComplete()
 
 void WindowSessionImpl::AddSetUIContentTimeoutCheck()
 {
-    const auto timeToBeginCheck =
+    const auto checkBeginTime =
         std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now())
             .time_since_epoch().count();
-    auto task = [weakThis = wptr(this), timeToBeginCheck] {
+    auto task = [weakThis = wptr(this), checkBeginTime] {
         auto window = weakThis.promote();
         if (window == nullptr) {
             TLOGNI(WmsLogTag::WMS_LIFE, "window is nullptr");
@@ -4296,10 +4296,10 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             return;
         }
 
-        const auto timeToEndCheck =
+        const auto checkEndTime =
             std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now())
                 .time_since_epoch().count();
-        if (timeToEndCheck - timeToBeginCheck > SET_UICONTENT_TIMEOUT_TIME_AFTER_FREEZE_MS) {
+        if (checkEndTime - checkBeginTime > SET_UICONTENT_TIMEOUT_TIME_AFTER_FREEZE_MS) {
             TLOGNI(WmsLogTag::WMS_LIFE, "will start re-check after freeze, persistentId=%{public}d",
                 window->GetPersistentId());
             window->AddSetUIContentTimeoutCheck();
