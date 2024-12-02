@@ -285,6 +285,26 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ReportFoldStatusChangeBegin, Functio
 }
 
 /**
+ * @tc.name: ChangeScreenDisplayModeToSub
+ * @tc.desc: test function : ChangeScreenDisplayModeToSub
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToSub, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+
+    policy.onBootAnimation_ = true;
+    policy.ChangeScreenDisplayModeToSub(screenSession);
+    EXPECT_TRUE(policy.onBootAnimation_);
+
+    policy.ChangeScreenDisplayModeToSub(screenSession);
+    EXPECT_TRUE(policy.onBootAnimation_);
+}
+
+/**
  * @tc.name: ChangeScreenDisplayModeToMain
  * @tc.desc: test function : ChangeScreenDisplayModeToMain
  * @tc.type: FUNC
@@ -301,26 +321,6 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMain, Funct
     EXPECT_TRUE(policy.onBootAnimation_);
 
     policy.ChangeScreenDisplayModeToMain(screenSession);
-    EXPECT_TRUE(policy.onBootAnimation_);
-}
-
-/**
- * @tc.name: ChangeScreenDisplayModeToFull
- * @tc.desc: test function : ChangeScreenDisplayModeToFull
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFull, Function | SmallTest | Level3)
-{
-    std::recursive_mutex displayInfoMutex;
-    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-    sptr<ScreenSession> screenSession = new ScreenSession;
-
-    policy.onBootAnimation_ = true;
-    policy.ChangeScreenDisplayModeToFull(screenSession);
-    EXPECT_TRUE(policy.onBootAnimation_);
-
-    policy.ChangeScreenDisplayModeToFull(screenSession);
     EXPECT_TRUE(policy.onBootAnimation_);
 }
 
@@ -356,6 +356,22 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, SendPropertyChangeResult, Function |
 }
 
 /**
+ * @tc.name: ChangeScreenDisplayModeToSubOnBootAnimation
+ * @tc.desc: test function : ChangeScreenDisplayModeToSubOnBootAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToSubOnBootAnimation, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+
+    policy.ChangeScreenDisplayModeToSubOnBootAnimation(screenSession);
+    EXPECT_FALSE(policy.onBootAnimation_);
+}
+
+/**
  * @tc.name: ChangeScreenDisplayModeToMainOnBootAnimation
  * @tc.desc: test function : ChangeScreenDisplayModeToMainOnBootAnimation
  * @tc.type: FUNC
@@ -368,22 +384,6 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToMainOnBootA
     sptr<ScreenSession> screenSession = new ScreenSession;
 
     policy.ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
-    EXPECT_FALSE(policy.onBootAnimation_);
-}
-
-/**
- * @tc.name: ChangeScreenDisplayModeToFullOnBootAnimation
- * @tc.desc: test function : ChangeScreenDisplayModeToFullOnBootAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToFullOnBootAnimation, Function | SmallTest | Level3)
-{
-    std::recursive_mutex displayInfoMutex;
-    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-    sptr<ScreenSession> screenSession = new ScreenSession;
-
-    policy.ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 
