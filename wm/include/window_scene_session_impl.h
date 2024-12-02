@@ -249,6 +249,11 @@ private:
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /**
+     * Window Layout
+     */
+    void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+
+    /**
      * Window Immersive
      */
     void UpdateDefaultStatusBarColor();
