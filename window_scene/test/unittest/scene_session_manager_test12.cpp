@@ -667,6 +667,47 @@ HWTEST_F(SceneSessionManagerTest12, CheckSystemWindowPermission02, Function | Sm
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 }
+
+/**
+ * @tc.name: ActivateKeyboardAvoidAreaIfNeed
+ * @tc.desc: test ActivateKeyboardAvoidAreaIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ActivateKeyboardAvoidAreaIfNeed, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ActivateKeyboardAvoidAreaIfNeed";
+    info.bundleName_ = "ActivateKeyboardAvoidAreaIfNeed";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
+    ASSERT_NE(ssm, nullptr);
+
+    ssm->ActivateKeyboardAvoidAreaIfNeed(nullptr, false);
+    ASSERT_EQ(sceneSession->keyboardAvoidAreaActive_, true);
+
+    ssm->ActivateKeyboardAvoidAreaIfNeed(sceneSession, false);
+    ASSERT_EQ(sceneSession->keyboardAvoidAreaActive_, true);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    ssm->ActivateKeyboardAvoidAreaIfNeed(sceneSession, false);
+    ASSERT_EQ(sceneSession->keyboardAvoidAreaActive_, true);
+
+    sceneSession->SetIsSystemKeyboard(true);
+    ssm->ActivateKeyboardAvoidAreaIfNeed(sceneSession, false);
+    ASSERT_EQ(sceneSession->keyboardAvoidAreaActive_, false);
+    ssm->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession1, nullptr);
+    sceneSession1->SetSessionProperty(property);
+    sceneSession1->SetIsSystemKeyboard(true);
+    ssm->ActivateKeyboardAvoidAreaIfNeed(sceneSession1, false);
+    ASSERT_EQ(sceneSession1->keyboardAvoidAreaActive_, false);
+    ASSERT_EQ(sceneSession->keyboardAvoidAreaActive_, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
