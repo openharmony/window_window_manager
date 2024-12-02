@@ -3413,6 +3413,29 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
 }
 
+void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        uiContent_->UpdateConfigurationSyncForAll(configuration);
+    }
+    if (subWindowMap_.count(GetWindowId()) == 0) {
+        TLOGI(WmsLogTag::WMS_IMMS, "no subWindow, winId: %{public}d", GetWindowId());
+        return;
+    }
+    for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        subWindow->UpdateConfigurationSync(configuration);
+    }
+}
+
+void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    for (const auto& winPair : windowMap_) {
+        auto window = winPair.second.second;
+        window->UpdateConfigurationSync(configuration);
+    }
+}
+
 void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     WLOGI("Update AvoidArea, id: %{public}u", property_->GetWindowId());
@@ -4314,31 +4337,6 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     property_->SetTextFieldHeight(textFieldHeight);
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
-}
-
-void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    if (uiContent_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "window: %{public}s", GetWindowName().c_str());
-        uiContent_->UpdateConfigurationSyncForAll(configuration);
-    }
-    uint32_t numSubWindow = subWindowMap_.count(GetWindowId());
-    TLOGI(WmsLogTag::WMS_IMMS, "subWindow num: %{public}u", numSubWindow);
-    if (numSubWindow == 0) {
-        return;
-    }
-    for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
-        subWindow->UpdateConfigurationSync(configuration);
-    }
-}
-
-void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    TLOGI(WmsLogTag::WMS_IMMS, "windowImpl");
-    for (const auto& winPair : windowMap_) {
-        auto window = winPair.second.second;
-        window->UpdateConfigurationSync(configuration);
-    }
 }
 } // namespace Rosen
 } // namespace OHOS

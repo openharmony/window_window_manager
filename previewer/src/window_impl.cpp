@@ -121,6 +121,25 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
     }
 }
 
+void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+    uiContent_->UpdateConfigurationSyncForAll(configuration);
+}
+
+void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    for (const auto& winPair : windowMap_) {
+        auto window = winPair.second.second;
+        window->UpdateConfigurationSync(configuration);
+    }
+}
+
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 {
     return surfaceNode_;
@@ -1154,26 +1173,6 @@ WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 bool WindowImpl::GetImmersiveModeEnabledState() const
 {
     return true;
-}
-
-void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    if (uiContent_ == nullptr) {
-        TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, previewer win: %{public}s", GetWindowName().c_str());
-        return;
-    }
-    TLOGI(WmsLogTag::WMS_IMMS, "previewer win: %{public}s", GetWindowName().c_str());
-    uiContent_->UpdateConfigurationSyncForAll(configuration);
-}
-
-void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    TLOGI(WmsLogTag::WMS_IMMS, "previewer");
-    std::lock_guard<std::mutex> lock(globalMutex_);
-    for (const auto& winPair : windowMap_) {
-        auto window = winPair.second.second;
-        window->UpdateConfigurationSync(configuration);
-    }
 }
 } // namespace Rosen
 } // namespace OHOS

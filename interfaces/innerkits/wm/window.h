@@ -635,6 +635,12 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
     /**
+     * @brief Update theme configuration for all windows
+     * @param configuration configuration for app
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+    /**
      * @brief Get surface node from RS
      *
      * @return Surface node from RS
@@ -1318,6 +1324,12 @@ public:
      * @param configuration Window configuration.
      */
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
+    /**
+     * @brief Update theme configuration.
+     * @param configuration Window configuration.
+     */
+    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 
     /**
      * @brief Register window lifecycle listener.
@@ -2705,18 +2717,6 @@ public:
      */
     virtual WMError OnContainerModalEvent(const std::string& eventName,
         const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-
-    /**
-     * @brief Update theme configuration for all windows
-     * @param configuration configuration for app
-     */
-    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
-
-    /**
-     * @brief Update theme configuration.
-     * @param configuration Window configuration.
-     */
-    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 };
 }
 }
