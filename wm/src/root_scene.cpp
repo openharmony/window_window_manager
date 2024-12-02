@@ -164,10 +164,11 @@ void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Config
 
 void RootScene::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "root scene");
-    if (staticRootScene_ != nullptr) {
-        staticRootScene_->UpdateConfigurationSync(configuration);
+    if (staticRootScene_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "staticRootScene is null");
+        return
     }
+    staticRootScene_->UpdateConfigurationSync(configuration);
 }
 
 void RootScene::RegisterInputEventListener()
