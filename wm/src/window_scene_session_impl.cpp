@@ -2877,6 +2877,32 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
     }
 }
 
+void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    auto uiContent = GetUIContentSharedPtr()
+    if (uiContent != nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        uiContent->UpdateConfigurationSyncForAll(configuration);
+    }
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        TLOGI(WmsLogTag::WMS_IMMS, "no subSession, winId: %{public}d", GetWindowId());
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+        subWindowSession->UpdateConfigurationSync(configuration);
+    }
+}
+
+void WindowSceneSessionImpl::UpdateConfigurationSyncForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        auto window = winPair.second.second;
+        window->UpdateConfigurationSync(configuration);
+    }
+}
+
 /** @note @window.hierarchy */
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
@@ -4511,33 +4537,6 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
         return ret;
     }
     return WMError::WM_DO_NOTHING;
-}
-
-void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "scene window: %{public}s", GetWindowName().c_str());
-        uiContent->UpdateConfigurationSyncForAll(configuration);
-    }
-    uint32_t numSubSession = subWindowSessionMap_.count(GetPersistentId());
-    TLOGI(WmsLogTag::WMS_IMMS, "scene subSession num: %{public}u", numSubSession);
-    if (numSubSession == 0) {
-        return;
-    }
-    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
-        subWindowSession->UpdateConfigurationSync(configuration);
-    }
-}
-
-void WindowSceneSessionImpl::UpdateConfigurationSyncForAll(
-    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    TLOGI(WmsLogTag::WMS_IMMS, "scene");
-    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-    for (const auto& winPair : windowSessionMap_) {
-        auto window = winPair.second.second;
-        window->UpdateConfigurationSync(configuration);
-    }
 }
 } // namespace Rosen
 } // namespace OHOS

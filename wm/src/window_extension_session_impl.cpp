@@ -162,6 +162,27 @@ void WindowExtensionSessionImpl::UpdateConfigurationForAll(const std::shared_ptr
     }
 }
 
+void WindowExtensionSessionImpl::UpdateConfigurationSync(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    auto uiContent = GetUIContentSharedPtr()
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+    uiContent->UpdateConfigurationSyncForAll(configuration);
+}
+
+void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+    for (const auto& window : windowExtensionSessionSet_) {
+        window->UpdateConfigurationSync(configuration);
+    }
+}
+
 WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClearListener)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
@@ -1287,27 +1308,6 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
             static_cast<uint32_t>(ret));
     }
     return isPcOrPadFreeMultiWindowMode;
-}
-
-void WindowExtensionSessionImpl::UpdateConfigurationSync(
-    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    if (auto uiContent = GetUIContentSharedPtr()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "extension win: %{public}s", GetWindowName().c_str());
-        uiContent->UpdateConfigurationSyncForAll(configuration);
-        return;
-    }
-    TLOGW(WmsLogTag::WMS_IMMS, "uiContent is null, extension win: %{public}s", GetWindowName().c_str());
-}
-
-void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
-    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    TLOGI(WmsLogTag::WMS_IMMS, "extension");
-    std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-    for (const auto& window : windowExtensionSessionSet_) {
-        window->UpdateConfigurationSync(configuration);
-    }
 }
 } // namespace Rosen
 } // namespace OHOS
