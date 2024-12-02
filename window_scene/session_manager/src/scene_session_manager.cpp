@@ -1718,6 +1718,10 @@ void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeT
 WMError SceneSessionManager::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
+    if (!(SessionPermission::IsSACalling())) {
+        WLOGFE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     SceneSession::globalDragResizeType_ = dragResizeType;
     return WMError::WM_OK;
 }
@@ -1734,6 +1738,10 @@ WMError SceneSessionManager::SetAppDragResizeType(const DragResizeType& dragResi
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
+    if (!(SessionPermission::IsSACalling())) {
+        WLOGFE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     if (bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
         return WMError::WM_ERROR_INVALID_PARAM;
