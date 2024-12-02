@@ -1376,6 +1376,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateAvoidAreaByType_ = [this](int32_t persistentId, AvoidAreaType type) {
         this->UpdateAvoidAreaByType(persistentId, type);
     };
+    specificCb->onGetDefualtStatusBarVisibleOnDisplay_ = [this](const DisplayId displayId) {
+        return this->GetDefaultStatusBarVisible(displayId);
+    };
     specificCb->onUpdateOccupiedAreaIfNeed_ = [this](int32_t persistentId) {
         this->UpdateOccupiedAreaIfNeed(persistentId);
     };
@@ -4883,6 +4886,22 @@ void SceneSessionManager::SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func)
 void SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func)
 {
     isRootSceneLastFrameLayoutFinishedFunc_ = std::move(func);
+}
+
+void SceneSessionManager::SetDefaultStatusBarVisible(DisplayId displayId, bool visible)
+{
+    defualtStatusBarVisibleMap_[displayId] = visible;
+    TLOGI(WmsLogTag::WMS_IMMS, "display: %{public}" PRIu64 " visible: %{public}d", displayId, visible);
+}
+
+bool SceneSessionManager::GetDefaultStatusBarVisible(DisplayId displayId)
+{
+    // default visisble if unset
+    bool visible = true;
+    if (defualtStatusBarVisibleMap_.find(displayId) != defualtStatusBarVisibleMap_.end()) {
+        visible = defualtStatusBarVisibleMap_[displayId];
+    }
+    return visible;
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
