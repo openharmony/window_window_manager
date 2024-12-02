@@ -15,6 +15,8 @@
 
 #include "session/host/include/session.h"
 
+#include <regex>
+
 #include "ability_info.h"
 #include "input_manager.h"
 #include "key_event.h"
@@ -95,6 +97,12 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
         auto focusedOnShow = info.want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
         TLOGI(WmsLogTag::WMS_FOCUS, "focusedOnShow:%{public}d", focusedOnShow);
         SetFocusedOnShow(focusedOnShow);
+    }
+
+    static const std::regex pattern(R"(^SCBScreenLock[0-9]+$)");
+    if (std::regex_match(info.bundleName_, pattern)) {
+        TLOGD(WmsLogTag::DEFAULT, "bundleName: %{public}s", info.bundleName_.c_str());
+        isScreenLockWindow_ = true;
     }
 }
 
@@ -692,7 +700,7 @@ bool Session::GetTouchable() const
 void Session::SetForceTouchable(bool forceTouchable)
 {
     if (forceTouchable != forceTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d forceTouchable:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(forceTouchable));
     }
     forceTouchable_ = forceTouchable;
@@ -701,7 +709,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d systemTouchable_:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(touchable));
     }
     systemTouchable_ = touchable;
@@ -1095,7 +1103,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
-        property->SetWindowModeSupportType(GetSessionInfo().windowModeSupportType);
+        property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
     }
     if (sessionProperty && property) {
         property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
@@ -1409,6 +1417,11 @@ void Session::SetClientDragEnable(bool dragEnable)
 std::optional<bool> Session::GetClientDragEnable() const
 {
     return clientDragEnable_;
+}
+
+bool Session::IsScreenLockWindow() const
+{
+    return isScreenLockWindow_;
 }
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
@@ -2128,12 +2141,13 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
-        WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+        TLOGD(WmsLogTag::WMS_EVENT, "eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
             "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     } else {
-        WLOGFI("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
-            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+        TLOGD(WmsLogTag::WMS_EVENT, "eventId:%{public}d, action:%{public}s, "
+            "persistentId:%{public}d, bundleName:%{public}s, pid:%{public}d",
+            pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
@@ -2778,8 +2792,9 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
 void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
-    if ((curWidth < minWidth) || (curWidth > maxFloatingWindowSize) ||
-        (curHeight < minHeight) || (curHeight > maxFloatingWindowSize)) {
+    const uint32_t marginOfError = 2; // Indicates the error value generated during the calculation.
+    if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError ||
+        curHeight + marginOfError < minHeight || curHeight > maxFloatingWindowSize + marginOfError) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
         std::ostringstream oss;
@@ -2944,7 +2959,7 @@ WSRect Session::GetSessionRequestRect() const
 void Session::SetClientRect(const WSRect& rect)
 {
     clientRect_ = rect;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
         GetPersistentId(), rect.ToString().c_str());
 }
 
@@ -3028,6 +3043,13 @@ WSError Session::ProcessBackEvent()
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_EVENT, "session stage is nullptr");
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (auto remoteObject = sessionStage_->AsObject();
+        remoteObject && !remoteObject->IsProxyObject()) {
+        PostExportTask([sessionStage = sessionStage_] {
+            sessionStage->HandleBackEvent();
+        });
+        return WSError::WS_OK;
     }
     return sessionStage_->HandleBackEvent();
 }

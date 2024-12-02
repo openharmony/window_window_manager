@@ -123,6 +123,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSplitButtonVisible(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM):
             return HandleSetEnableDragBySystem(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_FULLSCREEN_WATERFALL_MODE):
+            return HandleSetFullScreenWaterfallMode(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -683,6 +685,18 @@ int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessagePa
         return ERR_INVALID_DATA;
     }
     SetEnableDragBySystem(enableDrag);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetFullScreenWaterfallMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool isWaterfallMode = false;
+    if (!data.ReadBool(isWaterfallMode)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isWaterfallMode failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetFullScreenWaterfallMode(isWaterfallMode);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

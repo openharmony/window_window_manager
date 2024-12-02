@@ -108,11 +108,13 @@ void SceneSessionManagerTest2::TearDownTestCase()
 
 void SceneSessionManagerTest2::SetUp()
 {
+    ssm_->sceneSessionMap_.clear();
 }
 
 void SceneSessionManagerTest2::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+    ssm_->sceneSessionMap_.clear();
 }
 
 namespace {
@@ -2071,7 +2073,7 @@ HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest |
     Rect reqRect = { 0, 0, 10, 10 };
     property->SetRequestRect(reqRect);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    ASSERT_EQ(false, ssm_->isEnablePiPCreate(property));
+    ASSERT_EQ(false, ssm_->IsEnablePiPCreate(property));
 }
 
 /**
@@ -2155,6 +2157,7 @@ HWTEST_F(SceneSessionManagerTest2, CacheSpecificSessionForRecovering, Function |
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 2);
     ssm_->RecoverCachedSubSession(parentPersistentId);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 0);
+    ssm_->recoverSubSessionCacheMap_.clear();
 }
 
 /**

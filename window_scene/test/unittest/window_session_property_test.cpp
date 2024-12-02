@@ -1167,6 +1167,20 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Le
     EXPECT_NE(property, nullptr);;
     ASSERT_EQ(1, property->GetSubWindowLevel());
 }
+
+/**
+ * @tc.name: SetAndIsSystemKeyboard
+ * @tc.desc: SetIsSystemKeyboard and IsSystemKeyboard Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);;
+    ASSERT_EQ(false, property->IsSystemKeyboard());
+    property->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, property->IsSystemKeyboard());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

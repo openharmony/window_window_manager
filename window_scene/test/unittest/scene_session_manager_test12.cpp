@@ -543,6 +543,130 @@ HWTEST_F(SceneSessionManagerTest12, ForegroundAndDisconnect06, Function | SmallT
     result = sceneSession->DisconnectTask(true, true);
     ASSERT_EQ(result, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: RequestKeyboardPanelSession
+ * @tc.desc: test RequestKeyboardPanelSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RequestKeyboardPanelSession, Function | SmallTest | Level2)
+{
+    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    ASSERT_NE(nullptr, ssm);
+    std::string panelName = "SystemKeyboardPanel";
+    ASSERT_NE(nullptr, ssm->RequestKeyboardPanelSession(panelName, 0)); // 0 is screenId
+    ssm->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_NE(nullptr, ssm->RequestKeyboardPanelSession(panelName, 0)); // 0 is screenId
+}
+
+/**
+ * @tc.name: CreateKeyboardPanelSession03
+ * @tc.desc: test CreateKeyboardPanelSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | SmallTest | Level2)
+{
+    SessionInfo keyboardInfo;
+    keyboardInfo.abilityName_ = "CreateKeyboardPanelSession03";
+    keyboardInfo.bundleName_ = "CreateKeyboardPanelSession03";
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(keyboardInfo, nullptr, nullptr);
+    ASSERT_NE(nullptr, keyboardSession);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    ASSERT_NE(nullptr, ssm);
+
+    // the keyboard panel enabled flag of ssm is false
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    // keyboard session is nullptr
+    ssm->isKeyboardPanelEnabled_ = true;
+    ssm->CreateKeyboardPanelSession(nullptr);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    // the property of keyboard session is nullptr
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(nullptr));
+    ASSERT_EQ(nullptr, keyboardSession->GetSessionProperty());
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    // the keyboard session is system keyboard
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(property));
+    ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
+    keyboardSession->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, keyboardSession->IsSystemKeyboard());
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_NE(nullptr, keyboardSession->GetKeyboardPanelSession());
+}
+
+/**
+ * @tc.name: CreateKeyboardPanelSession04
+ * @tc.desc: test CreateKeyboardPanelSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession04, Function | SmallTest | Level2)
+{
+    SessionInfo keyboardInfo;
+    keyboardInfo.abilityName_ = "CreateKeyboardPanelSession04";
+    keyboardInfo.bundleName_ = "CreateKeyboardPanelSession04";
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(keyboardInfo, nullptr, nullptr);
+    ASSERT_NE(nullptr, keyboardSession);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    ASSERT_NE(nullptr, ssm);
+
+    // the keyboard panel enabled flag of ssm is true
+    ssm->isKeyboardPanelEnabled_ = true;
+    ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
+    ASSERT_EQ(false, keyboardSession->IsSystemKeyboard());
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_NE(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    // keyboard panel session is already exists
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_NE(nullptr, keyboardSession->GetKeyboardPanelSession());
+}
+
+/**
+ * @tc.name: CheckSystemWindowPermission02
+ * @tc.desc: test CheckSystemWindowPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CheckSystemWindowPermission02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(nullptr, property);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW); // main window is not system window
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+
+    property->SetIsSystemKeyboard(true);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

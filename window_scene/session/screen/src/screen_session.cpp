@@ -25,6 +25,7 @@
 #include "dms_xcollie.h"
 #include "fold_screen_state_internel.h"
 #include <parameters.h>
+#include "sys_cap_util.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -261,6 +262,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     RRect bounds = property_.GetBounds();
     RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
+    uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
+    TLOGD(WmsLogTag::DMS, "client: %{public}s,apiVersion: %{public}d", SysCapUtil::GetClientName().c_str(), apiVersion);
     if (isBScreenHalf_) {
         displayInfo->SetWidth(bounds.rect_.GetWidth());
         displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
@@ -268,7 +271,6 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
         displayInfo->SetWidth(bounds.rect_.GetWidth());
         displayInfo->SetHeight(bounds.rect_.GetHeight());
     }
-    
     displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
     displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
     displayInfo->SetScreenId(screenId_);
@@ -280,11 +282,16 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
     displayInfo->SetDpi(property_.GetVirtualPixelRatio() * DOT_PER_INCH);
-    displayInfo->SetRotation(property_.GetScreenRotation());
+    if (apiVersion >= 14 || apiVersion == 0) { // 14 is API version
+        displayInfo->SetRotation(property_.GetDeviceRotation());
+        displayInfo->SetDisplayOrientation(property_.GetDeviceOrientation());
+    } else {
+        displayInfo->SetRotation(property_.GetScreenRotation());
+        displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
+    }
     displayInfo->SetOrientation(property_.GetOrientation());
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
-    displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
     displayInfo->SetHdrFormats(hdrFormats_);
     displayInfo->SetColorSpaces(colorSpaces_);
     displayInfo->SetDisplayState(property_.GetDisplayState());
@@ -648,7 +655,8 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
     screenFlag_ = screenFlag;
 }
 
-void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
+    FoldDisplayMode foldDisplayMode)
 {
     bool needUpdateToInputManager = false;
     if (foldDisplayMode == FoldDisplayMode::FULL &&
@@ -661,6 +669,10 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, FoldDisplay
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    Rotation targetDeviceRotation = ConvertIntToRotation(deviceRotation);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation);
+    property_.UpdateDeviceRotation(targetDeviceRotation);
+    property_.SetDeviceOrientation(deviceOrientation);
     if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
         && g_screenRotationOffSet == ROTATION_270) {
         // fold phone need fix 90 degree by remainder 360 degree
@@ -715,13 +727,13 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
         transactionProxy->Begin();
         {
             std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+            displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
         }
         transactionProxy->Commit();
     } else {
         {
             std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+            displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
         }
     }
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
@@ -743,6 +755,15 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+}
+
+void ScreenSession::UpdateRotationOrientation(int rotation)
+{
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation);
+    property_.UpdateDeviceRotation(targetRotation);
+    property_.SetDeviceOrientation(deviceOrientation);
+    WLOGFI("rotation:%{public}d, orientation:%{public}u", rotation, deviceOrientation);
 }
 
 void ScreenSession::UpdatePropertyByFakeInUse(bool isFakeInUse)
@@ -949,6 +970,35 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 }
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
+{
+    // vertical: phone(Plugin screen); horizontal: pad & external screen
+    bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
+    if (foldDisplayMode != FoldDisplayMode::UNKNOWN
+        && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
+        WLOGD("foldDisplay is verticalScreen when width is greater than height");
+        isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
+    }
+    switch (rotation) {
+        case Rotation::ROTATION_0: {
+            return isVerticalScreen ? DisplayOrientation::PORTRAIT : DisplayOrientation::LANDSCAPE;
+        }
+        case Rotation::ROTATION_90: {
+            return isVerticalScreen ? DisplayOrientation::LANDSCAPE : DisplayOrientation::PORTRAIT;
+        }
+        case Rotation::ROTATION_180: {
+            return isVerticalScreen ? DisplayOrientation::PORTRAIT_INVERTED : DisplayOrientation::LANDSCAPE_INVERTED;
+        }
+        case Rotation::ROTATION_270: {
+            return isVerticalScreen ? DisplayOrientation::LANDSCAPE_INVERTED : DisplayOrientation::PORTRAIT_INVERTED;
+        }
+        default: {
+            WLOGE("unknown rotation %{public}u", rotation);
+            return DisplayOrientation::UNKNOWN;
+        }
+    }
+}
+
+DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation) const
 {
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
     switch (rotation) {

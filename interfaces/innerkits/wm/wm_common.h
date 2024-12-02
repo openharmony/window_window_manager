@@ -16,15 +16,32 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <parcel.h>
 #include <map>
-#include <float.h>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include <float.h>
+
+#include <parcel.h>
+
+#include "../dm/dm_common.h"
+#include "securec.h"
+
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
+    constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
+    constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
+    constexpr int32_t DEFAULT_COLOR_MODE = -1;
+    constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+    constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
+    constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
+    constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
+    constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
+    constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
+}
 using DisplayId = uint64_t;
 /**
  * @brief Enumerates type of window.
@@ -295,6 +312,7 @@ enum class WindowUIType : uint8_t {
  * @brief Enumerates flag of ControlAppType.
  */
 enum class ControlAppType : uint8_t {
+    CONTROL_APP_TYPE_BEGIN = 0,
     APP_LOCK = 1,
     CONTROL_APP_TYPE_END,
 };
@@ -368,8 +386,14 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
+    DRAG_MOVE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(WindowSizeChangeReason reason)
+{
+    return reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE;
+}
 
 /**
  * @brief Enumerates layout mode of window.
@@ -1207,6 +1231,20 @@ struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveOut;
 };
 
+struct MoveConfiguration {
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 11;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
+};
+
 enum class CaseType {
     CASE_WINDOW_MANAGER = 0,
     CASE_WINDOW,
@@ -1248,6 +1286,13 @@ struct SubWindowOptions {
     bool isModal = false;
     bool isTopmost = false;
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
+};
+
+struct DecorButtonStyle {
+    int32_t  colorMode = DEFAULT_COLOR_MODE;
+    uint32_t spacingBetweenButtons = DEFAULT_SPACING_BETWEEN_BUTTONS;
+    uint32_t closeButtonRightMargin = DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN;
+    uint32_t buttonBackgroundSize = DEFAULT_BUTTON_BACKGROUND_SIZE;
 };
 
 struct ExtensionWindowConfig {

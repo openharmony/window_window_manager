@@ -394,8 +394,8 @@ public:
     bool IsTerminated() const;
     bool IsSessionForeground() const;
     virtual bool IsAnco() const { return false; }
-    virtual void SetBlankFlag(bool isAddBlank) {};
-    virtual bool GetBlankFlag() const { return false; }
+    virtual void SetBlank(bool isAddBlank) {};
+    virtual bool GetBlank() const { return false; }
     virtual bool GetBufferAvailableCallbackEnable() const { return false; }
 
     sptr<IRemoteObject> dialogTargetToken_ = nullptr;
@@ -546,6 +546,11 @@ public:
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
+
+    /**
+     * Screen Lock
+     */
+    bool IsScreenLockWindow() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -842,6 +847,11 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+
+    /**
+     * Screen Lock
+     */
+    bool isScreenLockWindow_ { false };
 };
 } // namespace OHOS::Rosen
 

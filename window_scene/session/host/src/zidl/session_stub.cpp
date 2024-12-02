@@ -381,7 +381,17 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(winRect.height_);
         reply.WriteInt32(property->GetCollaboratorType());
         reply.WriteBool(property->GetFullScreenStart());
-        reply.WriteUint32(property->GetWindowModeSupportType());
+        std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+        property->GetSupportWindowModes(supportWindowModes);
+        auto size = supportWindowModes.size();
+        if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+            reply.WriteUint32(static_cast<uint32_t>(size));
+            for (decltype(size) i = 0; i < size; i++) {
+                reply.WriteInt32(static_cast<int32_t>(supportWindowModes[i]));
+            }
+        } else {
+            reply.WriteUint32(0);
+        }
         reply.WriteBool(property->GetCompatibleModeInPc());
         reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
@@ -433,7 +443,7 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
     if (eventId < static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE) ||
-        eventId > static_cast<uint32_t>(SessionEvent::EVENT_DRAG)) {
+        eventId >= static_cast<uint32_t>(SessionEvent::EVENT_END)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Invalid eventId: %{public}d", eventId);
         return ERR_INVALID_DATA;
     }
@@ -710,7 +720,14 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isFromMoveToGlobal failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal);
+    uint64_t displayId = DISPLAY_ID_INVALID;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    MoveConfiguration moveConfiguration;
+    moveConfiguration.displayId = static_cast<DisplayId>(displayId);
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal, moveConfiguration);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -721,11 +738,12 @@ int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& r
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
     Rect globalScaledRect;
     WMError errorCode = GetGlobalScaledRect(globalScaledRect);
-    reply.WriteInt32(globalScaledRect.posX_);
-    reply.WriteInt32(globalScaledRect.posY_);
-    reply.WriteUint32(globalScaledRect.width_);
-    reply.WriteUint32(globalScaledRect.height_);
-    reply.WriteInt32(static_cast<int32_t>(errorCode));
+    if (!reply.WriteInt32(globalScaledRect.posX_) || !reply.WriteInt32(globalScaledRect.posY_) ||
+        !reply.WriteUint32(globalScaledRect.width_) || !reply.WriteUint32(globalScaledRect.height_) ||
+        !reply.WriteInt32(static_cast<int32_t>(errorCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

@@ -1369,22 +1369,22 @@ HWTEST_F(SceneSessionLifecycleTest, HandleActionUpdateTextfieldAvoidInfo01, Func
 }
 
 /**
- * @tc.name: GetBlankFlag
- * @tc.desc: GetBlankFlag
+ * @tc.name: GetBlank
+ * @tc.desc: GetBlank
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, GetBlankFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLifecycleTest, GetBlank, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "GetBlankFlag";
-    info.bundleName_ = "GetBlankFlag";
-    info.moduleName_ = "GetBlankFlag";
+    info.abilityName_ = "GetBlank";
+    info.bundleName_ = "GetBlank";
+    info.moduleName_ = "GetBlank";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
 
     bool isAddBlank = false;
-    sceneSession->SetBlankFlag(isAddBlank);
-    ASSERT_EQ(false, sceneSession->GetBlankFlag());
+    sceneSession->SetBlank(isAddBlank);
+    ASSERT_EQ(false, sceneSession->GetBlank());
 }
 
 /**

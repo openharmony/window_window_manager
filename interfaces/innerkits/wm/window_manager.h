@@ -259,29 +259,18 @@ public:
 };
 
 /**
- * @class ControlAppInfo
+ * @class AppUseControlInfo
  *
- * @brief Window info used for ControlAppInfo.
+ * @brief Window info used for AppUseControlInfo.
  */
-class ControlAppInfo : public Parcelable {
-public:
+struct AppUseControlInfo : public Parcelable {
     /**
-     * @brief Default construct of ControlAppInfo.
-     */
-    ControlAppInfo() = default;
-
-    /**
-     * @brief Default deconstruct of ControlAppInfo.
-     */
-    ~ControlAppInfo() = default;
-
-    /**
-     * @brief Marshalling ControlAppInfo.
+     * @brief Marshalling AppUseControlInfo.
      *
-     * @param parcel Package of ControlAppInfo.
+     * @param parcel Package of AppUseControlInfo.
      * @return True means marshall success, false means marshall failed.
      */
-    virtual bool Marshalling(Parcel &parcel) const override
+    virtual bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteString(bundleName_) &&
                parcel.WriteInt32(appIndex_) &&
@@ -289,20 +278,17 @@ public:
     }
 
     /**
-     * @brief Unmarshalling ControlAppInfo.
+     * @brief Unmarshalling AppUseControlInfo.
      *
-     * @param parcel Package of ControlAppInfo.
-     * @return ControlAppInfo object.
+     * @param parcel Package of AppUseControlInfo.
+     * @return AppUseControlInfo object.
      */
-    static ControlAppInfo *Unmarshalling(Parcel &parcel)
+    static AppUseControlInfo* Unmarshalling(Parcel& parcel)
     {
-        auto info = new (std::nothrow) ControlAppInfo();
-        if (info == nullptr) {
-            return nullptr;
-        }
-        bool res = parcel.ReadString(info->bundleName_) && parcel.ReadInt32(info->appIndex_) &&
-            parcel.ReadBool(info->isNeedControl_);
-        if (!res) {
+        auto info = new AppUseControlInfo();
+        if (!parcel.ReadString(info->bundleName_) ||
+            !parcel.ReadInt32(info->appIndex_) ||
+            !parcel.ReadBool(info->isNeedControl_)) {
             delete info;
             return nullptr;
         }
