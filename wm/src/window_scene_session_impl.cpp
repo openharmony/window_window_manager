@@ -625,10 +625,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
-
-        if (WindowHelper::IsMainWindow(GetType())) {
-            AddSetUIContentTimeoutCheck();
-        }
+        AddSetUIContentTimeoutCheck();
         InputTransferStation::GetInstance().AddInputWindow(this);
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
@@ -1442,11 +1439,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         context_.reset();
     }
     ClearVsyncStation();
-
-    if (WindowHelper::IsMainWindow(GetType())) {
-        SetUIContentComplete();
-    }
-
+    SetUIContentComplete();
     surfaceNode_ = nullptr;
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;
