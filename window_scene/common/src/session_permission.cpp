@@ -29,6 +29,9 @@
 #include <pwd.h>
 #include "common/include/session_permission.h"
 #include "parameters.h"
+#ifdef OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
+#include "virtual_keyboard_client.h"
+#endif // OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -165,7 +168,7 @@ bool SessionPermission::IsShellCall()
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFI("TokenType is Shell, verify success");
+        TLOGD(WmsLogTag::DEFAULT, "TokenType is Shell, verify success");
         return true;
     }
     TLOGI(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
@@ -193,6 +196,17 @@ bool SessionPermission::IsStartedByInputMethod()
     }
     int pid = IPCSkeleton::GetCallingPid();
     return imc->IsCurrentImeByPid(pid);
+}
+
+bool SessionPermission::IsStartedBySystemKeyboard()
+{
+#ifdef OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
+    int pid = IPCSkeleton::GetCallingPid();
+    return VirtualKeyboard::VirtualKeyboardClient::GetInstance().IsCurrentProcess(pid);
+#else
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "This device dose not support system keyboard.");
+    return false;
+#endif
 }
 
 bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)
@@ -256,7 +270,7 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
     }
 
     if (bundleInfo.signatureInfo.appIdentifier == appIdentifier) {
-        TLOGI(WmsLogTag::DEFAULT, "verify app success");
+        TLOGD(WmsLogTag::DEFAULT, "verify app success");
         return true;
     }
 

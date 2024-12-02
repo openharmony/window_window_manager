@@ -193,6 +193,16 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCo
 
 void ScreenSessionAbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remoteObject)
 {
+    if (remoteObject == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remoteObject is null");
+        return;
+    }
+
+    sptr<IRemoteObject> object = remoteObject.promote();
+    if (!object) {
+        TLOGE(WmsLogTag::DMS, "object is null");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "OnRemoteDied entry");
     if (deathHandler_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "death handler is nullptr");

@@ -832,6 +832,25 @@ HWTEST_F(SessionStageStubTest, HandleSetEnableDragBySystem, Function | SmallTest
     data.WriteBool(false);
     ASSERT_EQ(0, sessionStageStub_->HandleSetEnableDragBySystem(data, reply));
 }
+
+/**
+ * @tc.name: HandleSetFullScreenWaterfallMode
+ * @tc.desc: test function : HandleSetFullScreenWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetFullScreenWaterfallMode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_FULLSCREEN_WATERFALL_MODE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    data.WriteBool(false);
+    ASSERT_EQ(0, sessionStageStub_->HandleSetFullScreenWaterfallMode(data, reply));
+}
 }
 }
 }

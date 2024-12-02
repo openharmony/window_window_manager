@@ -48,12 +48,18 @@ public:
     WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
-    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
-    WMError MoveToAsync(int32_t x, int32_t y) override;
-    WMError MoveWindowToGlobal(int32_t x, int32_t y) override;
+
+    /**
+     * Window Layout
+     */
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) override;
+    WMError MoveToAsync(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
+    WMError MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
+
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
     void PerformBack() override;
@@ -180,6 +186,12 @@ public:
     WMError SetGestureBackEnabled(bool enable) override;
     WMError GetGestureBackEnabled(bool& enable) override;
 
+    /**
+     * PC Screen Manager
+     */
+    WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
+    WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -243,6 +255,11 @@ private:
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /**
+     * Window Layout
+     */
+    void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+
+    /**
      * Window Immersive
      */
     void UpdateDefaultStatusBarColor();
@@ -283,6 +300,11 @@ private:
     std::unordered_map<int32_t, std::vector<bool>> eventMapTriggerByDisplay_;
     std::unordered_map<int32_t, std::vector<int32_t>> eventMapDeltaXByDisplay_;
     std::unordered_map<int32_t, std::vector<PointInfo>> downPointerByDisplay_;
+
+    /**
+     * PC Fold Screen
+     */
+    std::atomic_bool isFullScreenWaterfallMode_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS

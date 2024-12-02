@@ -60,6 +60,10 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
         property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     }
+    isDensityFollowHost_ = option->GetIsDensityFollowHost();
+    if (isDensityFollowHost_) {
+        hostDensityValue_ = option->GetDensity();
+    }
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
 }
@@ -206,9 +210,12 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
+WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y,
+    bool isMoveToGlobal, MoveConfiguration moveConfiguration)
 {
-    WLOGFD("Id:%{public}d xy %{public}d %{public}d", property_->GetPersistentId(), x, y);
+    TLOGD(WmsLogTag::WMS_UIEXT, "Id:%{public}d xy %{public}d %{public}d isMoveToGlobal %{public}d "
+        "moveConfiguration %{public}s", property_->GetPersistentId(), x, y, isMoveToGlobal,
+        moveConfiguration.ToString().c_str());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window session invalid.");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -344,7 +351,7 @@ WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
     ss << "ID: " << persistentId << ", needHide: " << needHide;
 
     if (surfaceNode_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "surfaceNode is null, %{public}s", ss.str().c_str());
+        TLOGI(WmsLogTag::WMS_UIEXT, "surfaceNode is null, %{public}s", ss.str().c_str());
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -352,9 +359,9 @@ WMError WindowExtensionSessionImpl::HidePrivacyContentForHost(bool needHide)
     auto errCode = surfaceNode_->SetHidePrivacyContent(needHide);
     TLOGI(WmsLogTag::WMS_UIEXT, "Notify Render Service client finished, %{public}s, err: %{public}u", ss.str().c_str(),
           errCode);
-    if (errCode == RSInterfaceErrorCode::NONSYSTEM_CALLING) { //  not system app calling
+    if (errCode == RSInterfaceErrorCode::NONSYSTEM_CALLING) { // not system app calling
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { //  other error
+    } else if (errCode != RSInterfaceErrorCode::NO_ERROR) { // other error
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
 
@@ -1257,7 +1264,7 @@ void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
 WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string>& params,
     std::vector<std::string>& info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Received dump request, persistentId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "Received dump request, persistentId=%{public}d", GetPersistentId());
     auto uiContentSharedPtr = GetUIContentSharedPtr();
     if (uiContentSharedPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is nullptr");

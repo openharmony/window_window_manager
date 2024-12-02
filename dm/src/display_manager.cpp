@@ -86,6 +86,8 @@ public:
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+    DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
+    DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
     DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
@@ -115,7 +117,7 @@ private:
     void NotifyCaptureStatusChanged(bool isCapture);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
-    void NotifyAvailableAreaChanged(DMRect rect);
+    void NotifyAvailableAreaChanged(DMRect rect, DisplayId displayId);
     void Clear();
     std::string GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo);
 
@@ -136,6 +138,7 @@ private:
     std::set<sptr<IDisplayUpdateListener>> displayUpdateListeners_;
     std::set<sptr<IDisplayModeListener>> displayModeListeners_;
     std::set<sptr<IAvailableAreaListener>> availableAreaListeners_;
+    std::map<DisplayId, std::set<sptr<IAvailableAreaListener>>> availableAreaListenersMap_;
     class DisplayManagerListener;
     sptr<DisplayManagerListener> displayManagerListener_;
     class DisplayManagerAgent;
@@ -401,9 +404,9 @@ public:
     }
     ~DisplayManagerAvailableAreaAgent() = default;
 
-    virtual void NotifyAvailableAreaChanged(DMRect area) override
+    virtual void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId) override
     {
-        pImpl_->NotifyAvailableAreaChanged(area);
+        pImpl_->NotifyAvailableAreaChanged(area, displayId);
     }
 private:
     sptr<Impl> pImpl_;
@@ -526,7 +529,7 @@ void DisplayManager::Impl::ClearDisplayModeCallback()
 
 void DisplayManager::Impl::Clear()
 {
-    WLOGFI("Clear displaymanager listener");
+    WLOGFI("Clear listener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
@@ -560,13 +563,13 @@ DisplayManager::Impl::~Impl()
 
 DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 {
-    WLOGFD("Create displaymanager instance");
+    WLOGFD("Create instance");
     g_dmIsDestroyed = false;
 }
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFI("Destroy displaymanager instance");
+    WLOGFI("Destroy instance");
     g_dmIsDestroyed = true;
 }
 
@@ -1653,7 +1656,7 @@ void DisplayManager::Impl::NotifyScreenMagneticStateChanged(bool isMagneticState
     }
 }
 
-void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect)
+void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect, DisplayId displayId)
 {
     std::set<sptr<IAvailableAreaListener>> availableAreaListeners;
     {
@@ -1662,6 +1665,16 @@ void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect)
     }
     for (auto& listener : availableAreaListeners) {
         listener->OnAvailableAreaChanged(rect);
+    }
+    std::map<DisplayId, std::set<sptr<IAvailableAreaListener>>> availableAreaListenersMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        availableAreaListenersMap = availableAreaListenersMap_;
+    }
+    if (availableAreaListenersMap_.find(displayId) != availableAreaListenersMap_.end()) {
+        for (auto& listener : availableAreaListenersMap[displayId]) {
+            listener->OnAvailableAreaChanged(rect);
+        }
     }
 }
 
@@ -1808,6 +1821,35 @@ DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaL
     return ret;
 }
 
+DMError DisplayManager::RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId)
+{
+    if (listener == nullptr) {
+        WLOGFE("RegisterAvailableAreaListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterAvailableAreaListener(listener, displayId);
+}
+
+DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (availableAreaListenerAgent_ == nullptr) {
+        availableAreaListenerAgent_ = new DisplayManagerAvailableAreaAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            availableAreaListenerAgent_,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterAvailableAreaListener failed !");
+        availableAreaListenerAgent_ = nullptr;
+    } else {
+        WLOGD("IAvailableAreaListener register success");
+        availableAreaListenersMap_[displayId].insert(listener);
+    }
+    return ret;
+}
+
 DMError DisplayManager::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener)
 {
     if (listener == nullptr) {
@@ -1827,7 +1869,46 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
     }
     availableAreaListeners_.erase(iter);
     DMError ret = DMError::DM_OK;
-    if (availableAreaListeners_.empty() && availableAreaListenerAgent_ != nullptr) {
+    if (availableAreaListeners_.empty() && availableAreaListenersMap_.empty() &&
+        availableAreaListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            availableAreaListenerAgent_,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
+        availableAreaListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
+DMError DisplayManager::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterPrivateWindowListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterAvailableAreaListener(listener, displayId);
+}
+
+DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener,
+    DisplayId displayId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (availableAreaListenersMap_.find(displayId) == availableAreaListenersMap_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto iter = std::find(availableAreaListenersMap_[displayId].begin(), availableAreaListenersMap_[displayId].end(),
+        listener);
+    if (iter == availableAreaListenersMap_[displayId].end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    availableAreaListenersMap_[displayId].erase(iter);
+    if (availableAreaListenersMap_[displayId].empty()) {
+        availableAreaListenersMap_.erase(displayId);
+    }
+    DMError ret = DMError::DM_OK;
+    if (availableAreaListeners_.empty() && availableAreaListenersMap_.empty() &&
+        availableAreaListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             availableAreaListenerAgent_,
             DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);

@@ -996,6 +996,39 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetSystemBarProperty02
+ * @tc.desc: SetSystemBarProperty02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSystemBarProperty02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "IsFloatingWindowAppType";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->property_ = nullptr;
+    SystemBarProperty statusBarProperty;
+    sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty);
+    ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
+              WSError::WS_ERROR_NULLPTR);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
+              WSError::WS_OK);
+    auto propMap = sceneSession->property_->GetSystemBarProperty();
+    ASSERT_EQ(statusBarProperty, propMap[WindowType::WINDOW_TYPE_STATUS_BAR]);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
+              WSError::WS_OK);
+}
+
+/**
  * @tc.name: OnShowWhenLocked
  * @tc.desc: OnShowWhenLocked
  * @tc.type: FUNC ok
@@ -1597,7 +1630,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(property);
     sceneSession->SetAspectRatio(ratio);
     auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1881,6 +1914,43 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: GetDockHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetDockHeight, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetDockHeight";
+    info.bundleName_ = "GetDockHeight";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    ASSERT_EQ(sceneSession->GetDockHeight(), 0);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback_, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
+    ASSERT_EQ(sceneSession->GetDockHeight(), 0);
+    WSRect rect({0, 0, 0, 112});
+    sceneSession->winRect_ = rect;
+    specificCallback_->onGetSceneSessionVectorByType_ = [&](WindowType type,
+        uint64_t displayId)->std::vector<sptr<SceneSession>>
+    {
+        std::vector<sptr<SceneSession>> vec;
+        vec.push_back(sceneSession);
+        return vec;
+    };
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->GetDockHeight(), 0);
+    sceneSession->isVisible_ = true;
+    ASSERT_EQ(sceneSession->GetDockHeight(), 0);
+    sceneSession->property_->windowName_ = "SCBSmartDock";
+    ASSERT_EQ(sceneSession->GetDockHeight(), 112);
+}
+
+/**
  * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
@@ -1912,6 +1982,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     info.bundleName_ = "HandleCompatibleModeMoveDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
@@ -1953,6 +2024,9 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
 
     sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
+
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE, false, false);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::DRAG_MOVE);
 }
 
 /**
@@ -1967,26 +2041,27 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, Function | SmallTest | Leve
     info.bundleName_ = "HandleCompatibleModeDrag";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {2, 1, 1, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 2, 1, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 }
 

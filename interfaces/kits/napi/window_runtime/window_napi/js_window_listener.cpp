@@ -192,7 +192,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
 
 void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 {
-    WLOGI("[NAPI]LifeCycleCallBack, envent type: %{public}u", eventType);
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI] event type: %{public}u", eventType);
     auto task = [self = weakRef_, eventType, eng = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::LifeCycleCallBack");
         auto thisListener = self.promote();
@@ -462,6 +462,24 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsWindowListener::OnWindowStatusChange",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    auto jsCallback = [self = weakRef_, displayId, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "[NAPI]this listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
+        thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)

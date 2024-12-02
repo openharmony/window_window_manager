@@ -54,6 +54,70 @@ HWTEST_F(ScreenPropertyTest, SetScreenRotation, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateDeviceRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, UpdateDeviceRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateDeviceRotation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    Rotation ret = Rotation::ROTATION_0;
+    Rotation rotation = Rotation::ROTATION_0;
+    property->UpdateDeviceRotation(rotation);
+    ret = property->GetDeviceRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_90;
+    property->UpdateDeviceRotation(rotation);
+    ret = property->GetDeviceRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_180;
+    property->UpdateDeviceRotation(rotation);
+    ret = property->GetDeviceRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_270;
+    property->UpdateDeviceRotation(rotation);
+    ret = property->GetDeviceRotation();
+    ASSERT_EQ(ret, rotation);
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateDeviceRotation end";
+}
+
+/**
+ * @tc.name: SetDeviceOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetDeviceOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDeviceOrientation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    DisplayOrientation ret = DisplayOrientation::PORTRAIT;
+    DisplayOrientation displayOrientation = DisplayOrientation::PORTRAIT;
+    property->SetDeviceOrientation(displayOrientation);
+    ret = property->GetDeviceOrientation();
+    ASSERT_EQ(ret, displayOrientation);
+
+    displayOrientation = DisplayOrientation::LANDSCAPE;
+    property->SetDeviceOrientation(displayOrientation);
+    ret = property->GetDeviceOrientation();
+    ASSERT_EQ(ret, displayOrientation);
+
+    displayOrientation = DisplayOrientation::PORTRAIT_INVERTED;
+    property->SetDeviceOrientation(displayOrientation);
+    ret = property->GetDeviceOrientation();
+    ASSERT_EQ(ret, displayOrientation);
+
+    displayOrientation = DisplayOrientation::LANDSCAPE_INVERTED;
+    property->SetDeviceOrientation(displayOrientation);
+    ret = property->GetDeviceOrientation();
+    ASSERT_EQ(ret, displayOrientation);
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDeviceOrientation end";
+}
+
+/**
  * @tc.name: UpdateVirtualPixelRatio
  * @tc.desc: normal function
  * @tc.type: FUNC

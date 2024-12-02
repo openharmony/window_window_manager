@@ -257,6 +257,39 @@ HWTEST_F(WindowHelperTest, GetTransformFromWorldMat4, Function | SmallTest | Lev
         }
     }
 }
+
+/**
+ * @tc.name: CheckButtonStyleValid
+ * @tc.desc: CheckButtonStyleValid test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowHelperTest, CheckButtonStyleValid, Function | SmallTest | Level1)
+{
+    DecorButtonStyle style;
+    // checkout the side of buttonBackgroundSize
+    style.buttonBackgroundSize = MIN_BUTTON_BACKGROUND_SIZE - 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonBackgroundSize = MAX_BUTTON_BACKGROUND_SIZE + 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.buttonBackgroundSize = MAX_BUTTON_BACKGROUND_SIZE;
+    ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
+
+    // checkout the side of closeButtonRightMargin
+    style.closeButtonRightMargin = MIN_CLOSE_BUTTON_RIGHT_MARGIN - 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.closeButtonRightMargin = MAX_CLOSE_BUTTON_RIGHT_MARGIN + 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.closeButtonRightMargin = MIN_CLOSE_BUTTON_RIGHT_MARGIN;
+    ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
+
+    // checkout the side of closeButtonRightMargin
+    style.spacingBetweenButtons =  MIN_SPACING_BETWEEN_BUTTONS - 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.spacingBetweenButtons = MAX_SPACING_BETWEEN_BUTTONS + 1;
+    ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
+    style.spacingBetweenButtons = MAX_SPACING_BETWEEN_BUTTONS;
+    ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

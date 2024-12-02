@@ -47,6 +47,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_TOP_MOST_CHANGE_CB,
     SESSION_MODAL_TYPE_CHANGE_CB,
     MAIN_SESSION_MODAL_TYPE_CHANGE_CB,
+    FULLSCREEN_WATERFALL_MODE_CHANGE_CB,
     CLICK_CB,
     TERMINATE_SESSION_CB,
     TERMINATE_SESSION_CB_NEW,
@@ -70,7 +71,6 @@ enum class ListenerFuncType : uint32_t {
     PREPARE_CLOSE_PIP_SESSION,
     LANDSCAPE_MULTI_WINDOW_CB,
     CONTEXT_TRANSPARENT_CB,
-    KEYBOARD_GRAVITY_CHANGE_CB,
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
@@ -80,6 +80,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB,
     TITLE_DOCK_HOVER_SHOW_CB,
     SET_WINDOW_RECT_AUTO_SAVE_CB,
+    UPDATE_APP_USE_CONTROL_CB,
 };
 
 class SceneSession;
@@ -143,7 +144,7 @@ private:
     static napi_value SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
-    static napi_value SetBlankFlag(napi_env env, napi_callback_info info);
+    static napi_value SetBlank(napi_env env, napi_callback_info info);
     static napi_value RemoveBlank(napi_env env, napi_callback_info info);
     static napi_value SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
     static napi_value SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
@@ -201,7 +202,7 @@ private:
     napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
-    napi_value OnSetBlankFlag(napi_env env, napi_callback_info info);
+    napi_value OnSetBlank(napi_env env, napi_callback_info info);
     napi_value OnRemoveBlank(napi_env env, napi_callback_info info);
     napi_value OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
     napi_value OnSyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
@@ -241,6 +242,7 @@ private:
     void ProcessMainWindowTopmostChangeRegister();
     void ProcessSessionModalTypeChangeRegister();
     void ProcessMainSessionModalTypeChangeRegister();
+    void RegisterFullScreenWaterfallModeChangeCallback();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -264,7 +266,6 @@ private:
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
     void ProcessContextTransparentRegister();
-    void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
     void ProcessDefaultDensityEnabledRegister();
@@ -273,7 +274,8 @@ private:
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
-
+    void RegisterUpdateAppUseControlCallback();
+    
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
@@ -299,6 +301,7 @@ private:
     void OnMainWindowTopmostChange(bool isTopmost);
     void OnSessionModalTypeChange(SubWindowModalType subWindowModalType);
     void OnMainSessionModalTypeChange(bool isModal);
+    void OnFullScreenWaterfallModeChange(bool isWaterfallMode);
     void OnClick(bool requestFocus, bool isClick);
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
@@ -321,7 +324,6 @@ private:
     void OnPrepareClosePiPSession();
     void OnContextTransparent();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
-    void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
@@ -331,6 +333,7 @@ private:
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
     void OnSetWindowRectAutoSave(bool enabled);
+    void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 
