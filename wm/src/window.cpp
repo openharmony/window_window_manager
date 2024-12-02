@@ -245,12 +245,10 @@ void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configu
 void Window::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "scb enabled, config: %{public}s", configuration->GetName().c_str());
         WindowSceneSessionImpl::UpdateConfigurationSyncForAll(configuration);
         RootScene::UpdateConfigurationSyncForAll(configuration);
         WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(configuration);
     } else {
-        TLOGI(WmsLogTag::WMS_IMMS, "scb disabled, config: %{public}s", configuration->GetName().c_str());
         WindowImpl::UpdateConfigurationSyncForAll(configuration);
     }
 }
