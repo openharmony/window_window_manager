@@ -1399,15 +1399,14 @@ void SceneSessionManagerProxy::NotifyDumpInfoResult(const std::vector<std::strin
         return;
     }
     for (const auto& elem : info) {
-        const char* curInfo = elem.c_str();
-        uint32_t curSize = static_cast<uint32_t>(strlen(curInfo));
+        uint32_t curSize = static_cast<uint32_t>(elem.length());
         WLOGFD("NotifyDumpInfoResult infoSize: %{public}u", curSize);
         if (!data.WriteUint32(curSize)) {
             WLOGFE("Write info size failed");
             return;
         }
         if (curSize != 0) {
-            if (!data.WriteRawData(curInfo, curSize)) {
+            if (!data.WriteRawData(elem.c_str(), curSize)) {
                 WLOGFE("Write info failed");
                 return;
             }
