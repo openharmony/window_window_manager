@@ -2284,9 +2284,6 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ != nullptr && isPointDown) {
-        specificCallback_->onSessionTouchOutside_(GetPersistentId());
-    }
 
     auto property = GetSessionProperty();
     if (property == nullptr) {
