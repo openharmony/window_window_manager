@@ -64,6 +64,9 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
         property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     }
+    if (isDensityFollowHost_ = option->GetIsDensityFollowHost()) {
+        hostDensityValue_ = option->GetDensity();
+    }
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
 }

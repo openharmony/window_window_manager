@@ -176,12 +176,15 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
     return false;
 }
 
-bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t callingTokenId)
+bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t callingTokenId,
+    AppExecFwk::ExtensionAbilityType extensionAbilityType)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: bundleName: %{public}s, moduleName: %{public}s, ablilityName: %{public}s",
           element.GetBundleName().c_str(), element.GetModuleName().c_str(), element.GetAbilityName().c_str());
-
-    static const std::vector<std::tuple<std::string, std::string, std::string>> whitelist = {
+    static const std::unordered_set<AppExecFwk::ExtensionAbilityType> extensionAbilityTypeWhitelist = {
+        AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN
+    };
+    static const std::vector<std::tuple<std::string, std::string, std::string>> elementNamewhitelist = {
         std::make_tuple("com.huawei.hmos.settings", "AccessibilityReConfirmDialog", "phone_settings"),
         std::make_tuple("com.huawei.hmos.settings", "AccessibilityShortKeyDialog", "phone_settings"),
         std::make_tuple("com.huawei.hmos.settings", "DefaultIntentUiExtensionAbility", "phone_settings"),
@@ -189,11 +192,16 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.huawei.hmos.motiongesture", "IntentUIExtensionAbility", "entry"),
     };
 
-    auto it = std::find_if(whitelist.begin(), whitelist.end(), [&element](const auto& item) {
+    if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: extensionAbilityType in white list");
+        return true;
+    }
+
+    auto it = std::find_if(elementNamewhitelist.begin(), elementNamewhitelist.end(), [&element](const auto& item) {
         auto& [bundleName, abilityName, _] = item;
         return (element.GetBundleName() == bundleName && element.GetAbilityName() == abilityName);
     });
-    if (it != whitelist.end()) {
+    if (it != elementNamewhitelist.end()) {
         return true;
     }
 
@@ -1519,9 +1527,9 @@ uint32_t SceneSessionManager::GetLockScreenZorder()
 }
 
 WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t callingTokenId,
-    const AppExecFwk::ElementName& element, int32_t& pid)
+    const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
-    auto task = [this, windowId, &callingTokenId, &element, &pid]() -> WMError {
+    auto task = [this, windowId, &callingTokenId, &element, &extensionAbilityType, &pid]() -> WMError {
         pid = INVALID_PID;
         auto sceneSession = GetSceneSession(windowId);
         if (sceneSession == nullptr) {
@@ -1542,7 +1550,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
         }
 
         // 2. check permission
-        if (!IsUIExtCanShowOnLockScreen(element, callingTokenId)) {
+        if (!IsUIExtCanShowOnLockScreen(element, callingTokenId, extensionAbilityType)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: no permisson, window id %{public}d, %{public}d", windowId,
                 callingTokenId);
             return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -10127,7 +10135,8 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         UIExtensionTokenInfo tokenInfo;
         tokenInfo.abilityToken = token;
         tokenInfo.callingTokenId = callingTokenId;
-        tokenInfo.canShowOnLockScreen = IsUIExtCanShowOnLockScreen(info.elementName, callingTokenId);
+        tokenInfo.canShowOnLockScreen = IsUIExtCanShowOnLockScreen(info.elementName, callingTokenId,
+            info.extensionAbilityType);
         parentSession->AddExtensionTokenInfo(tokenInfo);
         parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
         if (usage == UIExtensionUsage::MODAL && parentSession) {
