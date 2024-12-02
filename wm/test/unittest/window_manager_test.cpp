@@ -1491,6 +1491,56 @@ HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level
     auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
+
+/**
+ * @tc.name: SetGlobalDragResizeType
+ * @tc.desc: check SetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME
+    auto ret = WindowManager::GetInstance().SetGlobalDragResizeType(dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetGlobalDragResizeType
+ * @tc.desc: check GetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED
+    auto ret = WindowManager::GetInstance().GetGlobalDragResizeType(dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetAppDragResizeType
+ * @tc.desc: check SetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetAppDragResizeType, Function | SmallTest | Level2)
+{
+    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME
+    const std::string bundleName = "test";
+    auto ret = WindowManager::GetInstance().SetAppDragResizeType(dragResizeType, bundleName);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetAppDragResizeType
+ * @tc.desc: check GetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED
+    const std::string bundleName = "test";
+    auto ret = WindowManager::GetInstance().GetAppDragResizeType(dragResizeType, bundleName);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

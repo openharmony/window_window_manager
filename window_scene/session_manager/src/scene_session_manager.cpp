@@ -1648,7 +1648,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(dragResizeType, sessionInfo.bundleName_);
-        sceneSession->setAppDragResizeType(dragResizeType);
+        sceneSession->SetAppDragResizeType(dragResizeType);
     }
     return sceneSession;
 }
@@ -1674,7 +1674,7 @@ void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeT
 
 WMError SceneSessionManager::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "SetGlobalResizeType dragResizeType: %{public}d", dragResizeType);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
     SceneSession::globalDragResizeType_ = dragResizeType;
     return WMError::WM_OK;
 }
@@ -1683,13 +1683,13 @@ WMError SceneSessionManager::GetGlobalDragResizeType(DragResizeType& dragResizeT
 {
     dragResizeType = SceneSession::globalDragResizeType_;
     GetEffectiveDragResizeType(dragResizeType);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "GetGlobalResizeType dragResizeType: %{public}d", dragResizeType);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
     return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "SetAppResizeType dragResizeType: %{public}d, bundleName: %{public}s",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
     if (bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
@@ -1705,7 +1705,7 @@ WMError SceneSessionManager::SetAppDragResizeType(const DragResizeType& dragResi
             continue;
         }
         if (sceneSession->GetSessionInfo().bundleName_ == bundleName) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "SetAppResizeType to sceneSession: %{public}d, bundleName: %{public}s",
+            TLOGI(WmsLogTag::WMS_LAYOUT, "to sceneSession: %{public}d, bundleName: %{public}s",
                 dragResizeType, bundleName.c_str());
             sceneSession->setAppDragResizeType(dragResizeType);
         }
@@ -1725,7 +1725,7 @@ WMError SceneSessionManager::GetAppDragResizeType(DragResizeType& dragResizeType
         dragResizeType = iter->second;
     }
     GetEffectiveDragResizeType(dragResizeType);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "GetAppResizeType: %{public}d, bundleName: %{public}s",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
     return WMError::WM_OK;
 }

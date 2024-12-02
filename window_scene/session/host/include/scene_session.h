@@ -527,17 +527,8 @@ public:
     WSError SetSplitButtonVisible(bool isVisible);
 
     static DragResizeType globalDragResizeType_;
-    void setAppDragResizeType(const DragResizeType& dragResizeType) { appDragResizeType_ = dragResizeType; };
-    void getAppDragResizeType(DragResizeType& dragResizeType) { dragResizeType = appDragResizeType_; };
-    DragResizeType GetDefaultDragResizeType() const;
-    DragResizeType GetDragResizeType() const;
-    DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    void SetDragResizeTypeDuringDrag(const DragResizeType& dragResizeType)
-    {
-        dragResizeTypeDuringDrag_ = dragResizeType;
-    };
-    DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; };
+    void SetAppDragResizeType(const DragResizeType& dragResizeType) { appDragResizeType_ = dragResizeType; };
+    void GetAppDragResizeType(DragResizeType& dragResizeType) { dragResizeType = appDragResizeType_; };
 
     /**
      * Window Layout
@@ -697,12 +688,18 @@ private:
      */
     void HandleMoveDragSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
-    bool IsPCOnMoveDragCallbackEnd(SizeChangeReason reason, WSRect rect);
+    bool isDragResizeWhenEnd(SizeChangeReason reason, WSRect rect);
     void InitializeCrossMoveDrag();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
         bool isGlobal, bool needFlush);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
+    DragResizeType GetDragResizeType() const;
+    void SetDragResizeTypeDuringDrag(const DragResizeType& dragResizeType)
+    {
+        dragResizeTypeDuringDrag_ = dragResizeType;
+    };
+    DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; };
 
     /**
      * Gesture Back
@@ -870,6 +867,8 @@ private:
      */
     static std::shared_mutex windowDragHotAreaMutex_;
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
+    DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
 
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };

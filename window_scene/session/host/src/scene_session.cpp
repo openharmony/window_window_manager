@@ -609,23 +609,6 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
-
-void OnSessionEventWhenDrag(sptr<SceneSession> session, SessionEvent event)
-{
-    if (session->moveDragController_ && (event == SessionEvent::EVENT_DRAG ||
-        event == SessionEvent::EVENT_DRAG_START)) {
-        WSRect rect = session->moveDragController_->GetTargetRect(
-            MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-        DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-        if (event == SessionEvent::EVENT_DRAG_START) {
-            dragResizeType = session->GetDragResizeType();
-            session->SetDragResizeTypeDuringDrag(dragResizeType);
-        }
-        session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_,
-            static_cast<uint32_t>(dragResizeType)});
-    }
-}
-
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     auto task = [weakThis = wptr(this), event]() {
@@ -661,7 +644,18 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
         }
-        OnSessionEventWhenDrag(session, event);
+        if (session->moveDragController_ && (event == SessionEvent::EVENT_DRAG ||
+                event == SessionEvent::EVENT_DRAG_START)) {
+            WSRect rect = session->moveDragController_->GetTargetRect(
+                MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+            DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+            if (event == SessionEvent::EVENT_DRAG_START) {
+                dragResizeType = session->GetDragResizeType();
+                session->SetDragResizeTypeDuringDrag(dragResizeType);
+            }
+            session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_,
+                static_cast<uint32_t>(dragResizeType)});
+        }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
             session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
         }
@@ -2785,23 +2779,43 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         WLOGE("moveDragController_ is null");
         return;
     }
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "property is null");
+        return;
+    }
     if (reason == SizeChangeReason::DRAG_START) {
         InitializeCrossMoveDrag();
     }
-
+    bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
+    bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
+    bool isMainWindow = WindowHelper::IsMainWindow(property->GetWindowType());
     WSRect rect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
             MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
             MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason: %{public}d, ",
-        rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+    WSRect globalRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
+            MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
+            MoveDragController::TargetRectCoordinate::GLOBAL);
+    bool isGlobal = (reason != SizeChangeReason::DRAG_END);
+    bool needFlush = (reason != SizeChangeReason::DRAG_END);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason: %{public}d, "
+        "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d", rect.posX_, rect.posY_,
+        rect.width_, rect.height_, reason, isCompatibleModeInPc, isSupportDragInPcCompatibleMode);
     HandleMoveDragSurfaceNode(reason);
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_END) {
         UpdateWinRectForSystemBar(rect);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::OnMoveDragCallback [%d, %d, %u, %u]", rect.posX_, rect.posY_, rect.width_, rect.height_);
-    if (IsPCOnMoveDragCallbackEnd(reason, rect)) {
+    if (isCompatibleModeInPc && !IsFreeMultiWindowMode() && reason == SizeChangeReason::DRAG_END) {
+        HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
+    } else if (isCompatibleModeInPc && !IsFreeMultiWindowMode() && reason != SizeChangeReason::DRAG_END) {
+        HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
+    } else if (isDragResizeWhenEnd(reason, rect)) {
+        OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
+    } else {
+        HandleMoveDragSurfaceBounds(rect, globalRect, reason, isGlobal, needFlush);
     }
     if (reason == SizeChangeReason::DRAG_END) {
         HandleMoveDragEnd(rect, reason);
@@ -2810,46 +2824,18 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     }
 }
 
-bool SceneSession::IsPCOnMoveDragCallbackEnd(SizeChangeReason reason, WSRect rect)
+bool SceneSession::isDragResizeWhenEnd(SizeChangeReason reason, WSRect rect)
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "property is null");
         return true;
     }
-    bool isCompatibleModeInPc = property->GetCompatibleModeInPc();
-    bool isSupportDragInPcCompatibleMode = property->GetIsSupportDragInPcCompatibleMode();
-    WSRect globalRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
-        MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
-        MoveDragController::TargetRectCoordinate::GLOBAL);
-    bool isGlobal = (reason != SizeChangeReason::DRAG_END);
-    bool needFlush = (reason != SizeChangeReason::DRAG_END);
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
         WindowHelper::IsMainWindow(property->GetWindowType());
     bool isDragResizeWhenEnd = (reason == SizeChangeReason::DRAG) && isPcOrPcModeMainWindow &&
         (GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "isCompatibleMode: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
-        isCompatibleModeInPc, isSupportDragInPcCompatibleMode);
-    if (isCompatibleModeInPc && !IsFreeMultiWindowMode() && reason == SizeChangeReason::DRAG_END) {
-        HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
-    } else if (isCompatibleModeInPc && !IsFreeMultiWindowMode() && reason != SizeChangeReason::DRAG_END) {
-        HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
-    } else if (isDragResizeWhenEnd) {
-        OnSessionEvent(SessionEvent::EVENT_DRAG);
-        return true;
-    } else {
-        HandleMoveDragSurfaceBounds(rect, globalRect, reason, isGlobal, needFlush);
-    }
-    return false;
-}
-
-DragResizeType SceneSession::GetDefaultDragResizeType() const
-{
-    if (IsFreeMultiWindowMode()) {
-        return DragResizeType::RESIZE_WHEN_DRAG_END;
-    } else {
-        return DragResizeType::RESIZE_EACH_FRAME;
-    }
+    return isDragResizeWhenEnd;
 }
 
 DragResizeType SceneSession::GetDragResizeType() const
@@ -2857,10 +2843,14 @@ DragResizeType SceneSession::GetDragResizeType() const
     if (globalDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         return globalDragResizeType_;
     }
-    if (appDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+    if (GetAppDragResizeType() != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         return appDragResizeType_;
     }
-    return GetDefaultDragResizeType();
+    if (IsFreeMultiWindowMode()) {
+        return DragResizeType::RESIZE_WHEN_DRAG_END;
+    } else {
+        return DragResizeType::RESIZE_EACH_FRAME;
+    }
 }
 
 void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)

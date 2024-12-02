@@ -852,6 +852,27 @@ bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAn
     return true;
 }
 
+bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType)
+{
+    uint32_t dragResizeTypeValue = nullptr;
+    ConvertFromJsValue(env, napi_value, dragResizeTypeValue)
+    switch (dragResizeTypeValue) {
+        case static_cast<uint32_t>(DragResizeType::RESIZE_TYPE_UNDEFINED):
+            dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+            break;
+        case static_cast<uint32_t>(DragResizeType::RESIZE_EACH_FRAME):
+            dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+            break;
+        case static_cast<int32_t>(AceTouchType::RESIZE_WHEN_DRAG_END):
+            dragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
+            break;
+        default:
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragResizeType");
+            return false;
+    }
+    return true;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
