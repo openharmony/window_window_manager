@@ -65,6 +65,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneS
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
+constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -1424,6 +1426,23 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         newWinRect.ToString().c_str());
 }
 
+void SceneSession::UpdateSessionRectPosYFromClient(WSRect& rect)
+{
+    if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
+        return;
+    }
+    if (lastUpdatedDisplayId != VIRTUAL_DISPLAY_ID) {
+        return;
+    }
+    std::string logRect = "last: " + rect.ToString() + ", cur: ";
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    auto upperScreenPosY = defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR;
+    rect.posY_ += upperScreenPosY + foldCreaseRect.height_;
+    logRect += rect.ToString();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, logRect: %{public}s", GetPersistentId(), logRect.c_str());
+}
+
 /** @note @window.layout */
 WSError SceneSession::UpdateSessionRect(
     const WSRect& rect, SizeChangeReason reason, bool isGlobal,
@@ -1433,6 +1452,7 @@ WSError SceneSession::UpdateSessionRect(
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         return WSError::WS_DO_NOTHING;
     }
+    UpdateSessionRectFromClient(rect);
     WSRect newRect = rect;
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
