@@ -1686,6 +1686,13 @@ public:
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
 
     /**
+     * @brief Is pc window or pad free multi-window.
+     *
+     * @return True means pc window or pad free multi-window, false means the opposite.
+     */
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
@@ -2005,9 +2012,10 @@ public:
      * @brief Set the modality of window.
      *
      * @param isModal bool.
+     * @param modalityType ModalityType.
      * @return WMError
      */
-    virtual WMError SetSubWindowModal(bool isModal)
+    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

@@ -56,6 +56,7 @@ using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlT
 using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
+using NotifySessionModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -261,6 +262,8 @@ public:
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
     virtual bool IsModal() const { return false; }
+    WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
+    void SetSessionModalTypeChangeCallback(NotifySessionModalTypeChangeFunc&& func);
 
     /**
      * Window Immersive
@@ -513,6 +516,11 @@ protected:
      * Window Immersive
      */
     NotifyNeedAvoidFunc onNeedAvoid_;
+
+    /**
+     * Window Hierarchy
+     */
+    NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
 
     /*
      * PiP Window

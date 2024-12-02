@@ -544,6 +544,41 @@ void SceneSession::AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& are
     }
 }
 
+WSError SceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModalType)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), subWindowModalType, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s subWindowModalType: %{public}u",
+            where, static_cast<uint32_t>(subWindowModalType));
+        if (session->onSessionModalTypeChange_) {
+            session->onSessionModalTypeChange_(subWindowModalType);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
+void SceneSession::SetSessionModalTypeChangeCallback(NotifySessionModalTypeChangeFunc&& func)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or SessionModalTypeChangeFunc is null", where);
+            return;
+        }
+        session->onSessionModalTypeChange_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s id: %{public}d",
+            where, session->GetPersistentId());
+    };
+    PostTask(task, __func__);
+}
+
 SubWindowModalType SceneSession::GetSubWindowModalType() const
 {
     SubWindowModalType modalType = SubWindowModalType::TYPE_UNDEFINED;
@@ -559,7 +594,11 @@ SubWindowModalType SceneSession::GetSubWindowModalType() const
     if (WindowHelper::IsDialogWindow(windowType)) {
         modalType = SubWindowModalType::TYPE_DIALOG;
     } else if (WindowHelper::IsModalSubWindow(windowType, property->GetWindowFlags())) {
-        modalType = SubWindowModalType::TYPE_WINDOW_MODALITY;
+        if (WindowHelper::IsApplicationModalSubWindow(windowType, property->GetWindowFlags())) {
+            modalType = SubWindowModalType::TYPE_APPLICATION_MODALITY;
+        } else {
+            modalType = SubWindowModalType::TYPE_WINDOW_MODALITY;
+        }
     } else if (WindowHelper::IsSubWindow(windowType)) {
         modalType = SubWindowModalType::TYPE_NORMAL;
     }

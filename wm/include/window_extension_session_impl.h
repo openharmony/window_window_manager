@@ -103,6 +103,11 @@ public:
     WindowType GetParentWindowType() const override;
     void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
 
+    /*
+     * PC Window
+     */
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
     NotifyTransferComponentDataForResultFunc notifyTransferComponentDataForResultFunc_;

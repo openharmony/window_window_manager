@@ -228,15 +228,75 @@ HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionImplTest4, SetSubWindowModal, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest01 start";
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetSubWindowModal");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
     WMError res = window->SetSubWindowModal(true);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest01 end";
+}
+
+/**
+ * @tc.name: SetSubWindowModal02
+ * @tc.desc: SetSubWindowModal and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetSubWindowModal02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest02 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetSubWindowModal02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.uiType_ = "pc";
+    WMError res = window->SetSubWindowModal(true, ModalityType::WINDOW_MODALITY);
+    ASSERT_EQ(res, WMError::WM_OK);
+    res = window->SetSubWindowModal(true, ModalityType::APPLICATION_MODALITY);
+    ASSERT_EQ(res, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest02 end";
+}
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadFreeMultiWindowMode start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("IsPcOrPadFreeMultiWindowMode");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.uiType_ = "pc";
+    ASSERT_EQ(true, window->IsPcOrPadFreeMultiWindowMode());
+    window->windowSystemConfig_.uiType_ = "phone";
+    ASSERT_EQ(false, window->IsPcOrPadFreeMultiWindowMode());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadFreeMultiWindowMode end";
 }
 
 /**
