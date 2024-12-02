@@ -6285,7 +6285,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
             TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
             continue;
         }
-        if (subSession->GetSubSession().size() > 0) {
+        if (!subSession->GetSubSession().empty()) {
             ProcessSubSessionForeground(subSession);
         }
         if (subSession->IsTopmost()) {
@@ -6411,7 +6411,7 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
             TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
             continue;
         }
-        if (subSession->GetSubSession().size() > 0) {
+        if (!subSession->GetSubSession().empty()) {
             ProcessSubSessionBackground(subSession);
         }
         const auto& state = subSession->GetSessionState();
