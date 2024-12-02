@@ -584,6 +584,34 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: ActivateKeyboardAvoidArea
+ * @tc.desc: test function : ActivateKeyboardAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, ActivateKeyboardAvoidArea, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("ActivateKeyboardAvoidArea", "ActivateKeyboardAvoidArea");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    ASSERT_EQ(keyboardSession->keyboardAvoidAreaActive_, true);
+    keyboardSession->ActivateKeyboardAvoidArea(false);
+    ASSERT_EQ(keyboardSession->keyboardAvoidAreaActive_, false);
+
+    keyboardSession->dirtyFlags_ = 0;
+    keyboardSession->UpdateKeyboardAvoidArea();
+    ASSERT_EQ(keyboardSession->dirtyFlags_, 0);
+
+    Rosen::WSRect rect{ 0, 0, 0, 0 };
+    Rosen::WSRect emptyRect{ 0, 0, 0, 0 };
+    keyboardSession->RaiseCallingSession(rect, false, nullptr);
+    ASSERT_EQ(rect, emptyRect);
+
+    AvoidArea avoidArea;
+    keyboardSession->GetKeyboardAvoidArea(rect, avoidArea);
+    ASSERT_EQ(rect, emptyRect);
+}
+
+/**
  * @tc.name: IsCallingSessionSplitMode01
  * @tc.desc: test function : IsCallingSessionSplitMode
  * @tc.type: FUNC

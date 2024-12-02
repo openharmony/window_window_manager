@@ -1559,37 +1559,26 @@ sptr<SceneSession> SceneSessionManager::RequestKeyboardPanelSession(const std::s
     return RequestSceneSession(panelInfo, nullptr);
 }
 
-void SceneSessionManager::ActivateKeyboardAvoidAreaIfNeed(WindowType windowType, DisplayId displayId)
+void SceneSessionManager::ActivateKeyboardAvoidAreaIfNeed(const sptr<SceneSession>& session,
+    bool sysKeyboardAvoidAreaActive)
 {
-    if (windowType != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "is not keyboard window.");
+    if (!session || !(session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+        session->IsSystemKeyboard())) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "this session is nullptr or not system keyboard session");
         return;
     }
-
+    session->ActivateKeyboardAvoidArea(sysKeyboardAvoidAreaActive);
+    DisplayId displayId = session->GetScreenId();
     const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayId);
     if (keyboardSessionVec.empty()) {
         TLOGD(WmsLogTag::WMS_KEYBOARD, "there is no keyboard window in the map");
         return;
     }
-    bool hasSystemKeyboardSession = false;
     for (const auto& tempKeyboardSession : keyboardSessionVec) {
         if (!tempKeyboardSession) {
             continue;
         }
-        if (tempKeyboardSession->IsSystemKeyboard()) {
-            hasSystemKeyboardSession = true;
-            tempKeyboardSession->ActivateKeyboardAvoidArea(true);
-        } else {
-            tempKeyboardSession->ActivateKeyboardAvoidArea(false);
-        }
-    }
-    if (hasSystemKeyboardSession) {
-        return;
-    }
-    for (const auto& tempKeyboardSession : keyboardSessionVec) {
-        if (tempKeyboardSession) {
-            tempKeyboardSession->ActivateKeyboardAvoidArea(true);
-        }
+        tempKeyboardSession->ActivateKeyboardAvoidArea(!sysKeyboardAvoidAreaActive);
     }
 }
 
@@ -1767,13 +1756,13 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            ActivateKeyboardAvoidAreaIfNeed(sceneSession, true);
             sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
             if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
                 MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
                 MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
             }
         }
-        ActivateKeyboardAvoidAreaIfNeed(sceneSession->GetWindowType(), sceneSession->GetScreenId());
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id: %{public}d, type: %{public}d, instanceKey: %{public}s",
@@ -2378,17 +2367,11 @@ void SceneSessionManager::EraseSceneSessionAndMarkDirtyLockFree(int32_t persiste
     }
     sptr<SceneSession> sceneSession = iter->second;
 
-    DisplayId displayId = INVALID_SESSION_ID;
-    WindowType windowType = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
-    if (sceneSession != nullptr) {
-        if (sceneSession->IsVisible()) {
-            sessionMapDirty_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
-        }
-        displayId = sceneSession->GetScreenId();
-        windowType = sceneSession->GetWindowType();
+    if (sceneSession != nullptr && sceneSession->IsVisible()) {
+        sessionMapDirty_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
     }
+    ActivateKeyboardAvoidAreaIfNeed(sceneSession, false);
     sceneSessionMap_.erase(persistentId);
-    ActivateKeyboardAvoidAreaIfNeed(windowType, displayId);
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession,
