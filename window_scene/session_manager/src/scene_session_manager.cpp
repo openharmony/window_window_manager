@@ -1750,7 +1750,7 @@ WMError SceneSessionManager::SetAppDragResizeType(const DragResizeType& dragResi
         if (sceneSession->GetSessionInfo().bundleName_ == bundleName) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "to sceneSession: %{public}d, bundleName: %{public}s",
                 dragResizeType, bundleName.c_str());
-            sceneSession->setAppDragResizeType(dragResizeType);
+            sceneSession->SetAppDragResizeType(dragResizeType);
         }
     }
     return WMError::WM_OK;
