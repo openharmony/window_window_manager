@@ -3167,26 +3167,25 @@ napi_value JsSceneSessionManager::OnSetDragResizeType(napi_env env, napi_callbac
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    uint32_t dragResizeType;
-    if (!ConvertFromJsValue(env, argv[0], dragResizeType)) {
+    DragResizeType dragResizeType;
+    if (!ConvertDragResizeTypeFromJs(env, argv[0], dragResizeType)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to dragResizeType");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     std::string bundleName;
-    if (!ConvertFromJsValue(env, argv[1], bundleName)) {
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], bundleName)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to bundleName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]OnSetDragResizeType, reiszeType:%{public}d, bundleName:%{public}s",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
-    WMError err = SceneSessionManager::GetInstance().SetAppDragResizeType(
-        static_cast<DragResizeType>(dragResizeType), bundleName);
+    WMError err = SceneSessionManager::GetInstance().SetAppDragResizeType(dragResizeType, bundleName);
     if (err != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to SetAppDragResizeType");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to call set method");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
             "System is abnormal"));
         return NapiGetUndefined(env);

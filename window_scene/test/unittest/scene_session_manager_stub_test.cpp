@@ -2212,6 +2212,71 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | Sma
     res = stub_->HandleRegisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: HandleSetGlobalDragResizeType
+ * @tc.desc: test HandleSetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
+    int res = stub_->HandleSetGlobalDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetGlobalDragResizeType
+ * @tc.desc: test HandleGetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
+    int res = stub_->HandleGetGlobalDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetAppDragResizeType
+ * @tc.desc: test HandleSetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    const std::string bundleName = "test";
+    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
+    data.WriteString(bundleName);
+    int res = stub_->HandleSetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+
+/**
+ * @tc.name: HandleGetAppDragResizeType
+ * @tc.desc: test HandleGetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    const std::string bundleName = "test";
+    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
+    data.WriteString(bundleName);
+    int res = stub_->HandleGetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }

@@ -462,7 +462,6 @@ public:
     WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName) override;
     WMError GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName) override;
-    void GetEffectiveDragResizeType(DragResizeType& dragResizeType);
 
     /**
      * Multi Window
@@ -1115,6 +1114,7 @@ private:
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
     std::shared_mutex appDragResizeTypeMapMutex_;
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
+    void GetEffectiveDragResizeType(DragResizeType& dragResizeType);
 
     /*
      * Specific Window
