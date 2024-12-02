@@ -416,6 +416,15 @@ enum class DragEvent : uint32_t {
 };
 
 /**
+ * @brief Enumerates drag resize type.
+ */
+enum class DragResizeType : uint32_t {
+    RESIZE_TYPE_UNDEFINED  = 0,
+    RESIZE_EACH_FRAME = 1,
+    RESIZE_WHEN_DRAG_END = 2,
+};
+
+/**
  * @brief Enumerates window tag.
  */
 enum class WindowTag : uint32_t {

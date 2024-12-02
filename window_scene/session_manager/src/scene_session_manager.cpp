@@ -1689,8 +1689,88 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
+        DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+        GetAppDragResizeType(dragResizeType, sessionInfo.bundleName_);
+        sceneSession->SetAppDragResizeType(dragResizeType);
     }
     return sceneSession;
+}
+
+void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeType)
+{
+    DragResizeType effectiveDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    GetGlobalDragResizeType(effectiveDragResizeType);
+    if (effectiveDragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+        dragResizeType = effectiveDragResizeType;
+        return;
+    }
+    if (dragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+        return;
+    }
+    if (systemConfig_.freeMultiWindowSupport_) {
+        dragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
+    } else {
+        dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    }
+    return;
+}
+
+WMError SceneSessionManager::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
+    SceneSession::globalDragResizeType_ = dragResizeType;
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetGlobalDragResizeType(DragResizeType& dragResizeType)
+{
+    dragResizeType = SceneSession::globalDragResizeType_;
+    GetEffectiveDragResizeType(dragResizeType);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
+        dragResizeType, bundleName.c_str());
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    std::unique_lock<std::shared_mutex> dragResizeTypeLock(appDragResizeTypeMapMutex_);
+    appDragResizeTypeMap_[bundleName] = dragResizeType;
+    dragResizeTypeLock.unlock();
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto &item : sceneSessionMap_) {
+        auto sceneSession = item.second;
+        if (sceneSession == nullptr) {
+            continue;
+        }
+        if (sceneSession->GetSessionInfo().bundleName_ == bundleName) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "to sceneSession: %{public}d, bundleName: %{public}s",
+                dragResizeType, bundleName.c_str());
+            sceneSession->setAppDragResizeType(dragResizeType);
+        }
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::shared_lock<std::shared_mutex> dragResizeTypeLock(appDragResizeTypeMapMutex_);
+    if (auto iter = appDragResizeTypeMap_.find(bundleName); iter != appDragResizeTypeMap_.end()) {
+        dragResizeType = iter->second;
+    }
+    GetEffectiveDragResizeType(dragResizeType);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
+        dragResizeType, bundleName.c_str());
+    return WMError::WM_OK;
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo)
