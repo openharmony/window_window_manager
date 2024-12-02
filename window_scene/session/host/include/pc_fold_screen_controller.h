@@ -127,7 +127,7 @@ public:
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
     void RecordMoveRects(const WSRect& rect);
     bool ThrowSlip(DisplayId displayId, WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
-    bool IsStartFullScreen() const;
+    bool IsStartFullScreen();
     void ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
 
     // animation parameters
