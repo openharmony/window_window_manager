@@ -2847,7 +2847,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
     } else if (isCompatibleModeInPc && !IsFreeMultiWindowMode() && reason != SizeChangeReason::DRAG_END) {
         HandleCompatibleModeMoveDrag(globalRect, reason, isSupportDragInPcCompatibleMode, isGlobal, needFlush);
-    } else if (isDragResizeWhenEnd(reason, rect)) {
+    } else if (IsDragResizeWhenEnd(reason, rect)) {
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
     } else {
@@ -2860,7 +2860,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     }
 }
 
-bool SceneSession::isDragResizeWhenEnd(SizeChangeReason reason, WSRect rect)
+bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason, WSRect rect)
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
@@ -2879,7 +2879,7 @@ DragResizeType SceneSession::GetDragResizeType() const
     if (globalDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         return globalDragResizeType_;
     }
-    if (GetAppDragResizeType() != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+    if (appDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         return appDragResizeType_;
     }
     if (IsFreeMultiWindowMode()) {
