@@ -865,7 +865,7 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
         case static_cast<uint32_t>(DragResizeType::RESIZE_EACH_FRAME):
             dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
             break;
-        case static_cast<int32_t>(AceTouchType::RESIZE_WHEN_DRAG_END):
+        case static_cast<int32_t>(DragResizeType::RESIZE_WHEN_DRAG_END):
             dragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
             break;
         default:
