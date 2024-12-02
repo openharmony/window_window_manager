@@ -2594,7 +2594,7 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
             result = WSError::WS_OK;
         }
     }
-    if (SessionPermission::IsSystemCalling()) { // Bottom-up strategy.
+    if (SessionPermission::IsSystemCalling()) { // Fallback strategy.
         TLOGI(WmsLogTag::WMS_UIEXT, "is system app");
         result = WSError::WS_OK;
     }
