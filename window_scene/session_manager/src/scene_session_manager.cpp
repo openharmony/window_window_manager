@@ -1253,6 +1253,19 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return iter->second;
 }
 
+void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
+    const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName &&
+            sceneSession->GetSessionInfo().appIndex_ == appIndex &&
+            SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            mainSessions.push_back(sceneSession);
+        }
+    }
+}
+
 sptr<SceneSession> SceneSessionManager::GetSceneSessionByIdentityInfo(const SessionIdentityInfo& info)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -8162,6 +8175,49 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
         WLOGFD("Notify WindowDrawingContenInfo changed start");
         SessionManagerAgentController::GetInstance().UpdateWindowDrawingContentInfo(windowDrawingContenInfos);
     }
+}
+
+WSError SceneSessionManager::NotifyAppUseControlList(
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
+{
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "controlApptype: %{public}d userId: %{public}d controlList size: %{public}zu",
+        static_cast<int>(type), userId, controlList.size());
+    if (!SessionPermission::IsSACalling()) {
+        TLOGW(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) {
+        TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_, userId);
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    auto task = [this, type, userId, controlList] {
+        if (notifyAppUseControlListFunc_ != nullptr) {
+            notifyAppUseControlListFunc_(type, userId, controlList);
+        }
+
+        std::vector<sptr<SceneSession>> mainSessions;
+        for (const auto& appUseControlInfo : controlList) {
+            GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
+            if (mainSessions.empty()) {
+                continue;
+            }
+            for (const auto& session : mainSessions) {
+                session->NotifyUpdateAppUseControl(type, appUseControlInfo.isNeedControl_);
+            }
+            mainSessions.clear();
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, __func__);
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func)
+{
+    auto task = [this, callback = std::move(func)] {
+        notifyAppUseControlListFunc_ = std::move(callback);
+    };
+    taskScheduler_->PostAsyncTask(task, __func__);
 }
 
 bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid)

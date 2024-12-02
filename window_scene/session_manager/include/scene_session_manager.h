@@ -126,6 +126,8 @@ using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
+using NotifyAppUseControlListFunc =
+    std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -523,6 +525,15 @@ public:
     void RegisterBindDialogTargetListener(const sptr<SceneSession>& session, NotifyBindDialogSessionFunc&& func);
     void UnregisterSpecificSessionCreateListener(int32_t persistentId);
 
+    /**
+     * Window Lifecycle
+     */
+    void GetMainSessionByBundleNameAndAppIndex(
+        const std::string& bundleName, const int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
+    WSError NotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
+    void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -787,13 +798,23 @@ private:
         }
     };
     std::unordered_map<sptr<IRemoteObject>, int32_t, IRemoteObjectHash> remoteObjectMap_;
-    std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> remoteExtSessionMap_;
-    std::map<sptr<IRemoteObject>, ExtensionWindowAbilityInfo> extSessionInfoMap_;
+
+    /**
+     * UIExtension
+     */
+    std::unordered_map<sptr<IRemoteObject>, sptr<IRemoteObject>, IRemoteObjectHash> remoteExtSessionMap_;
+    std::unordered_map<sptr<IRemoteObject>, ExtensionWindowAbilityInfo, IRemoteObjectHash> extSessionInfoMap_;
+    std::unordered_map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+    ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
+    std::atomic_bool shouldHideNonSecureFloatingWindows_ { false };
+    std::atomic_bool specialExtWindowHasPrivacyMode_ { false };
+    bool lastWaterMarkShowState_ { false };
+    sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
+        [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
+
     std::set<int32_t> avoidAreaListenerSessionSet_;
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
-    ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
-    std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     std::set<int32_t> failRecoveredPersistentIdSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
@@ -896,14 +917,9 @@ private:
     void CheckAndNotifyWaterMarkChangedResult();
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     void ProcessPreload(const AppExecFwk::AbilityInfo& abilityInfo) const;
-    std::atomic_bool shouldHideNonSecureFloatingWindows_ { false };
-    std::atomic_bool specialExtWindowHasPrivacyMode_ { false };
-    bool lastWaterMarkShowState_ { false };
     WindowChangedFunc WindowChangedFunc_;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
         [this](const sptr<IRemoteObject>& remoteObject) { this->DestroySpecificSession(remoteObject); });
-    sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
-        [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
 
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> sceneSession);
@@ -1117,6 +1133,11 @@ private:
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
     std::unordered_map<int32_t, NotifyBindDialogSessionFunc> bindDialogTargetFuncMap_;
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverDialogSessionCacheMap_;
+
+    /**
+     * Window Lifecycle
+     */
+    NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
 };
 } // namespace OHOS::Rosen
 
