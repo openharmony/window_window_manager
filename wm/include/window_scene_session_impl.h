@@ -192,6 +192,12 @@ public:
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
     WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
 
+    /*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);

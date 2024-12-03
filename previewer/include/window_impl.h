@@ -233,6 +233,12 @@ public:
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
 
+    /*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
 private:
     static sptr<Window> FindWindowById(uint32_t windowId);
     template<typename T1, typename T2, typename Ret>

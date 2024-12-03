@@ -2870,6 +2870,32 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
     }
 }
 
+void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        uiContent->UpdateConfigurationSyncForAll(configuration);
+    }
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        TLOGI(WmsLogTag::WMS_IMMS, "no subSession, winId: %{public}d", GetWindowId());
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+        subWindowSession->UpdateConfigurationSync(configuration);
+    }
+}
+
+void WindowSceneSessionImpl::UpdateConfigurationSyncForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
+    }
+}
+
 /** @note @window.hierarchy */
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
