@@ -3377,7 +3377,8 @@ void WindowImpl::UpdateFocusStatus(bool focused)
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", property_->GetAbilityInfo().bundleName_);
+            "BUNDLE_NAME", property_->GetAbilityInfo().bundleName_,
+            "WINDOW_TYPE", static_cast<uint32_t>(GetType()));
         if (state_ <= WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
             needNotifyFocusLater_ = true;
             return;
