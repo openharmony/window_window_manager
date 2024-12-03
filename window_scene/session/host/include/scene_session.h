@@ -532,7 +532,7 @@ public:
      * Move Drag
      */
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
-    DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }; 
+    DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
 
     /**
      * Window Layout

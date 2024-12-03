@@ -1788,7 +1788,7 @@ WMError SceneSessionManager::GetAppDragResizeType(const std::string& bundleName,
     if (auto iter = appDragResizeTypeMap_.find(bundleName); iter != appDragResizeTypeMap_.end()) {
         dragResizeType = iter->second;
     }
-    GetDefaultDragResizeType(dragResizeType);
+    GetEffectiveDragResizeType(dragResizeType);
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
     return WMError::WM_OK;
