@@ -158,7 +158,8 @@ WSError SCBSystemSession::UpdateFocus(bool isFocused)
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", sessionInfo_.bundleName_);
+            "BUNDLE_NAME", sessionInfo_.bundleName_,
+            "WINDOW_TYPE", static_cast<uint32_t>(GetWindowType()));
         NotifyUIRequestFocus();
     } else {
         NotifyUILostFocus();
