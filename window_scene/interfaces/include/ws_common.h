@@ -24,7 +24,6 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "wm_common.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
