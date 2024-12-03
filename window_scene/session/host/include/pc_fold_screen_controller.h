@@ -16,6 +16,7 @@
 #ifndef PC_FOLD_SCREEN_CONTROLLER_H
 #define PC_FOLD_SCREEN_CONTROLLER_H
 
+#include <chrono>
 #include "session/host/include/pc_fold_screen_manager.h"
 
 namespace OHOS::Rosen {

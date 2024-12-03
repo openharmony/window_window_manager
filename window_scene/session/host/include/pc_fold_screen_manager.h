@@ -16,7 +16,6 @@
 #ifndef PC_FOLD_SCREEN_MANAGER_H
 #define PC_FOLD_SCREEN_MANAGER_H
 
-#include <chrono>
 #include <mutex>
 #include <shared_mutex>
 #include <tuple>
@@ -116,4 +115,4 @@ private:
 };
 } // namespace OHOS::Rosen
 
-#endif // PC_FOLD_SCREEN_MANAGER_H
+#endif // PC_FOLD_SCREEN_MANAGER_H
