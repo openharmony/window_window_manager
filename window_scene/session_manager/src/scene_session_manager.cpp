@@ -1778,13 +1778,13 @@ WMError SceneSessionManager::GetAppDragResizeType(const std::string& bundleName,
         TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    GetGlobalDragResizeType(dragResizeType);
-    if (dragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+    std::lock_guard<std::mutex> lock(dragResizeTypeMutex_);
+    if (globalDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "use global value");
+        dragResizeType = globalDragResizeType_;
         return WMError::WM_OK;
     }
     dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    std::lock_guard<std::mutex> dragResizeTypeLock(dragResizeTypeMutex_);
     if (auto iter = appDragResizeTypeMap_.find(bundleName); iter != appDragResizeTypeMap_.end()) {
         dragResizeType = iter->second;
     }

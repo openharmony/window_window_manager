@@ -2268,7 +2268,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | Sma
 {
     MessageParcel data;
     MessageParcel reply;
-    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
     data.WriteString(bundleName);
     int res = stub_->HandleGetAppDragResizeType(data, reply);
