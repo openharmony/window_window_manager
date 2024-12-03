@@ -539,9 +539,9 @@ struct Rect {
 
     inline std::string ToString() const
     {
-        std::stringstream ss;
-        ss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
-        return ss.str();
+        std::ostringstream oss;
+        oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
+        return oss.str();
     }
 };
 
