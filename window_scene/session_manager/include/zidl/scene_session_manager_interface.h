@@ -322,7 +322,7 @@ public:
     WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override { return WMError::WM_OK; }
     WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override { return WMError::WM_OK; }
     WMError SetAppDragResizeType(const std::string& bundleName,
-        dragResizeType) override { return WMError::WM_OK; }
+        DragResizeType dragResizeType) override { return WMError::WM_OK; }
     WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
 };

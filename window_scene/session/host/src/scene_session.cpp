@@ -652,7 +652,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 dragResizeType = session->GetAppDragResizeType();
                 session->SetDragResizeTypeDuringDrag(dragResizeType);
             }
-            session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_, dragResizeType});
+            session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_,
+                static_cast<uint32_t>(dragResizeType)});
         }
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
             session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
