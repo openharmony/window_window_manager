@@ -1701,7 +1701,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-        GetAppDragResizeType(dragResizeType, sessionInfo.bundleName_);
+        GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
     }
     return sceneSession;

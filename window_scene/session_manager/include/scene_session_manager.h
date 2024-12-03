@@ -1140,8 +1140,8 @@ private:
      * Move Drag
      */
     std::mutex dragResizeTypeMutex_;
-    DragResizeType globalDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED GUARDED_BY(dragResizeTypeMutex_);
-    std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_ GUARDED_BY(dragResizeTypeMutex_);
+    DragResizeType globalDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
     void GetEffectiveDragResizeType(DragResizeType& dragResizeType);
 
     /*

@@ -527,7 +527,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
-;
+
     /**
      * Move Drag
      */
@@ -811,7 +811,7 @@ private:
     std::vector<sptr<SceneSession>> toastSession_;
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
-    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0, DragResizeType::RESIZE_TYPE_UNDEFINED };
+    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
