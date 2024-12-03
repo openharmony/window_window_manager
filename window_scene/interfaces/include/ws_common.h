@@ -24,6 +24,7 @@
 
 #include <iremote_broker.h>
 #include <want.h>
+#include "wm_common.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -303,16 +304,6 @@ enum class SceneType : uint8_t {
     PANEL_SCENE,
     INPUT_SCENE,
 };
-
-/**
- * @brief Enumerates drag resize type.
- */
-enum class DragResizeType : uint32_t {
-    RESIZE_TYPE_UNDEFINED = 0,
-    RESIZE_EACH_FRAME = 1,
-    RESIZE_WHEN_DRAG_END = 2,
-};
-
 
 struct SessionViewportConfig {
     bool isDensityFollowHost_ = false;
