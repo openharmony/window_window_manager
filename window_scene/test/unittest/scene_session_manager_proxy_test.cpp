@@ -1134,9 +1134,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetGlobalDragResizeType, Function | Small
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         new SceneSessionManagerProxy(iRemoteObjectMocker);
     ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
-    DragResizeType toDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    SceneSession::globalDragResizeType_ = toDragResizeType;
     sceneSessionManagerProxy->GetGlobalDragResizeType(dragResizeType);
 }
 
