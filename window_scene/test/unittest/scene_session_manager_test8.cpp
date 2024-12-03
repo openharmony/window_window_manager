@@ -890,19 +890,6 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessProperty01, Function | SmallTest |
  */
 HWTEST_F(SceneSessionManagerTest8, SetVmaCacheStatus, Function | SmallTest | Level3)
 {
-    SessionInfo info;
-    info.bundleName_ = "SetVmaCacheStatus";
-    info.abilityName_ = "SetVmaCacheStatus";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sceneSession->persistentId_ = 1;
-    ssm_->focusedSessionId_ = 1;
-    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
-    ssm_->ProcessFocusWhenForeground(sceneSession);
-
     AppExecFwk::AbilityInfo abilityInfo;
     ssm_->ProcessPreload(abilityInfo);
 
