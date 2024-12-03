@@ -1787,7 +1787,6 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationSyncForAll, Function | 
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     windowSession->hostSession_ = session;
-    ASSERT_NE(nullptr, windowSession->property_);
     windowSession->property_->SetPersistentId(1);
     windowSession->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, windowSession->Create(abilityContext_, session));

@@ -135,8 +135,9 @@ void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk:
 {
     std::lock_guard<std::mutex> lock(globalMutex_);
     for (const auto& winPair : windowMap_) {
-        auto window = winPair.second.second;
-        window->UpdateConfigurationSync(configuration);
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
     }
 }
 
