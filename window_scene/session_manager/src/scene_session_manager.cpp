@@ -1573,29 +1573,6 @@ sptr<SceneSession> SceneSessionManager::RequestKeyboardPanelSession(const std::s
     return RequestSceneSession(panelInfo, nullptr);
 }
 
-void SceneSessionManager::ActivateKeyboardAvoidAreaIfNeed(const sptr<SceneSession>& session,
-    bool sysKeyboardAvoidAreaActive)
-{
-    if (!session || !(session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
-        session->IsSystemKeyboard())) {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "this session is nullptr or not system keyboard session");
-        return;
-    }
-    session->ActivateKeyboardAvoidArea(sysKeyboardAvoidAreaActive);
-    DisplayId displayId = session->GetScreenId();
-    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayId);
-    if (keyboardSessionVec.empty()) {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "there is no keyboard window in the map");
-        return;
-    }
-    for (const auto& tempKeyboardSession : keyboardSessionVec) {
-        if (!tempKeyboardSession) {
-            continue;
-        }
-        tempKeyboardSession->ActivateKeyboardAvoidArea(!sysKeyboardAvoidAreaActive);
-    }
-}
-
 void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession)
 {
     if (!isKeyboardPanelEnabled_) {
@@ -1770,7 +1747,6 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         {
             std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            ActivateKeyboardAvoidAreaIfNeed(sceneSession, true);
             sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
             if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
                 MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
@@ -2384,7 +2360,6 @@ void SceneSessionManager::EraseSceneSessionAndMarkDirtyLockFree(int32_t persiste
     if (sceneSession != nullptr && sceneSession->IsVisible()) {
         sessionMapDirty_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
     }
-    ActivateKeyboardAvoidAreaIfNeed(sceneSession, false);
     sceneSessionMap_.erase(persistentId);
 }
 
