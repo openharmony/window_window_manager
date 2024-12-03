@@ -6456,13 +6456,6 @@ napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -6471,18 +6464,22 @@ napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
-
-    napi_value nativeObj = argv[0];
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     DecorButtonStyle decorButtonStyle;
     WMError res = windowToken_->GetDecorButtonStyle(decorButtonStyle);
     if (res != WMError::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    if (nativeObj == nullptr || !SetDecorButtonStyleFromJs(env, nativeObj, decorButtonStyle)) {
+    if (argv[INDEX_ZERO] == nullptr || !ConvertDecorButtonStyleFromJs(env, argv[INDEX_ZERO], decorButtonStyle)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    
     if (!WindowHelper::CheckButtonStyleValid(decorButtonStyle)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "out of range params");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
