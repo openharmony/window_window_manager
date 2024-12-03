@@ -11333,7 +11333,8 @@ WMError SceneSessionManager::MakeScreenFoldData(const std::vector<std::string>& 
     }
     AppExecFwk::ElementName element = {};
     WSError ret = GetFocusSessionElement(element);
-    if (ret != WSError::WS_OK) {
+    auto sceneSession = GetSceneSession(focusedSessionId_);
+    if (sceneSession == nullptr || ret != WSError::WS_OK) {
         TLOGI(WmsLogTag::DMS, "Error: fail to get focused package name.");
         return WMError::WM_DO_NOTHING;
     }
@@ -11342,7 +11343,8 @@ WMError SceneSessionManager::MakeScreenFoldData(const std::vector<std::string>& 
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "FOCUS_WINDOW",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "BUNDLE_NAME", element.GetURI());
+        "BUNDLE_NAME", element.GetURI(),
+        "WINDOW_TYPE", static_cast<uint32_t>(sceneSession->GetWindowType()));
     if (ret_z != 0) {
         TLOGE(WmsLogTag::DMS, "Write FOCUS_WINDOW HiSysEvent error, ret_z: %{public}d.", ret_z);
     }
