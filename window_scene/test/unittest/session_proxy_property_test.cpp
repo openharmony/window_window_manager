@@ -41,9 +41,9 @@ namespace {
 HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction01 start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
@@ -60,9 +60,9 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, Function | S
 HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction02 start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
@@ -79,8 +79,8 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, Function | S
 HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
 {
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sessionProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionProxy, nullptr);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
