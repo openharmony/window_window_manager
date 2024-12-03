@@ -570,7 +570,7 @@ napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButto
     return objValue;
 }
 
-bool SetDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
+bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
 {
     int32_t colorMode;
     if (ParseJsValue(jsObject, env, "colorMode", colorMode)) {
