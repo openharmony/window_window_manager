@@ -474,12 +474,16 @@ int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& d
         return ERR_INVALID_DATA;
     }
 
-    int32_t extAbilityTypeTmp = -1;
-    if (!data.ReadInt32(extAbilityTypeTmp)) {
+    int32_t extAbilityTypeValue = -1;
+    if (!data.ReadInt32(extAbilityTypeValue)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get extensionAbilityType");
         return ERR_INVALID_DATA;
     }
-    AppExecFwk::ExtensionAbilityType extAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(extAbilityTypeTmp);
+    if (extAbilityTypeValue > -1) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get extensionAbilityType(out of range)");
+        return ERR_INVALID_DATA;
+    }
+    AppExecFwk::ExtensionAbilityType extAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(extAbilityTypeValue);
 
     sptr<AppExecFwk::ElementName> element = data.ReadParcelable<AppExecFwk::ElementName>();
     if (!element) {
