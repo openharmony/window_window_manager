@@ -41,16 +41,16 @@ public:
     FoldDisplayMode GetModeMatchStatus() override;
     void BootAnimationFinishPowerInit() override;
 private:
-    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
+    void ChangeScreenDisplayModeToSub(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
-    void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
+    void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToCoordination();
     void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode);
-    void ChangeScreenDisplayModeToMainWhenFoldScreenOn(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToMainWhenFoldScreenOff(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToSubWhenFoldScreenOn(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToSubWhenFoldScreenOff(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToSubOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenId screenId, ScreenPowerStatus screenPowerStatus);
     void RecoverWhenBootAnimationExit();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);

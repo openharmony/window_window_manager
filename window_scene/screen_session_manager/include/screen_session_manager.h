@@ -227,6 +227,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode() override;
 
     bool IsFoldable() override;
+    bool IsOuterScreen(FoldDisplayMode foldDisplayMode);
     bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;

@@ -2161,7 +2161,13 @@ HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest
     window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
     window->NotifySetUIContentComplete();
-    EXPECT_EQ(window->setUIContentCompleted_.load(), false);
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
+
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->NotifySetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
 }
 
 /**
