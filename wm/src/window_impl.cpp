@@ -3431,8 +3431,9 @@ void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Confi
 void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     for (const auto& winPair : windowMap_) {
-        auto window = winPair.second.second;
-        window->UpdateConfigurationSync(configuration);
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
     }
 }
 
