@@ -2584,7 +2584,7 @@ WMError SceneSessionManagerProxy::GetGlobalDragResizeType(DragResizeType& dragRe
         TLOGE(WmsLogTag::WMS_MAIN, "Read dragResizeType failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (obtainedDragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)){
+    if (obtainedDragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
         TLOGE(WmsLogTag::WMS_MAIN, "bad dragResizeType value");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -2660,7 +2660,7 @@ WMError SceneSessionManagerProxy::GetAppDragResizeType(const std::string& bundle
         TLOGE(WmsLogTag::WMS_MAIN, "Read dragResizeType failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (obtainedDragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)){
+    if (obtainedDragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
         TLOGE(WmsLogTag::WMS_MAIN, "bad dragResizeType value");
         return WMError::WM_ERROR_IPC_FAILED;
     }

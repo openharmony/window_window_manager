@@ -304,6 +304,16 @@ enum class SceneType : uint8_t {
     INPUT_SCENE,
 };
 
+/**
+ * @brief Enumerates drag resize type.
+ */
+enum class DragResizeType : uint32_t {
+    RESIZE_TYPE_UNDEFINED = 0,
+    RESIZE_EACH_FRAME = 1,
+    RESIZE_WHEN_DRAG_END = 2,
+};
+
+
 struct SessionViewportConfig {
     bool isDensityFollowHost_ = false;
     float density_ = 1.0f; // Indicates the host's density, if following the host, use it, otherwise get it from DMS.

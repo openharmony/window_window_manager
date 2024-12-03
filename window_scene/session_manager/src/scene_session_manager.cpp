@@ -1762,7 +1762,6 @@ WMError SceneSessionManager::SetAppDragResizeTypeInner(const std::string& bundle
     std::unique_lock<std::mutex> dragResizeTypeLock(dragResizeTypeMutex_);
     appDragResizeTypeMap_[bundleName] = dragResizeType;
     dragResizeTypeLock.unlock();
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     auto sceneSession = GetSceneSessionByBundleName(bundleName);
     if (sceneSession != nullptr) {
         GetAppDragResizeType(bundleName, dragResizeType);
