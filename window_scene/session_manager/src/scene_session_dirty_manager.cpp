@@ -147,7 +147,7 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
         static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL ||
-        (static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN &&
+        (static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::SUB &&
         FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
         Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
