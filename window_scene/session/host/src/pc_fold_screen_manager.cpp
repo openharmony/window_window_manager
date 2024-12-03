@@ -131,7 +131,7 @@ ScreenSide PcFoldScreenManager::CalculateScreenSide(const WSRect& rect)
 
 void PcFoldScreenManager::ResetArrangeRule()
 {
-    std::unique_lock<std::mutex> arrangedRectsMutex_;
+    std::unique_lock<std::mutex> lock(arrangedRectsMutex_);
     defaultArrangedRect_ = RECT_ZERO;
     virtualArrangedRect_ = RECT_ZERO;
 }
@@ -147,7 +147,7 @@ void PcFoldScreenManager::ResetArrangeRule(ScreenSide side)
         TLOGD(WmsLogTag::WMS_LAYOUT, "invalid side: %{public}d", static_cast<int32_t>(side));
         return;
     }
-    std::unique_lock<std::mutex> arrangedRectsMutex_;
+    std::unique_lock<std::mutex> lock(arrangedRectsMutex_);
     if (side == ScreenSide::FOLD_B) {
         defaultArrangedRect_ = RECT_ZERO;
     } else { // FOLD_C
