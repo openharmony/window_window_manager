@@ -199,6 +199,12 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.ohos.useriam.authwidget", "userauthuiextensionability", "entry"),
         std::make_tuple("com.ohos.sceneboard", "AodStyleAbility", "phone_sceneboard"),
         std::make_tuple("com.ohos.sceneboard", "HomeThemeComponentExtAbility", "themecomponent"),
+        std::make_tuple("com.ohos.sceneboard", "ThemePersonalizedResourceAbility", "engineservice"),
+        std::make_tuple("com.ohos.sceneboard", "ThemePersonalizedEditingAbility", "engineservice"),
+        std::make_tuple("com.ohos.sceneboard", "CoverExtensionAbility", "coverthemecomponent"),
+        std::make_tuple("com.huawei.hmos.findservice", "SystemDialogAbility", "entry"),
+        std::make_tuple("com.huawei.hmos.mediacontroller", "UIExtAbility", "phone_deviceswitch"),
+        std::make_tuple("com.huawei.hmos.mediacontroller", "AnahsDialogAbility", "phone_deviceswitch"),
     };
 
     auto it = std::find_if(whitelist.begin(), whitelist.end(), [&element](const auto& item) {
