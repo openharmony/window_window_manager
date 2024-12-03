@@ -1376,8 +1376,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateAvoidAreaByType_ = [this](int32_t persistentId, AvoidAreaType type) {
         this->UpdateAvoidAreaByType(persistentId, type);
     };
-    specificCb->onGetDefualtStatusBarVisibleOnDisplay_ = [this](const DisplayId displayId) {
-        return this->GetDefaultStatusBarVisible(displayId);
+    specificCb->onGetStatusBarDefaultVisibilityByDisplayId_ = [this](DisplayId displayId) {
+        return this->GetStatusBarDefaultVisibilityByDisplayId(displayId);
     };
     specificCb->onUpdateOccupiedAreaIfNeed_ = [this](int32_t persistentId) {
         this->UpdateOccupiedAreaIfNeed(persistentId);
@@ -4888,20 +4888,20 @@ void SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneL
     isRootSceneLastFrameLayoutFinishedFunc_ = std::move(func);
 }
 
-void SceneSessionManager::SetDefaultStatusBarVisible(DisplayId displayId, bool visible)
+void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible)
 {
-    defualtStatusBarVisibleMap_[displayId] = visible;
-    TLOGI(WmsLogTag::WMS_IMMS, "display: %{public}" PRIu64 " visible: %{public}d", displayId, visible);
+    taskScheduler_->PostSyncTask([this, displayId, visible] {
+        statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
+        TLOGNI(WmsLogTag::WMS_IMMS,
+            "set default visibility on display: %{public}" PRIu64 " visible: %{public}d", displayId, visible);
+        return WSError::WS_OK;
+    });
 }
 
-bool SceneSessionManager::GetDefaultStatusBarVisible(DisplayId displayId)
+bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId)
 {
-    // default visisble if unset
-    bool visible = true;
-    if (defualtStatusBarVisibleMap_.find(displayId) != defualtStatusBarVisibleMap_.end()) {
-        visible = defualtStatusBarVisibleMap_[displayId];
-    }
-    return visible;
+    return statusBarDefaultVisibilityPerDisplay_.count(displayId) != 0 ?
+           statusBarDefaultVisibilityPerDisplay_[displayId] : true;
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)

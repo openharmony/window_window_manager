@@ -178,8 +178,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "notifySwitchingUser", moduleName, JsSceneSessionManager::NotifySwitchingUser);
     BindNativeFunction(env, exportObj, "notifySessionRecoverStatus", moduleName,
         JsSceneSessionManager::NotifySessionRecoverStatus);
-    BindNativeFunction(env, exportObj, "setDefaultStatusBarVisible", moduleName,
-        JsSceneSessionManager::SetDefaultStatusBarVisible);
+    BindNativeFunction(env, exportObj, "setStatusBarDefaultVisibilityPerDisplay", moduleName,
+        JsSceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay);
     BindNativeFunction(env, exportObj, "notifyStatusBarShowStatus", moduleName,
         JsSceneSessionManager::NotifyStatusBarShowStatus);
     BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
@@ -997,11 +997,11 @@ napi_value JsSceneSessionManager::NotifySwitchingUser(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnNotifySwitchingUser(env, info) : nullptr;
 }
 
-napi_value JsSceneSessionManager::SetDefaultStatusBarVisible(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnSetDefaultStatusBarVisible(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetStatusBarDefaultVisibilityPerDisplay(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::NotifyStatusBarShowStatus(napi_env env, napi_callback_info info)
@@ -2809,7 +2809,7 @@ napi_value JsSceneSessionManager::OnNotifySwitchingUser(napi_env env, napi_callb
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::OnSetDefaultStatusBarVisible(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
@@ -2838,7 +2838,8 @@ napi_value JsSceneSessionManager::OnSetDefaultStatusBarVisible(napi_env env, nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().SetDefaultStatusBarVisible(static_cast<DisplayId>(displayId), visible);
+    SceneSessionManager::GetInstance().SetStatusBarDefaultVisibilityPerDisplay(
+        static_cast<DisplayId>(displayId), visible);
     return NapiGetUndefined(env);
 }
 

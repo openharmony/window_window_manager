@@ -386,8 +386,8 @@ public:
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
-    void SetDefaultStatusBarVisible(DisplayId displayId, bool visible);
-    bool GetDefaultStatusBarVisible(DisplayId displayId);
+    void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
+    bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -1090,7 +1090,7 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
-    std::unordered_map<DisplayId, bool> defualtStatusBarVisibleMap_;
+    std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
 
     struct SessionInfoList {
         int32_t uid_;
