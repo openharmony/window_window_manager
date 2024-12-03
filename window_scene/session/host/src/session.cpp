@@ -999,8 +999,8 @@ WSError Session::UpdateClientDisplayId(DisplayId updatedDisplayId)
         return WSError::WS_DO_NOTHING;
     }
     if (sessionStage_ != nullptr) {
-        TLOGI("windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64, GetPersistentId(),
-            updatedDisplayId, lastUpdatedDisplayId);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
+            GetPersistentId(), updatedDisplayId, lastUpdatedDisplayId);
         lastUpdatedDisplayId = updatedDisplayId;
         UpdateDisplayId(updatedDisplayId);
     } else {
@@ -1012,9 +1012,6 @@ WSError Session::UpdateClientDisplayId(DisplayId updatedDisplayId)
 
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "input rect: %{public}s", rect.ToString().c_str());
-    TLOGI(WmsLogTag::WMS_LAYOUT, "isHalfFolded: %{public}d",
-          PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()));
     if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
         return;
     }
@@ -1022,14 +1019,16 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     DisplayId updatedDisplayId = GetScreenId();
-    auto upperScreenPosY = defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR;
+    int32_t upperScreenPosY = defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "upperScreenPosY: %{public}d", upperScreenPosY);
     if (rect.posY_ >= upperScreenPosY + foldCreaseRect.height_) {
         updatedDisplayId = VIRTUAL_DISPLAY_ID;
         rect.posY_ -= upperScreenPosY + foldCreaseRect.height_;
     }
-    UpdateClientDisplayId(updatedDisplayId);
+    auto ret = UpdateClientDisplayId(updatedDisplayId);
     logRect += rect.ToString();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, logRect: %{public}s", GetPersistentId(), logRect.c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, logRect: %{public}s, updatedIdResult: %{public}d",
+        GetPersistentId(), logRect.c_str(), ret);
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,

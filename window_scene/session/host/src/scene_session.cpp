@@ -1431,6 +1431,8 @@ void SceneSession::UpdateSessionRectPosYFromClient(WSRect& rect)
     if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
         return;
     }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, lastUpdatedDisplayId: %{public}" PRIu64,
+        GetPersistentId(), lastUpdatedDisplayId);
     if (lastUpdatedDisplayId != VIRTUAL_DISPLAY_ID) {
         return;
     }
