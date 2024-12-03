@@ -527,12 +527,12 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
-
+;
     /**
      * Move Drag
      */
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
-    void GetAppDragResizeType(DragResizeType& dragResizeType) { dragResizeType = appDragResizeType_; }
+    DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }; 
 
     /**
      * Window Layout

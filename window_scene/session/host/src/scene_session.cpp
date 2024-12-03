@@ -649,7 +649,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
             DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
             if (event == SessionEvent::EVENT_DRAG_START) {
-                session->GetAppDragResizeType(dragResizeType);
+                dragResizeType = session->GetAppDragResizeType();
                 session->SetDragResizeTypeDuringDrag(dragResizeType);
             }
             session->SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_, dragResizeType});

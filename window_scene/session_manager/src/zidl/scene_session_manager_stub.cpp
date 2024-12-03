@@ -1517,7 +1517,7 @@ int SceneSessionManagerStub::HandleSetGlobalDragResizeType(MessageParcel& data, 
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
         return ERR_INVALID_DATA;
     }
-    if (dragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)){
+    if (dragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bad dragResizeType value");
         return ERR_INVALID_DATA;
     }
@@ -1556,7 +1556,7 @@ int SceneSessionManagerStub::HandleSetAppDragResizeType(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
         return ERR_INVALID_DATA;
     }
-    if (dragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)){
+    if (dragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bad dragResizeType value");
         return ERR_INVALID_DATA;
     }
