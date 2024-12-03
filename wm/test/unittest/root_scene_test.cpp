@@ -285,21 +285,6 @@ HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: GetAvoidAreaByType
- * @tc.desc: GetAvoidAreaByType Test err
- * @tc.type: FUNC
- */
-HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
-{
-    RootScene rootScene;
-    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
-    AvoidArea avoidArea;
-
-    auto ret = rootScene.GetAvoidAreaByType(type, avoidArea);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-}
-
-/**
  * @tc.name: RegisterAvoidAreaChangeListener
  * @tc.desc: RegisterAvoidAreaChangeListener Test
  * @tc.type: FUNC
@@ -342,6 +327,21 @@ HWTEST_F(RootSceneTest, NotifyAvoidAreaChangeForRoot, Function | SmallTest | Lev
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
     AvoidArea avoidArea;
     rootScene.NotifyAvoidAreaChangeForRoot(new AvoidArea(avoidArea), type);
+}
+
+/**
+ * @tc.name: GetAvoidAreaByType
+ * @tc.desc: GetAvoidAreaByType Test err
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
+    AvoidArea avoidArea;
+
+    auto ret = rootScene.GetAvoidAreaByType(type, avoidArea);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 }
 } // namespace Rosen
