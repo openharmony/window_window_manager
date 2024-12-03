@@ -1717,10 +1717,9 @@ void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeT
     } else {
         dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     }
-    return;
 }
 
-WMError SceneSessionManager::SetGlobalDragResizeType(dragResizeType)
+WMError SceneSessionManager::SetGlobalDragResizeType(DragResizeType dragResizeType)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsSystemCalling()) {

@@ -1119,7 +1119,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetGlobalDragResizeType, Function | Small
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         new SceneSessionManagerProxy(iRemoteObjectMocker);
     ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
-    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     sceneSessionManagerProxy->SetGlobalDragResizeType(dragResizeType);
 }
 
@@ -1134,7 +1134,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetGlobalDragResizeType, Function | Small
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         new SceneSessionManagerProxy(iRemoteObjectMocker);
     ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
-    const DragResizeType toDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType toDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     SceneSession::globalDragResizeType_ = toDragResizeType;
     sceneSessionManagerProxy->GetGlobalDragResizeType(dragResizeType);
@@ -1151,7 +1151,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetAppDragResizeType, Function | SmallTes
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         new SceneSessionManagerProxy(iRemoteObjectMocker);
     ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
-    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
     sceneSessionManagerProxy->SetAppDragResizeType(bundleName, dragResizeType);
 }
@@ -1167,7 +1167,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetAppDragResizeType, Function | SmallTes
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         new SceneSessionManagerProxy(iRemoteObjectMocker);
     ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
-    const DragResizeType toDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType toDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     const std::string bundleName = "test";
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
