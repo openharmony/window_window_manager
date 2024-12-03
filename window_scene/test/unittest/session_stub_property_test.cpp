@@ -68,7 +68,7 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction01, Function | Sma
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option{MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
     data.WriteUint32(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY);
@@ -89,9 +89,9 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction02, Function | Sma
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option{MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
-    const std::uint32_t invalidData = 0;
+    const uint32_t invalidData = 0;
     data.WriteUint32(invalidData);
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY);
 
@@ -111,7 +111,7 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction03, Function | Sma
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option{MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY);
 
