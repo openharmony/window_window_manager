@@ -13,12 +13,9 @@
  * limitations under the License.
  */
 
-#include "session/host/include/pc_fold_screen_controller.h"
-#include <parameters.h>
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "display_manager.h"
-#include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
-#include "wm_common_inner.h"
 #include "wm_math.h"
 
 namespace OHOS::Rosen {
@@ -378,4 +375,4 @@ void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displ
         iter++;
     }
 }
-} // namespace OHOS::Rosen
+} // namespace OHOS::Rosen

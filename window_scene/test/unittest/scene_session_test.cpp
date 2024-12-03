@@ -1758,7 +1758,8 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient, Function | SmallTest
     sptr<Rosen::ISession> session_;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXCEPT_EQ(sceneSession->GetScreenId(), 0);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     WSRect rect = {0, 0, 0, 0};
@@ -1777,8 +1778,8 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient, Function | SmallTest
     sceneSession->lastUpdatedDisplayId = 0;
     rect = {0, 100, 100, 100};
     sceneSession->UpdateSessionRectPosYFromClient(rect);
-    EXPECT_EQ(rect.posY_, 1000);
-    sceneSession->lastUpdatedDisplayId = 10;
+    EXPECT_EQ(rect.posY_, 100);
+    sceneSession->lastUpdatedDisplayId = 999;
     rect = {0, 100, 100, 100};
     auto rect2 = rect;
     sceneSession->UpdateSessionRectPosYFromClient(rect);
