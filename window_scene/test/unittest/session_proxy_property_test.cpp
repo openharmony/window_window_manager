@@ -48,7 +48,6 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction01, Function | S
     WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     ASSERT_EQ(res, WMError::WM_OK);
-    delete sProxy;
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction01 end";
 }
 
@@ -67,7 +66,6 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction02, Function | S
     WMError res = sProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     ASSERT_EQ(res, WMError::WM_OK);
-    delete sProxy;
     GTEST_LOG_(INFO) << "SessionProxyPropertyTest: UpdateSessionPropertyByAction02 end";
 }
 
