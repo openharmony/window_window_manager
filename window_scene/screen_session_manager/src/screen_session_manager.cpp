@@ -5270,6 +5270,20 @@ bool ScreenSessionManager::IsFoldable()
     return foldScreenController_->IsFoldable();
 }
 
+bool ScreenSessionManager::IsOuterScreen(FoldDisplayMode foldDisplayMode)
+{
+    DmsXcollie dmsXcollie("DMS:IsOuterScreen", XCOLLIE_TIMEOUT_10S);
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        return foldDisplayMode == FoldDisplayMode::SUB;
+    }
+
+    if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+        return foldDisplayMode == FoldDisplayMode::MAIN;
+    }
+    return false;
+}
+
 bool ScreenSessionManager::IsCaptured()
 {
     if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
@@ -5763,19 +5777,36 @@ void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phy
     if (foldScreenController_ != nullptr) {
         FoldDisplayMode displayMode = GetFoldDisplayMode();
         TLOGI(WmsLogTag::DMS, "fold screen with screenId = %{public}u", displayMode);
-        if (displayMode == FoldDisplayMode::MAIN) {
-            auto phyBounds = GetPhyScreenProperty(SCREEN_ID_MAIN).GetPhyBounds();
-            phyWidth = phyBounds.rect_.width_;
-            phyHeight = phyBounds.rect_.height_;
-        } else if (displayMode == FoldDisplayMode::FULL) {
-            auto phyBounds = GetPhyScreenProperty(SCREEN_ID_FULL).GetPhyBounds();
-            phyWidth = phyBounds.rect_.width_;
-            phyHeight = phyBounds.rect_.height_;
-            if (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270) {
-                std::swap(phyWidth, phyHeight);
+        if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+            if (displayMode == FoldDisplayMode::SUB) {
+                auto phyBounds = GetPhyScreenProperty(SCREEN_ID_MAIN).GetPhyBounds();
+                phyWidth = phyBounds.rect_.width_;
+                phyHeight = phyBounds.rect_.height_;
+            } else if (displayMode == FoldDisplayMode::MAIN) {
+                auto phyBounds = GetPhyScreenProperty(SCREEN_ID_FULL).GetPhyBounds();
+                phyWidth = phyBounds.rect_.width_;
+                phyHeight = phyBounds.rect_.height_;
+                if (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270) {
+                    std::swap(phyWidth, phyHeight);
+                }
+            } else {
+                isReset = false;
             }
         } else {
-            isReset = false;
+            if (displayMode == FoldDisplayMode::MAIN) {
+                auto phyBounds = GetPhyScreenProperty(SCREEN_ID_MAIN).GetPhyBounds();
+                phyWidth = phyBounds.rect_.width_;
+                phyHeight = phyBounds.rect_.height_;
+            } else if (displayMode == FoldDisplayMode::FULL) {
+                auto phyBounds = GetPhyScreenProperty(SCREEN_ID_FULL).GetPhyBounds();
+                phyWidth = phyBounds.rect_.width_;
+                phyHeight = phyBounds.rect_.height_;
+                if (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270) {
+                    std::swap(phyWidth, phyHeight);
+                }
+            } else {
+                isReset = false;
+            }
         }
     } else {
         int id = HiviewDFX::XCollie::GetInstance().SetTimer("GetCurrentScreenPhyBounds", XCOLLIE_TIMEOUT_10S, nullptr,
