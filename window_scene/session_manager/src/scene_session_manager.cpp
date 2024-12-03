@@ -1722,18 +1722,18 @@ void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeT
 WMError SceneSessionManager::SetGlobalDragResizeType(DragResizeType dragResizeType)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
-    if (!SessionPermission::IsSACalling() && !SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    std::unique_lock<std::mutex> lock(globalDragResizeTypeMutex_);
+    std::lock_guard<std::mutex> lock(dragResizeTypeMutex_);
     globalDragResizeType_ = dragResizeType;
     return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::GetGlobalDragResizeType(DragResizeType& dragResizeType)
 {
-    std::shared_lock<std::mutex> lock(globalDragResizeTypeMutex_);
+    std::lock_guard<std::mutex> lock(dragResizeTypeMutex_);
     dragResizeType = globalDragResizeType_;
     GetEffectiveDragResizeType(dragResizeType);
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
@@ -1744,29 +1744,33 @@ WMError SceneSessionManager::SetAppDragResizeType(const std::string& bundleName,
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
-    if (!SessionPermission::IsSACalling() && !SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    return SetAppDragResizeTypeInner(bundleName, dragResizeType);
+}
+
+WMError SceneSessionManager::SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
+        dragResizeType, bundleName.c_str());
     if (bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto task = [this, dragResizeType, bundleName]() -> WMError {
-        std::unique_lock<std::mutex> dragResizeTypeLock(appDragResizeTypeMapMutex_);
-        appDragResizeTypeMap_[bundleName] = dragResizeType;
-        dragResizeTypeLock.unlock();
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        auto sceneSession = GetSceneSessionByBundleName(bundleName);
-        if (sceneSession != nullptr) {
-            GetAppDragResizeType(bundleName, dragResizeType);
-            TLOGI(WmsLogTag::WMS_LAYOUT, "to sceneSession: %{public}d, bundleName: %{public}s",
-                dragResizeType, bundleName.c_str());
-            sceneSession->SetAppDragResizeType(dragResizeType);
-        }
-        return WMError::WM_OK;
-    };
-    return taskScheduler_->PostSyncTask(task, __func__);
+    std::unique_lock<std::mutex> dragResizeTypeLock(dragResizeTypeMutex_);
+    appDragResizeTypeMap_[bundleName] = dragResizeType;
+    dragResizeTypeLock.unlock();
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    auto sceneSession = GetSceneSessionByBundleName(bundleName);
+    if (sceneSession != nullptr) {
+        GetAppDragResizeType(bundleName, dragResizeType);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "to sceneSession: %{public}d, bundleName: %{public}s",
+            dragResizeType, bundleName.c_str());
+        sceneSession->SetAppDragResizeType(dragResizeType);
+    }
+    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
@@ -1781,7 +1785,7 @@ WMError SceneSessionManager::GetAppDragResizeType(const std::string& bundleName,
         return WMError::WM_OK;
     }
     dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    std::shared_lock<std::mutex> dragResizeTypeLock(appDragResizeTypeMapMutex_);
+    std::lock_guard<std::mutex> dragResizeTypeLock(dragResizeTypeMutex_);
     if (auto iter = appDragResizeTypeMap_.find(bundleName); iter != appDragResizeTypeMap_.end()) {
         dragResizeType = iter->second;
     }
