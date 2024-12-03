@@ -814,11 +814,9 @@ private:
     sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
         [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
 
-    std::set<int32_t> avoidAreaListenerSessionSet_;
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
     std::set<int32_t> failRecoveredPersistentIdSet_;
-    std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;
@@ -1091,6 +1089,8 @@ private:
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
+    std::set<int32_t> avoidAreaListenerSessionSet_;
+    std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     struct SessionInfoList {
         int32_t uid_;
