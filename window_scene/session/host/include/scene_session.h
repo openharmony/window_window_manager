@@ -183,7 +183,6 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
-    WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
     WSError RaiseToAppTop() override;
 
     /**
@@ -258,6 +257,8 @@ public:
      * Window Layout
      */
     WMError SetWindowEnableDragBySystem(bool enableDrag);
+    WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
+    void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     void SetParentPersistentId(int32_t parentId);
@@ -384,7 +385,6 @@ public:
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
-    void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
     /**
@@ -633,6 +633,11 @@ protected:
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
 
     /**
+     * Window Layout
+     */
+    NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
+
+    /**
      * Window Lifecycle
      */
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
@@ -655,16 +660,6 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
-
-    /**
-     * Window Layout
-     */
-    NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
-
-    /**
-     * keyboard Window
-     */
-    bool keyboardAvoidAreaActive_ = true;
 
 private:
     void NotifyAccessibilityVisibilityChange();
