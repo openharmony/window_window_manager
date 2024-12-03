@@ -107,12 +107,6 @@ struct UIExtensionTokenInfo {
 
 class SceneSession : public Session {
 public:
-    struct UIExtensionTokenInfo {
-        bool canShowOnLockScreen{false};
-        uint32_t callingTokenId{0};
-        sptr<IRemoteObject> abilityToken;
-    };
-
     // callback for notify SceneSessionManager
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
