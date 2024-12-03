@@ -3173,14 +3173,14 @@ napi_value JsSceneSessionManager::OnSetAppDragResizeType(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     std::string bundleName;
-    if (!ConvertFromJsValue(env, argv[ARGC_ONE], bundleName)) {
+    if (!ConvertFromJsValue(env, argv[0], bundleName)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to bundleName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     DragResizeType dragResizeType;
-    if (!ConvertDragResizeTypeFromJs(env, argv[0], dragResizeType)) {
+    if (!ConvertDragResizeTypeFromJs(env, argv[ARGC_ONE], dragResizeType)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to dragResizeType");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
