@@ -4890,12 +4890,11 @@ void SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneL
 
 void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible)
 {
-    taskScheduler_->PostSyncTask([this, displayId, visible] {
+    taskScheduler_->PostAsyncTask([this, displayId, visible] {
         statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
         TLOGNI(WmsLogTag::WMS_IMMS,
             "set default visibility on display: %{public}" PRIu64 " visible: %{public}d", displayId, visible);
-        return WSError::WS_OK;
-    });
+    }, __func__);
 }
 
 bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId)
