@@ -386,6 +386,8 @@ public:
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
+    void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
+    bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -812,11 +814,9 @@ private:
     sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
         [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
 
-    std::set<int32_t> avoidAreaListenerSessionSet_;
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
     std::set<int32_t> failRecoveredPersistentIdSet_;
-    std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;
@@ -1088,6 +1088,9 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
+    std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
+    std::set<int32_t> avoidAreaListenerSessionSet_;
+    std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     struct SessionInfoList {
         int32_t uid_;
