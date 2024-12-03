@@ -603,6 +603,12 @@ void WindowSessionImpl::DestroySubWindow()
                 TLOGD(WmsLogTag::WMS_SUB, "Exists other sub window, persistentId: %{public}d", persistentId);
             }
         }
+        if (property_->GetIsUIExtFirstSubWindow() && subWindowSessionMap_.empty()) {
+            auto extensionWindow = FindExtensionWindowWithContext();
+            if (extensionWindow != nullptr && extensionWindow->GetUIContent() == nullptr) {
+                extensionWindow->AddSetUIExtensionDestroyTimeoutCheck();
+            }
+        }
     }
     // remove from subWindowMap_ when destroy parent window
     auto mainIter = subWindowSessionMap_.find(persistentId);
@@ -4048,6 +4054,65 @@ void WindowSessionImpl::NotifySetUIContentComplete()
         }
     }
     SetUIContentComplete();
+}
+
+void WindowSessionImpl::SetUIExtensionDestroyComplete()
+{
+    bool setUIExtensionDestroyCompleted = false;
+    if (setUIExtensionDestroyCompleted_.compare_exchange_strong(setUIExtensionDestroyCompleted, true)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+        handler_->RemoveTask(SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
+    } else {
+        TLOGI(WmsLogTag::WMS_LIFE, "already, persistentId=%{public}d", GetPersistentId());
+    }
+}
+
+void WindowSessionImpl::SetUIExtensionDestroyCompleteInSubWindow()
+{
+    if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) {
+        auto extWindow = FindExtensionWindowWithContext();
+        if (extWindow != nullptr && extWindow->startUIExtensionDestroyTimer_.load()) {
+            TLOGI(WmsLogTag::WMS_LIFE, "called");
+            extWindow->SetUIExtensionDestroyComplete();
+            extWindow->setUIExtensionDestroyCompleted_.store(false);
+            extWindow->startUIExtensionDestroyTimer_.store(false);
+        }
+    }
+}
+
+void WindowSessionImpl::AddSetUIExtensionDestroyTimeoutCheck()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
+            return;
+        }
+        if (window->setUIExtensionDestroyCompleted_.load()) {
+            TLOGI(WmsLogTag::WMS_LIFE, "already, persistentId=%{public}d", window->GetPersistentId());
+            return;
+        }
+
+        TLOGI(WmsLogTag::WMS_LIFE, "SetUIExtDestroy timeout, persistentId=%{public}d", window->GetPersistentId());
+        std::ostringstream oss;
+        oss << "SetUIExtDestroy timeout uid: " << getuid();
+        oss << ", windowName: " << window->GetWindowName();
+        if (window->context_) {
+            oss << ", bundleName: " << window->context_->GetBundleName();
+            if (window->context_->GetApplicationInfo()) {
+                oss << ", abilityName: " << window->context_->GetApplicationInfo()->name;
+            }
+        }
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
+
+        if (WindowHelper::IsUIExtensionWindow(window->GetType())) {
+            window->NotifyExtensionTimeout(TimeoutErrorCode::SET_UIEXTENSION_DESTROY_TIMEOUT);
+        }
+    };
+    handler_->PostTask(task, SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
+        SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS, AppExecFwk::EventQueue::Priority::HIGH);
+    startUIExtensionDestroyTimer_.store(true);
 }
 
 WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
