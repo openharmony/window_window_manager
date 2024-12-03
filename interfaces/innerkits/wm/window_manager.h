@@ -934,7 +934,7 @@ public:
 
     /**
      * @brief Get drag resize type of specific app.
-     * effective order: 
+     * effective order:
      *  1. global value
      *  2. app value
      *  3. default value
