@@ -1060,7 +1060,8 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_);
+            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_,
+            "WINDOW_TYPE", static_cast<uint32_t>(GetType()));
         NotifyAfterFocused();
     } else {
         NotifyAfterUnfocused();
