@@ -153,6 +153,45 @@ HWTEST_F(RootSceneSessionTest, GetCutoutAvoidAreaForRoot, Function | SmallTest |
     rootSceneSession.GetCutoutAvoidAreaForRoot(rect, avoidArea);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
 }
+
+/**
+ * @tc.name: SetRootSessionRect
+ * @tc.desc: test function : SetRootSessionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, SetRootSessionRect, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    WSRect rect;
+    rootSceneSession.SetRootSessionRect(rect);
+}
+
+/**
+ * @tc.name: UpdateAvoidArea
+ * @tc.desc: test function : UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    auto ret = rootSceneSession.UpdateAvoidArea(new AvoidArea(avoidArea), AvoidAreaType::TYPE_SYSTEM);
+    ASSERT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: SetIsStatusBarVisible
+ * @tc.desc: test function : SetIsStatusBarVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, SetIsStatusBarVisible, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    rootSceneSession.SetIsStatusBarVisible(false);
+    rootSceneSession.SetIsStatusBarVisible(true);
+}
 }
 }
 }
