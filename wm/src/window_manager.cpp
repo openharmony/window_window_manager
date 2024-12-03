@@ -1474,9 +1474,9 @@ WMError WindowManager::GetGlobalDragResizeType(DragResizeType& dragResizeType)
     return ret;
 }
 
-WMError WindowManager::SetAppDragResizeType(const std::string& bundleName, dragResizeType)
+WMError WindowManager::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().SetAppDragResizeType(dragResizeType, bundleName);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetAppDragResizeType(bundleName, dragResizeType);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "failed");
     }
@@ -1485,7 +1485,7 @@ WMError WindowManager::SetAppDragResizeType(const std::string& bundleName, dragR
 
 WMError WindowManager::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAppDragResizeType(dragResizeType, bundleName);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAppDragResizeType(bundleName, dragResizeType);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "failed");
     }

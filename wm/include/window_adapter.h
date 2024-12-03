@@ -149,7 +149,7 @@ public:
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
     virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
     virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
-    virtual WMError SetAppDragResizeType(const std::string& bundleName, dragResizeType);
+    virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
 private:
