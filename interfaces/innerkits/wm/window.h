@@ -2696,7 +2696,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
-    
+
     /**
      * @brief this interface is invoked by the ACE to the native host.
      * @param eventName invoking event name, which is used to distinguish different invoking types.
@@ -2712,7 +2712,6 @@ public:
      * @return The string corresponding to the scene.
      */
     virtual const char* GetSceneType() const { return "base"; }
-    
 };
 }
 }

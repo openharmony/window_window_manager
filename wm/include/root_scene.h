@@ -134,7 +134,7 @@ private:
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
     std::set<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
-    UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_;
+    UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
