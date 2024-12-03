@@ -528,6 +528,7 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible);
 
+    static std::shared_mutex globalDragResizeTypeMutex_;
     static DragResizeType globalDragResizeType_;
     void SetAppDragResizeType(const DragResizeType& dragResizeType) { appDragResizeType_ = dragResizeType; };
 

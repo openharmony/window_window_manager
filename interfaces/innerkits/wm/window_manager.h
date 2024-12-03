@@ -906,6 +906,7 @@ public:
 
     /**
      * @brief Set global drag resize type.
+     * this priority is highest.
      *
      * @param dragResizeType global drag resize type to set
      * @return WM_OK means get success, others means failed.
@@ -914,6 +915,7 @@ public:
 
     /**
      * @brief Get global drag resize type.
+     * if it is RESIZE_TYPE_UNDEFINED, return default value.
      *
      * @param dragResizeType global drag resize type to get
      * @return WM_OK means get success, others means failed.
@@ -922,6 +924,7 @@ public:
 
     /**
      * @brief Set drag resize type of specific app.
+     * only when global value is RESIZE_TYPE_UNDEFINED, this value take effect.
      *
      * @param dragResizeType drag resize type to set
      * @param bundleName bundleName of specific app
@@ -931,6 +934,10 @@ public:
 
     /**
      * @brief Get drag resize type of specific app.
+     * effective order: 
+     *  1. global value
+     *  2. app value
+     *  3. default value
      *
      * @param dragResizeType drag resize type to get
      * @param bundleName bundleName of specific app
