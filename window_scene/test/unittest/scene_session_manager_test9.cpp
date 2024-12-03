@@ -890,7 +890,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallT
 
     session.property_ = nullptr;
     ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, pid);
-    ASSERT_EQ(ret, WMERROR::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_OK);
 
     sceneSession->IsShowOnLockScreen(0);
     session.zOrder_ = 1;
@@ -907,23 +907,23 @@ HWTEST_F(SceneSessionManagerTest9, GetLockScreenZorder, Function | SmallTest | L
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
-    sptr<SceneSesssion::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
+    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
     sptr<SceneSession> sceneSession = new SceneSession(info, callback);
 
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
     auto ret = ssm_->GetLockScreenZorder();
-    ASSET_EQ(ret, 0);
+    ASSERT_EQ(ret, 0);
 
     Session session(info);
-    session.IsScreenLockWindow_ = true;
+    session.isScreenLockWindow_ = true;
     ret = ssm_->GetLockScreenZorder();
-    ASSET_EQ(ret, 0);
+    ASSERT_EQ(ret, 0);
 
     ssm_->pipWindowSurfaceId_ = 0;
     RSSurfaceNodeConfig config;
     session.surfaceNode_ = std::make_shared<RSSurfaceNode>(config, true);
 
-    ssm_->SelectSessionFromMap(0);
+    ssm_->SelectSesssionFromMap(0);
     ssm_->NotifyPiPWindowVisibleChange(true);
     ssm_->NotifyPiPWindowVisibleChange(false);
 }
@@ -953,7 +953,7 @@ HWTEST_F(SceneSessionManagerTest9, IsLastPiPWindowVisible01, Function | SmallTes
     WindowVisibilityState lastVisibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
 
     SessionInfo info;
-    sptr<SceneSesssion::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
+    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
     sptr<SceneSession> sceneSession = new SceneSession(info, callback);
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, nullptr));
 
@@ -961,7 +961,7 @@ HWTEST_F(SceneSessionManagerTest9, IsLastPiPWindowVisible01, Function | SmallTes
     sceneSession->surfaceNode_ = RSSurfaceNode::Create(config);
     ASSERT_EQ(nullptr, sceneSession->surfaceNode_);
     sceneSession->surfaceNode_->id_ = 0;
-    ssm_->SelectSessionFromMap(0);
+    ssm_->SelectSesssionFromMap(0);
     sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
 
