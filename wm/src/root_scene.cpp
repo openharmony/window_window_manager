@@ -262,7 +262,7 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListe
         return WMError::WM_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
-    avoidAreaChangeListeners_.insert(listener);
+    avoidAreaChangeListeners_.erase(listener);
     return WMError::WM_OK;
 }
 

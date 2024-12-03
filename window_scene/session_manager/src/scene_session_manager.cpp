@@ -8809,12 +8809,16 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
     TLOGD(WmsLogTag::WMS_IMMS, "isVisible %{public}u, persistentId %{public}u",
         isVisible, persistentId);
     auto task = [this, persistentId, isVisible] {
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "scene session is nullptr");
-            return;
+        if (auto rootScene = GetRootSceneSession(); rootScene->GetPersistentId() == persistentId) {
+            rootScene->SetIsStatusBarVisible(isVisible);
+        } else {
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_IMMS, "scene session is nullptr");
+                return;
+            }
+            sceneSession->SetIsStatusBarVisible(isVisible);
         }
-        sceneSession->SetIsStatusBarVisible(isVisible);
     };
     taskScheduler_->PostTask(task, "NotifyStatusBarShowStatus");
     return WSError::WS_OK;

@@ -194,8 +194,8 @@ void RootSceneSession::SetRootSessionRect(const WSRect& rect)
 
 WSError RootSceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_) {
-        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+    if (specificCallback_ != nullptr && specificCallback_->onNotifyAvoidAreaChange_) {
+        specificCallback_->onNotifyAvoidAreaChange_(avoidArea, type);
     }
     return WSError::WS_OK;
 }
