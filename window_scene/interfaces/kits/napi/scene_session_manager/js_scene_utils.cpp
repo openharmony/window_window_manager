@@ -862,7 +862,7 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragResizeType");
         return false;
     }
-    dragResizeType = static_cast<uint32_t>(dragResizeTypeValue);
+    dragResizeType = static_cast<DragResizeType>(dragResizeTypeValue);
     return true;
 }
 
@@ -1342,7 +1342,8 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
     napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
-    napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
+    napi_set_named_property(env, objValue, "dragResizeType",
+        CreateJsValue(env, static_cast<uint32_t>(param.dragResizeType)));
     return objValue;
 }
 

@@ -707,7 +707,7 @@ private:
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
     void NotifyFullScreenAfterThrowSlip(const WSRect& rect);
-    void SetDragResizeTypeDuringDrag(dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
+    void SetDragResizeTypeDuringDrag(DragResizeType dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
     DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; }
 
     /**
@@ -811,7 +811,7 @@ private:
     std::vector<sptr<SceneSession>> toastSession_;
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
-    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0, 0 };
+    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0, DragResizeType::RESIZE_TYPE_UNDEFINED };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };

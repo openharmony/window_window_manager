@@ -2222,7 +2222,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetGlobalDragResizeType, Function | 
 {
     MessageParcel data;
     MessageParcel reply;
-    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     data.WriteUint32(static_cast<uint32_t>(dragResizeType));
     int res = stub_->HandleSetGlobalDragResizeType(data, reply);
     EXPECT_EQ(res, ERR_NONE);
@@ -2237,8 +2237,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetGlobalDragResizeType, Function | 
 {
     MessageParcel data;
     MessageParcel reply;
-    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
     int res = stub_->HandleGetGlobalDragResizeType(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
@@ -2252,7 +2250,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, Function | Sma
 {
     MessageParcel data;
     MessageParcel reply;
-    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
     data.WriteString(bundleName);
     data.WriteUint32(static_cast<uint32_t>(dragResizeType));
@@ -2273,7 +2271,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | Sma
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
     data.WriteString(bundleName);
-    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
     int res = stub_->HandleGetAppDragResizeType(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }

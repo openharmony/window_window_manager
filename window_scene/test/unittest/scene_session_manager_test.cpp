@@ -2362,7 +2362,7 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
  */
 HWTEST_F(SceneSessionManagerTest, SetGlobalDragResizeType, Function | SmallTest | Level3)
 {
-    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
 }
 
@@ -2391,7 +2391,7 @@ HWTEST_F(SceneSessionManagerTest, SetAppDragResizeType, Function | SmallTest | L
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     ASSERT_EQ(ssm_->SetAppDragResizeType(info.bundleName_, dragResizeType), WMError::WM_OK);
 }
 
