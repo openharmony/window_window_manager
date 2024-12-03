@@ -119,7 +119,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetCollaboratorType(session->GetCollaboratorType());
             property->SetAppInstanceKey(session->GetAppInstanceKey());
         }
-        session->ResetDefaultStatusBarVisible();
+        session->RetrieveStatusBarDefaultVisibility();
         auto ret = session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
@@ -5193,11 +5193,11 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
     return isDisplayStatusBarTemporarily_.load();
 }
 
-void SceneSession::ResetDefaultStatusBarVisible()
+void SceneSession::RetrieveStatusBarDefaultVisibility()
 {
     auto property = GetSessionProperty();
-    if (property && specificCallback_ && specificCallback_->onGetDefualtStatusBarVisibleOnDisplay_) {
-        isStatusBarVisible_ = specificCallback_->onGetDefualtStatusBarVisibleOnDisplay_(property->GetDisplayId());
+    if (property && specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
+        isStatusBarVisible_ = specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(property->GetDisplayId());
     }
 }
 

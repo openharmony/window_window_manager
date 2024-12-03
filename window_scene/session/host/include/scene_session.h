@@ -93,7 +93,7 @@ using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
-using GetDefualtStatusBarVisibleOnDisplayFunc = std::function<bool(const DisplayId displayId)>;
+using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 
@@ -116,7 +116,7 @@ public:
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
         UpdateAvoidAreaByTypeCallback onUpdateAvoidAreaByType_;
-        GetDefualtStatusBarVisibleOnDisplayFunc onGetDefualtStatusBarVisibleOnDisplay_;
+        GetStatusBarDefaultVisibilityByDisplayIdFunc onGetStatusBarDefaultVisibilityByDisplayId_;
         UpdateOccupiedAreaIfNeedCallback onUpdateOccupiedAreaIfNeed_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
@@ -308,7 +308,7 @@ public:
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
-    void ResetDefaultStatusBarVisible();
+    void RetrieveStatusBarDefaultVisibility();
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
     void MarkAvoidAreaAsDirty();
 
