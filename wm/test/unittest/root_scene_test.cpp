@@ -298,6 +298,42 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByType, Function | SmallTest | Level3)
     auto ret = rootScene.GetAvoidAreaByType(type, avoidArea);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
+
+/**
+ * @tc.name: UpdateConfigurationSync
+ * @tc.desc: UpdateConfigurationSync Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateConfigurationSync, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+
+    rootScene.uiContent_ = nullptr;
+    rootScene.UpdateConfigurationSync(configuration);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+
+    auto prevStaticRootScene = RootScene::staticRootScene_;
+    rootScene.UpdateConfigurationSyncForAll(configuration);
+
+    sptr<RootScene> staticRootScene;
+    RootScene::staticRootScene_ = staticRootScene;
+    rootScene.UpdateConfigurationSyncForAll(configuration);
+
+    RootScene::staticRootScene_ = prevStaticRootScene;
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
