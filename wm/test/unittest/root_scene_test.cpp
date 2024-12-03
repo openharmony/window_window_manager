@@ -323,6 +323,7 @@ HWTEST_F(RootSceneTest, NotifyAvoidAreaChangeForRoot, Function | SmallTest | Lev
 {
     RootScene rootScene;
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
     rootScene.avoidAreaChangeListeners_.insert(listener);
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
     AvoidArea avoidArea;

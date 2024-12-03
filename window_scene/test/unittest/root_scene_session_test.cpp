@@ -165,6 +165,7 @@ HWTEST_F(RootSceneSessionTest, SetRootSessionRect, Function | SmallTest | Level1
     AvoidArea avoidArea;
     WSRect rect;
     rootSceneSession.SetRootSessionRect(rect);
+    ASSERT_EQ(rootSceneSession.winRect_, rect);
 }
 
 /**
@@ -191,6 +192,7 @@ HWTEST_F(RootSceneSessionTest, SetIsStatusBarVisible, Function | SmallTest | Lev
     AvoidArea avoidArea;
     rootSceneSession.SetIsStatusBarVisible(false);
     rootSceneSession.SetIsStatusBarVisible(true);
+    ASSERT_EQ(rootSceneSession.isStatusBarVisibleForRoot_, true);
 }
 }
 }
