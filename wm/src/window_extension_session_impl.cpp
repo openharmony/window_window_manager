@@ -166,11 +166,11 @@ void WindowExtensionSessionImpl::UpdateConfigurationSync(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        uiContent->UpdateConfigurationSyncForAll(configuration);
+    } else {
         TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
-        return;
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
-    uiContent->UpdateConfigurationSyncForAll(configuration);
 }
 
 void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
