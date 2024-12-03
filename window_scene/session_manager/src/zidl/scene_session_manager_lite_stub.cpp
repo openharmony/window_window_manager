@@ -553,7 +553,7 @@ int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& d
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get extensionAbilityType");
         return ERR_INVALID_DATA;
     }
-    if (extAbilityTypeValue > -1) {
+    if (extAbilityTypeValue < 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get extensionAbilityType(out of range)");
         return ERR_INVALID_DATA;
     }
