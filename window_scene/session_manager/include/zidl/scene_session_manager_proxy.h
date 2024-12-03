@@ -132,7 +132,7 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
     WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;
-    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType)  override;
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
 
