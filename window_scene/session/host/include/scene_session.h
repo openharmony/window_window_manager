@@ -372,11 +372,16 @@ public:
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
+    /*
+     * Window Lifecycle
+     */
+    void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback);
+    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    
     void ClearSpecificSessionCbMap();
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
     void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
-    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -409,7 +414,6 @@ public:
     static uint32_t GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
-
     int32_t GetCustomDecorHeight() override
     {
         return customDecorHeight_;
@@ -728,11 +732,6 @@ private:
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
-
-    /**
-     * Window property
-     */
-    std::map<ControlAppType, bool> appUseControlMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
