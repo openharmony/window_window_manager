@@ -1023,6 +1023,22 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
         napi_set_named_property(env, objValue, "extraFormIdentity",
             CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
+        if (params.HasParam("expectWindowMode")) {
+            napi_set_named_property(env, objValue, "expectWindowMode",
+                CreateJsValue(env, params.GetIntParam("expectWindowMode", INVALID_VAL)));
+        }
+        if (params.HasParam("isStartFromAppDock")) {
+            napi_set_named_property(env, objValue, "isStartFromAppDock",
+                CreateJsValue(env, params.GetIntParam("isStartFromAppDock", INVALID_VAL)));
+        }
+        if (params.HasParam("dockAppDirection")) {
+            napi_set_named_property(env, objValue, "dockAppDirection",
+                CreateJsValue(env, params.GetIntParam("dockAppDirection", INVALID_VAL)));
+        }
+        if (params.HasParam("isAppFromRecentAppsOrDockApps")) {
+            napi_set_named_property(env, objValue, "isAppFromRecentAppsOrDockApps",
+                CreateJsValue(env, params.GetIntParam("isAppFromRecentAppsOrDockApps", INVALID_VAL)));
+        }
     }
 }
 
