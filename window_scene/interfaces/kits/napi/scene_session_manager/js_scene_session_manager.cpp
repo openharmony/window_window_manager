@@ -3739,7 +3739,7 @@ void JsSceneSessionManager::OnNotifyAppUseControlList(
     ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
-    auto task = [this, type, userId, controlList,
+    taskScheduler_->PostMainThreadTask([this, type, userId, controlList,
         jsCallBack = GetJSCallback(NOTIFY_APP_USE_CONTROL_LIST_CB), env = env_] {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
@@ -3750,8 +3750,7 @@ void JsSceneSessionManager::OnNotifyAppUseControlList(
         napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
         napi_value argv[] = { typeValue, userIdValue, controlListValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, __func__);
+        }, __func__);
 }
 
 napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info)
