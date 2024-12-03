@@ -733,6 +733,8 @@ ohos_unittest("ws_scene_session_manager_test8") {
 
   sources = [ "scene_session_manager_test8.cpp" ]
 
+  cflags_cc = [ "-Wno-thread-safety" ]
+
   deps = [ ":ws_unittest_common" ]
 
   include_dirs = [ "${ability_runtime_services_path}/abilitymgr/include" ]
