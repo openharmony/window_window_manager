@@ -1153,7 +1153,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetAppDragResizeType, Function | SmallTes
     ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
     const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
-    sceneSessionManagerProxy->SetAppDragResizeType(dragResizeType, bundleName);
+    sceneSessionManagerProxy->SetAppDragResizeType(bundleName, dragResizeType);
 }
 
 /**
@@ -1172,7 +1172,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetAppDragResizeType, Function | SmallTes
     const std::string bundleName = "test";
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
     appDragResizeTypeMap_[bundleName] = toDragResizeType;
-    sceneSessionManagerProxy->GetAppDragResizeType(dragResizeType, bundleName);
+    sceneSessionManagerProxy->GetAppDragResizeType(bundleName, dragResizeType);
 }
 }  // namespace
 }

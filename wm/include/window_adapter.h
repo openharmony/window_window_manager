@@ -147,10 +147,10 @@ public:
 
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
-    virtual WMError SetGlobalDragResizeType(const DragResizeType& dragResizeType);
+    virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
     virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
-    virtual WMError SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName);
-    virtual WMError GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName);
+    virtual WMError SetAppDragResizeType(const std::string& bundleName, dragResizeType);
+    virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

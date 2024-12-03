@@ -1542,17 +1542,17 @@ int SceneSessionManagerStub::HandleGetGlobalDragResizeType(MessageParcel& data, 
 
 int SceneSessionManagerStub::HandleSetAppDragResizeType(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t dragResizeType;
-    if (!data.ReadUint32(dragResizeType)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
-        return ERR_INVALID_DATA;
-    }
     std::string bundleName;
     if (!data.ReadString(bundleName)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read bundleName failed.");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = SetAppDragResizeType(static_cast<DragResizeType>(dragResizeType), bundleName);
+    uint32_t dragResizeType;
+    if (!data.ReadUint32(dragResizeType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetAppDragResizeType(bundleName, static_cast<DragResizeType>(dragResizeType));
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
         return ERR_INVALID_DATA;
@@ -1568,7 +1568,7 @@ int SceneSessionManagerStub::HandleGetAppDragResizeType(MessageParcel& data, Mes
         return ERR_INVALID_DATA;
     }
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    WMError errCode = GetAppDragResizeType(dragResizeType, bundleName);
+    WMError errCode = GetAppDragResizeType(bundleName, dragResizeType);
     if (!data.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write dragResizeType failed.");
         return ERR_INVALID_DATA;

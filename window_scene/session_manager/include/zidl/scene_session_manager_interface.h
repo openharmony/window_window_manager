@@ -319,12 +319,12 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
 
-    WMError SetGlobalDragResizeType(const DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override { return WMError::WM_OK; }
     WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override { return WMError::WM_OK; }
-    WMError SetAppDragResizeType(const DragResizeType& dragResizeType,
-        const std::string& bundleName) override { return WMError::WM_OK; }
-    WMError GetAppDragResizeType(DragResizeType& dragResizeType,
-        const std::string& bundleName) override { return WMError::WM_OK; }
+    WMError SetAppDragResizeType(const std::string& bundleName,
+        dragResizeType) override { return WMError::WM_OK; }
+    WMError GetAppDragResizeType(const std::string& bundleName,
+        DragResizeType& dragResizeType) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

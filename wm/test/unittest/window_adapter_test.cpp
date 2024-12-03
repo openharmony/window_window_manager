@@ -858,7 +858,7 @@ HWTEST_F(WindowAdapterTest, SetAppDragResizeType, Function | SmallTest | Level2)
     WindowAdapter windowAdapter;
     const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     const std::string bundleName = "test";
-    auto err = windowAdapter.SetAppDragResizeType(dragResizeType, bundleName);
+    auto err = windowAdapter.SetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
@@ -872,7 +872,7 @@ HWTEST_F(WindowAdapterTest, GetAppDragResizeType, Function | SmallTest | Level2)
     WindowAdapter windowAdapter;
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     const std::string bundleName = "test";
-    auto err = windowAdapter.GetAppDragResizeType(dragResizeType, bundleName);
+    auto err = windowAdapter.GetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 }

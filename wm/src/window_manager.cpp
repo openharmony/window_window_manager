@@ -1456,7 +1456,7 @@ WMError WindowManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windo
     return ret;
 }
 
-WMError WindowManager::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
+WMError WindowManager::SetGlobalDragResizeType(DragResizeType dragResizeType)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetGlobalDragResizeType(dragResizeType);
     if (ret != WMError::WM_OK) {
@@ -1474,7 +1474,7 @@ WMError WindowManager::GetGlobalDragResizeType(DragResizeType& dragResizeType)
     return ret;
 }
 
-WMError WindowManager::SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName)
+WMError WindowManager::SetAppDragResizeType(const std::string& bundleName, dragResizeType)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetAppDragResizeType(dragResizeType, bundleName);
     if (ret != WMError::WM_OK) {
@@ -1483,7 +1483,7 @@ WMError WindowManager::SetAppDragResizeType(const DragResizeType& dragResizeType
     return ret;
 }
 
-WMError WindowManager::GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName)
+WMError WindowManager::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAppDragResizeType(dragResizeType, bundleName);
     if (ret != WMError::WM_OK) {

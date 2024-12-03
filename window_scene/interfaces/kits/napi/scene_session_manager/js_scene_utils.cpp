@@ -858,20 +858,11 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
     if (!ConvertFromJsValue(env, value, dragResizeTypeValue)) {
         return false;
     }
-    switch (dragResizeTypeValue) {
-        case static_cast<uint32_t>(DragResizeType::RESIZE_TYPE_UNDEFINED):
-            dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-            break;
-        case static_cast<uint32_t>(DragResizeType::RESIZE_EACH_FRAME):
-            dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
-            break;
-        case static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END):
-            dragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
-            break;
-        default:
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragResizeType");
-            return false;
+    if (dragResizeTypeValue > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragResizeType");
+        return false;
     }
+    dragResizeType = static_cast<uint32_t>(dragResizeTypeValue);
     return true;
 }
 
@@ -1351,7 +1342,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
     napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
-    napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType_));
+    napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
     return objValue;
 }
 

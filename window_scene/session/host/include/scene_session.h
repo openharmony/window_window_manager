@@ -528,9 +528,11 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible);
 
-    static std::shared_mutex globalDragResizeTypeMutex_;
-    static DragResizeType globalDragResizeType_;
-    void SetAppDragResizeType(const DragResizeType& dragResizeType) { appDragResizeType_ = dragResizeType; };
+    /**
+     * Move Drag
+     */
+    void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
+    void GetAppDragResizeType(DragResizeType& dragResizeType) { dragResizeType = appDragResizeType_; }
 
     /**
      * Window Layout
@@ -705,12 +707,8 @@ private:
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
     void NotifyFullScreenAfterThrowSlip(const WSRect& rect);
-    DragResizeType GetDragResizeType() const;
-    void SetDragResizeTypeDuringDrag(const DragResizeType& dragResizeType)
-    {
-        dragResizeTypeDuringDrag_ = dragResizeType;
-    };
-    DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; };
+    void SetDragResizeTypeDuringDrag(dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
+    DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; }
 
     /**
      * Gesture Back

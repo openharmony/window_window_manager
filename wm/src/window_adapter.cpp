@@ -1010,7 +1010,7 @@ WMError WindowAdapter::GetDisplayIdByWindowId(const std::vector<uint64_t>& windo
     return wmsProxy->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
 }
 
-WMError WindowAdapter::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
+WMError WindowAdapter::SetGlobalDragResizeType(DragResizeType dragResizeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
@@ -1026,20 +1026,20 @@ WMError WindowAdapter::GetGlobalDragResizeType(DragResizeType& dragResizeType)
     return wmsProxy->GetGlobalDragResizeType(dragResizeType);
 }
 
-WMError WindowAdapter::SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName)
+WMError WindowAdapter::SetAppDragResizeType(const std::string& bundleName, dragResizeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->SetAppDragResizeType(dragResizeType, bundleName);
+    return wmsProxy->SetAppDragResizeType(bundleName, dragResizeType);
 }
 
-WMError WindowAdapter::GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName)
+WMError WindowAdapter::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->GetAppDragResizeType(dragResizeType, bundleName);
+    return wmsProxy->GetAppDragResizeType(bundleName, dragResizeType);
 }
 } // namespace Rosen
 } // namespace OHOS

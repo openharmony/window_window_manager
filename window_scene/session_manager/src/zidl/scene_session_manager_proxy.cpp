@@ -2529,7 +2529,7 @@ WMError SceneSessionManagerProxy::IsWindowRectAutoSave(const std::string& key, b
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::SetGlobalDragResizeType(const DragResizeType& dragResizeType)
+WMError SceneSessionManagerProxy::SetGlobalDragResizeType(dragResizeType)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2593,8 +2593,7 @@ WMError SceneSessionManagerProxy::GetGlobalDragResizeType(DragResizeType& dragRe
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::SetAppDragResizeType(const DragResizeType& dragResizeType,
-    const std::string& bundleName)
+WMError SceneSessionManagerProxy::SetAppDragResizeType(const std::string& bundleName, dragResizeType)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2629,8 +2628,7 @@ WMError SceneSessionManagerProxy::SetAppDragResizeType(const DragResizeType& dra
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::GetAppDragResizeType(DragResizeType& dragResizeType,
-    const std::string& bundleName)
+WMError SceneSessionManagerProxy::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
 {
     MessageParcel data;
     MessageParcel reply;

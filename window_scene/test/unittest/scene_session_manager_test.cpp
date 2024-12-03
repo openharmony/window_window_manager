@@ -2392,7 +2392,7 @@ HWTEST_F(SceneSessionManagerTest, SetAppDragResizeType, Function | SmallTest | L
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     const DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
-    ASSERT_EQ(ssm_->SetAppDragResizeType(dragResizeType, info.bundleName_), WMError::WM_OK);
+    ASSERT_EQ(ssm_->SetAppDragResizeType(info.bundleName_, dragResizeType), WMError::WM_OK);
 }
 
 /**
@@ -2410,7 +2410,7 @@ HWTEST_F(SceneSessionManagerTest, GetAppDragResizeType, Function | SmallTest | L
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    ASSERT_EQ(ssm_->GetAppDragResizeType(dragResizeType, info.bundleName_), WMError::WM_OK);
+    ASSERT_EQ(ssm_->GetAppDragResizeType(info.bundleName_, dragResizeType), WMError::WM_OK);
 }
 }
 } // namespace Rosen
