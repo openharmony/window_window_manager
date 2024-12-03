@@ -78,6 +78,7 @@ bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 } // namespace
 
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
+std::shared_mutex SceneSession::globalDragResizeTypeMutex_;
 DragResizeType SceneSession::globalDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
@@ -645,7 +646,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
         }
         if (session->moveDragController_ && (event == SessionEvent::EVENT_DRAG ||
-                event == SessionEvent::EVENT_DRAG_START)) {
+            event == SessionEvent::EVENT_DRAG_START)) {
             WSRect rect = session->moveDragController_->GetTargetRect(
                 MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
             DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;

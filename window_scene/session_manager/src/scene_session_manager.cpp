@@ -1698,12 +1698,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
 
 void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeType)
 {
-    DragResizeType effectiveDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-    GetGlobalDragResizeType(effectiveDragResizeType);
-    if (effectiveDragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
-        dragResizeType = effectiveDragResizeType;
-        return;
-    }
     if (dragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         return;
     }
@@ -1722,12 +1716,14 @@ WMError SceneSessionManager::SetGlobalDragResizeType(const DragResizeType& dragR
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    std::unique_lock<std::shared_mutex> lock(SceneSession::globalDragResizeTypeMutex_);
     SceneSession::globalDragResizeType_ = dragResizeType;
     return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::GetGlobalDragResizeType(DragResizeType& dragResizeType)
 {
+    std::shared_lock<std::shared_mutex> lock(SceneSession::globalDragResizeTypeMutex_);
     dragResizeType = SceneSession::globalDragResizeType_;
     GetEffectiveDragResizeType(dragResizeType);
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
@@ -1769,6 +1765,11 @@ WMError SceneSessionManager::GetAppDragResizeType(DragResizeType& dragResizeType
     if (bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
         return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    GetGlobalDragResizeType(dragResizeType);
+    if (dragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "use global value");
+        return WMError::WM_OK;
     }
     dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     std::shared_lock<std::shared_mutex> dragResizeTypeLock(appDragResizeTypeMapMutex_);

@@ -187,8 +187,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetSystemAnimatedScenes);
     BindNativeFunction(env, exportObj, "getSessionSnapshotPixelMap", moduleName,
         JsSceneSessionManager::GetSessionSnapshotPixelMap);
-    BindNativeFunction(env, exportObj, "setDragResizeType", moduleName,
-        JsSceneSessionManager::SetDragResizeType);
+    BindNativeFunction(env, exportObj, "setAppDragResizeType", moduleName,
+        JsSceneSessionManager::SetAppDragResizeType);
     BindNativeFunction(env, exportObj, "getSessionSnapshotPixelMapSync", moduleName,
         JsSceneSessionManager::GetSessionSnapshotPixelMapSync);
     BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
@@ -1039,11 +1039,11 @@ napi_value JsSceneSessionManager::GetSessionSnapshotPixelMapSync(napi_env env, n
     return (me != nullptr) ? me->OnGetSessionSnapshotPixelMapSync(env, info) : nullptr;
 }
 
-napi_value JsSceneSessionManager::SetDragResizeType(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::SetAppDragResizeType(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnSetDragResizeType(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetAppDragResizeType(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::SwitchFreeMultiWindow(napi_env env, napi_callback_info info)
@@ -3161,7 +3161,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
     return pixelMapObj;
 }
 
-napi_value JsSceneSessionManager::OnSetDragResizeType(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnSetAppDragResizeType(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
