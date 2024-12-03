@@ -1759,26 +1759,33 @@ WMError SceneSessionManager::SetAppDragResizeTypeInner(const std::string& bundle
         TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::unique_lock<std::mutex> dragResizeTypeLock(dragResizeTypeMutex_);
+    std::lock_guard<std::mutex> dragResizeTypeLock(dragResizeTypeMutex_);
     appDragResizeTypeMap_[bundleName] = dragResizeType;
-    dragResizeTypeLock.unlock();
-    auto sceneSession = GetSceneSessionByBundleName(bundleName);
-    if (sceneSession != nullptr) {
-        GetAppDragResizeType(bundleName, dragResizeType);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "to sceneSession: %{public}d, bundleName: %{public}s",
-            dragResizeType, bundleName.c_str());
-        sceneSession->SetAppDragResizeType(dragResizeType);
-    }
+    GetAppDragResizeTypeInner(bundleName, dragResizeType);
+    taskScheduler_->PostAsyncTask([this, bundleName] {
+        auto sceneSession = GetSceneSessionByBundleName(bundleName);
+        if (sceneSession != nullptr) {
+            GetAppDragResizeType(bundleName, dragResizeType);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "to sceneSession: %{public}d, bundleName: %{public}s",
+                dragResizeType, bundleName.c_str());
+            sceneSession->SetAppDragResizeType(dragResizeType);
+        }
+    }, __func__);
     return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
 {
+    std::lock_guard<std::mutex> lock(dragResizeTypeMutex_);
+    return GetAppDragResizeTypeInner(bundleName, dragResizeType);
+}
+
+WMError SceneSessionManager::GetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType& dragResizeType)
+{
     if (bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(dragResizeTypeMutex_);
     if (globalDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "use global value");
         dragResizeType = globalDragResizeType_;

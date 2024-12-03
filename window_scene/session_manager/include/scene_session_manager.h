@@ -1143,6 +1143,7 @@ private:
     DragResizeType globalDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
     void GetEffectiveDragResizeType(DragResizeType& dragResizeType);
+    WMError GetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType& dragResizeType);
 
     /*
      * Specific Window
