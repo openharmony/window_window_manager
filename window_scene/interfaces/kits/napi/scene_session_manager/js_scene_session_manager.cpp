@@ -21,7 +21,7 @@
 #include "napi_common_want.h"
 #include "native_value.h"
 #include "pixel_map_napi.h"
-#include "session/host/include/pc_fold_screen_controller.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
