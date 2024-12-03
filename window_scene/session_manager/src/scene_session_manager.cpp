@@ -1490,7 +1490,7 @@ uint32_t SceneSessionManager::GetLockScreenZorder()
 WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t callingTokenId,
     const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
-    auto task = [this, windowId, &callingTokenId, &element, &extensionAbilityType, &pid]() -> WMError {
+    auto task = [this, windowId, callingTokenId, &element, extensionAbilityType, &pid]() -> WMError {
         pid = INVALID_PID;
         auto sceneSession = GetSceneSession(windowId);
         if (sceneSession == nullptr) {
