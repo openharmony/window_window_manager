@@ -37,6 +37,7 @@ namespace OHOS {
 namespace Rosen {
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
+using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
 
 class RootScene : public Window {
 public:
@@ -61,6 +62,11 @@ public:
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
+    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
+    const char* GetSceneType() const override { return "RootScene"; }
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
@@ -127,6 +133,8 @@ private:
      */
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
+    std::set<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
+    UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_;
 };
 } // namespace Rosen
 } // namespace OHOS

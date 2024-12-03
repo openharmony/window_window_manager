@@ -608,6 +608,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().SetIsRootSceneLastFrameLayoutFinishedFunc([] {
         return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
     });
+    SceneSessionManager::GetInstance().NotifyAvoidAreaChangeForRoot(
+        [](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {
+        RootScene::staticRootScene_->NotifyAvoidAreaChangeForRoot(avoidArea, type);
+    });
 }
 
 void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
@@ -620,6 +624,9 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
     });
     rootScene_->RegisterGetSessionAvoidAreaByTypeCallback([](AvoidAreaType type) {
         return SceneSessionManager::GetInstance().GetRootSessionAvoidAreaByType(type);
+    });
+    rootScene_->RegisterUpdateRootSceneAvoidAreaCallback([] {
+        SceneSessionManager::GetInstance().UpdateAvoidAreaForRootListener();
     });
     if (!Session::IsScbCoreEnabled()) {
         rootScene_->SetFrameLayoutFinishCallback([] {
