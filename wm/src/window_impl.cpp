@@ -76,6 +76,7 @@ int constructorCnt = 0;
 int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     property_ = new (std::nothrow) WindowProperty();
     if (property_ == nullptr) {
         WLOGFE("Property is null");
@@ -2408,8 +2409,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         postTaskDone_ = true;
     };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-    if (handler_ != nullptr && reason == WindowSizeChangeReason::ROTATION) {
+    if (reason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         handler_->PostTask(task, "wms:UpdateRect");
     } else {
@@ -2493,7 +2493,6 @@ void WindowImpl::PerformBack()
         WLOGD("id: %{public}u closed, to kill Ability: %{public}u",
               property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
     };
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     handler_->PostTask(task, "WindowImpl::PerformBack");
 }
 
