@@ -911,7 +911,7 @@ public:
      * @param dragResizeType global drag resize type to set
      * @return WM_OK means get success, others means failed.
      */
-    WMError SetGlobalDragResizeType(const DragResizeType& dragResizeType);
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
 
     /**
      * @brief Get global drag resize type.
@@ -926,11 +926,11 @@ public:
      * @brief Set drag resize type of specific app.
      * only when global value is RESIZE_TYPE_UNDEFINED, this value take effect.
      *
-     * @param dragResizeType drag resize type to set
      * @param bundleName bundleName of specific app
+     * @param dragResizeType drag resize type to set
      * @return WM_OK means get success, others means failed.
      */
-    WMError SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName);
+    WMError SetAppDragResizeType(const std::string& bundleName, dragResizeType);
 
     /**
      * @brief Get drag resize type of specific app.
@@ -939,11 +939,11 @@ public:
      *  2. app value
      *  3. default value
      *
-     * @param dragResizeType drag resize type to get
      * @param bundleName bundleName of specific app
+     * @param dragResizeType drag resize type to get
      * @return WM_OK means get success, others means failed.
      */
-    WMError GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName);
+    WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
 private:
     WindowManager();

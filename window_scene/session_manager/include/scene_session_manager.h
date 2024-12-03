@@ -180,6 +180,7 @@ public:
 
     sptr<SceneSession> GetSceneSessionByIdentityInfo(const SessionIdentityInfo& info);
     sptr<SceneSession> GetSceneSessionByType(WindowType type);
+    sptr<SceneSession> GetSceneSessionByBundleName(const std::string& bundleName);
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -460,10 +461,14 @@ public:
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId);
-    WMError SetGlobalDragResizeType(const DragResizeType& dragResizeType) override;
+
+    /**
+     * Move Drag
+     */
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;
     WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
-    WMError SetAppDragResizeType(const DragResizeType& dragResizeType, const std::string& bundleName) override;
-    WMError GetAppDragResizeType(DragResizeType& dragResizeType, const std::string& bundleName) override;
+    WMError SetAppDragResizeType(const std::string& bundleName, dragResizeType) override;
+    WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
 
     /**
      * Multi Window
@@ -1129,7 +1134,13 @@ private:
      */
     std::mutex isWindowRectAutoSaveMapMutex_;
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
-    std::shared_mutex appDragResizeTypeMapMutex_;
+    
+    /**
+     * Move Drag
+     */
+    std::mutex globalDragResizeTypeMutex_;
+    DragResizeType globalDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::mutex appDragResizeTypeMapMutex_;
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
     void GetEffectiveDragResizeType(DragResizeType& dragResizeType);
 
