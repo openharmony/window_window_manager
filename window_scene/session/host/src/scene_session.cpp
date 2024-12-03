@@ -912,7 +912,8 @@ void SceneSession::RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callbac
             return;
         }
         session->onTouchOutside_ = std::move(callback);
-    }, __func__);
+    },
+        __func__);
 }
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
