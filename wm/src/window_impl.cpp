@@ -2725,7 +2725,7 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
         window->postTaskDone_ = true;
     };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    if (handler_ != nullptr && reason == WindowSizeChangeReason::ROTATION) {
+    if (reason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         handler_->PostTask(task, "wms:UpdateRect");
     } else {
