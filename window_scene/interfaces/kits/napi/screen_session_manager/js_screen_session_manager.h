@@ -38,7 +38,7 @@ public:
 
     void OnScreenConnected(const sptr<ScreenSession>& screenSession) override;
     void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) override;
-    bool OnTakeOverShutdown(bool isReboot) override;
+    bool OnTakeOverShutdown(const PowerMgr::TakeOverInfo& info) override;
 
 private:
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
