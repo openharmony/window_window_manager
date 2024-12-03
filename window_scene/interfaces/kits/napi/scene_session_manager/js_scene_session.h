@@ -74,6 +74,7 @@ enum class ListenerFuncType : uint32_t {
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
+    UPDATE_APP_USE_CONTROL_CB,
 };
 
 class SceneSession;
@@ -240,6 +241,7 @@ private:
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void RegisterUpdateAppUseControlCallback();
+
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);

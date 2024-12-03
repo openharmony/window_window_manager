@@ -369,7 +369,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, Function | SmallTes
     appUseControlInfo.appIndex_ = 1;
     appUseControlInfo.isNeedControl_ = true;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
-    ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
+        ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
 }
 }  // namespace
 }

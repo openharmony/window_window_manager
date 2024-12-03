@@ -438,12 +438,8 @@ public:
      * Window Lifecycle
      */
     void RemoveAppInfo(const std::string& bundleName);
-
-    /**
-     * Window Lifecycle
-     */
     void GetMainSessionByBundleNameAndAppIndex(
-        const std::string& bundleName, const int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
+        const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);

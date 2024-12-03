@@ -7627,7 +7627,7 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_, userId);
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    auto task = [this, type, userId, controlList] {
+    taskScheduler_->PostAsyncTask([this, type, userId, controlList] {
         if (notifyAppUseControlListFunc_ != nullptr) {
             notifyAppUseControlListFunc_(type, userId, controlList);
         }
@@ -7643,17 +7643,15 @@ WSError SceneSessionManager::NotifyAppUseControlList(
             }
             mainSessions.clear();
         }
-    };
-    taskScheduler_->PostAsyncTask(task, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 
 void SceneSessionManager::RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func)
 {
-    auto task = [this, callback = std::move(func)] {
+    taskScheduler_->PostAsyncTask([this, callback = std::move(func)] {
         notifyAppUseControlListFunc_ = std::move(callback);
-    };
-    taskScheduler_->PostAsyncTask(task, __func__);
+    }, __func__);
 }
 
 std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingContentChangeInfo(
