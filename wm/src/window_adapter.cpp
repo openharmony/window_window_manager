@@ -1026,7 +1026,7 @@ WMError WindowAdapter::GetGlobalDragResizeType(DragResizeType& dragResizeType)
     return wmsProxy->GetGlobalDragResizeType(dragResizeType);
 }
 
-WMError WindowAdapter::SetAppDragResizeType(const std::string& bundleName, dragResizeType)
+WMError WindowAdapter::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();

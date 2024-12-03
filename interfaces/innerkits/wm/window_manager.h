@@ -930,7 +930,7 @@ public:
      * @param dragResizeType drag resize type to set
      * @return WM_OK means get success, others means failed.
      */
-    WMError SetAppDragResizeType(const std::string& bundleName, dragResizeType);
+    WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
 
     /**
      * @brief Get drag resize type of specific app.

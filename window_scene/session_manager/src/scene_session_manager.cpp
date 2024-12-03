@@ -1741,7 +1741,7 @@ WMError SceneSessionManager::GetGlobalDragResizeType(DragResizeType& dragResizeT
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::SetAppDragResizeType(const std::string& bundleName, dragResizeType)
+WMError SceneSessionManager::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
@@ -1759,10 +1759,10 @@ WMError SceneSessionManager::SetAppDragResizeType(const std::string& bundleName,
         dragResizeTypeLock.unlock();
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         auto sceneSession = GetSceneSessionByBundleName(bundleName);
-        if (sceneSession) {
+        if (sceneSession != nullptr) {
+            GetAppDragResizeType(bundleName, dragResizeType);
             TLOGI(WmsLogTag::WMS_LAYOUT, "to sceneSession: %{public}d, bundleName: %{public}s",
                 dragResizeType, bundleName.c_str());
-            GetAppDragResizeType(bundleName, dragResizeType);
             sceneSession->SetAppDragResizeType(dragResizeType);
         }
         return WMError::WM_OK;
