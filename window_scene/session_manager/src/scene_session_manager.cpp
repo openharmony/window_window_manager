@@ -184,7 +184,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
     static const std::unordered_set<AppExecFwk::ExtensionAbilityType> extensionAbilityTypeWhitelist = {
         AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN
     };
-    static const std::vector<std::tuple<std::string, std::string, std::string>> elementNamewhitelist = {
+    static const std::vector<std::tuple<std::string, std::string, std::string>> elementNameWhitelist = {
         std::make_tuple("com.huawei.hmos.settings", "AccessibilityReConfirmDialog", "phone_settings"),
         std::make_tuple("com.huawei.hmos.settings", "AccessibilityShortKeyDialog", "phone_settings"),
         std::make_tuple("com.huawei.hmos.settings", "DefaultIntentUiExtensionAbility", "phone_settings"),
@@ -197,11 +197,11 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         return true;
     }
 
-    auto it = std::find_if(elementNamewhitelist.begin(), elementNamewhitelist.end(), [&element](const auto& item) {
+    auto it = std::find_if(elementNameWhitelist.begin(), elementNameWhitelist.end(), [&element](const auto& item) {
         auto& [bundleName, abilityName, _] = item;
         return (element.GetBundleName() == bundleName && element.GetAbilityName() == abilityName);
     });
-    if (it != elementNamewhitelist.end()) {
+    if (it != elementNameWhitelist.end()) {
         return true;
     }
 
