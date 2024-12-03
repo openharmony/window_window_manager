@@ -566,7 +566,6 @@ public:
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
     bool IsSystemKeyboard() const;
-    void ActivateKeyboardAvoidArea(bool active);
 
 protected:
     void NotifySessionRectChange(const WSRect& rect,
@@ -663,11 +662,6 @@ protected:
      * Window Layout
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
-
-    /**
-     * keyboard Window
-     */
-    bool keyboardAvoidAreaActive_ = true;
 
 private:
     void NotifyAccessibilityVisibilityChange();
