@@ -134,7 +134,6 @@ public:
     struct SessionChangeCallback : public RefBase {
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
-        NotifySessionEventFunc OnSessionEvent_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
     };
@@ -231,6 +230,7 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+    void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
 
     /**
      * PiP Window
@@ -547,6 +547,7 @@ public:
     void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
+    NotifySessionEventFunc OnSessionEvent_;
 
     /**
      * Gesture Back
@@ -618,7 +619,7 @@ protected:
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
-    
+
     /**
      * Dialog window
      */

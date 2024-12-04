@@ -518,17 +518,13 @@ HWTEST_F(WindowSessionTest, OnSessionEvent01, Function | SmallTest | Level2)
     auto result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
-        new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSessionChangeCallBack, nullptr);
-    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
     result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
     int resultValue = 0;
     NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId, SessionEventParam param)
     { resultValue = 1; };
-    sceneSessionChangeCallBack->OnSessionEvent_ = onSessionEvent_;
+    sceneSession->OnSessionEvent_ = onSessionEvent_;
     result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 }
