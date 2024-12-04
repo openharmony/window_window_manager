@@ -2711,7 +2711,7 @@ public:
      *
      * @return The string corresponding to the scene.
      */
-    virtual const char* GetSceneType() const { return "base"; }
+    virtual std::string GetClassType() const { return "Window"; }
 };
 }
 }
