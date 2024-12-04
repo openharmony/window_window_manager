@@ -37,10 +37,14 @@ public:
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
+
+    /**
+     * Window Layout
+     */
     void NotifySessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID) override;
     void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-        MoveConfiguration moveConfiguration) override;
+        const MoveConfiguration& moveConfiguration) override;
 
     /*
      * Window Hierarchy

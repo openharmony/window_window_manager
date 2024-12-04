@@ -73,8 +73,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
 
 void SubSession::CheckParentDisplayIdAndMove()
 {
-    auto parentSession = GetParentSession();
-    if (parentSession) {
+    if (auto parentSession = GetParentSession()) {
         auto parentDisplayId = parentSession->GetSessionProperty()->GetDisplayId();
         if (parentDisplayId == GetSessionProperty()->GetDisplayId()) {
             return;
@@ -94,7 +93,7 @@ void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason re
 }
 
 void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-    MoveConfiguration moveConfiguration)
+    const MoveConfiguration& moveConfiguration)
 {
     if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
         shouldFollow_.store(false);

@@ -574,8 +574,6 @@ public:
     bool IsSystemKeyboard() const;
 
 protected:
-    virtual void NotifySessionRectChange(const WSRect& rect,
-        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
@@ -668,8 +666,10 @@ protected:
      * Window Layout
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
+    virtual void NotifySessionRectChange(const WSRect& rect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     virtual void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-        MoveConfiguration moveConfiguration);
+        const MoveConfiguration& moveConfiguration);
 
 private:
     void NotifyAccessibilityVisibilityChange();
