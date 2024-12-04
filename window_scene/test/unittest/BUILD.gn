@@ -935,6 +935,9 @@ ohos_unittest("ws_scene_session_manager_supplement_test") {
     "${window_base_path}/test/common/utils:libtestutil",
   ]
 
+  public_deps =
+      [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
+
   external_deps = [
     "ability_base:configuration",
     "ability_base:session_info",

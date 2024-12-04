@@ -31,16 +31,16 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
-    constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
-    constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
-    constexpr int32_t DEFAULT_COLOR_MODE = -1;
-    constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
-    constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
-    constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
-    constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
-    constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
-    constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
+constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
+constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
+constexpr int32_t DEFAULT_COLOR_MODE = -1;
+constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
+constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
+constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
+constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
+constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 }
 using DisplayId = uint64_t;
 /**
@@ -416,6 +416,15 @@ enum class DragEvent : uint32_t {
 };
 
 /**
+ * @brief Enumerates drag resize type.
+ */
+enum class DragResizeType : uint32_t {
+    RESIZE_TYPE_UNDEFINED = 0,
+    RESIZE_EACH_FRAME = 1,
+    RESIZE_WHEN_DRAG_END = 2,
+};
+
+/**
  * @brief Enumerates window tag.
  */
 enum class WindowTag : uint32_t {
@@ -758,9 +767,9 @@ struct Rect {
 
     inline std::string ToString() const
     {
-        std::stringstream ss;
-        ss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
-        return ss.str();
+        std::ostringstream oss;
+        oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
+        return oss.str();
     }
 };
 

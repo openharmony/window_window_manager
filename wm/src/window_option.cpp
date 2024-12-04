@@ -23,7 +23,7 @@ WindowOption::WindowOption(): windowTag_(WindowTag::SYSTEM_WINDOW)
 {
 }
 
-void WindowOption::SetWindowRect(const struct Rect& rect)
+void WindowOption::SetWindowRect(const Rect& rect)
 {
     windowRect_ = rect;
 }

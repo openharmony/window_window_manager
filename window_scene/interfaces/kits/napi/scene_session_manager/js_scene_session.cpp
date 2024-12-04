@@ -426,7 +426,7 @@ void JsSceneSession::BindNativeMethodForFocus(napi_env env, napi_value objValue,
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     : env_(env), weakSession_(session), persistentId_(session->GetPersistentId()),
-    taskScheduler_(std::make_shared<MainThreadScheduler>(env))
+      taskScheduler_(std::make_shared<MainThreadScheduler>(env))
 {
     auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     session->RegisterSessionChangeCallback(sessionchangeCallback);
