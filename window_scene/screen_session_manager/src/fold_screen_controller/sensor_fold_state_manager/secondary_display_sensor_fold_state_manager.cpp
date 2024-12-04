@@ -69,9 +69,8 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(std::vector<
 
     FoldStatus state = FoldStatus::UNKNOWN;
     if (angles.size() != FOLDING_AXIS_SIZE || halls.size() != FOLDING_AXIS_SIZE) {
-        TLOGE(WmsLogTag::DMS, "angles or halls size is not equals %{public}u,
-        angles size %{public}u, halls size %{public}u", FOLDING_AXIS_SIZE,
-        angles.size(), halls.size());
+        TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}lu, halls size %{public}lu",
+            angles.size(), halls.size());
         return state;
     }
 
