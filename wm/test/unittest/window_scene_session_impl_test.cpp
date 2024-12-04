@@ -345,8 +345,8 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function
  */
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function | SmallTest | Level2)
 {
-    const int parentId = 10000;
-    const int displayId = 100;
+    constexpr int parentId = 10000;
+    constexpr int displayId = 100;
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -368,7 +368,7 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function
     windowSceneSession->Create(abilityContext_, nullptr);
     ASSERT_EQ(windowSceneSession->property_->GetParentPersistentId(), option->GetParentId());
 
-    sptr<WindowOption> mainOption = new (std::nothrow) WindowOption();
+    sptr<WindowOption> mainOption = new WindowOption();
     mainOption->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     mainOption->SetDisplayId(displayId);
     sptr<WindowSceneSessionImpl> mainWindow = new (std::nothrow) WindowSceneSessionImpl(option);

@@ -306,10 +306,10 @@ WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<Win
     return WMError::WM_OK;
 }
 
-static void SetPropertySessionInfo(SessionInfo& info, const std::shared_ptr<AbilityRuntime::Context> context)
+static void AdjustPropertySessionInfo(const std::shared_ptr<AbilityRuntime::Context>& context, SessionInfo& info)
 {
     if (!context) {
-        TLOGI(WmsLogTag::WMS_LIFE, "contex is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "context is null");
         return;
     }
     info.moduleName_ = context->GetHapModuleInfo() ? context->GetHapModuleInfo()->moduleName : "";
@@ -332,29 +332,22 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     if (token) {
         property_->SetTokenState(true);
     }
-
-    SetPropertySessionInfo(property_->EditSessionInfo(), context_);
-
-    const WindowType& type = GetType();
+    AdjustPropertySessionInfo(context_, property_->EditSessionInfo());
+    
+    const WindowType type = GetType();
     bool hasToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
-
-    /**
-     * at the following conditions, the parent window must be found on the server side,
-     * because it cannot be found on the client side
-     */
-    bool toServerProcess = property_->GetIsUIExtFirstSubWindow() ||
-                           (property_->GetIsUIExtAnySubWindow() && hasToastFlag);
-    if (WindowHelper::IsSubWindow(type) && toServerProcess) { // sub window, parent window cannot be found here
+    if (WindowHelper::IsSubWindow(type) && (property_->GetIsUIExtFirstSubWindow() ||
+                                            (property_->GetIsUIExtAnySubWindow() && hasToastFlag))) {
         property_->SetParentPersistentId(property_->GetParentId());
         SetDefaultDisplayIdIfNeed();
         property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
-        // creat sub session by parent session
+        // create sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         if (!hasToastFlag) {
             AddSubWindowMapForExtensionWindow();
         }
-    } else if (WindowHelper::IsSubWindow(type)) { // sub window, parent window can be found here
+    } else if (WindowHelper::IsSubWindow(type)) {
         sptr<WindowSessionImpl> parentSession = nullptr;
         auto ret = GetParentSessionAndVerify(hasToastFlag, parentSession);
         if (ret != WMError::WM_OK) {
