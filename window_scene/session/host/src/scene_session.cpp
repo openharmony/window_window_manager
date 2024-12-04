@@ -905,15 +905,14 @@ void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
 
 void SceneSession::RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback)
 {
-    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
         session->onTouchOutside_ = std::move(callback);
-    };
-    PostTask(task, __func__);
+    }, __func__);
 }
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
