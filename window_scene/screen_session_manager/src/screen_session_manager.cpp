@@ -893,11 +893,11 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
         }
         return;
     }
-    if (clientProxy_ && !phyMirrorEnable) {
+    if (clientProxy_ && (!phyMirrorEnable || g_isPcDevice)) {
         clientProxy_->OnScreenConnectionChanged(screenId, screenEvent,
             screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
     }
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+    if (g_isPcDevice) {
         RecoverMultiScreenInfoFromData(screenSession);
     }
     if (phyMirrorEnable) {
@@ -917,7 +917,7 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         FreeDisplayMirrorNodeInner(screenSession);
         isPhyScreenConnected_ = false;
     }
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+    if (g_isPcDevice) {
         if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN ||
             screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
             TLOGI(WmsLogTag::DMS, "need to change screen");
@@ -1523,32 +1523,43 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         TLOGW(WmsLogTag::DMS, "mirror disabled by edm!");
         return screenSession;
     }
-    sptr<ScreenSession> defaultScreen = GetDefaultScreenSession();
-    if (defaultScreen == nullptr || defaultScreen->GetDisplayNode() == nullptr) {
-        TLOGE(WmsLogTag::DMS, "default screen null");
-        return screenSession;
+    ScreenSessionConfig config;
+    if (g_isPcDevice) {
+        config = {
+            .screenId = screenId,
+            .defaultScreenId = defScreenId,
+            .property = property,
+        };
+        screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    } else {
+        sptr<ScreenSession> defaultScreen = GetDefaultScreenSession();
+        if (defaultScreen == nullptr || defaultScreen->GetDisplayNode() == nullptr) {
+            TLOGE(WmsLogTag::DMS, "default screen null");
+            return screenSession;
+        }
+        NodeId nodeId = defaultScreen->GetDisplayNode()->GetId();
+        TLOGI(WmsLogTag::DMS, "physical mirror screen nodeId: %{public}" PRIu64 "", nodeId);
+        config = {
+            .screenId = screenId,
+            .defaultScreenId = defScreenId,
+            .mirrorNodeId = nodeId,
+            .property = property
+        };
+        screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
     }
-    NodeId nodeId = defaultScreen->GetDisplayNode()->GetId();
-    TLOGI(WmsLogTag::DMS, "physical mirror screen nodeId: %{public}" PRIu64 "", nodeId);
-    ScreenSessionConfig config = {
-        .screenId = screenId,
-        .defaultScreenId = defScreenId,
-        .mirrorNodeId = nodeId,
-        .property = property,
-    };
-    screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return nullptr;
     }
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+    if (g_isPcDevice) {
         // pc is none, pad&&phone is mirror
         screenSession->SetName("ExtendedDisplay");
+        screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     } else {
         screenSession->SetName("CastEngine");
+        screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
+        screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     }
-    screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
-    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     screenSession->SetIsInternal(false);
     screenSession->SetIsExtend(true);
     screenSession->SetIsCurrentInUse(true);
