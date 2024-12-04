@@ -570,7 +570,7 @@ napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButto
     return objValue;
 }
 
-bool SetDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
+bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
 {
     int32_t colorMode;
     if (ParseJsValue(jsObject, env, "colorMode", colorMode)) {
@@ -1205,6 +1205,45 @@ static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<Win
             return false;
         }
     }
+    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{pubilc}d, isTopmost: %{pubilc}d, WindowFlag: %{public}d",
+        isModal, isTopmost, windowOption->GetWindowFlags());
+    return true;
+}
+
+static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+{
+    napi_value windowRect = nullptr;
+    napi_get_named_property(env, jsObject, "windowRect", &windowRect);
+    if (windowRect == nullptr || GetType(env, windowRect) != napi_object) {
+        return true;
+    }
+    int32_t width = 0;
+    if (!ParseJsValue(windowRect, env, "width", width)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to width");
+        return false;
+    }
+    int32_t height = 0;
+    if (!ParseJsValue(windowRect, env, "height", height)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to height");
+        return false;
+    }
+    if (width <= 0 || height <= 0) {
+        TLOGE(WmsLogTag::WMS_SUB, "width or height should greater than 0!");
+        return false;
+    }
+    int32_t left = 0;
+    if (!ParseJsValue(windowRect, env, "left", left)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to left");
+        return false;
+    }
+    int32_t top = 0;
+    if (!ParseJsValue(windowRect, env, "top", top)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to top");
+        return false;
+    }
+    Rect rect = { left, top, static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+    windowOption->SetWindowRect(rect);
+    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{pubilc}s", rect.ToString().c_str());
     return true;
 }
 
@@ -1227,6 +1266,9 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
 
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
+    if (!ParseRectParam(env, jsObject, windowOption)) {
+        return false;
+    }
     return ParseModalityParam(env, jsObject, windowOption);
 }
 } // namespace Rosen

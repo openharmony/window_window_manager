@@ -904,6 +904,47 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 
+    /**
+     * @brief Set global drag resize type.
+     * this priority is highest.
+     *
+     * @param dragResizeType global drag resize type to set
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
+
+    /**
+     * @brief Get global drag resize type.
+     * if it is RESIZE_TYPE_UNDEFINED, return default value.
+     *
+     * @param dragResizeType global drag resize type to get
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
+
+    /**
+     * @brief Set drag resize type of specific app.
+     * only when global value is RESIZE_TYPE_UNDEFINED, this value take effect.
+     *
+     * @param bundleName bundleName of specific app
+     * @param dragResizeType drag resize type to set
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
+
+    /**
+     * @brief Get drag resize type of specific app.
+     * effective order:
+     *  1. global value
+     *  2. app value
+     *  3. default value
+     *
+     * @param bundleName bundleName of specific app
+     * @param dragResizeType drag resize type to get
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
+
 private:
     WindowManager();
     ~WindowManager();

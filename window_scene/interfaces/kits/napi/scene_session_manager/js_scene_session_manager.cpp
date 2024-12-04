@@ -111,6 +111,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "PiPControlType", CreateJsSessionPiPControlType(env));
     napi_set_named_property(env, exportObj, "PiPControlStatus", CreateJsSessionPiPControlStatus(env));
     napi_set_named_property(env, exportObj, "Gravity", CreateJsSessionGravity(env));
+    napi_set_named_property(env, exportObj, "DragResizeType", CreateJsSessionDragResizeType(env));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(env, exportObj, "getRootSceneSession", moduleName, JsSceneSessionManager::GetRootSceneSession);
@@ -178,6 +179,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "notifySwitchingUser", moduleName, JsSceneSessionManager::NotifySwitchingUser);
     BindNativeFunction(env, exportObj, "notifySessionRecoverStatus", moduleName,
         JsSceneSessionManager::NotifySessionRecoverStatus);
+    BindNativeFunction(env, exportObj, "setStatusBarDefaultVisibilityPerDisplay", moduleName,
+        JsSceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay);
     BindNativeFunction(env, exportObj, "notifyStatusBarShowStatus", moduleName,
         JsSceneSessionManager::NotifyStatusBarShowStatus);
     BindNativeFunction(env, exportObj, "notifyAINavigationBarShowStatus", moduleName,
@@ -187,6 +190,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetSystemAnimatedScenes);
     BindNativeFunction(env, exportObj, "getSessionSnapshotPixelMap", moduleName,
         JsSceneSessionManager::GetSessionSnapshotPixelMap);
+    BindNativeFunction(env, exportObj, "setAppDragResizeType", moduleName,
+        JsSceneSessionManager::SetAppDragResizeType);
     BindNativeFunction(env, exportObj, "getSessionSnapshotPixelMapSync", moduleName,
         JsSceneSessionManager::GetSessionSnapshotPixelMapSync);
     BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
@@ -995,6 +1000,13 @@ napi_value JsSceneSessionManager::NotifySwitchingUser(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnNotifySwitchingUser(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetStatusBarDefaultVisibilityPerDisplay(env, info) : nullptr;
+}
+
 napi_value JsSceneSessionManager::NotifyStatusBarShowStatus(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
@@ -1035,6 +1047,13 @@ napi_value JsSceneSessionManager::GetSessionSnapshotPixelMapSync(napi_env env, n
     TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetSessionSnapshotPixelMapSync(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SetAppDragResizeType(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetAppDragResizeType(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::SwitchFreeMultiWindow(napi_env env, napi_callback_info info)
@@ -2800,6 +2819,40 @@ napi_value JsSceneSessionManager::OnNotifySwitchingUser(napi_env env, napi_callb
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int64_t displayId = -1;
+    if (!ConvertFromJsValue(env, argv[0], displayId)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    if (displayId < 0) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Failed to convert parameter to displayId");
+        return NapiGetUndefined(env);
+    }
+    bool visible = false;
+    if (!ConvertFromJsValue(env, argv[1], visible)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Failed to convert parameter to visible");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetStatusBarDefaultVisibilityPerDisplay(
+        static_cast<DisplayId>(displayId), visible);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -3150,6 +3203,43 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
         return NapiGetUndefined(env);
     }
     return pixelMapObj;
+}
+
+napi_value JsSceneSessionManager::OnSetAppDragResizeType(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to bundleName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    DragResizeType dragResizeType;
+    if (!ConvertDragResizeTypeFromJs(env, argv[ARGC_ONE], dragResizeType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to dragResizeType");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]dragResizeType: %{public}d, bundleName: %{public}s",
+        dragResizeType, bundleName.c_str());
+    WMError err = SceneSessionManager::GetInstance().SetAppDragResizeTypeInner(bundleName, dragResizeType);
+    if (err != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to call set method");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "System is abnormal"));
+        return NapiGetUndefined(env);
+    }
+    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::GetCustomDecorHeight(napi_env env, napi_callback_info info)
