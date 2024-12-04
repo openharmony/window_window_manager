@@ -128,7 +128,7 @@ using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
-using OnNotifyAvoidAreaChangeForRootFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
+using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -380,6 +380,8 @@ public:
      */
     WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
     WSError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener) override;
+    void RegisterNotifyRootSceneAvoidAreaChangeFunc(NotifyRootSceneAvoidAreaChangeFunc&& func);
+    void UpdateRootSceneAvoidArea();
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
@@ -388,8 +390,6 @@ public:
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
-    void NotifyAvoidAreaChangeForRoot(OnNotifyAvoidAreaChangeForRootFunc&& func);
-    void UpdateAvoidAreaForRootListener();
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -666,7 +666,7 @@ private:
     void UpdateNormalSessionAvoidArea(const int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
-    void UpdateRootSceneSessionAvoidArea(const int32_t persistentId);
+    void UpdateRootSceneSessionAvoidArea(const int32_t persistentId, bool& needUpdate);
 
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
@@ -1093,7 +1093,7 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
-    OnNotifyAvoidAreaChangeForRootFunc onNotifyAvoidAreaChangeForRootFunc_;
+    NotifyRootSceneAvoidAreaChangeFunc onNotifyAvoidAreaChangeForRootFunc_;
 
     struct SessionInfoList {
         int32_t uid_;
