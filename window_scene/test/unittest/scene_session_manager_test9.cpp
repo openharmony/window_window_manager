@@ -849,8 +849,8 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation, Function | SmallTes
     int32_t windowId = 5;
     uint32_t callingTokenId = 0;
     int32_t pid = 0;
-    AppExecFwk::ExtensionAbilityType extensionAbilityTyp = AppExecFwk::ExtensionAbilityType::ACTION;
-    auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityTyp, pid);
+    AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
+    auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     SessionInfo info;
@@ -861,11 +861,11 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation, Function | SmallTes
 
     Session session(info);
     session.getStateFromManagerFunc_ = getStateFalse;
-    ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityTyp, pid);
+    ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
     ASSERT_EQ(ret, WMError::WM_OK);
 
     session.getStateFromManagerFunc_ = getStateTrue;
-    ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityTyp, pid);
+    ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
 }
 
 /**
@@ -880,7 +880,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallT
     int32_t windowId = 0;
     uint32_t callingTokenId = 0;
     int32_t pid = 0;
-    AppExecFwk::ExtensionAbilityType extensionAbilityTyp = AppExecFwk::ExtensionAbilityType::ACTION;
+    AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
@@ -888,15 +888,15 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallT
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
     Session session(info);
     session.getStateFromManagerFunc_ = getStateTrue;
-    auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityTyp, pid);
+    auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
 
     session.property_ = nullptr;
-    ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityTyp, pid);
+    ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
     ASSERT_EQ(ret, WMError::WM_OK);
 
     sceneSession->IsShowOnLockScreen(0);
     session.zOrder_ = 1;
-    ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityTyp, pid);
+    ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
     ASSERT_EQ(ret, WMError::WM_OK);
 }
 
