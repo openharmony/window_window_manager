@@ -533,6 +533,125 @@ HWTEST_F(WindowSessionImplTest3, IsVerticalOrientation, Function | SmallTest | L
     ASSERT_EQ(ret, false);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsVerticalOrientation end";
 }
+
+/**
+ * @tc.name: MarkProcessed
+ * @tc.desc: MarkProcessed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, MarkProcessed, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MarkProcessed start";
+    window_ = GetTestWindowImpl("MarkProcessed");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = 1;
+    window_->state_ = WindowState::STATE_CREATED;
+    auto ret = window_->MarkProcessed(1);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: MarkProcessed end";
+}
+
+/**
+ * @tc.name: UpdateRectForOtherReasonTask
+ * @tc.desc: UpdateRectForOtherReasonTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UpdateRectForOtherReasonTask, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRectForOtherReasonTask start";
+    window_ = GetTestWindowImpl("UpdateRectForOtherReasonTask");
+    ASSERT_NE(window_, nullptr);
+    Rect wmRect = { 0, 0, 0, 0 };
+    Rect preRect = { 0, 0, 0, 0 };
+    WindowSizeChangeReason wmReason = WindowSizeChangeReason::UNDEFINED;
+    std::shared_ptr<RSTransaction> rsTransaction = nullptr;
+    window_->lastSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    window_->postTaskDone_ = false;
+    window_->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
+    ASSERT_EQ(window_->postTaskDone_, true);
+    window_->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
+    window_->postTaskDone_ = false;
+    wmRect.posX_ = 1;
+    window_->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
+    ASSERT_EQ(window_->postTaskDone_, true);
+
+    window_->handler_ = nullptr;
+    window_->UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRectForOtherReasonTask end";
+}
+
+/**
+ * @tc.name: CopyUniqueDensityParameter
+ * @tc.desc: CopyUniqueDensityParameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: CopyUniqueDensityParameter start";
+    window_ = GetTestWindowImpl("CopyUniqueDensityParameter");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionImpl> parentWindow = GetTestWindowImpl("CopyUniqueDensityParameter01");;
+    ASSERT_NE(parentWindow, nullptr);
+    window_->useUniqueDensity_ = false;
+    window_->virtualPixelRatio_ = 1.0f;
+    parentWindow->useUniqueDensity_ = true;
+    parentWindow->virtualPixelRatio_ = 1.0f;
+    window_->CopyUniqueDensityParameter(parentWindow);
+    ASSERT_EQ(window_->useUniqueDensity_, true);
+    parentWindow = nullptr;
+    window_->CopyUniqueDensityParameter(parentWindow);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: CopyUniqueDensityParameter end";
+}
+
+/**
+ * @tc.name: SetRaiseByClickEnabled
+ * @tc.desc: SetRaiseByClickEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetRaiseByClickEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRaiseByClickEnabled start";
+    window_ = GetTestWindowImpl("SetRaiseByClickEnabled");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->parentPersistentId_ = 2;
+    window_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    window_->state_ = WindowState::STATE_SHOWN;
+    window_->property_->persistentId_ = 1;
+    auto ret = window_->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRaiseByClickEnabled end";
+}
+
+/**
+ * @tc.name: SetSubWindowModal
+ * @tc.desc: SetSubWindowModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetSubWindowModal, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModal start";
+    window_ = GetTestWindowImpl("SetSubWindowModal");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = 1;
+    window_->state_ = WindowState::STATE_CREATED;
+    window_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    ModalityType modalityType = ModalityType::APPLICATION_MODALITY;
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window_->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window_->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    auto ret = window_->SetSubWindowModal(true, modalityType);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModal end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
