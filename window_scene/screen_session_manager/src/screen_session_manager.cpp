@@ -755,11 +755,11 @@ bool ScreenSessionManager::IsScreenRestored(sptr<ScreenSession> screenSession)
 {
     const ScreenProperty& screenProperty = screenSession->GetScreenProperty();
     ScreenId currentScreenId = screenSession->GetScreenId();
-    int32_t currentWidth = screenProperty.GetBounds().rect_.GetWidth();
-    int32_t currentHeight = screenProperty.GetBounds().rect_.GetHeight();
+    uint32_t currentWidth = screenProperty.GetBounds().rect_.GetWidth();
+    uint32_t currentHeight = screenProperty.GetBounds().rect_.GetHeight();
     TLOGI(WmsLogTag::DMS, "currentScreenId: %{public}" PRIu64
         ", currentWidth: %{public}d, currentHeight: %{public}d", currentScreenId, currentWidth, currentHeight);
-    std::map<uint64_t, std::pair<int32_t, int32_t>> resolution;
+    std::map<ScreenId, std::pair<uint32_t, uint32_t>> resolution;
     bool getResolution = ScreenSettingHelper::GetSettingRecoveryResolutionMap(resolution);
     if (!getResolution) {
         TLOGE(WmsLogTag::DMS, "get restored resolution failed");
