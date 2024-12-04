@@ -1089,7 +1089,7 @@ WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         return WSError::WS_ERROR_IPC_FAILED;
     }
     uint32_t size = reply.ReadUint32();
-    if (size > 100) {
+    if (size > ROTATE_ANIMATION_DURATION) {
         return WSError::WS_ERROR_IPC_FAILED;
     }
     for (uint32_t i = 0; i < size; i++) {
