@@ -643,7 +643,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
         }
-        WSError wsError = session->HandleOnSessionDragEvent(event);
+        WSError wsError = session->HandleSessionDragEvent(event);
         if (wsError != WSError::WS_OK) {
             WLOGFE("[WMSCom] event: %{public}d, handle event drag failed", static_cast<int32_t>(event));
         }
@@ -656,7 +656,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::HandleOnSessionDragEvent(SessionEvent event)
+WSError SceneSession::HandleSessionDragEvent(SessionEvent event)
 {
     if (moveDragController_ &&
         (event == SessionEvent::EVENT_DRAG || event == SessionEvent::EVENT_DRAG_START)) {

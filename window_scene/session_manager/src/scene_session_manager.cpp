@@ -1742,7 +1742,7 @@ WMError SceneSessionManager::GetGlobalDragResizeType(DragResizeType& dragResizeT
 
 WMError SceneSessionManager::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
     if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
