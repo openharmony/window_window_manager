@@ -999,15 +999,14 @@ WSError Session::UpdateClientDisplayId(DisplayId updatedDisplayId)
     if (updatedDisplayId == lastUpdatedDisplayId_) {
         return WSError::WS_DO_NOTHING;
     }
-    if (sessionStage_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
-            GetPersistentId(), updatedDisplayId, lastUpdatedDisplayId_);
-        lastUpdatedDisplayId_ = updatedDisplayId;
-        UpdateDisplayId(updatedDisplayId);
-    } else {
+    if (sessionStage_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
+          GetPersistentId(), updatedDisplayId, lastUpdatedDisplayId_);
+    lastUpdatedDisplayId_ = updatedDisplayId;
+    UpdateDisplayId(updatedDisplayId);
     return WSError::WS_OK;
 }
 
