@@ -1000,7 +1000,7 @@ HWTEST_F(SceneSessionManagerTest8, IsWindowSupportCacheForRecovering, Function |
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
-    sceneSession1->isRecovered_ = true;
+    sceneSession1->isRecovered_ = false;
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession1));
     sptr<SceneSession> sceneSession2 = nullptr;
     ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession2));
@@ -1063,7 +1063,7 @@ HWTEST_F(SceneSessionManagerTest8, IsWindowSupportCacheForRecovering02, Function
     ssm_->recoveringFinished_ = false;
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     property->parentPersistentId_ = 1;
-    NotifyBindDialogSessionFunc func = [](const sptr<SceneSession>& sceneSession){};
+    NotifyBindDialogSessionFunc func = [](const sptr<SceneSession>& sceneSession) {};
     ssm_->bindDialogTargetFuncMap_.insert(std::make_pair(1, func));
     auto ret = ssm_->IsWindowSupportCacheForRecovering(sceneSession, property);
     EXPECT_EQ(false, ret);
@@ -1083,14 +1083,14 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Func
     SessionInfo info;
     info.bundleName_ = "UnregisterSpecificSessionCreateListener";
     info.abilityName_ = "UnregisterSpecificSessionCreateListener";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_ = nullptr;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);
 
-    NotifyCreateKeyboardSessionFunc func = [](const sptr<SceneSession>& keyboardSessiom,
+    NotifyCreateKeyboardSessionFunc func = [](const sptr<SceneSession>& keyboardSession,
         const sptr<SceneSession>& panelSession) {};
     ssm_->SetCreateKeyboardSessionListener(func);
 
