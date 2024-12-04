@@ -3933,8 +3933,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_OK;
     }
 
-    auto hostSession = GetHostSession();
-    if (hostSession != nullptr) {
+    if (auto hostSession = GetHostSession()) {
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
