@@ -23,6 +23,7 @@
 
 namespace OHOS::Rosen {
 enum class SessionInterfaceCode;
+constexpr int32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
 class SessionProxy : public IRemoteProxy<ISession> {
 public:
     explicit SessionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<ISession>(impl) {}

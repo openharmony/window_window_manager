@@ -79,6 +79,8 @@ public:
     Ace::UIContent* GetUIContent() const override;
     WMError Destroy() override;
 
+    std::string GetClassType() const override { return "ScreenScene"; }
+
 private:
     mutable std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;
