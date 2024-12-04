@@ -1987,45 +1987,45 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 2000, 1};
     rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 2000, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 500, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 500, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::DRAG_MOVE);
 }
 
@@ -2046,22 +2046,22 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, Function | SmallTest | Leve
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {2, 1, 1, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 2, 1, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 }
 
