@@ -42,6 +42,9 @@ PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession, i
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "controller is nullptr");
                 return;
             }
+            if (status != SuperFoldStatus::KEYBOARD && status != prevStatus) {
+                controller->UpdateRect();
+            }
             if ((prevStatus == SuperFoldStatus::HALF_FOLDED && status == SuperFoldStatus::FOLDED) ||
                 (prevStatus == SuperFoldStatus::FOLDED && status == SuperFoldStatus::HALF_FOLDED)) {
                 return;
@@ -256,5 +259,21 @@ WSRectF PcFoldScreenController::CalculateMovingVelocity()
         return velocity;
     }
     return velocity;
+}
+
+/**
+ * The callback that is triggered when the screen fold status changes.
+ */
+void PcFoldScreenController::UpdateRect()
+{
+    auto sceneSession = weakSceneSession_.promote();
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
+        return;
+    }
+    auto ret = sceneSession->NotifyClientToUpdateRect("ScreenFoldStatusChanged", nullptr);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "NotifyClientToUpdateRect Fail, id: %{public}d", GetPersistentId());
+    }
 }
 } // namespace OHOS::Rosen

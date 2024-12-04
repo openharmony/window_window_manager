@@ -19,7 +19,6 @@
 #include "wm_math.h"
 
 namespace OHOS::Rosen {
-
 namespace {
 // moving
 constexpr int32_t MOVING_RESPONSE = 50;
@@ -81,6 +80,12 @@ void PcFoldScreenManager::SetDisplayRects(
     defaultDisplayRect_ = defaultDisplayRect;
     virtualDisplayRect_ = virtualDisplayRect;
     foldCreaseRect_ = foldCreaseRect;
+}
+
+SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus()
+{
+    std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
+    return screenFoldStatus_;
 }
 
 bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId)
