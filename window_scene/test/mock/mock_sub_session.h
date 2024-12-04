@@ -21,9 +21,9 @@ namespace OHOS {
 namespace Rosen {
 class SubSessionMocker : public SubSession {
 public:
-    SubSessionMocker(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback) :
-        SubSession(info, specificCallback) {};
-    ~SubSessionMocker() {};
+    SubSessionMocker(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
+        : SubSession(info, specificCallback) {}
+    ~SubSessionMocker() {}
     MOCK_METHOD(void, SetScreenId, (uint64_t screenId), (override));
     MOCK_METHOD(void, NotifySessionRectChange, (const WSRect& rect,
         SizeChangeReason reason, DisplayId displayId), (override));
