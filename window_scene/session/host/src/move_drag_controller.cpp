@@ -148,6 +148,16 @@ bool MoveDragController::GetMovable() const
     return isMovable_;
 }
 
+void MoveDragController::SetTargetRect(const WSRect& rect)
+{
+    moveDragProperty_.targetRect_ = rect;
+}
+
+WSRect MoveDragController::GetOriginalRect() const
+{
+    return moveDragProperty_.originalRect_;
+}
+
 WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
 {
     DisplayId relatedDisplayId = DISPLAY_ID_INVALID;

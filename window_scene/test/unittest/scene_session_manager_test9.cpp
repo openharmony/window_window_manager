@@ -46,6 +46,16 @@ void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const 
 {
 }
 
+bool getStateFalse(const ManagerState key)
+{
+    return false;
+}
+
+bool getStateTrue(const ManagerState key)
+{
+    return true;
+}
+
 bool TraverseFuncTest(const sptr<SceneSession>& session)
 {
     return true;
@@ -825,6 +835,146 @@ HWTEST_F(SceneSessionManagerTest9, ShiftFocus, Function | SmallTest | Level3)
     ASSERT_EQ(ret, WSError::WS_OK);
     ASSERT_EQ(focusedSession->isFocused_, false);
     ASSERT_EQ(nextSession->isFocused_, true);
+}
+
+/**
+ * @tc.name: CheckUIExtensionCreation
+ * @tc.desc: CheckUIExtensionCreation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AppExecFwk::ElementName element;
+    int32_t windowId = 5;
+    uint32_t callingTokenId = 0;
+    int32_t pid = 0;
+    AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
+    auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
+    sptr<SceneSession> sceneSession = new SceneSession(info, callback);
+    ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
+    windowId = 0;
+
+    Session session(info);
+    session.getStateFromManagerFunc_ = getStateFalse;
+    ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    session.getStateFromManagerFunc_ = getStateTrue;
+    ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+}
+
+/**
+ * @tc.name: CheckUIExtensionCreation01
+ * @tc.desc: CheckUIExtensionCreation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AppExecFwk::ElementName element;
+    int32_t windowId = 0;
+    uint32_t callingTokenId = 0;
+    int32_t pid = 0;
+    AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
+    sptr<SceneSession> sceneSession = new SceneSession(info, callback);
+    ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
+    Session session(info);
+    session.getStateFromManagerFunc_ = getStateTrue;
+    auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+
+    session.property_ = nullptr;
+    ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    sceneSession->IsShowOnLockScreen(0);
+    session.zOrder_ = 1;
+    ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetLockScreenZorder
+ * @tc.desc: GetLockScreenZorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, GetLockScreenZorder, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
+    sptr<SceneSession> sceneSession = new SceneSession(info, callback);
+
+    ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
+    auto ret = ssm_->GetLockScreenZorder();
+    ASSERT_EQ(ret, 0);
+
+    Session session(info);
+    session.isScreenLockWindow_ = true;
+    ret = ssm_->GetLockScreenZorder();
+    ASSERT_EQ(ret, 0);
+
+    ssm_->pipWindowSurfaceId_ = 0;
+    RSSurfaceNodeConfig config;
+    session.surfaceNode_ = std::make_shared<RSSurfaceNode>(config, true);
+
+    ssm_->SelectSesssionFromMap(0);
+    ssm_->NotifyPiPWindowVisibleChange(true);
+    ssm_->NotifyPiPWindowVisibleChange(false);
+}
+
+/**
+ * @tc.name: IsLastPiPWindowVisible
+ * @tc.desc: IsLastPiPWindowVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, IsLastPiPWindowVisible, Function | SmallTest | Level3)
+{
+    uint64_t surfaceId = 0;
+    WindowVisibilityState lastVisibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, nullptr));
+    auto ret = ssm_->IsLastPiPWindowVisible(surfaceId, lastVisibilityState);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsLastPiPWindowVisible01
+ * @tc.desc: IsLastPiPWindowVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, IsLastPiPWindowVisible01, Function | SmallTest | Level3)
+{
+    uint64_t surfaceId = 0;
+    WindowVisibilityState lastVisibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
+    sptr<SceneSession> sceneSession = new SceneSession(info, callback);
+    ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, nullptr));
+
+    struct RSSurfaceNodeConfig config;
+    sceneSession->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_EQ(nullptr, sceneSession->surfaceNode_);
+    sceneSession->surfaceNode_->id_ = 0;
+    ssm_->SelectSesssionFromMap(0);
+    sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
+    property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+
+    auto ret = ssm_->IsLastPiPWindowVisible(surfaceId, lastVisibilityState);
+    ASSERT_EQ(ret, false);
+    ssm_->isScreenLocked_ = true;
+    ret = ssm_->IsLastPiPWindowVisible(surfaceId, lastVisibilityState);
+    ASSERT_EQ(ret, false);
+    lastVisibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
+    ret = ssm_->IsLastPiPWindowVisible(surfaceId, lastVisibilityState);
+    ASSERT_EQ(ret, false);
 }
 }
 } // namespace Rosen
