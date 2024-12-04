@@ -1320,11 +1320,11 @@ napi_value CreateJsSessionDragResizeType(napi_env env)
     }
 
     napi_set_named_property(env, objValue, "RESIZE_TYPE_UNDEFINED", CreateJsValue(env,
-        static_cast<int32_t>(DragResizeType::RESIZE_TYPE_UNDEFINED)));
+        static_cast<uint32_t>(DragResizeType::RESIZE_TYPE_UNDEFINED)));
     napi_set_named_property(env, objValue, "RESIZE_EACH_FRAME", CreateJsValue(env,
-        static_cast<int32_t>(DragResizeType::RESIZE_EACH_FRAME)));
+        static_cast<uint32_t>(DragResizeType::RESIZE_EACH_FRAME)));
     napi_set_named_property(env, objValue, "RESIZE_WHEN_DRAG_END", CreateJsValue(env,
-        static_cast<int32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)));
+        static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)));
     return objValue;
 }
 
