@@ -54,7 +54,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
-        if (shouldFollow_) {
+        if (session->shouldFollow_) {
             session->CheckParentDisplayIdAndMove();
         }
         // use property from client
