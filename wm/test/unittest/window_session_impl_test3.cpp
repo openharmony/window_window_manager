@@ -653,6 +653,7 @@ HWTEST_F(WindowSessionImplTest3, SetSubWindowModal, Function | SmallTest | Level
 
     window_->vsyncStation_ = nullptr;
     window_->ClearVsyncStation();
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModal end";
 }
 }
 } // namespace Rosen
