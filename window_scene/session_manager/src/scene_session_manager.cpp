@@ -8602,7 +8602,7 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& nee
     if (rootSceneSession != nullptr) {
     AvoidArea avoidArea = rootSceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
     ret = UpdateSessionAvoidAreaIfNeed(
-        rootScene->GetPersistentId(), rootSceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
+        rootSceneSession->GetPersistentId(), rootSceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
     needUpdate = needUpdate || ret;
     }
     for (auto& persistentId : avoidAreaListenerSessionSet_) {

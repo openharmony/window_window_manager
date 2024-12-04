@@ -183,7 +183,7 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
 
 void RootSceneSession::SetRootSessionRect(const WSRect& rect)
 {
-    if (winRect_ != rect) {
+    if (!rect.IsInvalid() && winRect_ != rect) {
         winRect_ = rect;
         TLOGI(WmsLogTag::WMS_IMMS, "rootsession update rect: %{public}s", winRect_.ToString().c_str());
         if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_) {
