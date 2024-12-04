@@ -137,7 +137,7 @@ void SecondaryFoldSensorManager::HandlePostureData(const SensorEvent * const eve
     }
     globalAngle[SENSOR_EVENT_FIRST_DATA] = postureBc;
     globalAngle[SENSOR_EVENT_SECOND_DATA] = postureAb;
-    if (isDataBeyondBoundary()) {
+    if (IsDataBeyondBoundary()) {
         return;
     }
     TLOGD(WmsLogTag::DMS, "%{public}s, %{public}s",
@@ -176,7 +176,7 @@ void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const eve
     }
     globalHall[SENSOR_EVENT_FIRST_DATA] = hallBc;
     globalHall[SENSOR_EVENT_SECOND_DATA] = hallAb;
-    if (isDataBeyondBoundary()) {
+    if (IsDataBeyondBoundary()) {
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}s, %{public}s",
@@ -193,7 +193,8 @@ void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const eve
 bool SecondaryFoldSensorManager::IsDataBeyondBoundary()
 {
     if (globalAngle.size() < SECONDARY_FOLDING_AXIS_SIZE || globalHall.size() < SECONDARY_FOLDING_AXIS_SIZE) {
-        TLOGW(WmsLogTag::DMS, "global angles and halls size is less than %{public}lu.", SECONDARY_FOLDING_AXIS_SIZE);
+        TLOGW(WmsLogTag::DMS, "oversize, global angles: %{public}zu, halls size: %{public}zu.",
+            globalAngle.size(), globalHall.size());
         return true;
     }
     for (size_t i = 0; i < SECONDARY_FOLDING_AXIS_SIZE; i++) {
@@ -202,7 +203,7 @@ bool SecondaryFoldSensorManager::IsDataBeyondBoundary()
         if (hall == USHRT_MAX ||
             std::isless(angle, ANGLE_MIN_VAL) ||
             std::isgreater(angle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
-            TLOGW(WmsLogTag::DMS, "i = %{public}lu, angle = %{public}f, hall = %{public}u", i, angle, hall);
+            TLOGW(WmsLogTag::DMS, "i = %{public}zu, angle = %{public}f, hall = %{public}u", i, angle, hall);
             return true;
         }
     }
@@ -229,7 +230,7 @@ bool SecondaryFoldSensorManager::GetPostureInner(const SensorEvent * const event
     valueAb = (*postureData).postureAb;
     valueAbAnti = (*postureData).postureAbAnti;
     TLOGD(WmsLogTag::DMS, "PostureData postureBc: %{public}f, postureAb: %{public}f, postureAbAnti: %{public}f.",
-        valueBc, valueAb, postureAbAnti);
+        valueBc, valueAb, valueAbAnti);
     return true;
 }
 
@@ -257,6 +258,16 @@ bool SecondaryFoldSensorManager::GetHallInner(const SensorEvent * const event, u
     valueAb = (uint16_t)(*extHallData).hallAb;
     TLOGI(WmsLogTag::DMS, "HallData hallBc: %{public}u, hallAb: %{public}u.", valueBc, valueAb);
     return true;
+}
+
+bool SecondaryFoldSensorManager::IsPostureUserCallbackInvalid()
+{
+    return postureUser.callback == nullptr;
+}
+
+bool SecondaryFoldSensorManager::IsHallUserCallbackInvalid()
+{
+    return hallUser.callback == nullptr;
 }
 } // Rosen
 } // OHOS
