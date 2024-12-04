@@ -173,6 +173,7 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env);
 napi_value CreateJsSessionPiPControlType(napi_env env);
 napi_value CreateJsSessionPiPControlStatus(napi_env env);
 napi_value CreateJsSessionGravity(napi_env env);
+napi_value CreateJsSessionDragResizeType(napi_env env);
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect);
