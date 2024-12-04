@@ -37,14 +37,16 @@ public:
     void RegisterApplicationStateObserver();
     void SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy);
     void SetSensorFoldStateManager(sptr<SensorFoldStateManager> sensorFoldStateManager);
-    void SecondarySensorPostureDataCallback();
-    void SecondarySensorHallDataCallbackExt();
+    void SecondarySensorPostureDataCallback(SensorEvent *event);
+    void SecondarySensorHallDataCallbackExt(SensorEvent *event);
     void RegisterPostureCallback();
     void RegisterHallCallback();
     void UnRegisterPostureCallback();
     void UnRegisterHallCallback();
     void HandlePostureData(const SensorEvent * const event);
     void HandleHallDataExt(const SensorEvent * const event);
+    bool IsPostureUserCallbackInvalid();
+    bool IsHallUserCallbackInvalid();
 private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
     sptr<SensorFoldStateManager> sensorFoldStateManager_;

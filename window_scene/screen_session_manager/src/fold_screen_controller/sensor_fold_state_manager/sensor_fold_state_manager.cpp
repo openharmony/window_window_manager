@@ -38,6 +38,12 @@ void SensorFoldStateManager::HandleAngleChange(float angle, int hall, sptr<FoldS
 
 void SensorFoldStateManager::HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) {}
 
+void HandleAngleChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
+    sptr<FoldScreenPolicy> foldScreenPolicy) {}
+
+void HandleHallChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
+    sptr<FoldScreenPolicy> foldScreenPolicy) {}
+
 void SensorFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) {}
 
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angle,
@@ -57,6 +63,34 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
     NotifyReportFoldStatusToScb(mState_, nextState, angle);
+
+    mState_ = nextState;
+    if (foldScreenPolicy != nullptr) {
+        foldScreenPolicy->SetFoldStatus(mState_);
+    }
+    ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
+    if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
+        foldScreenPolicy->SendSensorResult(mState_);
+    }
+}
+
+void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std::vector<float> &angles,
+    sptr<FoldScreenPolicy> foldScreenPolicy)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (nextState == FoldStatus::UNKNOWN) {
+        WLOGFW("fold state is UNKNOWN");
+        return;
+    }
+    if (mState_ == nextState) {
+        WLOGFD("fold state doesn't change, foldState = %{public}d.", mState_);
+        return;
+    }
+    WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
+    ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angles);
+    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+
+    NotifyReportFoldStatusToScb(mState_, nextState, angles);
 
     mState_ = nextState;
     if (foldScreenPolicy != nullptr) {
@@ -90,6 +124,23 @@ void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus,
     }
 }
 
+void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
+    const std::vector<float> &postureAngles)
+{
+    TLOGI(WmsLogTag::DMS, "currentStatus: %{public}d, nextStatus: %{public}d, %{public}s",
+        currentStatus, nextStatus, FoldScreenStateInternel::TransVec2Str(postureAngles, "postureAngles").c_str());
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "NOTIFY_FOLD_STATE_CHANGE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "CURRENT_FOLD_STATUS", currentStatus,
+        "NEXT_FOLD_STATUS", nextStatus,
+        "SENSOR_POSTURE", FoldScreenStateInternel::TransVec2Str(postureAngles, "postureAngles"));
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
 void SensorFoldStateManager::ClearState(sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     mState_ = FoldStatus::UNKNOWN;
@@ -101,7 +152,6 @@ void SensorFoldStateManager::RegisterApplicationStateObserver()
     TLOGI(WmsLogTag::DMS, "current device is not supported");
 }
 
-
 void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus,
     float postureAngle)
 {
@@ -112,6 +162,21 @@ void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatu
 
     std::vector<std::string> screenFoldInfo {std::to_string(static_cast<int32_t>(currentStatus)),
         std::to_string(static_cast<int32_t>(nextStatus)), std::to_string(duration), std::to_string(postureAngle)};
+    ScreenSessionManager::GetInstance().ReportFoldStatusToScb(screenFoldInfo);
+}
+
+void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatus, FoldStatus nextStatus,
+    const std::vector<float> &postureAngles)
+{
+    std::chrono::time_point<std::chrono::system_clock> timeNow = std::chrono::system_clock::now();
+    int32_t duration = static_cast<int32_t>(
+        std::chrono::duration_cast<std::chrono::seconds>(timeNow - mLastStateClock_).count());
+    mLastStateClock_ = timeNow;
+    std::vector<std::string> screenFoldInfo {std::to_string(static_cast<int32_t>(currentStatus)),
+        std::to_string(static_cast<int32_t>(nextStatus)), std::to_string(duration)};
+    for (const float &angle : postureAngles) {
+        screenFoldInfo.emplace_back(std::to_string(angle));
+    }
     ScreenSessionManager::GetInstance().ReportFoldStatusToScb(screenFoldInfo);
 }
 

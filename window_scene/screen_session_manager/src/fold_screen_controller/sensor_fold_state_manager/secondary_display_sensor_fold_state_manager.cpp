@@ -46,22 +46,22 @@ constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 SecondaryDisplaySensorFoldStateManager::SecondaryDisplaySensorFoldStateManager() {}
 SecondaryDisplaySensorFoldStateManager::~SecondaryDisplaySensorFoldStateManager() {}
 
-void SecondaryDisplaySensorFoldStateManager::HandleAngleChange(std::vector<float> angles, std::vector<uint16_t> halls,
-    sptr<FoldScreenPolicy> foldScreenPolicy)
+void SecondaryDisplaySensorFoldStateManager::HandleAngleChange(const std::vector<float> &angles,
+    const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     FoldStatus nextState = GetNextFoldState(angles, halls);
     HandleSensorChange(nextState, angles, foldScreenPolicy);
 }
 
-void SecondaryDisplaySensorFoldStateManager::HandleHallChange(std::vector<float> angles, std::vector<uint16_t> halls,
-    sptr<FoldScreenPolicy> foldScreenPolicy)
+void SecondaryDisplaySensorFoldStateManager::HandleHallChange(const std::vector<float> &angles,
+    const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     FoldStatus nextState = GetNextFoldState(angles, halls);
     HandleSensorChange(nextState, angles, foldScreenPolicy);
 }
 
-FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(std::vector<float> angles,
-    std::vector<uint16_t> halls)
+FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(std::vector<float> &angles,
+    const std::vector<uint16_t> &halls)
 {
     TLOGD(WmsLogTag::DMS, "%{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(angles, "angles").c_str(),
