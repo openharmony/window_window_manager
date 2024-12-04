@@ -1431,9 +1431,9 @@ void SceneSession::UpdateSessionRectPosYFromClient(WSRect& rect)
     if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
         return;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, lastUpdatedDisplayId: %{public}" PRIu64,
-        GetPersistentId(), lastUpdatedDisplayId);
-    if (lastUpdatedDisplayId != VIRTUAL_DISPLAY_ID) {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, lastUpdatedDisplayId_: %{public}" PRIu64,
+        GetPersistentId(), lastUpdatedDisplayId_);
+    if (lastUpdatedDisplayId_ != VIRTUAL_DISPLAY_ID) {
         return;
     }
     std::string logRect = "last: " + rect.ToString() + ", cur: ";

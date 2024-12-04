@@ -547,6 +547,7 @@ public:
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId updatedDisplayId);
+    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
 
     /**
@@ -692,7 +693,8 @@ protected:
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
-    DisplayId lastUpdatedDisplayId = 0;
+    DisplayId lastUpdatedDisplayId_ = 0;
+    SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /**
      * Window ZOrder

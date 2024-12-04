@@ -1746,11 +1746,11 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
 }
 
 /**
- * @tc.name: UpdateSessionRectPosYFromClient
+ * @tc.name: UpdateSessionRectPosYFromClient01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "UpdateSessionRectPosYFromClient";
@@ -1775,11 +1775,11 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient, Function | SmallTest
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
             PcFoldScreenManager::GetInstance().GetDisplayRects();
-    sceneSession->lastUpdatedDisplayId = 0;
+    sceneSession->lastUpdatedDisplayId_ = 0;
     rect = {0, 100, 100, 100};
     sceneSession->UpdateSessionRectPosYFromClient(rect);
     EXPECT_EQ(rect.posY_, 100);
-    sceneSession->lastUpdatedDisplayId = 999;
+    sceneSession-> = 999;
     rect = {0, 100, 100, 100};
     auto rect2 = rect;
     sceneSession->UpdateSessionRectPosYFromClient(rect);

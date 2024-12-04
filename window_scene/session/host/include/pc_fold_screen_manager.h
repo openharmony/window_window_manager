@@ -27,9 +27,7 @@
 #include "interfaces/include/ws_common.h"
 #include "wm_single_instance.h"
 
-
 namespace OHOS::Rosen {
-
 using FoldScreenStatusChangeCallback = std::function<void(DisplayId displayId,
     SuperFoldStatus status, SuperFoldStatus prevStatus)>;
 
@@ -44,6 +42,7 @@ WM_DECLARE_SINGLE_INSTANCE(PcFoldScreenManager);
 public:
     void UpdateFoldScreenStatus(DisplayId displayId, SuperFoldStatus status,
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
+    SuperFoldStatus GetScreenFoldStatus();
     bool IsHalfFolded(DisplayId displayId);
 
     std::tuple<WSRect, WSRect, WSRect> GetDisplayRects();
@@ -94,10 +93,13 @@ private:
     float vpr_ { 1.5f }; // display vp ratio
     SuperFoldStatus prevScreenFoldStatus_ { SuperFoldStatus::UNKNOWN };
     SuperFoldStatus screenFoldStatus_ { SuperFoldStatus::UNKNOWN };
+    // Above guarded by displayInfoMutex_
+
     std::shared_mutex rectsMutex_; // protect rects
     WSRect defaultDisplayRect_;
     WSRect virtualDisplayRect_;
     WSRect foldCreaseRect_;
+    // Above guarded by rectsMutex_
 
     /*
      * arranged rect
@@ -107,6 +109,7 @@ private:
     std::mutex arrangedRectsMutex_;
     WSRect defaultArrangedRect_;
     WSRect virtualArrangedRect_;
+    // Above guarded by arrangedRectsMutex_
 
     void ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId,
         SuperFoldStatus status, SuperFoldStatus prevStatus);

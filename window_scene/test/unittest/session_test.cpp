@@ -207,29 +207,28 @@ HWTEST_F(WindowSessionTest, UpdateClientDisplayId01, Function | SmallTest | Leve
 {
     ASSERT_NE(session_, nullptr);
     session_->sessionStage_ = nullptr;
-    session_->lastUpdatedDisplayId = 0;
+    session_->lastUpdatedDisplayId_ = 0;
     DisplayId updatedDisplayId = 0;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
     updatedDisplayId = 10;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_ERROR_NULLPTR);
-    EXPECT_NE(updatedDisplayId, session_->lastUpdatedDisplayId);
+    EXPECT_NE(updatedDisplayId, session_->lastUpdatedDisplayId_);
 
     ASSERT_NE(mockSessionStage_, nullptr);
     session_->sessionStage_ = mockSessionStage_;
     updatedDisplayId = 0;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
     updatedDisplayId = 100;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
 }
 
 /**
  * @tc.name: UpdateClientRectPosYAndDisplayId01
  * @tc.desc: UpdateClientRectPosYAndDisplayId
  * @tc.type: FUNC
- * @tc.require: #I6JLSI
  */
 HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | SmallTest | Level2)
 {
