@@ -218,6 +218,321 @@ HWTEST_F(WindowSessionImplTest3, IsFocused, Function | SmallTest | Level2)
     ASSERT_EQ(ret, window_->isFocused_);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFocused end";
 }
+
+/**
+ * @tc.name: IsNotifyInteractiveDuplicative
+ * @tc.desc: IsNotifyInteractiveDuplicative
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsNotifyInteractiveDuplicative, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsNotifyInteractiveDuplicative start";
+    window_ = GetTestWindowImpl("IsNotifyInteractiveDuplicative");
+    ASSERT_NE(window_, nullptr);
+    window_->hasFirstNotifyInteractive_ = true;
+    window_->interactive_ = true;
+    window_->NotifyForegroundInteractiveStatus(true);
+    auto ret = window_->IsNotifyInteractiveDuplicative(true);
+    ASSERT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "IsNotifyInteractiveDuplicative: IsFocused end";
+}
+
+/**
+ * @tc.name: SetMainWindowTopmost
+ * @tc.desc: SetMainWindowTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetMainWindowTopmost, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetMainWindowTopmost start";
+    window_ = GetTestWindowImpl("SetMainWindowTopmost");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    auto ret = window_->SetMainWindowTopmost(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetMainWindowTopmost end";
+}
+
+/**
+ * @tc.name: GetRequestedOrientation
+ * @tc.desc: GetRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetRequestedOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation start";
+    window_ = GetTestWindowImpl("GetRequestedOrientation");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    auto ret = window_->GetRequestedOrientation();
+    ASSERT_EQ(ret, Orientation::UNSPECIFIED);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation end";
+}
+
+/**
+ * @tc.name: SetDecorVisible
+ * @tc.desc: SetDecorVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetDecorVisible, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisible start";
+    window_ = GetTestWindowImpl("SetDecorVisible");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    auto ret = window_->SetDecorVisible(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisible end";
+}
+
+/**
+ * @tc.name: SetWindowModal
+ * @tc.desc: SetWindowModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowModal start";
+    window_ = GetTestWindowImpl("SetWindowModal");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    auto ret = window_->SetWindowModal(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    window_->property_->persistentId_ = 1;
+    window_->state_ = WindowState::STATE_CREATED;
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window_->SetWindowModal(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowModal end";
+}
+
+/**
+ * @tc.name: SetDecorButtonStyle
+ * @tc.desc: SetDecorButtonStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetDecorButtonStyle, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorButtonStyle start";
+    window_ = GetTestWindowImpl("SetDecorButtonStyle");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    DecorButtonStyle decorButtonStyle;
+    auto ret = window_->SetDecorButtonStyle(decorButtonStyle);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorButtonStyle end";
+}
+
+/**
+ * @tc.name: GetDecorButtonStyle
+ * @tc.desc: GetDecorButtonStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetDecorButtonStyle, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorButtonStyle start";
+    window_ = GetTestWindowImpl("GetDecorButtonStyle");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    DecorButtonStyle decorButtonStyle;
+    auto ret = window_->GetDecorButtonStyle(decorButtonStyle);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorButtonStyle end";
+}
+
+/**
+ * @tc.name: RegisterMainWindowCloseListeners
+ * @tc.desc: RegisterMainWindowCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterMainWindowCloseListeners start";
+    window_ = GetTestWindowImpl("RegisterMainWindowCloseListeners");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
+    ASSERT_NE(listener, nullptr);
+    auto ret = window_->RegisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    window_->property_->persistentId_ = 1;
+    window_->state_ = WindowState::STATE_CREATED;
+    ret = window_->RegisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window_->RegisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterMainWindowCloseListeners end";
+}
+
+/**
+ * @tc.name: UnregisterMainWindowCloseListeners
+ * @tc.desc: UnregisterMainWindowCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners start";
+    window_ = GetTestWindowImpl("UnregisterMainWindowCloseListeners");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
+    ASSERT_NE(listener, nullptr);
+    auto ret = window_->UnregisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    window_->property_->persistentId_ = 1;
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window_->state_ = WindowState::STATE_CREATED;
+    ret = window_->UnregisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    ret = window_->UnregisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners end";
+}
+
+/**
+ * @tc.name: RegisterSwitchFreeMultiWindowListener
+ * @tc.desc: RegisterSwitchFreeMultiWindowListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RegisterSwitchFreeMultiWindowListener, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterSwitchFreeMultiWindowListener start";
+    window_ = GetTestWindowImpl("RegisterSwitchFreeMultiWindowListener");
+    ASSERT_NE(window_, nullptr);
+    sptr<ISwitchFreeMultiWindowListener> listener = sptr<ISwitchFreeMultiWindowListener>::MakeSptr();
+    ASSERT_NE(listener, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    auto ret = window_->RegisterSwitchFreeMultiWindowListener(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterSwitchFreeMultiWindowListener end";
+}
+
+/**
+ * @tc.name: UnregisterSwitchFreeMultiWindowListener
+ * @tc.desc: UnregisterSwitchFreeMultiWindowListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UnregisterSwitchFreeMultiWindowListener, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterSwitchFreeMultiWindowListener start";
+    window_ = GetTestWindowImpl("UnregisterSwitchFreeMultiWindowListener");
+    ASSERT_NE(window_, nullptr);
+    sptr<ISwitchFreeMultiWindowListener> listener = sptr<ISwitchFreeMultiWindowListener>::MakeSptr();
+    ASSERT_NE(listener, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    auto ret = window_->UnregisterSwitchFreeMultiWindowListener(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    ret = window_->UnregisterSwitchFreeMultiWindowListener(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterSwitchFreeMultiWindowListener end";
+}
+
+/**
+ * @tc.name: SetSplitButtonVisible
+ * @tc.desc: SetSplitButtonVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetSplitButtonVisible, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSplitButtonVisible start";
+    window_ = GetTestWindowImpl("SetSplitButtonVisible");
+    ASSERT_NE(window_, nullptr);
+    auto ret = window_->SetSplitButtonVisible(true);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSplitButtonVisible end";
+}
+
+/**
+ * @tc.name: NotifyNoInteractionTimeout
+ * @tc.desc: NotifyNoInteractionTimeout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyNoInteractionTimeout, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyNoInteractionTimeout start";
+    window_ = GetTestWindowImpl("NotifyNoInteractionTimeout");
+    ASSERT_NE(window_, nullptr);
+    IWindowNoInteractionListenerSptr listener = nullptr;
+    auto ret = window_->NotifyNoInteractionTimeout(listener);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyNoInteractionTimeout end";
+}
+
+/**
+ * @tc.name: IsVerticalOrientation
+ * @tc.desc: IsVerticalOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsVerticalOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsVerticalOrientation start";
+    window_ = GetTestWindowImpl("IsVerticalOrientation");
+    ASSERT_NE(window_, nullptr);
+    Orientation orientation = Orientation::VERTICAL;
+    auto ret = window_->IsVerticalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::REVERSE_VERTICAL;
+    ret = window_->IsVerticalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::SENSOR_VERTICAL;
+    ret = window_->IsVerticalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED;
+    ret = window_->IsVerticalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::USER_ROTATION_PORTRAIT;
+    ret = window_->IsVerticalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::USER_ROTATION_PORTRAIT_INVERTED;
+    ret = window_->IsVerticalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::UNSPECIFIED;
+    ret = window_->IsVerticalOrientation(orientation);
+    ASSERT_EQ(ret, false);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsVerticalOrientation end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
