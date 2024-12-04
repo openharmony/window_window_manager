@@ -650,7 +650,10 @@ HWTEST_F(WindowSessionImplTest3, SetSubWindowModal, Function | SmallTest | Level
     window_->windowSystemConfig_.freeMultiWindowSupport_ = false;
     auto ret = window_->SetSubWindowModal(true, modalityType);
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModal end";
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window_->vsyncStation_ = nullptr;
+    window_->ClearVsyncStation();
 }
 }
 } // namespace Rosen
