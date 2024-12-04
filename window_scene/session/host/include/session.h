@@ -28,6 +28,7 @@
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "session/host/include/scene_persistence.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "vsync_station.h"
 #include "window_visibility_info.h"
 #include "wm_common.h"
