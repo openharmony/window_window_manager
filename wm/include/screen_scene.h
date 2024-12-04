@@ -53,7 +53,7 @@ public:
 
     void SetDisplayOrientation(int32_t orientation);
 
-    uint64_t GetDisplayId() const override;
+    DisplayId GetDisplayId() const override;
     void SetDisplayId(DisplayId displayId);
 
     WindowState GetWindowState() const override
