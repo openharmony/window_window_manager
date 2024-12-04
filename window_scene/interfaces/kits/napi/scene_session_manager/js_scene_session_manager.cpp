@@ -3187,7 +3187,7 @@ napi_value JsSceneSessionManager::OnSetAppDragResizeType(napi_env env, napi_call
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]dragResizeType: %{public}d, bundleName: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
     WMError err = SceneSessionManager::GetInstance().SetAppDragResizeTypeInner(bundleName, dragResizeType);
     if (err != WMError::WM_OK) {
