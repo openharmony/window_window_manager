@@ -1315,7 +1315,7 @@ napi_value CreateJsSessionDragResizeType(napi_env env)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("Failed to create object!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object!");
         return NapiGetUndefined(env);
     }
 
