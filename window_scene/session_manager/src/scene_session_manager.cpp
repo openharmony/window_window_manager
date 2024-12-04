@@ -8181,7 +8181,12 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         TLOGW(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    if (currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) {
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WRITE_APP_LOCK)) {
+        TLOGW(WmsLogTag::WMS_LIFE, "wriete app lock permission denied");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if ((currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) ||
+        (currentUserId_ == DEFAULT_USERID && currentUserId_ != GetUserIdByUid(getuid()))) {
         TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_.load(), userId);
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
