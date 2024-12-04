@@ -2877,9 +2877,8 @@ bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
     }
     bool isPcOrPcModeMainWindow = (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode()) &&
         WindowHelper::IsMainWindow(property->GetWindowType());
-    bool isDragResizeWhenEnd = reason == SizeChangeReason::DRAG && isPcOrPcModeMainWindow &&
+    return reason == SizeChangeReason::DRAG && isPcOrPcModeMainWindow &&
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
-    return isDragResizeWhenEnd;
 }
 
 void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)

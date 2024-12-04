@@ -2535,26 +2535,26 @@ WMError SceneSessionManagerProxy::SetGlobalDragResizeType(DragResizeType dragRes
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write dragResizeType failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write dragResizeType failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_GLOBAL_DRAG_RESIZE_TYPE),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     uint32_t ret = 0;
     if (!reply.ReadUint32(ret)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read ret failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);
@@ -2566,32 +2566,32 @@ WMError SceneSessionManagerProxy::GetGlobalDragResizeType(DragResizeType& dragRe
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     uint32_t obtainedDragResizeType = 0;
     if (!data.ReadUint32(obtainedDragResizeType)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read dragResizeType failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (obtainedDragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "bad dragResizeType value");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "bad dragResizeType value");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     dragResizeType = static_cast<DragResizeType>(obtainedDragResizeType);
     uint32_t ret = 0;
     if (!reply.ReadUint32(ret)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read ret failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);
@@ -2603,30 +2603,30 @@ WMError SceneSessionManagerProxy::SetAppDragResizeType(const std::string& bundle
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteString(bundleName)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write bundleName failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write bundleName failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write dragResizeType failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write dragResizeType failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_APP_DRAG_RESIZE_TYPE),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     uint32_t ret = 0;
     if (!reply.ReadUint32(ret)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read ret failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);
@@ -2638,36 +2638,36 @@ WMError SceneSessionManagerProxy::GetAppDragResizeType(const std::string& bundle
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteString(bundleName)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Write bundleName failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write bundleName failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_APP_DRAG_RESIZE_TYPE),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     uint32_t obtainedDragResizeType = 0;
     if (!data.ReadUint32(obtainedDragResizeType)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read dragResizeType failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (obtainedDragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "bad dragResizeType value");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "bad dragResizeType value");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     dragResizeType = static_cast<DragResizeType>(obtainedDragResizeType);
     uint32_t ret = 0;
     if (!reply.ReadUint32(ret)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read ret failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(ret);
