@@ -1088,12 +1088,12 @@ private:
     /**
      * Window Immersive
      */
+    NotifyRootSceneAvoidAreaChangeFunc onNotifyAvoidAreaChangeForRootFunc_;
     OnFlushUIParamsFunc onFlushUIParamsFunc_;
     IsRootSceneLastFrameLayoutFinishedFunc isRootSceneLastFrameLayoutFinishedFunc_;
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
-    NotifyRootSceneAvoidAreaChangeFunc onNotifyAvoidAreaChangeForRootFunc_;
 
     struct SessionInfoList {
         int32_t uid_;

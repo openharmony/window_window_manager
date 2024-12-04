@@ -43,7 +43,6 @@ public:
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
     void SetRootSessionRect(const WSRect& rect);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
-    void SetIsStatusBarVisible(bool isVisible);
 
 private:
     LoadContentFunc loadContentFunc_;
@@ -51,7 +50,6 @@ private:
     /**
      * Window Immersive
      */
-    bool isStatusBarVisibleForRoot_ = true;
     void GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);

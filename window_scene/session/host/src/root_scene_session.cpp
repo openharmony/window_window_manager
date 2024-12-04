@@ -199,15 +199,4 @@ WSError RootSceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avoi
     }
     return WSError::WS_OK;
 }
-
-void RootSceneSession::SetIsStatusBarVisible(bool isVisible)
-{
-    bool isNeedNotify = isStatusBarVisibleForRoot_ != isVisible;
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, "
-        "need notify %{public}u", GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
-    isStatusBarVisibleForRoot_ = isVisible;
-    if (isNeedNotify && specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_) {
-        specificCallback_->onUpdateAvoidArea_(GetPersistentId());
-    }
-}
 } // namespace OHOS::Rosen
