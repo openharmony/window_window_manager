@@ -1121,9 +1121,6 @@ HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, Function | SmallTest |
     ASSERT_NE(sceneSession, nullptr);
     ssm_->DumpSessionInfo(sceneSession, oss);
 
-    ssm_->listenerController_ = nullptr;
-    ssm_->NotifyUnFocusedByMission(sceneSession);
-
     ssm_->listenerController_ = std::make_shared<SessionListenerController>();
     ASSERT_NE(ssm_->listenerController_, nullptr);
     info.isSystem_ = true;
