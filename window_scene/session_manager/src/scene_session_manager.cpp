@@ -8558,12 +8558,8 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
 bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
-    auto rootSceneSession = GetRootSceneSession();
-    if ((rootSceneSession == nullptr && sceneSession == nullptr) ||
-        (rootSceneSession != nullptr && rootSceneSession->GetPersistentId() != persistentId &&
-        sceneSession == nullptr)) {
-        TLOGI(WmsLogTag::WMS_IMMS, "session null no need update avoid area");
-        return false;
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "session null no need update avoid area, persistentId: %{public}d", persistentId);
     }
     if (lastUpdatedAvoidArea_.find(persistentId) == lastUpdatedAvoidArea_.end()) {
         lastUpdatedAvoidArea_[persistentId] = {};
@@ -8583,13 +8579,8 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t persistentI
     }
     if (needUpdate) {
         lastUpdatedAvoidArea_[persistentId][avoidAreaType] = avoidArea;
-        if (rootSceneSession->GetPersistentId() == persistentId) {
-            rootSceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidAreaType);
-        } else {
-            sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidAreaType);
-        }
+        sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidAreaType);
     }
-
     return needUpdate;
 }
 
@@ -8671,7 +8662,7 @@ void SceneSessionManager::UpdateRootSceneSessionAvoidArea(const int32_t persiste
 {
     auto rootSceneSession = GetRootSceneSession();
     if (rootSceneSession == nullptr) {
-        TLOGD(WmsLogTag::WMS_IMMS, "rootSceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "rootSceneSession is nullptr, persistentId: %{public}d", persistentId);
         return;
     }
     using T = std::underlying_type_t<AvoidAreaType>;

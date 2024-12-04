@@ -194,9 +194,11 @@ void RootSceneSession::SetRootSessionRect(const WSRect& rect)
 
 WSError RootSceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    if (specificCallback_ != nullptr && specificCallback_->onNotifyAvoidAreaChange_) {
-        specificCallback_->onNotifyAvoidAreaChange_(avoidArea, type);
+    if (specificCallback_ == nullptr || specificCallback_->onNotifyAvoidAreaChange_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "callback is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
+    specificCallback_->onNotifyAvoidAreaChange_(avoidArea, type);
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

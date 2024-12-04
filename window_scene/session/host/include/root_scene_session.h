@@ -38,10 +38,14 @@ public:
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
 
     /**
+     * Window Layout
+     */
+    void SetRootSessionRect(const WSRect& rect);
+
+    /**
      * Window Immersive
      */
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
-    void SetRootSessionRect(const WSRect& rect);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
 
 private:
