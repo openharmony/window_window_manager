@@ -199,6 +199,25 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, Function | SmallTes
     }
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
 }
+
+/**
+ * @tc.name: IsFocused
+ * @tc.desc: IsFocused
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsFocused, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFocused start";
+    window_ = GetTestWindowImpl("IsFocused");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    auto ret = window_->IsFocused();
+    ASSERT_EQ(ret, window_->isFocused_);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFocused end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
