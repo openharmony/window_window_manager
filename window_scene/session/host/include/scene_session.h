@@ -709,7 +709,7 @@ private:
     void NotifyFullScreenAfterThrowSlip(const WSRect& rect);
     void SetDragResizeTypeDuringDrag(DragResizeType dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
     DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; }
-    WSError HandleOnSessionDragEvent(SessionEvent event);
+    WSError HandleSessionDragEvent(SessionEvent event);
 
     /**
      * Gesture Back
