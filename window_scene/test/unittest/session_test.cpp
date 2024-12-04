@@ -233,7 +233,7 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | Small
 {
     ASSERT_NE(session_, nullptr);
     session_->sessionInfo_.screenId_ = 0;
-    EXCEPT_EQ(session_->GetScreenId(), 0);
+    EXPECT_EQ(session_->GetScreenId(), 0);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     WSRect rect = {0, 0, 0, 0};
@@ -255,7 +255,7 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | Small
     rect = {0, 2000, 100, 100};
     auto rect2 = rect;
     session_->UpdateClientRectPosYAndDisplayId(rect);
-    EXPECT_EQ(rect.posY_, rect2.PosY_ - defaultDisplayRect.height_ - foldCreaseRect.height_ / 2);
+    EXPECT_EQ(rect.posY_, rect2.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_ / 2);
 }
 
 /**
