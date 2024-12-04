@@ -1765,7 +1765,7 @@ WMError SceneSessionManager::SetAppDragResizeTypeInner(const std::string& bundle
     taskScheduler_->PostAsyncTask([this, bundleName, dragResizeType] {
         auto sceneSession = GetSceneSessionByBundleName(bundleName);
         if (sceneSession != nullptr) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "SetAppDragResizeType persistentId: %{public}d, bundleName: %{public}s,
+            TLOGI(WmsLogTag::WMS_LAYOUT, "SetAppDragResizeType persistentId: %{public}d, bundleName: %{public}s, \
                 dragResizeType: %{public}d", sceneSession->GetPersistentId(), bundleName.c_str(), dragResizeType);
             sceneSession->SetAppDragResizeType(dragResizeType);
         }
