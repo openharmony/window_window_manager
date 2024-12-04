@@ -398,12 +398,12 @@ HWTEST_F(SubSessionTest, CheckDisplayAndMove01, Function | SmallTest | Level2)
  */
 HWTEST_F(SubSessionTest, NotifySessionRectChange01, Function | SmallTest | Level2)
 {
-    subSession_->shouldFollow_.store(true);
+    subSession_->shouldFollowParentWhenShow_ = true;
     WSRect rect;
     subSession_->NotifySessionRectChange(rect, SizeChangeReason::UNDEFINED, DISPLAY_ID_INVALID);
-    ASSERT_EQ(subSession_->shouldFollow_.load(), true);
+    ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, true);
     subSession_->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, DISPLAY_ID_INVALID);
-    ASSERT_EQ(subSession_->shouldFollow_.load(), false);
+    ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, false);
 }
 
 /**
@@ -413,15 +413,15 @@ HWTEST_F(SubSessionTest, NotifySessionRectChange01, Function | SmallTest | Level
  */
 HWTEST_F(SubSessionTest, UpdateSessionRectInner01, Function | SmallTest | Level2)
 {
-    subSession_->shouldFollow_.store(true);
+    subSession_->shouldFollowParentWhenShow_ = true;
     WSRect rect;
     MoveConfiguration config;
     config.displayId = DISPLAY_ID_INVALID;
     subSession_->UpdateSessionRectInner(rect, SizeChangeReason::UNDEFINED, config);
-    ASSERT_EQ(subSession_->shouldFollow_.load(), true);
+    ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, true);
     config.displayId = 123;
     subSession_->UpdateSessionRectInner(rect, SizeChangeReason::DRAG_END, config);
-    ASSERT_EQ(subSession_->shouldFollow_.load(), false);
+    ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, false);
 }
 }
 }

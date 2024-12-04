@@ -55,7 +55,7 @@ protected:
 
 private:
     void CheckParentDisplayIdAndMove();
-    bool shouldFollow_ = true;
+    bool shouldFollowParentWhenShow_ = true;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H
