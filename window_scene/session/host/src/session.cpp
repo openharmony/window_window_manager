@@ -1010,7 +1010,8 @@ WSError Session::UpdateClientDisplayId(DisplayId updatedDisplayId)
     return WSError::WS_OK;
 }
 
-DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) {
+DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
+{
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     DisplayId updatedDisplayId = GetScreenId();
