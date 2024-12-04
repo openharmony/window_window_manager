@@ -35,6 +35,7 @@
 #include <hisysevent.h>
 #include "hitrace_meter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "perform_reporter.h"
 
 namespace OHOS::Rosen {
