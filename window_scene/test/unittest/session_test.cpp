@@ -201,7 +201,6 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, Function | SmallTest |
  * @tc.name: UpdateClientDisplayId01
  * @tc.desc: UpdateClientDisplayId
  * @tc.type: FUNC
- * @tc.require: #I6JLSI
  */
 HWTEST_F(WindowSessionTest, UpdateClientDisplayId01, Function | SmallTest | Level2)
 {
