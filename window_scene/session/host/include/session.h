@@ -232,7 +232,7 @@ public:
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
-    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
+    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) const;
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
@@ -779,7 +779,6 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
     std::function<bool()> isScreenLockedCallback_;
 
-    mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
 
     /**
