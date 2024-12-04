@@ -411,6 +411,11 @@ ScreenId ScreenSession::GetRSScreenId()
     return rsId_;
 }
 
+ScreenShape ScreenSession::GetScreenShape() const
+{
+    return property_.GetScreenShape();
+}
+
 ScreenProperty ScreenSession::GetScreenProperty() const
 {
     return property_;

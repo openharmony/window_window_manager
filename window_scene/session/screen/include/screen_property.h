@@ -153,6 +153,9 @@ public:
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
 
+    void SetScreenShape(ScreenShape screenShape);
+    ScreenShape GetScreenShape() const;
+
     DMRect GetAvailableArea()
     {
         return availableArea_;
@@ -213,6 +216,8 @@ private:
 
     uint32_t startX_ { 0 };
     uint32_t startY_ { 0 };
+
+    ScreenShape screenShape { 0 };
 
     ScreenType type_ { ScreenType::REAL };
 
