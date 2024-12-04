@@ -48,6 +48,7 @@ private:
     void ShowAllScreenInfo();
     void DumpFoldStatus();
     void DumpTentMode();
+    void DumpFoldCreaseRegion();
     void OutputDumpInfo();
     void DumpScreenSessionById(ScreenId id);
     void DumpRsInfoById(ScreenId id);
