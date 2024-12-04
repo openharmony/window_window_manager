@@ -1436,13 +1436,15 @@ void SceneSession::UpdateSessionRectPosYFromClient(WSRect& rect)
     if (lastUpdatedDisplayId_ != VIRTUAL_DISPLAY_ID) {
         return;
     }
-    std::string logRect = "last: " + rect.ToString() + ", cur: ";
+    std::string logStr = "inputRect: " + rect.ToString() + ", outputRect: ";
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
-    auto upperScreenPosY = defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR;
-    rect.posY_ += upperScreenPosY + foldCreaseRect.height_;
-    logRect += rect.ToString();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, logRect: %{public}s", GetPersistentId(), logRect.c_str());
+    auto lowerScreenPosY =
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    rect.posY_ += lowerScreenPosY;
+    logStr += rect.ToString();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, %{public}s", GetPersistentId(), logStr.c_str());
 }
 
 /** @note @window.layout */
