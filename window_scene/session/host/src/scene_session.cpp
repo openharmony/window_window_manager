@@ -3302,10 +3302,6 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
         rsTransaction->Begin();
     }
     surfaceNode->SetAbilityBGAlpha(alpha8bit);
-    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    if (leashWinSurfaceNode != nullptr) {
-        leashWinSurfaceNode->SetAbilityBGAlpha(alpha8bit);
-    }
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
