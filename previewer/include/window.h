@@ -343,7 +343,10 @@ public:
     }
     virtual WMError SetDecorHeight(int32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError SetDecorButtonStyle(DecorButtonStyle style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetDecorButtonStyle(const DecorButtonStyle& style)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError GetDecorButtonStyle(DecorButtonStyle& style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     {

@@ -2149,14 +2149,14 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetDecorButtonStyle(DecorButtonStyle decorButtonStyle)
+WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButtonStyle)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     
     if (!WindowHelper::CheckButtonStyleValid(decorButtonStyle)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "set decor button  style param invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set decor button style param invalid");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
