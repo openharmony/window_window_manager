@@ -34,7 +34,7 @@ public:
     void RegisterApplicationStateObserver() override;
 
 private:
-    FoldStatus GetNextFoldState(std::vector<float> angles, std::vector<uint16_t> halls, bool isLogDebug = true);
+    FoldStatus GetNextFoldState(std::vector<float> angles, std::vector<uint16_t> halls);
     FoldStatus GetNextFoldStateHalf(float angle, int hall, FoldStatus myNextStatus);
     FoldStatus GetGlobalFoldState(FoldStatus, FoldStatus);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, uint16_t);
