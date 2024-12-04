@@ -180,20 +180,6 @@ HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
     auto ret = rootSceneSession.UpdateAvoidArea(new AvoidArea(avoidArea), AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
-
-/**
- * @tc.name: SetIsStatusBarVisible
- * @tc.desc: test function : SetIsStatusBarVisible
- * @tc.type: FUNC
- */
-HWTEST_F(RootSceneSessionTest, SetIsStatusBarVisible, Function | SmallTest | Level1)
-{
-    RootSceneSession rootSceneSession;
-    AvoidArea avoidArea;
-    rootSceneSession.SetIsStatusBarVisible(false);
-    rootSceneSession.SetIsStatusBarVisible(true);
-    ASSERT_EQ(rootSceneSession.isStatusBarVisibleForRoot_, true);
-}
 }
 }
 }

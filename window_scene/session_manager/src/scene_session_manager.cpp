@@ -8720,13 +8720,6 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
         } else {
             UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
         }
-
-        // if (rootSceneSession_ != nullptr && rootSceneSession_->GetPersistentId() == persistentId) {
-        //     UpdateRootSceneSessionAvoidArea(persistentId);
-        //     needUpdate = true;
-        // } else {
-
-        // }
         if (needUpdate) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_BOUNDS);
         }
