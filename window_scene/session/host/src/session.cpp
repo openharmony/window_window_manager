@@ -1006,7 +1006,7 @@ WSError Session::UpdateClientDisplayId(DisplayId updatedDisplayId)
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
           GetPersistentId(), updatedDisplayId, lastUpdatedDisplayId_);
     lastUpdatedDisplayId_ = updatedDisplayId;
-    UpdateDisplayId(updatedDisplayId);
+    sessionStage_->UpdateDisplayId(updatedDisplayId);
     return WSError::WS_OK;
 }
 
