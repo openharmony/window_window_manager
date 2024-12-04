@@ -213,6 +213,7 @@ public:
     bool GetIsFakeInUse() const;
     void SetIsBScreenHalf(bool isBScreenHalf);
     bool GetIsBScreenHalf() const;
+    ScreenShape GetScreenShape() const;
 
     bool isPrimary_ { false };
     bool isInternal_ { false };

@@ -605,6 +605,40 @@ HWTEST_F(ScreenPropertyTest, SetStartPosition, Function | SmallTest | Level2)
     ASSERT_EQ(200, property->GetStartY());
     property->SetStartPosition(retx_copy, rety_copy);
 }
+
+/**
+ * @tc.name: SetScreenShape
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetScreenShape, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenShape start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    ScreenShape screenshape = ScreenShape::CIRCLE;
+    property->SetScreenShape(screenshape);
+    ASSERT_EQ(property->GetScreenShape(), screenshape);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenShape end";
+}
+
+/**
+ * @tc.name: GetScreenShape
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetScreenShape, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenShape start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    ScreenShape screenshape = ScreenShape::CIRCLE;
+    property->SetScreenShape(screenshape);
+    ASSERT_EQ(property->GetScreenShape(), screenshape);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenShape end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
