@@ -6585,9 +6585,9 @@ napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_i
         TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible failed!");
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT,
-        "Window [%{public}u, %{public}s] [%{public}d, %{public}d, %{public}d]",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isMaximizeVisible, isMinimizeVisible, isCloseVisible);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] [%{public}d, %{public}d, %{public}d]",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
+        isMaximizeVisible, isMinimizeVisible, isCloseVisible);
     return NapiGetUndefined(env);
 }
 
