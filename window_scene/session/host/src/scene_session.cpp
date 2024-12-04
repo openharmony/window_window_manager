@@ -1456,8 +1456,8 @@ WSError SceneSession::UpdateSessionRect(
         GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
         return WSError::WS_DO_NOTHING;
     }
-    UpdateSessionRectFromClient(rect);
     WSRect newRect = rect;
+    UpdateSessionRectPosYFromClient(newRect);
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
          (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
