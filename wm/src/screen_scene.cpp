@@ -40,6 +40,7 @@ ScreenScene::ScreenScene(std::string name) : name_(name)
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     g_ssIsDestroyed = false;
+    displayId_ = DISPLAY_ID_INVALID;
 }
 
 ScreenScene::~ScreenScene()
