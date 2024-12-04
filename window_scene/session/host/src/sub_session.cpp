@@ -54,7 +54,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
-        if (session->shouldFollow_.load()) {
+        if (shouldFollow_) {
             session->CheckParentDisplayIdAndMove();
         }
         // use property from client
@@ -87,7 +87,7 @@ void SubSession::CheckParentDisplayIdAndMove()
 void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId)
 {
     if (reason == SizeChangeReason::DRAG_END) {
-        shouldFollow_.store(false);
+        shouldFollow_ = false;
     }
     SceneSession::NotifySessionRectChange(rect, reason, displayId);
 }
@@ -96,7 +96,7 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
     const MoveConfiguration& moveConfiguration)
 {
     if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
-        shouldFollow_.store(false);
+        shouldFollow_ = false;
     }
     SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration);
 }
