@@ -134,7 +134,6 @@ public:
     struct SessionChangeCallback : public RefBase {
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
-        NotifySessionEventFunc OnSessionEvent_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
     };
@@ -536,6 +535,7 @@ public:
      */
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
+    void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
 
     /**
      * Window Layout
@@ -710,6 +710,7 @@ private:
     void HandleSessionDragEvent(SessionEvent event);
     void HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason);
     void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason, bool isSupportDragInPcCompatibleMode);
+    NotifySessionEventFunc onSessionEvent_;
 
     /**
      * Gesture Back
