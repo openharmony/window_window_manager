@@ -1535,7 +1535,7 @@ static ScreenShape GetScreenShape(ScreenId screenId) {
         }
     }
     TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
-    returen ScreenShape::RECTANGLE;
+    return ScreenShape::RECTANGLE;
 }
 
 void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenProperty& property)
@@ -1581,7 +1581,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
         property.SetBounds(screenBounds);
     }
     property.CalcDefaultDisplayOrientation();
-    property.SetScreenShape(GetScreenShape(screenId))
+    property.SetScreenShape(GetScreenShape(screenId));
 }
 
 void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property)

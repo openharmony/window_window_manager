@@ -217,7 +217,7 @@ private:
     uint32_t startX_ { 0 };
     uint32_t startY_ { 0 };
 
-    ScreenShape screenShape { ScreenShape::RECTANGLE };
+    ScreenShape screenShape_ { ScreenShape::RECTANGLE };
 
     ScreenType type_ { ScreenType::REAL };
 
