@@ -1524,7 +1524,8 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     return screenSession;
 }
 
-static ScreenShape GetScreenShape(ScreenId screenId) {
+static ScreenShape GetScreenShape(ScreenId screenId)
+{
     std::istringstream iss(SCREEN_SHAPE);
     std::string id;
     std::string shape;
