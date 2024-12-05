@@ -75,6 +75,7 @@ RootScene::RootScene()
 
     NodeId nodeId = 0;
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
 
 RootScene::~RootScene()
@@ -256,7 +257,8 @@ WMError RootScene::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListene
         }
         return WMError::WM_OK;
     };
-    return PostSyncTask(task, __func__);
+    handler_->PostSyncTask(task, __func__);
+    return WMError::WM_OK;
 }
 
 WMError RootScene::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
@@ -271,7 +273,8 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListe
         rootScene->avoidAreaChangeListeners_.erase(listener);
         return WMError::WM_OK;
     };
-    return PostSyncTask(task, __func__);
+    handler_->PostSyncTask(task, __func__);
+    return WMError::WM_OK;
 }
 
 void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
