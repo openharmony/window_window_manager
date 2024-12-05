@@ -23,7 +23,7 @@ WindowOption::WindowOption(): windowTag_(WindowTag::SYSTEM_WINDOW)
 {
 }
 
-void WindowOption::SetWindowRect(const struct Rect& rect)
+void WindowOption::SetWindowRect(const Rect& rect)
 {
     windowRect_ = rect;
 }
@@ -361,6 +361,26 @@ void WindowOption::SetIsSystemKeyboard(bool isSystemKeyboard)
 bool WindowOption::IsSystemKeyboard() const
 {
     return isSystemKeyboard_;
+}
+
+void WindowOption::SetDensity(float density)
+{
+    density_ = density;
+}
+
+float WindowOption::GetDensity() const
+{
+    return density_;
+}
+
+void WindowOption::SetIsDensityFollowHost(bool isDensityFollowHost)
+{
+    isDensityFollowHost_ = isDensityFollowHost;
+}
+
+bool WindowOption::GetIsDensityFollowHost() const
+{
+    return isDensityFollowHost_;
 }
 
 } // namespace Rosen

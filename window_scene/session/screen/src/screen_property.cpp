@@ -395,8 +395,10 @@ void ScreenProperty::CalcDefaultDisplayOrientation()
 {
     if (bounds_.rect_.width_ > bounds_.rect_.height_) {
         displayOrientation_ = DisplayOrientation::LANDSCAPE;
+        deviceOrientation_ = DisplayOrientation::LANDSCAPE;
     } else {
         displayOrientation_ = DisplayOrientation::PORTRAIT;
+        deviceOrientation_ = DisplayOrientation::PORTRAIT;
     }
 }
 

@@ -137,7 +137,7 @@ ScreenSide PcFoldScreenManager::CalculateScreenSide(const WSRect& rect)
 
 void PcFoldScreenManager::ResetArrangeRule()
 {
-    std::unique_lock<std::mutex> arrangedRectsMutex_;
+    std::unique_lock<std::mutex> lock(arrangedRectsMutex_);
     defaultArrangedRect_ = RECT_ZERO;
     virtualArrangedRect_ = RECT_ZERO;
 }
@@ -153,7 +153,7 @@ void PcFoldScreenManager::ResetArrangeRule(ScreenSide side)
         TLOGD(WmsLogTag::WMS_LAYOUT, "invalid side: %{public}d", static_cast<int32_t>(side));
         return;
     }
-    std::unique_lock<std::mutex> arrangedRectsMutex_;
+    std::unique_lock<std::mutex> lock(arrangedRectsMutex_);
     if (side == ScreenSide::FOLD_B) {
         defaultArrangedRect_ = RECT_ZERO;
     } else { // FOLD_C
@@ -424,21 +424,21 @@ void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStar
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "rect: %{public}s, isStartFullScreen: %{public}d",
         rect.ToString().c_str(), isStartFullScreen);
-    std::unique_lock<std::mutex> moveMutex_;
+    std::unique_lock<std::mutex> lock(moveMutex_);
     startMoveRect_ = rect;
     isStartFullScreen_ = isStartFullScreen;
 }
 
-bool PcFoldScreenController::IsStartFullScreen() const
+bool PcFoldScreenController::IsStartFullScreen()
 {
-    std::unique_lock<std::mutex> moveMutex_;
+    std::unique_lock<std::mutex> lock(moveMutex_);
     return isStartFullScreen_;
 }
 
 void PcFoldScreenController::RecordMoveRects(const WSRect& rect)
 {
     auto time = std::chrono::high_resolution_clock::now();
-    std::unique_lock<std::mutex> moveMutex_;
+    std::unique_lock<std::mutex> lock(moveMutex_);
     movingRectRecords_.push_back(std::make_pair(time, rect));
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, rect: %{public}s", GetPersistentId(), rect.ToString().c_str());
     // pop useless record
@@ -465,7 +465,7 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
         return false;
     }
     {
-        std::unique_lock<std::mutex> moveMutex_;
+        std::unique_lock<std::mutex> lock(moveMutex_);
         manager.ResetArrangeRule(startMoveRect_);
     }
     WSRect titleRect = { rect.posX_, rect.posY_, rect.width_, GetTitleHeight() };
@@ -585,7 +585,7 @@ int32_t PcFoldScreenController::GetTitleHeight() const
 WSRectF PcFoldScreenController::CalculateMovingVelocity()
 {
     WSRectF velocity = { 0.0f, 0.0f, 0.0f, 0.0f };
-    std::unique_lock<std::mutex> moveMutex_;
+    std::unique_lock<std::mutex> lock(moveMutex_);
     int32_t recordsSize = movingRectRecords_.size();
     if (recordsSize <= 1) {
         return velocity;

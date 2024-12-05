@@ -891,7 +891,7 @@ WMError SceneSessionManagerLiteProxy::CheckWindowId(int32_t windowId, int32_t& p
 }
 
 WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId,
-    const AppExecFwk::ElementName& element, int32_t& pid)
+    const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -908,6 +908,11 @@ WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId,
 
     if (!data.WriteUint32(tokenId)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write tokenId");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(static_cast<int32_t>(extensionAbilityType))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write extensionAbilityType");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -1375,5 +1380,54 @@ WMError SceneSessionManagerLiteProxy::GetAccessibilityWindowInfo(std::vector<spt
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerLiteProxy::NotifyAppUseControlList(
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteUint8(static_cast<uint8_t>(type))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write type failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write userId failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    if (!data.WriteInt32(static_cast<int32_t>(controlList.size()))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write controlList size failed");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
+    for (const auto& control : controlList) {
+        if (!data.WriteString(control.bundleName_) || !data.WriteInt32(control.appIndex_) ||
+            !data.WriteBool(control.isNeedControl_)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Write controlList failed");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

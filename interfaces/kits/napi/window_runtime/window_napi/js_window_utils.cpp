@@ -570,7 +570,7 @@ napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButto
     return objValue;
 }
 
-bool SetDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
+bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
 {
     int32_t colorMode;
     if (ParseJsValue(jsObject, env, "colorMode", colorMode)) {
@@ -1094,7 +1094,56 @@ bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConf
             return false;
         }
         moveConfiguration.displayId = static_cast<DisplayId>(displayId);
-        return true;
+    }
+    napi_get_named_property(env, jsObject, "rectAnimationConfig", &jsConfig);
+    if (GetType(env, jsConfig) != napi_undefined) {
+        RectAnimationConfig rectAnimationConfig;
+        if (!ParseRectAnimationConfig(env, jsConfig, rectAnimationConfig)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to rectAnimationConfig");
+            return false;
+        }
+        moveConfiguration.rectAnimationConfig = rectAnimationConfig;
+    }
+    return true;
+}
+
+bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig)
+{
+    uint32_t duration = 0;
+    if (ParseJsValue(jsObject, env, "duration", duration)) {
+        if (duration <= 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "RectAnimationConfig duration invalid");
+            return false;
+        }
+        rectAnimationConfig.duration = duration;
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig duration");
+        return false;
+    }
+    double coordinate = 0.0;
+    if (ParseJsValue(jsObject, env, "x1", coordinate)) {
+        rectAnimationConfig.x1 = static_cast<float>(std::clamp(coordinate, 0.0, 1.0));
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig x1");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "y1", coordinate)) {
+        rectAnimationConfig.y1 = static_cast<float>(coordinate);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig y1");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "x2", coordinate)) {
+        rectAnimationConfig.x2 = static_cast<float>(std::clamp(coordinate, 0.0, 1.0));
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig x2");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "y2", coordinate)) {
+        rectAnimationConfig.y2 = static_cast<float>(coordinate);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig y2");
+        return false;
     }
     return true;
 }
@@ -1205,6 +1254,45 @@ static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<Win
             return false;
         }
     }
+    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{pubilc}d, isTopmost: %{pubilc}d, WindowFlag: %{public}d",
+        isModal, isTopmost, windowOption->GetWindowFlags());
+    return true;
+}
+
+static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+{
+    napi_value windowRect = nullptr;
+    napi_get_named_property(env, jsObject, "windowRect", &windowRect);
+    if (windowRect == nullptr || GetType(env, windowRect) != napi_object) {
+        return true;
+    }
+    int32_t width = 0;
+    if (!ParseJsValue(windowRect, env, "width", width)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to width");
+        return false;
+    }
+    int32_t height = 0;
+    if (!ParseJsValue(windowRect, env, "height", height)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to height");
+        return false;
+    }
+    if (width <= 0 || height <= 0) {
+        TLOGE(WmsLogTag::WMS_SUB, "width or height should greater than 0!");
+        return false;
+    }
+    int32_t left = 0;
+    if (!ParseJsValue(windowRect, env, "left", left)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to left");
+        return false;
+    }
+    int32_t top = 0;
+    if (!ParseJsValue(windowRect, env, "top", top)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to top");
+        return false;
+    }
+    Rect rect = { left, top, static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+    windowOption->SetWindowRect(rect);
+    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{pubilc}s", rect.ToString().c_str());
     return true;
 }
 
@@ -1227,6 +1315,9 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
 
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
+    if (!ParseRectParam(env, jsObject, windowOption)) {
+        return false;
+    }
     return ParseModalityParam(env, jsObject, windowOption);
 }
 } // namespace Rosen

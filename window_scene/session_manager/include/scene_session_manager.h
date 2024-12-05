@@ -126,6 +126,8 @@ using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
+using NotifyAppUseControlListFunc =
+    std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -178,6 +180,7 @@ public:
 
     sptr<SceneSession> GetSceneSessionByIdentityInfo(const SessionIdentityInfo& info);
     sptr<SceneSession> GetSceneSessionByType(WindowType type);
+    sptr<SceneSession> GetSceneSessionByBundleName(const std::string& bundleName);
 
     WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -384,6 +387,8 @@ public:
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type);
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
+    void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
+    bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -408,7 +413,7 @@ public:
      */
     uint32_t GetLockScreenZorder();
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
-        int32_t& pid);
+        AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid);
     void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override;
@@ -460,6 +465,15 @@ public:
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId);
 
     /**
+     * Move Drag
+     */
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
+    WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
+    WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
+    WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
+
+    /**
      * Multi Window
      */
     void SetCloseTargetFloatWindowFunc(const ProcessCloseTargetFloatWindowFunc& func);
@@ -471,9 +485,9 @@ public:
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
 
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid);
-    WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, const AppForceLandscapeConfig& config);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
+    WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
@@ -522,6 +536,15 @@ public:
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void RegisterBindDialogTargetListener(const sptr<SceneSession>& session, NotifyBindDialogSessionFunc&& func);
     void UnregisterSpecificSessionCreateListener(int32_t persistentId);
+
+    /**
+     * Window Lifecycle
+     */
+    void GetMainSessionByBundleNameAndAppIndex(
+        const std::string& bundleName, const int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
+    WSError NotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
+    void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
 
 protected:
     SceneSessionManager();
@@ -584,7 +607,7 @@ private:
     void PostProcessProperty(uint32_t dirty);
 
     /**
-     * Window  Lifecycle
+     * Window Lifecycle
      */
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
 
@@ -787,15 +810,23 @@ private:
         }
     };
     std::unordered_map<sptr<IRemoteObject>, int32_t, IRemoteObjectHash> remoteObjectMap_;
-    std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> remoteExtSessionMap_;
-    std::map<sptr<IRemoteObject>, ExtensionWindowAbilityInfo> extSessionInfoMap_;
-    std::set<int32_t> avoidAreaListenerSessionSet_;
+
+    /**
+     * UIExtension
+     */
+    std::unordered_map<sptr<IRemoteObject>, sptr<IRemoteObject>, IRemoteObjectHash> remoteExtSessionMap_;
+    std::unordered_map<sptr<IRemoteObject>, ExtensionWindowAbilityInfo, IRemoteObjectHash> extSessionInfoMap_;
+    std::unordered_map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+    ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
+    std::atomic_bool shouldHideNonSecureFloatingWindows_ { false };
+    std::atomic_bool specialExtWindowHasPrivacyMode_ { false };
+    bool lastWaterMarkShowState_ { false };
+    sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
+        [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
+
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
-    ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
-    std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     std::set<int32_t> failRecoveredPersistentIdSet_;
-    std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;
@@ -896,14 +927,9 @@ private:
     void CheckAndNotifyWaterMarkChangedResult();
     WSError NotifyWaterMarkFlagChangedResult(bool hasWaterMark);
     void ProcessPreload(const AppExecFwk::AbilityInfo& abilityInfo) const;
-    std::atomic_bool shouldHideNonSecureFloatingWindows_ { false };
-    std::atomic_bool specialExtWindowHasPrivacyMode_ { false };
-    bool lastWaterMarkShowState_ { false };
     WindowChangedFunc WindowChangedFunc_;
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(
         [this](const sptr<IRemoteObject>& remoteObject) { this->DestroySpecificSession(remoteObject); });
-    sptr<AgentDeathRecipient> extensionDeath_ = new AgentDeathRecipient(
-        [this](const sptr<IRemoteObject>& remoteExtSession) { this->DestroyExtensionSession(remoteExtSession); });
 
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> sceneSession);
@@ -964,7 +990,6 @@ private:
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     sptr<SceneSession> RequestKeyboardPanelSession(const std::string& panelName, uint64_t displayId);
-    void ActivateKeyboardAvoidAreaIfNeed(WindowType windowType, DisplayId displayId);
 
     /*
      * Specific Window
@@ -1072,6 +1097,9 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
+    std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
+    std::set<int32_t> avoidAreaListenerSessionSet_;
+    std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
 
     struct SessionInfoList {
         int32_t uid_;
@@ -1109,6 +1137,15 @@ private:
      */
     std::mutex isWindowRectAutoSaveMapMutex_;
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
+    
+    /**
+     * Move Drag
+     */
+    std::mutex dragResizeTypeMutex_;
+    DragResizeType globalDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
+    void GetEffectiveDragResizeType(DragResizeType& dragResizeType);
+    WMError GetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType& dragResizeType);
 
     /*
      * Specific Window
@@ -1117,6 +1154,11 @@ private:
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
     std::unordered_map<int32_t, NotifyBindDialogSessionFunc> bindDialogTargetFuncMap_;
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverDialogSessionCacheMap_;
+
+    /**
+     * Window Lifecycle
+     */
+    NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
 };
 } // namespace OHOS::Rosen
 

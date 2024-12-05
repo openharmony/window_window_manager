@@ -173,6 +173,7 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env);
 napi_value CreateJsSessionPiPControlType(napi_env env);
 napi_value CreateJsSessionPiPControlStatus(napi_env env);
 napi_value CreateJsSessionGravity(napi_env env);
+napi_value CreateJsSessionDragResizeType(napi_env env);
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect);
@@ -191,6 +192,7 @@ bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo);
 bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config);
+bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType);
 WSError GetIntValueFromString(const std::string& str, uint32_t& value);
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;

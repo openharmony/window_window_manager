@@ -60,6 +60,9 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
         property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
         extensionWindowFlags_.hideNonSecureWindowsFlag = true;
     }
+    if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
+        hostDensityValue_ = option->GetDensity();
+    }
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
 }
@@ -155,6 +158,26 @@ void WindowExtensionSessionImpl::UpdateConfigurationForAll(const std::shared_ptr
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     for (const auto& window : windowExtensionSessionSet_) {
         window->UpdateConfiguration(configuration);
+    }
+}
+
+void WindowExtensionSessionImpl::UpdateConfigurationSync(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        uiContent->UpdateConfigurationSyncForAll(configuration);
+    } else {
+        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+    }
+}
+
+void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
+    for (const auto& window : windowExtensionSessionSet_) {
+        window->UpdateConfigurationSync(configuration);
     }
 }
 

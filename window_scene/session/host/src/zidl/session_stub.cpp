@@ -479,12 +479,12 @@ int SessionStub::HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel&
 {
     bool isDefaultDensityEnabled = false;
     if (!data.ReadBool(isDefaultDensityEnabled)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isDefaultDensityEnabled failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isDefaultDensityEnabled failed.");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled: %{public}d", isDefaultDensityEnabled);
     WSError errCode = OnDefaultDensityEnabled(isDefaultDensityEnabled);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -734,6 +734,9 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
             !data.ReadFloat(rectAnimationConfig.y2)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "read animation config failed");
             return ERR_INVALID_DATA;
+        }
+        if (reason == SizeChangeReason::MOVE_WITH_ANIMATION) {
+            moveConfiguration.rectAnimationConfig = rectAnimationConfig;
         }
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig:[%{public}u, %{public}f, %{public}f, %{public}f, %{public}f]",

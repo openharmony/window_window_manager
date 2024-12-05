@@ -121,6 +121,26 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
     }
 }
 
+void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+    uiContent_->UpdateConfigurationSyncForAll(configuration);
+}
+
+void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    for (const auto& winPair : windowMap_) {
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
+    }
+}
+
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 {
     return surfaceNode_;

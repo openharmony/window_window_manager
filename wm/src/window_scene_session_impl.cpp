@@ -307,6 +307,22 @@ WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<Win
     return WMError::WM_OK;
 }
 
+static void AdjustPropertySessionInfo(const std::shared_ptr<AbilityRuntime::Context>& context, SessionInfo& info)
+{
+    if (!context) {
+        TLOGE(WmsLogTag::WMS_LIFE, "context is null");
+        return;
+    }
+    info.moduleName_ = context->GetHapModuleInfo() ? context->GetHapModuleInfo()->moduleName : "";
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
+    if (abilityContext && abilityContext->GetAbilityInfo()) {
+        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
+        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
+    } else {
+        info.bundleName_ = context->GetBundleName();
+    }
+}
+
 WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
@@ -317,32 +333,24 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     if (token) {
         property_->SetTokenState(true);
     }
-    const WindowType& type = GetType();
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    auto info = property_->GetSessionInfo();
-    if (abilityContext && abilityContext->GetAbilityInfo()) {
-        info.abilityName_ = abilityContext->GetAbilityInfo()->name;
-        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
-        info.bundleName_ = abilityContext->GetAbilityInfo()->bundleName;
-    } else if (context_) {
-        info.moduleName_ = context_->GetHapModuleInfo() ? context_->GetHapModuleInfo()->moduleName : "";
-        info.bundleName_ = context_->GetBundleName();
-    }
-    property_->SetSessionInfo(info);
-
-    bool isToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
-    bool isUiExtSubWindowFlag = property_->GetIsUIExtAnySubWindow();
-
-    bool isNormalAppSubWindow = WindowHelper::IsSubWindow(type) &&
-        !property_->GetIsUIExtFirstSubWindow() && !isUiExtSubWindowFlag;
-    bool isArkSubSubWindow = WindowHelper::IsSubWindow(type) &&
-        !property_->GetIsUIExtFirstSubWindow() && isUiExtSubWindowFlag && !isToastFlag;
-    bool isUiExtSubWindowToast =  WindowHelper::IsSubWindow(type) && isUiExtSubWindowFlag && isToastFlag;
-    bool isUiExtSubWindow = WindowHelper::IsSubWindow(type) && property_->GetIsUIExtFirstSubWindow();
-
-    if (isNormalAppSubWindow || isArkSubSubWindow) { // sub window
+    AdjustPropertySessionInfo(context_, property_->EditSessionInfo());
+    
+    const WindowType type = GetType();
+    bool hasToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    if (WindowHelper::IsSubWindow(type) && (property_->GetIsUIExtFirstSubWindow() ||
+                                            (property_->GetIsUIExtAnySubWindow() && hasToastFlag))) {
+        property_->SetParentPersistentId(property_->GetParentId());
+        SetDefaultDisplayIdIfNeed();
+        property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
+        // create sub session by parent session
+        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
+        if (!hasToastFlag) {
+            AddSubWindowMapForExtensionWindow();
+        }
+    } else if (WindowHelper::IsSubWindow(type)) {
         sptr<WindowSessionImpl> parentSession = nullptr;
-        auto ret = GetParentSessionAndVerify(isToastFlag, parentSession);
+        auto ret = GetParentSessionAndVerify(hasToastFlag, parentSession);
         if (ret != WMError::WM_OK) {
             return ret;
         }
@@ -356,16 +364,6 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
-    } else if (isUiExtSubWindow || isUiExtSubWindowToast) {
-        property_->SetParentPersistentId(property_->GetParentId());
-        SetDefaultDisplayIdIfNeed();
-        property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
-        // creat sub session by parent session
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        if (!isToastFlag) {
-            AddSubWindowMapForExtensionWindow();
-        }
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
@@ -625,10 +623,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
-
-        if (WindowHelper::IsMainWindow(GetType())) {
-            AddSetUIContentTimeoutCheck();
-        }
+        AddSetUIContentTimeoutCheck();
         InputTransferStation::GetInstance().AddInputWindow(this);
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
@@ -1442,11 +1437,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         context_.reset();
     }
     ClearVsyncStation();
-
-    if (WindowHelper::IsMainWindow(GetType())) {
-        SetUIContentComplete();
-    }
-
+    SetUIContentComplete();
     surfaceNode_ = nullptr;
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;
@@ -1541,8 +1532,7 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
     CheckMoveConfiguration(moveConfiguration);
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
-    RectAnimationConfig rectAnimationConfig = { moveConfiguration.duration, moveConfiguration.x1,
-        moveConfiguration.y1, moveConfiguration.x2, moveConfiguration.y2 };
+    RectAnimationConfig rectAnimationConfig = moveConfiguration.rectAnimationConfig;
     SizeChangeReason reason = rectAnimationConfig.duration > 0 ? SizeChangeReason::MOVE_WITH_ANIMATION :
         SizeChangeReason::MOVE;
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
@@ -1760,7 +1750,7 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
     SizeChangeReason reason = rectAnimationConfig.duration > 0 ? SizeChangeReason::RESIZE_WITH_ANIMATION :
         SizeChangeReason::RESIZE;
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, false, rectAnimationConfig);
+    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, false, {}, rectAnimationConfig);
     return static_cast<WMError>(ret);
 }
 
@@ -2885,6 +2875,32 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
     }
 }
 
+void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        uiContent->UpdateConfigurationSyncForAll(configuration);
+    }
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        TLOGI(WmsLogTag::WMS_IMMS, "no subSession, winId: %{public}d", GetWindowId());
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+        subWindowSession->UpdateConfigurationSync(configuration);
+    }
+}
+
+void WindowSceneSessionImpl::UpdateConfigurationSyncForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
+    }
+}
+
 /** @note @window.hierarchy */
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
@@ -3922,8 +3938,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_OK;
     }
 
-    auto hostSession = GetHostSession();
-    if (hostSession != nullptr) {
+    if (auto hostSession = GetHostSession()) {
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 

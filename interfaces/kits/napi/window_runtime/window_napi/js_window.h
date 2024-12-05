@@ -193,7 +193,6 @@ private:
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits);
-    static bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig);
     bool CheckWindowMaskParams(napi_env env, napi_value jsObject);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);

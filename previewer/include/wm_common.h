@@ -17,6 +17,8 @@
 #define OHOS_ROSEN_WM_COMMON_H
 
 #include <map>
+#include <sstream>
+#include <string>
 
 #include <float.h>
 
@@ -27,16 +29,16 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
-    constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
-    constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
-    constexpr int32_t DEFAULT_COLOR_MODE = -1;
-    constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
-    constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
-    constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
-    constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
-    constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
-    constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
+constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
+constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
+constexpr int32_t DEFAULT_COLOR_MODE = -1;
+constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
+constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
+constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
+constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
+constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 }
 using DisplayId = uint64_t;
 
@@ -549,6 +551,13 @@ struct Rect {
     {
         return width_ == 0 && height_ == 0;
     }
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
+        return oss.str();
+    }
 };
 
 /**
@@ -837,17 +846,15 @@ struct KeyboardAnimationConfig {
 
 struct MoveConfiguration {
     DisplayId displayId = DISPLAY_ID_INVALID;
-    uint32_t duration = 0; // Duartion of the animation, in milliseconds.
-    float x1 = 0.0f;       // X coordinate of the first point on the Bezier curve.
-    float y1 = 0.0f;       // Y coordinate of the first point on the Bezier curve.
-    float x2 = 0.0f;       // X coordinate of the second point on the Bezier curve.
-    float y2 = 0.0f;       // Y coordinate of the second point on the Bezier curve.
+    RectAnimationConfig rectAnimationConfig = { 0, 0.0f, 0.0f, 0.0f, 0.0f };
     std::string ToString() const
     {
         std::string str;
-        constexpr int BUFFER_SIZE = 11;
+        constexpr int BUFFER_SIZE = 1024;
         char buffer[BUFFER_SIZE] = { 0 };
-        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[displayId: %llu, rectAnimationConfig: [%u, %f, %f, %f, %f]]", displayId, rectAnimationConfig.duration,
+            rectAnimationConfig.x1, rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2) > 0) {
             str.append(buffer);
         }
         return str;
