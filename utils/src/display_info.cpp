@@ -75,7 +75,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadUint32(displayInfo->availableHeight_) && parcel.ReadFloat(displayInfo->scaleX_) &&
         parcel.ReadFloat(displayInfo->scaleY_) && parcel.ReadFloat(displayInfo->pivotX_) &&
         parcel.ReadFloat(displayInfo->pivotY_) && parcel.ReadFloat(displayInfo->translateX_) &&
-        parcel.ReadFloat(displayInfo->translateY_) && parcel.ReadFloat(displayInfo->screenShape);
+        parcel.ReadFloat(displayInfo->translateY_) && parcel.ReadFloat(displayInfo->screenShape_);
     if (!res) {
         delete displayInfo;
         return nullptr;
