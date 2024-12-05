@@ -1151,7 +1151,7 @@ void JsSceneSession::ProcessSessionEventRegister()
         }
         jsSceneSession->OnSessionEvent(eventId, param);
     });
-    WLOGFD("success");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
 void JsSceneSession::ProcessTerminateSessionRegister()

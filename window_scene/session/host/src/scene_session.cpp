@@ -644,8 +644,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
         }
         session->HandleSessionDragEvent(event);
-        if (session->OnSessionEvent_) {
-            session->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
+        if (session->onSessionEvent_) {
+            session->onSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
         }
         return WSError::WS_OK;
     };
@@ -832,15 +832,14 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
 
 void SceneSession::RegisterSessionEventCallback(NotifySessionEventFunc&& callback)
 {
-    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return;
         }
-        session->OnSessionEvent_ = std::move(callback);
-    };
-    PostTask(task, __func__);
+        session->onSessionEvent_ = std::move(callback);
+    }, __func__);
 }
 
 void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback)
@@ -2806,12 +2805,12 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
             TLOGNW(WmsLogTag::WMS_LAYOUT, "session moved when throw");
             return;
         }
-        if (!(session->OnSessionEvent_)) {
+        if (!session->onSessionEvent_) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s invalid callback", where);
             return;
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s rect: %{public}s", where, rect.ToString().c_str());
-        session->OnSessionEvent_(
+        session->onSessionEvent_(
             static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE_WITHOUT_ANIMATION),
             SessionEventParam {rect.posX_, rect.posY_, rect.width_, rect.height_});
     };

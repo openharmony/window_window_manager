@@ -230,7 +230,6 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
-    void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
 
     /**
      * PiP Window
@@ -536,6 +535,8 @@ public:
      */
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
+    void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
+    NotifySessionEventFunc onSessionEvent_;
 
     /**
      * Window Layout
@@ -547,7 +548,6 @@ public:
     void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
-    NotifySessionEventFunc OnSessionEvent_;
 
     /**
      * Gesture Back

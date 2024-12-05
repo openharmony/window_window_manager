@@ -524,7 +524,7 @@ HWTEST_F(WindowSessionTest, OnSessionEvent01, Function | SmallTest | Level2)
     int resultValue = 0;
     NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId, SessionEventParam param)
     { resultValue = 1; };
-    sceneSession->OnSessionEvent_ = onSessionEvent_;
+    sceneSession->onSessionEvent_ = onSessionEvent_;
     result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 }
