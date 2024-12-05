@@ -232,7 +232,7 @@ public:
     WindowType GetWindowType() const;
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
-    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property) const;
+    WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
     sptr<WindowSessionProperty> GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
