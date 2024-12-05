@@ -1358,7 +1358,7 @@ void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPS
 
 /** @note @window.layout */
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-    MoveConfiguration moveConfiguration)
+    const MoveConfiguration& moveConfiguration)
 {
     auto newWinRect = winRect_;
     auto newRequestRect = GetSessionRequestRect();
