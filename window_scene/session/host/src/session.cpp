@@ -1028,8 +1028,12 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
 
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
-    std::string logStr = "inputRect: " + rect.ToString();
     auto curScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    if (curScreenFoldStatus == SuperFoldStatus::UNKNOWN || curScreenFoldStatus == SuperFoldStatus::FOLDED) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Error Status");
+        return;
+    }
+    std::string logStr = "inputRect: " + rect.ToString();
     TLOGI(WmsLogTag::WMS_LAYOUT, "lastStatus: %{public}d, curStatus: %{public}d",
         lastScreenFoldStatus_, curScreenFoldStatus);
     if (curScreenFoldStatus == SuperFoldStatus::EXPANDED) {
