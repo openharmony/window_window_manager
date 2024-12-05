@@ -644,8 +644,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
         }
         session->HandleSessionDragEvent(event);
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_) {
-            session->sessionChangeCallback_->OnSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
+        if (session->onSessionEvent_) {
+            session->onSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
         }
         return WSError::WS_OK;
     };
@@ -828,6 +828,18 @@ void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::Sessio
 {
     std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
     sessionChangeCallback_ = sessionChangeCallback;
+}
+
+void SceneSession::RegisterSessionEventCallback(NotifySessionEventFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        session->onSessionEvent_ = std::move(callback);
+    }, __func__);
 }
 
 void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback)
@@ -2781,12 +2793,12 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
             TLOGNW(WmsLogTag::WMS_LAYOUT, "session moved when throw");
             return;
         }
-        if (!(session->sessionChangeCallback_ && session->sessionChangeCallback_->OnSessionEvent_)) {
+        if (!session->onSessionEvent_) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s invalid callback", where);
             return;
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s rect: %{public}s", where, rect.ToString().c_str());
-        session->sessionChangeCallback_->OnSessionEvent_(
+        session->onSessionEvent_(
             static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE_WITHOUT_ANIMATION),
             SessionEventParam {rect.posX_, rect.posY_, rect.width_, rect.height_});
     };
@@ -5755,7 +5767,6 @@ void SceneSession::UnregisterSessionChangeListeners()
         if (session->sessionChangeCallback_) {
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
-            session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
         }
