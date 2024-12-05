@@ -2749,7 +2749,6 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 
 sptr<WindowSessionProperty> Session::GetSessionProperty() const
 {
-    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
     return property_;
 }
 
