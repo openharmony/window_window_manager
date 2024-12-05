@@ -1859,6 +1859,30 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
 }
 
 /**
+ * @tc.name: HandleRemoveExtensionWindowStageFromSCB
+ * @tc.desc: test HandleRemoveExtensionWindowStageFromSCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStage, nullptr);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+
+    sptr<SceneSessionManager> stub = sptr<SceneSessionManager>::MakeSptr();
+    stub->remoteExtSessionMap_.clear();
+    stub->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), token));
+    int res = stub_->HandleRemoveExtensionWindowStageFromSCB(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleUpdateModalExtensionRect
  * @tc.desc: test HandleUpdateModalExtensionRect
  * @tc.type: FUNC
