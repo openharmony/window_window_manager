@@ -8182,11 +8182,11 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WRITE_APP_LOCK)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "wriete app lock permission denied");
+        TLOGW(WmsLogTag::WMS_LIFE, "write app lock permission denied");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     if ((currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) ||
-        (currentUserId_ == DEFAULT_USERID && currentUserId_ != GetUserIdByUid(getuid()))) {
+        (currentUserId_ == DEFAULT_USERID && userId != GetUserIdByUid(getuid()))) {
         TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_.load(), userId);
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
@@ -11414,7 +11414,8 @@ WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
 void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid)
 {
     if (currentUserId_ != static_cast<int32_t>(userid)) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64"", currentUserId_.load(), userid);
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64,
+            currentUserId_.load(), userid);
         return;
     }
     auto secSurfaceInfoMap = secExtensionData->GetSecData();

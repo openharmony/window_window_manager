@@ -3735,24 +3735,6 @@ void JsSceneSessionManager::RegisterNotifyAppUseControlListCallback()
         });
 }
 
-void JsSceneSessionManager::OnNotifyAppUseControlList(
-    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
-{
-    TLOGI(WmsLogTag::WMS_LIFE, "in");
-    taskScheduler_->PostMainThreadTask([this, type, userId, controlList,
-        jsCallBack = GetJSCallback(NOTIFY_APP_USE_CONTROL_LIST_CB), env = env_] {
-        if (jsCallBack == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
-            return;
-        }
-        napi_value typeValue = CreateJsValue(env, static_cast<uint8_t>(type));
-        napi_value userIdValue = CreateJsValue(env, userId);
-        napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
-        napi_value argv[] = { typeValue, userIdValue, controlListValue };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        }, __func__);
-}
-
 napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
     size_t argc = DEFAULT_ARG_COUNT;
@@ -3780,5 +3762,23 @@ napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_c
     }
     SceneSessionManager::GetInstance().SetIsWindowRectAutoSave(key, enabled);
     return NapiGetUndefined(env);
+}
+
+void JsSceneSessionManager::OnNotifyAppUseControlList(
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    taskScheduler_->PostMainThreadTask([this, type, userId, controlList,
+        jsCallBack = GetJSCallback(NOTIFY_APP_USE_CONTROL_LIST_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value typeValue = CreateJsValue(env, static_cast<uint8_t>(type));
+        napi_value userIdValue = CreateJsValue(env, userId);
+        napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
+        napi_value argv[] = { typeValue, userIdValue, controlListValue };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
 }
 } // namespace OHOS::Rosen
