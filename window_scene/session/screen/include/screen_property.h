@@ -156,6 +156,9 @@ public:
     void SetScreenShape(ScreenShape screenShape);
     ScreenShape GetScreenShape() const;
 
+    void SetScreenShape(ScreenShape screenShape);
+    ScreenShape GetScreenShape() const;
+
     DMRect GetAvailableArea()
     {
         return availableArea_;
