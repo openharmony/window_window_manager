@@ -14,12 +14,20 @@
  */
 
 #include "multi_screen_manager.h"
+#ifdef RES_SCHED_ENABLE
+#include "res_sched_client.h"
+#include "res_type.h"
+#endif
 
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(MultiScreenManager)
 namespace {
 const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
+const std::string MULTI_SCREEN_EXIT_STR = "exit";
+const std::string MULTI_SCREEN_ENTER_STR = "enter";
+constexpr int32_t MULTI_SCREEN_EXIT = 0;
+constexpr int32_t MULTI_SCREEN_ENTER = 1;
 }
 MultiScreenManager::MultiScreenManager()
 {
@@ -523,7 +531,11 @@ void MultiScreenManager::InternalScreenOnChange(sptr<ScreenSession> internalSess
         TLOGW(WmsLogTag::DMS, "6: external mirror to external extend");
     } else {
         TLOGE(WmsLogTag::DMS, "no need to change or paramater error!");
-        return;
+    }
+    if (secondaryScreenMode == MultiScreenMode::SCREEN_MIRROR) {
+        MultiScreenReportDataToRss(SCREEN_MIRROR, MULTI_SCREEN_ENTER_STR);
+    } else if (secondaryScreenMode == MultiScreenMode::SCREEN_EXTEND) {
+        MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_ENTER_STR);
     }
 }
 
@@ -540,16 +552,19 @@ void MultiScreenManager::InternalScreenOffChange(sptr<ScreenSession> internalSes
     ScreenId internalScreenId = ScreenSessionManager::GetInstance().GetInternalScreenId();
     if (mainScreenId == internalScreenId && secondaryScreenMode == MultiScreenMode::SCREEN_MIRROR) {
         DoFirstMirrorChange(externalSession, internalSession, SCREEN_MIRROR);
+        MultiScreenReportDataToRss(SCREEN_MIRROR, MULTI_SCREEN_EXIT_STR);
         TLOGW(WmsLogTag::DMS, "3: internal mirror to external mirror");
     } else if (mainScreenId == internalScreenId && secondaryScreenMode == MultiScreenMode::SCREEN_EXTEND) {
         DoFirstExtendChange(externalSession, internalSession, SCREEN_MIRROR);
+        MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_EXIT_STR);
         TLOGW(WmsLogTag::DMS, "10: internal extend to external mirror");
     } else if (mainScreenId != internalScreenId && secondaryScreenMode == MultiScreenMode::SCREEN_EXTEND) {
         DoFirstMainChange(externalSession, internalSession, SCREEN_MIRROR);
+        MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_EXIT_STR);
         TLOGW(WmsLogTag::DMS, "14: external extend to external mirror");
     } else {
+        MultiScreenReportDataToRss(SCREEN_MIRROR, MULTI_SCREEN_EXIT_STR);
         TLOGE(WmsLogTag::DMS, "no need to change or paramater error!");
-        return;
     }
 }
 
@@ -603,5 +618,18 @@ bool MultiScreenManager::AreScreensTouching(sptr<ScreenSession> mainScreenSessio
         return false;
     }
     return horizontalTouching || verticalTouching;
+}
+
+void MultiScreenManager::MultiScreenReportDataToRss(std::string multiScreenType, std::string status)
+{
+#ifdef RES_SCHED_ENABLE
+    uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_DISPLAY_MULTI_SCREEN;
+    std::unordered_map<std::string, std::string> payload = {
+        { "type", multiScreenType },
+        { "status", status },
+    };
+    int32_t value = status == MULTI_SCREEN_ENTER_STR ? MULTI_SCREEN_ENTER : MULTI_SCREEN_EXIT;
+    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, value, payload);
+#endif
 }
 } // namespace OHOS::Rosen
