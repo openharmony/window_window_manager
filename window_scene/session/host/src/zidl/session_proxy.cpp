@@ -780,7 +780,7 @@ WSError SessionProxy::OnRestoreMainWindow()
 
 /** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
-    bool isGlobal, bool isFromMoveToGlobal, MoveConfiguration moveConfiguration,
+    bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
     const RectAnimationConfig& rectAnimationConfig)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u] isGlobal %{public}d "
@@ -826,7 +826,7 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
             !data.WriteFloat(rectAnimationConfig.y1) || !data.WriteFloat(rectAnimationConfig.x2) ||
             !data.WriteFloat(rectAnimationConfig.y2)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Write rectAnimationConfig failed");
-            return WSError::WS_ERROR_IPC_FAILED; 
+            return WSError::WS_ERROR_IPC_FAILED;
         }
     }
 

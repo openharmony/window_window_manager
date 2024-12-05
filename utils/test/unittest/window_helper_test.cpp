@@ -283,7 +283,7 @@ HWTEST_F(WindowHelperTest, CheckButtonStyleValid, Function | SmallTest | Level1)
     ASSERT_TRUE(WindowHelper::CheckButtonStyleValid(style));
 
     // checkout the side of closeButtonRightMargin
-    style.spacingBetweenButtons =  MIN_SPACING_BETWEEN_BUTTONS - 1;
+    style.spacingBetweenButtons = MIN_SPACING_BETWEEN_BUTTONS - 1;
     ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));
     style.spacingBetweenButtons = MAX_SPACING_BETWEEN_BUTTONS + 1;
     ASSERT_FALSE(WindowHelper::CheckButtonStyleValid(style));

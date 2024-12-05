@@ -166,10 +166,6 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 
 void KeyboardSession::UpdateKeyboardAvoidArea()
 {
-    if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "no need to update keyboard avoid area");
-        return;
-    }
     if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
         return;
@@ -297,7 +293,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
         }
-        session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
             "PortraitPanelRect: %{public}s, requestRect: %{public}s", session->GetPersistentId(),
@@ -397,10 +392,6 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
 void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "no need to raise calling session for inactive avoid area.");
-        return;
-    }
     if (!IsSessionForeground() || (needCheckVisible && !IsVisibleForeground())) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
@@ -600,8 +591,6 @@ void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
 {
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
-    WSRect newWinRect = winRect_;
-    WSRect newRequestRect = GetSessionRequestRect();
     bool ret = (isShow) ? GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight) :
         GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
     if (!ret) {
@@ -611,22 +600,10 @@ void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
     bool isLandscape = screenWidth > screenHeight ? true : false;
     WSRect rect = isLandscape ? SessionHelper::TransferToWSRect(params.LandscapeKeyboardRect_) :
         SessionHelper::TransferToWSRect(params.PortraitKeyboardRect_);
-    SessionGravity gravity = static_cast<SessionGravity>(params.gravity_);
-    if (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM || gravity == SessionGravity::SESSION_GRAVITY_DEFAULT) {
-        newWinRect.width_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ?
-            static_cast<int32_t>(screenWidth) : rect.width_;
-        newWinRect.height_ = rect.height_;
-        newWinRect.posX_ = (gravity == SessionGravity::SESSION_GRAVITY_BOTTOM) ? 0 : rect.posX_;
-        newWinRect.posY_ = static_cast<int32_t>(screenHeight) - rect.height_;
-        newRequestRect= newWinRect;
-    } else if (rect.width_ > 0 && rect.height_ > 0) {
-        newWinRect = rect;
-        newRequestRect = newWinRect;
-    }
-    SetSessionRequestRect(newRequestRect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, gravity: %{public}d, rect: %{public}s, newRequestRect: %{public}s"
-        ", isLandscape: %{public}d, screenWidth: %{public}d, screenHeight: %{public}d", GetPersistentId(), gravity,
-        rect.ToString().c_str(), newRequestRect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
+    SetSessionRequestRect(rect);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, rect: %{public}s, isLandscape: %{public}d"
+        ", screenWidth: %{public}d, screenHeight: %{public}d", GetPersistentId(),
+        rect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
 }
 
 bool KeyboardSession::IsVisibleForeground() const

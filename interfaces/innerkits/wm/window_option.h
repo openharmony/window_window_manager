@@ -506,6 +506,34 @@ public:
      */
     bool IsSystemKeyboard() const;
 
+    /**
+     * @brief Set density of UIExtension.
+     *
+     * @param density Density of UIExtension.
+     */
+    void SetDensity(float density);
+
+    /**
+     * @brief Get density of UIExtension.
+     *
+     * @return Density of UIExtension.
+     */
+    float GetDensity() const;
+
+    /**
+     * @brief Set DPI follow-up mode of UIExtension.
+     *
+     * @param isDensityFollowHost DPI follow-up mode of UIExtension.
+     */
+    void SetIsDensityFollowHost(bool isDensityFollowHost);
+
+    /**
+     * @brief Get DPI follow-up mode of UIExtension.
+     *
+     * @return true - DPI follows host, false - DPI follows UIExtensionAbility.
+     */
+    bool GetIsDensityFollowHost() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -546,6 +574,8 @@ private:
     bool isUIExtFirstSubWindow_ = false;
     bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    float density_ = 1.0f;
+    bool isDensityFollowHost_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

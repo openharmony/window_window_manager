@@ -1649,7 +1649,7 @@ static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback& execu
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const where = __func__;
-    execute = [weakToken, errCodePtr, X, y, moveConfiguration, where] {
+    execute = [weakToken, errCodePtr, x, y, moveConfiguration, where] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -1701,25 +1701,14 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     MoveConfiguration moveConfiguration;
-    RectAnimationConfig rectAnimationConfig;
     size_t lastParamIndex = INDEX_TWO;
     if (argc > TWO_PARAMS_SIZE && argv[INDEX_TWO] != nullptr && GetType(env, argv[INDEX_TWO]) == napi_object) {
         lastParamIndex = INDEX_THREE; // MoveConfiguration is optional param
-        bool convertMoveConfiguration = GetMoveConfigurationFromJsValue(env, argv[INDEX_TWO], moveConfiguration);
-        bool convertRectAnimationConfig = ParseRectAnimationConfig(env, argv[INDEX_TWO], rectAnimationConfig);
-        if (!convertMoveConfiguration && !convertRectAnimationConfig) {
+        if (!GetMoveConfigurationFromJsValue(env, argv[INDEX_TWO], moveConfiguration)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to moveConfiguration and rectAnimationConfig");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
-        if (convertRectAnimationConfig) {
-            moveConfiguration.duration = rectAnimationConfig.duration;
-            moveConfiguration.x1 = rectAnimationConfig.x1;
-            moveConfiguration.y1 = rectAnimationConfig.y1;
-            moveConfiguration.x2 = rectAnimationConfig.x2;
-            moveConfiguration.y2 = rectAnimationConfig.y2;
-        }
     }
-
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
     SetMoveWindowToGlobalAsyncTask(execute, complete, wptr<Window>(windowToken_), x, y, moveConfiguration);
@@ -1963,8 +1952,7 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->ResizeAsync(static_cast<uint32_t>(rect.width_),
-            static_cast<uint32_t>(rect.height_), rectAnimationConfig));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->ResizeAsync(rect.width_, rect.height_, rectAnimationConfig));
         TLOGNI(WmsLogTag::WMS_LAYOUT,
             "%{public}s Window [%{public}u, %{public}s] resize with animation end, err = %{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
@@ -2020,7 +2008,6 @@ napi_value JsWindow::OnResizeWindowWithAnimation(napi_env env, napi_callback_inf
     Rect rect = { 0, 0, width, height };
     SetResizeWindowWithAnimationAsyncTask(execute, complete, wptr<Window>(windowToken_), rect,
         rectAnimationConfig);
-
     napi_value lastParam = (argc <= THREE_PARAMS_SIZE) ? nullptr :
         ((argv[INDEX_THREE] != nullptr && GetType(env, argv[INDEX_THREE]) == napi_function) ?
          argv[INDEX_THREE] : nullptr);
@@ -6289,48 +6276,6 @@ NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(
 }
 
 /** @note @window.layout */
-bool JsWindow::ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig)
-{
-    double coordinate = 0.0;
-    uint32_t duration = 0;
-    if (ParseJsValue(jsObject, env, "duration", duration)) {
-        if (duration <= 0) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "RectAnimationConfig duration invalid");
-            return false;
-        }
-        rectAnimationConfig.duration = duration;
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig duration");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "x1", coordinate)) {
-        rectAnimationConfig.x1 = static_cast<float>(std::clamp(coordinate, 0.0, 1.0));
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig x1");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "y1", coordinate)) {
-        rectAnimationConfig.y1 = static_cast<float>(coordinate);
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig y1");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "x2", coordinate)) {
-        rectAnimationConfig.x2 = static_cast<float>(std::clamp(coordinate, 0.0, 1.0));
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig x2");
-        return false;
-    }
-    if (ParseJsValue(jsObject, env, "y2", coordinate)) {
-        rectAnimationConfig.y2 = static_cast<float>(coordinate);
-    } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig y2");
-        return false;
-    }
-    return true;
-}
-
-/** @note @window.layout */
 napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -6602,13 +6547,6 @@ napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -6617,18 +6555,22 @@ napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
-
-    napi_value nativeObj = argv[0];
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     DecorButtonStyle decorButtonStyle;
     WMError res = windowToken_->GetDecorButtonStyle(decorButtonStyle);
     if (res != WMError::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    if (nativeObj == nullptr || !SetDecorButtonStyleFromJs(env, nativeObj, decorButtonStyle)) {
+    if (argv[INDEX_ZERO] == nullptr || !ConvertDecorButtonStyleFromJs(env, argv[INDEX_ZERO], decorButtonStyle)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    
     if (!WindowHelper::CheckButtonStyleValid(decorButtonStyle)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "out of range params");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -6772,10 +6714,10 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
 
 napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 2) { // 2: params num
+    if (argc != 3) { // 3: params num
         WLOGFE("Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -6789,20 +6731,25 @@ napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_i
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isMinimizeVisible");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    bool isCloseVisible = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_TWO], isCloseVisible)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isCloseVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isMaximizeVisible,
-        true);
+        isCloseVisible);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "set title button visible failed!");
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT,
-        "Window [%{public}u, %{public}s] [%{public}d, %{public}d]",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isMaximizeVisible, isMinimizeVisible);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] [%{public}d, %{public}d, %{public}d]",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
+        isMaximizeVisible, isMinimizeVisible, isCloseVisible);
     return NapiGetUndefined(env);
 }
 

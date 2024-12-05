@@ -635,6 +635,12 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
     /**
+     * @brief Update theme configuration for all windows
+     * @param configuration configuration for app
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+    /**
      * @brief Get surface node from RS
      *
      * @return Surface node from RS
@@ -1320,6 +1326,12 @@ public:
      * @param configuration Window configuration.
      */
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
+    /**
+     * @brief Update theme configuration.
+     * @param configuration Window configuration.
+     */
+    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 
     /**
      * @brief Register window lifecycle listener.
@@ -2237,13 +2249,16 @@ public:
      */
     virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
-     /**
+    /**
      * @brief Set decor button style of window.
      *
      * @param style Decor style of the window
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SetDecorButtonStyle(DecorButtonStyle style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetDecorButtonStyle(const DecorButtonStyle& style)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get decor button style of window.

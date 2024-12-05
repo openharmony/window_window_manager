@@ -50,6 +50,7 @@ using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
  */
 const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
 constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_MS = 4000;
+constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_AFTER_FREEZE_MS = 5000;
 }
 
 struct WindowTitleVisibleFlags {
@@ -257,6 +258,7 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+
     /**
      * Window Decor
      */
@@ -264,7 +266,7 @@ public:
     virtual WMError SetWindowTitleMoveEnabled(bool enable) override;
     virtual WMError SetDecorHeight(int32_t decorHeight) override;
     virtual WMError GetDecorHeight(int32_t& height) override;
-    virtual WMError SetDecorButtonStyle(DecorButtonStyle decorButtonStyle) override;
+    virtual WMError SetDecorButtonStyle(const DecorButtonStyle& decorButtonStyle) override;
     virtual WMError GetDecorButtonStyle(DecorButtonStyle& decorButtonStyle) override;
 
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
@@ -596,6 +598,10 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    /**
+     * Window Decor
+     */
     DecorButtonStyle decorButtonStyle_;
 
     /**
