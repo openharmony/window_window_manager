@@ -1149,7 +1149,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     touchable_ = property->touchable_;
     dragEnabled_ = property->dragEnabled_;
     raiseEnabled_ = property->raiseEnabled_;
-    isSystemCalling_ = PROPERTY->isSystemCalling_;
+    isSystemCalling_ = property->isSystemCalling_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
