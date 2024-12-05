@@ -1294,6 +1294,9 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        uiContent->OnContainerModalEvent("scb_waterfall_visibility", "true");
+    }
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,

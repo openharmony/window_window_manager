@@ -1704,7 +1704,7 @@ void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeT
 WMError SceneSessionManager::SetGlobalDragResizeType(DragResizeType dragResizeType)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d", dragResizeType);
-    if (!SessionPermission::IsSACalling()) {
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
@@ -1726,7 +1726,7 @@ WMError SceneSessionManager::SetAppDragResizeType(const std::string& bundleName,
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
-    if (!SessionPermission::IsSACalling()) {
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
@@ -2896,12 +2896,16 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         // some system types could be created by normal app
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_FLOAT &&
-        SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+    if (type == WindowType::WINDOW_TYPE_FLOAT) {
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        if (systemConfig_.supportTypeFloatWindow_) {
-            WLOGFD("check create float window permission success on 2in1 device.");
+        if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
+            (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
+             systemConfig_.supportTypeFloatWindow_)) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success.");
             return true;
+        } else {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission failed.");
+            return false;
         }
     }
     if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
@@ -3701,10 +3705,10 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
         if (isUserActive) { // switch to current user
             SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
-            AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
             if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
                 MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
             }
+            AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
             // notify screenSessionManager to recover current user
             ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
             FlushWindowInfoToMMI(true);
@@ -10511,7 +10515,7 @@ void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionS
             return;
         }
         auto iter = remoteExtSessionMap_.find(remoteExtSession);
-        if (iter->second != token) {
+        if (iter == remoteExtSessionMap_.end() || iter->second != token) {
             TLOGE(WmsLogTag::WMS_UIEXT, "token not match");
             return;
         }
@@ -11923,7 +11927,7 @@ void SceneSessionManager::RefreshAppInfo(const std::string& bundleName)
     if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
         MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);
     }
-    AbilityInfoManager::GetInstance().RefreshAppInfo(bundleName);
+    AbilityInfoManager::GetInstance().RemoveAppInfo(bundleName);
 }
 
 WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()

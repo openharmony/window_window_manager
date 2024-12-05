@@ -28,6 +28,7 @@
 #include "window_manager_hilog.h"
 #include "window_property.h"
 #include "window_session_property.h"
+#include "mock_sub_session.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -359,6 +360,68 @@ HWTEST_F(SubSessionTest, IsApplicationModal, Function | SmallTest | Level2)
     EXPECT_EQ(subSession_->IsApplicationModal(), false);
     subSession_->SetSessionProperty(property);
     EXPECT_EQ(subSession_->IsApplicationModal(), true);
+}
+
+/**
+ * @tc.name: CheckDisplayAndMove
+ * @tc.desc: CheckDisplayAndMove function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, CheckDisplayAndMove01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<Session> mainSession = sptr<Session>::MakeSptr(info);
+    sptr<SubSession::SpecificSessionCallback> specificCallback = sptr<SubSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SubSessionMocker> subSession = sptr<SubSessionMocker>::MakeSptr(info, specificCallback);
+    // if main window not exist
+    EXPECT_CALL(*subSession, SetScreenId(_)).Times(0);
+    subSession->CheckParentDisplayIdAndMove();
+    // if main window and sub window has same display id
+    subSession->parentSession_ = mainSession;
+    DisplayId mainDisplayId = 123;
+    mainSession->GetSessionProperty()->SetDisplayId(mainDisplayId);
+    subSession->GetSessionProperty()->SetDisplayId(mainDisplayId);
+    EXPECT_CALL(*subSession, SetScreenId(_)).Times(0);
+    subSession->CheckParentDisplayIdAndMove();
+    // if main window and sub window has different display id
+    DisplayId subDisplayId = 234;
+    subSession->GetSessionProperty()->SetDisplayId(subDisplayId);
+    EXPECT_CALL(*subSession, SetScreenId(mainDisplayId)).Times(1);
+    subSession->CheckParentDisplayIdAndMove();
+    ASSERT_EQ(subSession->property_->displayId_, mainDisplayId);
+}
+
+/**
+ * @tc.name: NotifySessionRectChange
+ * @tc.desc: NotifySessionRectChange function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, NotifySessionRectChange01, Function | SmallTest | Level2)
+{
+    subSession_->shouldFollowParentWhenShow_ = true;
+    WSRect rect;
+    subSession_->NotifySessionRectChange(rect, SizeChangeReason::UNDEFINED, DISPLAY_ID_INVALID);
+    ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, true);
+    subSession_->NotifySessionRectChange(rect, SizeChangeReason::DRAG_END, DISPLAY_ID_INVALID);
+    ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, false);
+}
+
+/**
+ * @tc.name: UpdateSessionRectInner
+ * @tc.desc: UpdateSessionRectInner function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, UpdateSessionRectInner01, Function | SmallTest | Level2)
+{
+    subSession_->shouldFollowParentWhenShow_ = true;
+    WSRect rect;
+    MoveConfiguration config;
+    config.displayId = DISPLAY_ID_INVALID;
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::UNDEFINED, config);
+    ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, true);
+    config.displayId = 123;
+    subSession_->UpdateSessionRectInner(rect, SizeChangeReason::DRAG_END, config);
+    ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, false);
 }
 }
 }

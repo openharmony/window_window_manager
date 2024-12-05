@@ -535,18 +535,18 @@ HWTEST_F(WindowSessionImplTest4, SetDecorButtonStyle, Function | SmallTest | Lev
     WMError res = window->SetDecorButtonStyle(style);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 
-    //check get value
+    // check get value
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     style.buttonBackgroundSize = -1;
     res = window->SetDecorButtonStyle(style);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
-    //check uiContent is null
+    // check uiContent is null
     style.buttonBackgroundSize = 24;
     res = window->SetDecorButtonStyle(style);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    //check same style data
+    // check same style data
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     res = window->SetDecorButtonStyle(style);
     ASSERT_EQ(res, WMError::WM_OK);

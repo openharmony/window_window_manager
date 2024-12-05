@@ -372,6 +372,26 @@ bool ScreenSession::GetIsFakeInUse() const
     return isFakeInUse_;
 }
 
+void ScreenSession::SetIsRealScreen(bool isReal)
+{
+    isReal_ = isReal;
+}
+
+bool ScreenSession::GetIsRealScreen()
+{
+    return isReal_;
+}
+
+void ScreenSession::SetIsPcUse(bool isPcUse)
+{
+    isPcUse_ = isPcUse;
+}
+
+bool ScreenSession::GetIsPcUse()
+{
+    return isPcUse_;
+}
+
 void ScreenSession::SetIsBScreenHalf(bool isBScreenHalf)
 {
     isBScreenHalf_ = isBScreenHalf;
@@ -1038,11 +1058,14 @@ DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation) const
 
 ScreenSourceMode ScreenSession::GetSourceMode() const
 {
-    if (screenId_ == defaultScreenId_) {
+    if (!isPcUse_ && screenId_ == defaultScreenId_) {
         return ScreenSourceMode::SCREEN_MAIN;
     }
     ScreenCombination combination = GetScreenCombination();
     switch (combination) {
+        case ScreenCombination::SCREEN_MAIN: {
+            return ScreenSourceMode::SCREEN_MAIN;
+        }
         case ScreenCombination::SCREEN_MIRROR: {
             return ScreenSourceMode::SCREEN_MIRROR;
         }
