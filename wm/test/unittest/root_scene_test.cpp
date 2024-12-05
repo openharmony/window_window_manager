@@ -295,9 +295,9 @@ HWTEST_F(RootSceneTest, RegisterAvoidAreaChangeListener, Function | SmallTest | 
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
     auto ret = rootScene.RegisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    rootScene.handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    listener = nullptr;
     ret = rootScene.RegisterAvoidAreaChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -311,9 +311,9 @@ HWTEST_F(RootSceneTest, UnregisterAvoidAreaChangeListener, Function | SmallTest 
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
     auto ret = rootScene.UnregisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    rootScene.handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    listener = nullptr;
     ret = rootScene.UnregisterAvoidAreaChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
