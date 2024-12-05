@@ -2730,9 +2730,9 @@ bool Session::GetBlockingFocus() const
     return blockingFocus_;
 }
 
-WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property) const
+WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    property_->copyform(property);
+    property_->CopyFrom(property);
     NotifySessionInfoChange();
 
     auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
