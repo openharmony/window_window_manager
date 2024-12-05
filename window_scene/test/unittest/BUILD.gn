@@ -245,6 +245,8 @@ ohos_unittest("ws_scb_system_session_test") {
 ohos_unittest("ws_sub_session_test") {
   module_out_path = module_out_path
 
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+
   sources = [ "sub_session_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
