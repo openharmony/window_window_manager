@@ -68,8 +68,6 @@ class ResourceManager;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
-constexpr int32_t DEFAULT_USERID = -1;
-
 namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
@@ -888,6 +886,7 @@ private:
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
     // Multi User
+    static constexpr int32_t DEFAULT_USERID = -1;
     std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
     bool isUserBackground_ = false; // Only accessed on SSM thread
 
