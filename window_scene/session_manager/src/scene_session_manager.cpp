@@ -5509,6 +5509,10 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
         if (isFocused) {
             SetFocusedSessionId(INVALID_SESSION_ID);
             lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+            if (!needBlockNotifyFocusStatusUntilForeground_) {
+                auto prevSession = GetSceneSession(lastFocusedSessionId_);
+                NotifyUnFocusedByMission(prevSession);
+            }
         }
         return;
     }
