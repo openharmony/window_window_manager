@@ -1090,6 +1090,7 @@ WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     }
     uint32_t size = reply.ReadUint32();
     if (size > AVOID_AREA_TYPE_MAX_SIZE) {
+        WLOGFE("size is invalid");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     for (uint32_t i = 0; i < size; i++) {
