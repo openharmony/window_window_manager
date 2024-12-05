@@ -1088,8 +1088,8 @@ WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         WLOGFE("SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
     uint32_t size = reply.ReadUint32();
+    uint32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
     if (size > AVOID_AREA_TYPE_MAX_SIZE) {
         TLOGE(WmsLogTag::WMS_IMMS, "size is invalid");
         return WSError::WS_ERROR_IPC_FAILED;
