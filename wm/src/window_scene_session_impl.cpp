@@ -609,16 +609,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
-<<<<<<< HEAD
-        InputTransferStation::GetInstance().AddInputWindow(this);
-
-        if (WindowHelper::IsMainWindow(GetType())) {
-            AddSetUIContentTimeoutCheck();
-        }
-=======
         AddSetUIContentTimeoutCheck();
         InputTransferStation::GetInstance().AddInputWindow(this);
->>>>>>> b76a39f73 (透明窗口检测增强)
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
         id:%{public}d], state:%{public}u, windowmode:%{public}u",
