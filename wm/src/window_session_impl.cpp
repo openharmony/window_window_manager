@@ -1295,7 +1295,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        uiContent->OnContainerModalEvent("scb_waterfall_visibility","true");
+        uiContent->OnContainerModalEvent("scb_waterfall_visibility", "true");
     }
 }
 
