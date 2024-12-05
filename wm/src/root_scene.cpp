@@ -244,6 +244,10 @@ void RootScene::RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAre
 
 WMError RootScene::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "handler is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     auto task = [weakThis = wptr(this), listener] {
         auto rootScene = weakThis.promote();
         if (listener == nullptr) {
@@ -263,6 +267,10 @@ WMError RootScene::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListene
 
 WMError RootScene::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "handler is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     auto task = [weakThis = wptr(this), listener] {
         auto rootScene = weakThis.promote();
         if (listener == nullptr) {
