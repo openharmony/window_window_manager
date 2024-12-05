@@ -1213,9 +1213,6 @@ void SceneSessionManager::SetRootSceneContext(const std::weak_ptr<AbilityRuntime
 
 void SceneSessionManager::CreateRootSceneSession()
 {
-    if (rootSceneSession_ != nullptr) {
-        return;
-    }
     system::SetParameter("bootevent.wms.fullscreen.ready", "true");
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
@@ -1241,17 +1238,13 @@ void SceneSessionManager::CreateRootSceneSession()
 
 sptr<RootSceneSession> SceneSessionManager::GetRootSceneSession()
 {
-    if (rootSceneSession_ == nullptr) {
-        CreateRootSceneSession();
-    }
     return rootSceneSession_;
 }
 
 void SceneSessionManager::UpdateRootSceneAvoidArea()
 {
-    if (auto rootSession = GetRootSceneSession()) {
-        UpdateAvoidArea(rootSession->GetPersistentId());
-    }
+    auto rootSession = GetRootSceneSession();
+    UpdateAvoidArea(rootSession->GetPersistentId());
 }
 
 void SceneSessionManager::RegisterNotifyRootSceneAvoidAreaChangeFunc(NotifyRootSceneAvoidAreaChangeFunc&& func)
@@ -8558,11 +8551,12 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
     return taskScheduler_->PostSyncTask(task, "UpdateSessionAvoidAreaListener:PID:" + std::to_string(persistentId));
 }
 
-bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
+bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "session null no need update avoid area, persistentId: %{public}d", persistentId);
+        return false;
     }
     if (lastUpdatedAvoidArea_.find(persistentId) == lastUpdatedAvoidArea_.end()) {
         lastUpdatedAvoidArea_[persistentId] = {};
@@ -8591,15 +8585,13 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type, bool& nee
 {
     AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
         AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
-    bool ret = true;
     auto rootSceneSession = GetRootSceneSession();
-    if (rootSceneSession != nullptr) {
-        AvoidArea avoidArea = rootSceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-        ret = UpdateSessionAvoidAreaIfNeed(
-            rootSceneSession->GetPersistentId(), rootSceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
-        needUpdate = needUpdate || ret;
-    }
-    for (auto& persistentId : avoidAreaListenerSessionSet_) {
+    AvoidArea avoidArea = rootSceneSession->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
+    bool ret = UpdateSessionAvoidAreaIfNeed(
+        rootSceneSession->GetPersistentId(), rootSceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
+    needUpdate = needUpdate || ret;
+
+    for (auto persistentId : avoidAreaListenerSessionSet_) {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
             continue;
@@ -8626,11 +8618,10 @@ static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& av
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
-    const int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate)
+    int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate)
 {
-    bool ret = true;
     auto rootSceneSession = GetRootSceneSession();
-    if (rootSceneSession != nullptr && rootSceneSession->GetPersistentId() == persistentId) {
+    if (rootSceneSession->GetPersistentId() == persistentId) {
         UpdateRootSceneSessionAvoidArea(persistentId, needUpdate);
         return;
     }
@@ -8655,19 +8646,15 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
                 sceneSession->GetSessionRect().height_)) {
             continue;
         }
-        ret = UpdateSessionAvoidAreaIfNeed(
+        bool ret = UpdateSessionAvoidAreaIfNeed(
             persistentId, sceneSession, avoidArea, static_cast<AvoidAreaType>(avoidType));
         needUpdate = needUpdate || ret;
     }
 }
 
-void SceneSessionManager::UpdateRootSceneSessionAvoidArea(const int32_t persistentId, bool& needUpdate)
+void SceneSessionManager::UpdateRootSceneSessionAvoidArea(int32_t persistentId, bool& needUpdate)
 {
     auto rootSceneSession = GetRootSceneSession();
-    if (rootSceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "rootSceneSession is nullptr, persistentId: %{public}d", persistentId);
-        return;
-    }
     using T = std::underlying_type_t<AvoidAreaType>;
     for (T avoidAreaType = static_cast<T>(AvoidAreaType::TYPE_START);
         avoidAreaType < static_cast<T>(AvoidAreaType::TYPE_END); avoidAreaType++) {

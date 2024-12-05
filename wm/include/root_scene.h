@@ -133,8 +133,14 @@ private:
      */
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
-    std::set<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
+    struct IAvoidAreaChangedListenerHash {
+        size_t operator()(const sptr<IAvoidAreaChangedListener>& ptr) const
+        {
+            return std::hash<IAvoidAreaChangedListener*>{}(ptr.GetRefPtr());
+        }
+    };
+    std::unordered_set<sptr<IAvoidAreaChangedListener>, IAvoidAreaChangedListenerHash> avoidAreaChangeListeners_;
 };
 } // namespace Rosen
 } // namespace OHOS

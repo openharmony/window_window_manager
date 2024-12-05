@@ -591,11 +591,6 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
 
     /**
-     * RootSceneSession
-     */
-    void CreateRootSceneSession();
-
-    /**
      * Window Pipeline
      */
     void ProcessFocusZOrderChange(uint32_t dirty);
@@ -664,13 +659,13 @@ private:
     /**
      * Window Immersive
      */
-    bool UpdateSessionAvoidAreaIfNeed(const int32_t persistentId,
+    bool UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
         const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
     void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
-    void UpdateNormalSessionAvoidArea(const int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
+    void UpdateNormalSessionAvoidArea(int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
     void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
-    void UpdateRootSceneSessionAvoidArea(const int32_t persistentId, bool& needUpdate);
+    void UpdateRootSceneSessionAvoidArea(int32_t persistentId, bool& needUpdate);
 
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
@@ -1148,6 +1143,7 @@ private:
      * Window Lifecycle
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
+    void CreateRootSceneSession();
 };
 } // namespace OHOS::Rosen
 

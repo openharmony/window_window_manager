@@ -243,33 +243,41 @@ void RootScene::RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAre
 
 WMError RootScene::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (avoidAreaChangeListeners_.find(listener) == avoidAreaChangeListeners_.end()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "register success.");
-        avoidAreaChangeListeners_.insert(listener);
-        updateRootSceneAvoidAreaCallback_();
-    }
-    return WMError::WM_OK;
+    auto task = [weakThis = wptr(this), listener] {
+        auto rootScene = weakThis.promote();
+        if (listener == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "listener is null");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (rootScene->avoidAreaChangeListeners_.find(listener) == rootScene->avoidAreaChangeListeners_.end()) {
+            TLOGNI(WmsLogTag::WMS_IMMS, "register success.");
+            rootScene->avoidAreaChangeListeners_.insert(listener);
+            rootScene->updateRootSceneAvoidAreaCallback_();
+        }
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, __func__);
 }
 
 WMError RootScene::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
-    avoidAreaChangeListeners_.erase(listener);
-    return WMError::WM_OK;
+    auto task = [weakThis = wptr(this), listener] {
+        auto rootScene = weakThis.promote();
+        if (listener == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "listener is null");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
+        rootScene->avoidAreaChangeListeners_.erase(listener);
+        return WMError::WM_OK;
+    };
+    return PostSyncTask(task, __func__);
 }
 
 void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}d, area: %{public}s.", type, avoidArea->ToString().c_str());
-    for (auto &listener : avoidAreaChangeListeners_) {
+    for (auto& listener : avoidAreaChangeListeners_) {
         if (listener != nullptr) {
             listener->OnAvoidAreaChanged(*avoidArea, type);
         }
