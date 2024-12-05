@@ -1076,10 +1076,7 @@ HWTEST_F(WindowImplTest3, Create1, Function | SmallTest | Level3)
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     option->SetWindowRect({ 1, 1, 1, 1 });
     option->SetBundleName("OK");
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
-
     WMError res = window->Create(INVALID_WINDOW_ID);
     ASSERT_EQ(WMError::WM_OK, res);
 
@@ -1112,10 +1109,7 @@ HWTEST_F(WindowImplTest3, Create2, Function | SmallTest | Level3)
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     option->SetWindowRect({ 1, 1, 1, 1 });
     option->SetBundleName("OK");
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
-
     WMError res = window->Create(1);
     ASSERT_EQ(WMError::WM_OK, res);
 
@@ -1148,9 +1142,7 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithId, Function | SmallTest | Level3)
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     option->SetWindowRect({ 1, 1, 1, 1 });
     option->SetBundleName("OK");
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
     sptr<Window> topWindow = window->GetTopWindowWithId(INVALID_WINDOW_ID);
     ASSERT_EQ(topWindow, nullptr);
 
@@ -1165,9 +1157,7 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithId, Function | SmallTest | Level3)
 HWTEST_F(WindowImplTest3, NotifyForegroundInteractiveStatus, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
     bool interactive = false;
     window->NotifyForegroundInteractiveStatus(interactive);
     window->SetWindowState(WindowState::STATE_DESTROYED);
@@ -1189,9 +1179,7 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithContext01, Function | SmallTest | Leve
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     option->SetWindowRect({ 1, 1, 1, 1 });
     option->SetBundleName("OK");
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
     std::shared_ptr<AbilityRuntime::Context> context;
     ASSERT_EQ(nullptr, sptr<Window>(window)->GetTopWindowWithContext(context));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1210,11 +1198,9 @@ HWTEST_F(WindowImplTest3, GetSubWindowtext02, Function | SmallTest | Level3)
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     option->SetWindowRect({ 1, 1, 1, 1 });
     option->SetBundleName("OK");
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-
     auto subWindowVec = sptr<Window>(window)->GetSubWindow(window->GetWindowId());
     if (subWindowVec.size() == 1) {
         ASSERT_EQ(1, subWindowVec.size());
@@ -1273,9 +1259,7 @@ HWTEST_F(WindowImplTest3, SetAspectRatio02, Function | SmallTest | Level2)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetAspectRatio02");
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetAspectRatio(0.0));
 }
 
@@ -1292,9 +1276,7 @@ HWTEST_F(WindowImplTest3, MapDialogWindowToAppIfNeededtest, Function | SmallTest
     option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     option->SetWindowRect({ 1, 1, 1, 1 });
     option->SetBundleName("OK");
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->MapDialogWindowToAppIfNeeded();
@@ -1313,11 +1295,9 @@ HWTEST_F(WindowImplTest3, GetConfigurationFromAbilityInfotest, Function | SmallT
     option->SetWindowName("GetConfigurationFromAbilityInfotest");
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-
     window->MapDialogWindowToAppIfNeeded();
     window->GetConfigurationFromAbilityInfo();
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
