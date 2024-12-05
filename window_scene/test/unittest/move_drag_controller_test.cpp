@@ -24,7 +24,7 @@
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "screen_manager.h"
-
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -246,45 +246,40 @@ HWTEST_F(MoveDragControllerTest, SetAspectRatio, Function | SmallTest | Level1)
  */
 HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, Function | SmallTest | Level1)
 {
-    int32_t res = 0;
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    if (!surfaceNode || !pointerEvent) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, surfaceNode);
+        ASSERT_NE(nullptr, pointerEvent);
+        pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+        auto tempPointerEvent = pointerEvent;
+        pointerEvent = nullptr;
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        pointerEvent = tempPointerEvent;
+        auto tempSurfaceNode = surfaceNode;
+        surfaceNode = nullptr;
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        surfaceNode = tempSurfaceNode;
+        moveDragController->type_ = AreaType::UNDEFINED;
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        moveDragController->type_ = AreaType::RIGHT;
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
     }
-    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    auto tempPointerEvent = pointerEvent;
-    pointerEvent = nullptr;
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-    pointerEvent = tempPointerEvent;
-    auto tempSurfaceNode = surfaceNode;
-    surfaceNode = nullptr;
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-    surfaceNode = tempSurfaceNode;
-    moveDragController->type_ = AreaType::UNDEFINED;
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-    moveDragController->type_ = AreaType::RIGHT;
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-    ASSERT_EQ(0, res);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-    ASSERT_EQ(0, res);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-    ASSERT_EQ(0, res);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-    ASSERT_EQ(0, res);
-
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-    moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-    ASSERT_EQ(0, res);
 }
 
 /**
@@ -319,7 +314,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
  */
 HWTEST_F(MoveDragControllerTest, EventDownInit, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SystemSessionConfig sysConfig;
     moveDragController->InitMoveDragProperty();
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -350,7 +345,7 @@ HWTEST_F(MoveDragControllerTest, EventDownInit, Function | SmallTest | Level1)
  */
 HWTEST_F(MoveDragControllerTest, EventDownInit01, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetDecorEnable(true);
 
@@ -585,7 +580,7 @@ HWTEST_F(MoveDragControllerTest, ConvertXYByAspectRatio01, Function | SmallTest 
  */
 HWTEST_F(MoveDragControllerTest, InitDecorValue01, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SystemSessionConfig sysConfig;
     ASSERT_TRUE((moveDragController != nullptr));
     moveDragController->InitDecorValue(property, sysConfig);
@@ -599,36 +594,36 @@ HWTEST_F(MoveDragControllerTest, InitDecorValue01, Function | SmallTest | Level1
 HWTEST_F(MoveDragControllerTest, ConsumeMoveEvent, Function | SmallTest | Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    if (!pointerEvent) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, pointerEvent);
+        WSRect originalRect = { 100, 100, 1000, 1000 };
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(nullptr, originalRect));
+        auto preStratDragFlag = moveDragController->GetStartDragFlag();
+        moveDragController->isStartDrag_ = true;
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->isStartDrag_ = false;
+        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+        pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        pointerEvent->SetSourceType(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+        moveDragController->SetStartMoveFlag(false);
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->SetStartMoveFlag(true);
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->moveDragProperty_.pointerId_ = -2;
+        moveDragController->moveDragProperty_.pointerType_ = -2;
+        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->isStartDrag_ = preStratDragFlag;
     }
-    WSRect originalRect = { 100, 100, 1000, 1000 };
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(nullptr, originalRect));
-    auto preStratDragFlag = moveDragController->GetStartDragFlag();
-    moveDragController->isStartDrag_ = true;
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    moveDragController->isStartDrag_ = false;
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    pointerEvent->SetSourceType(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    moveDragController->SetStartMoveFlag(false);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    moveDragController->SetStartMoveFlag(true);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    moveDragController->moveDragProperty_.pointerId_ = -2;
-    moveDragController->moveDragProperty_.pointerType_ = -2;
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    moveDragController->isStartDrag_ = preStratDragFlag;
 }
 
 /**
@@ -660,41 +655,38 @@ HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, Function | SmallT
 HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    if (!pointerEvent) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, pointerEvent);
+        sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+        WSRect originalRect = { 100, 100, 1000, 1000 };
+        SystemSessionConfig sysConfig;
+        moveDragController->GetVirtualPixelRatio();
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(nullptr, originalRect, property, sysConfig));
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, nullptr, sysConfig));
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->SetStartMoveFlag(true);
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->SetStartMoveFlag(false);
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_DOWN));
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        MMI::PointerEvent::PointerItem pointerItem;
+        pointerItem.SetPointerId(0);
+        pointerItem.SetWindowX(0);
+        pointerItem.SetWindowY(0);
+        pointerEvent->AddPointerItem(pointerItem);
+        pointerEvent->SetPointerId(0);
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_DOWN));
+        ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+        pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_MOVE));
+        ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_UP));
+        ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_UNKNOWN));
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
     }
-    WSRect originalRect = { 100, 100, 1000, 1000 };
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    if (!property) {
-        return;
-    }
-    SystemSessionConfig sysConfig;
-    moveDragController->GetVirtualPixelRatio();
-    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(nullptr, originalRect, property, sysConfig));
-    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, nullptr, sysConfig));
-    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
-    moveDragController->SetStartMoveFlag(true);
-    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
-    moveDragController->SetStartMoveFlag(false);
-    pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_DOWN));
-    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
-    MMI::PointerEvent::PointerItem pointerItem;
-    pointerItem.SetPointerId(0);
-    pointerItem.SetWindowX(0);
-    pointerItem.SetWindowY(0);
-    pointerEvent->AddPointerItem(pointerItem);
-    pointerEvent->SetPointerId(0);
-    pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_DOWN));
-    ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
-    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
-    pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_MOVE));
-    ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
-    pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_UP));
-    ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
-    pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_UNKNOWN));
-    ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
 }
 
 /**
@@ -885,7 +877,7 @@ HWTEST_F(MoveDragControllerTest, CheckDragEventLegal, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     auto tempPointerEvent = pointerEvent;
     pointerEvent = nullptr;

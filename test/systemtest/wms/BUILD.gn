@@ -21,12 +21,16 @@ group("systemtest") {
 
   deps = [
     ":wms_window_app_floating_window_test",
+    ":wms_window_dialogwindow_test",
+    ":wms_window_display_zoom_test",
+    ":wms_window_drag_test",
+    ":wms_window_effect_test",
+    ":wms_window_gamut_test",
     ":wms_window_focus_test",
     ":wms_window_gesture_navigation_enabled_test",
     ":wms_window_immersive_test",
     ":wms_window_input_method_test",
     ":wms_window_input_test",
-    ":wms_window_layout_integration_test",
     ":wms_window_mode_support_info_test",
     ":wms_window_multi_ability_test",
     ":wms_window_nointeraction_listener_test",
@@ -45,6 +49,7 @@ group("systemtest") {
   ]
   if (!window_manager_use_sceneboard) {
     deps += [
+      ":wms_window_focus_test",
       ":wms_window_animation_transition_test",
       ":wms_window_dialogwindow_test",
       ":wms_window_display_zoom_test",
