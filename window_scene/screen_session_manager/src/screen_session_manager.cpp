@@ -844,11 +844,42 @@ bool ScreenSessionManager::GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
     return true;
 }
 
+void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
+{
+    MultiScreenPositionOptions mainOptions;
+    MultiScreenPositionOptions extendOptions;
+    sptr<ScreenSession> mainSession = nullptr;
+    sptr<ScreenSession> extendSession = nullptr;
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGI(WmsLogTag::DMS, "screenSession is nullptr, ScreenId: %{public}" PRIu64,
+                sessionIt.first);
+            continue;
+        }
+        if (screenSession->GetIsRealScreen()) {
+            if (screenSession->GetIsExtend() && extendSession == nullptr) {
+                extendSession = screenSession;
+            } else {
+                mainSession = screenSession;
+            }
+        }
+    }
+    if (extendSession != nullptr && mainSession != nullptr) {
+        ScreenProperty mainProperty = mainSession->GetScreenProperty();
+        int32_t mainWidth = mainProperty.GetBounds().rect_.GetWidth();
+        mainOptions = { mainSession->GetScreenId(), 0, 0 };
+        extendOptions = { extendSession->GetScreenId(), mainWidth, 0 };
+        SetMultiScreenRelativePosition(mainOptions, extendOptions);
+    }
+}
+
 void ScreenSessionManager::RecoverMultiScreenInfoFromData(sptr<ScreenSession> screenSession)
 {
     bool isRestored = IsScreenRestored(screenSession);
     if (!isRestored) {
         TLOGE(WmsLogTag::DMS, "no restored screen found");
+        SetMultiScreenDefaultRelativePosition();
         return;
     }
     MultiScreenMode multiScreenMode;
@@ -1515,14 +1546,10 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
     return screenSession->SetScreenColorTransform();
 }
 
-sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defScreenId,
+sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId screenId, ScreenId defScreenId,
     ScreenProperty property)
 {
     sptr<ScreenSession> screenSession = nullptr;
-    if (system::GetBoolParameter("persist.edm.disallow_mirror", false)) {
-        TLOGW(WmsLogTag::DMS, "mirror disabled by edm!");
-        return screenSession;
-    }
     ScreenSessionConfig config;
     if (g_isPcDevice) {
         config = {
@@ -1538,15 +1565,27 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
             return screenSession;
         }
         NodeId nodeId = defaultScreen->GetDisplayNode()->GetId();
-        TLOGI(WmsLogTag::DMS, "physical mirror screen nodeId: %{public}" PRIu64 "", nodeId);
+        TLOGI(WmsLogTag::DMS, "physical mirror screen nodeId: %{public}" PRIu64, nodeId);
         config = {
             .screenId = screenId,
             .defaultScreenId = defScreenId,
             .mirrorNodeId = nodeId,
-            .property = property
+            .property = property,
         };
         screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
     }
+    return screenSession;
+}
+
+sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defScreenId,
+    ScreenProperty property)
+{
+    sptr<ScreenSession> screenSession = nullptr;
+    if (system::GetBoolParameter("persist.edm.disallow_mirror", false)) {
+        TLOGW(WmsLogTag::DMS, "mirror disabled by edm!");
+        return screenSession;
+    }
+    screenSession = GetPhysicalScreenSession(screenId, defScreenId, property);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return nullptr;
@@ -1560,8 +1599,10 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     }
+    screenSession->SetIsPcUse(g_isPcDevice ? true : false);
     screenSession->SetIsInternal(false);
     screenSession->SetIsExtend(true);
+    screenSession->SetIsRealScreen(true);
     screenSession->SetIsCurrentInUse(true);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
     hdmiScreenCount_ = hdmiScreenCount_ + 1;
@@ -1591,7 +1632,9 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     screenSession->SetIsExtend(false);
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
     screenSession->SetIsInternal(true);
+    screenSession->SetIsRealScreen(true);
     screenSession->SetIsCurrentInUse(true);
+    screenSession->SetIsPcUse(g_isPcDevice ? true : false);
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         InitFakeScreenSession(screenSession);
     }
@@ -1681,7 +1724,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         return screenSession;
     }
 
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none" && phyScreenPropMap_.size() > 1) {
+    if (g_isPcDevice && phyScreenPropMap_.size() > 1) {
         // pc is none, pad&&phone is mirror
         TLOGI(WmsLogTag::DMS, "Only Support one External screen.");
         return nullptr;
@@ -3945,6 +3988,7 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     screenSession->activeIdx_ = 0;
     screenSession->SetScreenType(ScreenType::VIRTUAL);
     screenSession->SetVirtualPixelRatio(option.density_);
+    screenSession->SetIsPcUse(g_isPcDevice ? true : false);
     screenSession->SetDisplayBoundary(RectF(0, 0, option.width_, option.height_), 0);
     screenSession->RegisterScreenChangeListener(this);
     return screenSession;
