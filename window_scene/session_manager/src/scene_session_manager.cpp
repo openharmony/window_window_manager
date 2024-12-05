@@ -1213,6 +1213,9 @@ void SceneSessionManager::SetRootSceneContext(const std::weak_ptr<AbilityRuntime
 
 void SceneSessionManager::CreateRootSceneSession()
 {
+    if (rootSceneSession_ != nullptr) {
+        return;
+    }
     system::SetParameter("bootevent.wms.fullscreen.ready", "true");
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
