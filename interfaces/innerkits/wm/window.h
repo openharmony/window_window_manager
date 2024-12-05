@@ -2707,7 +2707,7 @@ public:
         const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Get the type of scene.
+     * @brief Get the type of window.
      *
      * @return The string corresponding to the scene.
      */
