@@ -119,7 +119,7 @@ const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
 const std::string SCREEN_UNKNOWN = "unknown";
 
-const std::string SCREEN_SHAPE = system::GetIntParameter("const.window.screen_shape", "0:0");
+const std::string SCREEN_SHAPE = system::GetIntParameter<std::string>("const.window.screen_shape", "0:0");
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
