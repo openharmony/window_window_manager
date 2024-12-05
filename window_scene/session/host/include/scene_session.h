@@ -536,7 +536,6 @@ public:
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
-    NotifySessionEventFunc onSessionEvent_;
 
     /**
      * Window Layout
@@ -708,6 +707,7 @@ private:
     void SetDragResizeTypeDuringDrag(DragResizeType dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
     DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; }
     void HandleSessionDragEvent(SessionEvent event);
+    NotifySessionEventFunc onSessionEvent_;
 
     /**
      * Gesture Back
