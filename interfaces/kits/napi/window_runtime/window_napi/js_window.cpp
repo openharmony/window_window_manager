@@ -928,6 +928,13 @@ napi_value JsWindow::SetWindowTitleButtonVisible(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnSetWindowTitleButtonVisible(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowTitle(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowTitle(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowGrayScale(napi_env env, napi_callback_info info)
 {
     WLOGI("[NAPI]SetWindowGrayScale");
@@ -6665,6 +6672,45 @@ napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_i
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindow::OnSetWindowTitle(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGW(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::string title;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], title)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to title");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    const char* const where = __func__;
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), title, env, task = napiAsyncTask, where] {
+        auto window = windowToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowTitle(title));
+        if (ret == WmErrorCode::WM_OK) {
+            TLOGNI(WmsLogTag::WMS_DECOR, "%{public}s Window [%{public}u] end", where, window->GetWindowId());
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set title failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
@@ -7289,6 +7335,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
         JsWindow::SetSingleFrameComposerEnabled);
     BindNativeFunction(env, object, "enableLandscapeMultiWindow", moduleName, JsWindow::EnableLandscapeMultiWindow);
     BindNativeFunction(env, object, "disableLandscapeMultiWindow", moduleName, JsWindow::DisableLandscapeMultiWindow);
+    BindNativeFunction(env, object, "setWindowTitle", moduleName, JsWindow::SetWindowTitle);
     BindNativeFunction(env, object, "setWindowDecorVisible", moduleName, JsWindow::SetWindowDecorVisible);
     BindNativeFunction(env, object, "setWindowTitleMoveEnabled", moduleName, JsWindow::SetWindowTitleMoveEnabled);
     BindNativeFunction(env, object, "setSubWindowModal", moduleName, JsWindow::SetSubWindowModal);
