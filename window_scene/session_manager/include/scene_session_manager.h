@@ -956,11 +956,6 @@ private:
     std::unordered_map<int32_t, sptr<AAFwk::IAbilityManagerCollaborator>> collaboratorMap_;
     std::atomic<int64_t> containerStartAbilityTime_ { 0 };
     sptr<AgentDeathRecipient> collaboratorDeathRecipient_;
-
-    std::vector<uint64_t> skipSurfaceNodeIds_;
-
-    std::atomic_bool processingFlushUIParams_ { false };
-
     BrokerStates NotifyStartAbility(
         int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId = 0);
     void NotifySessionCreate(const sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
@@ -974,6 +969,9 @@ private:
     void NotifyCollaboratorAfterStart(sptr<SceneSession>& sceneSession, sptr<AAFwk::SessionInfo>& sceneSessionInfo);
     void UpdateCollaboratorSessionWant(sptr<SceneSession>& session, int32_t persistentId = 0);
     sptr<AAFwk::IAbilityManagerCollaborator> GetCollaboratorByType(int32_t collaboratorType);
+
+    std::vector<uint64_t> skipSurfaceNodeIds_;
+    std::atomic_bool processingFlushUIParams_ { false };
 
     /**
      * PiP Window
