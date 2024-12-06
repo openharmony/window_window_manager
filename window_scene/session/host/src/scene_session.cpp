@@ -2287,6 +2287,12 @@ void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEven
         return;
     }
 
+    // notify touch outside
+    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ &&
+        sessionInfo_.bundleName_.find("SCBGestureBack") == std::string::npos) {
+        specificCallback_->onSessionTouchOutside_(GetPersistentId());
+    }
+
     // notify outside down event
     if (specificCallback_ != nullptr && specificCallback_->onOutsideDownEvent_) {
         specificCallback_->onOutsideDownEvent_(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
@@ -2326,9 +2332,6 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (specificCallback_ != nullptr && specificCallback_->onSessionTouchOutside_ != nullptr && isPointDown) {
-        specificCallback_->onSessionTouchOutside_(GetPersistentId());
-    }
 
     auto property = GetSessionProperty();
     if (property == nullptr) {
