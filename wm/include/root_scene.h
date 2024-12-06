@@ -140,8 +140,9 @@ private:
             return std::hash<IAvoidAreaChangedListener*>{}(ptr.GetRefPtr());
         }
     };
-    std::unordered_set<sptr<IAvoidAreaChangedListener>, IAvoidAreaChangedListenerHash> avoidAreaChangeListeners_;
     mutable std::mutex mutex_;
+    std::unordered_set<sptr<IAvoidAreaChangedListener>, IAvoidAreaChangedListenerHash> avoidAreaChangeListeners_;
+    // Above guarded by mutex_
 };
 } // namespace Rosen
 } // namespace OHOS
