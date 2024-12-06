@@ -655,6 +655,91 @@ HWTEST_F(WindowSessionImplTest3, SetSubWindowModal, Function | SmallTest | Level
     window_->ClearVsyncStation();
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModal end";
 }
+
+/**
+ * @tc.name: UpdateFrameLayoutCallbackIfNeeded
+ * @tc.desc: UpdateFrameLayoutCallbackIfNeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UpdateFrameLayoutCallbackIfNeeded, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFrameLayoutCallbackIfNeeded start";
+    window_ = GetTestWindowImpl("UpdateFrameLayoutCallbackIfNeeded");
+    ASSERT_NE(window_, nullptr);
+    window_->enableFrameLayoutFinishCb_ = false;
+    WindowSizeChangeReason wmReason = WindowSizeChangeReason::FULL_TO_SPLIT;
+    window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+    ASSERT_EQ(window_->enableFrameLayoutFinishCb_, true);
+
+    window_->enableFrameLayoutFinishCb_ = false;
+    wmReason = WindowSizeChangeReason::SPLIT_TO_FULL;
+    window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+    ASSERT_EQ(window_->enableFrameLayoutFinishCb_, true);
+
+    window_->enableFrameLayoutFinishCb_ = false;
+    wmReason = WindowSizeChangeReason::FULL_TO_FLOATING;
+    window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+    ASSERT_EQ(window_->enableFrameLayoutFinishCb_, true);
+
+    window_->enableFrameLayoutFinishCb_ = false;
+    wmReason = WindowSizeChangeReason::FLOATING_TO_FULL;
+    window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+    ASSERT_EQ(window_->enableFrameLayoutFinishCb_, true);
+
+    window_->enableFrameLayoutFinishCb_ = false;
+    wmReason = WindowSizeChangeReason::DRAG_END;
+    window_->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window_->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+    ASSERT_EQ(window_->enableFrameLayoutFinishCb_, true);
+    
+    window_->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFrameLayoutCallbackIfNeeded end";
+}
+
+/**
+ * @tc.name: SetRequestedOrientation
+ * @tc.desc: SetRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetRequestedOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation start";
+    window_ = GetTestWindowImpl("SetRequestedOrientation");
+    ASSERT_NE(window_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    window_->property_ = property;
+    window_->property_->persistentId_ = 1;
+    window_->state_ = WindowState::STATE_CREATED;
+    Orientation orientation = Orientation::VERTICAL;
+    window_->property_->requestedOrientation_ = Orientation::VERTICAL;
+    window_->SetRequestedOrientation(orientation);
+    orientation = Orientation::USER_ROTATION_PORTRAIT;
+    window_->SetRequestedOrientation(orientation);
+    auto ret = window_->GetRequestedOrientation();
+    ASSERT_EQ(ret, orientation);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation end";
+}
+
+/**
+ * @tc.name: SetAPPWindowIcon
+ * @tc.desc: SetAPPWindowIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetAPPWindowIcon, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetAPPWindowIcon start";
+    window_ = GetTestWindowImpl("SetAPPWindowIcon");
+    ASSERT_NE(window_, nullptr);
+    window_->uiContent_ = nullptr;
+    std::shared_ptr<Media::PixelMap> icon = std::make_shared<Media::PixelMap>();
+    ASSERT_NE(icon, nullptr);
+    auto ret = window_->SetAPPWindowIcon(icon);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetAPPWindowIcon end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS
