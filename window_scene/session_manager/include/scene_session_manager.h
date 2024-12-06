@@ -541,7 +541,7 @@ public:
      * Window Lifecycle
      */
     void GetMainSessionByBundleNameAndAppIndex(
-        const std::string& bundleName, const int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
+        const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
@@ -896,7 +896,8 @@ private:
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
     // Multi User
-    int32_t currentUserId_;
+    static constexpr int32_t DEFAULT_USERID = -1;
+    std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
     bool isUserBackground_ = false; // Only accessed on SSM thread
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,

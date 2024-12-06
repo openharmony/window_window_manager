@@ -90,7 +90,6 @@ constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_
 constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
-constexpr int32_t DEFAULT_USERID = -1;
 constexpr int32_t SCALE_DIMENSION = 2;
 constexpr int32_t TRANSLATE_DIMENSION = 2;
 constexpr int32_t ROTAION_DIMENSION = 4;
@@ -825,7 +824,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
 void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "persistentIds recovered = %{public}zu. CurrentUserId = %{public}d",
-        recoveredPersistentIds.size(), currentUserId_);
+        recoveredPersistentIds.size(), currentUserId_.load());
 
     auto task = [this, recoveredPersistentIds]() {
         ClearUnrecoveredSessions(recoveredPersistentIds);
@@ -2957,7 +2956,7 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
 void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "PersistentIds need to be recovered=%{public}zu, CurrentUserId=%{public}d",
-          alivePersistentIds.size(), currentUserId_);
+          alivePersistentIds.size(), currentUserId_.load());
     alivePersistentIds_ = alivePersistentIds;
 }
 
@@ -3700,7 +3699,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
     const char* const where = __func__;
     auto task = [this, isUserActive, where]() {
         TLOGNI(WmsLogTag::WMS_MULTI_USER, "%{public}s: IsUserActive=%{public}u, currentUserId=%{public}d", where,
-            isUserActive, currentUserId_);
+            isUserActive, currentUserId_.load());
         isUserBackground_ = !isUserActive;
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
         if (isUserActive) { // switch to current user
@@ -8294,11 +8293,16 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         TLOGW(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    if (currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) {
-        TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_, userId);
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WRITE_APP_LOCK)) {
+        TLOGW(WmsLogTag::WMS_LIFE, "write app lock permission denied");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if ((currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) ||
+        (currentUserId_ == DEFAULT_USERID && userId != GetUserIdByUid(getuid()))) {
+        TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_.load(), userId);
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    auto task = [this, type, userId, controlList] {
+    taskScheduler_->PostAsyncTask([this, type, userId, controlList] {
         if (notifyAppUseControlListFunc_ != nullptr) {
             notifyAppUseControlListFunc_(type, userId, controlList);
         }
@@ -8314,17 +8318,15 @@ WSError SceneSessionManager::NotifyAppUseControlList(
             }
             mainSessions.clear();
         }
-    };
-    taskScheduler_->PostAsyncTask(task, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 
 void SceneSessionManager::RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func)
 {
-    auto task = [this, callback = std::move(func)] {
+    taskScheduler_->PostAsyncTask([this, callback = std::move(func)] {
         notifyAppUseControlListFunc_ = std::move(callback);
-    };
-    taskScheduler_->PostAsyncTask(task, __func__);
+    }, __func__);
 }
 
 bool SceneSessionManager::GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid)
@@ -11527,7 +11529,8 @@ WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
 void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid)
 {
     if (currentUserId_ != static_cast<int32_t>(userid)) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64"", currentUserId_, userid);
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64,
+            currentUserId_.load(), userid);
         return;
     }
     auto secSurfaceInfoMap = secExtensionData->GetSecData();
