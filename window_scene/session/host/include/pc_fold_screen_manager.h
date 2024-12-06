@@ -21,8 +21,8 @@
 #include <tuple>
 #include <unordered_map>
 
-#include "animation/rs_animation_timing_curve.h"
-#include "animation/rs_animation_timing_protocol.h"
+#include <animation/rs_animation_timing_curve.h>
+#include <animation/rs_animation_timing_protocol.h>
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
 #include "wm_single_instance.h"
