@@ -1580,7 +1580,7 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, Function | SmallTest | Level2
 HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
     session_->property_ = new WindowSessionProperty();
-    touchHotAreas = session_->property_->touchHotAreas_;
+    std::vector<Rect> touchHotAreas = session_->property_->touchHotAreas_;
     session_->property_->SetTouchHotAreas(touchHotAreas);
     ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
 }
