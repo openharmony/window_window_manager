@@ -1440,7 +1440,6 @@ void SceneSession::UpdateSessionRectPosYFromClient(WSRect& rect)
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     auto lowerScreenPosY =
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
     WSRect lastRect = rect;
     rect.posY_ += lowerScreenPosY;
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, lowerScreenPosY: %{public}d, output: %{public}s",
