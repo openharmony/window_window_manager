@@ -4347,7 +4347,7 @@ void ScreenSessionManager::AddScreenToGroup(sptr<ScreenSessionGroup> group,
         Point expandPoint = addChildPos[i];
         TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64", Point: %{public}d, %{public}d",
             screen->screenId_, expandPoint.posX_, expandPoint.posY_);
-        bool addChildRes = group->AddChild(screen, expandPoint, GetScreenSession(GetDefaultScreenId()));
+        bool addChildRes = group->AddChild(screen, expandPoint, GetScreenSession(group->mirrorScreenId_));
         if (removeChildResMap[screenId] && addChildRes) {
             changeGroup.emplace_back(screen->ConvertToScreenInfo());
             TLOGD(WmsLogTag::DMS, "changeGroup");
