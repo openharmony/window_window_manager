@@ -547,7 +547,7 @@ public:
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
-    WSError UpdateClientDisplayId(DisplayId updatedDisplayId);
+    WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
 

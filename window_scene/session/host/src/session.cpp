@@ -995,9 +995,9 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
-WSError Session::UpdateClientDisplayId(DisplayId updatedDisplayId)
+WSError Session::UpdateClientDisplayId(DisplayId displayId)
 {
-    if (updatedDisplayId == lastUpdatedDisplayId_) {
+    if (displayId == lastUpdatedDisplayId_) {
         return WSError::WS_DO_NOTHING;
     }
     if (sessionStage_ == nullptr) {
@@ -1005,9 +1005,9 @@ WSError Session::UpdateClientDisplayId(DisplayId updatedDisplayId)
         return WSError::WS_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
-          GetPersistentId(), updatedDisplayId, lastUpdatedDisplayId_);
-    lastUpdatedDisplayId_ = updatedDisplayId;
-    sessionStage_->UpdateDisplayId(updatedDisplayId);
+          GetPersistentId(), displayId, lastUpdatedDisplayId_);
+    lastUpdatedDisplayId_ = displayId;
+    sessionStage_->UpdateDisplayId(displayId);
     return WSError::WS_OK;
 }
 
@@ -1015,10 +1015,10 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
-    DisplayId updatedDisplayId = GetScreenId();
     int32_t lowerScreenPosY =
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
     TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    DisplayId updatedDisplayId = GetScreenId();
     if (rect.posY_ >= lowerScreenPosY) {
         updatedDisplayId = VIRTUAL_DISPLAY_ID;
         rect.posY_ -= lowerScreenPosY;
@@ -1028,27 +1028,27 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
 
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
-    auto curScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
-    if (curScreenFoldStatus == SuperFoldStatus::UNKNOWN || curScreenFoldStatus == SuperFoldStatus::FOLDED) {
+    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Error Status");
         return;
     }
     std::string logStr = "inputRect: " + rect.ToString();
     TLOGI(WmsLogTag::WMS_LAYOUT, "lastStatus: %{public}d, curStatus: %{public}d",
-        lastScreenFoldStatus_, curScreenFoldStatus);
-    if (curScreenFoldStatus == SuperFoldStatus::EXPANDED) {
-        lastScreenFoldStatus_ = curScreenFoldStatus;
+        lastScreenFoldStatus_, currScreenFoldStatus);
+    if (currScreenFoldStatus == SuperFoldStatus::EXPANDED) {
+        lastScreenFoldStatus_ = currScreenFoldStatus;
         auto ret = UpdateClientDisplayId(DEFAULT_DISPLAY_ID);
         TLOGI(WmsLogTag::WMS_LAYOUT, "JustUpdatedId: windowId: %{public}d, %{public}s, UpdatedIdResult: %{public}d",
             GetPersistentId(), logStr.c_str(), ret);
         return;
     }
+    WSRect lastRect = rect;
     auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect);
     auto ret = UpdateClientDisplayId(updatedDisplayId);
-    lastScreenFoldStatus_ = curScreenFoldStatus;
-    logStr += ", outputRect: " + rect.ToString();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: windowId: %{public}d, %{public}s, UpdatedIdResult: %{public}d",
-        GetPersistentId(), logStr.c_str(), ret);
+    lastScreenFoldStatus_ = currScreenFoldStatus;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: windowId: %{public}d, input: %{public}s, output: %{public}s,"
+        " Result: %{public}d", GetPersistentId(), lastRect.ToString().c_str(), rect.ToString().c_str(), ret);
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,

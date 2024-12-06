@@ -248,7 +248,7 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | Small
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-            PcFoldScreenManager::GetInstance().GetDisplayRects();
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
     rect = {0, 1000, 100, 100};
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 1000);

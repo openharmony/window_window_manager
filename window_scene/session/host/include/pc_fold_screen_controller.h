@@ -24,8 +24,6 @@ namespace OHOS::Rosen {
 class SceneSession;
 using RectRecordsVector =
     std::vector<std::pair<std::chrono::time_point<std::chrono::high_resolution_clock>, WSRect>>;
-using FoldScreenStatusChangeCallback = std::function<void(DisplayId displayId,
-    SuperFoldStatus status, SuperFoldStatus prevStatus)>;
 
 class PcFoldScreenController : public RefBase {
 public:
