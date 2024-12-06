@@ -27,14 +27,14 @@ public:
     SecondaryDisplaySensorFoldStateManager();
     virtual ~SecondaryDisplaySensorFoldStateManager();
 
-    void HandleAngleChange(std::vector<float> angles, std::vector<uint16_t> halls,
-        sptr<FoldScreenPolicy> foldScreenPolicy) override;
-    void HandleHallChange(std::vector<float> angles, std::vector<uint16_t> halls,
-        sptr<FoldScreenPolicy> foldScreenPolicy) override;
+    void HandleAngleChange(const std::vector<float> &angles,
+        const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy) override;
+    void HandleHallChange(const std::vector<float> &angles,
+         const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void RegisterApplicationStateObserver() override;
 
 private:
-    FoldStatus GetNextFoldState(std::vector<float> angles, std::vector<uint16_t> halls);
+    FoldStatus GetNextFoldState(const std::vector<float> &angles, const std::vector<uint16_t> &halls);
     FoldStatus GetNextFoldStateHalf(float angle, int hall, FoldStatus myNextStatus);
     FoldStatus GetGlobalFoldState(FoldStatus, FoldStatus);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, uint16_t);
