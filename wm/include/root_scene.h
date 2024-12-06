@@ -78,6 +78,16 @@ public:
         density_ = density;
     }
 
+    void SetDisplayId(DisplayId displayId)
+    {
+        displayId_ = displayId;
+    }
+
+    DisplayId GetDisplayId() const ovveride
+    {
+        return displayId_;
+    }
+
     void SetDisplayOrientation(int32_t orientation);
 
     float GetDisplayDensity()
@@ -126,6 +136,7 @@ private:
     std::unique_ptr<Ace::UIContent> uiContent_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
     int32_t orientation_ = 0;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
