@@ -304,6 +304,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetPivotY(property_.GetPivotY());
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
+    displayInfo->SetScreenShape(property_.GetScreenShape());
     return displayInfo;
 }
 
