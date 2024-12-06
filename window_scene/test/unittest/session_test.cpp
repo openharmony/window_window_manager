@@ -1625,7 +1625,7 @@ HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | 
 {
     WSRect rect = {0, 0, 0, 0};
     session_->SetSessionRequestRect(rect);
-    ASSERT_EQ(session_->property_, nullptr);
+    ASSERT_EQ(session_->GetSessionRequestRect(), rect);
 }
 
 /**
