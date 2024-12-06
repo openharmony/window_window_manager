@@ -398,8 +398,8 @@ template<typename T>
 WSError SceneSessionManagerLiteProxy::GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos)
 {
     int32_t infoSize = reply.ReadInt32();
-    if (infoSize > CYCLE_LIMIT) {
-        WLOGFE("infoSize is too large");
+    if (infoSize > CYCLE_LIMIT || infoSize < 0) {
+        WLOGFE("infoSize is too large or negative");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
