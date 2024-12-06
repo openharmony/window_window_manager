@@ -1132,12 +1132,6 @@ private:
         int32_t uid_ = 0;
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
-
-    /**
-     * PC Window
-     */
-    std::mutex isWindowRectAutoSaveMapMutex_;
-    std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
     
     /**
      * Move Drag
@@ -1155,6 +1149,12 @@ private:
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverSubSessionCacheMap_;
     std::unordered_map<int32_t, NotifyBindDialogSessionFunc> bindDialogTargetFuncMap_;
     std::unordered_map<int32_t, std::vector<sptr<SceneSession>>> recoverDialogSessionCacheMap_;
+
+    /**
+     * PC Window
+     */
+    std::mutex isWindowRectAutoSaveMapMutex_;
+    std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
 
     /**
      * Window Lifecycle
