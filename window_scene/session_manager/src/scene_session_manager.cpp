@@ -8187,7 +8187,8 @@ WSError SceneSessionManager::NotifyAppUseControlList(
     }
     if ((currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) ||
         (currentUserId_ == DEFAULT_USERID && userId != GetUserIdByUid(getuid()))) {
-        TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_.load(), userId);
+        TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d GetUserIdByUid:%{public}d",
+            currentUserId_.load(), userId, GetUserIdByUid(getuid()));
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     taskScheduler_->PostAsyncTask([this, type, userId, controlList] {
