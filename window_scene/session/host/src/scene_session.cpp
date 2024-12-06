@@ -5858,6 +5858,18 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
     PostTask(task, __func__);
 }
 
+bool SceneSession::SetFrameGravity(Gravity gravity)
+{
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "fail id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
+    surfaceNode->SetFrameGravity(gravity);
+    return true;
+}
+
 void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func)
 {
     const char* const where = __func__;
@@ -5872,18 +5884,6 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
             session->GetPersistentId());
     };
     PostTask(task, __func__);
-}
-
-bool SceneSession::SetFrameGravity(Gravity gravity)
-{
-    auto surfaceNode = GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "fail id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
-        return false;
-    }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
-    surfaceNode->SetFrameGravity(gravity);
-    return true;
 }
 
 void SceneSession::SetIsSystemKeyboard(bool isSystemKeyboard)
