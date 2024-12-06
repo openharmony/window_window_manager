@@ -75,7 +75,6 @@ RootScene::RootScene()
 
     NodeId nodeId = 0;
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
 
 RootScene::~RootScene()
@@ -244,44 +243,28 @@ void RootScene::RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAre
 
 WMError RootScene::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    if (handler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "handler is nullptr");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto task = [weakThis = wptr(this), listener] {
-        auto rootScene = weakThis.promote();
-        if (listener == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "listener is null");
-            return WMError::WM_ERROR_NULLPTR;
-        }
-        if (rootScene->avoidAreaChangeListeners_.find(listener) == rootScene->avoidAreaChangeListeners_.end()) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "register success.");
-            rootScene->avoidAreaChangeListeners_.insert(listener);
-            rootScene->updateRootSceneAvoidAreaCallback_();
-        }
-        return WMError::WM_OK;
-    };
-    handler_->PostSyncTask(task, __func__);
+    std::unique_lock<std::mutex> lock(mutex);
+    if (avoidAreaChangeListeners_.find(listener) == avoidAreaChangeListeners_.end()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "register success.");
+        avoidAreaChangeListeners_.insert(listener);
+        updateRootSceneAvoidAreaCallback_();
+    }
     return WMError::WM_OK;
 }
 
 WMError RootScene::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    if (handler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "handler is nullptr");
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto task = [weakThis = wptr(this), listener] {
-        auto rootScene = weakThis.promote();
-        if (listener == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "listener is null");
-            return WMError::WM_ERROR_NULLPTR;
-        }
-        TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
-        rootScene->avoidAreaChangeListeners_.erase(listener);
-        return WMError::WM_OK;
-    };
-    handler_->PostSyncTask(task, __func__);
+    TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
+    std::unique_lock<std::mutex> lock(mutex);
+    avoidAreaChangeListeners_.erase(listener);
     return WMError::WM_OK;
 }
 
