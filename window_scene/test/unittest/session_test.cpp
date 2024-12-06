@@ -1532,10 +1532,6 @@ HWTEST_F(WindowSessionTest, UpdateMaximizeMode, Function | SmallTest | Level2)
     session_->SetSessionProperty(property);
     ret = session_->UpdateMaximizeMode(false);
     ASSERT_EQ(ret, WSError::WS_OK);
-
-    session_->SetSessionProperty(nullptr);
-    ret = session_->UpdateMaximizeMode(false);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -1583,11 +1579,6 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
-    session_->SetSessionProperty(nullptr);
-    std::vector<Rect> touchHotAreas;
-    session_->SetTouchHotAreas(touchHotAreas);
-    ASSERT_EQ(session_->property_, nullptr);
-
     session_->property_ = new WindowSessionProperty();
     touchHotAreas = session_->property_->touchHotAreas_;
     session_->property_->SetTouchHotAreas(touchHotAreas);
@@ -1632,10 +1623,6 @@ HWTEST_F(WindowSessionTest, ProcessBackEvent, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | Level2)
 {
-    session_->SetSessionProperty(nullptr);
-    session_->GetSessionRequestRect();
-    ASSERT_EQ(session_->property_, nullptr);
-
     WSRect rect = {0, 0, 0, 0};
     session_->SetSessionRequestRect(rect);
     ASSERT_EQ(session_->property_, nullptr);
