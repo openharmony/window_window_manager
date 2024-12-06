@@ -600,19 +600,19 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
     napi_value nativeArray = nullptr;
-    uint32_t size = 0;
-    size_t argc = 4;
-    napi_value argv[4] = { nullptr };
+    uint32_t size = INDEX_ZERO;
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > 0 && GetType(env, argv[0]) != napi_function) {
-        nativeArray = argv[0];
+    if (argc > INDEX_ZERO && GetType(env, argv[INDEX_ZERO]) != napi_function) {
+        nativeArray = argv[INDEX_ZERO];
         if (nativeArray == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to SystemBarArray");
             return false;
         }
         napi_get_array_length(env, nativeArray, &size);
     }
-    for (uint32_t i = 0; i < size; i++) {
+    for (uint32_t i = INDEX_ZERO; i < size; i++) {
         std::string name;
         napi_value getElementValue = nullptr;
         napi_get_element(env, nativeArray, i, &getElementValue);
@@ -620,10 +620,10 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to SystemBarName");
             return false;
         }
-        if (name.compare("status") == 0) {
+        if (name.compare("status") == INDEX_ZERO) {
             systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
             systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = true;
-        } else if (name.compare("navigation") == 0) {
+        } else if (name.compare("navigation") == INDEX_ZERO) {
             systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
         }
     }
