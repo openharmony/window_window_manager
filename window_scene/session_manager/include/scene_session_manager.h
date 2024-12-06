@@ -245,7 +245,9 @@ public:
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
     WSError RaiseWindowToTop(int32_t persistentId) override;
     void SetScreenLocked(const bool isScreenLocked);
+    void SetUserAuthPassed(const bool isUserAuthPassed);
     bool IsScreenLocked() const;
+    bool IsUserAuthPassed() const;
 
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
     void NotifySwitchingUser(const bool isUserActive);
@@ -877,6 +879,7 @@ private:
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};
+    bool isUserAuthPassed_ {false};
     bool needBlockNotifyFocusStatusUntilForeground_ {false};
     bool needBlockNotifyUnfocusStatus_ {false};
     bool isPrepareTerminateEnable_ {false};
