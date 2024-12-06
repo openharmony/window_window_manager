@@ -55,6 +55,30 @@ public:
 
     void TriggerDisplaySwitch();
 
+    typedef struct EXTHALLData {
+        float flag = 0.0F;
+        float hall = 0.0F; // BC axis angle
+        float hallNfc = 0.0F;
+        float hallProtectiveCase = 0.0F;
+        float hallAb = 0.0F;
+    } ExtHallData;
+
+    typedef struct PostureDataSecondary {
+        float postureAccxc = 0.0F;
+        float postureAccyc = 0.0F;
+        float postureAcczc = 0.0F;
+        float postureAccxb = 0.0F;
+        float postureAccyb = 0.0F;
+        float postureAcczb = 0.0F;
+        float postureBc = 0.0F;
+        float postureScreen = 0.0F;
+        float postureAccxx = 0.0F;
+        float postureAccyx = 0.0F;
+        float postureAcczx = 0.0F;
+        float postureAb = 0.0F;
+        float postureAbAnti = 0.0F;
+    } PostureDataSecondary;
+
 protected:
     FoldStatus GetCurrentState();
 
@@ -82,11 +106,6 @@ private:
     uint16_t globalHall = USHRT_MAX;
 
     bool registerPosture_ = false;
-
-    typedef struct EXTHALLData {
-        float flag = 0.0;
-        float hall = 0.0;
-    } ExtHallData;
 };
 } // namespace Rosen
 } // namespace OHOS
