@@ -2233,6 +2233,28 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     return enable;
 }
 
+WMError WindowSceneSessionImpl::SetWindowTitle(const std::string& title)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsDecorEnable()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "DecorEnable is false");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (WindowHelper::IsMainWindow(GetType())) {
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext == nullptr) {
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        abilityContext->SetMissionLabel(title);
+    } else {
+        return SetAPPWindowLabel(title);
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::Minimize()
 {
     WLOGFI("id: %{public}d", GetPersistentId());
