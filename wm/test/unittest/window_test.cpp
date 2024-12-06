@@ -2756,7 +2756,7 @@ HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
  * @tc.name: SetWindowTitle
  * @tc.desc: SetWindowTitle
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowTest, SetWindowTitle, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
