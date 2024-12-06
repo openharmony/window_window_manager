@@ -599,11 +599,11 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     std::map<WindowType, SystemBarProperty>& systemBarProperties,
     std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
-    napi_value nativeArray = nullptr;
     uint32_t size = INDEX_ZERO;
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value nativeArray = nullptr;
     if (argc > INDEX_ZERO && GetType(env, argv[INDEX_ZERO]) != napi_function) {
         nativeArray = argv[INDEX_ZERO];
         if (nativeArray == nullptr) {
