@@ -536,7 +536,6 @@ public:
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
-    void CreateRootSceneSession();
 
 protected:
     SceneSessionManager();
@@ -599,9 +598,10 @@ private:
     void PostProcessProperty(uint32_t dirty);
 
     /**
-     * Window  Lifecycle
+     * Window Lifecycle
      */
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
+    void CreateRootSceneSession();
 
     /**
      * Window Focus
