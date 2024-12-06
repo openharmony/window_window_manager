@@ -954,7 +954,7 @@ napi_value JsSceneSessionManager::SetScreenLocked(napi_env env, napi_callback_in
 
 napi_value JsSceneSessionManager::SetUserAuthPassed(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetUserAuthPassed(env, info) : nullptr;
 }
