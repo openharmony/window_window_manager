@@ -105,7 +105,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
-    } else if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)){
+    } else if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
     currRect_ = rect;
@@ -150,7 +150,7 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)){
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
     currRect_ = rect;
