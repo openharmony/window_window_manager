@@ -1848,7 +1848,7 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifyDrawingCompleted, Function | SmallTe
     sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
     windowSessionImpl->hostSession_ = nullptr;
     auto ret = window->NotifyDrawingCompleted();
-    ASSERT_EQ(ret, WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -1950,13 +1950,14 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal01, Function | SmallTest
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
+    MoveConfiguration moveConfiguration;
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSessionImpl->hostSession_ = session;
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_INITIAL;
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->property_->SetWindowMode(WindowType::WINDOW_TYPE_PIP);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
 
     auto ret = window->MoveWindowToGlobal(0, 0, moveConfiguration);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
