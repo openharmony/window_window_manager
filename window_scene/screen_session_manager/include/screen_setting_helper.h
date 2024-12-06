@@ -55,6 +55,7 @@ public:
     static bool GetSettingRelativePositionString(std::vector<std::string>& relativePositionStrings,
         const std::string& key = SETTING_RELATIVE_POSITION_KEY);
     static bool GetSettingRelativePositionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& relativePosition);
+    static ScreenShape GetScreenShape(ScreenId screenId);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};

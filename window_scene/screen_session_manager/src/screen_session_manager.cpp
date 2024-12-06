@@ -119,8 +119,6 @@ const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
 const std::string SCREEN_UNKNOWN = "unknown";
 
-const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
-
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
@@ -1524,21 +1522,6 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     return screenSession;
 }
 
-static ScreenShape GetScreenShape(ScreenId screenId)
-{
-    std::istringstream iss(SCREEN_SHAPE);
-    std::string id;
-    std::string shape;
-    while (std::getline(iss, id, ':')) {
-        std::getline(iss, shape, ';');
-        if (screenId == static_cast<ScreenId>(std::stoi(id))) {
-            return static_cast<ScreenShape>(std::stoi(shape));
-        }
-    }
-    TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
-    return ScreenShape::RECTANGLE;
-}
-
 void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenProperty& property)
 {
     int id = HiviewDFX::XCollie::GetInstance().SetTimer("CreateScreenPropertyCallRS", XCOLLIE_TIMEOUT_10S, nullptr,
@@ -1582,7 +1565,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
         property.SetBounds(screenBounds);
     }
     property.CalcDefaultDisplayOrientation();
-    property.SetScreenShape(GetScreenShape(screenId));
+    property.SetScreenShape(ScreenSettingHelper::GetScreenShape(screenId));
 }
 
 void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property)

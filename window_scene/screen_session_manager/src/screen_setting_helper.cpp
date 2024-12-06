@@ -18,6 +18,7 @@
 #include "window_manager_hilog.h"
 #include "setting_provider.h"
 #include "system_ability_definition.h"
+#include <parameters.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -31,6 +32,7 @@ constexpr int32_t EXPECT_RESOLUTION_SIZE = 3;
 constexpr int32_t RESOLVED_DATA_INDEX_ZERO = 0;
 constexpr int32_t RESOLVED_DATA_INDEX_ONE = 1;
 constexpr int32_t RESOLVED_DATA_INDEX_TWO = 2;
+const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");  
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -412,5 +414,20 @@ bool ScreenSettingHelper::GetSettingRelativePositionMap
     }
     return true;
 }
+
+ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
+{
+    std::istringstream iss(SCREEN_SHAPE);
+    std::string id;
+    std::string shape;
+    while (std::getline(iss, id, ':')) {
+        std::getline(iss, shape, ';');
+        if (screenId == static_cast<ScreenId>(std::stoi(id))) {
+            return static_cast<ScreenShape>(std::stoi(shape));
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
+    return ScreenShape::RECTANGLE;
+} 
 } // namespace Rosen
 } // namespace OHOS
