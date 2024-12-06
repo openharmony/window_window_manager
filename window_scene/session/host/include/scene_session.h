@@ -89,6 +89,7 @@ using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 
 class SceneSession : public Session {
 public:
@@ -371,6 +372,12 @@ public:
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
+    /*
+     * Window Lifecycle
+     */
+    void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback);
+    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    
     void ClearSpecificSessionCbMap();
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
@@ -530,6 +537,8 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
+    UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
+    std::unordered_map<ControlAppType, bool> appUseControlMap_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
