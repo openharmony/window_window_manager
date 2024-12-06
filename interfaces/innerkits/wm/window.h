@@ -2720,6 +2720,13 @@ public:
      */
     virtual WMError OnContainerModalEvent(const std::string& eventName,
         const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the type of window.
+     *
+     * @return The string corresponding to the window.
+     */
+    virtual std::string GetClassType() const { return "Window"; }
 };
 }
 }

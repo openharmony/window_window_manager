@@ -787,6 +787,21 @@ HWTEST_F(SceneSessionManagerTest4, UpdateNormalSessionAvoidArea, Function | Smal
 }
 
 /**
+ * @tc.name: UpdateRootSceneSessionAvoidArea
+ * @tc.desc: UpdateRootSceneSessionAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, UpdateRootSceneSessionAvoidArea, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    int32_t persistentId = 1;
+    ssm_->rootSceneSession_ = ssm_->GetRootSceneSession();
+    ASSERT_NE(nullptr, ssm_->rootSceneSession_);
+    bool needUpdate = false;
+    ssm_->UpdateRootSceneSessionAvoidArea(persistentId, needUpdate);
+}
+
+/**
  * @tc.name: UpdateAvoidSessionAvoidArea
  * @tc.desc: UpdateAvoidSessionAvoidArea
  * @tc.type: FUNC
