@@ -253,5 +253,54 @@ void RootScene::RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&
 {
     updateRootSceneRectCallback_ = std::move(callback);
 }
+
+void RootScene::RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback)
+{
+    updateRootSceneAvoidAreaCallback_ = std::move(callback);
+}
+
+WMError RootScene::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    bool firstInserted = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (avoidAreaChangeListeners_.find(listener) == avoidAreaChangeListeners_.end()) {
+            TLOGI(WmsLogTag::WMS_IMMS, "register success.");
+            avoidAreaChangeListeners_.insert(listener);
+            firstInserted = true;
+        }
+    }
+    if (firstInserted) {
+        updateRootSceneAvoidAreaCallback_();
+    }
+    return WMError::WM_OK;
+}
+
+WMError RootScene::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
+    std::lock_guard<std::mutex> lock(mutex_);
+    avoidAreaChangeListeners_.erase(listener);
+    return WMError::WM_OK;
+}
+
+void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}d, area: %{public}s.", type, avoidArea->ToString().c_str());
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto& listener : avoidAreaChangeListeners_) {
+        if (listener != nullptr) {
+            listener->OnAvoidAreaChanged(*avoidArea, type);
+        }
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

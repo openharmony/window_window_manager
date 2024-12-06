@@ -96,6 +96,7 @@ using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinish
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
+using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -128,6 +129,7 @@ public:
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
+        NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
     };
 
     // callback for notify SceneBoard
