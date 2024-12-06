@@ -1884,7 +1884,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveTo, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>(option);
+    sptr<WindowSessionImpl> windowSessionImpl = new sptr<WindowSessionImpl>(option);
     option->SetWindowName("MoveTo");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
@@ -1911,7 +1911,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal, Function | SmallTest |
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>(option);
+    sptr<WindowSessionImpl> windowSessionImpl = new sptr<WindowSessionImpl>(option);
     option->SetWindowName("MoveWindowToGlobal");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
@@ -1945,7 +1945,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal01, Function | SmallTest
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>(option);
+    sptr<WindowSessionImpl> windowSessionImpl = new sptr<WindowSessionImpl>(option);
     option->SetWindowName("MoveWindowToGlobal01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
