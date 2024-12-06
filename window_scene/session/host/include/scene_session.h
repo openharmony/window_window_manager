@@ -832,6 +832,7 @@ private:
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
+    void UpdateSessionRectPosYFromClient(WSRect& rect);
 
     /**
      * Window Decor
