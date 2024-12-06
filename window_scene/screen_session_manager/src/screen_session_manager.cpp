@@ -2193,7 +2193,7 @@ int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
 
 void ScreenSessionManager::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
 {
-    if ((cameraStatus_ == cameraStatus) && (cameraPosition_ = cameraPosition)) {
+    if ((cameraStatus_ == cameraStatus) && (cameraPosition_ == cameraPosition)) {
         return; // no need to update
     }
     cameraStatus_ = cameraStatus;
