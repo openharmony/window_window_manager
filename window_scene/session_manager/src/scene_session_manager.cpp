@@ -3387,7 +3387,7 @@ void SceneSessionManager::UnregisterSpecificSessionCreateListener(int32_t persis
         }
         return WMError::WM_OK;
     };
-    taskScheduler_->PostSyncTask(task, "NotifyStatusBarEnabledChange");
+    taskScheduler_->PostSyncTask(task, "UnregisterSpecificSessionCreateListener");
 }
 
 void SceneSessionManager::SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func)
@@ -7353,6 +7353,7 @@ WSError SceneSessionManager::GetSessionSnapshot(const std::string& deviceId, int
         }
         sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
         if (!sceneSession) {
+            WLOGFE("fail to find session by persistentId: %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         auto sessionInfo = sceneSession->GetSessionInfo();
@@ -8465,7 +8466,7 @@ WSError SceneSessionManager::NotifyWindowExtensionVisibilityChange(int32_t pid, 
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
     windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(INVALID_WINDOW_ID, pid, uid,
         visible ? WINDOW_VISIBILITY_STATE_NO_OCCLUSION : WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
-	WindowType::WINDOW_TYPE_APP_COMPONENT));
+        WindowType::WINDOW_TYPE_APP_COMPONENT));
     SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     return WSError::WS_OK;
 }
@@ -10845,7 +10846,7 @@ void SceneSessionManager::CacVisibleWindowNum()
                 windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_PIP) {
                 isFullScreen = false;
             }
-            int32_t displayId = static_cast<uint32_t>(curSession->GetSessionProperty()->GetDisplayId());
+            int32_t displayId = static_cast<int32_t>(curSession->GetSessionProperty()->GetDisplayId());
             auto it = std::find_if(visibleWindowNumInfo.begin(), visibleWindowNumInfo.end(),
                 [=](const VisibleWindowNumInfo& info) {
                     return (static_cast<int32_t>(info.displayId)) == displayId;
@@ -10885,7 +10886,7 @@ void SceneSessionManager::ReportWindowProfileInfos()
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
         if (curSession == nullptr || curSession->GetSessionInfo().isSystem_ ||
-            curSession->GetWindowType() !=  WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            curSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             continue;
         }
         WindowProfileInfo windowProfileInfo;
@@ -11725,7 +11726,7 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& iter: sceneSessionMap_) {
+    for (const auto& iter : sceneSessionMap_) {
         auto& session = iter.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
             bundleName = session->GetSessionInfo().bundleName_;
