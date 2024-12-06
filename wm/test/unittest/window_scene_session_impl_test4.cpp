@@ -1120,6 +1120,46 @@ HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus03, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: SetWindowTitle
+ * @tc.desc: SetWindowTitle Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetWindowTitle");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetDisplayId(0);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    std::string title = "SetWindowTitle";
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_INVALID_WINDOW);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->property_->SetDecorEnable(true);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->Create(abilityContext_, session), WMError::WM_OK);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
  * @tc.name: VerifySubWindowLevel
  * @tc.desc: VerifySubWindowLevel Test
  * @tc.type: FUNC
