@@ -616,7 +616,7 @@ HWTEST_F(ScreenPropertyTest, SetScreenShape, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenShape start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
-    ScreenShape screenshape = ScreenShape::CIRCLE;
+    ScreenShape screenshape = ScreenShape::ROUND;
     property->SetScreenShape(screenshape);
     ASSERT_EQ(property->GetScreenShape(), screenshape);
     delete property;
@@ -633,7 +633,7 @@ HWTEST_F(ScreenPropertyTest, GetScreenShape, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenShape start";
     ScreenProperty* property = new(std::nothrow) ScreenProperty();
     ASSERT_NE(property, nullptr);
-    ScreenShape screenshape = ScreenShape::CIRCLE;
+    ScreenShape screenshape = ScreenShape::ROUND;
     property->SetScreenShape(screenshape);
     ASSERT_EQ(property->GetScreenShape(), screenshape);
     delete property;
