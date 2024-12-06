@@ -313,7 +313,12 @@ HWTEST_F(WindowSessionTest, LifeCycleTask, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, SetSessionProperty01, Function | SmallTest | Level2)
 {
-    ASSERT_EQ(session_->SetSessionProperty(nullptr), WSError::WS_OK);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetIsNeedUpdateWindowMode(true);
+    session_->SetScreenId(233);
+    session_->SetSessionProperty(property);
+    ASSERT_EQ(session_->SetSessionProperty(property), WSError::WS_OK);
 }
 
 /**
