@@ -331,7 +331,7 @@ napi_value JsExtensionWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callbac
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [env, task = napiAsyncTask]() {
-        task.Reject(env,
+        task->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -351,7 +351,7 @@ napi_value JsExtensionWindow::OnSetWindowBrightness(napi_env env, napi_callback_
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [env, task = napiAsyncTask]() {
-        task.Reject(env,
+        task->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -376,7 +376,7 @@ napi_value JsExtensionWindow::OnSetPreferredOrientation(napi_env env, napi_callb
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [env, task = napiAsyncTask]() {
-        task.Reject(env,
+        task->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -396,7 +396,7 @@ napi_value JsExtensionWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_c
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [env, task = napiAsyncTask]() {
-        task.Reject(env,
+        task->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -416,7 +416,7 @@ napi_value JsExtensionWindow::OnResizeWindow(napi_env env, napi_callback_info in
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [env, task = napiAsyncTask]() {
-        task.Reject(env,
+        task->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };    
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -436,7 +436,7 @@ napi_value JsExtensionWindow::OnMoveWindowTo(napi_env env, napi_callback_info in
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [env, task = napiAsyncTask]() {
-        task.Reject(env,
+        task->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -480,14 +480,14 @@ napi_value JsExtensionWindow::OnDestroyWindow(napi_env env, napi_callback_info i
     auto asyncTask = [env, task = napiAsyncTask]() {
         if (extwin == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
-            task.Reject(env,
+            task->Reject(env,
                 CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
         sptr<Window> windowImpl = extwin->GetWindow();
         if (windowImpl == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "window is nullptr or get invalid param");
-            task.Reject(env,
+            task->Reject(env,
                 CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
@@ -495,13 +495,13 @@ napi_value JsExtensionWindow::OnDestroyWindow(napi_env env, napi_callback_info i
         TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
             windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
         if (ret != WmErrorCode::WM_OK) {
-            task.Reject(env,
+            task->Reject(env,
                 CreateJsError(env, static_cast<int32_t>(ret),
                 "Window destroy failed"));
             return;
         }
         windowImpl = nullptr; // ensure window dtor when finalizer invalid
-        task.Resolve(env, NapiGetUndefined(env));
+        task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
@@ -535,13 +535,13 @@ napi_value JsExtensionWindow::OnShowWindow(napi_env env, napi_callback_info info
     auto asyncTask = [extwin = extensionWindow_, env, task = napiAsyncTask]() {
         if (extwin == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
-            task.Reject(env, CreateJsError(env,
+            task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
         sptr<Window> windowImpl = extwin->GetWindow();
         if (windowImpl == nullptr) {
-            task.Reject(env, CreateJsError(env,
+            task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             TLOGE(WmsLogTag::WMS_UIEXT, "window is nullptr or get invalid param");
             return;
@@ -550,9 +550,9 @@ napi_value JsExtensionWindow::OnShowWindow(napi_env env, napi_callback_info info
         TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show with ret = %{public}d",
             windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
         if (ret == WMError::WM_OK) {
-            task.Resolve(env, NapiGetUndefined(env));
+            task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, CreateJsError(env,
+            task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
         }
         TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show end, ret = %{public}d",
@@ -596,7 +596,7 @@ napi_value JsExtensionWindow::OnSetUIContent(napi_env env, napi_callback_info in
         env, task = napiAsyncTask]() {
         if (extwin == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
-            task.Reject(env,
+            task->Reject(env,
                 CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
@@ -653,7 +653,7 @@ napi_value JsExtensionWindow::OnLoadContent(napi_env env, napi_callback_info inf
         env, task = napiAsyncTask]() {
         if (extwin == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr or get invalid param");
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
         LoadContentTask(contentStorage, contextUrl, extwin, env, task, parentToken, isLoadedByName);
@@ -957,7 +957,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             windowOption = option, env, task = napiAsyncTask]() mutable {
         auto extWindow = extensionWindow->GetWindow();
         if (extWindow == nullptr) {
-            task.Reject(env, CreateJsError(env,
+            task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "extension's window is null"));
             return;
         }
@@ -967,14 +967,14 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         windowOption->SetIsUIExtFirstSubWindow(true);
         auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
         if (window == nullptr) {
-            task.Reject(env, CreateJsError(env,
+            task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "create sub window failed"));
             return;
         }
         if (!window->IsTopmost()) {
             extWindow->NotifyModalUIExtensionMayBeCovered(false);
         }
-        task.Resolve(env, CreateJsWindowObject(env, window));
+        task->Resolve(env, CreateJsWindowObject(env, window));
         TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s [NAPI]Create sub window %{public}s end",
             where, windowName.c_str());
     };
