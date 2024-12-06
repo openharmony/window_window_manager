@@ -44,6 +44,9 @@ group("unittest") {
     ":ws_screen_session_test",
     ":ws_screen_setting_helper_test",
     ":ws_screen_snapshot_picker_connection_test",
+    ":ws_secondary_display_fold_policy_test",
+    ":ws_secondary_display_sensor_fold_state_manager_test",
+    ":ws_secondary_fold_sensor_manager_test",
     ":ws_sensor_fold_state_manager_test",
     ":ws_session_display_power_controller_test",
     ":ws_setting_observer_test",
@@ -604,6 +607,60 @@ ohos_unittest("ws_super_fold_sensor_manager_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "sensor:sensor_interface_native",
+  ]
+}
+
+ohos_unittest("ws_secondary_display_sensor_fold_state_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "secondary_display_sensor_fold_state_manager_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("ws_secondary_fold_sensor_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "secondary_fold_sensor_manager_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "sensor:sensor_interface_native",
+  ]
+
+  defines = []
+  if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
+    external_deps += [ "sensor:sensor_interface_native" ]
+    defines += [ "SENSOR_ENABLE" ]
+  }
+}
+
+ohos_unittest("ws_secondary_display_fold_policy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "secondary_display_fold_policy_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
   ]
 }
 

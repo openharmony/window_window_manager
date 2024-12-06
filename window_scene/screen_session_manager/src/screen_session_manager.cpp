@@ -59,6 +59,7 @@
 #include "screen_sensor_plugin.h"
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_controller/secondary_fold_sensor_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -363,11 +364,19 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
             return;
         }
         if (GetDisplayState(foldScreenController_->GetCurrentScreenId()) == DisplayState::ON) {
-            FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+                SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+            } else {
+                FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            }
             TLOGI(WmsLogTag::DMS, "Recover Posture sensor finished");
         }
-
-        FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+        
+        if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
+        } else {
+            FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+        }
         TLOGI(WmsLogTag::DMS, "Recover Hall sensor finished");
 #endif
     }
@@ -655,6 +664,13 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
         SuperFoldSensorManager::GetInstance().RegisterHallCallback();
         SetSensorSubscriptionEnabled();
         screenEventTracker_.RecordEvent("Dms subscribed to sensor successfully.");
+    }
+
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+        SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
+        SetSensorSubscriptionEnabled();
+        screenEventTracker_.RecordEvent("secondary device: Dms subscribed to sensor successfully.");
     }
 
     if (foldScreenController_ != nullptr) {
@@ -2447,37 +2463,47 @@ void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
 
 void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
-    if (ScreenSceneConfig::IsSupportRotateWithSensor()) {
-        if (status == ScreenPowerStatus::POWER_STATUS_ON) {
-            DmsXcollie dmsXcollie("DMS:SubscribeRotationSensor", XCOLLIE_TIMEOUT_5S);
-            TLOGI(WmsLogTag::DMS, "subscribe rotation and posture sensor when phone turn on");
-            ScreenSensorConnector::SubscribeRotationSensor();
+    if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
+        TLOGW(WmsLogTag::DMS, "not supportRotateWithSensor.");
+        return;
+    }
+    if (status == ScreenPowerStatus::POWER_STATUS_ON) {
+        DmsXcollie dmsXcollie("DMS:SubscribeRotationSensor", XCOLLIE_TIMEOUT_5S);
+        TLOGI(WmsLogTag::DMS, "subscribe rotation and posture sensor when phone turn on");
+        ScreenSensorConnector::SubscribeRotationSensor();
 #ifdef SENSOR_ENABLE
-            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+        if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+            if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+                SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+            } else {
                 FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-            } else {
-                TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed register posture.");
             }
-#endif
-        } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
-            TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
-            if (isMultiScreenCollaboration_) {
-                TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
-            } else {
-                DmsXcollie dmsXcollie("DMS:UnsubscribeRotationSensor", XCOLLIE_TIMEOUT_5S);
-                ScreenSensorConnector::UnsubscribeRotationSensor();
-            }
-#ifdef SENSOR_ENABLE
-            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
-                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
-            } else {
-                TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
-            }
-#endif
         } else {
-            TLOGI(WmsLogTag::DMS, "SetScreenPower state not support");
-            screenEventTracker_.RecordEvent("HandlerSensor start!");
+            TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed register posture.");
         }
+#endif
+    } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
+        TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
+        if (isMultiScreenCollaboration_) {
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
+        } else {
+            DmsXcollie dmsXcollie("DMS:UnsubscribeRotationSensor", XCOLLIE_TIMEOUT_5S);
+            ScreenSensorConnector::UnsubscribeRotationSensor();
+        }
+#ifdef SENSOR_ENABLE
+        if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+            if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+                SecondaryFoldSensorManager::GetInstance().UnRegisterPostureCallback();
+            } else {
+                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+            }
+        } else {
+            TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
+        }
+#endif
+    } else {
+        TLOGI(WmsLogTag::DMS, "SetScreenPower state not support");
+        screenEventTracker_.RecordEvent("HandlerSensor start!");
     }
 }
 
@@ -2891,8 +2917,13 @@ void ScreenSessionManager::SetPostureAndHallSensorEnabled()
         TLOGI(WmsLogTag::DMS, "current device is not fold phone.");
         return;
     }
-    FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-    FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+        SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
+    } else {
+        FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+        FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+    }
     TLOGI(WmsLogTag::DMS, "successful");
 #endif
 }
@@ -6140,7 +6171,9 @@ void ScreenSessionManager::RegisterApplicationStateObserver()
 {
 #ifdef SENSOR_ENABLE
     std::string identify = IPCSkeleton::ResetCallingIdentity();
-    FoldScreenSensorManager::GetInstance().RegisterApplicationStateObserver();
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        FoldScreenSensorManager::GetInstance().RegisterApplicationStateObserver();
+    }
     IPCSkeleton::SetCallingIdentity(identify);
 #endif
 }

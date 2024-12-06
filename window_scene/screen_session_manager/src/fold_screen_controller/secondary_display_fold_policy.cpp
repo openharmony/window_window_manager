@@ -141,7 +141,7 @@ FoldDisplayMode SecondaryDisplayFoldPolicy::GetModeMatchStatus()
             displayMode = FoldDisplayMode::GLOBAL_FULL;
             break;
         }
-        case FoldStatus::FOLD_STATE_HALF_FOLDEDE_WITH_SECOND_HALF_FOLDED: {
+        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED: {
             displayMode = FoldDisplayMode::GLOBAL_FULL;
             break;
         }
