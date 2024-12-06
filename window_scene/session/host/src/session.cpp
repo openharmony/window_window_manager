@@ -1039,7 +1039,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     if (currScreenFoldStatus == SuperFoldStatus::EXPANDED) {
         lastScreenFoldStatus_ = currScreenFoldStatus;
         auto ret = UpdateClientDisplayId(DEFAULT_DISPLAY_ID);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "JustUpdatedId: windowId: %{public}d, %{public}s, UpdatedIdResult: %{public}d",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "JustUpdatedId: windowId: %{public}d, %{public}s, Result: %{public}d",
             GetPersistentId(), logStr.c_str(), ret);
         return;
     }
