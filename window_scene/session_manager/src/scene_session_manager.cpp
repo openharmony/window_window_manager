@@ -62,7 +62,6 @@
 #include "dms_reporter.h"
 #include "res_sched_client.h"
 #include "anomaly_detection.h"
-#include "hidump_controller.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/multi_instance_manager.h"
 
@@ -6416,6 +6415,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         }
         const auto& state = subSession->GetSessionState();
         if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            TLOGD(WmsLogTag::WMS_SUB, "sub session is not active");
             continue;
         }
         RequestSessionFocus(subSession->GetPersistentId(), true);
@@ -8465,7 +8465,7 @@ WSError SceneSessionManager::NotifyWindowExtensionVisibilityChange(int32_t pid, 
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
     windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(INVALID_WINDOW_ID, pid, uid,
         visible ? WINDOW_VISIBILITY_STATE_NO_OCCLUSION : WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
-    WindowType::WINDOW_TYPE_APP_COMPONENT));
+	WindowType::WINDOW_TYPE_APP_COMPONENT));
     SessionManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     return WSError::WS_OK;
 }
@@ -10806,8 +10806,8 @@ bool SceneSessionManager::IsVectorSame(const std::vector<VisibleWindowNumInfo>& 
         WLOGFE("last and current info is not Same");
         return false;
     }
-    size_t sizeOfLastInfo = lastInfo.size();
-    for (size_t i = 0; i < sizeOfLastInfo; i++) {
+    int sizeOfLastInfo = static_cast<int>(lastInfo.size());
+    for (int i = 0; i < sizeOfLastInfo; i++) {
         if (lastInfo[i].displayId != currentInfo[i].displayId ||
             lastInfo[i].visibleWindowNum != currentInfo[i].visibleWindowNum) {
             WLOGFE("last and current visible window num is not Same");
@@ -10845,10 +10845,10 @@ void SceneSessionManager::CacVisibleWindowNum()
                 windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_PIP) {
                 isFullScreen = false;
             }
-            uint32_t displayId = static_cast<uint32_t>(curSession->GetSessionProperty()->GetDisplayId());
+            int32_t displayId = static_cast<uint32_t>(curSession->GetSessionProperty()->GetDisplayId());
             auto it = std::find_if(visibleWindowNumInfo.begin(), visibleWindowNumInfo.end(),
                 [=](const VisibleWindowNumInfo& info) {
-                    return info.displayId == displayId;
+                    return (static_cast<int32_t>(info.displayId)) == displayId;
             });
             if (it == visibleWindowNumInfo.end()) {
                 visibleWindowNumInfo.push_back({displayId, 1});
@@ -10935,13 +10935,13 @@ void SceneSessionManager::RemoveFailRecoveredSession()
             TLOGW(WmsLogTag::WMS_RECOVER, "not recovered session persistentId = %{public}d", persistentId);
             continue;
         }
-        const auto &sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
-        if (!sceneSessionInfo) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "sceneSessionInfo is nullptr, persistentId = %{public}d", persistentId);
+        const auto &scnSessionInfo = SetAbilitySessionInfo(sceneSession);
+        if (!scnSessionInfo) {
+            TLOGW(WmsLogTag::WMS_RECOVER, "scnSessionInfo is nullptr, persistentId = %{public}d", persistentId);
             continue;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId = %{public}d", persistentId);
-        sceneSession->NotifySessionExceptionInner(sceneSessionInfo, true);
+        sceneSession->NotifySessionExceptionInner(scnSessionInfo, true);
     }
     failRecoveredPersistentIdSet_.clear();
 }
@@ -11263,7 +11263,6 @@ WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
     taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabledTask");
     return WSError::WS_OK;
 }
-
 
 WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo)
 {
@@ -11726,7 +11725,7 @@ WMError SceneSessionManager::GetCurrentPiPWindowInfo(std::string& bundleName)
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& iter : sceneSessionMap_) {
+    for (const auto& iter: sceneSessionMap_) {
         auto& session = iter.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
             bundleName = session->GetSessionInfo().bundleName_;
