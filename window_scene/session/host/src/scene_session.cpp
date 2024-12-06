@@ -1443,8 +1443,8 @@ void SceneSession::UpdateSessionRectPosYFromClient(WSRect& rect)
     TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
     WSRect lastRect = rect;
     rect.posY_ += lowerScreenPosY;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, input: %{public}s, output: %{public}s", GetPersistentId(),
-        rect.ToString().c_str(), lastRect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, lowerScreenPosY: %{public}d, output: %{public}s",
+        GetPersistentId(), lowerScreenPosY, rect.ToString().c_str());
 }
 
 /** @note @window.layout */

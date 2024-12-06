@@ -1033,7 +1033,6 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "Error Status");
         return;
     }
-    std::string logStr = "inputRect: " + rect.ToString();
     TLOGI(WmsLogTag::WMS_LAYOUT, "lastStatus: %{public}d, curStatus: %{public}d",
         lastScreenFoldStatus_, currScreenFoldStatus);
     if (currScreenFoldStatus == SuperFoldStatus::EXPANDED) {
@@ -1048,7 +1047,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     auto ret = UpdateClientDisplayId(updatedDisplayId);
     lastScreenFoldStatus_ = currScreenFoldStatus;
     TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: windowId: %{public}d, input: %{public}s, output: %{public}s,"
-        " Result: %{public}d", GetPersistentId(), lastRect.ToString().c_str(), rect.ToString().c_str(), ret);
+        " result: %{public}d", GetPersistentId(), lastRect.ToString().c_str(), rect.ToString().c_str(), ret);
 }
 
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
