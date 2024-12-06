@@ -3770,11 +3770,11 @@ bool Session::SetWindowFreeze(bool isFreeze)
         TLOGW(WmsLogTag::WMS_MAIN, "fail, id %{public}d", GetPersistentId());
         return false;
     }
-    TLOGE(WmsLogTag::WMS_MAIN, "id: %{public}d, isFreeze: %{public}d", GetPersistentId(), isFreeze);
+    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d, isFreeze: %{public}d", GetPersistentId(), isFreeze);
     surfaceNode->SetFreeze(isFreeze);
     auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
+    if (rsTransaction != nullptr) {
+        rsTransaction->FlushImplicitTransaction();
     }
     return true;
 }
@@ -3803,8 +3803,7 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotWithFreeze(float scaleParam
     }
     auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
-        TLOGI(WmsLogTag::WMS_MAIN, "success, id: %{public}d",
-            pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
+        TLOGI(WmsLogTag::WMS_MAIN, "success, id: %{public}d", persistentId_);
         return pixelMap;
     }
     TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, id: %{public}d", persistentId_);
