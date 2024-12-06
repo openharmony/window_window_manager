@@ -120,7 +120,7 @@ enum class ScreenPropertyChangeType : uint32_t {
  */
 enum class ScreenShape : uint32_t {
     RECTANGLE = 0,
-    CIRCLE = 1,
+    ROUND = 1,
 };
 
 /**
