@@ -141,7 +141,7 @@ private:
         }
     };
     std::unordered_set<sptr<IAvoidAreaChangedListener>, IAvoidAreaChangedListenerHash> avoidAreaChangeListeners_;
-    mutable std::mutex::mutex_;
+    mutable std::mutex mutex_;
 };
 } // namespace Rosen
 } // namespace OHOS
