@@ -225,9 +225,7 @@ public:
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
     WSError RaiseWindowToTop(int32_t persistentId) override;
     void SetScreenLocked(const bool isScreenLocked);
-    void SetUserAuthPassed(const bool isUserAuthPassed);
     bool IsScreenLocked() const;
-    bool IsUserAuthPassed() const;
 
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
     void NotifySwitchingUser(const bool isUserActive);
@@ -543,6 +541,8 @@ private:
     /**
      * Window Lifecycle
      */
+    bool IsUserAuthPassed() const;
+    void SetUserAuthPassed(bool isUserAuthPassed);
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
 
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
