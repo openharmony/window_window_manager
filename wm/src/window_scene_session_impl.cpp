@@ -402,12 +402,9 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
         auto mainWindow = FindMainWindowWithContext();
         property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
         if (mainWindow != nullptr) {
-            if (property_->GetDisplayId() != DISPLAY_ID_INVALID &&
-                property_->GetDisplayId() != mainWindow->GetDisplayId()) {
-                TLOGE(WmsLogTag::WMS_LIFE, "window has parent and display not same");
-                return WMError::WM_ERROR_INVALID_DISPLAY;
+            if (property_->GetDisplayId() == DISPLAY_ID_INVALID) {
+                property_->SetDisplayId(mainWindow->GetDisplayId());
             }
-            property_->SetDisplayId(mainWindow->GetDisplayId());
             property_->SetSubWindowLevel(mainWindow->GetProperty()->GetSubWindowLevel() + 1);
         }
     } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
