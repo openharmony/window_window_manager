@@ -3762,4 +3762,52 @@ std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
 {
     return handler_;
 }
+
+bool Session::SetWindowFreeze(bool isFreeze)
+{
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGW(WmsLogTag::WMS_MAIN, "fail, id %{public}d", GetPersistentId());
+        return false;
+    }
+    TLOGE(WmsLogTag::WMS_MAIN, "id: %{public}d, isFreeze: %{public}d", GetPersistentId(), isFreeze);
+    surfaceNode->SetFreeze(isFreeze);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    return true;
+}
+
+std::shared_ptr<Media::PixelMap> Session::GetSnapshotWithFreeze(float scaleParam, bool isFreeze) const
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "GetSnapshotWithFreeze[%d][%s]",
+        persistentId_, sessionInfo_.bundleName_.c_str());
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+        return nullptr;
+    }
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
+        snapshotScale_ : scaleParam;
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleValue,
+        .scaleY = scaleValue,
+        .useDma = true,
+        .useCurWindow = true,
+    };
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config, isFreeze);
+    if (!ret) {
+        TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
+        return nullptr;
+    }
+    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+    if (pixelMap != nullptr) {
+        TLOGI(WmsLogTag::WMS_MAIN, "success, id: %{public}d",
+            pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
+        return pixelMap;
+    }
+    TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, id: %{public}d", persistentId_);
+    return nullptr;
+}
 } // namespace OHOS::Rosen
