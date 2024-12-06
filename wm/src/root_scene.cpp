@@ -247,7 +247,7 @@ WMError RootScene::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListene
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex_);
     if (avoidAreaChangeListeners_.find(listener) == avoidAreaChangeListeners_.end()) {
         TLOGI(WmsLogTag::WMS_IMMS, "register success.");
         avoidAreaChangeListeners_.insert(listener);
@@ -263,7 +263,7 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListe
         return WMError::WM_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
-    std::unique_lock<std::mutex> lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex_);
     avoidAreaChangeListeners_.erase(listener);
     return WMError::WM_OK;
 }
