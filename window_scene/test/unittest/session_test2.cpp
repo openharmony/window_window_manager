@@ -2132,6 +2132,20 @@ HWTEST_F(WindowSessionTest2, NotifyCloseExistPipWindow, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: SetUseStartingWindowAboveLocked
+ * @tc.desc: SetUseStartingWindowAboveLocked Test
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionTest2, SetUseStartingWindowAboveLocked, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->useStartingWindowAboveLocked_ = false;
+    ASSERT_EQ(session_->useStartingWindowAboveLocked_, false);
+    session_->SetUseStartingWindowAboveLocked(true);
+    ASSERT_EQ(session_->UseStartingWindowAboveLocked(), true);
+}
+
+/**
  * @tc.name: SetSystemConfig
  * @tc.desc: SetSystemConfig Test
  * @tc.type: FUNC
