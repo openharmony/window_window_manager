@@ -536,6 +536,7 @@ public:
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
+    void CreateRootSceneSession();
 
 protected:
     SceneSessionManager();
@@ -1143,7 +1144,6 @@ private:
      * Window Lifecycle
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
-    void CreateRootSceneSession();
 };
 } // namespace OHOS::Rosen
 

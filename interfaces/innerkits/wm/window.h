@@ -2709,7 +2709,7 @@ public:
     /**
      * @brief Get the type of window.
      *
-     * @return The string corresponding to the scene.
+     * @return The string corresponding to the window.
      */
     virtual std::string GetClassType() const { return "Window"; }
 };

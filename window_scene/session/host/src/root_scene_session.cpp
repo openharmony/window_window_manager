@@ -185,7 +185,7 @@ void RootSceneSession::SetRootSessionRect(const WSRect& rect)
 {
     if (!rect.IsInvalid() && winRect_ != rect) {
         winRect_ = rect;
-        TLOGI(WmsLogTag::WMS_IMMS, "rootsession update rect: %{public}s", winRect_.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "root session update rect: %{public}s", winRect_.ToString().c_str());
         if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_) {
             specificCallback_->onUpdateAvoidArea_(GetPersistentId());
         }
