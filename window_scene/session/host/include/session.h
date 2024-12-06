@@ -22,6 +22,7 @@
 
 #include <event_handler.h>
 
+#include "dm_common.h"
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
 #include "pattern_detach_callback_interface.h"
@@ -546,6 +547,9 @@ public:
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
+    WSError UpdateClientDisplayId(DisplayId displayId);
+    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
+    void UpdateClientRectPosYAndDisplayId(WSRect& rect);
 
     /**
      * Screen Lock
@@ -690,6 +694,8 @@ protected:
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    DisplayId lastUpdatedDisplayId_ = 0;
+    SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /**
      * Window ZOrder
