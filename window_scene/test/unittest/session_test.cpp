@@ -1077,7 +1077,6 @@ HWTEST_F(WindowSessionTest, GetFocusable01, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, GetFocusable02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = nullptr;
     ASSERT_EQ(true, session_->GetFocusable());
 }
 
@@ -1219,8 +1218,7 @@ HWTEST_F(WindowSessionTest, SetBrightness01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    session_->property_ = nullptr;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetBrightness(0.1f));
+    ASSERT_EQ(WSError::WS_OK, session_->SetBrightness(0.1f));
 }
 
 /**
