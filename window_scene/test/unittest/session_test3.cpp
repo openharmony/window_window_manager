@@ -143,13 +143,11 @@ HWTEST_F(WindowSessionTest3, NotifyContextTransparent, Function | SmallTest | Le
 HWTEST_F(WindowSessionTest3, SetFocusable04, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = nullptr;
     auto result = session_->SetFocusable(false);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     session_->isFocused_ = true;
     session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(session_->property_, nullptr);
     session_->property_->SetFocusable(false);
 
     result = session_->SetFocusable(false);
@@ -222,10 +220,6 @@ HWTEST_F(WindowSessionTest3, GetTouchable02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
-    EXPECT_EQ(true, session_->GetTouchable());
-
-    session_->property_ = nullptr;
     EXPECT_EQ(true, session_->GetTouchable());
 }
 
@@ -840,7 +834,6 @@ HWTEST_F(WindowSessionTest3, NotifyUIRequestFocus, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, Function | SmallTest | Level2)
 {
-    session_->property_ = nullptr;
     auto enable = true;
     auto isSupportDragInPcCompatibleMode = true;
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
@@ -1038,11 +1031,9 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->isVisible_ = true;
-    session_->property_ = nullptr;
     session_->RectCheckProcess();
 
     session_->state_ = SessionState::STATE_FOREGROUND;
-    session_->property_ = nullptr;
     session_->RectCheckProcess();
     EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
 }
@@ -1057,7 +1048,6 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_INACTIVE;
     session_->isVisible_ = false;
-    session_->property_ = nullptr;
     session_->RectCheckProcess();
 
     session_->state_ = SessionState::STATE_ACTIVE;
@@ -1136,9 +1126,6 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
     session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     auto result = session_->SetIsPcAppInPad(isPcAppInPad);
     EXPECT_EQ(result, WSError::WS_OK);
-
-    session_->property_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetIsPcAppInPad(isPcAppInPad));
 }
 
 /**
@@ -1183,13 +1170,12 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest 
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_FOREGROUND;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    session_->property_ = nullptr;
     bool enable = true;
+    session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
     ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
 
     enable = false;

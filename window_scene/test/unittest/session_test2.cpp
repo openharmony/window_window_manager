@@ -710,9 +710,6 @@ HWTEST_F(WindowSessionTest2, UpdateFocus02, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, UpdateWindowMode01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-
-    session_->property_ = nullptr;
-
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
 }
 
@@ -1372,7 +1369,6 @@ HWTEST_F(WindowSessionTest2, GetBrightness, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    session_->property_ = nullptr;
     ASSERT_EQ(UNDEFINED_BRIGHTNESS, session_->GetBrightness());
 }
 
@@ -2281,7 +2277,6 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
     sptr<Session> session = sptr<Session>::MakeSptr(info);
     ASSERT_NE(session, nullptr);
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session->property_, nullptr);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     EXPECT_EQ(session, session->GetMainSession());
 
@@ -2289,7 +2284,6 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
     ASSERT_NE(subSession, nullptr);
     subSession->SetParentSession(session);
     subSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(subSession->property_, nullptr);
     subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(session, subSession->GetMainSession());
 
@@ -2297,7 +2291,6 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
     ASSERT_NE(subSubSession, nullptr);
     subSubSession->SetParentSession(subSession);
     subSubSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(subSubSession->property_, nullptr);
     subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(session, subSubSession->GetMainSession());
 }
