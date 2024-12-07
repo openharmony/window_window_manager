@@ -2837,11 +2837,6 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
     return WSError::WS_OK;
 }
 
-const sptr<WindowSessionProperty>& Session::GetSessionProperty() const
-{
-    return property_;
-}
-
 /** @note @window.layout */
 void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
