@@ -1942,7 +1942,12 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         scnSessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0));
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
-    if (systemConfig_.backgroundswitch == false) {
+    bool isAppSupportPhoneInPc = false;
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        isAppSupportPhoneInPc = sessionProperty->GetIsAppSupportPhoneInPc();
+    }
+    if (systemConfig_.backgroundswitch == false || isAppSupportPhoneInPc) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(scnSession->GetSessionInfo().isSystem_));
         errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(scnSessionInfo, isColdStart);
@@ -2036,11 +2041,13 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             return WSError::WS_ERROR_NULLPTR;
         }
         bool isPcAppInpad = false;
+        bool isAppSupportPhoneInPc = false;
         auto property = scnSession->GetSessionProperty();
         if (property) {
             isPcAppInpad = property->GetIsPcAppInPad();
+            isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPC();
         }
-        if (systemConfig_.backgroundswitch || isPcAppInpad) {
+        if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);
             scnSession->NotifySessionBackground(1, true, true);
         } else {
