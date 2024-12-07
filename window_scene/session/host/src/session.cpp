@@ -2822,14 +2822,8 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(propertyMutex_);
-        property_ = property;
-    }
+    property_->CopyFrom(property);
     NotifySessionInfoChange();
-    if (property == nullptr) {
-        return WSError::WS_OK;
-    }
 
     auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
@@ -2843,9 +2837,8 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
     return WSError::WS_OK;
 }
 
-sptr<WindowSessionProperty> Session::GetSessionProperty() const
+const sptr<WindowSessionProperty>& Session::GetSessionProperty() const
 {
-    std::shared_lock<std::shared_mutex> lock(propertyMutex_);
     return property_;
 }
 
