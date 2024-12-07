@@ -61,6 +61,7 @@ public:
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
+    WMError Restore() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
     WMError Close() override;
@@ -162,12 +163,7 @@ public:
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
-    
-    /**
-     * PC Window
-     */
     bool IsPcOrPadCapabilityEnabled() const override;
-    WMError Restore() override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
