@@ -105,13 +105,8 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
-    } else {
-        if (!eventHandler_) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
-            return;
-        }
-        eventHandler_->PostTask(jsCallback, "wms:JsExtensionWindowListener::OnSizeChange", 0,
-                                AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    } else if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
     currRect_ = rect;
 }
@@ -155,12 +150,9 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (!eventHandler_) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Get main event handler failed!");
-        return;
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
-    eventHandler_->PostTask(jsCallback, "wms:JsExtensionWindowListener::OnRectChange", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
     currRect_ = rect;
     currentRectChangeReason_ = rectChangeReason;
 }
