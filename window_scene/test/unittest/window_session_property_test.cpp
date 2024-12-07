@@ -176,6 +176,19 @@ HWTEST_F(WindowSessionPropertyTest, SetTopmost, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetMainWindowTopmost
+ * @tc.desc: SetMainWindowTopmost test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetMainWindowTopmost, Function | SmallTest | Level2)
+{
+    bool isTopmost = true;
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.SetMainWindowTopmost(isTopmost);
+    ASSERT_TRUE(windowSessionProperty.IsMainWindowTopmost());
+}
+
+/**
  * @tc.name: GetParentId
  * @tc.desc: GetParentId test
  * @tc.type: FUNC
