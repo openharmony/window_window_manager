@@ -4708,7 +4708,7 @@ void SceneSession::RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindo
     auto task = [weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            TLOGNE(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
             return;
         }
         session->onSetLandscapeMultiWindowFunc_ = std::move(callback);
