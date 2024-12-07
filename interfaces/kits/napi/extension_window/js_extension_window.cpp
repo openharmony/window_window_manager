@@ -486,13 +486,13 @@ napi_value JsExtensionWindow::OnDestroyWindow(napi_env env, napi_callback_info i
         }
         sptr<Window> windowImpl = extwin->GetWindow();
         if (windowImpl == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "window is nullptr or get invalid param");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr or get invalid param");
             task->Reject(env,
                 CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowImpl->Destroy());
-        TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
             windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
         if (ret != WmErrorCode::WM_OK) {
             task->Reject(env,
@@ -543,11 +543,11 @@ napi_value JsExtensionWindow::OnShowWindow(napi_env env, napi_callback_info info
         if (windowImpl == nullptr) {
             task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-            TLOGE(WmsLogTag::WMS_UIEXT, "window is nullptr or get invalid param");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr or get invalid param");
             return;
         }
         WMError ret = windowImpl->Show(0, false);
-        TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show with ret = %{public}d",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show with ret = %{public}d",
             windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
         if (ret == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
@@ -555,7 +555,7 @@ napi_value JsExtensionWindow::OnShowWindow(napi_env env, napi_callback_info info
             task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
         }
-        TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show end, ret = %{public}d",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show end, ret = %{public}d",
             windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -595,7 +595,7 @@ napi_value JsExtensionWindow::OnSetUIContent(napi_env env, napi_callback_info in
     auto asyncTask = [extwin = extensionWindow_, contentStorage, contextUrl, parentToken,
         env, task = napiAsyncTask]() {
         if (extwin == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
             task->Reject(env,
                 CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
@@ -652,7 +652,7 @@ napi_value JsExtensionWindow::OnLoadContent(napi_env env, napi_callback_info inf
     auto asyncTask = [extwin = extensionWindow_, contentStorage, contextUrl, parentToken, isLoadedByName,
         env, task = napiAsyncTask]() {
         if (extwin == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr or get invalid param");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "Window is nullptr or get invalid param");
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
             return;
         }
