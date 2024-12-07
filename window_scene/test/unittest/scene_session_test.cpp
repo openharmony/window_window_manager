@@ -1746,6 +1746,46 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: UpdateSessionRectPosYFromClient01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionRectPosYFromClient";
+    info.bundleName_ = "UpdateSessionRectPosYFromClient";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(sceneSession->GetScreenId(), 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = {0, 0, 0, 0};
+    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    EXPECT_EQ(rect.posY_, 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = {0, 100, 0, 0};
+    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    EXPECT_EQ(rect.posY_, 100);
+
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    sceneSession->lastUpdatedDisplayId_ = 0;
+    rect = {0, 100, 100, 100};
+    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    EXPECT_EQ(rect.posY_, 100);
+    sceneSession->lastUpdatedDisplayId_ = 999;
+    rect = {0, 100, 100, 100};
+    auto rect2 = rect;
+    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    EXPECT_EQ(rect.posY_, rect2.posY_ + defaultDisplayRect.height_ + foldCreaseRect.height_ / 2);
+}
+
+/**
  * @tc.name: UpdateSessionRect
  * @tc.desc: normal function
  * @tc.type: FUNC

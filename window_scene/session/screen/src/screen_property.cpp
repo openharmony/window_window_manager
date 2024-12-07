@@ -509,4 +509,14 @@ uint32_t ScreenProperty::GetDefaultDeviceRotationOffset() const
 {
     return defaultDeviceRotationOffset_;
 }
+
+void ScreenProperty::SetScreenShape(ScreenShape screenShape)
+{
+    screenShape_ = screenShape;
+}
+
+ScreenShape ScreenProperty::GetScreenShape() const
+{
+    return screenShape_;
+}
 } // namespace OHOS::Rosen

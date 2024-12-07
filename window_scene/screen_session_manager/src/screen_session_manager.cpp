@@ -1684,6 +1684,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
         property.SetBounds(screenBounds);
     }
     property.CalcDefaultDisplayOrientation();
+    property.SetScreenShape(ScreenSettingHelper::GetScreenShape(screenId));
 }
 
 void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property)

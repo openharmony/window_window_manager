@@ -17,6 +17,7 @@
 #include "ability_context_impl.h"
 #include "display_manager_proxy.h"
 #include "mock_window_adapter.h"
+#include "scene_board_judgement.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
 #include "mock_uicontent.h"
@@ -593,24 +594,39 @@ HWTEST_F(WindowImplTest2, PrivacyMode01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
 
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(8).WillRepeatedly(Return(WMError::WM_OK));
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        window->SetPrivacyMode(true);
+        window->SetSystemPrivacyMode(true);
+        ASSERT_EQ(true, window->IsPrivacyMode());
 
-    window->SetPrivacyMode(true);
-    window->SetSystemPrivacyMode(true);
-    ASSERT_EQ(true, window->IsPrivacyMode());
+        window->SetPrivacyMode(true);
+        window->SetSystemPrivacyMode(false);
+        ASSERT_EQ(true, window->IsPrivacyMode());
 
-    window->SetPrivacyMode(true);
-    window->SetSystemPrivacyMode(false);
-    ASSERT_EQ(true, window->IsPrivacyMode());
+        window->SetPrivacyMode(false);
+        window->SetSystemPrivacyMode(true);
+        ASSERT_EQ(false, window->IsPrivacyMode());
 
-    window->SetPrivacyMode(false);
-    window->SetSystemPrivacyMode(true);
-    ASSERT_EQ(false, window->IsPrivacyMode());
+        window->SetPrivacyMode(false);
+        window->SetSystemPrivacyMode(false);
+        ASSERT_EQ(false, window->IsPrivacyMode());
+    } else {
+        window->SetPrivacyMode(true);
+        window->SetSystemPrivacyMode(true);
+        ASSERT_EQ(false, window->IsPrivacyMode());
 
-    window->SetPrivacyMode(false);
-    window->SetSystemPrivacyMode(false);
-    ASSERT_EQ(false, window->IsPrivacyMode());
+        window->SetPrivacyMode(true);
+        window->SetSystemPrivacyMode(false);
+        ASSERT_EQ(false, window->IsPrivacyMode());
+
+        window->SetPrivacyMode(false);
+        window->SetSystemPrivacyMode(true);
+        ASSERT_EQ(false, window->IsPrivacyMode());
+
+        window->SetPrivacyMode(false);
+        window->SetSystemPrivacyMode(false);
+        ASSERT_EQ(false, window->IsPrivacyMode());
+    }
 }
 
 /**

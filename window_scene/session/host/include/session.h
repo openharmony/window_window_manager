@@ -22,6 +22,7 @@
 
 #include <event_handler.h>
 
+#include "dm_common.h"
 #include "interfaces/include/ws_common.h"
 #include "occupied_area_change_info.h"
 #include "pattern_detach_callback_interface.h"
@@ -234,7 +235,7 @@ public:
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
     WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
-    sptr<WindowSessionProperty> GetSessionProperty() const { return property_; }
+    const sptr<WindowSessionProperty>& GetSessionProperty() const { return property_; }
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
@@ -546,6 +547,9 @@ public:
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
+    WSError UpdateClientDisplayId(DisplayId displayId);
+    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
+    void UpdateClientRectPosYAndDisplayId(WSRect& rect);
 
     /**
      * Screen Lock
@@ -690,6 +694,8 @@ protected:
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    DisplayId lastUpdatedDisplayId_ = 0;
+    SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /**
      * Window ZOrder
@@ -786,7 +792,6 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
     std::function<bool()> isScreenLockedCallback_;
 
-    mutable std::shared_mutex propertyMutex_;
     sptr<WindowSessionProperty> property_;
 
     /**
