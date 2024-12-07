@@ -70,9 +70,6 @@ HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
 {
     fullScreenAppInfo_.name = "window_isSupportWideGamut01";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
 
     ASSERT_EQ(true, window->IsSupportWideGamut());
@@ -89,9 +86,6 @@ HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
 {
     fullScreenAppInfo_.name = "window_getColorSpace01";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
 
     ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
@@ -114,9 +108,6 @@ HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
     ColorSpace colorSpace;
     fullScreenAppInfo_.name = "window_setColorSpace01";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
 
     ColorSpace colorSpaceBackup = window->GetColorSpace(); // backup origin
@@ -148,9 +139,6 @@ HWTEST_F(WindowGamutTest, SetColorSpace02, Function | MediumTest | Level3)
 {
     fullScreenAppInfo_.name = "window_setColorSpace02";
     sptr<Window> window = Utils::CreateTestWindow(fullScreenAppInfo_);
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
     ColorSpace colorSpaceBackup = window->GetColorSpace();
 
