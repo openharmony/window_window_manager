@@ -140,7 +140,10 @@ ohos_unittest("wm_window_impl_test2") {
 
   sources = [ "window_impl_test2.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   include_dirs =
       [ "${accessibility_path}/interfaces/innerkits/common/include/" ]
