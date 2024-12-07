@@ -69,6 +69,7 @@ const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
+const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -123,6 +124,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
+    {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -659,6 +661,45 @@ void JsSceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnDefaultDensityEnabled");
+}
+
+void JsSceneSession::ProcessRestoreMainWindowRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const funcName = __func__;
+    session->SetRestoreMainWindowCallback([weakThis = wptr(this), funcName] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", funcName);
+            return;
+        }
+        jsSceneSession->RestoreMainWindow();
+    });
+    TLOGI(WmsLogTag::WMS_LIFE, "success");
+}
+
+void JsSceneSession::RestoreMainWindow()
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, funcName] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                funcName, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(RESTORE_MAIN_WINDOW_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsCallBack is nullptr", funcName);
+            return;
+        }
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, {}, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, funcName);
 }
 
 void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)

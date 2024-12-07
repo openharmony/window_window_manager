@@ -164,6 +164,12 @@ napi_value JsWindow::Recover(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRecover(env, info) : nullptr;
 }
 
+napi_value JsWindow::Restore(napi_env env, napi_callback_info info)
+{
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnRestore(env, info) : nullptr;
+}
+
 napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
 {
     WLOGD("MoveTo");
@@ -1330,6 +1336,43 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnRecover",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr :
+        (GetType(env, argv[INDEX_ZERO]) == napi_function ? argv[INDEX_ZERO] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    const char* const where = __func__;
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
+        auto window = windowToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        if (!WindowHelper::IsMainWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s Restore fail, not main window", where);
+            task->Reject(env,
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Restore());
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window restore failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 

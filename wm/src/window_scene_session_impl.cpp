@@ -2295,6 +2295,31 @@ WMError WindowSceneSessionImpl::Recover()
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::Restore()
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Restore fail, not main window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!(windowSystemConfig_.uiType_ == UI_TYPE_PC || property_->GetIsPcAppInPad())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "This is not PC or PcAppInPad, not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (property_->GetIsAppSupportPhoneInPc()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "This is PhoneAppSupportOnPc, not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->OnRestoreMainWindow();
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::Recover(uint32_t reason)
 {
     WLOGFI("WindowSceneSessionImpl::Recover id: %{public}d, reason:%{public}u", GetPersistentId(), reason);

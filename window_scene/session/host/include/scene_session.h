@@ -462,6 +462,11 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
+    /**
+     * PC Window
+     */
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -530,6 +535,11 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
+
+    /**
+     * PC Window
+     */
+    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
