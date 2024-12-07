@@ -374,7 +374,12 @@ HWTEST_F(WindowSessionTest, LifeCycleTask, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, SetSessionProperty01, Function | SmallTest | Level2)
 {
-    ASSERT_EQ(session_->SetSessionProperty(nullptr), WSError::WS_OK);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetIsNeedUpdateWindowMode(true);
+    session_->SetScreenId(233);
+    session_->SetSessionProperty(property);
+    ASSERT_EQ(session_->SetSessionProperty(property), WSError::WS_OK);
 }
 
 /**
@@ -1584,10 +1589,6 @@ HWTEST_F(WindowSessionTest, UpdateMaximizeMode, Function | SmallTest | Level2)
     session_->SetSessionProperty(property);
     ret = session_->UpdateMaximizeMode(false);
     ASSERT_EQ(ret, WSError::WS_OK);
-
-    session_->SetSessionProperty(nullptr);
-    ret = session_->UpdateMaximizeMode(false);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -1635,13 +1636,8 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
-    session_->SetSessionProperty(nullptr);
-    std::vector<Rect> touchHotAreas;
-    session_->SetTouchHotAreas(touchHotAreas);
-    ASSERT_EQ(session_->property_, nullptr);
-
     session_->property_ = new WindowSessionProperty();
-    touchHotAreas = session_->property_->touchHotAreas_;
+    std::vector<Rect> touchHotAreas = session_->property_->touchHotAreas_;
     session_->property_->SetTouchHotAreas(touchHotAreas);
     ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
 }
@@ -1684,13 +1680,9 @@ HWTEST_F(WindowSessionTest, ProcessBackEvent, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | Level2)
 {
-    session_->SetSessionProperty(nullptr);
-    session_->GetSessionRequestRect();
-    ASSERT_EQ(session_->property_, nullptr);
-
     WSRect rect = {0, 0, 0, 0};
     session_->SetSessionRequestRect(rect);
-    ASSERT_EQ(session_->property_, nullptr);
+    ASSERT_EQ(session_->GetSessionRequestRect(), rect);
 }
 
 /**
