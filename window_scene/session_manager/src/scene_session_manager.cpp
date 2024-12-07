@@ -2618,8 +2618,8 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
             return;
         }
         WLOGFD("Remote died, id: %{public}d", iter->second);
-        auto session = GetSceneSession(iter->second);
-        if (session == nullptr) {
+        auto sceneSession = GetSceneSession(iter->second);
+        if (sceneSession == nullptr) {
             WLOGFW("Remote died, session is nullptr, id: %{public}d", iter->second);
             return;
         }
@@ -10936,13 +10936,13 @@ void SceneSessionManager::RemoveFailRecoveredSession()
             TLOGW(WmsLogTag::WMS_RECOVER, "not recovered session persistentId = %{public}d", persistentId);
             continue;
         }
-        const auto &scnSessionInfo = SetAbilitySessionInfo(sceneSession);
-        if (!scnSessionInfo) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "scnSessionInfo is nullptr, persistentId = %{public}d", persistentId);
+        const auto& sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
+        if (!sceneSessionInfo) {
+            TLOGW(WmsLogTag::WMS_RECOVER, "sceneSessionInfo is nullptr, persistentId = %{public}d", persistentId);
             continue;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId = %{public}d", persistentId);
-        sceneSession->NotifySessionExceptionInner(scnSessionInfo, true);
+        sceneSession->NotifySessionExceptionInner(sceneSessionInfo, true);
     }
     failRecoveredPersistentIdSet_.clear();
 }
