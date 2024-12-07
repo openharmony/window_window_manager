@@ -118,10 +118,6 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 
 void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
-    if (currRect_ == rect && reason == WindowSizeChangeReason::UNDEFINED) {
-        TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]Skip redundant rect update");
-        return;
-    }
     RectChangeReason rectChangeReason = RectChangeReason::UNDEFINED;
     if (JS_SIZE_CHANGE_REASON.count(reason) != 0 &&
         !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
@@ -129,6 +125,10 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
     }
     if (currentRectChangeReason_ != RectChangeReason::DRAG && rectChangeReason == RectChangeReason::DRAG_END) {
         rectChangeReason = RectChangeReason::MOVE;
+    }
+    if (currRect_ == rect && currentRectChangeReason_ == rectChangeReason) {
+        TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]Skip redundant rect update");
+        return;
     }
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_] {

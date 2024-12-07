@@ -450,6 +450,12 @@ struct ExpandOption {
     uint32_t startY_;
 };
 
+struct MultiScreenRecoverOption {
+    ScreenId screenId_;
+    uint32_t first_;
+    uint32_t second_;
+};
+
 struct MultiScreenPositionOptions {
     ScreenId screenId_;
     uint32_t startX_;

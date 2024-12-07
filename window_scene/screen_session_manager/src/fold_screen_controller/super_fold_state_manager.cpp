@@ -14,9 +14,10 @@
  */
 
 #include "screen_session_manager/include/screen_session_manager.h"
-#include "fold_screen_controller/super_fold_state_manager.h"
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "window_manager_hilog.h"
+#include "fold_screen_state_internel.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS {
 
@@ -25,6 +26,8 @@ namespace Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
 namespace {
+const std::string g_FoldScreenRect = system::GetParameter("const.window.foldscreen.config_rect", "");
+const int32_t PARAM_NUMBER_MIN = 10;
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const char* KEYBOARD_ON_CONFIG = "version:3+main";
@@ -164,14 +167,41 @@ void SuperFoldStateManager::InitSuperFoldStateManagerMap()
         [&](SuperFoldStatusChangeEvents events) {});
 }
 
-SuperFoldStateManager::SuperFoldStateManager()
+bool SuperFoldStateManager::isParamsValid(std::vector<std::string>& params)
 {
-    InitSuperFoldStateManagerMap();
+    for (auto &param : params) {
+        if (param.size() == 0) {
+            return false;
+        }
+        for (int32_t i = 0; i < static_cast<int32_t>(param.size()); ++i) {
+            if (param.at(i) < '0' || param.at(i) > '9') {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void SuperFoldStateManager::InitSuperFoldCreaseRegionParams()
+{
+    std::vector<std::string> foldRect = FoldScreenStateInternel::StringSplit(g_FoldScreenRect, ',');
+
+    if (foldRect.empty() || foldRect.size() <= PARAM_NUMBER_MIN) {
+        // ccm numbers of parameter > 10
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return;
+    }
+
+    if (!isParamsValid(foldRect)) {
+        TLOGE(WmsLogTag::DMS, "params is invalid");
+        return;
+    }
+
     ScreenId screenIdFull = 0;
     int32_t superFoldCreaseRegionPosX = 0;
-    int32_t superFoldCreaseRegionPosY = 1624;
-    int32_t superFoldCreaseRegionPosWidth = 2472;
-    int32_t superFoldCreaseRegionPosHeight = 48;
+    int32_t superFoldCreaseRegionPosY = std::stoi(foldRect[10]); // ccm PosY
+    int32_t superFoldCreaseRegionPosWidth = std::stoi(foldRect[4]); // ccm PosWidth
+    int32_t superFoldCreaseRegionPosHeight = std::stoi(foldRect[9]); // ccm PosHeight
 
     std::vector<DMRect> rect = {
         {
@@ -180,6 +210,12 @@ SuperFoldStateManager::SuperFoldStateManager()
         }
     };
     currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
+}
+
+SuperFoldStateManager::SuperFoldStateManager()
+{
+    InitSuperFoldStateManagerMap();
+    InitSuperFoldCreaseRegionParams();
 }
 
 SuperFoldStateManager::~SuperFoldStateManager() = default;

@@ -63,7 +63,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest01, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_CREATE_WINDOW);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
+    EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
 }
 
 /**
@@ -113,7 +113,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest03, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_REQUEST_FOCUS);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -134,7 +134,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest04, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_AVOID_AREA);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -157,7 +157,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest05, Function | SmallTest | Level2
         static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -181,7 +181,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest06, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -202,7 +202,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest07, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -222,7 +222,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest08, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -242,7 +242,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest09, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -282,7 +282,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest11, Function | SmallTest | Level2
         static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -302,7 +302,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest12, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -343,7 +343,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest14, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
+    EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
 
 /**
@@ -367,7 +367,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest15, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -389,7 +389,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest16, Function | SmallTest | Level2
         static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -414,7 +414,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest17, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_ANIMATION_CALLBACK);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -437,7 +437,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest18, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -469,7 +469,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest19, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_CREATE_WINDOW);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -502,7 +502,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest20, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_CREATE_WINDOW);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -522,7 +522,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest21, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_RAISE_WINDOW_Z_ORDER);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -540,7 +540,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest22, Function | SmallTest | Level2
     data.WriteBool(true);
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GESTURE_NAVIGATION_ENABLED);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**
@@ -559,7 +559,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest23, Function | SmallTest | Level2
     uint32_t code = static_cast<uint32_t>(
         IWindowManager::WindowManagerMessage::TRANS_ID_GET_UNRELIABLE_WINDOW_INFO_ID);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
 }
 
 /**

@@ -648,12 +648,11 @@ HWTEST_F(SceneSessionManagerTest12, CheckSystemWindowPermission02, Function | Sm
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
-    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 
     property->SetIsSystemKeyboard(true);
-    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 

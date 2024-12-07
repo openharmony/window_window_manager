@@ -67,14 +67,14 @@ public:
     void OnChange(DisplayId displayId)
     {
         if (innerDisplayChangeFunc_ == NULL) {
-            TLOGI(WmsLogTag::DMS, "[DMNDK] OnChange callback is null");
+            TLOGI(WmsLogTag::DMS, "[DMNDK] callback is null");
             return;
         }
-        TLOGI(WmsLogTag::DMS, "[DMNDK] OnChange callback displayId=%{public}" PRIu64, displayId);
+        TLOGI(WmsLogTag::DMS, "[DMNDK] callback displayId=%{public}" PRIu64, displayId);
         innerDisplayChangeFunc_(static_cast<uint64_t>(displayId));
         sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplaySync();
         if (display != nullptr) {
-            TLOGI(WmsLogTag::DMS, "[DMNDK] OnChange callback rotation=%{public}d orientation=%{public}d",
+            TLOGI(WmsLogTag::DMS, "[DMNDK] callback rotation=%{public}d orientation=%{public}d",
                 display->GetRotation(), display->GetOrientation());
         }
     }

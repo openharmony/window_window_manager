@@ -1865,8 +1865,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
 {
-    ASSERT_NE(stub_, nullptr);
-
     MessageParcel data;
     MessageParcel reply;
 
@@ -1877,7 +1875,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, F
     ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);
 
-    int res = stub_->HandleRemoveExtensionWindowStageFromSCB(data, reply);
+    sptr<SceneSessionManager> stub = sptr<SceneSessionManager>::MakeSptr();
+    stub->remoteExtSessionMap_.clear();
+    stub->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), token));
+    int res = stub->HandleRemoveExtensionWindowStageFromSCB(data, reply);
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -2211,6 +2213,67 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRegisterCollaborator, Function | Sma
     data.WriteInt32(type);
     res = stub_->HandleRegisterCollaborator(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleSetGlobalDragResizeType
+ * @tc.desc: test HandleSetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
+    int res = stub_->HandleSetGlobalDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetGlobalDragResizeType
+ * @tc.desc: test HandleGetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleGetGlobalDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetAppDragResizeType
+ * @tc.desc: test HandleSetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    const std::string bundleName = "test";
+    data.WriteString(bundleName);
+    data.WriteUint32(static_cast<uint32_t>(dragResizeType));
+    int res = stub_->HandleSetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+
+/**
+ * @tc.name: HandleGetAppDragResizeType
+ * @tc.desc: test HandleGetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::string bundleName = "test";
+    data.WriteString(bundleName);
+    int res = stub_->HandleGetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 }
 }

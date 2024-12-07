@@ -70,7 +70,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
-        int32_t& pid) override;
+        AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override;
@@ -87,6 +87,8 @@ public:
     WMError GetCurrentPiPWindowInfo(std::string& bundleName) override;
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
+    WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
+        const std::vector<AppUseControlInfo>& controlList) override;
 
 private:
     template<typename T>
