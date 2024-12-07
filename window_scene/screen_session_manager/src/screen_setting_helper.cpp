@@ -32,7 +32,7 @@ constexpr int32_t EXPECT_RESOLUTION_SIZE = 3;
 constexpr int32_t RESOLVED_DATA_INDEX_ZERO = 0;
 constexpr int32_t RESOLVED_DATA_INDEX_ONE = 1;
 constexpr int32_t RESOLVED_DATA_INDEX_TWO = 2;
-const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");  
+const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -428,6 +428,6 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     }
     TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
     return ScreenShape::RECTANGLE;
-} 
+}
 } // namespace Rosen
 } // namespace OHOS
