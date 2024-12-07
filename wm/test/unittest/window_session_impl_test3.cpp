@@ -212,7 +212,14 @@ HWTEST_F(WindowSessionImplTest3, IsFocused, Function | SmallTest | Level2)
     ASSERT_NE(window_, nullptr);
     window_->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = window_->IsFocused();
-    ASSERT_EQ(ret, window_->isFocused_);
+    ASSERT_EQ(ret, false);
+
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    window_->UpdateFocus(true);
+    ret = window_->IsFocused();
+    ASSERT_EQ(ret, true);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFocused end";
 }
 
