@@ -83,7 +83,7 @@ public:
         displayId_ = displayId;
     }
 
-    DisplayId GetDisplayId() const ovveride
+    DisplayId GetDisplayId() const override
     {
         return displayId_;
     }
