@@ -594,7 +594,7 @@ HWTEST_F(WindowImplTest2, PrivacyMode01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
 
-    if(SceneBoardJudgement::IsSceneBoardEnabled()){
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         window->SetPrivacyMode(true);
         window->SetSystemPrivacyMode(true);
         ASSERT_EQ(true, window->IsPrivacyMode());
