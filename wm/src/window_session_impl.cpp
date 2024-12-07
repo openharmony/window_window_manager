@@ -4070,30 +4070,33 @@ void WindowSessionImpl::SetUIExtensionDestroyComplete()
 void WindowSessionImpl::SetUIExtensionDestroyCompleteInSubWindow()
 {
     if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) {
-        auto extWindow = FindExtensionWindowWithContext();
-        if (extWindow != nullptr && extWindow->startUIExtensionDestroyTimer_.load()) {
+        bool startUIExtensionDestroyTimer = true;
+        auto extionsionWindow = FindExtensionWindowWithContext();
+        if (extionsionWindow != nullptr && extionsionWindow->startUIExtensionDestroyTimer_.compare_exchange_strong(
+            startUIExtensionDestroyTimer, false)) {
             TLOGI(WmsLogTag::WMS_LIFE, "called");
-            extWindow->SetUIExtensionDestroyComplete();
-            extWindow->setUIExtensionDestroyCompleted_.store(false);
-            extWindow->startUIExtensionDestroyTimer_.store(false);
+            extionsionWindow->SetUIExtensionDestroyComplete();
+            extionsionWindow->setUIExtensionDestroyCompleted_.store(false);
         }
     }
 }
 
 void WindowSessionImpl::AddSetUIExtensionDestroyTimeoutCheck()
 {
-    auto task = [weakThis = wptr(this)] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
         auto window = weakThis.promote();
         if (window == nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:window is nullptr", __func__);
             return;
         }
         if (window->setUIExtensionDestroyCompleted_.load()) {
-            TLOGI(WmsLogTag::WMS_LIFE, "already, persistentId=%{public}d", window->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s:already, persistentId=%{public}d", __func__,
+                window->GetPersistentId());
             return;
         }
 
-        TLOGI(WmsLogTag::WMS_LIFE, "SetUIExtDestroy timeout, persistentId=%{public}d", window->GetPersistentId());
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s:timeout, persistentId=%{public}d", __func__, window->GetPersistentId());
         std::ostringstream oss;
         oss << "SetUIExtDestroy timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
