@@ -1942,6 +1942,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::PENDING_SCENE_CB):
             ProcessPendingSceneSessionActivationRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::RESTORE_MAIN_WINDOW_CB):
+            ProcessRestoreMainWindowRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR):
             ProcessChangeSessionVisibilityWithStatusBarRegister();
             break;

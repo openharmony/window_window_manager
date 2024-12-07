@@ -1943,7 +1943,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
     bool isAppSupportPhoneInPc = false;
-    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto sessionProperty = scnSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
         isAppSupportPhoneInPc = sessionProperty->GetIsAppSupportPhoneInPc();
     }
@@ -2045,7 +2045,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         auto property = scnSession->GetSessionProperty();
         if (property) {
             isPcAppInpad = property->GetIsPcAppInPad();
-            isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPC();
+            isAppSupportPhoneInPc = property->GetIsAppSupportPhoneInPc();
         }
         if ((systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInpad) {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionBackground: %{public}d", persistentId);

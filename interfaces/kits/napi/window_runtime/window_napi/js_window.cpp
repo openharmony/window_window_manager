@@ -6700,6 +6700,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "hide", moduleName, JsWindow::Hide);
     BindNativeFunction(env, object, "hideWithAnimation", moduleName, JsWindow::HideWithAnimation);
     BindNativeFunction(env, object, "recover", moduleName, JsWindow::Recover);
+    BindNativeFunction(env, object, "restore", moduleName, JsWindow::Restore);
     BindNativeFunction(env, object, "moveTo", moduleName, JsWindow::MoveTo);
     BindNativeFunction(env, object, "moveWindowTo", moduleName, JsWindow::MoveWindowTo);
     BindNativeFunction(env, object, "moveWindowToAsync", moduleName, JsWindow::MoveWindowToAsync);
