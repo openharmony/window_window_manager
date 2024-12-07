@@ -34,10 +34,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowE
 
 WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (keyEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -72,10 +68,6 @@ WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::Key
 
 WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (pointerEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is nullptr");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -131,10 +123,6 @@ WSError WindowEventChannelProxy::TransferBackpressedEventForConsumed(bool& isCon
 WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed, bool isPreImeEvent)
 {
-    if (keyEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -169,10 +157,6 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
 WSError WindowEventChannelProxy::TransferKeyEventForConsumedAsync(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreImeEvent, const sptr<IRemoteObject>& listener)
 {
-    if (keyEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
