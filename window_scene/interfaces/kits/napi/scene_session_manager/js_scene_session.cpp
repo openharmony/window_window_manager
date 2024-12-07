@@ -69,7 +69,6 @@ const std::string SESSIONINFO_LOCKEDSTATE_CHANGE_CB = "sessionInfoLockedStateCha
 const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";
 const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
 const std::string CONTEXT_TRANSPARENT_CB = "contextTransparent";
-const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
@@ -133,7 +132,6 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {PREPARE_CLOSE_PIP_SESSION,             ListenerFuncType::PREPARE_CLOSE_PIP_SESSION},
     {LANDSCAPE_MULTI_WINDOW_CB,             ListenerFuncType::LANDSCAPE_MULTI_WINDOW_CB},
     {CONTEXT_TRANSPARENT_CB,                ListenerFuncType::CONTEXT_TRANSPARENT_CB},
-    {KEYBOARD_GRAVITY_CHANGE_CB,            ListenerFuncType::KEYBOARD_GRAVITY_CHANGE_CB},
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
@@ -427,7 +425,8 @@ void JsSceneSession::BindNativeMethodForFocus(napi_env env, napi_value objValue,
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
-    : env_(env), weakSession_(session), persistentId_(session->GetPersistentId())
+    : env_(env), weakSession_(session), persistentId_(session->GetPersistentId()),
+      taskScheduler_(std::make_shared<MainThreadScheduler>(env))
 {
     auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     session->RegisterSessionChangeCallback(sessionchangeCallback);
@@ -445,7 +444,6 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     });
     sessionchangeCallback_ = sessionchangeCallback;
 
-    taskScheduler_ = std::make_shared<MainThreadScheduler>(env);
     TLOGI(WmsLogTag::WMS_LIFE, "created, id:%{public}d", persistentId_);
 }
 
@@ -611,48 +609,6 @@ void JsSceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
         "SetLandscapeMultiWindow, isLandscapeMultiWindow:" + std::to_string(isLandscapeMultiWindow));
 }
 
-void JsSceneSession::ProcessKeyboardGravityChangeRegister()
-{
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    NotifyKeyboardGravityChangeFunc func = [weakThis = wptr(this)](SessionGravity gravity) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessKeyboardGravityChangeRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnKeyboardGravityChange(gravity);
-    };
-    session->SetKeyboardGravityChangeCallback(func);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "success");
-}
-
-void JsSceneSession::OnKeyboardGravityChange(SessionGravity gravity)
-{
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, gravity, env = env_] {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnKeyboardGravityChange jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
-            return;
-        }
-        auto jsCallBack = jsSceneSession->GetJSCallback(KEYBOARD_GRAVITY_CHANGE_CB);
-        if (!jsCallBack) {
-            WLOGFE("[NAPI]jsCallBack is nullptr");
-            return;
-        }
-        napi_value gravityObj = CreateJsValue(env, gravity);
-        napi_value argv[] = {gravityObj};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Napi call gravity success, gravity: %{public}u", gravity);
-    };
-    taskScheduler_->PostMainThreadTask(task, "OnKeyboardGravityChange: gravity " +
-        std::to_string(static_cast<int>(gravity)));
-}
-
 void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
 {
     NotifyKeyboardLayoutAdjustFunc func = [weakThis = wptr(this)](const KeyboardLayoutParams& params) {
@@ -716,13 +672,13 @@ void JsSceneSession::ProcessDefaultDensityEnabledRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     session->RegisterDefaultDensityEnabledCallback([weakThis = wptr(this)](bool isDefaultDensityEnabled) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessDefaultDensityEnabledRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnDefaultDensityEnabled(isDefaultDensityEnabled);
@@ -735,13 +691,13 @@ void JsSceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     auto task = [weakThis = wptr(this), persistentId = persistentId_, isDefaultDensityEnabled, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnDefaultDensityEnabled jsSceneSession id:%{public}d has been destroyed",
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnDefaultDensityEnabled jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(DEFAULT_DENSITY_ENABLED_CB);
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "OnDefaultDensityEnabled jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "OnDefaultDensityEnabled jsCallBack is nullptr");
             return;
         }
         napi_value paramsObj = CreateJsValue(env, isDefaultDensityEnabled);
@@ -1182,20 +1138,20 @@ void JsSceneSession::ProcessRaiseAboveTargetRegister()
 
 void JsSceneSession::ProcessSessionEventRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is null, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnSessionEvent_ = [weakThis = wptr(this)](uint32_t eventId, const SessionEventParam& param) {
+    session->RegisterSessionEventCallback([weakThis = wptr(this)](uint32_t eventId, const SessionEventParam& param) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionEventRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "ProcessSessionEventRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSessionEvent(eventId, param);
-    };
-    WLOGFD("success");
+    });
+    TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
 void JsSceneSession::ProcessTerminateSessionRegister()
@@ -2390,9 +2346,6 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::CONTEXT_TRANSPARENT_CB):
             ProcessContextTransparentRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::KEYBOARD_GRAVITY_CHANGE_CB):
-            ProcessKeyboardGravityChangeRegister();
-            break;
         case static_cast<uint32_t>(ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB):
             ProcessAdjustKeyboardLayoutRegister();
             break;
@@ -2415,7 +2368,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             ProcessSetWindowRectAutoSaveRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::UPDATE_APP_USE_CONTROL_CB):
-            ProcessUpdateAppUseControllRegister();
+            RegisterUpdateAppUseControlCallback();
             break;
         default:
             break;
@@ -5312,6 +5265,49 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
+void JsSceneSession::RegisterUpdateAppUseControlCallback()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->RegisterUpdateAppUseControlCallback(
+        [weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{pubilc}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
+    });
+    TLOGI(WmsLogTag::WMS_LIFE, "success");
+}
+
+void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedControl)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, type, isNeedControl, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_APP_USE_CONTROL_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsTypeArgv = CreateJsValue(env, static_cast<uint8_t>(type));
+        napi_value jsIsNeedControlArgv = CreateJsValue(env, isNeedControl);
+        napi_value argv[] = { jsTypeArgv, jsIsNeedControlArgv };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
 napi_value JsSceneSession::OnSetFrameGravity(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -5338,8 +5334,6 @@ napi_value JsSceneSession::OnSetFrameGravity(napi_env env, napi_callback_info in
     session->SetFrameGravity(gravity);
     return NapiGetUndefined(env);
 }
-
-void JsSceneSession::ProcessUpdateAppUseControllRegister() {}
 
 napi_value JsSceneSession::OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info)
 {

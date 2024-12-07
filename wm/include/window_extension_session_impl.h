@@ -37,7 +37,8 @@ public:
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
-    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
@@ -116,6 +117,12 @@ public:
      * PC Window
      */
     bool IsPcOrPadFreeMultiWindowMode() const override;
+
+    /*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;

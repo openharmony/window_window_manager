@@ -43,7 +43,7 @@ const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
 
 JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env)
 {
-    TLOGI(WmsLogTag::DMS, "Create JsScreenSessionManager instance");
+    TLOGI(WmsLogTag::DMS, "Create instance");
 }
 
 napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
@@ -103,7 +103,7 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
 
 JsScreenSessionManager::~JsScreenSessionManager()
 {
-    TLOGI(WmsLogTag::DMS, "Destroy JsScreenSessionManager instance");
+    TLOGI(WmsLogTag::DMS, "Destroy instance");
 }
 
 void JsScreenSessionManager::Finalizer([[maybe_unused]]napi_env env, void* data, [[maybe_unused]]void* hint)

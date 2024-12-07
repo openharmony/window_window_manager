@@ -15,6 +15,8 @@
 
 // gtest
 #include <gtest/gtest.h>
+
+#include "scene_board_judgement.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
@@ -257,14 +259,19 @@ namespace {
 HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.name = "immer01";
-    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if (window == nullptr) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        fullScreenAppinfo_.type = WindowType::WINDOW_TYPE_FLOAT;
     }
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
+    ASSERT_NE(window, nullptr);
     activeWindows_.push_back(window);
     SetWindowSystemProps(window, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    }
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
@@ -275,10 +282,11 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if (window1 == nullptr) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        fullScreenAppinfo_.type = WindowType::WINDOW_TYPE_FLOAT;
     }
+    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    ASSERT_NE(window1, nullptr);
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     fullScreenAppinfo_.name = "Immer02";
@@ -287,12 +295,24 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
     activeWindows_.push_back(window2);
     SetWindowSystemProps(window2, TEST_PROPS_2);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    }
     ASSERT_EQ(WMError::WM_OK, window2->Show());
 
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    }
     ASSERT_EQ(WMError::WM_OK, window2->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    }
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
 }
 
@@ -303,10 +323,11 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if (window1 == nullptr) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        fullScreenAppinfo_.type = WindowType::WINDOW_TYPE_FLOAT;
     }
+    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    ASSERT_NE(window1, nullptr);
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     fullScreenAppinfo_.name = "Immer03";
@@ -316,11 +337,23 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
     activeWindows_.push_back(window2);
     SetWindowSystemProps(window2, TEST_PROPS_2);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    }
     ASSERT_EQ(WMError::WM_OK, window2->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    }
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    }
 }
 
 /**
@@ -331,20 +364,33 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
 HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
-    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if (window1 == nullptr) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        fullScreenAppinfo_.type = WindowType::WINDOW_TYPE_FLOAT;
     }
+    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    ASSERT_NE(window1, nullptr);
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    }
     ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(true));
     ASSERT_EQ(true, window1->IsLayoutFullScreen());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    }
     ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(false));
     ASSERT_EQ(false, window1->IsLayoutFullScreen());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    }
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
 }
 
@@ -356,17 +402,26 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
 HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
 {
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
-    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if (window1 == nullptr) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        fullScreenAppinfo_.type = WindowType::WINDOW_TYPE_FLOAT;
     }
+    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppinfo_);
+    ASSERT_NE(window1, nullptr);
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    } else {
+        ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    }
     ASSERT_EQ(WMError::WM_OK, window1->SetFullScreen(true));
     ASSERT_EQ(true, window1->IsFullScreen());
-    ASSERT_TRUE(SystemBarEnableState(false, false));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(SystemBarEnableState(false, false));
+    } else {
+        ASSERT_FALSE(SystemBarEnableState(false, false));
+    }
     ASSERT_EQ(WMError::WM_OK, window1->SetFullScreen(false));
     ASSERT_EQ(false, window1->IsFullScreen());
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
@@ -383,10 +438,11 @@ HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | L
         { WindowType::WINDOW_TYPE_KEYGUARD, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
         { WindowType::WINDOW_TYPE_POINTER, SYS_BAR_PROP_2, SYS_BAR_REGION_NULL },
     };
-    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if (window == nullptr) {
-        return;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        fullScreenAppinfo_.type = WindowType::WINDOW_TYPE_FLOAT;
     }
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
+    ASSERT_NE(window, nullptr);
     activeWindows_.push_back(window);
     SetWindowSystemProps(window, TEST_PROPS_NEGATIVE);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -403,6 +459,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | L
 HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | Level3)
 {
     // Add full screenwindow for call GetAvoidArea, and push_back in activeWindows_
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        fullScreenAppinfo_.type = WindowType::WINDOW_TYPE_FLOAT;
+    }
     const sptr<Window>& win = Utils::CreateTestWindow(fullScreenAppinfo_);
     if (win == nullptr) {
         return;

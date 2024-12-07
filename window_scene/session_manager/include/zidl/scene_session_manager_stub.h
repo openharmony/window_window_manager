@@ -107,6 +107,10 @@ private:
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleSetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleGetGlobalDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleSetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

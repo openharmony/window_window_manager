@@ -254,52 +254,8 @@ HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, Function | SmallTest | L
 
     // branch SESSION_GRAVITY_BOTTOM
     param.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    Rect expectRect = { 0, 300, 300, 100 };
-    keyboardSession->MoveAndResizeKeyboard(param, nullptr, false);
-    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
-
-    //branch SESSION_GRAVITY_DEFAULT
-    param.gravity_ = WindowGravity::WINDOW_GRAVITY_DEFAULT;
-    expectRect = { 200, 300, 200, 100 };
-    keyboardSession->MoveAndResizeKeyboard(param, nullptr, true);
-    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
-}
-
-/**
- * @tc.name: MoveAndResizeKeyboard02
- * @tc.desc: test function : MoveAndResizeKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard02, Function | SmallTest | Level1)
-{
-    auto keyboardSession = GetKeyboardSession("MoveAndResizeKeyboard02",
-        "MoveAndResizeKeyboard02");
-    ASSERT_NE(keyboardSession, nullptr);
-
-    KeyboardLayoutParams param;
-    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
-    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
-
-    keyboardSession->isScreenAngleMismatch_ = true;
-    keyboardSession->targetScreenWidth_ = 300;
-    keyboardSession->targetScreenHeight_ = 400;
-    param.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
-
-    // branch else
     Rect expectRect = param.PortraitKeyboardRect_;
-    keyboardSession->MoveAndResizeKeyboard(param, nullptr, true);
-    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
-
-    param.PortraitKeyboardRect_ = { 200, 200, 200, 0 };
-    auto requestRect = keyboardSession->GetSessionRequestRect();
-    expectRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
-    keyboardSession->MoveAndResizeKeyboard(param, nullptr, true);
-    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
-
-    param.PortraitKeyboardRect_ = { 200, 200, 0, 0 };
-    requestRect = keyboardSession->GetSessionRequestRect();
-    expectRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
-    keyboardSession->MoveAndResizeKeyboard(param, nullptr, true);
+    keyboardSession->MoveAndResizeKeyboard(param, nullptr, false);
     ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
 }
 

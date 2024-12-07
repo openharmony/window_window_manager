@@ -48,12 +48,18 @@ public:
     WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
-    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
-    WMError MoveToAsync(int32_t x, int32_t y) override;
-    WMError MoveWindowToGlobal(int32_t x, int32_t y) override;
+
+    /**
+     * Window Layout
+     */
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) override;
+    WMError MoveToAsync(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
+    WMError MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
+
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
     void PerformBack() override;
@@ -181,9 +187,21 @@ public:
     WMError GetGestureBackEnabled(bool& enable) override;
 
     /**
-     * PC Fold Screen
+     * PC Screen Manager
      */
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
+    WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
+
+    /*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
+    /**
+     * Window Decor
+     */
+    WMError SetWindowTitle(const std::string& title) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -246,6 +264,11 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+
+    /**
+     * Window Layout
+     */
+    void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
 
     /**
      * Window Immersive

@@ -1357,6 +1357,18 @@ HWTEST_F(WindowSessionTest3, SetStartingBeforeVisible, Function | SmallTest | Le
     ASSERT_EQ(false, session_->isStartingBeforeVisible_);
     ASSERT_EQ(false, session_->GetStartingBeforeVisible());
 }
+
+/**
+ * @tc.name: GetScreenId
+ * @tc.desc: test func: GetScreenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, GetScreenId, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.screenId_ = 100;
+    ASSERT_EQ(session_->GetScreenId(), 100);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
