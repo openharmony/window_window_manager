@@ -69,6 +69,7 @@ const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
+const std::string SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -123,6 +124,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
+    {SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB, ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -226,6 +228,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
     napi_set_named_property(env, objValue, "isTopmost",
         CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
+    napi_set_named_property(env, objValue, "isMainWindowTopmost",
+        CreateJsValue(env, static_cast<int32_t>(session->IsMainWindowTopmost())));
     napi_set_named_property(env, objValue, "subWindowModalType",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
 
@@ -1153,6 +1157,26 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
     TLOGD(WmsLogTag::WMS_LAYOUT, "ProcessSessionTopmostChangeRegister success");
 }
 
+/** @note @window.hierarchy */
+void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
+{
+    NotifyMainWindowTopmostChangeFunc func = [weakThis = wptr(this)](bool isTopmost) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnMainWindowTopmostChange(isTopmost);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetMainWindowTopmostChangeCallback(func);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "register success");
+}
+
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
 {
     NotifySessionFocusableChangeFunc func = [weakThis = wptr(this)](bool isFocusable) {
@@ -1937,6 +1961,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB):
             ProcessSessionTopmostChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB):
+            ProcessMainWindowTopmostChangeRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::CLICK_CB):
             ProcessClickRegister();
             break;
@@ -2693,6 +2720,29 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionTopmostChange: state " + std::to_string(topmost));
+}
+
+/** @note @window.hierarchy */
+void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]isTopmost: %{public}u", isTopmost);
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsMainWindowTopmostObj = CreateJsValue(env, isTopmost);
+        napi_value argv[] = {jsMainWindowTopmostObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task,
+        "OnMainWindowTopmostChange: " + std::to_string(isTopmost));
 }
 
 void JsSceneSession::OnClick()
