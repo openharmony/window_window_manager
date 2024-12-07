@@ -77,7 +77,7 @@ public:
 
     void SetDisplayId(DisplayId displayId) { displayId_ = displayId; }
 
-    DisplayId GetDisplayId() const { return displayId_; }
+    DisplayId GetDisplayId() const override { return displayId_; }
 
     void SetDisplayOrientation(int32_t orientation);
 
