@@ -35,6 +35,7 @@
 #include <hisysevent.h>
 #include "hitrace_meter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "perform_reporter.h"
 
 namespace OHOS::Rosen {
@@ -50,6 +51,9 @@ constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
+constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
+constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 const std::string SHELL_BUNDLE_NAME = "com.huawei.shell_assistant";
 const std::string SHELL_APP_IDENTIFIER = "5765880207854632823";
 const std::map<SessionState, bool> ATTACH_MAP = {
@@ -700,7 +704,7 @@ bool Session::GetTouchable() const
 void Session::SetForceTouchable(bool forceTouchable)
 {
     if (forceTouchable != forceTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d forceTouchable:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(forceTouchable));
     }
     forceTouchable_ = forceTouchable;
@@ -709,7 +713,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d systemTouchable_:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(touchable));
     }
     systemTouchable_ = touchable;
@@ -991,6 +995,61 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
+WSError Session::UpdateClientDisplayId(DisplayId displayId)
+{
+    if (displayId == lastUpdatedDisplayId_) {
+        return WSError::WS_DO_NOTHING;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
+          GetPersistentId(), displayId, lastUpdatedDisplayId_);
+    lastUpdatedDisplayId_ = displayId;
+    sessionStage_->UpdateDisplayId(displayId);
+    return WSError::WS_OK;
+}
+
+DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    int32_t lowerScreenPosY =
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    DisplayId updatedDisplayId = GetScreenId();
+    if (rect.posY_ >= lowerScreenPosY) {
+        updatedDisplayId = VIRTUAL_DISPLAY_ID;
+        rect.posY_ -= lowerScreenPosY;
+    }
+    return updatedDisplayId;
+}
+
+void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
+{
+    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Error status");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "lastStatus: %{public}d, curStatus: %{public}d",
+        lastScreenFoldStatus_, currScreenFoldStatus);
+    if (currScreenFoldStatus == SuperFoldStatus::EXPANDED) {
+        lastScreenFoldStatus_ = currScreenFoldStatus;
+        auto ret = UpdateClientDisplayId(DEFAULT_DISPLAY_ID);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "JustUpdateId: windowId: %{public}d, result: %{public}d",
+            GetPersistentId(), ret);
+        return;
+    }
+    WSRect lastRect = rect;
+    auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect);
+    auto ret = UpdateClientDisplayId(updatedDisplayId);
+    lastScreenFoldStatus_ = currScreenFoldStatus;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: windowId: %{public}d, input: %{public}s, output: %{public}s,"
+        " result: %{public}d", GetPersistentId(), lastRect.ToString().c_str(), rect.ToString().c_str(), ret);
+}
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -1006,7 +1065,9 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
-        sessionStage_->UpdateRect(rect, reason, config);
+        WSRect updatedRect = rect;
+        UpdateClientRectPosYAndDisplayId(updatedRect);
+        sessionStage_->UpdateRect(updatedRect, reason, config);
         SetClientRect(rect);
         RectCheckProcess();
     } else {
@@ -2141,12 +2202,13 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
-        WLOGFD("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
+        TLOGD(WmsLogTag::WMS_EVENT, "eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
             "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     } else {
-        WLOGFI("Session TransferPointEvent, eventId:%{public}d, action:%{public}s, persistentId:%{public}d, "
-            "bundleName:%{public}s, pid:%{public}d", pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
+        TLOGD(WmsLogTag::WMS_EVENT, "eventId:%{public}d, action:%{public}s, "
+            "persistentId:%{public}d, bundleName:%{public}s, pid:%{public}d",
+            pointerEvent->GetId(), pointerEvent->DumpPointerAction(),
             persistentId_, callingBundleName_.c_str(), callingPid_);
     }
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
@@ -2791,8 +2853,9 @@ sptr<WindowSessionProperty> Session::GetSessionProperty() const
 void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
-    if ((curWidth < minWidth) || (curWidth > maxFloatingWindowSize) ||
-        (curHeight < minHeight) || (curHeight > maxFloatingWindowSize)) {
+    const uint32_t marginOfError = 2; // Indicates the error value generated during the calculation.
+    if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError ||
+        curHeight + marginOfError < minHeight || curHeight > maxFloatingWindowSize + marginOfError) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
         std::ostringstream oss;
@@ -2957,7 +3020,7 @@ WSRect Session::GetSessionRequestRect() const
 void Session::SetClientRect(const WSRect& rect)
 {
     clientRect_ = rect;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
         GetPersistentId(), rect.ToString().c_str());
 }
 
@@ -3041,6 +3104,13 @@ WSError Session::ProcessBackEvent()
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_EVENT, "session stage is nullptr");
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (auto remoteObject = sessionStage_->AsObject();
+        remoteObject && !remoteObject->IsProxyObject()) {
+        PostExportTask([sessionStage = sessionStage_] {
+            sessionStage->HandleBackEvent();
+        });
+        return WSError::WS_OK;
     }
     return sessionStage_->HandleBackEvent();
 }

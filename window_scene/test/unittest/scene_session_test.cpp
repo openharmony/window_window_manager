@@ -1746,6 +1746,46 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: UpdateSessionRectPosYFromClient01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionRectPosYFromClient";
+    info.bundleName_ = "UpdateSessionRectPosYFromClient";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(sceneSession->GetScreenId(), 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = {0, 0, 0, 0};
+    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    EXPECT_EQ(rect.posY_, 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = {0, 100, 0, 0};
+    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    EXPECT_EQ(rect.posY_, 100);
+
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    sceneSession->lastUpdatedDisplayId_ = 0;
+    rect = {0, 100, 100, 100};
+    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    EXPECT_EQ(rect.posY_, 100);
+    sceneSession->lastUpdatedDisplayId_ = 999;
+    rect = {0, 100, 100, 100};
+    auto rect2 = rect;
+    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    EXPECT_EQ(rect.posY_, rect2.posY_ + defaultDisplayRect.height_ + foldCreaseRect.height_ / 2);
+}
+
+/**
  * @tc.name: UpdateSessionRect
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1914,6 +1954,43 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: GetDockHeight
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetDockHeight, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetDockHeight";
+    info.bundleName_ = "GetDockHeight";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    ASSERT_EQ(sceneSession->GetDockHeight(), 0);
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback_, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
+    ASSERT_EQ(sceneSession->GetDockHeight(), 0);
+    WSRect rect({0, 0, 0, 112});
+    sceneSession->winRect_ = rect;
+    specificCallback_->onGetSceneSessionVectorByType_ = [&](WindowType type,
+        uint64_t displayId)->std::vector<sptr<SceneSession>>
+    {
+        std::vector<sptr<SceneSession>> vec;
+        vec.push_back(sceneSession);
+        return vec;
+    };
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    sceneSession->property_ = property;
+    ASSERT_EQ(sceneSession->GetDockHeight(), 0);
+    sceneSession->isVisible_ = true;
+    ASSERT_EQ(sceneSession->GetDockHeight(), 0);
+    sceneSession->property_->windowName_ = "SCBSmartDock";
+    ASSERT_EQ(sceneSession->GetDockHeight(), 112);
+}
+
+/**
  * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
@@ -1950,45 +2027,45 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 2000, 1};
     rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 2000, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 500, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, true, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
     rect = {1, 1, 500, 1};
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE, false, false);
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::DRAG_MOVE);
 }
 
@@ -2009,22 +2086,22 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeDrag, Function | SmallTest | Leve
     WSRect rect = {1, 1, 1, 1};
     WSRect rect2 = {2, 1, 1, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 2, 1, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 1, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 
     rect2 = {1, 1, 1, 2};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false, false, false);
+    sceneSession->HandleCompatibleModeDrag(rect, SizeChangeReason::DRAG_MOVE, false);
     ASSERT_EQ(sceneSession->winRect_, rect2);
 }
 

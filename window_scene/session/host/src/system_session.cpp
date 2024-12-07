@@ -231,21 +231,11 @@ WSError SystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& ke
 
 WSError SystemSession::ProcessBackEvent()
 {
-    if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_EVENT, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && !dialogSessionBackGestureEnabled_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
     }
-    if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage_ is nullptr, id = %{public}d.",
-            GetPersistentId());
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->HandleBackEvent();
+    return Session::ProcessBackEvent();
 }
 
 WSError SystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
