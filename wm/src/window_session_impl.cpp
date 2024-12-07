@@ -1280,6 +1280,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         WLOGFE("[WMSLife]interrupt set uicontent because window is invalid! window state: %{public}d", state_);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    NotifySetUIContentComplete();
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     WMError initUIContentRet = InitUIContent(contentInfo, env, storage, type, ability, aceRet);
     if (initUIContentRet != WMError::WM_OK) {
@@ -1349,8 +1350,6 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGD(WmsLogTag::WMS_LIFE, "notify uiContent window size change end");
-
-    NotifySetUIContentComplete();
     return WMError::WM_OK;
 }
 
@@ -3891,30 +3890,45 @@ void WindowSessionImpl::SetUIContentComplete()
         TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     } else {
-        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent, persistentId=%{public}d", GetPersistentId());
     }
 }
 
 void WindowSessionImpl::AddSetUIContentTimeoutCheck()
 {
-    auto task = [weakThis = wptr(this)] {
+    const auto checkBeginTime =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now())
+            .time_since_epoch().count();
+    auto task = [weakThis = wptr(this), checkBeginTime] {
         auto window = weakThis.promote();
         if (window == nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
+            TLOGNI(WmsLogTag::WMS_LIFE, "window is nullptr");
             return;
         }
-
         if (window->setUIContentCompleted_.load()) {
-            TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+            TLOGNI(WmsLogTag::WMS_LIFE, "already SetUIContent, persistentId=%{public}d", window->GetPersistentId());
             return;
         }
 
-        TLOGI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
+        const auto checkEndTime =
+            std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now())
+                .time_since_epoch().count();
+        if (checkEndTime - checkBeginTime > SET_UICONTENT_TIMEOUT_TIME_AFTER_FREEZE_MS) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "will start re-check after freeze, persistentId=%{public}d",
+                window->GetPersistentId());
+            window->AddSetUIContentTimeoutCheck();
+            return;
+        }
+
+        TLOGNI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
         std::ostringstream oss;
         oss << "SetUIContent timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
         if (window->context_) {
             oss << ", bundleName: " << window->context_->GetBundleName();
+            if (window->context_->GetApplicationInfo()) {
+                oss << ", abilityName: " << window->context_->GetApplicationInfo()->name;
+            }
         }
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
             static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
@@ -3929,23 +3943,14 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
 
 void WindowSessionImpl::NotifySetUIContentComplete()
 {
-    if (WindowHelper::IsMainWindow(GetType())) { // main window
-        SetUIContentComplete();
-    } else if (WindowHelper::IsSubWindow(GetType()) ||
-               WindowHelper::IsSystemWindow(GetType())) { // sub window or system window
+    if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) {
         // created by UIExtension
         auto extWindow = FindExtensionWindowWithContext();
         if (extWindow != nullptr) {
             extWindow->SetUIContentComplete();
-            return;
-        }
-
-        // created by main window
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow != nullptr) {
-            mainWindow->SetUIContentComplete();
         }
     }
+    SetUIContentComplete();
 }
 
 WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
