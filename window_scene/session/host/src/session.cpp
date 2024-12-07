@@ -1121,7 +1121,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         return;
     }
     auto sessionProperty = GetSessionProperty();
-    if (sessionProperty->GetIsNeedUpdateWindowMode() && property) {
+    if (sessionProperty->GetIsNeedUpdateWindowMode()) {
         property->SetIsNeedUpdateWindowMode(true);
         property->SetWindowMode(sessionProperty->GetWindowMode());
     }
@@ -1130,36 +1130,34 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     }
     InitSystemSessionDragEnable(property);
     SetSessionProperty(property);
-    if (property) {
-        Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
-            static_cast<uint32_t>(winRect_.height_)};
-        property->SetWindowRect(rect);
-        property->SetPersistentId(GetPersistentId());
-        property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
-        property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
+
+    Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
+        static_cast<uint32_t>(winRect_.height_)};
+    property->SetWindowRect(rect);
+    property->SetPersistentId(GetPersistentId());
+    property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
+    property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
+    property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
+    property->SetDefaultRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
+    TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u,"
+        " defaultRequestedOrientation: %{public}u", GetPersistentId(),
+        static_cast<uint32_t>(sessionProperty->GetRequestedOrientation()),
+        static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
+    property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
+    property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+    if (sessionProperty->GetCompatibleModeInPc()) {
+        property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
     }
-    if (sessionProperty && property) {
-        property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
-        property->SetDefaultRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
-        TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u,"
-            " defaultRequestedOrientation: %{public}u", GetPersistentId(),
-            static_cast<uint32_t>(sessionProperty->GetRequestedOrientation()),
-            static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
-        property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
-        property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
-        if (sessionProperty->GetCompatibleModeInPc()) {
-            property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
-        }
-        property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
-        property->SetCompatibleModeEnableInPad(sessionProperty->GetCompatibleModeEnableInPad());
-        property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
-            sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
-            sessionProperty->GetCompatibleInPcLandscapeHeight());
-        std::optional<bool> clientDragEnable = GetClientDragEnable();
-        if (clientDragEnable.has_value()) {
+    property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
+    property->SetCompatibleModeEnableInPad(sessionProperty->GetCompatibleModeEnableInPad());
+    property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
+        sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
+        sessionProperty->GetCompatibleInPcLandscapeHeight());
+    std::optional<bool> clientDragEnable = GetClientDragEnable();
+    if (clientDragEnable.has_value()) {
             property->SetDragEnabled(clientDragEnable.value());
-        }
     }
+
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
     }
@@ -2607,11 +2605,10 @@ WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompat
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",
         enable, isSupportDragInPcCompatibleMode);
-    auto property = GetSessionProperty();
-    property->SetCompatibleModeInPc(enable);
-    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
+    GetSessionProperty()->SetCompatibleModeInPc(enable);
+    GetSessionProperty()->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
     if (enable) {
-        property->SetDragEnabled(isSupportDragInPcCompatibleMode);
+        GetSessionProperty()->SetDragEnabled(isSupportDragInPcCompatibleMode);
     }
     return WSError::WS_OK;
 }
@@ -2708,19 +2705,18 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),
         static_cast<int32_t>(mode));
-    auto property = GetSessionProperty();
     if (state_ == SessionState::STATE_END) {
         WLOGFI("session is already destroyed or property is nullptr! id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     } else if (state_ == SessionState::STATE_DISCONNECT) {
-        property->SetWindowMode(mode);
-        property->SetIsNeedUpdateWindowMode(true);
+        GetSessionProperty()->SetWindowMode(mode);
+        GetSessionProperty()->SetIsNeedUpdateWindowMode(true);
         UpdateGestureBackEnabled();
     } else {
-        property->SetWindowMode(mode);
+        GetSessionProperty()->SetWindowMode(mode);
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            property->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+            GetSessionProperty()->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
         UpdateGestureBackEnabled();
         UpdateGravityWhenUpdateWindowMode(mode);
@@ -2793,9 +2789,8 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " RectCheck err size ";
         oss << " cur persistentId: " << GetPersistentId() << ",";
         oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
-        auto property = GetSessionProperty();
-        oss << " windowName: " << property->GetWindowName() << ",";
-        oss << " windowState: " << static_cast<uint32_t>(property->GetWindowState()) << ",";
+        oss << " windowName: " << GetSessionProperty()->GetWindowName() << ",";
+        oss << " windowState: " << static_cast<uint32_t>(GetSessionProperty()->GetWindowState()) << ",";
         oss << " curWidth: " << curWidth << ",";
         oss << " curHeight: " << curHeight << ",";
         oss << " minWidth: " << minWidth << ",";
@@ -2813,8 +2808,7 @@ void Session::RectCheckProcess()
     if (!(IsSessionForeground() || isVisible_)) {
         return;
     }
-    auto property = GetSessionProperty();
-    auto displayId = property->GetDisplayId();
+    auto displayId = GetSessionProperty()->GetDisplayId();
     std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
@@ -2833,8 +2827,8 @@ void Session::RectCheckProcess()
             oss << " RectCheck err ratio ";
             oss << " cur persistentId: " << GetPersistentId() << ",";
             oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
-            oss << " windowName: " << property->GetWindowName() << ",";
-            oss << " windowState: " << static_cast<uint32_t>(property->GetWindowState()) << ",";
+            oss << " windowName: " << GetSessionProperty()->GetWindowName() << ",";
+            oss << " windowState: " << static_cast<uint32_t>(GetSessionProperty()->GetWindowState()) << ",";
             oss << " curWidth: " << curWidth << ",";
             oss << " curHeight: " << curHeight << ",";
             oss << " setting ratio: " << ratio << ",";
@@ -3473,9 +3467,8 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto property = GetSessionProperty();
-    bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
-        property->GetIsUIExtFirstSubWindow();
+    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetSessionProperty()->GetWindowType()) &&
+        GetSessionProperty()->GetIsUIExtFirstSubWindow();
     if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {
         return sessionStage_->SwitchFreeMultiWindow(enable);
     }
@@ -3568,9 +3561,8 @@ bool Session::GetIsMidScene() const
 
 void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
 {
-    auto property = GetSessionProperty();
     std::vector<Rect> lastTouchHotAreas;
-    property->GetTouchHotAreas(lastTouchHotAreas);
+    GetSessionProperty()->GetTouchHotAreas(lastTouchHotAreas);
     if (touchHotAreas == lastTouchHotAreas) {
         return;
     }
@@ -3581,7 +3573,7 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
         rectStr = rectStr + " hot : " + rect.ToString();
     }
     TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
-    property->SetTouchHotAreas(touchHotAreas);
+    GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)

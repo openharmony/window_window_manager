@@ -147,7 +147,6 @@ HWTEST_F(WindowSessionTest3, SetFocusable04, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     session_->isFocused_ = true;
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     session_->property_->SetFocusable(false);
 
     result = session_->SetFocusable(false);
@@ -219,7 +218,6 @@ HWTEST_F(WindowSessionTest3, SetTouchable03, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest3, GetTouchable02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_EQ(true, session_->GetTouchable());
 }
 
@@ -271,8 +269,6 @@ HWTEST_F(WindowSessionTest3, UpdateOrientation, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest3, HandleDialogBackground, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     session_->HandleDialogBackground();
 
@@ -309,8 +305,6 @@ HWTEST_F(WindowSessionTest3, HandleDialogBackground, Function | SmallTest | Leve
 HWTEST_F(WindowSessionTest3, HandleDialogForeground, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     session_->HandleDialogForeground();
 
@@ -455,8 +449,6 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfPointDown, Function | SmallTest | Lev
     session_->PresentFocusIfPointDown();
 
     session_->isFocused_ = false;
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(session_->property_, nullptr);
     session_->property_->SetFocusable(false);
     session_->PresentFocusIfPointDown();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
@@ -522,9 +514,6 @@ HWTEST_F(WindowSessionTest3, HandleSubWindowClick03, Function | SmallTest | Leve
     ASSERT_NE(dialogSession, nullptr);
     session_->SetParentSession(dialogSession);
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
-
     auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN);
     EXPECT_EQ(result, WSError::WS_OK);
 
@@ -569,8 +558,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent07, Function | SmallTest | Leve
     session_->SetSessionState(SessionState::STATE_CONNECT);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     auto result = session_->TransferPointerEvent(pointerEvent);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
@@ -587,9 +574,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent08, Function | SmallTest | Leve
     session_->SetSessionState(SessionState::STATE_CONNECT);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
 
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     SessionInfo info;
@@ -615,9 +599,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent09, Function | SmallTest | Leve
     session_->SetSessionState(SessionState::STATE_FOREGROUND);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
 
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     SessionInfo info;
@@ -647,8 +628,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent10, Function | SmallTest | Leve
     ASSERT_NE(pointerEvent, nullptr);
     pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_DOWN;
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
 
     SessionInfo info;
@@ -683,8 +662,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent11, Function | SmallTest | Leve
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
     session_->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
 
     session_->windowEventChannel_ = nullptr;
@@ -838,7 +815,6 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, Function | SmallTest | Level
     auto isSupportDragInPcCompatibleMode = true;
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 
     enable = false;
@@ -1052,7 +1028,6 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
 
     session_->state_ = SessionState::STATE_ACTIVE;
     session_->isVisible_ = true;
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     session_->RectCheckProcess();
 
     session_->property_->displayId_ = 0;
@@ -1123,7 +1098,6 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     bool isPcAppInPad = false;
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     auto result = session_->SetIsPcAppInPad(isPcAppInPad);
     EXPECT_EQ(result, WSError::WS_OK);
 }

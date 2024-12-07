@@ -1065,18 +1065,6 @@ HWTEST_F(WindowSessionTest, SetFocusable02, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, GetFocusable01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = new WindowSessionProperty();
-    ASSERT_EQ(true, session_->GetFocusable());
-}
-
-/**
- * @tc.name: GetFocusable02
- * @tc.desc: property_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, GetFocusable02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
     ASSERT_EQ(true, session_->GetFocusable());
 }
 
@@ -1230,7 +1218,6 @@ HWTEST_F(WindowSessionTest, SetBrightness02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetBrightness(0.1f));
 }
 
@@ -1345,7 +1332,6 @@ HWTEST_F(WindowSessionTest, NotifyScreenshot, Function | SmallTest | Level2)
     session_->sessionStage_ = mockSessionStage_;
     session_->NotifyScreenshot();
 
-    session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
@@ -1634,7 +1620,6 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
-    session_->property_ = new WindowSessionProperty();
     std::vector<Rect> touchHotAreas = session_->property_->touchHotAreas_;
     session_->property_->SetTouchHotAreas(touchHotAreas);
     ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
