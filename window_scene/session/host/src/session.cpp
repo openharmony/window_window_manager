@@ -1030,7 +1030,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Error status");
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Error status");
         return;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "lastStatus: %{public}d, curStatus: %{public}d",
