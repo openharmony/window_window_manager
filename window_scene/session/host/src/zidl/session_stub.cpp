@@ -315,6 +315,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
         reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
         reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
+        reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
         reply.WriteBool(property->GetCompatibleModeEnableInPad());

@@ -1032,6 +1032,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
+        property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
         property->SetDragEnabled(sessionProperty->GetDragEnabled());
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
@@ -2447,6 +2448,18 @@ WSError Session::SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t port
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight);
+    return WSError::WS_OK;
+}
+
+WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "isSupportPhone: %{public}d", isSupportPhone);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetIsAppSupportPhoneInPc(isSupportPhone);
     return WSError::WS_OK;
 }
 

@@ -300,6 +300,7 @@ public:
     WSError SetIsPcAppInPad(bool enable);
     WSError SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
+    WSError SetAppSupportPhoneInPc(bool isSupportPhone);
     WSError SetCompatibleModeEnableInPad(bool enable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
