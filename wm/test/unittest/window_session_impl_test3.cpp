@@ -210,7 +210,7 @@ HWTEST_F(WindowSessionImplTest3, IsFocused, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFocused start";
     window_ = GetTestWindowImpl("IsFocused");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = window_->IsFocused();
     ASSERT_EQ(ret, window_->isFocused_);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFocused end";
@@ -244,7 +244,7 @@ HWTEST_F(WindowSessionImplTest3, SetMainWindowTopmost, Function | SmallTest | Le
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetMainWindowTopmost start";
     window_ = GetTestWindowImpl("SetMainWindowTopmost");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = window_->SetMainWindowTopmost(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetMainWindowTopmost end";
@@ -260,7 +260,7 @@ HWTEST_F(WindowSessionImplTest3, GetRequestedOrientation, Function | SmallTest |
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation start";
     window_ = GetTestWindowImpl("GetRequestedOrientation");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = window_->GetRequestedOrientation();
     ASSERT_EQ(ret, Orientation::UNSPECIFIED);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetRequestedOrientation end";
@@ -276,7 +276,7 @@ HWTEST_F(WindowSessionImplTest3, SetDecorVisible, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisible start";
     window_ = GetTestWindowImpl("SetDecorVisible");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = window_->SetDecorVisible(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorVisible end";
@@ -292,12 +292,12 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowModal start";
     window_ = GetTestWindowImpl("SetWindowModal");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = window_->SetWindowModal(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
-    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
-    window_->property_->persistentId_ = 1;
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window_->SetWindowModal(true);
@@ -315,7 +315,7 @@ HWTEST_F(WindowSessionImplTest3, SetDecorButtonStyle, Function | SmallTest | Lev
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetDecorButtonStyle start";
     window_ = GetTestWindowImpl("SetDecorButtonStyle");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     DecorButtonStyle decorButtonStyle;
     auto ret = window_->SetDecorButtonStyle(decorButtonStyle);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
@@ -332,7 +332,7 @@ HWTEST_F(WindowSessionImplTest3, GetDecorButtonStyle, Function | SmallTest | Lev
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetDecorButtonStyle start";
     window_ = GetTestWindowImpl("GetDecorButtonStyle");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     DecorButtonStyle decorButtonStyle;
     auto ret = window_->GetDecorButtonStyle(decorButtonStyle);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
@@ -349,19 +349,19 @@ HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, Function | Sm
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterMainWindowCloseListeners start";
     window_ = GetTestWindowImpl("RegisterMainWindowCloseListeners");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
     auto ret = window_->RegisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
-    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
-    window_->property_->persistentId_ = 1;
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
     ret = window_->RegisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
-    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window_->RegisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
@@ -378,20 +378,20 @@ HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, Function | 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners start";
     window_ = GetTestWindowImpl("UnregisterMainWindowCloseListeners");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = INVALID_SESSION_ID;
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
     sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
     auto ret = window_->UnregisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
-    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
-    window_->property_->persistentId_ = 1;
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    window_->property_->SetPersistentId(1);
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window_->state_ = WindowState::STATE_CREATED;
     ret = window_->UnregisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
-    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ret = window_->UnregisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners end";
@@ -409,7 +409,7 @@ HWTEST_F(WindowSessionImplTest3, RegisterSwitchFreeMultiWindowListener, Function
     ASSERT_NE(window_, nullptr);
     sptr<ISwitchFreeMultiWindowListener> listener = sptr<ISwitchFreeMultiWindowListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
-    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     auto ret = window_->RegisterSwitchFreeMultiWindowListener(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterSwitchFreeMultiWindowListener end";
@@ -427,10 +427,10 @@ HWTEST_F(WindowSessionImplTest3, UnregisterSwitchFreeMultiWindowListener, Functi
     ASSERT_NE(window_, nullptr);
     sptr<ISwitchFreeMultiWindowListener> listener = sptr<ISwitchFreeMultiWindowListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
-    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     auto ret = window_->UnregisterSwitchFreeMultiWindowListener(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
-    window_->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ret = window_->UnregisterSwitchFreeMultiWindowListener(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterSwitchFreeMultiWindowListener end";
@@ -511,7 +511,7 @@ HWTEST_F(WindowSessionImplTest3, MarkProcessed, Function | SmallTest | Level2)
     GTEST_LOG_(INFO) << "WindowSessionImplTest: MarkProcessed start";
     window_ = GetTestWindowImpl("MarkProcessed");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = 1;
+    window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
     auto ret = window_->MarkProcessed(1);
     ASSERT_EQ(ret, WSError::WS_OK);
@@ -581,9 +581,9 @@ HWTEST_F(WindowSessionImplTest3, SetRaiseByClickEnabled, Function | SmallTest | 
     window_ = GetTestWindowImpl("SetRaiseByClickEnabled");
     ASSERT_NE(window_, nullptr);
     window_->property_->parentPersistentId_ = 2;
-    window_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    window_->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     window_->state_ = WindowState::STATE_SHOWN;
-    window_->property_->persistentId_ = 1;
+    window_->property_->SetPersistentId(1);
     auto ret = window_->SetRaiseByClickEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRaiseByClickEnabled end";
@@ -599,9 +599,9 @@ HWTEST_F(WindowSessionImplTest3, SetSubWindowModal, Function | SmallTest | Level
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetSubWindowModal start";
     window_ = GetTestWindowImpl("SetSubWindowModal");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = 1;
+    window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
-    window_->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    window_->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ModalityType modalityType = ModalityType::APPLICATION_MODALITY;
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     window_->windowSystemConfig_.freeMultiWindowEnable_ = false;
@@ -666,7 +666,7 @@ HWTEST_F(WindowSessionImplTest3, SetRequestedOrientation, Function | SmallTest |
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetRequestedOrientation start";
     window_ = GetTestWindowImpl("SetRequestedOrientation");
     ASSERT_NE(window_, nullptr);
-    window_->property_->persistentId_ = 1;
+    window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
     Orientation orientation = Orientation::VERTICAL;
     window_->property_->requestedOrientation_ = Orientation::VERTICAL;
