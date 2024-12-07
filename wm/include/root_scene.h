@@ -73,20 +73,11 @@ public:
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
 
-    void SetDisplayDensity(float density)
-    {
-        density_ = density;
-    }
+    void SetDisplayDensity(float density) { density_ = density; }
 
-    void SetDisplayId(DisplayId displayId)
-    {
-        displayId_ = displayId;
-    }
+    void SetDisplayId(DisplayId displayId) { displayId_ = displayId; }
 
-    DisplayId GetDisplayId() const override
-    {
-        return displayId_;
-    }
+    DisplayId GetDisplayId() const { return displayId_; }
 
     void SetDisplayOrientation(int32_t orientation);
 
