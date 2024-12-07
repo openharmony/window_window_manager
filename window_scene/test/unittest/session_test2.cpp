@@ -156,7 +156,6 @@ HWTEST_F(WindowSessionTest2, SetParentSession, Function | SmallTest | Level2)
     sptr<Session> session = new (std::nothrow) Session(info);
     session_->SetParentSession(session);
 
-    session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
@@ -190,7 +189,6 @@ HWTEST_F(WindowSessionTest2, BindDialogToParentSession, Function | SmallTest | L
     session_->dialogVec_.push_back(session2);
     session_->BindDialogToParentSession(session1);
 
-    session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
@@ -224,7 +222,6 @@ HWTEST_F(WindowSessionTest2, RemoveDialogToParentSession, Function | SmallTest |
     session_->dialogVec_.push_back(session2);
     session_->RemoveDialogToParentSession(session1);
 
-    session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
@@ -271,8 +268,6 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent03, Function | SmallTest | Leve
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
 
     SessionInfo info;
@@ -301,7 +296,6 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent04, Function | SmallTest | Leve
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
 
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
 
     SessionInfo info;
@@ -330,7 +324,6 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent05, Function | SmallTest | Leve
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
 
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferPointerEvent(pointerEvent));
@@ -350,7 +343,6 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent06, Function | SmallTest | Leve
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
 
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
     session_->windowEventChannel_ = mockEventChannel_;
 
@@ -427,7 +419,6 @@ HWTEST_F(WindowSessionTest2, TransferKeyEvent03, Function | SmallTest | Level2)
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
 
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
 
     SessionInfo info;
@@ -456,7 +447,6 @@ HWTEST_F(WindowSessionTest2, TransferKeyEvent04, Function | SmallTest | Level2)
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
 
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
 
     SessionInfo info;
@@ -486,7 +476,6 @@ HWTEST_F(WindowSessionTest2, TransferKeyEvent05, Function | SmallTest | Level2)
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
 
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
 
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->TransferKeyEvent(keyEvent));
@@ -1679,7 +1668,6 @@ HWTEST_F(WindowSessionTest2, SetShowRecent004, Function | SmallTest | Level2)
     ssm_->SetScreenLocked(false);
     sleep(1);
 
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     bool showRecent = false;
@@ -1924,7 +1912,6 @@ HWTEST_F(WindowSessionTest2, SetFocusable03, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->isFocused_ = true;
-    session_->property_ = new (std::nothrow) WindowSessionProperty();
     session_->property_->focusable_ = false;
     bool isFocusable = true;
 
@@ -2276,21 +2263,18 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
     info.bundleName_ = "getMainSession";
     sptr<Session> session = sptr<Session>::MakeSptr(info);
     ASSERT_NE(session, nullptr);
-    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     EXPECT_EQ(session, session->GetMainSession());
 
     sptr<Session> subSession = sptr<Session>::MakeSptr(info);
     ASSERT_NE(subSession, nullptr);
     subSession->SetParentSession(session);
-    subSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(session, subSession->GetMainSession());
 
     sptr<Session> subSubSession = sptr<Session>::MakeSptr(info);
     ASSERT_NE(subSubSession, nullptr);
     subSubSession->SetParentSession(subSession);
-    subSubSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(session, subSubSession->GetMainSession());
 }
@@ -2310,7 +2294,6 @@ HWTEST_F(WindowSessionTest2, IsSupportDetectWindow, Function | SmallTest | Level
 
     ssm_->SetScreenLocked(false);
     sleep(1);
-    session_->property_ = new WindowSessionProperty();
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = session_->IsSupportDetectWindow(true);
     ASSERT_EQ(ret, false);
