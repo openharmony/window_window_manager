@@ -2747,7 +2747,7 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
     return WSError::WS_OK;
 }
 
-const sptr<WindowSessionProperty> Session::GetSessionProperty() const
+const sptr<WindowSessionProperty>& Session::GetSessionProperty() const
 {
     return property_;
 }

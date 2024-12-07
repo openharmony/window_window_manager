@@ -233,7 +233,7 @@ public:
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
     WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
-    const sptr<WindowSessionProperty> GetSessionProperty() const;
+    const sptr<WindowSessionProperty>& GetSessionProperty() const;
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
