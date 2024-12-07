@@ -214,7 +214,6 @@ HWTEST_F(WindowSessionImplTest3, IsFocused, Function | SmallTest | Level2)
     auto ret = window_->IsFocused();
     ASSERT_EQ(ret, false);
 
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
     window_->UpdateFocus(true);
