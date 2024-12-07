@@ -47,9 +47,9 @@ SCBSystemSession::~SCBSystemSession()
 
 WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
-    const auto& id = GetPersistentId();
-    const auto& type = GetWindowType();
-    WLOGFI("id: %{public}d, type: %{public}d", id, type);
+    const auto id = GetPersistentId();
+    const auto type = GetWindowType();
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id: %{public}d, type: %{public}d", id, type);
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
@@ -158,7 +158,8 @@ WSError SCBSystemSession::UpdateFocus(bool isFocused)
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", sessionInfo_.bundleName_);
+            "BUNDLE_NAME", sessionInfo_.bundleName_,
+            "WINDOW_TYPE", static_cast<uint32_t>(GetWindowType()));
         NotifyUIRequestFocus();
     } else {
         NotifyUILostFocus();

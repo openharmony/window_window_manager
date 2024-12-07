@@ -181,9 +181,9 @@ int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& a
             ShowIllegalArgsInfo(dumpInfo);
         }
     }
-    int ret = dprintf(fd, "%s\n", dumpInfo.c_str());
+    int ret = write(fd, dumpInfo.c_str(), dumpInfo.length());
     if (ret < 0) {
-        WLOGFE("dprintf error");
+        WLOGFE("write error");
         return -1; // WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("dump end");

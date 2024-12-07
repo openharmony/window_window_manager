@@ -1107,6 +1107,71 @@ HWTEST_F(sceneSessionManagerProxyTest, GetDisplayIdByWindowId, Function | SmallT
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     sceneSessionManagerProxy->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
 }
+
+/**
+ * @tc.name: SetGlobalDragResizeType
+ * @tc.desc: SetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    sceneSessionManagerProxy->SetGlobalDragResizeType(dragResizeType);
+}
+
+/**
+ * @tc.name: GetGlobalDragResizeType
+ * @tc.desc: GetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    sceneSessionManagerProxy->GetGlobalDragResizeType(dragResizeType);
+}
+
+/**
+ * @tc.name: SetAppDragResizeType
+ * @tc.desc: SetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetAppDragResizeType, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    const std::string bundleName = "test";
+    sceneSessionManagerProxy->SetAppDragResizeType(bundleName, dragResizeType);
+}
+
+/**
+ * @tc.name: GetAppDragResizeType
+ * @tc.desc: GetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetAppDragResizeType, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        new SceneSessionManagerProxy(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    DragResizeType toDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    const std::string bundleName = "test";
+    std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
+    appDragResizeTypeMap_[bundleName] = toDragResizeType;
+    sceneSessionManagerProxy->GetAppDragResizeType(bundleName, dragResizeType);
+}
 }  // namespace
 }
 }
