@@ -576,7 +576,7 @@ void JsSceneSession::ProcessLandscapeMultiWindowRegister()
     session->RegisterSetLandscapeMultiWindowFunc([weakThis = wptr(this)](bool isLandscapeMultiWindow) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
