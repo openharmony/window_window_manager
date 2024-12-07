@@ -6345,6 +6345,11 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         TLOGE(WmsLogTag::DMS, "ScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
+    if (!MultiScreenManager::GetInstance().AreScreensTouching(firstScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption)) {
+        TLOGE(WmsLogTag::DMS, "Options incorrect!");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
     firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
     firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
