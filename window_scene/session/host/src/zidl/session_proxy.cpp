@@ -780,10 +780,11 @@ WSError SessionProxy::OnRestoreMainWindow()
 
 /** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
-    bool isGlobal, bool isFromMoveToGlobal)
+    bool isGlobal, bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u]",
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u] isGlobal %{public}d "
+        "isFromMoveToGlobal %{public}d moveConfiguration %{public}s", rect.posX_, rect.posY_,
+        rect.width_, rect.height_, isGlobal, isFromMoveToGlobal, moveConfiguration.ToString().c_str());
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -811,6 +812,11 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
 
     if (!data.WriteBool(isFromMoveToGlobal)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write bool failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint64(static_cast<uint64_t>(moveConfiguration.displayId))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write session displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -848,8 +854,17 @@ WMError SessionProxy::GetGlobalScaledRect(Rect& globalScaledRect)
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    globalScaledRect = { reply.ReadInt32(), reply.ReadInt32(), reply.ReadUint32(), reply.ReadUint32() };
-    int32_t ret = reply.ReadInt32();
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    int32_t ret = 0;
+    if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) ||
+        !reply.ReadUint32(width) || !reply.ReadUint32(height) || !reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    globalScaledRect = { posX, posY, width, height };
     return static_cast<WMError>(ret);
 }
 
@@ -1074,6 +1089,11 @@ WSError SessionProxy::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         return WSError::WS_ERROR_IPC_FAILED;
     }
     uint32_t size = reply.ReadUint32();
+    constexpr uint32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
+    if (size > AVOID_AREA_TYPE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "size is invalid");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     for (uint32_t i = 0; i < size; i++) {
         uint32_t type = reply.ReadUint32();
         if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||

@@ -76,13 +76,16 @@ group("unittest") {
     ":ws_session_proxy_immersive_test",
     ":ws_session_proxy_lifecycle_test",
     ":ws_session_proxy_mock_test",
+    ":ws_session_proxy_property_test",
     ":ws_session_proxy_test",
     ":ws_session_stage_proxy_lifecycle_test",
     ":ws_session_stage_proxy_test",
     ":ws_session_stage_stub_lifecycle_test",
     ":ws_session_stage_stub_test",
+    ":ws_session_stub_immersive_test",
     ":ws_session_stub_lifecycle_test",
     ":ws_session_stub_mock_test",
+    ":ws_session_stub_property_test",
     ":ws_session_stub_test",
     ":ws_session_test",
     ":ws_sub_session_lifecycle_test",
@@ -245,6 +248,8 @@ ohos_unittest("ws_scb_system_session_test") {
 
 ohos_unittest("ws_sub_session_test") {
   module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
   sources = [ "sub_session_test.cpp" ]
 
@@ -730,6 +735,8 @@ ohos_unittest("ws_scene_session_manager_test8") {
 
   sources = [ "scene_session_manager_test8.cpp" ]
 
+  cflags_cc = [ "-Wno-thread-safety" ]
+
   deps = [ ":ws_unittest_common" ]
 
   include_dirs = [ "${ability_runtime_services_path}/abilitymgr/include" ]
@@ -930,6 +937,9 @@ ohos_unittest("ws_scene_session_manager_supplement_test") {
     "${window_base_path}/test/common/utils:libtestutil",
   ]
 
+  public_deps =
+      [ "${window_base_path}/window_scene/interfaces/innerkits:libwsutils" ]
+
   external_deps = [
     "ability_base:configuration",
     "ability_base:session_info",
@@ -1075,6 +1085,19 @@ ohos_unittest("ws_multi_instance_manager_test") {
   ]
 }
 
+ohos_unittest("ws_pc_fold_screen_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "pc_fold_screen_controller.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_session_proxy_test") {
   module_out_path = module_out_path
 
@@ -1085,6 +1108,11 @@ ohos_unittest("ws_session_proxy_test") {
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
     "session_proxy_test.cpp",
+  ]
+
+  defines = [
+    "ENABLE_MOCK_READ_UINT32",
+    "ENABLE_MOCK_READ_INT32",
   ]
 
   deps = [
@@ -1149,6 +1177,31 @@ ohos_unittest("ws_session_proxy_immersive_test") {
   include_dirs =
       [ "${window_base_path}/window_scene/session/host/include/zidl" ]
   sources = [ "session_proxy_immersive_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/session:screen_session",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "c_utils:utils",
+  ]
+}
+
+ohos_unittest("ws_session_proxy_property_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include/zidl",
+    "${window_base_path}/window_scene/test/mock",
+  ]
+
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "session_proxy_property_test.cpp",
+  ]
 
   deps = [
     ":ws_unittest_common",
@@ -1350,6 +1403,36 @@ ohos_unittest("ws_session_stub_mock_test") {
   defines = [ "ENABLE_MOCK_READ_INT64" ]
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  public_external_deps = [ "accessibility:accessibility_interface" ]
+}
+
+ohos_unittest("ws_session_stub_immersive_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_stub_immersive_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  public_external_deps = [ "accessibility:accessibility_interface" ]
+}
+
+ohos_unittest("ws_session_stub_property_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_stub_property_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 

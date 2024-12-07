@@ -37,6 +37,7 @@ namespace OHOS {
 namespace Rosen {
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
+using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
 
 class RootScene : public Window {
 public:
@@ -61,6 +62,11 @@ public:
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
+    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
+    std::string GetClassType() const override { return "RootScene"; }
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
@@ -106,6 +112,12 @@ public:
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
+    /*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
     static sptr<RootScene> staticRootScene_;
 
 private:
@@ -127,6 +139,16 @@ private:
      */
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
+    UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
+    struct IAvoidAreaChangedListenerHash {
+        size_t operator()(const sptr<IAvoidAreaChangedListener>& ptr) const
+        {
+            return std::hash<IAvoidAreaChangedListener*>{}(ptr.GetRefPtr());
+        }
+    };
+    mutable std::mutex mutex_;
+    std::unordered_set<sptr<IAvoidAreaChangedListener>, IAvoidAreaChangedListenerHash> avoidAreaChangeListeners_;
+    // Above guarded by mutex_
 };
 } // namespace Rosen
 } // namespace OHOS

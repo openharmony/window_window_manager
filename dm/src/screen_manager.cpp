@@ -213,12 +213,12 @@ extern "C" __attribute__((destructor)) void ScreenManager::Impl::DlcloseTimeout(
 ScreenManager::ScreenManager()
 {
     pImpl_ = new Impl();
-    WLOGFD("Create screenmanager instance");
+    WLOGFD("Create instance");
 }
 
 ScreenManager::~ScreenManager()
 {
-    WLOGFI("Destroy screenmanager instance");
+    WLOGFI("Destroy instance");
 }
 
 ScreenManager::Impl::~Impl()

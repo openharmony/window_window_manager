@@ -479,12 +479,12 @@ int SessionStub::HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel&
 {
     bool isDefaultDensityEnabled = false;
     if (!data.ReadBool(isDefaultDensityEnabled)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isDefaultDensityEnabled failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isDefaultDensityEnabled failed.");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled: %{public}d", isDefaultDensityEnabled);
     WSError errCode = OnDefaultDensityEnabled(isDefaultDensityEnabled);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -720,7 +720,14 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_LAYOUT, "read isFromMoveToGlobal failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal);
+    uint64_t displayId = DISPLAY_ID_INVALID;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    MoveConfiguration moveConfiguration;
+    moveConfiguration.displayId = static_cast<DisplayId>(displayId);
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal, moveConfiguration);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -731,11 +738,12 @@ int SessionStub::HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& r
     TLOGD(WmsLogTag::WMS_LAYOUT, "In");
     Rect globalScaledRect;
     WMError errorCode = GetGlobalScaledRect(globalScaledRect);
-    reply.WriteInt32(globalScaledRect.posX_);
-    reply.WriteInt32(globalScaledRect.posY_);
-    reply.WriteUint32(globalScaledRect.width_);
-    reply.WriteUint32(globalScaledRect.height_);
-    reply.WriteInt32(static_cast<int32_t>(errorCode));
+    if (!reply.WriteInt32(globalScaledRect.posX_) || !reply.WriteInt32(globalScaledRect.posY_) ||
+        !reply.WriteUint32(globalScaledRect.width_) || !reply.WriteUint32(globalScaledRect.height_) ||
+        !reply.WriteInt32(static_cast<int32_t>(errorCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

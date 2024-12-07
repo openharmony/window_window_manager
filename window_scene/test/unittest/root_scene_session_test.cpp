@@ -153,6 +153,33 @@ HWTEST_F(RootSceneSessionTest, GetCutoutAvoidAreaForRoot, Function | SmallTest |
     rootSceneSession.GetCutoutAvoidAreaForRoot(rect, avoidArea);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
 }
+
+/**
+ * @tc.name: SetRootSessionRect
+ * @tc.desc: test function : SetRootSessionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, SetRootSessionRect, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    WSRect rect;
+    rootSceneSession.SetRootSessionRect(rect);
+    ASSERT_EQ(rootSceneSession.winRect_, rect);
+}
+
+/**
+ * @tc.name: UpdateAvoidArea
+ * @tc.desc: test function : UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    auto ret = rootSceneSession.UpdateAvoidArea(new AvoidArea(avoidArea), AvoidAreaType::TYPE_SYSTEM);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+}
 }
 }
 }
