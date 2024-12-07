@@ -4703,6 +4703,19 @@ WSError SceneSession::SetSplitButtonVisible(bool isVisible)
     return sessionStage_->SetSplitButtonVisible(isVisible);
 }
 
+void SceneSession::RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
+            return;
+        }
+        session->onSetLandscapeMultiWindowFunc_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 int32_t SceneSession::GetOriPosYBeforeRaisedByKeyboard() const
 {
     return oriPosYBeforeRaisedByKeyboard_;
@@ -4830,10 +4843,8 @@ WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
             TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "premission denied, not call by the same process");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-        if (session->sessionChangeCallback_ &&
-            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_) {
-            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_(
-                isLandscapeMultiWindow);
+        if (session->onSetLandscapeMultiWindowFunc_) {
+            session->onSetLandscapeMultiWindowFunc_(isLandscapeMultiWindow);
         }
         TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "NotifySetLandscapeMultiWindow, id: %{public}d,"
             "isLandscapeMultiWindow: %{public}u", session->GetPersistentId(), isLandscapeMultiWindow);
@@ -5800,7 +5811,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onSessionTopmostChange_ = nullptr;
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
-            session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
         }
         session->Session::UnregisterSessionChangeListeners();
     };
