@@ -137,7 +137,6 @@ public:
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
     };
 
     // func for change window scene pattern property
@@ -531,6 +530,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
+    void RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& func);
 
     /**
      * Move Drag
@@ -672,6 +672,11 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
+
+    /*
+     * Multi Window
+     */
+    NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -832,6 +837,7 @@ private:
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
+    void UpdateSessionRectPosYFromClient(WSRect& rect);
 
     /**
      * Window Decor

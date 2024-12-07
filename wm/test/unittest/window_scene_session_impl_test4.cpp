@@ -1120,6 +1120,46 @@ HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus03, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: SetWindowTitle
+ * @tc.desc: SetWindowTitle Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetWindowTitle");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetDisplayId(0);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    std::string title = "SetWindowTitle";
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_INVALID_WINDOW);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->property_->SetDecorEnable(true);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_NULLPTR);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(window->Create(abilityContext_, session), WMError::WM_OK);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
  * @tc.name: VerifySubWindowLevel
  * @tc.desc: VerifySubWindowLevel Test
  * @tc.type: FUNC
@@ -1792,6 +1832,199 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationSyncForAll, Function | 
     ASSERT_EQ(WMError::WM_OK, windowSession->Create(abilityContext_, session));
     windowSceneSessionImpl->UpdateConfigurationSyncForAll(configuration);
     ASSERT_EQ(WMError::WM_OK, windowSession->Destroy(true));
+}
+
+/**
+ * @tc.name: VerifySubWindowLevel01
+ * @tc.desc: VerifySubWindowLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, VerifySubWindowLevel01, Function | SmallTest | Level2)
+{
+    uint32_t parentId = 0;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("VerifySubWindowLevel01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
+    windowSceneSessionImpl->windowSessionMap_.clear();
+    windowSceneSessionImpl->windowSessionMap_.insert(
+        std::pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>("", std::pair(0, nullptr)));
+    auto ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
+    ASSERT_EQ(ret, false);
+
+    windowSceneSessionImpl->windowSessionMap_.clear();
+    windowSceneSessionImpl->windowSessionMap_.insert(
+        std::pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>("", std::pair(1, windowSessionImpl)));
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.persistentId_ = 0;
+    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
+    ASSERT_EQ(ret, true);
+
+    windowSessionImpl->GetProperty()->SetSubWindowLevel(10000);
+    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
+    ASSERT_EQ(ret, false);
+
+    windowSessionProperty.persistentId_ = 1;
+    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: NotifyDrawingCompleted
+ * @tc.desc: NotifyDrawingCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, NotifyDrawingCompleted, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifyDrawingCompleted");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
+    windowSessionImpl->hostSession_ = nullptr;
+    auto ret = window->NotifyDrawingCompleted();
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: NotifyDrawingCompleted01
+ * @tc.desc: NotifyDrawingCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, NotifyDrawingCompleted01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifyDrawingCompleted01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSessionImpl->hostSession_ = session;
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.SetPersistentId(1);
+
+    auto ret = window->NotifyDrawingCompleted();
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: MoveTo
+ * @tc.desc: MoveTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveTo, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
+    option->SetWindowName("MoveTo");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    MoveConfiguration moveConfiguration;
+
+    windowSessionImpl->hostSession_ = nullptr;
+    auto ret = window->MoveTo(0, 0, true, moveConfiguration);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ret = window->MoveTo(0, 0, true, moveConfiguration);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    windowSessionImpl->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    window->MoveTo(0, 0, true, moveConfiguration);
+}
+
+/**
+ * @tc.name: MoveWindowToGlobal
+ * @tc.desc: MoveWindowToGlobal
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
+    option->SetWindowName("MoveWindowToGlobal");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    MoveConfiguration moveConfiguration;
+    windowSessionImpl->hostSession_ = nullptr;
+    auto ret = window->MoveWindowToGlobal(0, 0, moveConfiguration);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    windowSessionImpl->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_INITIAL;
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ret = window->MoveWindowToGlobal(0, 0, moveConfiguration);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->MoveWindowToGlobal(0, 0, moveConfiguration);
+}
+
+/**
+ * @tc.name: MoveWindowToGlobal01
+ * @tc.desc: MoveWindowToGlobal
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
+    option->SetWindowName("MoveWindowToGlobal01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    MoveConfiguration moveConfiguration;
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSessionImpl->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_INITIAL;
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+
+    auto ret = window->MoveWindowToGlobal(0, 0, moveConfiguration);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: OnContainerModalEvent01
+ * @tc.desc: OnContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("VerifySubWindowLevel01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    std::string eventName = "";
+    std::string value = "";
+    auto ret = window->OnContainerModalEvent(eventName, value);
+    ASSERT_NE(WMError::WM_DO_NOTHING, ret);
+
+    eventName = "scb_waterfall_window_event";
+    window->hostSession_ = nullptr;
+    ret = window->OnContainerModalEvent(eventName, value);
+    ASSERT_NE(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 }
 } // namespace Rosen

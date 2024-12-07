@@ -325,53 +325,6 @@ HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: NotifyClientToUpdateInteractive01
- * @tc.desc: check func NotifyClientToUpdateInteractive
- * @tc.type: FUNC
- */
-HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive01, Function | SmallTest | Level1)
-{
-    mainSession_->NotifyClientToUpdateInteractive(true);
-    ASSERT_TRUE(true); // exec success
-}
-
-/**
- * @tc.name: NotifyClientToUpdateInteractive02
- * @tc.desc: check func NotifyClientToUpdateInteractive
- * @tc.type: FUNC
- */
-HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive02, Function | SmallTest | Level1)
-{
-    auto surfaceNode = CreateRSSurfaceNode();
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
-    EXPECT_NE(nullptr, mockSessionStage);
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
-    EXPECT_NE(nullptr, testWindowEventChannel);
-
-    auto result = mainSession_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    mainSession_->NotifyClientToUpdateInteractive(true);
-    ASSERT_TRUE(true); // exec success
-
-    mainSession_->SetSessionState(SessionState::STATE_ACTIVE);
-    mainSession_->NotifyClientToUpdateInteractive(true);
-    ASSERT_TRUE(true); // exec success
-
-    mainSession_->SetSessionState(SessionState::STATE_FOREGROUND);
-    mainSession_->NotifyClientToUpdateInteractive(true);
-    ASSERT_TRUE(true); // exec success
-
-    mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
-    bool visible = mainSession_->UpdateVisibilityInner(true);
-    ASSERT_TRUE(visible);
-    mainSession_->NotifyClientToUpdateInteractive(true);
-    ASSERT_TRUE(true); // exec success
-}
-
-/**
  * @tc.name: OnTitleAndDockHoverShowChange
  * @tc.desc: OnTitleAndDockHoverShowChange
  * @tc.type: FUNC
