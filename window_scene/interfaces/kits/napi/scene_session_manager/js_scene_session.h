@@ -71,7 +71,6 @@ enum class ListenerFuncType : uint32_t {
     PREPARE_CLOSE_PIP_SESSION,
     LANDSCAPE_MULTI_WINDOW_CB,
     CONTEXT_TRANSPARENT_CB,
-    KEYBOARD_GRAVITY_CHANGE_CB,
     ADJUST_KEYBOARD_LAYOUT_CB,
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
@@ -95,6 +94,32 @@ public:
     sptr<SceneSession> GetNativeSession() const;
 
 private:
+
+    /*
+     * Window Lifecycle
+     */
+    void ProcessPendingSceneSessionActivationRegister();
+    void ProcessSessionStateChangeRegister();
+    void ProcessSessionEventRegister();
+    void ProcessTerminateSessionRegister();
+    void ProcessTerminateSessionRegisterNew();
+    void ProcessTerminateSessionRegisterTotal();
+    void ProcessSessionExceptionRegister();
+    void ProcessPendingSessionToForegroundRegister();
+    void ProcessPendingSessionToBackgroundForDelegatorRegister();
+    sptr<SceneSession> GenSceneSession(SessionInfo& info);
+    void PendingSessionActivation(SessionInfo& info);
+    void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
+    void OnSessionStateChange(const SessionState& state);
+    void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
+    void TerminateSession(const SessionInfo& info);
+    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
+    void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
+    void OnSessionException(const SessionInfo& info, bool needRemoveSession, bool startFail);
+    void PendingSessionToForeground(const SessionInfo& info);
+    void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller);
+    static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
+
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UpdateNativeVisibility(napi_env env, napi_callback_info info);
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
@@ -129,7 +154,6 @@ private:
     static napi_value NotifyPipOcclusionChange(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
-    static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     static napi_value SetSkipDraw(napi_env env, napi_callback_info info);
     static napi_value SyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static napi_value UnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
@@ -224,10 +248,7 @@ private:
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
-    void ProcessPendingSceneSessionActivationRegister();
-    void ProcessSessionStateChangeRegister();
     void ProcessBufferAvailableChangeRegister();
-    void ProcessSessionEventRegister();
     void ProcessCreateSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
@@ -245,16 +266,10 @@ private:
     void ProcessMainSessionModalTypeChangeRegister();
     void RegisterFullScreenWaterfallModeChangeCallback();
     void ProcessClickRegister();
-    void ProcessTerminateSessionRegister();
-    void ProcessTerminateSessionRegisterNew();
-    void ProcessTerminateSessionRegisterTotal();
-    void ProcessSessionExceptionRegister();
     void ProcessUpdateSessionLabelRegister();
     void ProcessUpdateSessionIconRegister();
     void ProcessSystemBarPropertyChangeRegister();
     void ProcessNeedAvoidRegister();
-    void ProcessPendingSessionToForegroundRegister();
-    void ProcessPendingSessionToBackgroundForDelegatorRegister();
     void ProcessSessionDefaultAnimationFlagChangeRegister();
     void ProcessIsCustomAnimationPlaying();
     void ProcessShowWhenLockedRegister();
@@ -267,7 +282,6 @@ private:
     void ProcessPrepareClosePiPSessionRegister();
     void ProcessLandscapeMultiWindowRegister();
     void ProcessContextTransparentRegister();
-    void ProcessKeyboardGravityChangeRegister();
     void ProcessAdjustKeyboardLayoutRegister();
     void ProcessLayoutFullScreenChangeRegister();
     void ProcessDefaultDensityEnabledRegister();
@@ -276,16 +290,11 @@ private:
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
-    void ProcessUpdateAppUseControllRegister();
+    void RegisterUpdateAppUseControlCallback();
     
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
-    sptr<SceneSession> GenSceneSession(SessionInfo& info);
-    void PendingSessionActivation(SessionInfo& info);
-    void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
-    void OnSessionStateChange(const SessionState& state);
     void OnBufferAvailableChange(const bool isBufferAvailable);
-    void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect,
@@ -305,16 +314,10 @@ private:
     void OnMainSessionModalTypeChange(bool isModal);
     void OnFullScreenWaterfallModeChange(bool isWaterfallMode);
     void OnClick(bool requestFocus, bool isClick);
-    void TerminateSession(const SessionInfo& info);
-    void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
-    void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
     void UpdateSessionLabel(const std::string& label);
     void UpdateSessionIcon(const std::string& iconPath);
-    void OnSessionException(const SessionInfo& info, bool needRemoveSession, bool startFail);
     void OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
     void OnNeedAvoid(bool status);
-    void PendingSessionToForeground(const SessionInfo& info);
-    void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller);
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
@@ -326,7 +329,6 @@ private:
     void OnPrepareClosePiPSession();
     void OnContextTransparent();
     void SetLandscapeMultiWindow(bool isLandscapeMultiWindow);
-    void OnKeyboardGravityChange(SessionGravity gravity);
     void OnAdjustKeyboardLayout(const KeyboardLayoutParams& params);
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
@@ -336,6 +338,7 @@ private:
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
     void OnSetWindowRectAutoSave(bool enabled);
+    void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

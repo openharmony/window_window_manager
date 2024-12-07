@@ -47,6 +47,7 @@ public:
     virtual void NotifyDisplayModeChanged(FoldDisplayMode) override;
     virtual void NotifyAvailableAreaChanged(DMRect, DisplayId displayId) override;
     virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) override;
+    virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) override;
 private:
     static inline BrokerDelegator<DisplayManagerAgentProxy> delegator_;
 };

@@ -206,6 +206,10 @@ public:
     void SetIsExtend(bool isExtend);
     bool GetIsExtend() const;
     void SetIsInternal(bool isInternal);
+    void SetIsRealScreen(bool isReal);
+    bool GetIsRealScreen();
+    void SetIsPcUse(bool isPcUse);
+    bool GetIsPcUse();
     bool GetIsInternal() const;
     void SetIsCurrentInUse(bool isInUse);
     bool GetIsCurrentInUse() const;
@@ -219,6 +223,8 @@ public:
     bool isInternal_ { false };
     bool isExtended_ { false };
     bool isInUse_ { false };
+    bool isReal_ { false };
+    bool isPcUse_ { false };
 
     NodeId nodeId_ {};
 

@@ -159,19 +159,14 @@ public:
     static napi_value SetBackdropBlurStyle(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
-    static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
-    static napi_value SetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
-    static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
-    static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
-    static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
-    static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
-    static napi_value SetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
+    static napi_value SetDecorButtonStyle(napi_env env, napi_callback_info info);
+    static napi_value GetDecorButtonStyle(napi_env env, napi_callback_info info);
 
     /**
      * Sub Window
@@ -183,6 +178,18 @@ public:
      */
     static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
     static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
+
+    /**
+     * Window Decor
+     */
+    static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
+    static napi_value SetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
+    static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
+    static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
+    static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
+    static napi_value SetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
+    static napi_value SetWindowTitle(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -247,14 +254,7 @@ private:
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowDecorVisible(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
-    napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
-    napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
-    napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowContainerColor(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
@@ -321,6 +321,8 @@ private:
     napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
     napi_value OnStartMoving(napi_env env, napi_callback_info info);
+    napi_value OnSetDecorButtonStyle(napi_env env, napi_callback_info info);
+    napi_value OnGetDecorButtonStyle(napi_env env, napi_callback_info info);
 
     /**
      * Sub Window
@@ -332,6 +334,18 @@ private:
      */
     napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);
     napi_value OnGetGestureBackEnabled(napi_env env, napi_callback_info info);
+
+    /**
+     * Window Decor
+     */
+    napi_value OnSetWindowDecorVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
+    napi_value OnGetTitleButtonRect(napi_env env, napi_callback_info info);
+    napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowTitle(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
