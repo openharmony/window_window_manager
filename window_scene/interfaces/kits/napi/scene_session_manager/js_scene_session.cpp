@@ -568,19 +568,19 @@ void JsSceneSession::ProcessSessionInfoLockedStateChangeRegister()
 void JsSceneSession::ProcessLandscapeMultiWindowRegister()
 {
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "session is nullptr");
         return;
     }
-    sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = [weakThis = wptr(this)](bool isLandscapeMultiWindow) {
+    session->RegisterSetLandscapeMultiWindowFunc([weakThis = wptr(this)](bool isLandscapeMultiWindow) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLandscapeMultiWindowRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "jsSceneSession is null");
             return;
         }
         jsSceneSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
-    };
+    });
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "success");
 }
 
