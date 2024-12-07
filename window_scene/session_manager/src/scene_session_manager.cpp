@@ -4774,8 +4774,9 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         auto curSession = elem.second;
         if (curSession == nullptr || (!curSession->GetSessionInfo().isSystem_ && (curSession->GetSessionState() <
             SessionState::STATE_FOREGROUND || curSession->GetSessionState() > SessionState::STATE_BACKGROUND))) {
-            WLOGW("Session is nullptr or Session state is invalid, id: %{public}d, state: %{public}u",
-                curSession->GetPersistenId(), curSession->GetSessionState());
+            WLOGFW("Session is nullptr or session state is invalid, id: %{public}d, state: %{public}u",
+                curSession->GetPersistentId(), curSession->GetSessionState());
+            continue;
         }
         if (IsSessionVisibleForeground(curSession)) {
             allSession.push_back(curSession);
@@ -4944,6 +4945,7 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         WLOGFE("GetSessionDumpInfo permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
+
     if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
         return GetAllSessionDumpInfo(dumpInfo);
     }
@@ -4956,10 +4958,10 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
     if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2: params num
         std::string cmd;
         std::for_each(params.begin() + 1, params.end(),
-                        [&cmd](const std::string& value) {
-                            cmd += value;
-                            cmd += ' ';
-                        });
+                      [&cmd](const std::string& value) {
+                          cmd += value;
+                          cmd += ' ';
+                      });
         return GetSCBDebugDumpInfo(std::move(cmd), dumpInfo);
     }
     if (params.size() >= 2 && params[0] == ARG_DUMP_PIPLINE && IsValidDigitString(params[1])) { // 2: params num
@@ -6543,6 +6545,7 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
         auto dialogSession = GetSceneSession(dialog->GetPersistentId());
         if (dialogSession == nullptr) {
             TLOGD(WmsLogTag::WMS_DIALOG, "dialogSession is null");
+            continue;
         }
         NotifyWindowInfoChange(dialog->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
         HandleKeepScreenOn(dialogSession, false);
@@ -9905,8 +9908,8 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
             TLOGD(WmsLogTag::WMS_PIPELINE, "FlushUIParams found dirty: %{public}d", sessionMapDirty_);
             for (const auto& item : uiParams) {
-                TLOGD(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder: %{public}d, rect: %{public}s, transX: %{public}f"
-                    " transY: %{public}f, needSync: %{public}d, intreactive: %{public}d", item.first, item.second.zOrder_,
+                TLOGD(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder: %{public}d, rect: %{public}s, transX:%{public}f"
+                    " transY:%{public}f, needSync:%{public}d, intreactive:%{public}d", item.first, item.second.zOrder_,
                     item.second.rect_.ToString().c_str(), item.second.transX_, item.second.transY_,
                     item.second.needSync_, item.second.interactive_);
             }
