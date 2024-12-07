@@ -729,6 +729,22 @@ WSError SceneSession::SetAspectRatio(float ratio)
     return PostSyncTask(task, "SetAspectRatio");
 }
 
+void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session or RestoreMainWindowFunc is null");
+            return;
+        }
+        session->onRestoreMainWindowFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d",
+            funcName, session->GetPersistentId());
+    };
+    PostTask(task, funcName);
+}
+
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {

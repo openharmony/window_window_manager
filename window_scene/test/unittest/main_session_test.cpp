@@ -322,6 +322,30 @@ HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Leve
     bool ret = mainSession_->IsExitSplitOnBackground();
     ASSERT_EQ(false, ret);
 }
+
+/**
+ * @tc.name: OnRestoreMainWindow
+ * @tc.desc: OnRestoreMainWindow function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnRestoreMainWindow";
+    info.bundleName_ = "OnRestoreMainWindow";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
+
+    session->onRestoreMainWindowFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
+
+    NotifyRestoreMainWindowFunc func = []() {
+        return;
+    };
+    session->onRestoreMainWindowFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
+}
 }
 }
 }

@@ -267,6 +267,7 @@ public:
     virtual WMError Minimize() = 0;
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
+    virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual void StartMove() = 0;
     virtual WMError Close() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
