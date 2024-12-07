@@ -116,6 +116,14 @@ enum class ScreenPropertyChangeType : uint32_t {
 };
 
 /**
+ * @brief Enumerates screen shape.
+ */
+enum class ScreenShape : uint32_t {
+    RECTANGLE = 0,
+    ROUND = 1,
+};
+
+/**
  * @brief Enumerates the state of the display.
  */
 enum class DisplayState : uint32_t {
