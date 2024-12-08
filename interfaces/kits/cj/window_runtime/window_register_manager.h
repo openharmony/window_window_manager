@@ -58,6 +58,8 @@ private:
         bool isRegister);
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,
         bool isRegister);
+    WmErrorCode ProcessDensityChangeRegister(const sptr<CjWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister);
     using Func = std::function<WmErrorCode(sptr<CjWindowListener>, sptr<Window>, bool)>;
     std::map<std::string, std::map<int64_t, sptr<CjWindowListener>>> cjCbMap_;
     mutable std::shared_mutex mtx_;

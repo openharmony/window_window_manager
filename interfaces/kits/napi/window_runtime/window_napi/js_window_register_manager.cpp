@@ -49,6 +49,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
+    {WINDOW_DENSITY_CHANGE_CB, RegisterListenerType::WINDOW_DENSITY_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
@@ -465,6 +466,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_DENSITY_CHANGE_CB):
+                return ProcessDensityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
                 WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
@@ -607,6 +610,21 @@ WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<J
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
     }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessDensityChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    if (window == nullptr || listener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "window or listener is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowRectChangeListener> thisListener(listener);
+    WmErrorCode ret = isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDensityChangeListener(thisListener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDensityChangeListener(thisListener));
     return ret;
 }
 } // namespace Rosen
