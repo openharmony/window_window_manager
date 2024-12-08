@@ -421,6 +421,20 @@ public:
 using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
 
 /**
+ * @class IDensityChangeListener
+ *
+ * @brief Listener to observe one window density changed.
+ */
+class IDensityChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window displayId changed.
+     */
+    virtual void OnDensityChanged(float density) {}
+};
+using IDensityChangeListenerSptr = sptr<IDensityChangeListener>;
+
+/**
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
@@ -2084,7 +2098,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     virtual WMError RegisterDensityChangeListener(
-        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+        const IDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Unregister window density change listener.
@@ -2093,7 +2107,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterDensityChangeListener(
-        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+        const IDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the window limits of current window.

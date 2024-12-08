@@ -473,6 +473,11 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
     }
 }
 
+void JsWindowListener::OnDensityChanged(float density)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+}
+
 void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
