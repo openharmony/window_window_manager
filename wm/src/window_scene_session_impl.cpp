@@ -4103,7 +4103,7 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
             return;
         }
     }
-    
+
     NotifyDisplayInfoChange(info);
 
     auto preRect = GetRect();
