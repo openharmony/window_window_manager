@@ -58,6 +58,7 @@ class CjWindowListener : public IWindowChangeListener,
                          public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener,
                          public IDisplayIdChangeListener,
+                         public IDensityChangeListener,
                          public IWindowVisibilityChangedListener,
                          public IWindowTitleButtonRectChangedListener,
                          public IWindowStatusChangeListener {
