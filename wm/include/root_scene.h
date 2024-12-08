@@ -67,42 +67,25 @@ public:
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
 
-    void SetDisplayDensity(float density)
-    {
-        density_ = density;
-    }
+    void SetDisplayDensity(float density) { density_ = density; }
+
+    void SetDisplayId(DisplayId displayId) { displayId_ = displayId; }
+
+    DisplayId GetDisplayId() { return displayId_; }
 
     void SetDisplayOrientation(int32_t orientation);
 
-    float GetDisplayDensity()
-    {
-        return density_;
-    }
+    float GetDisplayDensity() { return density_; }
 
-    WindowState GetWindowState() const override
-    {
-        return WindowState::STATE_SHOWN;
-    }
+    WindowState GetWindowState() const override { return WindowState::STATE_SHOWN; }
 
-    WindowType GetType() const override
-    {
-        return type_;
-    }
+    WindowType GetType() const override { return type_; }
 
-    const std::string& GetWindowName() const override
-    {
-        return name_;
-    }
+    const std::string& GetWindowName() const override { return name_; }
 
-    uint32_t GetWindowId() const override
-    {
-        return 1; // 1 for root
-    }
+    uint32_t GetWindowId() const override { return 1; } // 1 for root
 
-    Ace::UIContent* GetUIContent() const override
-    {
-        return uiContent_.get();
-    }
+    Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
@@ -114,6 +97,7 @@ private:
     std::unique_ptr<Ace::UIContent> uiContent_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
     int32_t orientation_ = 0;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
