@@ -52,6 +52,7 @@ const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
+const std::string WINDOW_DENSITY_CHANGE_CB = "densityChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,

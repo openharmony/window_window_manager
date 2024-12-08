@@ -61,6 +61,9 @@ CjWindowRegisterManager::CjWindowRegisterManager()
         {WINDOW_DISPLAYID_CHANGE_CB,
             [this](const sptr<CjWindowListener>& listener, const sptr<Window>& window, bool isRegister)
             { return this->ProcessDisplayIdChangeRegister(listener, window, isRegister); } },
+        {WINDOW_DENSITY_CHANGE_CB,
+            [this](const sptr<CjWindowListener>& listener, const sptr<Window>& window, bool isRegister)
+            { return this->ProcessDensityChangeRegister(listener, window, isRegister); } },
     };
     listenerProcess_[CaseType::CASE_STAGE] = {
         {WINDOW_STAGE_EVENT_CB, [this](sptr<CjWindowListener> listener, sptr<Window> window, bool isRegister)
@@ -181,6 +184,12 @@ WmErrorCode CjWindowRegisterManager::ProcessWindowVisibilityChangeRegister(
 }
 
 WmErrorCode CjWindowRegisterManager::ProcessDisplayIdChangeRegister(
+    const sptr<CjWindowListener>& listener, const sptr<Window>& window, bool isRegister)
+{
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode CjWindowRegisterManager::ProcessDensityChangeRegister(
     const sptr<CjWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     return WmErrorCode::WM_OK;
