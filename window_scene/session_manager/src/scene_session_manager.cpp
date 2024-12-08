@@ -4945,29 +4945,31 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         WLOGFE("GetSessionDumpInfo permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-
-    if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
-        return GetAllSessionDumpInfo(dumpInfo);
-    }
-    if (params.size() == 1 && params[0] == ARG_DUMP_DETAIL) { // 1: params num
-        return GetAllSessionDumpDetailInfo(dumpInfo);
-    }
-    if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
-        return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
-    }
-    if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2: params num
-        std::string cmd;
-        std::for_each(params.begin() + 1, params.end(),
-                      [&cmd](const std::string& value) {
-                          cmd += value;
-                          cmd += ' ';
-                      });
-        return GetSCBDebugDumpInfo(std::move(cmd), dumpInfo);
-    }
-    if (params.size() >= 2 && params[0] == ARG_DUMP_PIPLINE && IsValidDigitString(params[1])) { // 2: params num
-        return GetTotalUITreeInfo(params[1], dumpInfo);
-    }
-    return WSError::WS_ERROR_INVALID_OPERATION;
+    auto task = [this, params, &dumpInfo]() {
+        if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
+            return GetAllSessionDumpInfo(dumpInfo);
+        }
+        if (params.size() == 1 && params[0] == ARG_DUMP_DETAIL) { // 1: params num
+            return GetAllSessionDumpDetailInfo(dumpInfo);
+        }
+        if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
+            return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
+        }
+        if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2: params num
+            std::string cmd;
+            std::for_each(params.begin() + 1, params.end(),
+                          [&cmd](const std::string& value) {
+                              cmd += value;
+                              cmd += ' ';
+                          });
+            return GetSCBDebugDumpInfo(std::move(cmd), dumpInfo);
+        }
+        if (params.size() >= 2 && params[0] == ARG_DUMP_PIPLINE && IsValidDigitString(params[1])) { // 2: params num
+            return GetTotalUITreeInfo(params[1], dumpInfo);
+        }
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    };
+    return taskScheduler_->PostSyncTask(task);
 }
 
 WSError SceneSessionManager::GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo)
@@ -9909,7 +9911,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             TLOGD(WmsLogTag::WMS_PIPELINE, "FlushUIParams found dirty: %{public}d", sessionMapDirty_);
             for (const auto& item : uiParams) {
                 TLOGD(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder: %{public}d, rect: %{public}s, transX:%{public}f"
-                    " transY:%{public}f, needSync:%{public}d, intreactive:%{public}d", item.first, item.second.zOrder_,
+                    " transY:%{public}f, needSync:%{public}d, interactive:%{public}d", item.first, item.second.zOrder_,
                     item.second.rect_.ToString().c_str(), item.second.transX_, item.second.transY_,
                     item.second.needSync_, item.second.interactive_);
             }
