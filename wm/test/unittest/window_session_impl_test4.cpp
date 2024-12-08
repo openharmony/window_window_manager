@@ -2449,7 +2449,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyDensityChange01, Function | SmallTest | L
     ASSERT_NE(window, nullptr);
 
     SessionInfo sessioninfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(option);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
     ASSERT_NE(session, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     float density = 1.2;
