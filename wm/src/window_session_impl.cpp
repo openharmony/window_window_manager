@@ -102,7 +102,7 @@ std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::t
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
-std::mutex WindowSessionImpl::densityChangeListenerMutex_
+std::mutex WindowSessionImpl::densityChangeListenerMutex_;
 std::map<int32_t, std::vector<IDensityChangeListenerSptr>> WindowSessionImpl::densityChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
@@ -3495,7 +3495,7 @@ template<typename T>
 EnableIfSame<T, IDensityChangeListener,
     std::vector<IDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
-    return displayIdChangeListeners_[GetPersistentId()];
+    return densityChangeListeners_[GetPersistentId()];
 }
 
 template<typename T>
@@ -3516,6 +3516,19 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
     for (auto& listener : displayIdChangeListeners) {
         if (listener != nullptr) {
             listener->OnDisplayIdChanged(displayId);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::NotifyDensityChange(float density)
+{
+    TLOGD(WmsLogTag::DEFAULT, "windowId: %{public}u, density: %{public}f}", GetPersistentId(), density);
+    std::lock_guard<std::mutex> lock(densityChangeListenerMutex_);
+    auto displayIdChangeListeners = GetListeners<IDisplayIdChangeListener>();
+    for (auto& listener : displayIdChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnDensityChanged(density);
         }
     }
     return WSError::WS_OK;

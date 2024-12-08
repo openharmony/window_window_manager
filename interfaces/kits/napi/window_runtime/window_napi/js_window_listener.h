@@ -101,6 +101,7 @@ public:
     void SetMainEventHandler();
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
     void OnDisplayIdChanged(DisplayId displayId) override;
+    void OnDensityChanged(float density) override;
 
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowNoInteractionCallback() override;
