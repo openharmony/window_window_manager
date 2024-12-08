@@ -1296,7 +1296,7 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     res = window->UnregisterWindowTitleButtonRectChangeListener(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    IDisplayIdChangeListenerSptr listener11 = nullptr;
+    IDensityChangeListenerSptr listener11 = nullptr;
     res = window->RegisterDensityChangeListener(listener11);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterDensityChangeListener(listener11);
