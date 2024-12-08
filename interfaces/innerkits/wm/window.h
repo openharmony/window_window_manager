@@ -428,7 +428,7 @@ using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
 class IDensityChangeListener : virtual public RefBase {
 public:
     /**
-     * @brief Notify caller when window displayId changed.
+     * @brief Notify caller when window density changed.
      */
     virtual void OnDensityChanged(float density) {}
 };
