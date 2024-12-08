@@ -2385,7 +2385,7 @@ HWTEST_F(WindowSessionImplTest4, RegisterDensityChangeListener01, Function | Sma
     ASSERT_NE(option, nullptr);
     option->SetWindowName("RegisterDensityChangeListener01");
 
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     sptr<IDensityChangeListener> listener = nullptr;
     WMError ret = window->RegisterDensityChangeListener(listener);
@@ -2417,7 +2417,7 @@ HWTEST_F(WindowSessionImplTest4, UnregisterDensityChangeListener01, Function | S
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UnregisterDensityChangeListener01");
 
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     sptr<IDensityChangeListener> listener = nullptr;
     WMError ret = window->UnregisterDensityChangeListener(listener);
@@ -2445,11 +2445,11 @@ HWTEST_F(WindowSessionImplTest4, NotifyDensityChange01, Function | SmallTest | L
     ASSERT_NE(option, nullptr);
     option->SetWindowName("NotifyDensityChange01");
 
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
     SessionInfo sessioninfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr();
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(option);
     ASSERT_NE(session, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     float density = 1.2;
