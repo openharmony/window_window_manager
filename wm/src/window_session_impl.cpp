@@ -3525,8 +3525,8 @@ WSError WindowSessionImpl::NotifyDensityChange(float density)
 {
     TLOGD(WmsLogTag::DEFAULT, "windowId: %{public}u, density: %{public}f}", GetPersistentId(), density);
     std::lock_guard<std::mutex> lock(densityChangeListenerMutex_);
-    auto displayIdChangeListeners = GetListeners<IDisplayIdChangeListener>();
-    for (auto& listener : displayIdChangeListeners) {
+    auto densityChangeListeners = GetListeners<IDensityChangeListener>();
+    for (auto& listener : densityChangeListeners) {
         if (listener != nullptr) {
             listener->OnDensityChanged(density);
         }

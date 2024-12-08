@@ -621,7 +621,7 @@ WmErrorCode JsWindowRegisterManager::ProcessDensityChangeRegister(sptr<JsWindowL
         TLOGE(WmsLogTag::DEFAULT, "window or listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    sptr<IWindowRectChangeListener> thisListener(listener);
+    sptr<IDensityChangeListener> thisListener(listener);
     WmErrorCode ret = isRegister ?
         WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDensityChangeListener(thisListener)) :
         WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDensityChangeListener(thisListener));
