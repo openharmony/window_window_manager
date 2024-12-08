@@ -476,6 +476,19 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
 void JsWindowListener::OnDensityChanged(float density)
 {
     TLOGD(WmsLogTag::DEFAULT, "in");
+    auto jsCallback = [self = weakRef_, density, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "[NAPI]this listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, density) };
+        thisListener->CallJsMethod(WINDOW_DENSITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)

@@ -4103,7 +4103,6 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
             return;
         }
     }
-
     NotifyDisplayInfoChange(info);
 
     auto preRect = GetRect();
@@ -4192,6 +4191,10 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
         return;
     }
     float density = GetVirtualPixelRatio(displayInfo);
+    if (MathHelper::NearZero(lastDensity_ - density)) {
+        NotifyDensityChange(density);
+        lastDensity_ = density;
+    }
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
 
     if (context_ == nullptr) {

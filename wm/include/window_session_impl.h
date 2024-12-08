@@ -448,6 +448,12 @@ protected:
      */
     uint32_t GetStatusBarHeight() override;
 
+    /**
+     * Window Property
+     */
+    float lastDensity_ { 1.0f };
+    WSError NotifyDensityChange(float density);
+
 private:
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
