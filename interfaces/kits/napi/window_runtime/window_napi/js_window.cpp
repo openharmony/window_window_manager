@@ -484,7 +484,7 @@ napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_HIERARCHY, "in");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
 }
@@ -3668,15 +3668,15 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]device not support");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]device not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[NAPI]not allowed since window is not main window");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]not allowed since window is not main window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
@@ -3684,7 +3684,7 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1 || argv[0] == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY,
+        TLOGE(WmsLogTag::WMS_LAYOUT,
             "Argc is invalid: %{public}zu. Failed to convert parameter to topmost", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -3695,12 +3695,12 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
     NapiAsyncTask::ExecuteCallback execute = [weakToken = wptr(windowToken_), isMainWindowTopmost, errCodePtr] {
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "window is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowTopmost(isMainWindowTopmost));
-        TLOGND(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set success",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] set success",
             window->GetWindowId(), window->GetWindowName().c_str());
     };
     NapiAsyncTask::CompleteCallback complete =

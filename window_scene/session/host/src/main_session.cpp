@@ -185,7 +185,7 @@ WSError MainSession::SetMainWindowTopmost(bool isTopmost)
     auto property = GetSessionProperty();
     if (property) {
         property->SetMainWindowTopmost(isTopmost);
-        TLOGD(WmsLogTag::WMS_HIERARCHY,
+        TLOGD(WmsLogTag::WMS_LAYOUT,
             "Notify session topmost change, id: %{public}d, isTopmost: %{public}u",
             GetPersistentId(), isTopmost);
         if (mainWindowTopmostChangeFunc_) {
