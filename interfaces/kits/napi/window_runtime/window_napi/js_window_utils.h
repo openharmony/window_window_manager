@@ -327,6 +327,8 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastParam,
         std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback>&& execute,
         std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback>&& complete, napi_value* result);
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
+        napi_env env, napi_value lastParam, napi_value* result);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {
