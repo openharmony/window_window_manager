@@ -410,13 +410,6 @@ public:
 
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
     int32_t GetCustomDecorHeight(int32_t persistentId);
-
-    /**
-     * Window Lifecycle
-     */
-    bool IsUserAuthPassed() const;
-    void SetUserAuthPassed(bool isUserAuthPassed);
-
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
     const SystemSessionConfig& GetSystemSessionConfig() const;
@@ -485,6 +478,8 @@ public:
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
+    bool IsUserAuthPassed() const;
+    void SetUserAuthPassed(bool isUserAuthPassed);
 
 protected:
     SceneSessionManager();
