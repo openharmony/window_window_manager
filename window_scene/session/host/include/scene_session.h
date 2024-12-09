@@ -311,6 +311,7 @@ public:
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
     void RetrieveStatusBarDefaultVisibility();
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
+    void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
@@ -387,7 +388,6 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
-    void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
     /**
@@ -608,8 +608,8 @@ protected:
     void CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoidRect, AvoidArea& avoidArea) const;
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
-    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     NotifyNeedAvoidFunc onNeedAvoid_;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
 
     /**
      * Gesture Back
