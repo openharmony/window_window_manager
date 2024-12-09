@@ -4191,6 +4191,7 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
         TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
         return;
     }
+    NotifyDensityChange(displayInfo);
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
 
