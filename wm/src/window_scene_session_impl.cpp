@@ -2363,6 +2363,7 @@ bool WindowSceneSessionImpl::IsStartMoving()
         isMoving = hostSession->IsStartMoving();
     }
     TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
+    return isMoving;
 }
 
 WMError WindowSceneSessionImpl::Close()

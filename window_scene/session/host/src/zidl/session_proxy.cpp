@@ -1573,7 +1573,6 @@ bool SessionProxy::IsStartMoving()
         TLOGE(WmsLogTag::DEFAULT, "Read isMoving failed");
         return false;
     }
-
     return isMoving;
 }
 
