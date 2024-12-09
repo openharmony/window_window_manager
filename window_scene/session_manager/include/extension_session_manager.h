@@ -67,6 +67,7 @@ public:
      * @return WSError
      */
     WSError RequestExtensionSessionDestructionDone(const sptr<ExtensionSession>& extensionSession);
+
 private:
     ExtensionSessionManager();
     ~ExtensionSessionManager() = default;
