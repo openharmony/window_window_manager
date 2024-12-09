@@ -148,6 +148,19 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction01, Func
 }
 
 /**
+ * @tc.name: RequestExtensionSessionDestructionDone01
+ * @tc.desc: RequestExtensionSessionDestructionDone Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone01, Function | MediumTest | Level2)
+{
+    SessionInfo info;
+    sptr<ExtensionSession> extensionSession = new ExtensionSession(info);
+    ASSERT_EQ(WSError::WS_OK,
+              ExtensionSessionManager::GetInstance().RequestExtensionSessionDestructionDone(extensionSession));
+}
+
+/**
  * @tc.name: RequestExtensionSessionDestruction03
  * @tc.desc: RequestExtensionSessionDestruction Test
  * @tc.type: FUNC
@@ -166,6 +179,24 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction03, Func
 
     instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestruction(extensionSession, func));
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: RequestExtensionSessionDestructionDone03
+ * @tc.desc: RequestExtensionSessionDestructionDone Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone03, Function | MediumTest | Level2)
+{
+    SessionInfo info;
+    sptr<ExtensionSession> extensionSession = new ExtensionSession(info);
+    ExtensionSessionManager* instance = &ExtensionSessionManager::GetInstance();
+    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestructionDone(extensionSession));
+    usleep(WAIT_SYNC_IN_NS);
+
+    instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
+    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestructionDone(extensionSession));
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -214,6 +245,22 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction02, Func
     sptr<ExtensionSession> extSession = nullptr;
     ExtensionSessionManager *instance = &ExtensionSessionManager::GetInstance();
     WSError result01 = instance->RequestExtensionSessionDestruction(extSession, nullptr);
+    EXPECT_EQ(result01, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RequestExtensionSessionDestructionDone02
+ * @tc.desc: RequestExtensionSessionDestructionDone Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestructionDone02, Function | MediumTest | Level2)
+{
+    AAFwk::Want want;
+    SessionInfo infoInput;
+    infoInput.want = std::make_shared<AAFwk::Want>(want);
+    sptr<ExtensionSession> extSession = nullptr;
+    ExtensionSessionManager* instance = &ExtensionSessionManager::GetInstance();
+    WSError result01 = instance->RequestExtensionSessionDestructionDone(extSession);
     EXPECT_EQ(result01, WSError::WS_OK);
 }
 } // namespace
