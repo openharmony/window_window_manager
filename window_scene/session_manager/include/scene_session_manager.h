@@ -410,6 +410,13 @@ public:
 
     std::shared_ptr<TaskScheduler> GetTaskScheduler() {return taskScheduler_;};
     int32_t GetCustomDecorHeight(int32_t persistentId);
+
+    /**
+     * Window Lifecycle
+     */
+    bool IsUserAuthPassed() const;
+    void SetUserAuthPassed(bool isUserAuthPassed);
+
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
     const SystemSessionConfig& GetSystemSessionConfig() const;
@@ -541,8 +548,7 @@ private:
     /**
      * Window Lifecycle
      */
-    bool IsUserAuthPassed() const;
-    void SetUserAuthPassed(bool isUserAuthPassed);
+    bool isUserAuthPassed_ {false};
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
 
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
@@ -750,7 +756,6 @@ private:
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};
-    bool isUserAuthPassed_ {false};
     bool needBlockNotifyFocusStatusUntilForeground_ {false};
     bool needBlockNotifyUnfocusStatus_ {false};
     bool isPrepareTerminateEnable_ {false};
