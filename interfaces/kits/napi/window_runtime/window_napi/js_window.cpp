@@ -1837,6 +1837,7 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
                       env, task = napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
         if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -2037,6 +2038,7 @@ napi_value JsWindow::OnSetWindowMode(napi_env env, napi_callback_info info)
                       env, task = napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
         if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -6217,9 +6219,10 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), windowLimits,
-                      env, task = napiAsyncTask, where = __func__] () mutable {
+                      env, task = napiAsyncTask, where = __func__]() mutable {
         auto window = windowToken.promote();
         if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }

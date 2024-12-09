@@ -88,20 +88,17 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        HandleScope handleScope(env);
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert rect to jsObject", funcName);
-            napi_close_handle_scope(env, scope);
             return;
         }
         napi_set_named_property(env, objValue, "width", CreateJsValue(env, rect.width_));
         napi_set_named_property(env, objValue, "height", CreateJsValue(env, rect.height_));
         napi_value argv[] = {objValue};
         thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        napi_close_handle_scope(env, scope);
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
@@ -444,11 +441,9 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        HandleScope handleScope(env);
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(windowstatus))};
         thisListener->CallJsMethod(WINDOW_STATUS_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        napi_close_handle_scope(env, scope);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
@@ -530,15 +525,14 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         rectChangeReason = RectChangeReason::MOVE;
     }
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_, funcName = __func__] () {
+    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_, funcName = __func__] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRectChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        HandleScope handleScope(env);
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
@@ -554,7 +548,6 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         napi_set_named_property(env, objValue, "reason", CreateJsValue(env, rectChangeReason));
         napi_value argv[] = {objValue};
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        napi_close_handle_scope(env, scope);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
