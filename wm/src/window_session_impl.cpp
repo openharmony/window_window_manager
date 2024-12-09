@@ -3521,14 +3521,24 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::NotifyDensityChange(float density)
+WSError WindowSessionImpl::NotifyDensityChange(const sptr<DisplayInfo>& displayInfo)
 {
-    TLOGD(WmsLogTag::DEFAULT, "windowId: %{public}u, density: %{public}f}", GetPersistentId(), density);
+    if (displayInfo == nullptr) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    float currDensity = displayInfo->GetVirtualPixelRatio();
+    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, lastDensity: %{public}f, currDensity: %{public}f",
+        GetPersistentId(), lastDensity_, currDensity);
+    if (MathHelper::NearZero(lastDensity_ - currDensity)) {
+        return WSError::WS_DO_NOTHING;
+    }
+    lastDensity_ = currDensity;
+
     std::lock_guard<std::mutex> lock(densityChangeListenerMutex_);
     auto densityChangeListeners = GetListeners<IDensityChangeListener>();
     for (auto& listener : densityChangeListeners) {
         if (listener != nullptr) {
-            listener->OnDensityChanged(density);
+            listener->OnDensityChanged(currDensity);
         }
     }
     return WSError::WS_OK;

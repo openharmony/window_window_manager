@@ -2452,9 +2452,18 @@ HWTEST_F(WindowSessionImplTest4, NotifyDensityChange01, Function | SmallTest | L
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
     ASSERT_NE(session, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    float density = 1.2;
+
+    sptr<DisplayInfo> displayInfo = nullptr;
     auto ret = window->NotifyDensityChange(density);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+
+    displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetVirtualPixelRatio(1.5);
+    ret = window->NotifyDensityChange(displayInfo);
     ASSERT_EQ(WSError::WS_OK, ret);
+
+    ret = window->NotifyDensityChange(displayInfo);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, ret);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 }
