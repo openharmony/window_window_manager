@@ -1037,7 +1037,7 @@ void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopm
     auto task = [weakThis = wptr(this), func] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session or func is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session or func is null");
             return;
         }
         session->mainWindowTopmostChangeFunc_ = func;
@@ -3354,7 +3354,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         uint32_t accessTokenId = property->GetAccessTokenId();
         if (!SessionPermission::VerifyPermissionByCallerToken(accessTokenId,
             PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
-            TLOGE(WmsLogTag::WMS_HIERARCHY, "The caller has no permission granted.");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "The caller has no permission granted.");
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }

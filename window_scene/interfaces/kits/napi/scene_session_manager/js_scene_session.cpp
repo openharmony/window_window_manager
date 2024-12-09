@@ -1163,18 +1163,18 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
     NotifyMainWindowTopmostChangeFunc func = [weakThis = wptr(this)](bool isTopmost) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnMainWindowTopmostChange(isTopmost);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     session->SetMainWindowTopmostChangeCallback(func);
-    TLOGD(WmsLogTag::WMS_HIERARCHY, "register success");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "register success");
 }
 
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
@@ -2725,16 +2725,16 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
 /** @note @window.hierarchy */
 void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
 {
-    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]isTopmost: %{public}u", isTopmost);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]isTopmost: %{public}u", isTopmost);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "[NAPI]jsCallBack is nullptr");
             return;
         }
         napi_value jsMainWindowTopmostObj = CreateJsValue(env, isTopmost);
