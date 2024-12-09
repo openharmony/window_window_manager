@@ -60,6 +60,12 @@ constexpr DisplayId SUPER_FOLD_UPPER_DISPLAY_ID = 0;
 constexpr DisplayId SUPER_FOLD_LOWER_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 
+/**
+ * DFX
+ */
+const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
+constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
+
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
     auto contentInfoType = Ace::ContentInfoType::NONE;
@@ -604,7 +610,7 @@ void WindowSessionImpl::DestroySubWindow()
         }
         if (property_->GetIsUIExtFirstSubWindow() && subWindowSessionMap_.empty()) {
             auto extensionWindow = FindExtensionWindowWithContext();
-            if (extensionWindow != nullptr && extensionWindow->GetUIContent() == nullptr) {
+            if (extensionWindow != nullptr && extensionWindow->GetUIContentSharedPtr() == nullptr) {
                 extensionWindow->AddSetUIExtensionDestroyTimeoutCheck();
             }
         }
@@ -4364,12 +4370,12 @@ void WindowSessionImpl::SetUIExtensionDestroyCompleteInSubWindow()
 {
     if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) {
         bool startUIExtensionDestroyTimer = true;
-        auto extionsionWindow = FindExtensionWindowWithContext();
-        if (extionsionWindow != nullptr && extionsionWindow->startUIExtensionDestroyTimer_.compare_exchange_strong(
+        auto extensionWindow = FindExtensionWindowWithContext();
+        if (extensionWindow != nullptr && extensionWindow->startUIExtensionDestroyTimer_.compare_exchange_strong(
             startUIExtensionDestroyTimer, false)) {
             TLOGI(WmsLogTag::WMS_LIFE, "called");
-            extionsionWindow->SetUIExtensionDestroyComplete();
-            extionsionWindow->setUIExtensionDestroyCompleted_.store(false);
+            extensionWindow->SetUIExtensionDestroyComplete();
+            extensionWindow->setUIExtensionDestroyCompleted_.store(false);
         }
     }
 }
@@ -4380,16 +4386,16 @@ void WindowSessionImpl::AddSetUIExtensionDestroyTimeoutCheck()
     auto task = [weakThis = wptr(this), where] {
         auto window = weakThis.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:window is nullptr", __func__);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: window is nullptr", where);
             return;
         }
         if (window->setUIExtensionDestroyCompleted_.load()) {
-            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s:already, persistentId=%{public}d", __func__,
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: already, persistentId=%{public}d", where,
                 window->GetPersistentId());
             return;
         }
 
-        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s:timeout, persistentId=%{public}d", __func__, window->GetPersistentId());
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: timeout, persistentId=%{public}d", where, window->GetPersistentId());
         std::ostringstream oss;
         oss << "SetUIExtDestroy timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
