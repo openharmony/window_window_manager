@@ -4134,14 +4134,14 @@ void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSe
 {
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "session property null");
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "session property null");
         return;
     }
 
     bool hideNonSystemFloatingWindowsOld = propertyOld->GetHideNonSystemFloatingWindows();
     bool hideNonSystemFloatingWindowsNew = property->GetHideNonSystemFloatingWindows();
     if (hideNonSystemFloatingWindowsOld == hideNonSystemFloatingWindowsNew) {
-        TLOGI(WmsLogTag::DEFAULT, "property hideNonSystemFloatingWindows not change");
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "property hideNonSystemFloatingWindows not change");
         return;
     }
 
@@ -4249,7 +4249,7 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
             return;
         }
         bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession);
-        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d, %{public}d, %{public}d]",
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "keep screen on: [%{public}s, %{public}d, %{public}d, %{public}d, %{public}d]",
             sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(),
             sceneSession->IsVisible(), requireLock, shouldLock);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
@@ -4323,7 +4323,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
         SetDisplayBrightness(brightness);
     }
     if (!postTaskRet) {
-        TLOGE(WmsLogTag::DEFAULT, "post task failed. task is SetBrightness");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "post task failed. task is SetBrightness");
     }
 }
 
@@ -4331,20 +4331,20 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is invalid");
         return WSError::WS_ERROR_NULLPTR;
     }
     if (!(sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
             sceneSession->GetSessionInfo().isSystem_)) {
-        TLOGW(WmsLogTag::DEFAULT, "only app main window can set brightness");
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "only app main window can set brightness");
         return WSError::WS_DO_NOTHING;
     }
     auto brightness = sceneSession->GetBrightness();
-    TLOGI(WmsLogTag::DEFAULT, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (GetDisplayBrightness() != brightness) {
-            TLOGI(WmsLogTag::DEFAULT, "adjust brightness with default value");
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
             if (!isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             }
@@ -4353,7 +4353,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         brightnessSessionId_ = INVALID_WINDOW_ID;
     } else {
         if (GetDisplayBrightness() != brightness) {
-            TLOGI(WmsLogTag::DEFAULT, "adjust brightness with value");
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with value");
             if (isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
                     static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
@@ -6081,7 +6081,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
             if (!sceneSession->GetSessionInfo().bundleName_.empty()) {
                 privacyBundles.insert(sceneSession->GetSessionInfo().bundleName_);
             } else {
-                TLOGW(WmsLogTag::WMS_MAIN, "bundle name is empty, wid = %{public}d.", item.first);
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "bundle name is empty, wid = %{public}d.", item.first);
                 privacyBundles.insert(sceneSession->GetWindowName());
             }
         }
@@ -6312,7 +6312,7 @@ bool SceneSessionManager::IsInDefaultScreen(const sptr<SceneSession>& sceneSessi
 {
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "sessionProperty is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionProperty is nullptr");
         return false;
     }
     ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
@@ -7420,13 +7420,13 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
 WSError SceneSessionManager::GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
 {
     if (!SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Permission denied!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    TLOGI(WmsLogTag::DEFAULT, "PersistentId=%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "PersistentId=%{public}d", persistentId);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sceneSession is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     return sceneSession->GetUIContentRemoteObj(uiContentRemoteObj);
@@ -7929,17 +7929,17 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        TLOGW(WmsLogTag::DEFAULT, "null scene session.");
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "null scene session.");
         return false;
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBGestureBack") != std::string::npos ||
         sceneSession->GetSessionInfo().bundleName_.find("SCBGestureNavBar") != std::string::npos ||
         sceneSession->GetSessionInfo().bundleName_.find("SCBGestureTopBar") != std::string::npos) {
-        TLOGD(WmsLogTag::DEFAULT, "filter gesture window.");
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "filter gesture window.");
         return false;
     }
     if (sceneSession->GetSessionInfo().bundleName_.find("SCBDragScale") != std::string::npos) {
-        TLOGD(WmsLogTag::DEFAULT, "filter DragScale window.");
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "filter DragScale window.");
         return false;
     }
     sptr<AccessibilityWindowInfo> info = sptr<AccessibilityWindowInfo>::MakeSptr();
@@ -7967,7 +7967,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->isDecorEnable_ = property->IsDecorEnable();
     }
     infos.emplace_back(info);
-    TLOGD(WmsLogTag::WMS_MAIN, "wid = %{public}d, inWid = %{public}d, uiNId = %{public}d, bundleName = %{public}s",
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid = %{public}d, inWid = %{public}d, uiNId = %{public}d, bundleName = %{public}s",
         info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str());
     return true;
 }
@@ -8089,8 +8089,8 @@ void SceneSessionManager::UpdateSubWindowVisibility(const sptr<SceneSession>& se
             if (subSession == nullptr) {
                 continue;
             }
-            if (subSession->IsSessionForeground() || GetSessionRSVisible(subSession, currVisibleData)) {
-                TLOGI(WmsLogTag::DEFAULT, "Update subwindow visibility for winId: %{public}d",
+            if (GetSessionRSVisible(subSession, currVisibleData)) {
+                TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Update subwindow visibility for winId: %{public}d",
                     subSession->GetWindowId());
                 SetSessionVisibilityInfo(subSession, visibleState, windowVisibilityInfos, visibilityInfo);
             }
@@ -8122,7 +8122,7 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     std::string& visibilityInfo)
 {
     if (session == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Session is invalid!");
         return;
     }
     session->SetRSVisible(visibleState < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
@@ -11652,14 +11652,14 @@ WMError SceneSessionManager::GetProcessSurfaceNodeIdByPersistentId(const int32_t
     const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
-        TLOGE(WmsLogTag::DEFAULT, "The caller has no permission granted.");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The caller has no permission granted.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 
     surfaceNodeIds.clear();
-    TLOGI(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId, pid:%{public}d", pid);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Get process surfaceNodeId by persistentId, pid:%{public}d", pid);
     for (auto persistentId : persistentIds) {
-        TLOGI(WmsLogTag::DEFAULT, "convert wid:%{public}d", persistentId);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "convert wid:%{public}d", persistentId);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             continue;
@@ -11778,11 +11778,11 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<
 WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (pid < 0) {
-        TLOGE(WmsLogTag::DEFAULT, "invalid pid!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid pid!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "pid:%{public}d, skip:%{public}u", pid, skip);
@@ -11798,7 +11798,7 @@ WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
                 continue;
             }
             if (pid == sceneSession->GetCallingPid()) {
-                TLOGI(WmsLogTag::DEFAULT, "send rs set snapshot skip, persistentId:%{public}d, skip:%{public}u",
+                TLOGI(WmsLogTag::WMS_ATTRIBUTE, "send rs set snapshot skip, persistentId:%{public}d, skip:%{public}u",
                     persistentId, skip);
                 sceneSession->SetSnapshotSkip(skip);
             }
@@ -11811,7 +11811,7 @@ WMError SceneSessionManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
 void SceneSessionManager::RemoveProcessSnapshotSkip(int32_t pid)
 {
     if (snapshotSkipPidSet_.erase(pid) != 0) {
-        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from snapshot skip pid set. pid:%{public}d", pid);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "process died, delete pid from snapshot skip pid set. pid:%{public}d", pid);
     }
 }
 
@@ -11827,10 +11827,10 @@ WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
-        TLOGE(WmsLogTag::DEFAULT, "The caller has no permission granted.");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The caller has no permission granted.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    TLOGI(WmsLogTag::DEFAULT, "userId:%{public}d", userId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "userId:%{public}d", userId);
     auto task = [this, userId, bundleNameList]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         snapshotSkipBundleNameSet_.clear();
         for (auto& bundleName : bundleNameList) {
@@ -11843,7 +11843,7 @@ WMError SceneSessionManager::SkipSnapshotByUserIdAndBundleNames(int32_t userId,
             }
             const std::string& bundleName = sceneSession->GetSessionInfo().bundleName_;
             if (snapshotSkipBundleNameSet_.find(bundleName) != snapshotSkipBundleNameSet_.end()) {
-                TLOGNI(WmsLogTag::DEFAULT, "set RS snapshot skip true, name:%{public}s",
+                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "set RS snapshot skip true, name:%{public}s",
                     bundleName.c_str());
                 sceneSession->SetSnapshotSkip(true);
                 continue;
@@ -11859,7 +11859,7 @@ void SceneSessionManager::SetSessionSnapshotSkipForAppBundleName(const sptr<Scen
 {
     const std::string& name = sceneSession->GetSessionInfo().bundleName_;
     if (snapshotSkipBundleNameSet_.find(name) != snapshotSkipBundleNameSet_.end()) {
-        TLOGI(WmsLogTag::DEFAULT, "set RS snapshot skip true, name:%{public}s",
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "set RS snapshot skip true, name:%{public}s",
             name.c_str());
         sceneSession->SetSnapshotSkip(true);
     }
@@ -11868,13 +11868,13 @@ void SceneSessionManager::SetSessionSnapshotSkipForAppBundleName(const sptr<Scen
 WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    TLOGI(WmsLogTag::DEFAULT, "pid:%{public}d, watermarkName:%{public}s, isEnabled:%{public}u",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid:%{public}d, watermarkName:%{public}s, isEnabled:%{public}u",
         pid, watermarkName.c_str(), isEnabled);
     if (isEnabled && watermarkName.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "watermarkName is empty!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "watermarkName is empty!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     auto task = [this, pid, watermarkName, isEnabled] {
@@ -11911,7 +11911,7 @@ bool SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSessi
 void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
 {
     if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
-        TLOGI(WmsLogTag::DEFAULT, "process died, delete pid from watermark pid map. pid:%{public}d", pid);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "process died, delete pid from watermark pid map. pid:%{public}d", pid);
         processWatermarkPidMap_.erase(pid);
     }
 }
@@ -12016,7 +12016,7 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
     std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 
@@ -12031,7 +12031,7 @@ WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>&
                 continue;
             }
 			DisplayId displayId = sessionProperty->GetDisplayId();
-            TLOGNI(WmsLogTag::DEFAULT, "windowId:%{public}" PRIu64 ", displayId:%{public}" PRIu64,
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}" PRIu64 ", displayId:%{public}" PRIu64,
                 windowId, displayId);
             windowDisplayIdMap.insert({windowId, displayId});
         }

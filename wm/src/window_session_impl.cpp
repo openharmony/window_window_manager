@@ -919,7 +919,7 @@ void WindowSessionImpl::UpdateDensity()
 
 void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio)
 {
-    TLOGI(WmsLogTag::DEFAULT, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "old {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}, "
         "new {useUniqueDensity: %{public}d, virtualPixelRatio: %{public}f}",
         useUniqueDensity_, virtualPixelRatio_, useUniqueDensity, virtualPixelRatio);
     bool oldUseUniqueDensity = useUniqueDensity_;
@@ -1742,11 +1742,11 @@ WMError WindowSessionImpl::SetBrightness(float brightness)
     if ((brightness < MINIMUM_BRIGHTNESS &&
          std::fabs(brightness - UNDEFINED_BRIGHTNESS) >= std::numeric_limits<float>::min()) ||
         brightness > MAXIMUM_BRIGHTNESS) {
-        TLOGE(WmsLogTag::DEFAULT, "invalid brightness value: %{public}f", brightness);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid brightness value: %{public}f", brightness);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (!WindowHelper::IsAppWindow(GetType())) {
-        TLOGE(WmsLogTag::DEFAULT, "non app window does not support set brightness, type: %{public}u", GetType());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "non app window does not support set brightness, type: %{public}u", GetType());
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     property_->SetBrightness(brightness);
@@ -2108,7 +2108,7 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    
+
     if (!WindowHelper::CheckButtonStyleValid(decorButtonStyle)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "set decor button style param invalid");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -3418,14 +3418,14 @@ WMError WindowSessionImpl::UnregisterWindowVisibilityChangeListener(const IWindo
 
 WMError WindowSessionImpl::RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
 {
-    TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(displayIdChangeListenerMutex_);
     return RegisterListener(displayIdChangeListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
 {
-    TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(displayIdChangeListenerMutex_);
     return UnregisterListener(displayIdChangeListeners_[GetPersistentId()], listener);
 }
@@ -3483,7 +3483,7 @@ EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionLi
 
 WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DEFAULT, "id=%{public}u, displayId=%{public}" PRIu64, GetPersistentId(), displayId);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}u, displayId=%{public}" PRIu64, GetPersistentId(), displayId);
     std::lock_guard<std::mutex> lock(displayIdChangeListenerMutex_);
     auto displayIdChangeListeners = GetListeners<IDisplayIdChangeListener>();
     for (auto& listener : displayIdChangeListeners) {
@@ -3496,7 +3496,7 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
 {
-    TLOGD(WmsLogTag::DEFAULT, "window: name=%{public}s, id=%{public}u, isVisible=%{public}d",
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "window: name=%{public}s, id=%{public}u, isVisible=%{public}d",
         GetWindowName().c_str(), GetPersistentId(), isVisible);
     std::lock_guard<std::recursive_mutex> lockListener(windowVisibilityChangeListenerMutex_);
     auto windowVisibilityListeners = GetListeners<IWindowVisibilityChangedListener>();
@@ -3817,22 +3817,22 @@ void WindowSessionImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& han
 WMError WindowSessionImpl::SetBackgroundColor(const std::string& color)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     uint32_t colorValue;
     if (ColorParser::Parse(color, colorValue)) {
-        TLOGD(WmsLogTag::DEFAULT, "window: %{public}s, value: [%{public}s, %{public}u]",
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "window: %{public}s, value: [%{public}s, %{public}u]",
             GetWindowName().c_str(), color.c_str(), colorValue);
         return SetBackgroundColor(colorValue);
     }
-    TLOGE(WmsLogTag::DEFAULT, "invalid color string: %{public}s", color.c_str());
+    TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid color string: %{public}s", color.c_str());
     return WMError::WM_ERROR_INVALID_PARAM;
 }
 
 WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 {
-    TLOGI(WmsLogTag::DEFAULT, "window: %{public}s, value:%{public}u", GetWindowName().c_str(), color);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "window: %{public}s, value:%{public}u", GetWindowName().c_str(), color);
 
     // 0xff000000: ARGB style, means Opaque color.
     const bool isAlphaZero = !(color & 0xff000000);
@@ -3857,7 +3857,7 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
         aceAbilityHandler_->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
-    TLOGD(WmsLogTag::DEFAULT, "FA mode could not set bg color: %{public}u", GetWindowId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "FA mode could not set bg color: %{public}u", GetWindowId());
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
