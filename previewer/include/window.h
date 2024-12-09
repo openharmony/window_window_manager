@@ -385,6 +385,13 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief notify window remove starting window.
+     *
+     * @return WMError
+     */
+    virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

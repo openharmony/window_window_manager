@@ -100,6 +100,11 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * Starting Window
+     */
+    WSError RemoveStartingWindow() override;
+
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
