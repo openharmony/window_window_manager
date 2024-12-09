@@ -120,7 +120,6 @@ public:
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
-        NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
@@ -279,6 +278,7 @@ public:
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
+    void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
@@ -513,6 +513,7 @@ protected:
      * Window Immersive
      */
     NotifyNeedAvoidFunc onNeedAvoid_;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
 
     /*
      * PiP Window
