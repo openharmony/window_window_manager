@@ -1579,6 +1579,14 @@ public:
      * @return true means main window is moving. Otherwise is not moving.
      */
     virtual bool IsStartMoving() { return false; }
+
+    /**
+     * @brief Start move system window. It is called by application.
+     *
+     * @return Errorcode of window.
+     */
+    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief Set flag that need remove window input channel.
      *
@@ -1939,6 +1947,14 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Enable drag window.
+     *
+     * @param enableDrag The value true means to enable window dragging, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set whether to display the maximize, minimize, split buttons of main window.

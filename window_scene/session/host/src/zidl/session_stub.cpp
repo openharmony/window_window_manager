@@ -72,6 +72,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRectChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT):
             return HandleSessionEvent(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT):
+            return HandleSystemSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
             return HandleUpdateSessionRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_GLOBAL_SCALED_RECT):
@@ -120,6 +122,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSendPointerEvenForMoveDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_START_MOVING):
             return HandleIsStartMoving(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE):
+            return HandleSetSystemEnableDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
             return HandleUpdateClientRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID):
@@ -367,6 +371,15 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     WLOGFD("HandleSessionEvent eventId: %{public}d", eventId);
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t eventId = data.ReadUint32();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
+    WSError errCode = OnSystemSessionEvent(static_cast<SessionEvent>(eventId));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -845,6 +858,15 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
     }
     WSError errCode = SetAutoStartPiP(isAutoStart, priority);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
+{
+    bool enableDrag = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
+    WMError errcode = SetSystemWindowEnableDrag(enableDrag);
+    reply.WriteInt32(static_cast<int32_t>(errcode));
     return ERR_NONE;
 }
 
