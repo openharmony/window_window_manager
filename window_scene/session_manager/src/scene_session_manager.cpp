@@ -4469,7 +4469,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
     }
     const char* const where = __func__;
     sceneSession->SetSessionExceptionListener([this, where](
-        const SessionInfo& info, bool needRemoveSession = false, bool startFail = false) {
+        const SessionInfo& info, bool needRemoveSession, bool startFail) {
         auto task = [this, info, where] {
             auto session = GetSceneSession(info.persistentId_);
             if (session == nullptr) {
