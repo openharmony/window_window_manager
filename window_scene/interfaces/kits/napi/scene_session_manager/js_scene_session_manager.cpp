@@ -21,7 +21,7 @@
 #include "napi_common_want.h"
 #include "native_value.h"
 #include "pixel_map_napi.h"
-#include "session/host/include/pc_fold_screen_controller.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "session/host/include/scene_persistence.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "session/host/include/session.h"
@@ -168,6 +168,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "requestAllAppSessionUnfocus", moduleName,
         JsSceneSessionManager::RequestAllAppSessionUnfocus);
     BindNativeFunction(env, exportObj, "setScreenLocked", moduleName, JsSceneSessionManager::SetScreenLocked);
+    BindNativeFunction(env, exportObj, "setUserAuthPassed", moduleName, JsSceneSessionManager::SetUserAuthPassed);
     BindNativeFunction(env, exportObj, "updateMaximizeMode", moduleName, JsSceneSessionManager::UpdateMaximizeMode);
     BindNativeFunction(env, exportObj, "reportData", moduleName, JsSceneSessionManager::ReportData);
     BindNativeFunction(env, exportObj, "getRssData", moduleName, JsSceneSessionManager::GetRssData);
@@ -613,6 +614,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().SetIsRootSceneLastFrameLayoutFinishedFunc([] {
         return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
     });
+    SceneSessionManager::GetInstance().RegisterNotifyRootSceneAvoidAreaChangeFunc(
+        [](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {
+        RootScene::staticRootScene_->NotifyAvoidAreaChangeForRoot(avoidArea, type);
+    });
 }
 
 void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
@@ -625,6 +630,9 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
     });
     rootScene_->RegisterGetSessionAvoidAreaByTypeCallback([](AvoidAreaType type) {
         return SceneSessionManager::GetInstance().GetRootSessionAvoidAreaByType(type);
+    });
+    rootScene_->RegisterUpdateRootSceneAvoidAreaCallback([] {
+        SceneSessionManager::GetInstance().UpdateRootSceneAvoidArea();
     });
     if (!Session::IsScbCoreEnabled()) {
         rootScene_->SetFrameLayoutFinishCallback([] {
@@ -942,6 +950,13 @@ napi_value JsSceneSessionManager::SetScreenLocked(napi_env env, napi_callback_in
     WLOGFI("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetScreenLocked(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SetUserAuthPassed(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetUserAuthPassed(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::UpdateMaximizeMode(napi_env env, napi_callback_info info)
@@ -2710,6 +2725,28 @@ napi_value JsSceneSessionManager::OnSetScreenLocked(napi_env env, napi_callback_
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::OnSetUserAuthPassed(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isUserAuthPassed = false;
+    if (!ConvertFromJsValue(env, argv[0], isUserAuthPassed)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isUserAuthPassed");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetUserAuthPassed(isUserAuthPassed);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::OnUpdateMaximizeMode(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -3825,25 +3862,6 @@ void JsSceneSessionManager::RegisterNotifyAppUseControlListCallback()
         });
 }
 
-void JsSceneSessionManager::OnNotifyAppUseControlList(
-    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
-{
-    TLOGI(WmsLogTag::WMS_LIFE, "in");
-    auto task = [this, type, userId, controlList,
-        jsCallBack = GetJSCallback(NOTIFY_APP_USE_CONTROL_LIST_CB), env = env_] {
-        if (jsCallBack == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
-            return;
-        }
-        napi_value typeValue = CreateJsValue(env, static_cast<uint8_t>(type));
-        napi_value userIdValue = CreateJsValue(env, userId);
-        napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
-        napi_value argv[] = { typeValue, userIdValue, controlListValue };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, __func__);
-}
-
 napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
     size_t argc = DEFAULT_ARG_COUNT;
@@ -3871,5 +3889,23 @@ napi_value JsSceneSessionManager::OnSetIsWindowRectAutoSave(napi_env env, napi_c
     }
     SceneSessionManager::GetInstance().SetIsWindowRectAutoSave(key, enabled);
     return NapiGetUndefined(env);
+}
+
+void JsSceneSessionManager::OnNotifyAppUseControlList(
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    taskScheduler_->PostMainThreadTask([this, type, userId, controlList,
+        jsCallBack = GetJSCallback(NOTIFY_APP_USE_CONTROL_LIST_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
+            return;
+        }
+        napi_value typeValue = CreateJsValue(env, static_cast<uint8_t>(type));
+        napi_value userIdValue = CreateJsValue(env, userId);
+        napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
+        napi_value argv[] = { typeValue, userIdValue, controlListValue };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
 }
 } // namespace OHOS::Rosen

@@ -122,6 +122,11 @@ FOCUS_WINDOW:
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   WINDOW_TYPE: {type: UINT32, desc: window type}
 
+WINDOW_STATUS_CHANGE:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: PowerStats, desc: Window status changed}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  WINDOW_MODE: {type: STRING, desc: window mode}
+
 APPLICATION_BLOCK_INPUT:
   __BASE: {type: FAULT, level: CRITICAL, desc: The event is not consumed}
   EVENT_ID: {type: INT32, desc: eventId}

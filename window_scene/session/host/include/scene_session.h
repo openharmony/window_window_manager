@@ -96,6 +96,7 @@ using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinish
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
+using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -128,15 +129,14 @@ public:
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
+        NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
     };
 
     // callback for notify SceneBoard
     struct SessionChangeCallback : public RefBase {
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
-        NotifySessionEventFunc OnSessionEvent_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-        NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
     };
 
     // func for change window scene pattern property
@@ -312,6 +312,7 @@ public:
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
     void RetrieveStatusBarDefaultVisibility();
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
+    void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
@@ -388,7 +389,6 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
-    void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
     /**
@@ -531,12 +531,14 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
+    void RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& func);
 
     /**
      * Move Drag
      */
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
+    void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
 
     /**
      * Window Layout
@@ -607,8 +609,8 @@ protected:
     void CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoidRect, AvoidArea& avoidArea) const;
     virtual void NotifyClientToUpdateAvoidArea();
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
-    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     NotifyNeedAvoidFunc onNeedAvoid_;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
 
     /**
      * Gesture Back
@@ -647,7 +649,7 @@ protected:
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
     virtual void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-        const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig);
+        const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig = {});
 
     /**
      * Window Lifecycle
@@ -672,6 +674,11 @@ protected:
     NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
+
+    /*
+     * Multi Window
+     */
+    NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
@@ -712,6 +719,7 @@ private:
     void HandleSessionDragEvent(SessionEvent event);
     void HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason);
     void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason, bool isSupportDragInPcCompatibleMode);
+    NotifySessionEventFunc onSessionEvent_;
 
     /**
      * Gesture Back
@@ -831,6 +839,7 @@ private:
     bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
+    void UpdateSessionRectPosYFromClient(WSRect& rect);
 
     /**
      * Window Decor

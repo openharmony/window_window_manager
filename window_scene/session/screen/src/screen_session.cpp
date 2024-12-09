@@ -315,6 +315,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetPivotY(property_.GetPivotY());
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
+    displayInfo->SetScreenShape(property_.GetScreenShape());
     return displayInfo;
 }
 
@@ -440,6 +441,11 @@ ScreenId ScreenSession::GetScreenId()
 ScreenId ScreenSession::GetRSScreenId()
 {
     return rsId_;
+}
+
+ScreenShape ScreenSession::GetScreenShape() const
+{
+    return property_.GetScreenShape();
 }
 
 ScreenProperty ScreenSession::GetScreenProperty() const

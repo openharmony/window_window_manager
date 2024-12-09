@@ -37,6 +37,7 @@ namespace OHOS {
 namespace Rosen {
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
+using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
 
 class RootScene : public Window {
 public:
@@ -61,48 +62,36 @@ public:
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
+    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
+    std::string GetClassType() const override { return "RootScene"; }
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
 
-    void SetDisplayDensity(float density)
-    {
-        density_ = density;
-    }
+    void SetDisplayDensity(float density) { density_ = density; }
+
+    void SetDisplayId(DisplayId displayId) { displayId_ = displayId; }
+
+    DisplayId GetDisplayId() const override { return displayId_; }
 
     void SetDisplayOrientation(int32_t orientation);
 
-    float GetDisplayDensity()
-    {
-        return density_;
-    }
+    float GetDisplayDensity() { return density_; }
 
-    WindowState GetWindowState() const override
-    {
-        return WindowState::STATE_SHOWN;
-    }
+    WindowState GetWindowState() const override { return WindowState::STATE_SHOWN; }
 
-    WindowType GetType() const override
-    {
-        return type_;
-    }
+    WindowType GetType() const override { return type_; }
 
-    const std::string& GetWindowName() const override
-    {
-        return name_;
-    }
+    const std::string& GetWindowName() const override { return name_; }
 
-    uint32_t GetWindowId() const override
-    {
-        return 1; // 1 for root
-    }
+    uint32_t GetWindowId() const override { return 1; } // 1 for root
 
-    Ace::UIContent* GetUIContent() const override
-    {
-        return uiContent_.get();
-    }
+    Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
@@ -120,6 +109,7 @@ private:
     std::unique_ptr<Ace::UIContent> uiContent_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
     int32_t orientation_ = 0;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
@@ -133,6 +123,16 @@ private:
      */
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
+    UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
+    struct IAvoidAreaChangedListenerHash {
+        size_t operator()(const sptr<IAvoidAreaChangedListener>& ptr) const
+        {
+            return std::hash<IAvoidAreaChangedListener*>{}(ptr.GetRefPtr());
+        }
+    };
+    mutable std::mutex mutex_;
+    std::unordered_set<sptr<IAvoidAreaChangedListener>, IAvoidAreaChangedListenerHash> avoidAreaChangeListeners_;
+    // Above guarded by mutex_
 };
 } // namespace Rosen
 } // namespace OHOS

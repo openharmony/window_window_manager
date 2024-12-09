@@ -1865,8 +1865,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, Function | SmallTest | Level2)
 {
-    ASSERT_NE(stub_, nullptr);
-
     MessageParcel data;
     MessageParcel reply;
 
@@ -1877,7 +1875,11 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, F
     ASSERT_NE(token, nullptr);
     data.WriteRemoteObject(token);
 
-    int res = stub_->HandleRemoveExtensionWindowStageFromSCB(data, reply);
+    sptr<SceneSessionManager> stub = sptr<SceneSessionManager>::MakeSptr();
+    stub->remoteExtSessionMap_.clear();
+    stub->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), token));
+    int res = stub->HandleRemoveExtensionWindowStageFromSCB(data, reply);
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(res, ERR_NONE);
 }
 

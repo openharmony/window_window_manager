@@ -285,6 +285,54 @@ HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: RegisterAvoidAreaChangeListener
+ * @tc.desc: RegisterAvoidAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
+    auto ret = rootScene.RegisterAvoidAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    listener = nullptr;
+    ret = rootScene.RegisterAvoidAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterAvoidAreaChangeListener
+ * @tc.desc: UnregisterAvoidAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UnregisterAvoidAreaChangeListener, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
+    auto ret = rootScene.UnregisterAvoidAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    listener = nullptr;
+    ret = rootScene.UnregisterAvoidAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: NotifyAvoidAreaChangeForRoot
+ * @tc.desc: NotifyAvoidAreaChangeForRoot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, NotifyAvoidAreaChangeForRoot, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    rootScene.avoidAreaChangeListeners_.insert(listener);
+    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM_GESTURE;
+    AvoidArea avoidArea;
+    rootScene.NotifyAvoidAreaChangeForRoot(new AvoidArea(avoidArea), type);
+}
+
+/**
  * @tc.name: GetAvoidAreaByType
  * @tc.desc: GetAvoidAreaByType Test err
  * @tc.type: FUNC

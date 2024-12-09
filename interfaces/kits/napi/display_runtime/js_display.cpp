@@ -785,6 +785,7 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
     napi_set_named_property(env, objValue, "hdrFormats", CreateJsHDRFormatArray(env, info->GetHdrFormats()));
     napi_set_named_property(env, objValue, "availableWidth", CreateJsValue(env, info->GetAvailableWidth()));
     napi_set_named_property(env, objValue, "availableHeight", CreateJsValue(env, info->GetAvailableHeight()));
+    napi_set_named_property(env, objValue, "screenShape", CreateJsValue(env, info->GetScreenShape()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)

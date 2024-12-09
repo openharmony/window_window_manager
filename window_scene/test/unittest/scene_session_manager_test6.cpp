@@ -1831,31 +1831,24 @@ HWTEST_F(SceneSessionManagerTest6, IsKeyboardForeground, Function | SmallTest | 
  */
 HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow, Function | SmallTest | Level3)
 {
-    sptr<SceneSession> scnSession = nullptr;
-    auto result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    sptr<SceneSession> sceneSession = nullptr;
+    auto result = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    scnSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ASSERT_NE(scnSession, nullptr);
+    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(sceneSession, nullptr);
 
     sptr<Session> session = new Session(info);
     ASSERT_NE(session, nullptr);
     session->GetDialogVector().clear();
-    result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    result = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->GetSceneSession(1);
-    result = ssm_->DestroyDialogWithMainWindow(scnSession);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    WindowVisibilityInfo windowVisibilityInfo;
-    windowVisibilityInfo.windowType_ = WindowType::APP_WINDOW_BASE;
-    result = ssm_->DestroyDialogWithMainWindow(scnSession);
+    result = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1868,8 +1861,8 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow02, Function | Sma
 {
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> scnSession = new (std::nothrow) SceneSession(info, specificCallback);
-    ASSERT_NE(scnSession, nullptr);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    ASSERT_NE(sceneSession, nullptr);
 
     sptr<Session> dialogSession1 = sptr<Session>::MakeSptr(info);
     sptr<Session> dialogSession2 = sptr<Session>::MakeSptr(info);
@@ -1877,15 +1870,15 @@ HWTEST_F(SceneSessionManagerTest6, DestroyDialogWithMainWindow02, Function | Sma
     ASSERT_NE(dialogSession2, nullptr);
     dialogSession1->persistentId_ = 0;
     dialogSession2->persistentId_ = 1;
-    scnSession->dialogVec_.push_back(dialogSession1);
-    scnSession->dialogVec_.push_back(dialogSession2);
+    sceneSession->dialogVec_.push_back(dialogSession1);
+    sceneSession->dialogVec_.push_back(dialogSession2);
 
     ASSERT_NE(ssm_, nullptr);
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert({0, nullptr});
-    ssm_->sceneSessionMap_.insert({0, scnSession});
+    ssm_->sceneSessionMap_.insert({0, sceneSession});
 
-    auto ret = ssm_->DestroyDialogWithMainWindow(scnSession);
+    auto ret = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
     ssm_->sceneSessionMap_.clear();
 }

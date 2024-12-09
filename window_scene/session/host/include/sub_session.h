@@ -45,7 +45,7 @@ protected:
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-        const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig) override;
+        const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig = {}) override;
 
     /*
      * Window Hierarchy

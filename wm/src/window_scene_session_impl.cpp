@@ -402,12 +402,9 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
         auto mainWindow = FindMainWindowWithContext();
         property_->SetFloatingWindowAppType(mainWindow != nullptr ? true : false);
         if (mainWindow != nullptr) {
-            if (property_->GetDisplayId() != DISPLAY_ID_INVALID &&
-                property_->GetDisplayId() != mainWindow->GetDisplayId()) {
-                TLOGE(WmsLogTag::WMS_LIFE, "window has parent and display not same");
-                return WMError::WM_ERROR_INVALID_DISPLAY;
+            if (property_->GetDisplayId() == DISPLAY_ID_INVALID) {
+                property_->SetDisplayId(mainWindow->GetDisplayId());
             }
-            property_->SetDisplayId(mainWindow->GetDisplayId());
             property_->SetSubWindowLevel(mainWindow->GetProperty()->GetSubWindowLevel() + 1);
         }
     } else if (type == WindowType::WINDOW_TYPE_DIALOG) {
@@ -2238,6 +2235,28 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     }
     WLOGFD("get decor enable %{public}d", enable);
     return enable;
+}
+
+WMError WindowSceneSessionImpl::SetWindowTitle(const std::string& title)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsDecorEnable()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "DecorEnable is false");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (WindowHelper::IsMainWindow(GetType())) {
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext == nullptr) {
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        abilityContext->SetMissionLabel(title);
+    } else {
+        return SetAPPWindowLabel(title);
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::Minimize()
