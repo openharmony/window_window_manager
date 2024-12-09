@@ -109,6 +109,12 @@ public:
 
     WMError GetSessionRectByType(AvoidAreaType type, WSRect& rect);
 
+	/*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
     static sptr<RootScene> staticRootScene_;
 
 private:
