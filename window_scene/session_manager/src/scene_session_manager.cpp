@@ -5940,6 +5940,13 @@ void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
     }, __func__);
 }
 
+void SceneSessionManager::SetUserAuthPassed(bool isUserAuthPassed)
+{
+    taskScheduler_->PostTask([this, isUserAuthPassed] {
+        isUserAuthPassed_ = isUserAuthPassed;
+    }, __func__);
+}
+
 void SceneSessionManager::DeleteStateDetectTask()
 {
     if (!IsScreenLocked()) {
@@ -5959,6 +5966,11 @@ void SceneSessionManager::DeleteStateDetectTask()
 bool SceneSessionManager::IsScreenLocked() const
 {
     return isScreenLocked_;
+}
+
+bool SceneSessionManager::IsUserAuthPassed() const
+{
+    return isUserAuthPassed_;
 }
 
 void SceneSessionManager::RegisterWindowChanged(const WindowChangedFunc& func)
