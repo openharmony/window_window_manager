@@ -2147,14 +2147,14 @@ napi_value JsSceneSession::SaveSnapshotSync(napi_env env, napi_callback_info inf
 
 napi_value JsSceneSession::SetWindowFreeze(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "in");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetWindowFreeze(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::GetSessionSnapshotWithFreeze(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "in");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnGetSessionSnapshotWithFreeze(env, info) : nullptr;
 }
@@ -5399,21 +5399,21 @@ napi_value JsSceneSession::OnSetWindowFreeze(napi_env env, napi_callback_info in
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool isFreeze = false;
     if (!ConvertFromJsValue(env, argv[0], isFreeze)) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isFreeze");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to isFreeze");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     session->SetWindowFreeze(isFreeze);
@@ -5426,43 +5426,42 @@ napi_value JsSceneSession::OnGetSessionSnapshotWithFreeze(napi_env env, napi_cal
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_TWO) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     double scaleValue;
     if (!ConvertFromJsValue(env, argv[0], scaleValue)) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to scaleValue");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to scaleValue");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
     bool isFreeze = false;
     if (!ConvertFromJsValue(env, argv[1], isFreeze)) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isFreeze");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to isFreeze");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     std::shared_ptr<Media::PixelMap> pixelPtr = session->GetSnapshotWithFreeze(scaleParam, isFreeze);
     if (pixelPtr == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to create pixlePtr");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to create pixlePtr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
             "System is abnormal"));
         return NapiGetUndefined(env);
     }
     napi_value pixelMapObj = Media::PixelMapNapi::CreatePixelMap(env, pixelPtr);
     if (pixelMapObj == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to create pixel map object");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to create pixel map object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
             "System is abnormal"));
         return NapiGetUndefined(env);

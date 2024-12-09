@@ -2321,6 +2321,37 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     return nullptr;
 }
 
+std::shared_ptr<Media::PixelMap> Session::GetSnapshotWithFreeze(float scaleParam, bool isFreeze) const
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "GetSnapshotWithFreeze[%d][%s]",
+        persistentId_, sessionInfo_.bundleName_.c_str());
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+        return nullptr;
+    }
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
+        snapshotScale_ : scaleParam;
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleValue,
+        .scaleY = scaleValue,
+        .useDma = true,
+        .useCurWindow = true,
+    };
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config, isFreeze);
+    if (!ret) {
+        TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
+        return nullptr;
+    }
+    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+    if (pixelMap != nullptr) {
+        TLOGI(WmsLogTag::WMS_MAIN, "success, id: %{public}d", persistentId_);
+        return pixelMap;
+    }
+    TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, id: %{public}d", persistentId_);
+    return nullptr;
+}
+
 void Session::SaveSnapshot(bool useFfrt)
 {
     if (scenePersistence_ == nullptr) {
@@ -3777,36 +3808,5 @@ bool Session::SetWindowFreeze(bool isFreeze)
         rsTransaction->FlushImplicitTransaction();
     }
     return true;
-}
-
-std::shared_ptr<Media::PixelMap> Session::GetSnapshotWithFreeze(float scaleParam, bool isFreeze) const
-{
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "GetSnapshotWithFreeze[%d][%s]",
-        persistentId_, sessionInfo_.bundleName_.c_str());
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
-        return nullptr;
-    }
-    auto callback = std::make_shared<SurfaceCaptureFuture>();
-    auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
-        snapshotScale_ : scaleParam;
-    RSSurfaceCaptureConfig config = {
-        .scaleX = scaleValue,
-        .scaleY = scaleValue,
-        .useDma = true,
-        .useCurWindow = true,
-    };
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config, isFreeze);
-    if (!ret) {
-        TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
-        return nullptr;
-    }
-    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
-    if (pixelMap != nullptr) {
-        TLOGI(WmsLogTag::WMS_MAIN, "success, id: %{public}d", persistentId_);
-        return pixelMap;
-    }
-    TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, id: %{public}d", persistentId_);
-    return nullptr;
 }
 } // namespace OHOS::Rosen
