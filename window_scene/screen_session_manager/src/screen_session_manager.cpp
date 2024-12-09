@@ -6267,7 +6267,13 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateFakeScreenSession(sptr<Scre
         return fakeScreenSession;
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    fakeScreenSession = new ScreenSession(SCREEN_ID_FAKE, screenProperty, SCREEN_ID_INVALID);
+    ScreenSessionConfig config = {
+        .screenId = SCREEN_ID_FAKE,
+        .defaultScreenId = SCREEN_ID_INVALID,
+        .property = screenProperty,
+    };
+    fakeScreenSession =
+        new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE);
     return fakeScreenSession;
 }
 
