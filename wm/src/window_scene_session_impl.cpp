@@ -1333,7 +1333,6 @@ void WindowSceneSessionImpl::SetDefaultProperty()
             break;
         }
         case WindowType::WINDOW_TYPE_SCREEN_CONTROL: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
             property_->SetTouchable(false);
             property_->SetFocusable(false);
             break;
