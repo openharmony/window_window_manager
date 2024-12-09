@@ -111,6 +111,23 @@ HWTEST_F(SessionProxyLifecycleTest, DrawingCompleted, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: RemoveStartingWindow
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyLifecycleTest, RemoveStartingWindow, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: RemoveStartingWindow start";
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SessionProxy> sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WSError res = sProxy->RemoveStartingWindow();
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: RemoveStartingWindow end";
+}
+
+/**
  * @tc.name: PendingSessionActivation
  * @tc.desc: normal function
  * @tc.type: FUNC
