@@ -1062,19 +1062,19 @@ void JsSceneSession::ProcessAutoStartPiPStatusChangeRegister()
 /** @note @window.hierarchy */
 void JsSceneSession::ProcessRaiseToTopRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onRaiseToTop_ = [weakThis = wptr(this)] {
+    session->RegisterRaiseToTopCallback([weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessRaiseToTopRegister jsSceneSession is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnRaiseToTop();
-    };
+    });
     WLOGFD("success");
 }
 
@@ -1120,19 +1120,19 @@ void JsSceneSession::ProcessClickModalWindowOutsideRegister()
 /** @note @window.hierarchy */
 void JsSceneSession::ProcessRaiseAboveTargetRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onRaiseAboveTarget_ = [weakThis = wptr(this)](int32_t subWindowId) {
+    session->RegisterRaiseAboveTargetCallback([weakThis = wptr(this)](int32_t subWindowId) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessRaiseAboveTargetRegister jsSceneSession is null");
+            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnRaiseAboveTarget(subWindowId);
-    };
+    });
     WLOGFD("success");
 }
 
@@ -1280,25 +1280,20 @@ void JsSceneSession::ProcessSessionExceptionRegister()
 /** @note @window.hierarchy */
 void JsSceneSession::ProcessSessionTopmostChangeRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "sessionchangeCallback is nullptr");
-        return;
-    }
-    sessionchangeCallback->onSessionTopmostChange_ = [weakThis = wptr(this)](bool topmost) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionTopmostChangeRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnSessionTopmostChange(topmost);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->onSessionTopmostChange_(session->IsTopmost());
+    session->RegisterSessionTopmostChangeCallback([weakThis = wptr(this)](bool topmost) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSessionTopmostChange(topmost);
+    });
+    OnSessionTopmostChange(session->IsTopmost());
     TLOGD(WmsLogTag::WMS_HIERARCHY, "success");
 }
 
