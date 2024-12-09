@@ -92,10 +92,10 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
     specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo& info,
         sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
-        sptr<SceneSession> scensessionreturn = new (std::nothrow) SceneSession(info, specificCallback);
-        EXPECT_NE(scensessionreturn, nullptr);
+        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
-        return scensessionreturn;
+        return sceneSessionReturn;
     };
     sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
     EXPECT_NE(sceneSession, nullptr);
@@ -274,10 +274,10 @@ HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
     specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo& info,
         sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
-        sptr<SceneSession> scensessionreturn = new (std::nothrow) SceneSession(info, specificCallback);
-        EXPECT_NE(scensessionreturn, nullptr);
+        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
-        return scensessionreturn;
+        return sceneSessionReturn;
     };
     sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
     EXPECT_NE(sceneSession, nullptr);
