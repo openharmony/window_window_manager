@@ -46,6 +46,7 @@ public:
     WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
     WSError OnSessionEvent(SessionEvent event) override;
+    WSError OnSystemSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
@@ -98,6 +99,7 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+    WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
 
     /*

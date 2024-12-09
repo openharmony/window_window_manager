@@ -45,6 +45,7 @@ public:
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
     bool IsStartMoving() override;
+    WmErrorCode StartMoveSystemWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
@@ -254,6 +255,11 @@ private:
      * Gesture Back
      */
     bool gestureBackEnabled_ = true;
+
+    /*
+     * Window Property
+     */
+    void InitSystemSessionDragEnable();
 
     /**
      * Sub Window

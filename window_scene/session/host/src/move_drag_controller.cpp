@@ -307,6 +307,9 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     } else {
         moveDragProperty_.targetRect_ = CalcFreeformTargetRect(type_, tranX, tranY, moveDragProperty_.originalRect_);
     }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "targetRect:%{public}s, originalRect:%{public}s, tranX:%{public}d, tranY:%{public}d",
+        moveDragProperty_.targetRect_.ToString().c_str(), moveDragProperty_.originalRect_.ToString().c_str(),
+        tranX, tranY);
     ProcessSessionRectChange(reason);
     return true;
 }
@@ -351,6 +354,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     const auto& sourceType = pointerEvent->GetSourceType();
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Mouse click event but not left click");
         return false;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "MoveDragController::EventDownInit");
@@ -394,6 +398,7 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
 {
     WSRect targetRect = originalRect;
     FixTranslateByLimits(tranX, tranY);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "areaType:%{public}u", type);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
         targetRect.posX_ += tranX;
         targetRect.width_ -= tranX;
@@ -425,12 +430,14 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     } else {
         targetRect.width_ = static_cast<int32_t>(static_cast<float>(targetRect.height_) * newRatio);
     }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "curRatio:%{public}f, newRatio:%{public}f", curRatio, newRatio);
     return targetRect;
 }
 
 WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t tranX, int32_t tranY,
     float aspectRatio, WSRect originalRect)
 {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     int32_t posX = originalRect.posX_;
     int32_t posY = originalRect.posY_;
     int32_t width = static_cast<int32_t>(originalRect.width_);
@@ -442,6 +449,7 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
         }
     }
 
+    TLOGD(WmsLogTag::WMS_LAYOUT, "ratio:%{public}f, areaType:%{public}u", aspectRatio, type);
     ConvertXYByAspectRatio(tranX, tranY, aspectRatio);
     switch (type) {
         case AreaType::LEFT_TOP: {
@@ -480,6 +488,9 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
 
 void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "areaType:%{public}u, minWidth:%{public}u, maxWidth:%{public}u, "
+        "minHeight:%{public}u, maxHeight:%{public}u", type,
+        limits_.minWidth_, limits_.maxWidth_, limits_.minHeight_, limits_.maxHeight_);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
         minTranX_ = moveDragProperty_.originalRect_.width_ - static_cast<int32_t>(limits_.maxWidth_);
         maxTranX_ = moveDragProperty_.originalRect_.width_ - static_cast<int32_t>(limits_.minWidth_);
@@ -526,6 +537,7 @@ void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type, Axis
         }
     }
 
+    TLOGD(WmsLogTag::WMS_LAYOUT, "areaType:%{public}u, axisType:%{public}d", type, axis);
     if (axis == AxisType::X_AXIS) {
         if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
             minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
@@ -557,6 +569,8 @@ void MoveDragController::FixTranslateByLimits(int32_t& tranX, int32_t& tranY)
     } else if (tranY > maxTranY_) {
         tranY = maxTranY_;
     }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "tranX:%{public}d, tranY:%{public}d, minTranX:%{public}d, maxTranX:%{public}d, "
+        "minTranY:%{public}d, maxTranY:%{public}d", tranX, tranY, minTranX_, maxTranX_, minTranY_, maxTranY_);
 }
 
 bool MoveDragController::InitMainAxis(AreaType type, int32_t tranX, int32_t tranY)

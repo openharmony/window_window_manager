@@ -44,6 +44,7 @@ private:
 
     // scene session
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleSystemSessionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalScaledRect(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseToAppTop(MessageParcel& data, MessageParcel& reply);
@@ -79,6 +80,7 @@ private:
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);

@@ -988,7 +988,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     surfaceNode_ = surfaceNode;
     abilityToken_ = token;
     systemConfig = systemConfig_;
-    SetWindowSessionProperty(property);
+    InitSessionPropertyWhenConnect(property);
     callingPid_ = pid;
     callingUid_ = uid;
     UpdateSessionState(SessionState::STATE_CONNECT);
@@ -1000,7 +1000,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     return WSError::WS_OK;
 }
 
-void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& property)
+void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property)
 {
     if (property == nullptr) {
         return;
@@ -1014,6 +1014,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         GetSessionInfo().screenId_ != SCREEN_ID_INVALID && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
+    InitSystemSessionDragEnable(property);
     SetSessionProperty(property);
     if (property) {
         Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
@@ -1039,10 +1040,29 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
         property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
-        property->SetDragEnabled(sessionProperty->GetDragEnabled());
+        std::optional<bool> clientDragEnable = GetClientDragEnable();
+        if (clientDragEnable.has_value()) {
+            property->SetDragEnabled(clientDragEnable.value());
+        }
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
+    }
+}
+
+void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
+{
+    auto defaultDragEnable = false;
+    auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
+    bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
+    bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
+    bool isSystemCalling = property->GetSystemCalling();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, defaultDragEnable: %{public}d, isSystemWindow: %{public}d, "
+        "isDialog: %{public}d, isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(),
+        defaultDragEnable, isSystemWindow, isDialog, isSubWindow, isSystemCalling);
+
+    if (isSystemWindow && !isDialog && !isSystemCalling) {
+        property->SetDragEnabled(defaultDragEnable);
     }
 }
 
@@ -1277,6 +1297,16 @@ WSError Session::SetActive(bool active)
         isActive_ = active;
     }
     return WSError::WS_OK;
+}
+
+void Session::SetClientDragEnable(bool dragEnable)
+{
+    clientDragEnable_ = dragEnable;
+}
+
+std::optional<bool> Session::GetClientDragEnable() const
+{
+    return clientDragEnable_;
 }
 
 void Session::NotifyForegroundInteractiveStatus(bool interactive)
