@@ -1734,7 +1734,7 @@ WMError SceneSessionManager::SetGlobalDragResizeType(DragResizeType dragResizeTy
             if (sceneSession != nullptr) {
                 const std::string& bundleName = sceneSession->GetSessionInfo().bundleName_;
                 DragResizeType appDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
-                GetAppDragResizeType(appDragResizeType);
+                GetAppDragResizeType(bundleName, appDragResizeType);
                 TLOGNI(WmsLogTag::WMS_LAYOUT, "SetGlobalDragResizeType persistentId: %{public}d, bundleName: %{public}s, "
                     "dragResizeType: %{public}d", sceneSession->GetPersistentId(), bundleName.c_str(), appDragResizeType);
                 sceneSession->SetAppDragResizeType(appDragResizeType);
