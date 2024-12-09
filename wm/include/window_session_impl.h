@@ -452,7 +452,7 @@ protected:
      * Window Property
      */
     float lastDensity_ { 1.0f };
-    WSError NotifyDensityChange(float density);
+    WSError NotifyDensityChange(const sptr<DisplayInfo>& displayInfo);
 
 private:
     //Trans between colorGamut and colorSpace
