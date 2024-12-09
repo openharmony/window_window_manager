@@ -293,10 +293,6 @@ WMError WindowImpl::SetUIContentByName(
     }
     uiContent->InitializeByName(this, contentInfo, storage);
     uiContent_ = std::move(uiContent);
-    if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "uiContent_ is NULL");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     NotifySetIgnoreSafeArea(isIgnoreSafeArea_);
     UpdateViewportConfig();
     if (contentInfoCallback_) {
