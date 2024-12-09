@@ -478,8 +478,8 @@ public:
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
-    bool IsUserAuthPassed() const;
     void SetUserAuthPassed(bool isUserAuthPassed);
+    bool IsUserAuthPassed() const;
 
 protected:
     SceneSessionManager();

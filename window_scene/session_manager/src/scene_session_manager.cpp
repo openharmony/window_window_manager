@@ -5620,7 +5620,7 @@ void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
     DeleteStateDetectTask();
 }
 
-void SceneSessionManager::SetUserAuthPassed(const bool isUserAuthPassed)
+void SceneSessionManager::SetUserAuthPassed(bool isUserAuthPassed)
 {
     taskScheduler_->PostTask([this, isUserAuthPassed] {
         isUserAuthPassed_ = isUserAuthPassed;
