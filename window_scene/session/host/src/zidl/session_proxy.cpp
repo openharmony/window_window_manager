@@ -1549,6 +1549,34 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+bool SessionProxy::IsStartMoving()
+{
+    bool isMoving = false;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "writeInterfaceToken failed");
+        return false;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_START_MOVING),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return false;
+    }
+    if (!reply.ReadBool(isMoving)) {
+        TLOGE(WmsLogTag::DEFAULT, "Read isMoving failed");
+        return false;
+    }
+
+    return isMoving;
+}
+
 WSError SessionProxy::UpdateRectChangeListenerRegistered(bool isRegister)
 {
     MessageParcel data;

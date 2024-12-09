@@ -378,8 +378,8 @@ public:
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
-    bool IsStartMoving() const;
-    void SetIsStartMoving(const bool startMoving);
+    bool IsStartMoving();
+    void SetIsStartMoving(bool startMoving);
     bool IsSystemSpecificSession() const;
     void SetIsSystemSpecificSession(bool isSystemSpecificSession);
     void SetShouldHideNonSecureWindows(bool shouldHide);
