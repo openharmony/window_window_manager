@@ -470,7 +470,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (GetSingleIntItem(item, param) &&
         (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
         param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
-            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
+        systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
     }
     item = config["defaultMaximizeMode"];
     if (GetSingleIntItem(item, param) &&
@@ -505,10 +505,6 @@ void SceneSessionManager::ConfigWindowSceneXml(const WindowSceneConfig::ConfigIt
     WindowSceneConfig::ConfigItem item = config["systemUIStatusBar"];
     if (item.IsMap()) {
         ConfigSystemUIStatusBar(item);
-    }
-    item = config["uiType"];
-    if (item.IsString()) {
-        appWindowSceneConfig_.uiType_ = item.stringValue_;
     }
     item = config["backgroundScreenLock"].GetProp("enable");
     if (item.IsBool()) {
@@ -2081,7 +2077,6 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
             "errorCode:%{public}d", persistentId, isPrepareTerminate, errorCode);
         return WSError::WS_OK;
     };
-
     taskScheduler_->PostSyncTask(task, "PrepareTerminate:PID:" + std::to_string(persistentId));
     return WSError::WS_OK;
 }
@@ -4478,10 +4473,6 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
                 TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s Not found session, id:%{public}d", where, info.persistentId_);
                 return;
             }
-            if (listenerController_ == nullptr) {
-                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s listenerController_ is nullptr", where);
-                return;
-            }
             if (session->GetSessionInfo().isSystem_) {
                 TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d is system", where, session->GetPersistentId());
                 return;
@@ -4772,8 +4763,10 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     }
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
-        if (curSession == nullptr || (!curSession->GetSessionInfo().isSystem_ && (curSession->GetSessionState() <
-            SessionState::STATE_FOREGROUND || curSession->GetSessionState() > SessionState::STATE_BACKGROUND))) {
+        if (curSession == nullptr ||
+            (!curSession->GetSessionInfo().isSystem_ && 
+             (curSession->GetSessionState() < SessionState::STATE_FOREGROUND ||
+              curSession->GetSessionState() > SessionState::STATE_BACKGROUND))) {
             WLOGFW("Session is nullptr or session state is invalid, id: %{public}d, state: %{public}u",
                 curSession->GetPersistentId(), curSession->GetSessionState());
             continue;
@@ -6560,6 +6553,7 @@ void SceneSessionManager::ProcessSubSessionBackground(sptr<SceneSession>& sceneS
         }
         const auto& state = toastSession->GetSessionState();
         if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
+            TLOGD(WmsLogTag::WMS_TOAST, "toast session is not active");
             continue;
         }
         NotifyWindowInfoChange(toastSession->GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -8626,7 +8620,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
     auto pid = IPCSkeleton::GetCallingRealPid();
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
     if (!info.isTestProcess && !SessionPermission::IsSystemCalling()) {
-        WLOGFE("GetFocusSessionElement permission denied!");
+        WLOGFE("permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     auto task = [this, &element]() {
@@ -9910,7 +9904,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
             static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
             TLOGD(WmsLogTag::WMS_PIPELINE, "FlushUIParams found dirty: %{public}d", sessionMapDirty_);
             for (const auto& item : uiParams) {
-                TLOGD(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder: %{public}d, rect: %{public}s, transX:%{public}f"
+                TLOGD(WmsLogTag::WMS_PIPELINE, "id: %{public}d, zOrder: %{public}d, rect: %{public}s, transX:%{public}f,"
                     " transY:%{public}f, needSync:%{public}d, interactive:%{public}d", item.first, item.second.zOrder_,
                     item.second.rect_.ToString().c_str(), item.second.transX_, item.second.transY_,
                     item.second.needSync_, item.second.interactive_);
