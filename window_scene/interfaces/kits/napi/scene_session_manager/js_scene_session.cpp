@@ -1064,18 +1064,18 @@ void JsSceneSession::ProcessRaiseToTopRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
+        TLOGE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     session->RegisterRaiseToTopCallback([weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnRaiseToTop();
     });
-    WLOGFD("success");
+    TLOGD("success");
 }
 
 /** @note @window.hierarchy */
@@ -1122,18 +1122,18 @@ void JsSceneSession::ProcessRaiseAboveTargetRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
+        TLOGE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     session->RegisterRaiseAboveTargetCallback([weakThis = wptr(this)](int32_t subWindowId) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnRaiseAboveTarget(subWindowId);
     });
-    WLOGFD("success");
+    TLOGD("success");
 }
 
 void JsSceneSession::ProcessSessionEventRegister()
@@ -1288,12 +1288,11 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
     session->RegisterSessionTopmostChangeCallback([weakThis = wptr(this)](bool topmost) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSessionTopmostChange(topmost);
     });
-    OnSessionTopmostChange(session->IsTopmost());
     TLOGD(WmsLogTag::WMS_HIERARCHY, "success");
 }
 
