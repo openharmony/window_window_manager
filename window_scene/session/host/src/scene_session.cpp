@@ -1544,44 +1544,39 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
 
 void SceneSession::RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback)
 {
-    auto task = [weakThis = wptr(this), callback = std::move(callback)] () {
+    auto task([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
         }
         session->onRaiseToTop_ = std::move(callback);
-        return WSError::WS_OK;
-    };
-    PostTask(task, "RegisterRaiseToTopCallback");
+    });
+    PostTask(task, __func__);
 }
 
 void SceneSession::RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&& callback)
 {
-    auto task = [weakThis = wptr(this), callback = std::move(callback)] () {
+    auto task([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
         }
         session->onRaiseAboveTarget_ = std::move(callback);
-        return WSError::WS_OK;
-    };
-    PostTask(task, "RegisterRaiseAboveTargetCallback");
+    });
+    PostTask(task, __func__);
 }
 
 void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback)
 {
-    auto task = [weakThis = wptr(this), callback = std::move(callback)] () {
+    auto task([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
         }
         session->onSessionTopmostChange_ = std::move(callback);
-        return WSError::WS_OK;
-    };
-    PostTask(task, "RegisterSessionTopmostChangeCallback");
+    });
+    PostTask(task, __func__);
+    callback(IsTopmost());
 }
 
 /** @note @window.hierarchy */

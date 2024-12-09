@@ -529,8 +529,8 @@ HWTEST_F(WindowSessionTest, RaiseToAppTop01, Function | SmallTest | Level2)
     ASSERT_FALSE(parentSession->GetUIStateDirty());
 
     parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    NotifyRaiseToTopFunc onRaiseToTop_ = []() {};
-    sceneSession->onRaiseToTop_ = onRaiseToTop_;
+    NotifyRaiseToTopFunc onRaiseToTop = []() {};
+    sceneSession->onRaiseToTop_ = onRaiseToTop;
     result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_TRUE(parentSession->GetUIStateDirty());
