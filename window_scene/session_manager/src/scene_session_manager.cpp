@@ -4767,7 +4767,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
         if (curSession == nullptr ||
-            (!curSession->GetSessionInfo().isSystem_ && 
+            (!curSession->GetSessionInfo().isSystem_ &&
              (curSession->GetSessionState() < SessionState::STATE_FOREGROUND ||
               curSession->GetSessionState() > SessionState::STATE_BACKGROUND))) {
             WLOGFW("Session is nullptr or session state is invalid, id: %{public}d, state: %{public}u",
@@ -5729,6 +5729,9 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
         }
         UpdateBrightness(focusedSessionId_);
         FocusIDChange(sceneSession->GetPersistentId(), sceneSession);
+        if (shiftFocusFunc_ != nullptr) {
+            shiftFocusFunc_(persistentId);
+        }
     }
     // notify window manager
     sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr(
@@ -5742,6 +5745,18 @@ void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bo
     SceneSessionManager::NotifyRssThawApp(focusChangeInfo->uid_, "", "THAW_BY_FOCUS_CHANGED");
     SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
     sceneSession->NotifyFocusStatus(isFocused);
+    std::string sName = "FoucusWindow:";
+    if (sceneSession->GetSessionInfo().isSystem_) {
+        sName += sceneSession->GetSessionInfo().abilityName_;
+    } else {
+        sName += sceneSession->GetWindowName();
+    }
+    if (isFocused) {
+        StartAsyncTrace(HITRACE_TAG_WINDOW_MANAGER, sName, sceneSession->GetPersistentId());
+    } else {
+        FinishAsyncTrace(HITRACE_TAG_WINDOW_MANAGER, sName, sceneSession->GetPersistentId());
+    }
+
     // notify listenerController
     auto prevSession = GetSceneSession(lastFocusedSessionId_);
     if (isFocused && MissionChanged(prevSession, sceneSession)) {
