@@ -420,12 +420,6 @@ public:
     int32_t GetCustomDecorHeight(int32_t persistentId);
 
     /**
-     * Window Lifecycle
-     */
-    bool IsUserAuthPassed() const;
-    void SetUserAuthPassed(bool isUserAuthPassed);
-
-    /**
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
@@ -554,6 +548,8 @@ public:
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError TerminateSessionByPersistentId(int32_t persistentId);
+    bool IsUserAuthPassed() const;
+    void SetUserAuthPassed(bool isUserAuthPassed);
 
 protected:
     SceneSessionManager();
