@@ -5929,8 +5929,8 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    if (windowToken_ != nullptr && WindowHelper::IsSubWindow(windowToken_->GetType())) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "subWindow use hide");
+    if (windowToken_ != nullptr && WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "subWindow or float window use hide");
         return HideWindowFunction(env, info, WmErrorCode::WM_OK);
     }
 
