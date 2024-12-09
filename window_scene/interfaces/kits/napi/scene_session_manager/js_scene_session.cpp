@@ -568,19 +568,19 @@ void JsSceneSession::ProcessSessionInfoLockedStateChangeRegister()
 void JsSceneSession::ProcessLandscapeMultiWindowRegister()
 {
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "session is nullptr");
         return;
     }
-    sessionchangeCallback->onSetLandscapeMultiWindowFunc_ = [weakThis = wptr(this)](bool isLandscapeMultiWindow) {
+    session->RegisterSetLandscapeMultiWindowFunc([weakThis = wptr(this)](bool isLandscapeMultiWindow) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessLandscapeMultiWindowRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->SetLandscapeMultiWindow(isLandscapeMultiWindow);
-    };
+    });
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "success");
 }
 
@@ -1139,20 +1139,20 @@ void JsSceneSession::ProcessRaiseAboveTargetRegister()
 
 void JsSceneSession::ProcessSessionEventRegister()
 {
-    auto sessionchangeCallback = sessionchangeCallback_.promote();
-    if (sessionchangeCallback == nullptr) {
-        WLOGFE("sessionchangeCallback is nullptr");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is null, id:%{public}d", persistentId_);
         return;
     }
-    sessionchangeCallback->OnSessionEvent_ = [weakThis = wptr(this)](uint32_t eventId, const SessionEventParam& param) {
+    session->RegisterSessionEventCallback([weakThis = wptr(this)](uint32_t eventId, const SessionEventParam& param) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionEventRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "ProcessSessionEventRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSessionEvent(eventId, param);
-    };
-    WLOGFD("success");
+    });
+    TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
 void JsSceneSession::ProcessTerminateSessionRegister()

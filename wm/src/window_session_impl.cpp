@@ -56,9 +56,6 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
-constexpr DisplayId SUPER_FOLD_UPPER_DISPLAY_ID = 0;
-constexpr DisplayId SUPER_FOLD_LOWER_DISPLAY_ID = 999;
-constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -681,59 +678,13 @@ WSError WindowSessionImpl::SetActive(bool active)
     return WSError::WS_OK;
 }
 
-int32_t WindowSessionImpl::CalcSuperFoldRectPosY(const WSRect& rect)
-{
-    // isSuperFoldDisplayDevice
-    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        return rect.posY_;
-    }
-    // Non-fold staus
-    property_->SetDisplayId(SUPER_FOLD_UPPER_DISPLAY_ID);
-    auto superFoldStatus = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
-    if (superFoldStatus != FoldStatus::HALF_FOLD) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, superFoldStatus: %{public}u", GetPersistentId(),
-              superFoldStatus);
-        return rect.posY_;
-    }
-    auto curAllDisplayIds = SingletonContainer::Get<DisplayManager>().GetAllDisplayIds();
-    auto it = std::find(curAllDisplayIds.begin(), curAllDisplayIds.end(), SUPER_FOLD_LOWER_DISPLAY_ID);
-    if (it == curAllDisplayIds.end()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, KEYBOARD Status", GetPersistentId());
-        return rect.posY_;
-    }
-    // Get Hopper's CreaseRects, Calculate coordinates, determine which screen the window is located on, and notify.
-    auto foldCreaseRegionVec = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion()->GetCreaseRects();
-    if (foldCreaseRegionVec.size() != 1) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "GetCurrentFoldCreaseRegion Error, size: %{public}zu", foldCreaseRegionVec.size());
-        return rect.posY_;
-    }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(SUPER_FOLD_UPPER_DISPLAY_ID);
-    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null!");
-        return rect.posY_;
-    }
-    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
-    auto foldCreaseRegion = foldCreaseRegionVec.front();
-    int32_t upperScreenPosY =
-        displayInfo->GetHeight() - static_cast<int32_t>(foldCreaseRegion.height_) / SUPER_FOLD_DIVIDE_FACTOR;
-    if (rect.posY_ <= upperScreenPosY) {
-        return rect.posY_;
-    }
-    int32_t lowerScreenPosY = upperScreenPosY + static_cast<int32_t>(foldCreaseRegion.height_);
-    if (rect.posY_ < lowerScreenPosY) {
-        return rect.posY_;
-    }
-    property_->SetDisplayId(SUPER_FOLD_LOWER_DISPLAY_ID);
-    return rect.posY_ - lowerScreenPosY;
-}
-
 /** @note @window.layout */
 WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const SceneAnimationConfig& config)
 {
     // delete after replace ws_common.h with wm_common.h
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
-    Rect wmRect = { rect.posX_, CalcSuperFoldRectPosY(rect), rect.width_, rect.height_ };
+    Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
@@ -4143,7 +4094,12 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
         windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
+        if (IsPcOrPadFreeMultiWindowMode()) {
+            windowStatus = GetImmersiveModeEnabledState() ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
+                WindowStatus::WINDOW_STATUS_MAXIMIZE;
+        } else {
+            windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
+        }
     }
     if (state_ == WindowState::STATE_HIDDEN) {
         windowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
@@ -4171,6 +4127,17 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
     for (auto& listener : windowStatusChangeListeners) {
         if (listener != nullptr) {
             listener->OnWindowStatusChange(windowStatus);
+        }
+    }
+    if (state_ != WindowState::STATE_HIDDEN) {
+        auto ret = HiSysEventWrite(
+            HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "WINDOW_STATUS_CHANGE",
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_,
+            "WINDOW_MODE", static_cast<int32_t>(mode));
+        if (ret) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "write event fail, WINDOW_STATUS_CHANGE, ret = %{public}d", ret);
         }
     }
 }

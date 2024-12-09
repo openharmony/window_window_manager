@@ -121,15 +121,15 @@ public:
     /**
      * @brief Application Control SA Notification Window Control Application Information
      *
-     * The application control SA notifies whether the window application is controlled or not.\n
-     * When the window main program starts, the application control information is fully notified,\n
-     * and only incremental information is notified after full notification.\n
+     * The application control SA notifies whether the window application is controlled or not.
+     * When the window main program starts, the application control information is fully notified,
+     * and only incremental information is notified after full notification.
      *
      * @param type controls the application type (caller), such as application lock
      * @param userId User ID
      * @param controlList Control Application Information List
      * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
-     * @permission application requires SA permission
+     * @permission application requires SA permission and ohos.permission.WRITE_APP_LOCK permission
      */
     virtual WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList) = 0;

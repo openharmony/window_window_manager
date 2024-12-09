@@ -2235,6 +2235,14 @@ public:
     }
 
     /**
+     * @brief Set Window new title
+     *
+     * @param title Window new title
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowTitle(const std::string& title) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set decor height of window.
      *
      * @param decorHeight Decor height of window
@@ -2722,6 +2730,13 @@ public:
      */
     virtual WMError OnContainerModalEvent(const std::string& eventName,
         const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the type of window.
+     *
+     * @return The string corresponding to the window.
+     */
+    virtual std::string GetClassType() const { return "Window"; }
 };
 }
 }

@@ -53,7 +53,7 @@ public:
 
     void SetDisplayOrientation(int32_t orientation);
 
-    uint64_t GetDisplayId() const override;
+    DisplayId GetDisplayId() const override;
     void SetDisplayId(DisplayId displayId);
 
     WindowState GetWindowState() const override
@@ -78,6 +78,8 @@ public:
 
     Ace::UIContent* GetUIContent() const override;
     WMError Destroy() override;
+
+    std::string GetClassType() const override { return "ScreenScene"; }
 
 private:
     mutable std::mutex mutex_;
