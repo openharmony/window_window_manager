@@ -420,6 +420,12 @@ public:
     int32_t GetCustomDecorHeight(int32_t persistentId);
 
     /**
+     * Window Lifecycle
+     */
+    bool IsUserAuthPassed() const;
+    void SetUserAuthPassed(bool isUserAuthPassed);
+
+    /**
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
@@ -612,8 +618,7 @@ private:
     /**
      * Window Lifecycle
      */
-    bool IsUserAuthPassed() const;
-    void SetUserAuthPassed(bool isUserAuthPassed);
+    bool isUserAuthPassed_ {false};
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
@@ -879,7 +884,6 @@ private:
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};
-    bool isUserAuthPassed_ {false};
     bool needBlockNotifyFocusStatusUntilForeground_ {false};
     bool needBlockNotifyUnfocusStatus_ {false};
     bool isPrepareTerminateEnable_ {false};
