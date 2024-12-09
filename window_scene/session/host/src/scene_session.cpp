@@ -4438,7 +4438,7 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
     if (sessionProperty != nullptr) {
         sessionProperty->SetWindowLimits(property->GetWindowLimits());
         WindowLimits windowLimits = sessionProperty->GetWindowLimits();
-        TLOGI(WmsLogTag::WMS_LAYOUT, "UpdateWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
+        TLOGD(WmsLogTag::WMS_LAYOUT, "UpdateWindowLimits minWidth:%{public}u, minHeight:%{public}u, "
             "maxWidth:%{public}u, maxHeight:%{public}u, vpRatio:%{public}f", windowLimits.minWidth_,
             windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, windowLimits.vpRatio_);
     }

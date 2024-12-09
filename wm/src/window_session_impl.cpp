@@ -692,10 +692,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetWindowRect(wmRect);
     property_->SetRequestRect(wmRect);
 
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
-        ", duration:%{public}d, [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(),
-        wmReason, config.rsTransaction_ != nullptr, config.animationDuration_,
-        GetWindowName().c_str(), GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, "
+        "[name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(),
+        wmReason, GetWindowName().c_str(), GetPersistentId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
