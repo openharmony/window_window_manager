@@ -2356,6 +2356,15 @@ void WindowSceneSessionImpl::StartMove()
     return;
 }
 
+bool WindowSceneSessionImpl::IsStartMoving()
+{
+    bool isMoving = false;
+    if (auto hostSession = GetHostSession()) {
+        isMoving = hostSession->IsStartMoving();
+    }
+    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
+}
+
 WMError WindowSceneSessionImpl::Close()
 {
     WLOGFI("WindowSceneSessionImpl::Close id: %{public}d", GetPersistentId());

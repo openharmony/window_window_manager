@@ -1530,6 +1530,12 @@ public:
      */
     virtual void StartMove() {}
     /**
+     * @brief get main window move flag.
+     *
+     * @return true means main window is moving. Otherwise is not moving.
+     */
+    virtual void IsStartMoving() { return false; }
+    /**
      * @brief Set flag that need remove window input channel.
      *
      * @param needRemoveWindowInputChannel True means remove input channel, false means not remove.

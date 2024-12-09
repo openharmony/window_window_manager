@@ -153,6 +153,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual bool IsStartMoving() { return false; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool visible) { return WSError::WS_OK; }
     virtual WSError UpdateRectChangeListenerRegistered(bool isRegister)
