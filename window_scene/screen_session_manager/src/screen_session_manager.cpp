@@ -6638,7 +6638,7 @@ void ScreenSessionManager::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldS
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", superFoldStatus: %{public}d", screenId,
         static_cast<uint32_t>(superFoldStatus));
     if (!clientProxy_) {
-        TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
     clientProxy_->OnSuperFoldStatusChanged(screenId, superFoldStatus);
