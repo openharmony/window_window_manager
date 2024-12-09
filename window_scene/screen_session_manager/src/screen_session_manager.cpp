@@ -345,6 +345,7 @@ void ScreenSessionManager::OnStart()
     }
     TLOGI(WmsLogTag::DMS, "DMS SA AddSystemAbilityListener");
     (void)AddSystemAbilityListener(SENSOR_SERVICE_ABILITY_ID);
+    screenEventTracker_.RecordEvent("Dms AddSystemAbilityListener finished.");
     TLOGI(WmsLogTag::DMS, "end");
     screenEventTracker_.RecordEvent("Dms onstart end.");
 }
@@ -359,7 +360,8 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
             TLOGI(WmsLogTag::DMS, "current device is not fold phone.");
             return;
         }
-        if (!foldScreenController_) {
+        if (!foldScreenController_ || isFoldScreenOuterScreenReady_) {
+            TLOGI(WmsLogTag::DMS, "foldScreenController_ is null or outer screen is not ready.");
             return;
         }
         if (GetDisplayState(foldScreenController_->GetCurrentScreenId()) == DisplayState::ON) {
@@ -369,6 +371,7 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
 
         FoldScreenSensorManager::GetInstance().RegisterHallCallback();
         TLOGI(WmsLogTag::DMS, "Recover Hall sensor finished");
+        screenEventTracker_.RecordEvent("Dms recover Posture and Hall sensor finished.");
 #endif
     }
 }
@@ -1778,6 +1781,7 @@ bool ScreenSessionManager::HandleFoldScreenSessionCreate(ScreenId screenId)
         if (screenId == SCREEN_ID_MAIN) {
             SetPostureAndHallSensorEnabled();
             ScreenSensorConnector::SubscribeTentSensor();
+            isFoldScreenOuterScreenReady_ = true;
             if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() && isCoordinationFlag_ == false) {
                 return false;
             }
@@ -2135,7 +2139,7 @@ bool ScreenSessionManager::TryToCancelScreenOff()
         sessionDisplayPowerController_->canCancelSuspendNotify_, gotScreenOffNotify_, needScreenOffNotify_);
     if (sessionDisplayPowerController_->canCancelSuspendNotify_) {
         sessionDisplayPowerController_->needCancelNotify_ = true;
-        TLOGI(WmsLogTag::DMS, "notify cancel screenoff");
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]notify cancel screenoff");
         ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF_CANCELED,
             EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
         return true;
@@ -2148,10 +2152,29 @@ bool ScreenSessionManager::TryToCancelScreenOff()
         TLOGI(WmsLogTag::DMS, "[UL_POWER]cancel wait and notify cancel screenoff");
         ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF_CANCELED,
             EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
-            return true;
+        return true;
     }
     TLOGW(WmsLogTag::DMS, "[UL_POWER]failed to cancel suspend");
     return false;
+}
+
+void ScreenSessionManager::ForceSkipScreenOffAnimation()
+{
+    std::lock_guard<std::mutex> notifyLock(sessionDisplayPowerController_->notifyMutex_);
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]about to skip animation, can:%{public}d, got:%{public}d, need:%{public}d",
+        sessionDisplayPowerController_->canCancelSuspendNotify_, gotScreenOffNotify_, needScreenOffNotify_);
+    if (sessionDisplayPowerController_->canCancelSuspendNotify_) {
+        sessionDisplayPowerController_->skipScreenOffBlock_ = true;
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]skip screenoff animation");
+        return;
+    }
+    if (gotScreenOffNotify_ == false && needScreenOffNotify_ == true) {
+        std::unique_lock <std::mutex> lock(screenOffMutex_);
+        screenOffCV_.notify_all();
+        needScreenOffNotify_ = false;
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]skip wait");
+        return;
+    }
 }
 
 bool ScreenSessionManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
@@ -2895,6 +2918,7 @@ void ScreenSessionManager::SetPostureAndHallSensorEnabled()
     FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
     FoldScreenSensorManager::GetInstance().RegisterHallCallback();
     TLOGI(WmsLogTag::DMS, "successful");
+    screenEventTracker_.RecordEvent("Dms subscribe Posture and Hall sensor finished.");
 #endif
 }
 
