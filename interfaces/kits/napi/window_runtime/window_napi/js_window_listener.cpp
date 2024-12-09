@@ -78,7 +78,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         TLOGD(WmsLogTag::WMS_LAYOUT, "no need to change size");
         return;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u], reason = %{public}u",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u], reason = %{public}u",
         rect.width_, rect.height_, reason);
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, rect, env = env_, funcName = __func__] {
