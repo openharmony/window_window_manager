@@ -289,6 +289,8 @@ napi_value MaximizePresentationInit(napi_env env)
         static_cast<int32_t>(MaximizePresentation::EXIT_IMMERSIVE)));
     napi_set_named_property(env, objValue, "ENTER_IMMERSIVE", CreateJsValue(env,
         static_cast<int32_t>(MaximizePresentation::ENTER_IMMERSIVE)));
+    napi_set_named_property(env, objValue, "ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER", CreateJsValue(env,
+        static_cast<int32_t>(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER)));
     return objValue;
 }
 

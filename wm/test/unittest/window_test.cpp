@@ -461,6 +461,20 @@ HWTEST_F(WindowTest, SetLayoutFullScreen, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetTitleAndDockHoverShown
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetTitleAndDockHoverShown, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(nullptr, window);
+    auto ret = window->SetTitleAndDockHoverShown(true, true);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: SetFullScreen
  * @tc.desc: get
  * @tc.type: FUNC
