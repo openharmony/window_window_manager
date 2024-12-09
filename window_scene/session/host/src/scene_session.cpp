@@ -1542,6 +1542,48 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
     return WSError::WS_OK;
 }
 
+void SceneSession::RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] () {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->onRaiseToTop_ = std::move(callback);
+        return WSError::WS_OK;
+    };
+    PostTask(task, "RegisterRaiseToTopCallback");
+}
+
+void SceneSession::RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] () {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->onRaiseAboveTarget_ = std::move(callback);
+        return WSError::WS_OK;
+    };
+    PostTask(task, "RegisterRaiseAboveTargetCallback");
+}
+
+void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] () {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->onSessionTopmostChange_ = std::move(callback);
+        return WSError::WS_OK;
+    };
+    PostTask(task, "RegisterSessionTopmostChangeCallback");
+}
+
 /** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
@@ -1551,9 +1593,9 @@ WSError SceneSession::RaiseToAppTop()
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRaiseToTop_) {
+        if (session->onRaiseToTop_) {
             TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d", session->GetPersistentId());
-            session->sessionChangeCallback_->onRaiseToTop_();
+            session->onRaiseToTop_();
             session->SetMainSessionUIStateDirty(true);
         }
         return WSError::WS_OK;
@@ -1583,8 +1625,8 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRaiseAboveTarget_) {
-            session->sessionChangeCallback_->onRaiseAboveTarget_(subWindowId);
+        if (session->onRaiseAboveTarget_) {
+            session->onRaiseAboveTarget_(subWindowId);
         }
         return WSError::WS_OK;
     };

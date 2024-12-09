@@ -419,6 +419,13 @@ public:
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
     /**
+     * Window Hierarchy
+     */
+    void RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback);
+    void RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&& callback);
+    void RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback);
+
+    /**
      * Window Lifecycle
      */
     void ClearJsSceneSessionCbMap(bool needRemove); // ONLY Accessed on OS_sceneSession thread
@@ -634,6 +641,9 @@ protected:
     NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
     NotifyMainSessionModalTypeChangeFunc onMainSessionModalTypeChange_;
     NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
+    NotifyRaiseToTopFunc onRaiseToTop_;
+    NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
+    NotifySessionTopmostChangeFunc onSessionTopmostChange_;
 
     /**
      * PiP Window
