@@ -1638,7 +1638,9 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    if (WindowHelper::IsSubWindow(GetType()) && !windowOption_->GetSubWindowDecorEnable()) {
+        return WMError::WM_OK;
+    }
     if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsSubWindow(GetType())) {
         property_->SetDragEnabled(dragEnabled);
     } else {
