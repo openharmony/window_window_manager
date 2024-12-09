@@ -479,7 +479,7 @@ void JsWindowListener::OnDensityChanged(float density)
     auto jsCallback = [self = weakRef_, density, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DEFAULT, "This listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
