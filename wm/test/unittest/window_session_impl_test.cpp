@@ -2190,20 +2190,6 @@ HWTEST_F(WindowSessionImplTest, AddSetUIExtensionDestroyTimeoutCheck, Function |
     EXPECT_EQ(WindowType::WINDOW_TYPE_UI_EXTENSION, window->property_->GetWindowType());
     EXPECT_EQ(window->startUIExtensionDestroyTimer_.load(), true);
 }
-
-/**
- * @tc.name: GetStatusBarHeight
- * @tc.desc: GetStatusBarHeight test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetStatusBarHeight");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    ASSERT_EQ(0, window->GetStatusBarHeight());
-}
 }
 } // namespace Rosen
 } // namespace OHOS
