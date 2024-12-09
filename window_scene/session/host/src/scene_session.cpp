@@ -3282,17 +3282,17 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
 {
     auto property = GetSessionProperty();
     if (!property) {
-        TLOGE(WmsLogTag::DEFAULT, "property is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
         return;
     }
     auto surfaceNode = GetSurfaceNode();
     if (!surfaceNode) {
-        TLOGE(WmsLogTag::DEFAULT, "surfaceNode_ is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
         return;
     }
     bool lastSnapshotSkip = property->GetSnapshotSkip();
     if (lastSnapshotSkip == isSkip) {
-        TLOGW(WmsLogTag::DEFAULT, "Snapshot skip does not change, do nothing, isSkip: %{public}d, "
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Snapshot skip does not change, do nothing, isSkip: %{public}d, "
             "id: %{public}d", isSkip, GetPersistentId());
         return;
     }
@@ -4241,14 +4241,14 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
     auto task = [weakThis = wptr(this)]() {
         auto sceneSession = weakThis.promote();
         if (!sceneSession) {
-            TLOGE(WmsLogTag::DEFAULT, "session is invalid");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is invalid");
             return;
         }
-        TLOGD(WmsLogTag::DEFAULT, "Win: %{public}s, is turn on: %{public}d",
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Win: %{public}s, is turn on: %{public}d",
             sceneSession->GetWindowName().c_str(), sceneSession->IsTurnScreenOn());
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         if (sceneSession->IsTurnScreenOn()) {
-            TLOGI(WmsLogTag::DEFAULT, "turn screen on");
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "turn screen on");
             PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         }
         // set ipc identity to raw
@@ -4256,7 +4256,7 @@ WMError SceneSession::HandleActionUpdateTurnScreenOn(const sptr<WindowSessionPro
     };
     PostTask(task, "HandleTurnScreenOn");
 #else
-    TLOGD(WmsLogTag::DEFAULT, "Can not found the sub system of PowerMgr");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Can not found the sub system of PowerMgr");
 #endif
     return WMError::WM_OK;
 }
@@ -4289,7 +4289,7 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
     WSPropertyChangeAction action)
 {
     if (GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-        TLOGW(WmsLogTag::DEFAULT, "only app main window can set brightness");
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "only app main window can set brightness");
         return WMError::WM_OK;
     }
     if (!IsSessionValid()) {
@@ -4299,7 +4299,7 @@ WMError SceneSession::HandleActionUpdateSetBrightness(const sptr<WindowSessionPr
     }
     float brightness = property->GetBrightness();
     if (std::abs(brightness - GetBrightness()) < std::numeric_limits<float>::epsilon()) {
-        TLOGD(WmsLogTag::DEFAULT, "Session brightness do not change: [%{public}f]", brightness);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Session brightness do not change: [%{public}f]", brightness);
         return WMError::WM_OK;
     }
     SetBrightness(brightness);
@@ -4471,7 +4471,7 @@ WMError SceneSession::HandleActionUpdateHideNonSystemFloatingWindows(const sptr<
     WSPropertyChangeAction action)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property hideNonSystemFloatingWindows permission denied!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Update property hideNonSystemFloatingWindows permission denied!");
         return WMError::WM_OK;
     }
     auto currentProperty = GetSessionProperty();
@@ -5324,10 +5324,10 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 
 WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
 {
-    TLOGI(WmsLogTag::DEFAULT, "SceneSession set unique dpi: id = %{public}d, dpi = %{public}f",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SceneSession set unique dpi: id = %{public}d, dpi = %{public}f",
         GetPersistentId(), dpi);
     if (useUnique && (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE)) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid input dpi value, valid input range: %{public}u ~ %{public}u",
             DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -5336,7 +5336,7 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionStage_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     sessionStage_->SetUniqueVirtualPixelRatio(useUnique, density);

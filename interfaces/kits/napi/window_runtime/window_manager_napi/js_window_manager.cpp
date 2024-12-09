@@ -1100,7 +1100,7 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
             nativeBoolean = (GetType(env, argv[1]) == napi_boolean ? argv[1] : nullptr);
         }
     }
-    
+
     std::shared_ptr<Media::PixelMap> pixelMap;
     pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, nativeObject);
     if (pixelMap == nullptr) {
@@ -1195,9 +1195,9 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
                 SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
-                TLOGD(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo success");
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
             } else {
-                TLOGE(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo failed");
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
             }
         };
