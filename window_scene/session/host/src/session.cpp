@@ -3801,11 +3801,14 @@ bool Session::SetWindowFreeze(bool isFreeze)
         TLOGW(WmsLogTag::WMS_MAIN, "fail, id %{public}d", GetPersistentId());
         return false;
     }
-    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d, isFreeze: %{public}d", GetPersistentId(), isFreeze);
-    surfaceNode->SetFreeze(isFreeze);
     auto rsTransaction = RSTransactionProxy::GetInstance();
     if (rsTransaction != nullptr) {
-        rsTransaction->FlushImplicitTransaction();
+        rsTransaction->Begin();
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d, isFreeze: %{public}d", GetPersistentId(), isFreeze);
+    surfaceNode->SetFreeze(isFreeze);
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
     }
     return true;
 }
