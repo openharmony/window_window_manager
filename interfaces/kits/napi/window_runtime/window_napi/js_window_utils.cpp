@@ -612,6 +612,9 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
         }
         napi_get_array_length(env, nativeArray, &size);
     }
+    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = false;
     for (uint32_t i = INDEX_ZERO; i < size; i++) {
         std::string name;
         napi_value getElementValue = nullptr;
@@ -831,7 +834,7 @@ bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
     std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
 
-    for (auto systemBarType : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {                                                                                                 );
+    for (auto systemBarType : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {
         properties[systemBarType].backgroundColor_ = GetColorFromJs(env, jsObject, "statusBarColor",
             properties[systemBarType].backgroundColor_, propertyFlags[systemBarType].backgroundColorFlag);
         if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||

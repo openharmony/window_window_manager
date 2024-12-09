@@ -2806,7 +2806,7 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask,
         systemBarProperties = std::move(systemBarProperties),
-        systemBarPropertyFlags = std::move(systemBarProperties)] {
+        systemBarPropertyFlags = std::move(systemBarPropertyFlags)] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
@@ -2866,7 +2866,8 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         systemBarProperties.enableAnimation_ = systemBarEnableAnimation;
         systemBarProperties.settingFlag_ = systemBarProperties.settingFlag_ |
             SystemBarSettingFlag::ENABLE_SETTING;
-        auto errCode =WM_JS_TO_ERROR_CODE_MAP.at(
+        auto errCode = 
+        WM_JS_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(systemBarType, systemBarProperties));
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
