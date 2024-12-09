@@ -112,6 +112,7 @@ public:
         TRANS_ID_GET_FREE_MULTI_WINDOW_ENABLE_STATE,
         TRANS_ID_GET_WINDOW_STYLE_TYPE,
         TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID,
+        TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
         TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
         TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
     };
@@ -269,6 +270,9 @@ public:
 
     virtual WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) = 0;
+
+    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber, int32_t x, int32_t y,
+        std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 
     WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
 
