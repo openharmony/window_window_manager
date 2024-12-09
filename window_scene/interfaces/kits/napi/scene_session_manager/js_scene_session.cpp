@@ -1064,7 +1064,7 @@ void JsSceneSession::ProcessRaiseToTopRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE("session is nullptr, id:%{public}d", persistentId_);
+        TLOGE("session is nullptr, id:%{public}d", jsSceneSession->persistentId_);
         return;
     }
     session->RegisterRaiseToTopCallback([weakThis = wptr(this)] {
@@ -1122,7 +1122,7 @@ void JsSceneSession::ProcessRaiseAboveTargetRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE("session is nullptr, id:%{public}d", persistentId_);
+        TLOGE("session is nullptr, id:%{public}d", jsSceneSession->persistentId_);
         return;
     }
     session->RegisterRaiseAboveTargetCallback([weakThis = wptr(this)](int32_t subWindowId) {
@@ -1282,7 +1282,7 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", jsSceneSession->persistentId_);
         return;
     }
     session->RegisterSessionTopmostChangeCallback([weakThis = wptr(this)](bool topmost) {
