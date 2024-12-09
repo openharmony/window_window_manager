@@ -4025,7 +4025,7 @@ void WindowImpl::SetDefaultOption()
             break;
         }
         case WindowType::WINDOW_TYPE_SCREEN_CONTROL: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetTouchable(false);
             property_->SetFocusable(false);
             property_->SetAlpha(0);
