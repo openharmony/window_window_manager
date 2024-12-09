@@ -557,10 +557,10 @@ public:
     bool IsScreenLockWindow() const;
 
     /**
-     * freeform window
+     * Free Multi Window
      */
     bool SetWindowFreeze(bool isFreeze);
-    std::shared_ptr<Media::PixelMap> GetSnapshotWithFreeze(float scaleParam = 0.0f, bool isFreeze = false) const;
+    std::shared_ptr<Media::PixelMap> GetSnapshotWithFreeze(float scaleParam, bool isFreeze) const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
