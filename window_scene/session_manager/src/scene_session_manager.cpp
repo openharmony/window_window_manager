@@ -178,7 +178,6 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
     for (const auto& item : metadata) {
         if (item.name == "enable.remove.starting.window") {
             return item.value == "true";
-            break;
         }
     }
     return false;
@@ -630,7 +629,7 @@ const SystemSessionConfig& SceneSessionManager::GetSystemSessionConfig() const
 WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
 {
     if (!systemConfig_.freeMultiWindowSupport_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "device not support");
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
     LoadFreeMultiWindowConfig(enable);

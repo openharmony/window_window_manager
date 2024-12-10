@@ -243,11 +243,11 @@ WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool 
     auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", funcName);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", funcName);
             return;
         }
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d", funcName,
-            isTitleHoverShown, isDockHoverShown);
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d",
+            funcName, isTitleHoverShown, isDockHoverShown);
         if (session->onTitleAndDockHoverShowChangeFunc_) {
             session->onTitleAndDockHoverShowChangeFunc_(isTitleHoverShown, isDockHoverShown);
         }
@@ -261,7 +261,7 @@ WSError MainSession::OnRestoreMainWindow()
     auto task = [weakThis = wptr(this)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is null");
             return;
         }
         if (session->onRestoreMainWindowFunc_) {
