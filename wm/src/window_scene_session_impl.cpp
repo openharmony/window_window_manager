@@ -1808,7 +1808,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
 WMError WindowSceneSessionImpl::RaiseToAppTop()
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -1838,7 +1838,7 @@ WMError WindowSceneSessionImpl::RaiseToAppTop()
 WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -2921,27 +2921,27 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
     {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         if (windowSessionMap_.empty()) {
-            TLOGE(WmsLogTag::DEFAULT, "[GetTopWin] Please create mainWindow First!");
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Please create mainWindow First!");
             return nullptr;
         }
         for (const auto& winPair : windowSessionMap_) {
             auto win = winPair.second.second;
             if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
                 mainWinId = win->GetWindowId();
-                TLOGD(WmsLogTag::DEFAULT, "[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
+                TLOGD(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
                 break;
             }
         }
     }
-    TLOGI(WmsLogTag::DEFAULT, "mainId:%{public}u!", mainWinId);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "mainId:%{public}u!", mainWinId);
     if (mainWinId == INVALID_WINDOW_ID) {
-        TLOGE(WmsLogTag::DEFAULT, "[GetTopWin] Cannot find topWindow!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Cannot find topWindow!");
         return nullptr;
     }
     uint32_t topWinId = INVALID_WINDOW_ID;
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
     return FindWindowById(topWinId);
@@ -2950,7 +2950,7 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
 /** @note @window.hierarchy */
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "mainId:%{public}u", mainWinId);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "mainId:%{public}u", mainWinId);
     uint32_t topWinId = INVALID_WINDOW_ID;
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
     if (ret != WMError::WM_OK) {

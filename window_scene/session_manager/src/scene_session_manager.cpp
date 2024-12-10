@@ -7178,11 +7178,11 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetBatchAbility
     const std::vector<std::string>& bundleNames, int32_t userId, std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
     if (bundleMgr_ == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "bundleMgr is nullptr");
+        TLOGE(WmsLogTag::WMS_RECOVER, "bundleMgr is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     if (bundleNames.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "bundleNames is empty");
+        TLOGE(WmsLogTag::WMS_RECOVER, "bundleNames is empty");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto flag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
@@ -7194,7 +7194,7 @@ __attribute__((no_sanitize("cfi"))) WSError SceneSessionManager::GetBatchAbility
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     auto ret = static_cast<int32_t>(bundleMgr_->BatchGetBundleInfo(bundleNames, flag, bundleInfos, userId));
     if (ret) {
-        TLOGE(WmsLogTag::DEFAULT, "Query batch ability infos from BMS failed!");
+        TLOGE(WmsLogTag::WMS_RECOVER, "Query batch ability infos from BMS failed!");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     return GetAbilityInfosFromBundleInfo(bundleInfos, scbAbilityInfos);
