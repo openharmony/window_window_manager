@@ -747,5 +747,13 @@ struct PostProcessFocusState {
         reason_ = FocusChangeReason::DEFAULT;
     }
 };
+
+template<typename T>
+struct Hasher {
+    size_t operator()(const sptr<T>& ptr) const
+    {
+        return std::hash<T*>{}(ptr.GetRefPtr());
+    }
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

@@ -62,8 +62,8 @@ public:
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
-    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
@@ -134,14 +134,8 @@ private:
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
-    struct IAvoidAreaChangedListenerHash {
-        size_t operator()(const sptr<IAvoidAreaChangedListener>& ptr) const
-        {
-            return std::hash<IAvoidAreaChangedListener*>{}(ptr.GetRefPtr());
-        }
-    };
     mutable std::mutex mutex_;
-    std::unordered_set<sptr<IAvoidAreaChangedListener>, IAvoidAreaChangedListenerHash> avoidAreaChangeListeners_;
+    std::unordered_set<sptr<IAvoidAreaChangedListener>, Hasher<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
     // Above guarded by mutex_
 };
 } // namespace Rosen

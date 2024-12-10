@@ -1363,7 +1363,7 @@ public:
      * @param listener IAvoidAreaChangedListener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+    virtual WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
     {
         return WMError::WM_OK;
     }
@@ -1374,7 +1374,7 @@ public:
      * @param listener IAvoidAreaChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+    virtual WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
     {
         return WMError::WM_OK;
     }
