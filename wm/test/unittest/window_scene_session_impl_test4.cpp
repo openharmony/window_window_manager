@@ -2018,12 +2018,12 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent01, Function | SmallT
     std::string eventName = "window_scene_session_impl_test4";
     std::string value = "window_scene_session_impl_test4";
     auto ret = window->OnContainerModalEvent(eventName, value);
-    ASSERT_NE(WMError::WM_DO_NOTHING, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
 
     eventName = "scb_waterfall_window_event";
     window->hostSession_ = nullptr;
     ret = window->OnContainerModalEvent(eventName, value);
-    ASSERT_NE(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 }
 } // namespace Rosen
