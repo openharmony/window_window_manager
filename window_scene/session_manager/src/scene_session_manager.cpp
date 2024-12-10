@@ -1728,6 +1728,19 @@ WMError SceneSessionManager::SetGlobalDragResizeType(DragResizeType dragResizeTy
     }
     std::lock_guard<std::mutex> lock(dragResizeTypeMutex_);
     globalDragResizeType_ = dragResizeType;
+    taskScheduler_->PostAsyncTask([this] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession != nullptr && WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                const std::string& bundleName = sceneSession->GetSessionInfo().bundleName_;
+                DragResizeType appDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+                GetAppDragResizeType(bundleName, appDragResizeType);
+                TLOGND(WmsLogTag::WMS_LAYOUT, "SetGlobalDragResizeType persistentId: %{public}d, bundleName: %{public}s, "
+                    "dragResizeType: %{public}d", sceneSession->GetPersistentId(), bundleName.c_str(), appDragResizeType);
+                sceneSession->SetAppDragResizeType(appDragResizeType);
+            }
+        }
+    }, __func__);
     return WMError::WM_OK;
 }
 
