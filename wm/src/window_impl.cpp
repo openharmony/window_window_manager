@@ -1073,7 +1073,7 @@ WMError WindowImpl::SetAspectRatio(float ratio)
 WMError WindowImpl::ResetAspectRatio()
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is invalid");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
