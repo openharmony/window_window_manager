@@ -3780,7 +3780,7 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam,
         .useDma = true,
         .useCurWindow = true,
     };
-    bool ret = RSInterfaces::GetInstance().SetFreezeImmediately(surfaceNode, callback, config, isFreeze);
+    bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config);
     if (!ret) {
         TLOGE(WmsLogTag::WMS_MAIN, "failed");
         return nullptr;
