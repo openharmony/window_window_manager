@@ -833,7 +833,6 @@ bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
     std::map<WindowType, SystemBarProperty>& properties,
     std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
-
     for (auto systemBarType : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {
         properties[systemBarType].backgroundColor_ = GetColorFromJs(env, jsObject, "statusBarColor",
             properties[systemBarType].backgroundColor_, propertyFlags[systemBarType].backgroundColorFlag);
