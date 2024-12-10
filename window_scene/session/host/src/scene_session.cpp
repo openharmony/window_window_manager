@@ -1544,39 +1544,36 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
 
 void SceneSession::RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback)
 {
-    auto task([weakThis = wptr(this), callback = std::move(callback)] {
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
         }
         session->onRaiseToTop_ = std::move(callback);
-    });
-    PostTask(task, __func__);
+    }, __func__);
 }
 
 void SceneSession::RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&& callback)
 {
-    auto task([weakThis = wptr(this), callback = std::move(callback)] {
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
         }
         session->onRaiseAboveTarget_ = std::move(callback);
-    });
-    PostTask(task, __func__);
+    }, __func__);
 }
 
 void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback)
 {
-    auto task([weakThis = wptr(this), callback = std::move(callback)] {
+    callback(IsTopmost());
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
         }
         session->onSessionTopmostChange_ = std::move(callback);
-    });
-    PostTask(task, __func__);
-    callback(IsTopmost());
+    }, __func__);
 }
 
 /** @note @window.hierarchy */
