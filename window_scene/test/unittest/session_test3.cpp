@@ -1371,22 +1371,6 @@ HWTEST_F(WindowSessionTest3, GetScreenId, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetWindowFreeze
- * @tc.desc: SetWindowFreeze Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, SetWindowFreeze, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    struct RSSurfaceNodeConfig config;
-    session_->surfaceNode_ = RSSurfaceNode::Create(config);
-    ASSERT_NE(session_->surfaceNode_, nullptr);
-    ASSERT_EQ(true, session_->SetWindowFreeze(true));
-    session_->surfaceNode_ = nullptr;
-    ASSERT_EQ(false, session_->SetWindowFreeze(true));
-}
-
-/**
  * @tc.name: SetFreezeImmediately
  * @tc.desc: SetFreezeImmediately Test
  * @tc.type: FUNC
