@@ -1708,6 +1708,29 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId02, Function | Small
     ASSERT_NE(session_, nullptr);
     session_->sessionInfo_.screenId_ = 0;
     EXPECT_EQ(session_->GetScreenId(), 0);
+    session_->property_->SetIsSystemKeyboard(false);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::UNKNOWN,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = {0, 0, 0, 0};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = {0, 100, 0, 0};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 100);
+}
+
+/**
+ * @tc.name: UpdateClientRectPosYAndDisplayId03
+ * @tc.desc: UpdateClientRectPosYAndDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId03, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(session_->GetScreenId(), 0);
     session_->property_->SetIsSystemKeyboard(true);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
