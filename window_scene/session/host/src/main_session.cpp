@@ -159,7 +159,7 @@ bool MainSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEv
 WSError MainSession::SetTopmost(bool topmost)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "SetTopmost id: %{public}d, topmost: %{public}d", GetPersistentId(), topmost);
-    auto task = [weakThis = wptr(this), topmost]() {
+    PostTask([weakThis = wptr(this), topmost]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
@@ -174,8 +174,7 @@ WSError MainSession::SetTopmost(bool topmost)
                 session->sessionChangeCallback_->onSessionTopmostChange_(topmost);
             }
         }
-    };
-    PostTask(task, "SetTopmost");
+    }, "SetTopmost");
     return WSError::WS_OK;
 }
 
@@ -240,7 +239,7 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
 WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
 {
     const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
+    PostTask([weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", funcName);
@@ -251,14 +250,13 @@ WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool 
         if (session->onTitleAndDockHoverShowChangeFunc_) {
             session->onTitleAndDockHoverShowChangeFunc_(isTitleHoverShown, isDockHoverShown);
         }
-    };
-    PostTask(task, funcName);
+    }, funcName);
     return WSError::WS_OK;
 }
 
 WSError MainSession::OnRestoreMainWindow()
 {
-    auto task = [weakThis = wptr(this)] {
+    PostTask([weakThis = wptr(this)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is null");
@@ -267,14 +265,13 @@ WSError MainSession::OnRestoreMainWindow()
         if (session->onRestoreMainWindowFunc_) {
             session->onRestoreMainWindowFunc_();
         }
-    };
-    PostTask(task, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 
 WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
 {
-    auto task = [weakThis = wptr(this), enabled] {
+    PostTask([weakThis = wptr(this), enabled] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
@@ -283,15 +280,14 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
         if (session->onSetWindowRectAutoSaveFunc_) {
             session->onSetWindowRectAutoSaveFunc_(enabled);
         }
-    };
-    PostTask(task, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 
 WSError MainSession::OnMainSessionModalTypeChange(bool isModal)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), isModal, where] {
+    PostTask([weakThis = wptr(this), isModal, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -301,8 +297,7 @@ WSError MainSession::OnMainSessionModalTypeChange(bool isModal)
         if (session->onMainSessionModalTypeChange_) {
             session->onMainSessionModalTypeChange_(isModal);
         }
-    };
-    PostTask(task, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 

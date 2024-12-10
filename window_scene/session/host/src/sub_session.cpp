@@ -46,7 +46,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto task = [weakThis = wptr(this), property]() {
+    PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_SUB, "session is null");
@@ -66,8 +66,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         }
         auto ret = session->SceneSession::Foreground(property);
         return ret;
-    };
-    PostTask(task, "Show");
+    }, "Show");
     return WSError::WS_OK;
 }
 

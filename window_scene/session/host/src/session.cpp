@@ -583,7 +583,7 @@ void Session::SetSystemFocusable(bool systemFocusable)
 
 WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
 {
-    auto task = [weakThis = wptr(this), isFocusableOnShow]() {
+    PostTask([weakThis = wptr(this), isFocusableOnShow]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "session is null");
@@ -592,8 +592,7 @@ WSError Session::SetFocusableOnShow(bool isFocusableOnShow)
         TLOGND(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusableOnShow: %{public}d",
             session->GetPersistentId(), isFocusableOnShow);
         session->focusableOnShow_ = isFocusableOnShow;
-    };
-    PostTask(task, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 
@@ -1428,7 +1427,7 @@ void Session::ProcessClickModalWindowOutside(int32_t posX, int32_t posY)
 void Session::SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or func is null", where);
@@ -1436,8 +1435,7 @@ void Session::SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFu
         }
         session->clickModalWindowOutsideFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_DIALOG, "%{public}s id: %{public}d", where, session->GetPersistentId());
-    };
-    PostTask(task, __func__);
+    }, __func__);
 }
 
 void Session::SetClientDragEnable(bool dragEnable)
@@ -1505,7 +1503,7 @@ void Session::SetIsActivatedAfterScreenLocked(bool isActivatedAfterScreenLocked)
 void Session::SetAttachState(bool isAttach, WindowMode windowMode)
 {
     isAttach_ = isAttach;
-    auto task = [weakThis = wptr(this), isAttach]() {
+    PostTask([weakThis = wptr(this), isAttach]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGD(WmsLogTag::WMS_LIFE, "session is null");
@@ -1518,8 +1516,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
         }
-    };
-    PostTask(task, "SetAttachState");
+    }, "SetAttachState");
     CreateDetectStateTask(isAttach, windowMode);
 }
 
@@ -1559,43 +1556,40 @@ void Session::SetChangeSessionVisibilityWithStatusBarEventListener(
 void Session::SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->pendingSessionActivationFunc_ = std::move(func);
-    };
-    PostTask(task, where);
+    }, where);
 }
 
 void Session::SetBackPressedListenser(NotifyBackPressedFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->backPressedFunc_ = std::move(func);
-    };
-    PostTask(task, where);
+    }, where);
 }
 
 void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->terminateSessionFunc_ = std::move(func);
-    };
-    PostTask(task, where);
+    }, where);
 }
 
 void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
@@ -1702,15 +1696,14 @@ WSError Session::TerminateSessionNew(
 void Session::SetTerminateSessionListenerNew(NotifyTerminateSessionFuncNew&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->terminateSessionFuncNew_ = std::move(func);
-    };
-    PostTask(task, where);
+    }, where);
 }
 
 WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySessionInfo, TerminateType terminateType)
@@ -1743,15 +1736,14 @@ WSError Session::TerminateSessionTotal(const sptr<AAFwk::SessionInfo> abilitySes
 void Session::SetTerminateSessionListenerTotal(NotifyTerminateSessionFuncTotal&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->terminateSessionFuncTotal_ = std::move(func);
-    };
-    PostTask(task, where);
+    }, where);
 }
 
 WSError Session::SetSessionLabel(const std::string& label)
@@ -1810,7 +1802,7 @@ WSError Session::Clear(bool needStartCaller)
 void Session::SetSessionExceptionListener(NotifySessionExceptionFunc&& func, bool fromJsScene)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where, fromJsScene] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where, fromJsScene] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
@@ -1821,8 +1813,7 @@ void Session::SetSessionExceptionListener(NotifySessionExceptionFunc&& func, boo
         } else {
             session->sessionExceptionFunc_ = std::move(func);
         }
-    };
-    PostTask(task, where);
+    }, where);
 }
 
 void Session::SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func)
@@ -1837,15 +1828,14 @@ void Session::SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func)
 void Session::SetPendingSessionToForegroundListener(NotifyPendingSessionToForegroundFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->pendingSessionToForegroundFunc_ = std::move(func);
-    };
-    PostTask(task, where);
+    }, where);
 }
 
 WSError Session::PendingSessionToForeground()
@@ -1862,15 +1852,14 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
     NotifyPendingSessionToBackgroundForDelegatorFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->pendingSessionToBackgroundForDelegatorFunc_ = std::move(func);
-    };
-    PostTask(task, where);
+    }, where);
 }
 
 WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
@@ -2327,7 +2316,7 @@ void Session::SaveSnapshot(bool useFfrt)
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
 {
-    auto task = [weakThis = wptr(this), func]() {
+    PostTask([weakThis = wptr(this), func]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             WLOGFE("session is null");
@@ -2345,8 +2334,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
         session->NotifySessionStateChange(changedState);
         TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, state_: %{public}d, changedState: %{public}d",
             session->GetPersistentId(), session->GetSessionState(), changedState);
-    };
-    PostTask(task, "SetSessionStateChangeListenser");
+    }, "SetSessionStateChangeListenser");
 }
 
 void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
@@ -2441,7 +2429,7 @@ void Session::SetGetStateFromManagerListener(const GetStateFromManagerFunc& func
 
 void Session::NotifySessionStateChange(const SessionState& state)
 {
-    auto task = [weakThis = wptr(this), state]() {
+    PostTask([weakThis = wptr(this), state]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             WLOGFE("session is null");
@@ -2460,8 +2448,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
         } else {
             TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeNotifyManagerFunc is null");
         }
-    };
-    PostTask(task, "NotifySessionStateChange");
+    }, "NotifySessionStateChange");
 }
 
 void Session::SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func)
@@ -3559,7 +3546,7 @@ bool Session::IsSystemInput()
 
 void Session::SetIsMidScene(bool isMidScene)
 {
-    auto task = [weakThis = wptr(this), isMidScene] {
+    PostTask([weakThis = wptr(this), isMidScene] {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
@@ -3570,8 +3557,7 @@ void Session::SetIsMidScene(bool isMidScene)
                 session->GetPersistentId(), isMidScene);
             session->isMidScene_ = isMidScene;
         }
-    };
-    PostTask(task, "SetIsMidScene");
+    }, "SetIsMidScene");
 }
 
 bool Session::GetIsMidScene() const
