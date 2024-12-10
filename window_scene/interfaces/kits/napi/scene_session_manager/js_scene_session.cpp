@@ -755,19 +755,19 @@ void JsSceneSession::ProcessRestoreMainWindowRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     const char* const funcName = __func__;
     session->SetRestoreMainWindowCallback([weakThis = wptr(this), funcName] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", funcName);
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s jsSceneSession is null", funcName);
             return;
         }
         jsSceneSession->RestoreMainWindow();
     });
-    TLOGI(WmsLogTag::WMS_LIFE, "success");
+    TLOGI(WmsLogTag::WMS_PC, "success");
 }
 
 void JsSceneSession::RestoreMainWindow()
