@@ -2707,7 +2707,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         ClosePipWindowIfExist(type);
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
         if (newSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
         property->SetSystemCalling(isSystemCalling);
