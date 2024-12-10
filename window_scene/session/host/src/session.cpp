@@ -677,7 +677,7 @@ WSError Session::SetTouchable(bool touchable)
 }
 
 bool Session::GetTouchable() const
-{ 
+{
     return GetSessionProperty()->GetTouchable();
 }
 
