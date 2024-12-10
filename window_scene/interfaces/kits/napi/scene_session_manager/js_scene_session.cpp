@@ -95,7 +95,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SESSION_FOCUSABLE_CHANGE_CB,           ListenerFuncType::SESSION_FOCUSABLE_CHANGE_CB},
     {SESSION_TOUCHABLE_CHANGE_CB,           ListenerFuncType::SESSION_TOUCHABLE_CHANGE_CB},
     {SESSION_TOP_MOST_CHANGE_CB,            ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB},
-    {SUB_MODAL_TYPE_CHANGE_CB,          ListenerFuncType::SUB_MODAL_TYPE_CHANGE_CB},
+    {SUB_MODAL_TYPE_CHANGE_CB,              ListenerFuncType::SUB_MODAL_TYPE_CHANGE_CB},
     {CLICK_CB,                              ListenerFuncType::CLICK_CB},
     {TERMINATE_SESSION_CB,                  ListenerFuncType::TERMINATE_SESSION_CB},
     {TERMINATE_SESSION_CB_NEW,              ListenerFuncType::TERMINATE_SESSION_CB_NEW},

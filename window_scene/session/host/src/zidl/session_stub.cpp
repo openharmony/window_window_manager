@@ -931,8 +931,7 @@ int SessionStub::HandleNotifySubModalTypeChange(MessageParcel& data, MessageParc
     if (subWindowModalType > static_cast<uint32_t>(SubWindowModalType::END)) {
         return ERR_INVALID_DATA;
     }
-    WSError errCode = NotifySubModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
-    reply.WriteInt32(static_cast<int32_t>(errCode));
+    NotifySubModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
