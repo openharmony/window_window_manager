@@ -1026,8 +1026,21 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
     return updatedDisplayId;
 }
 
+bool Session::CheckIsSkipUpdate()
+{
+    // skip VirtualKeyboard
+    if (GetSessionProperty()->IsSystemKeyboard()) {
+        TLOGI(Wms::WMS_LAYOUT, "skipUpdate VirtualKeyboard: %{public}d", GetPersistentId());
+        return true;
+    }
+    return false;
+}
+
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
+    if (CheckIsSkipUpdate()) {
+        return;
+    }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Error status");
