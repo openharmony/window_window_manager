@@ -1618,11 +1618,11 @@ bool WindowSessionImpl::IsMainWindowTopmost() const
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    TLOGD(WmsLogTag::DEFAULT, "%{public}d", dragEnabled);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1630,7 +1630,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
     if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsSubWindow(GetType())) {
         property_->SetDragEnabled(dragEnabled);
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "This is not main window or sub window.");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "This is not main window or sub window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);

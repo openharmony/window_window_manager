@@ -1776,7 +1776,7 @@ WSError SessionProxy::UpdateRectChangeListenerRegistered(bool isRegister)
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(
