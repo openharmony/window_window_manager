@@ -780,7 +780,8 @@ WSError SessionProxy::OnRestoreMainWindow()
 
 /** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
-    bool isGlobal, bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
+    bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
+    const RectAnimationConfig& rectAnimationConfig)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Rect [%{public}d, %{public}d, %{public}u, %{public}u] isGlobal %{public}d "
         "isFromMoveToGlobal %{public}d moveConfiguration %{public}s", rect.posX_, rect.posY_,
@@ -818,6 +819,15 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
     if (!data.WriteUint64(static_cast<uint64_t>(moveConfiguration.displayId))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write session displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (reason == SizeChangeReason::MOVE_WITH_ANIMATION || reason == SizeChangeReason::RESIZE_WITH_ANIMATION) {
+        if (!data.WriteUint32(rectAnimationConfig.duration) || !data.WriteFloat(rectAnimationConfig.x1) ||
+            !data.WriteFloat(rectAnimationConfig.y1) || !data.WriteFloat(rectAnimationConfig.x2) ||
+            !data.WriteFloat(rectAnimationConfig.y2)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Write rectAnimationConfig failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
     }
 
     sptr<IRemoteObject> remote = Remote();

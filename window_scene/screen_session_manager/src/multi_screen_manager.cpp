@@ -578,4 +578,31 @@ void MultiScreenManager::ExternalScreenDisconnectChange(sptr<ScreenSession> inte
         return;
     }
 }
+
+bool MultiScreenManager::AreScreensTouching(sptr<ScreenSession> mainScreenSession,
+    sptr<ScreenSession> secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
+    MultiScreenPositionOptions secondScreenOption)
+{
+    ScreenProperty mainProperty = mainScreenSession->GetScreenProperty();
+    int32_t mainScreenWidth = mainProperty.GetBounds().rect_.GetWidth();
+    int32_t mainScreenHeight = mainProperty.GetBounds().rect_.GetHeight();
+ 
+    ScreenProperty secondProperty = secondScreenSession->GetScreenProperty();
+    int32_t secondScreenWidth = secondProperty.GetBounds().rect_.GetWidth();
+    int32_t secondScreenHeight = secondProperty.GetBounds().rect_.GetHeight();
+ 
+    bool horizontalTouchingAB = (mainScreenOptions.startX_ + mainScreenWidth == secondScreenOption.startX_);
+    bool horizontalTouchingBA = (secondScreenOption.startX_ + secondScreenWidth == mainScreenOptions.startX_);
+    bool horizontalTouching = (horizontalTouchingAB || horizontalTouchingBA);
+ 
+    bool verticalTouchingAB = (mainScreenOptions.startY_ + mainScreenHeight == secondScreenOption.startY_);
+    bool verticalTouchingBA = (secondScreenOption.startY_ + secondScreenHeight == mainScreenOptions.startY_);
+    bool verticalTouching = (verticalTouchingAB || verticalTouchingBA);
+ 
+    if ((horizontalTouchingAB && verticalTouchingAB) || (horizontalTouchingBA && verticalTouchingBA)) {
+        return false;
+    }
+
+    return horizontalTouching || verticalTouching;
+}
 } // namespace OHOS::Rosen

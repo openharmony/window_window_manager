@@ -84,21 +84,22 @@ void SubSession::CheckParentDisplayIdAndMove()
     }
 }
 
-void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId)
+void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId,
+    const RectAnimationConfig& rectAnimationConfig)
 {
     if (reason == SizeChangeReason::DRAG_END) {
         shouldFollowParentWhenShow_ = false;
     }
-    SceneSession::NotifySessionRectChange(rect, reason, displayId);
+    SceneSession::NotifySessionRectChange(rect, reason, displayId, rectAnimationConfig);
 }
 
 void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-    const MoveConfiguration& moveConfiguration)
+    const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
 {
     if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
         shouldFollowParentWhenShow_ = false;
     }
-    SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration);
+    SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration, rectAnimationConfig);
 }
 
 WSError SubSession::Hide()

@@ -2171,6 +2171,75 @@ HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetUIExtensionDestroyComplete
+ * @tc.desc: SetUIExtensionDestroyComplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIExtensionDestroyComplete, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->SetUIExtensionDestroyComplete();
+    EXPECT_EQ(window->setUIExtensionDestroyCompleted_.load(), true);
+    window->SetUIExtensionDestroyComplete();
+    EXPECT_EQ(window->setUIExtensionDestroyCompleted_.load(), true);
+}
+
+/**
+ * @tc.name: SetUIExtensionDestroyCompleteInSubWindow
+ * @tc.desc: SetUIExtensionDestroyCompleteInSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetUIExtensionDestroyCompleteInSubWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(subWindowOption, nullptr);
+    subWindowOption->SetWindowName("subWindow");
+    sptr<WindowSessionImpl> subWindowSession = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
+    ASSERT_NE(subWindowSession, nullptr);
+    subWindowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subWindowSession->context_ = abilityContext_;
+    subWindowSession->SetUIExtensionDestroyCompleteInSubWindow();
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetUIExtensionDestroyCompleteInSubWindow");
+    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(windowSession, nullptr);
+    ASSERT_TRUE(windowSession->FindExtensionWindowWithContext() == nullptr);
+    windowSession->property_->SetPersistentId(12345);
+    windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    windowSession->context_ = abilityContext_;
+    WindowSessionImpl::windowExtensionSessionSet_.insert(windowSession);
+    ASSERT_TRUE(nullptr != windowSession->FindExtensionWindowWithContext());
+    windowSession->AddSetUIExtensionDestroyTimeoutCheck();
+    EXPECT_EQ(windowSession->startUIExtensionDestroyTimer_.load(), true);
+    subWindowSession->SetUIExtensionDestroyCompleteInSubWindow();
+    EXPECT_EQ(windowSession->startUIExtensionDestroyTimer_.load(), false);
+}
+
+/**
+ * @tc.name: AddSetUIExtensionDestroyTimeoutCheck
+ * @tc.desc: AddSetUIExtensionDestroyTimeoutCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, AddSetUIExtensionDestroyTimeoutCheck, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("AddSetUIExtensionDestroyTimeoutCheck");
+    option->SetBundleName("UTtest");
+    option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    window->AddSetUIExtensionDestroyTimeoutCheck();
+    EXPECT_EQ(WindowType::WINDOW_TYPE_UI_EXTENSION, window->property_->GetWindowType());
+    EXPECT_EQ(window->startUIExtensionDestroyTimer_.load(), true);
+}
+
+/**
  * @tc.name: GetStatusBarHeight
  * @tc.desc: GetStatusBarHeight test
  * @tc.type: FUNC

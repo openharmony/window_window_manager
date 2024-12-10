@@ -1795,7 +1795,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfig
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
-WMError WindowImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
     WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
@@ -2085,7 +2085,7 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 WMError WindowImpl::RaiseToAppTop()
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -3364,7 +3364,7 @@ int64_t WindowImpl::GetVSyncPeriod()
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Window is invalid");
         return;
     }
 
@@ -3392,7 +3392,7 @@ void WindowImpl::UpdateFocusStatus(bool focused)
 bool WindowImpl::IsFocused() const
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Window is invalid");
         return false;
     }
 
