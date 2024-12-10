@@ -1338,11 +1338,11 @@ void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& fu
     auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session or RestoreMainWindowFunc is null");
+            TLOGNE(WmsLogTag::WMS_PC, "session or RestoreMainWindowFunc is null");
             return;
         }
         session->onRestoreMainWindowFunc_ = std::move(func);
-        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d",
+        TLOGNI(WmsLogTag::WMS_PC, "%{public}s id: %{public}d",
             funcName, session->GetPersistentId());
     };
     PostTask(task, funcName);
