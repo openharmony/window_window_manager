@@ -1303,8 +1303,8 @@ struct ExtensionWindowConfig {
     SystemWindowOptions systemWindowOptions;
 };
 
-template<typename T>
-struct Hasher {
+template <typename T>
+struct SptrHasher {
     size_t operator()(const sptr<T>& ptr) const
     {
         return std::hash<T*>{}(ptr.GetRefPtr());
