@@ -677,7 +677,7 @@ WSError Session::SetTouchable(bool touchable)
 }
 
 bool Session::GetTouchable() const
-{   
+{ 
     return GetSessionProperty()->GetTouchable();
 }
 
@@ -2919,8 +2919,7 @@ void Session::SetSessionRequestRect(const WSRect& rect)
 
 WSRect Session::GetSessionRequestRect() const
 {
-    WSRect rect;
-    rect = SessionHelper::TransferToWSRect(GetSessionProperty()->GetRequestRect());
+    WSRect rect = SessionHelper::TransferToWSRect(GetSessionProperty()->GetRequestRect());
     WLOGFD("id: %{public}d, rect: %{public}s", persistentId_, rect.ToString().c_str());
     return rect;
 }
