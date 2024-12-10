@@ -45,6 +45,7 @@
 #include "screen_fold_data.h"
 #include "screen_session_manager_client.h"
 #include "session/host/include/keyboard_session.h"
+#include "session/host/include/session.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_listener_controller.h"
 #include "session_manager/include/window_manager_lru.h"
@@ -594,6 +595,7 @@ public:
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
     void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
+    void RemoveLifeCycleTaskByPersistentId(const int32_t persistentId, const LifeCycleTaskType taskType);
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;

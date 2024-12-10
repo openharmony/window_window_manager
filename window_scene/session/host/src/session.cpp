@@ -36,6 +36,7 @@
 #include "hitrace_meter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/pc_fold_screen_manager.h"
+#include "session_manager/include/scene_session_task_remover.h"
 #include "perform_reporter.h"
 
 namespace OHOS::Rosen {
@@ -1767,6 +1768,7 @@ void Session::SetTerminateSessionListenerNew(NotifyTerminateSessionFuncNew&& fun
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
+        SessionLifeCycleTaskAutoRemover remover = SessionLifeCycleTaskAutoRemover(session->persistentId_, LifeCycleTaskType::STOP);
         session->terminateSessionFuncNew_ = std::move(func);
     }, where);
 }
@@ -1854,6 +1856,7 @@ WSError Session::Clear(bool needStartCaller)
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
+        SessionLifeCycleTaskAutoRemover remover = SessionLifeCycleTaskAutoRemover(session->persistentId_, LifeCycleTaskType::STOP);
         session->isTerminating_ = true;
         if (session->terminateSessionFuncNew_) {
             session->terminateSessionFuncNew_(session->GetSessionInfo(), needStartCaller, false);
