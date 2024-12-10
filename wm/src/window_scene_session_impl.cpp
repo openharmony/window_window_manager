@@ -1064,7 +1064,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
             property_->SetWindowRect(requestRect);
             hostSession->UpdateClientRect(wsRect);
         } else {
-            TLOGE(WmsLogTag::DEFAULT, "hostSession is null");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is null");
         }
     }
     state_ = WindowState::STATE_SHOWN;
@@ -1554,7 +1554,7 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
 WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y, MoveConfiguration moveConfiguration)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -1756,7 +1756,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
     const RectAnimationConfig& rectAnimationConfig)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -2725,22 +2725,22 @@ MaximizeMode WindowSceneSessionImpl::GetGlobalMaximizeMode() const
 
 WMError WindowSceneSessionImpl::SetWindowMode(WindowMode mode)
 {
-    TLOGD(WmsLogTag::DEFAULT, "%{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
+    TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}u mode %{public}u", GetWindowId(), static_cast<uint32_t>(mode));
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     bool isCompatibleModeInPcSetFloatingWindowMode =
             property_->GetCompatibleModeInPc() && (mode == WindowMode::WINDOW_MODE_FLOATING);
     if (!(WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), mode) ||
           isCompatibleModeInPcSetFloatingWindowMode)) {
-        TLOGE(WmsLogTag::DEFAULT, "window %{public}u do not support mode: %{public}u",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "window %{public}u do not support mode: %{public}u",
             GetWindowId(), static_cast<uint32_t>(mode));
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
     WMError ret = UpdateWindowModeImmediately(mode);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "Update window mode fail, ret:%{public}u", ret);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Update window mode fail, ret:%{public}u", ret);
         return ret;
     }
     auto hostSession = GetHostSession();
