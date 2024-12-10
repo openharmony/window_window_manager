@@ -2118,7 +2118,7 @@ bool ScreenSessionManager::SetScreenBrightness(uint64_t screenId, uint32_t level
         TLOGE(WmsLogTag::DMS, "set screen brightness permission denied!");
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    TLOGD(WmsLogTag::DMS, "screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }
@@ -4415,7 +4415,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     if (screenshot == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to get pixelmap from RS, return nullptr!");
     } else {
-        TLOGI(WmsLogTag::DMS, "Sucess to get pixelmap from RS!");
+        TLOGD(WmsLogTag::DMS, "Sucess to get pixelmap from RS!");
     }
     // notify dm listener
     sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
