@@ -1035,7 +1035,7 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 bool WindowSessionImpl::IsFocused() const
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Session is invalid");
         return false;
     }
 
