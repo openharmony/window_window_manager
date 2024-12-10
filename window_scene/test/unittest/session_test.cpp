@@ -1734,7 +1734,7 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId03, Function | Small
     session_->property_->SetIsSystemKeyboard(true);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    rect = {0, 1000, 100, 100};
+    WSRect rect = {0, 1000, 100, 100};
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 1000);
 }
@@ -1750,7 +1750,7 @@ HWTEST_F(WindowSessionTest, CheckIsSkipUpdate01, Function | SmallTest | Level2)
     session_->property_->SetIsSystemKeyboard(true);
     auto ret = session_->CheckIsSkipUpdate();
     EXPECT_EQ(ret, true);
-    
+
     session_->property_->SetIsSystemKeyboard(false);
     ret = session_->CheckIsSkipUpdate();
     EXPECT_EQ(ret, false);
