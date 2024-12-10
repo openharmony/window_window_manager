@@ -407,7 +407,7 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
 
 WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
 {
-    TLOGI(WmsLogTag::PATTERN, "%{public}d, %{public}s", notifyListener, rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}s", notifyListener, rect.ToString().c_str());
     auto task = [weakThis = wptr(this), notifyListener, rect]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -5269,7 +5269,7 @@ void SceneSession::SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFun
 
 void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)
 {
-    TLOGI(WmsLogTag::DEFAULT, "SetStartingWindowExitAnimationFlag %{public}d", enable);
+    TLOGI(WmsLogTag::WMS_PATTERN, "SetStartingWindowExitAnimationFlag %{public}d", enable);
     needStartingWindowExitAnimation_.store(enable);
 }
 
