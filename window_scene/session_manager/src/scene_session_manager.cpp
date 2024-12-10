@@ -1731,7 +1731,7 @@ WMError SceneSessionManager::SetGlobalDragResizeType(DragResizeType dragResizeTy
     taskScheduler_->PostAsyncTask([this] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
-            if (sceneSession != nullptr) {
+            if (sceneSession != nullptr && WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
                 const std::string& bundleName = sceneSession->GetSessionInfo().bundleName_;
                 DragResizeType appDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
                 GetAppDragResizeType(bundleName, appDragResizeType);
