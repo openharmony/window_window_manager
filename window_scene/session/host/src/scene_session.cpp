@@ -1323,11 +1323,11 @@ void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHove
     auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session or TitleAndDockHoverShowChangeFunc is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session or TitleAndDockHoverShowChangeFunc is null");
             return;
         }
         session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d",
             funcName, session->GetPersistentId());
     };
     PostTask(task, funcName);
@@ -1339,11 +1339,11 @@ void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& fu
     auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_PC, "session or RestoreMainWindowFunc is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session or RestoreMainWindowFunc is null");
             return;
         }
         session->onRestoreMainWindowFunc_ = std::move(func);
-        TLOGNI(WmsLogTag::WMS_PC, "%{public}s id: %{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d",
             funcName, session->GetPersistentId());
     };
     PostTask(task, funcName);
@@ -4909,7 +4909,7 @@ void SceneSession::NotifySessionBackground(uint32_t reason, bool withAnimation, 
 void SceneSession::NotifySessionFullScreen(bool fullScreen)
 {
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage is null");
         return;
     }
     sessionStage_->NotifySessionFullScreen(fullScreen);

@@ -1216,12 +1216,12 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to displayId");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "invalid displayId");
+        TLOGE(WmsLogTag::WMS_PC, "invalid displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t windowNumber = 0;

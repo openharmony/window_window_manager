@@ -2691,11 +2691,11 @@ WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
 WSError Session::SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
     int32_t landscapeWidth, int32_t landscapeHeight)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "compatible size: [%{public}d, %{public}d, %{public}d, %{public}d]",
+    TLOGI(WmsLogTag::WMS_COMPAT, "compatible size: [%{public}d, %{public}d, %{public}d, %{public}d]",
         portraitWidth, portraitHeight, landscapeWidth, landscapeHeight);
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight);
@@ -2704,10 +2704,10 @@ WSError Session::SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t port
 
 WSError Session::SetIsPcAppInPad(bool enable)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "SetIsPcAppInPad enable: %{public}d", enable);
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetIsPcAppInPad enable: %{public}d", enable);
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetIsPcAppInPad(enable);
@@ -2716,14 +2716,14 @@ WSError Session::SetIsPcAppInPad(bool enable)
 
 WSError Session::CompatibleFullScreenRecover()
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "recover compatible full screen windowId:%{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_COMPAT, "recover compatible full screen windowId:%{public}d", GetPersistentId());
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGD(WmsLogTag::WMS_COMPAT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "session stage is nullptr id: %{public}d state: %{public}u",
+        TLOGE(WmsLogTag::WMS_COMPAT, "session stage is nullptr id: %{public}d state: %{public}u",
               GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -2748,14 +2748,14 @@ WSError Session::CompatibleFullScreenMinimize()
 
 WSError Session::CompatibleFullScreenClose()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "close compatible full screen windowId:%{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_COMPAT, "close compatible full screen windowId:%{public}d", GetPersistentId());
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_LIFE, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGD(WmsLogTag::WMS_COMPAT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session stage is nullptr id: %{public}d state: %{public}u",
+        TLOGE(WmsLogTag::WMS_COMPAT, "session stage is nullptr id: %{public}d state: %{public}u",
               GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -3576,20 +3576,20 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
 
 WSError Session::SwitchFreeMultiWindow(bool enable)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "windowId:%{public}d enable: %{public}d", GetPersistentId(), enable);
     systemConfig_.freeMultiWindowEnable_ = enable;
     if (!IsSessionValid()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "property is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "property is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     bool isUiExtSubWindow = WindowHelper::IsSubWindow(property->GetWindowType()) &&
