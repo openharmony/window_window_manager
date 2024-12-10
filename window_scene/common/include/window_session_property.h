@@ -372,7 +372,7 @@ private:
     /**
      * Sub Window
      */
-    uint32_t subWindowLevel_ = 1;
+    uint32_t subWindowLevel_ = 0;
 
     /**
      * UIExtension
