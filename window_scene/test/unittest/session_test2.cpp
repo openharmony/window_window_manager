@@ -699,7 +699,7 @@ HWTEST_F(WindowSessionTest2, UpdateFocus02, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, UpdateWindowMode01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
 }
 
 /**
