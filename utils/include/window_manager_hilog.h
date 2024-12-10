@@ -60,6 +60,13 @@ enum class WmsLogTag : uint8_t {
     WMS_INPUT_KEY_FLOW,        // C04213
     WMS_PIPELINE,              // C04214
     WMS_HIERARCHY,             // C04215
+    WMS_PATTERN,               // C04216
+    WMS_ATTRIBUTE,             // C04217
+    WMS_PC,                    // C04218
+    WMS_DECOR,                 // C04219
+    WMS_LAYOUT_PC,             // C0421A
+    WMS_STARTUP_PAGE,          // C0421B
+    WMS_COMPAT,                // C0421C
     END = 256,                 // Last one, do not use
 };
 
@@ -86,6 +93,13 @@ inline const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_INPUT_KEY_FLOW, "InputKeyFlow" },
     { WmsLogTag::WMS_PIPELINE, "WMSPipeLine" },
     { WmsLogTag::WMS_HIERARCHY, "WMSHierarchy" },
+    { WmsLogTag::WMS_PATTERN, "WMSPattern" },
+    { WmsLogTag::WMS_ATTRIBUTE, "WMSAttribute" },
+    { WmsLogTag::WMS_PC, "WMSPc" },
+    { WmsLogTag::WMS_DECOR, "WMSDecor" },
+    { WmsLogTag::WMS_LAYOUT_PC, "WMSLayoutPc" },
+    { WmsLogTag::WMS_STARTUP_PAGE, "WMSStartupPage" },
+    { WmsLogTag::WMS_COMPAT, "WMSCompat" },
 };
 #ifdef IS_RELEASE_VERSION
 #define WMS_FILE_NAME ""
