@@ -2648,7 +2648,7 @@ WSError Session::SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t port
 
 WSError Session::SetIsPcAppInPad(bool enable)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "SetIsPcAppInPad enable: %{public}d", enable);
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetIsPcAppInPad enable: %{public}d", enable);
     GetSessionProperty()->SetIsPcAppInPad(enable);
     return WSError::WS_OK;
 }
