@@ -4304,10 +4304,10 @@ void WindowSessionImpl::SetUIContentComplete()
 {
     bool setUIContentCompleted = false;
     if (setUIContentCompleted_.compare_exchange_strong(setUIContentCompleted, true)) {
-        TLOGD(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     } else {
-        TLOGD(WmsLogTag::WMS_LIFE, "already SetUIContent, persistentId=%{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent, persistentId=%{public}d", GetPersistentId());
     }
 }
 
