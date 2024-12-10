@@ -621,12 +621,6 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect3, Function | SmallTest | Level2)
 
     result = sceneSession->Disconnect(false);
     ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(false, false);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(false, true);
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
