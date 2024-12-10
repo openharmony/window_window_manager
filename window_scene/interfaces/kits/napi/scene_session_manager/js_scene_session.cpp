@@ -5403,7 +5403,7 @@ napi_value JsSceneSession::OnSetFreezeImmediately(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
-        static_case<float>(scaleValue) : 0.0f;
+        static_cast<float>(scaleValue) : 0.0f;
     bool isFreeze = false;
     if (!ConvertFromJsValue(env, argv[1], isFreeze)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to isFreeze");
