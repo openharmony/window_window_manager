@@ -2084,7 +2084,7 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 WMError WindowImpl::RaiseToAppTop()
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -3365,7 +3365,7 @@ int64_t WindowImpl::GetVSyncPeriod()
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Window is invalid");
         return;
     }
 
@@ -3392,7 +3392,7 @@ void WindowImpl::UpdateFocusStatus(bool focused)
 bool WindowImpl::IsFocused() const
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Window is invalid");
         return false;
     }
 
