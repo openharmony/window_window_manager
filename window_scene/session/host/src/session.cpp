@@ -1120,10 +1120,9 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (property == nullptr) {
         return;
     }
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty->GetIsNeedUpdateWindowMode()) {
+    if (GetSessionProperty()->GetIsNeedUpdateWindowMode()) {
         property->SetIsNeedUpdateWindowMode(true);
-        property->SetWindowMode(sessionProperty->GetWindowMode());
+        property->SetWindowMode(GetSessionProperty()->GetWindowMode());
     }
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
@@ -1137,29 +1136,30 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetPersistentId(GetPersistentId());
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
-    property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
-    property->SetDefaultRequestedOrientation(sessionProperty->GetDefaultRequestedOrientation());
+    property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
+    property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u,"
         " defaultRequestedOrientation: %{public}u", GetPersistentId(),
-        static_cast<uint32_t>(sessionProperty->GetRequestedOrientation()),
-        static_cast<uint32_t>(sessionProperty->GetDefaultRequestedOrientation()));
-    property->SetCompatibleModeInPc(sessionProperty->GetCompatibleModeInPc());
-    property->SetIsSupportDragInPcCompatibleMode(sessionProperty->GetIsSupportDragInPcCompatibleMode());
-    if (sessionProperty->GetCompatibleModeInPc()) {
-        property->SetDragEnabled(sessionProperty->GetIsSupportDragInPcCompatibleMode());
+        static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
+        static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
+    property->SetCompatibleModeInPc(GetSessionProperty()->GetCompatibleModeInPc());
+    property->SetIsSupportDragInPcCompatibleMode(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
+    if (GetSessionProperty()->GetCompatibleModeInPc()) {
+        property->SetDragEnabled(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
     }
-    property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
-    property->SetCompatibleModeEnableInPad(sessionProperty->GetCompatibleModeEnableInPad());
-    property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
-        sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
-        sessionProperty->GetCompatibleInPcLandscapeHeight());
+    property->SetIsAppSupportPhoneInPc(GetSessionProperty()->GetIsAppSupportPhoneInPc());
+    property->SetCompatibleModeEnableInPad(GetSessionProperty()->GetCompatibleModeEnableInPad());
+    property->SetCompatibleWindowSizeInPc(GetSessionProperty()->GetCompatibleInPcPortraitWidth(),
+        GetSessionProperty()->GetCompatibleInPcPortraitHeight(),
+        GetSessionProperty()->GetCompatibleInPcLandscapeWidth(),
+        GetSessionProperty()->GetCompatibleInPcLandscapeHeight());
     std::optional<bool> clientDragEnable = GetClientDragEnable();
     if (clientDragEnable.has_value()) {
             property->SetDragEnabled(clientDragEnable.value());
     }
 
-    if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
-        property->SetIsPcAppInPad(sessionProperty->GetIsPcAppInPad());
+    if (SessionHelper::IsMainWindow(GetWindowType())) {
+        property->SetIsPcAppInPad(GetSessionProperty()->GetIsPcAppInPad());
     }
 }
 
