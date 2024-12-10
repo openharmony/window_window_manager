@@ -94,6 +94,12 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     if (config) {
         systemConfig = *config;
     }
+    uint32_t level = 0;
+    if (!reply.ReadUint32(level)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read level failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    property->SetSubWindowLevel(level);
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
