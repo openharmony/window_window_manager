@@ -122,6 +122,7 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
+constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -2647,20 +2648,29 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
 {
     if (property == nullptr) {
-        WLOGFE("property is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "property is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
 
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
-        WLOGFE("create system window or modal subwindow permission denied!");
+        TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+
+    auto parentSession = GetSceneSession(property->GetParentPersistentId());
+    if (parentSession) {
+        auto parentProperty = parentSession->GetSessionProperty();
+        if (parentProperty->GetSubWindowLevel() >= MAX_SUB_WINDOW_LEVEL) {
+            TLOGE(WmsLogTag::WMS_SUB, "sub window level exceeds limit");
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
+        property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
     }
 
     bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
                         property->IsFloatingWindowAppType() && shouldHideNonSecureFloatingWindows_.load());
     bool isSystemCalling = SessionPermission::IsSystemCalling();
     if (SessionHelper::IsNonSecureToUIExtension(property->GetWindowType()) && !isSystemCalling) {
-        auto parentSession = GetSceneSession(property->GetParentPersistentId());
         if (parentSession) {
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
@@ -2691,7 +2701,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto task = [this, sessionStage, eventChannel, surfaceNode, property,
                     &persistentId, &session, &systemConfig, token, pid, uid, isSystemCalling]() {
         if (property == nullptr) {
-            WLOGFE("[WMSSub][WMSSystem] property is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "property is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_PIP && !IsEnablePiPCreate(property)) {
@@ -2710,7 +2720,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         ClosePipWindowIfExist(type);
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
         if (newSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[WMSSub][WMSSystem] session is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
         property->SetSystemCalling(isSystemCalling);
