@@ -523,7 +523,7 @@ protected:
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
 
     /**
-     * Window Hierarchy
+     * PC Window
      */
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
 
