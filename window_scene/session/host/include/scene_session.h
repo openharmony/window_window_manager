@@ -133,11 +133,7 @@ public:
     };
 
     // callback for notify SceneBoard
-    struct SessionChangeCallback : public RefBase {
-        NotifySessionTopmostChangeFunc onSessionTopmostChange_;
-        NotifyRaiseToTopFunc onRaiseToTop_;
-        NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
-    };
+    struct SessionChangeCallback : public RefBase {};
 
     // func for change window scene pattern property
     struct SetWindowScenePatternFunc : public RefBase {
