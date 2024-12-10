@@ -452,11 +452,11 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 
 void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DEFAULT, "in");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     auto jsCallback = [self = weakRef_, displayId, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
@@ -464,7 +464,7 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
         thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
     }
 }
 

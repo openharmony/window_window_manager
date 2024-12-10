@@ -1006,7 +1006,7 @@ napi_value JsWindow::SetGestureBackEnabled(napi_env env, napi_callback_info info
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetGestureBackEnabled(env, info) : nullptr;
 }
- 
+
 napi_value JsWindow::GetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
@@ -1720,7 +1720,7 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
     NapiAsyncTask::ExecuteCallback execute;
     NapiAsyncTask::CompleteCallback complete;
     SetMoveWindowToGlobalAsyncTask(execute, complete, wptr<Window>(windowToken_), x, y, moveConfiguration);
- 
+
     napi_value lastParam = (argc <= lastParamIndex) ? nullptr :
         ((argv[lastParamIndex] != nullptr && GetType(env, argv[lastParamIndex]) == napi_function) ?
          argv[lastParamIndex] : nullptr);
@@ -3756,7 +3756,7 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set brightness failed"));
             }
-            TLOGNI(WmsLogTag::DEFAULT, "Window [%{public}u, %{public}s] set brightness end, result: %{public}d",
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set brightness end, result: %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
@@ -4141,7 +4141,7 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    
+
     WLOGI("Window [%{public}u, %{public}s] set wake up screen %{public}d end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), wakeUp);
     return NapiGetUndefined(env);
@@ -6894,17 +6894,17 @@ void SetWindowGrayScaleTask(const wptr<Window>& weakToken, double grayScale,
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     execute = [weakToken, grayScale, err] {
         if (err == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "wm error code is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "wm error code is null");
             return;
         }
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "window is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         *err = WM_JS_TO_ERROR_CODE_MAP.at(window->SetGrayScale(static_cast<float>(grayScale)));
-        TLOGI(WmsLogTag::DEFAULT,
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
             "Window [%{public}u, %{public}s] OnSetWindowGrayScale end, grayScale = %{public}f",
             window->GetWindowId(), window->GetWindowName().c_str(), grayScale);
     };
@@ -6928,19 +6928,19 @@ napi_value JsWindow::OnSetWindowGrayScale(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {    // 1: the param num
-        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to grayScale");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to grayScale");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double grayScale = 0.0;
     napi_get_value_double(env, nativeVal, &grayScale);
     constexpr double eps = 1e-6;
     if (grayScale < (MIN_GRAY_SCALE - eps) || grayScale > (MAX_GRAY_SCALE + eps)) {
-        TLOGE(WmsLogTag::DEFAULT,
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE,
             "grayScale should be greater than or equal to 0.0, and should be smaller than or equal to 1.0");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -7045,7 +7045,7 @@ napi_value JsWindow::OnIsFocused(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_FOCUS, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    
+
     bool isFocused = window->IsFocused();
     TLOGI(WmsLogTag::WMS_FOCUS, "window [%{public}u, %{public}s] get isFocused end, isFocused = %{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isFocused);

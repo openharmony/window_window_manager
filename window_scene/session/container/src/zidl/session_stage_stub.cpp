@@ -508,7 +508,7 @@ int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessagePa
 
 int SessionStageStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::DEFAULT, "Called");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Called");
     sptr<IRemoteObject> uiContentRemoteObj;
     WSError errCode = GetUIContentRemoteObj(uiContentRemoteObj);
     reply.WriteRemoteObject(uiContentRemoteObj);
@@ -560,7 +560,7 @@ int SessionStageStub::HandleNotifyCompatibleModeEnableInPad(MessageParcel& data,
 
 int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "HandleSetUniqueVirtualPixelRatio!");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "HandleSetUniqueVirtualPixelRatio!");
     bool useUniqueDensity = data.ReadBool();
     float densityValue = data.ReadFloat();
     SetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
