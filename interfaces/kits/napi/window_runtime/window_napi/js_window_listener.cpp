@@ -490,23 +490,23 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 
 void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
     auto jsCallback = [self = weakRef_, titleButtonRect, env = env_, where = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s this listener or env is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s this listener or env is nullptr", where);
             return;
         }
         napi_value titleButtonRectValue = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
         if (titleButtonRectValue == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s titleButtonRectValue is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s titleButtonRectValue is nullptr", where);
             return;
         }
         napi_value argv[] = { titleButtonRectValue };
         thisListener->CallJsMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to send event");
     }
 }
 
@@ -590,7 +590,7 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnMainWindowClose");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_PC, "this listener or env is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;
@@ -604,7 +604,7 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
     };
 
     if (!eventHandler_) {
-        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        TLOGE(WmsLogTag::WMS_PC, "get main event handler failed!");
         return;
     }
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnMainWindowClose",

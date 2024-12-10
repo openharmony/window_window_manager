@@ -288,23 +288,23 @@ WSError SessionStageProxy::SwitchFreeMultiWindow(bool enable)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(enable)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write enable failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write enable failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -728,23 +728,23 @@ WSError SessionStageProxy::UpdateMaximizeMode(MaximizeMode mode)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("UpdateMaximizeMode WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
-        WLOGFE("UpdateMaximizeMode Write mode failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write mode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("UpdateMaximizeMode SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -785,24 +785,24 @@ void SessionStageProxy::NotifySessionFullScreen(bool fullScreen)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteBool(fullScreen)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write fullScreen failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write fullScreen failed");
         return;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Send Request failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Send Request failed");
     }
 }
 
@@ -847,28 +847,28 @@ WSError SessionStageProxy::UpdateTitleInTargetPos(bool isShow, int32_t height)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteBool(isShow)) {
-        WLOGFE("Write isShow failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "Write isShow failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteUint32(height)) {
-        WLOGFE("Write height failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "Write height failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_DECOR, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TITLE_POSITION_CHANGE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();

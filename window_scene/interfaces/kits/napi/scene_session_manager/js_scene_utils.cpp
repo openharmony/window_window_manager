@@ -79,7 +79,7 @@ WSError GetIntValueFromString(const std::string& str, uint32_t& value)
     if (*end == '\0' && value != 0) {
         return WSError::WS_OK;
     }
-    TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
+    TLOGE(WmsLogTag::WMS_PC, "param %{public}s convert int failed", str.c_str());
     return WSError::WS_ERROR_INVALID_PARAM;
 }
 
@@ -291,7 +291,7 @@ bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, Se
     if (GetType(env, jsFullscreenStart) != napi_undefined) {
         bool fullScreenStart = false;
         if (!ConvertFromJsValue(env, jsFullscreenStart, fullScreenStart)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to fullScreenStart");
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to fullScreenStart");
             return false;
         }
         sessionInfo.fullScreenStart_ = fullScreenStart;
