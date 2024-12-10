@@ -714,11 +714,18 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config);
+    } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
+        RectAnimationConfig rectAnimationConfig = property_->GetRectAnimationConfig();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig.duration: %{public}d", rectAnimationConfig.duration);
+        postTaskDone_ = false;
+        UpdateRectForResizeWithAnimation(wmRect, preRect, wmReason, rectAnimationConfig, config.rsTransaction_);
     } else {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
 
-    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
+    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE ||
+        wmReason == WindowSizeChangeReason::MOVE_WITH_ANIMATION ||
+        wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
         layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
     }
 
@@ -847,6 +854,46 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
     } else {
         handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
     }
+}
+
+void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const RectAnimationConfig& rectAnimationConfig,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "handler is null!");
+        return;
+    }
+    auto task = [weakThis = wptr(this), wmReason, wmRect, preRect, rectAnimationConfig, rsTransaction]() mutable {
+        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForResizeWithAnimation");
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null, updateRectForResizeWithAnimation failed");
+            return;
+        }
+        if (rsTransaction) {
+            RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
+        }
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(rectAnimationConfig.duration);
+        auto curve = RSAnimationTimingCurve::CreateCubicCurve(rectAnimationConfig.x1,
+            rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2);
+        RSNode::OpenImplicitAnimation(protocol, curve, nullptr);
+        if (wmRect != preRect || wmReason != window->lastSizeChangeReason_) {
+            window->NotifySizeChange(wmRect, wmReason);
+            window->lastSizeChangeReason_ = wmReason;
+        }
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        RSNode::CloseImplicitAnimation();
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        } else {
+            RSTransaction::FlushImplicitTransaction();
+        }
+        window->postTaskDone_ = true;
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForResizeWithAnimation");
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
