@@ -1534,7 +1534,7 @@ public:
      *
      * @return true means main window is moving. Otherwise is not moving.
      */
-    virtual void IsStartMoving() { return false; }
+    virtual bool IsStartMoving() { return false; }
     /**
      * @brief Set flag that need remove window input channel.
      *
