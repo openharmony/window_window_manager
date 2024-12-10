@@ -2362,7 +2362,7 @@ bool WindowSceneSessionImpl::IsStartMoving()
     if (auto hostSession = GetHostSession()) {
         isMoving = hostSession->IsStartMoving();
     }
-    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
     return isMoving;
 }
 
