@@ -3520,7 +3520,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
         if (parentSession != nullptr) {
             TLOGD(WmsLogTag::WMS_SUB, "Find parentSession, id: %{public}d", persistentId);
-            parentSession->RemoveSubSession(persistentId);
+            parentSession->RemoveSubSession(sceneSession->GetPersistentId());
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
@@ -4954,31 +4954,29 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         WLOGFE("GetSessionDumpInfo permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, params, &dumpInfo]() {
-        if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
-            return GetAllSessionDumpInfo(dumpInfo);
-        }
-        if (params.size() == 1 && params[0] == ARG_DUMP_DETAIL) { // 1: params num
-            return GetAllSessionDumpDetailInfo(dumpInfo);
-        }
-        if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
-            return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
-        }
-        if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2: params num
-            std::string cmd;
-            std::for_each(params.begin() + 1, params.end(),
-                          [&cmd](const std::string& value) {
-                              cmd += value;
-                              cmd += ' ';
-                          });
-            return GetSCBDebugDumpInfo(std::move(cmd), dumpInfo);
-        }
-        if (params.size() >= 2 && params[0] == ARG_DUMP_PIPLINE && IsValidDigitString(params[1])) { // 2: params num
-            return GetTotalUITreeInfo(params[1], dumpInfo);
-        }
-        return WSError::WS_ERROR_INVALID_OPERATION;
-    };
-    return taskScheduler_->PostSyncTask(task);
+    
+    if (params.size() == 1 && params[0] == ARG_DUMP_ALL) { // 1: params num
+        return GetAllSessionDumpInfo(dumpInfo);
+    }
+    if (params.size() == 1 && params[0] == ARG_DUMP_DETAIL) { // 1: params num
+        return GetAllSessionDumpDetailInfo(dumpInfo);
+    }
+    if (params.size() >= 2 && params[0] == ARG_DUMP_WINDOW && IsValidDigitString(params[1])) { // 2: params num
+        return GetSpecifiedSessionDumpInfo(dumpInfo, params, params[1]);
+    }
+    if (params.size() >= 2 && params[0] == ARG_DUMP_SCB) { // 2: params num
+        std::string cmd;
+        std::for_each(params.begin() + 1, params.end(),
+                        [&cmd](const std::string& value) {
+                            cmd += value;
+                            cmd += ' ';
+                        });
+        return GetSCBDebugDumpInfo(std::move(cmd), dumpInfo);
+    }
+    if (params.size() >= 2 && params[0] == ARG_DUMP_PIPLINE && IsValidDigitString(params[1])) { // 2: params num
+        return GetTotalUITreeInfo(params[1], dumpInfo);
+    }
+    return WSError::WS_ERROR_INVALID_OPERATION;
 }
 
 WSError SceneSessionManager::GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo)
