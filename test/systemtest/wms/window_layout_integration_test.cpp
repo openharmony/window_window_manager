@@ -63,14 +63,14 @@ namespace {
 
 /**
  * @tc.name: moveWindowTo01
- * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 2106
+ * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -290,14 +290,14 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
 /**
  * @tc.name: resize01
- * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2106
+ * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
 HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -443,14 +443,14 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
 
 /**
  * @tc.name: resize05
- * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2106
+ * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
 HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize05");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
