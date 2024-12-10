@@ -1030,7 +1030,7 @@ bool Session::CheckIsSkipUpdate()
 {
     // skip VirtualKeyboard
     if (GetSessionProperty()->IsSystemKeyboard()) {
-        TLOGI(Wms::WMS_LAYOUT, "skipUpdate VirtualKeyboard: %{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "skipUpdate VirtualKeyboard: %{public}d", GetPersistentId());
         return true;
     }
     return false;
