@@ -94,7 +94,7 @@ public:
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WSError RequestFocus(bool isFocused) override;
-    WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
 
     /*
      * Gesture Back
