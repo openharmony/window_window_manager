@@ -548,8 +548,13 @@ void ScreenSession::Connect()
 void ScreenSession::Disconnect()
 {
     screenState_ = ScreenState::DISCONNECTION;
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnDisconnect(screenId_);
@@ -559,8 +564,13 @@ void ScreenSession::Disconnect()
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
     property_ = newProperty;
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnPropertyChange(newProperty, reason, screenId_);
@@ -569,8 +579,13 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
 
 void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason)
 {
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnPowerStatusChange(event, status, reason);
@@ -882,8 +897,13 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
     isScreenLocked_ = isLocked;
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnScreenRotationLockedChange(isLocked, screenId_);
@@ -1680,8 +1700,13 @@ void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
 
 void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
 {
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnScreenCaptureNotify(mainScreenId, uid, clientName);
@@ -1690,8 +1715,13 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
 
 void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnSuperFoldStatusChange(screenId, superFoldStatus);

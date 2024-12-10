@@ -66,6 +66,7 @@ group("unittest") {
     ":ws_scene_session_manager_test8",
     ":ws_scene_session_manager_test9",
     ":ws_scene_session_test",
+    ":ws_scene_system_ability_listener_test",
     ":ws_session_lifecycle_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
@@ -1637,5 +1638,26 @@ ohos_static_library("ws_unittest_common") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+}
+
+ohos_unittest("ws_scene_system_ability_listener_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_system_ability_listener_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines = [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+  }
 }
 ## Build ws_unittest_common.a }}}

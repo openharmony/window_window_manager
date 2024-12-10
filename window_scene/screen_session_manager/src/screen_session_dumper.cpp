@@ -328,6 +328,10 @@ void ScreenSessionDumper::DumpFoldCreaseRegion()
 {
     std::ostringstream oss;
     auto creaseRegion = ScreenSessionManager::GetInstance().GetCurrentFoldCreaseRegion();
+    if (creaseRegion == nullptr) {
+        TLOGE(WmsLogTag::DMS, "creaseRegion is nullptr.");
+        return;
+    }
     auto creaseRects = creaseRegion->GetCreaseRects();
     if (creaseRects.empty()) {
         TLOGE(WmsLogTag::DMS, "current crease region is null");

@@ -57,6 +57,12 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 
+/**
+ * DFX
+ */
+const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
+constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
+
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
     auto contentInfoType = Ace::ContentInfoType::NONE;
@@ -229,10 +235,10 @@ bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Called %{public}d.", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_PC, "Called %{public}d.", GetPersistentId());
     if (IsPcOrPadCapabilityEnabled() && windowOption_ != nullptr) {
         if (WindowHelper::IsSubWindow(property_->GetWindowType())) {
-            TLOGI(WmsLogTag::WMS_LIFE, "create subwindow, title: %{public}s, decorEnable: %{public}d",
+            TLOGI(WmsLogTag::WMS_PC, "create subwindow, title: %{public}s, decorEnable: %{public}d",
                 windowOption_->GetSubWindowTitle().c_str(), windowOption_->GetSubWindowDecorEnable());
             property_->SetDecorEnable(windowOption_->GetSubWindowDecorEnable());
             property_->SetDragEnabled(windowOption_->GetSubWindowDecorEnable());
@@ -245,7 +251,7 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
             property_->SetDecorEnable(dialogDecorEnable);
             property_->SetDragEnabled(dialogDecorEnable);
             dialogTitle_ = windowOption_->GetDialogTitle();
-            TLOGI(WmsLogTag::WMS_LIFE, "create dialogWindow, title: %{public}s, decorEnable: %{public}d",
+            TLOGI(WmsLogTag::WMS_PC, "create dialogWindow, title: %{public}s, decorEnable: %{public}d",
                 dialogTitle_.c_str(), dialogDecorEnable);
         }
     }
@@ -599,6 +605,12 @@ void WindowSessionImpl::DestroySubWindow()
                 TLOGD(WmsLogTag::WMS_SUB, "Exists other sub window, persistentId: %{public}d", persistentId);
             }
         }
+        if (property_->GetIsUIExtFirstSubWindow() && subWindowSessionMap_.empty()) {
+            auto extensionWindow = FindExtensionWindowWithContext();
+            if (extensionWindow != nullptr && extensionWindow->GetUIContentSharedPtr() == nullptr) {
+                extensionWindow->AddSetUIExtensionDestroyTimeoutCheck();
+            }
+        }
     }
     // remove from subWindowMap_ when destroy parent window
     auto mainIter = subWindowSessionMap_.find(persistentId);
@@ -702,11 +714,18 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config);
+    } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
+        RectAnimationConfig rectAnimationConfig = property_->GetRectAnimationConfig();
+        TLOGI(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig.duration: %{public}d", rectAnimationConfig.duration);
+        postTaskDone_ = false;
+        UpdateRectForResizeWithAnimation(wmRect, preRect, wmReason, rectAnimationConfig, config.rsTransaction_);
     } else {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_);
     }
 
-    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
+    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE ||
+        wmReason == WindowSizeChangeReason::MOVE_WITH_ANIMATION ||
+        wmReason == WindowSizeChangeReason::RESIZE_WITH_ANIMATION) {
         layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
     }
 
@@ -835,6 +854,46 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
     } else {
         handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
     }
+}
+
+void WindowSessionImpl::UpdateRectForResizeWithAnimation(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const RectAnimationConfig& rectAnimationConfig,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "handler is null!");
+        return;
+    }
+    auto task = [weakThis = wptr(this), wmReason, wmRect, preRect, rectAnimationConfig, rsTransaction]() mutable {
+        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForResizeWithAnimation");
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "window is null, updateRectForResizeWithAnimation failed");
+            return;
+        }
+        if (rsTransaction) {
+            RSTransaction::FlushImplicitTransaction();
+            rsTransaction->Begin();
+        }
+        RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(rectAnimationConfig.duration);
+        auto curve = RSAnimationTimingCurve::CreateCubicCurve(rectAnimationConfig.x1,
+            rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2);
+        RSNode::OpenImplicitAnimation(protocol, curve, nullptr);
+        if (wmRect != preRect || wmReason != window->lastSizeChangeReason_) {
+            window->NotifySizeChange(wmRect, wmReason);
+            window->lastSizeChangeReason_ = wmReason;
+        }
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        RSNode::CloseImplicitAnimation();
+        if (rsTransaction) {
+            rsTransaction->Commit();
+        } else {
+            RSTransaction::FlushImplicitTransaction();
+        }
+        window->postTaskDone_ = true;
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForResizeWithAnimation");
 }
 
 void WindowSessionImpl::NotifyRotationAnimationEnd()
@@ -1023,7 +1082,7 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
 bool WindowSessionImpl::IsFocused() const
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Session is invalid");
         return false;
     }
 
@@ -1333,7 +1392,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s state:%{public}u", contentInfo.c_str(), state_);
+    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, state:%{public}u, persistentId: %{public}d",
+        contentInfo.c_str(), state_, GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "window is invalid! window state: %{public}d",
             state_);
@@ -4244,10 +4304,10 @@ void WindowSessionImpl::SetUIContentComplete()
 {
     bool setUIContentCompleted = false;
     if (setUIContentCompleted_.compare_exchange_strong(setUIContentCompleted, true)) {
-        TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     } else {
-        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent, persistentId=%{public}d", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_LIFE, "already SetUIContent, persistentId=%{public}d", GetPersistentId());
     }
 }
 
@@ -4308,6 +4368,68 @@ void WindowSessionImpl::NotifySetUIContentComplete()
         }
     }
     SetUIContentComplete();
+}
+
+void WindowSessionImpl::SetUIExtensionDestroyComplete()
+{
+    bool setUIExtensionDestroyCompleted = false;
+    if (setUIExtensionDestroyCompleted_.compare_exchange_strong(setUIExtensionDestroyCompleted, true)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
+        handler_->RemoveTask(SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
+    } else {
+        TLOGI(WmsLogTag::WMS_LIFE, "already, persistentId=%{public}d", GetPersistentId());
+    }
+}
+
+void WindowSessionImpl::SetUIExtensionDestroyCompleteInSubWindow()
+{
+    if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) {
+        bool startUIExtensionDestroyTimer = true;
+        auto extensionWindow = FindExtensionWindowWithContext();
+        if (extensionWindow != nullptr && extensionWindow->startUIExtensionDestroyTimer_.compare_exchange_strong(
+            startUIExtensionDestroyTimer, false)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "called");
+            extensionWindow->SetUIExtensionDestroyComplete();
+            extensionWindow->setUIExtensionDestroyCompleted_.store(false);
+        }
+    }
+}
+
+void WindowSessionImpl::AddSetUIExtensionDestroyTimeoutCheck()
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: window is nullptr", where);
+            return;
+        }
+        if (window->setUIExtensionDestroyCompleted_.load()) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: already, persistentId=%{public}d", where,
+                window->GetPersistentId());
+            return;
+        }
+
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: timeout, persistentId=%{public}d", where, window->GetPersistentId());
+        std::ostringstream oss;
+        oss << "SetUIExtDestroy timeout uid: " << getuid();
+        oss << ", windowName: " << window->GetWindowName();
+        if (window->context_) {
+            oss << ", bundleName: " << window->context_->GetBundleName();
+            if (window->context_->GetApplicationInfo()) {
+                oss << ", abilityName: " << window->context_->GetApplicationInfo()->name;
+            }
+        }
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
+
+        if (WindowHelper::IsUIExtensionWindow(window->GetType())) {
+            window->NotifyExtensionTimeout(TimeoutErrorCode::SET_UIEXTENSION_DESTROY_TIMEOUT);
+        }
+    };
+    handler_->PostTask(task, SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()),
+        SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS, AppExecFwk::EventQueue::Priority::HIGH);
+    startUIExtensionDestroyTimer_.store(true);
 }
 
 WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)

@@ -831,6 +831,28 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: UpdateFocusStatus01
+ * @tc.desc: UpdateFocusStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->focusedSessionId_ = 1;
+
+    ssm_->UpdateFocusStatus(sceneSession, false);
+    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
+    ssm_->UpdateFocusStatus(sceneSession, true);
+    ASSERT_NE(ssm_->focusedSessionId_, 1);
+    ssm_->focusedSessionId_ = 1;
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+    ssm_->UpdateFocusStatus(sceneSession, true);
+    ASSERT_NE(ssm_->focusedSessionId_, 1);
+}
+
+/**
  * @tc.name: RequestSessionUnfocus
  * @tc.desc: RequestSessionUnfocus
  * @tc.type: FUNC

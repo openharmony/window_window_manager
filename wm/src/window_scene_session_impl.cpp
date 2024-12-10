@@ -621,6 +621,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
         AddSetUIContentTimeoutCheck();
+        SetUIExtensionDestroyCompleteInSubWindow();
         InputTransferStation::GetInstance().AddInputWindow(this);
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
@@ -1529,8 +1530,11 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
     CheckMoveConfiguration(moveConfiguration);
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
+    RectAnimationConfig rectAnimationConfig = moveConfiguration.rectAnimationConfig;
+    SizeChangeReason reason = rectAnimationConfig.duration > 0 ? SizeChangeReason::MOVE_WITH_ANIMATION :
+        SizeChangeReason::MOVE;
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true, moveConfiguration);
+    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, true, moveConfiguration, rectAnimationConfig);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetMoveToLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -1691,7 +1695,7 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
 }
 
 /** @note @window.layout */
-WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d resize %{public}u %{public}u",
         property_->GetPersistentId(), width, height);
@@ -1737,15 +1741,19 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
         newRect.width_, newRect.height_);
 
     property_->SetRequestRect(newRect);
+    property_->SetRectAnimationConfig(rectAnimationConfig);
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
+    SizeChangeReason reason = rectAnimationConfig.duration > 0 ? SizeChangeReason::RESIZE_WITH_ANIMATION :
+        SizeChangeReason::RESIZE;
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE);
+    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, false, {}, rectAnimationConfig);
     return static_cast<WMError>(ret);
 }
 
-WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
+WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
+    const RectAnimationConfig& rectAnimationConfig)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
@@ -1757,7 +1765,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
             GetWindowId(), GetMode());
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-    auto ret = Resize(width, height);
+    auto ret = Resize(width, height, rectAnimationConfig);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetResizeLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -1807,7 +1815,7 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
 WMError WindowSceneSessionImpl::RaiseToAppTop()
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -1837,7 +1845,7 @@ WMError WindowSceneSessionImpl::RaiseToAppTop()
 WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -2920,27 +2928,27 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
     {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         if (windowSessionMap_.empty()) {
-            TLOGE(WmsLogTag::DEFAULT, "[GetTopWin] Please create mainWindow First!");
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Please create mainWindow First!");
             return nullptr;
         }
         for (const auto& winPair : windowSessionMap_) {
             auto win = winPair.second.second;
             if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
                 mainWinId = win->GetWindowId();
-                TLOGD(WmsLogTag::DEFAULT, "[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
+                TLOGD(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
                 break;
             }
         }
     }
-    TLOGI(WmsLogTag::DEFAULT, "mainId:%{public}u!", mainWinId);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "mainId:%{public}u!", mainWinId);
     if (mainWinId == INVALID_WINDOW_ID) {
-        TLOGE(WmsLogTag::DEFAULT, "[GetTopWin] Cannot find topWindow!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Cannot find topWindow!");
         return nullptr;
     }
     uint32_t topWinId = INVALID_WINDOW_ID;
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
     return FindWindowById(topWinId);
@@ -2949,7 +2957,7 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
 /** @note @window.hierarchy */
 sptr<Window> WindowSceneSessionImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "mainId:%{public}u", mainWinId);
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "mainId:%{public}u", mainWinId);
     uint32_t topWinId = INVALID_WINDOW_ID;
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
     if (ret != WMError::WM_OK) {

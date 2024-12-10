@@ -239,7 +239,7 @@ WSRectF PcFoldScreenController::CalculateMovingVelocity()
 {
     WSRectF velocity = { 0.0f, 0.0f, 0.0f, 0.0f };
     std::unique_lock<std::mutex> lock(moveMutex_);
-    int32_t recordsSize = movingRectRecords_.size();
+    uint32_t recordsSize = static_cast<uint32_t>(movingRectRecords_.size());
     if (recordsSize <= 1) {
         return velocity;
     }
