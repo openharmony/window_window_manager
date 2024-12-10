@@ -438,7 +438,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Funct
         std::make_shared<SessionListenerController>();
     ASSERT_NE(nullptr, listenerController);
     ssm_->listenerController_ = listenerController;
-    ASSERT_NE(nullptr, sceneSession);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, false);
     ssm_->AddClientDeathRecipient(sessionStage, sceneSession);

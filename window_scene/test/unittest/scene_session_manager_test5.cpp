@@ -1302,6 +1302,30 @@ HWTEST_F(SceneSessionManagerTest5, DestroyToastSession, Function | SmallTest | L
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC
  */
+HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.ancoSceneState = 0;
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = nullptr;
+    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, false, true));
+    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
+}
+
+/**
+ * @tc.name: RequestSceneSessionBackground
+ * @tc.desc: RequestSceneSessionBackground
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -1716,30 +1740,6 @@ HWTEST_F(SceneSessionManagerTest5, PrepareTerminate03, Function | SmallTest | Le
     int32_t persistentId = 1;
     bool isPrepareTerminate = true;
     ASSERT_EQ(WSError::WS_OK, ssm_->PrepareTerminate(persistentId, isPrepareTerminate));
-}
-
-/**
- * @tc.name: RequestSceneSessionBackground
- * @tc.desc: RequestSceneSessionBackground
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    info.ancoSceneState = 0;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = nullptr;
-    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, false, false, false));
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, false, true));
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true, true));
 }
 
 /**
