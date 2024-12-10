@@ -932,7 +932,7 @@ void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
             "NotifyFrameLayoutFinishFromApp, id: %u, rect: %s, notifyListener: %d",
             GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
-        TLOGI(WmsLogTag::PATTERN,
+        TLOGI(WmsLogTag::WMS_PATTERN,
             "NotifyFrameLayoutFinishFromApp, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
             GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
         if (auto session = GetHostSession()) {
