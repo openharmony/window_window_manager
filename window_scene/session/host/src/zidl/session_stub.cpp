@@ -822,8 +822,7 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
 
 int SessionStub::HandleIsStartMoving(MessageParcel& data, MessageParcel& reply)
 {
-    bool isMoving = false;
-    isMoving = IsStartMoving();
+    bool isMoving = IsStartMoving();
     if (!reply.WriteBool(isMoving)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write isMoving failed");
         return ERR_INVALID_DATA;
