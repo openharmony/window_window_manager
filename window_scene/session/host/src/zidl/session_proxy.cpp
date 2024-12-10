@@ -1551,7 +1551,6 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
 
 bool SessionProxy::IsStartMoving()
 {
-    bool isMoving = false;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1569,6 +1568,7 @@ bool SessionProxy::IsStartMoving()
         TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return false;
     }
+    bool isMoving = false;
     if (!reply.ReadBool(isMoving)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read isMoving failed");
         return false;
