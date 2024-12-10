@@ -135,6 +135,12 @@ public:
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
     virtual WMError ReleaseForegroundSessionScreenLock();
+
+    /*
+     * PC Window
+     */
+    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
+    
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
 

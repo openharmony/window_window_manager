@@ -121,6 +121,7 @@ public:
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
     WMError ReleaseForegroundSessionScreenLock() override;
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 

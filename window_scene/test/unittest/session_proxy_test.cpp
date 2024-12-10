@@ -485,6 +485,23 @@ HWTEST_F(SessionProxyTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetAppForceLandscapeConfig end";
 }
+
+/**
+ * @tc.name: OnSetWindowRectAutoSave
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnSetWindowRectAutoSave start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WSError res = sProxy->OnSetWindowRectAutoSave(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnSetWindowRectAutoSave end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

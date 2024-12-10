@@ -212,4 +212,20 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
         isClientInteractive_ = interactive;
     }
 }
+
+WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
+{
+    auto task = [weakThis = wptr(this), enabled] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        if (session->onSetWindowRectAutoSaveFunc_) {
+            session->onSetWindowRectAutoSaveFunc_(enabled);
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

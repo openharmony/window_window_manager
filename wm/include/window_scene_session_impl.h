@@ -175,6 +175,12 @@ public:
     bool GetIsUIExtensionSubWindowFlag() const override;
 
     /*
+     * PC Window
+     */
+    WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError IsWindowRectAutoSave(bool& enabled) override;
+
+    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;
