@@ -1571,6 +1571,7 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionSnapshotFunc, Function | Small
 
     ssm_->listenerController_ = nullptr;
     EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
+
     sessionInfo.abilityInfo = nullptr;
     EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
 
