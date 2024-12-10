@@ -1155,7 +1155,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         GetSessionProperty()->GetCompatibleInPcLandscapeHeight());
     std::optional<bool> clientDragEnable = GetClientDragEnable();
     if (clientDragEnable.has_value()) {
-            property->SetDragEnabled(clientDragEnable.value());
+        property->SetDragEnabled(clientDragEnable.value());
     }
 
     if (SessionHelper::IsMainWindow(GetWindowType())) {
