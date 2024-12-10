@@ -181,7 +181,7 @@ public:
      * @param subWindowModalType Indicates the {@link SubWindowModalType}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
+    virtual WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
     /*
      *  Gesture Back

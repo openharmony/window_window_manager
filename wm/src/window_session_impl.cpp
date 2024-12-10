@@ -1890,7 +1890,7 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
             SubWindowModalType::TYPE_WINDOW_MODALITY :
             SubWindowModalType::TYPE_APPLICATION_MODALITY;
     }
-    hostSession->OnSessionModalTypeChange(subWindowModalType);
+    hostSession->NotifySubModalTypeChange(subWindowModalType);
     return modalRet;
 }
 

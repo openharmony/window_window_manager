@@ -544,10 +544,10 @@ void SceneSession::AddOrUpdateWindowDragHotArea(uint32_t type, const WSRect& are
     }
 }
 
-WSError SceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModalType)
+WSError SceneSession::NotifySubModalTypeChange(SubWindowModalType subWindowModalType)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), subWindowModalType, where] {
+    PostTask([weakThis = wptr(this), subWindowModalType, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -555,28 +555,26 @@ WSError SceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModal
         }
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s subWindowModalType: %{public}u",
             where, static_cast<uint32_t>(subWindowModalType));
-        if (session->onSessionModalTypeChange_) {
-            session->onSessionModalTypeChange_(subWindowModalType);
+        if (session->onSubModalTypeChange_) {
+            session->onSubModalTypeChange_(subWindowModalType);
         }
-    };
-    PostTask(task, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 
-void SceneSession::SetSessionModalTypeChangeCallback(NotifySessionModalTypeChangeFunc&& func)
+void SceneSession::RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or SessionModalTypeChangeFunc is null", where);
             return;
         }
-        session->onSessionModalTypeChange_ = std::move(func);
+        session->onSubModalTypeChange_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s id: %{public}d",
             where, session->GetPersistentId());
-    };
-    PostTask(task, __func__);
+    }, __func__);
 }
 
 SubWindowModalType SceneSession::GetSubWindowModalType() const
