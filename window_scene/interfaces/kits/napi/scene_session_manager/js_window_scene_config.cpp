@@ -172,7 +172,7 @@ JsWindowSceneConfig::~JsWindowSceneConfig()
 
 napi_value JsWindowSceneConfig::CreateFreeMultiWindowConfig(napi_env env, const SystemSessionConfig& config)
 {
-    TLOGD(WmsLogTag::DEFAULT, "in");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {

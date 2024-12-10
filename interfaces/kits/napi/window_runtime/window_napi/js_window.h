@@ -158,25 +158,25 @@ public:
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * Sub Window
      */
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * Gesture Back
      */
     static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
     static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * PC Window
      */
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * Window Decor
      */
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
@@ -192,7 +192,7 @@ public:
     static napi_value GetDecorButtonStyle(napi_env env, napi_callback_info info);
     static napi_value SetWindowTitle(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * PC Window Layout
      */
     static napi_value Recover(napi_env env, napi_callback_info info);
@@ -323,25 +323,25 @@ private:
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
     napi_value OnStartMoving(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * Sub Window
      */
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * Gesture Back
      */
     napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);
     napi_value OnGetGestureBackEnabled(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * PC Window
      */
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * Window Decor
      */
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
@@ -357,7 +357,7 @@ private:
     napi_value OnGetDecorButtonStyle(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTitle(napi_env env, napi_callback_info info);
 
-    /**
+    /*
      * PC Window Layout
      */
     napi_value OnRecover(napi_env env, napi_callback_info info);
