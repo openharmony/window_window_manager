@@ -803,14 +803,6 @@ enum class MaximizePresentation {
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
 
-
-enum class BackupAndRestoreType : int32_t {
-    NONE = 0,                       // no backup and restore
-    CONTINUATION = 1,               // distribute
-    APP_RECOVERY = 2,               // app recovery
-    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
-};
-
 enum class ExtensionWindowAttribute : int32_t {
     SYSTEM_WINDOW = 0,
     SUB_WINDOW = 1,
@@ -840,6 +832,13 @@ struct ExtensionWindowConfig {
     Rect windowRect;
     SubWindowOptions subWindowOptions;
     SystemWindowOptions systemWindowOptions;
+};
+
+enum class BackupAndRestoreType : int32_t {
+    NONE = 0,                       // no backup and restore
+    CONTINUATION = 1,               // distribute
+    APP_RECOVERY = 2,               // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
 }
 }
