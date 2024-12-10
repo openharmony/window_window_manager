@@ -2866,8 +2866,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         systemBarProperties.settingFlag_ = systemBarProperties.settingFlag_ |
             SystemBarSettingFlag::ENABLE_SETTING;
         auto errCode =
-        WM_JS_TO_ERROR_CODE_MAP.at(
-            window->SetSpecificBarProperty(systemBarType, systemBarProperties));
+            WM_JS_TO_ERROR_CODE_MAP.at(window->SetSpecificBarProperty(systemBarType, systemBarProperties));
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
