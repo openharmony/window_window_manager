@@ -130,10 +130,8 @@ HWTEST_F(WindowImplTest5, NotifyMemoryLevel, Function | SmallTest | Level1)
 HWTEST_F(WindowImplTest5, SetRequestedOrientation, Function | SmallTest | Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-
     option->SetWindowName("SetRequestedOrientation");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
     window->property_->SetRequestedOrientation(Orientation::BEGIN);
     auto orientation = Orientation::BEGIN;
     window->SetRequestedOrientation(orientation);
@@ -201,7 +199,6 @@ HWTEST_F(WindowImplTest5, CheckCameraFloatingWindowMultiCreated, Function | Smal
 HWTEST_F(WindowImplTest5, SetDefaultOption01, Function | SmallTest | Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-
     option->SetWindowName("SetDefaultOption01");
     option->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
@@ -253,7 +250,6 @@ HWTEST_F(WindowImplTest5, SetDefaultOption01, Function | SmallTest | Level1)
 HWTEST_F(WindowImplTest5, SetDefaultOption02, Function | SmallTest | Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-
     option->SetWindowName("SetDefaultOption02");
     option->SetWindowType(WindowType::WINDOW_TYPE_VOICE_INTERACTION);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
@@ -347,7 +343,6 @@ HWTEST_F(WindowImplTest5, UpdateWindowState02, Function | SmallTest | Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateWindowState02");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
@@ -681,7 +676,6 @@ HWTEST_F(WindowImplTest5, NotifyOccupiedAreaChange, Function | SmallTest | Level
     sptr<MockOccupiedAreaChangeListener> listener;
     window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener);
     listener = sptr<MockOccupiedAreaChangeListener>::MakeSptr();
-
     window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener);
     EXPECT_CALL(*listener, OnSizeChange(_, _));
     sptr<OccupiedAreaChangeInfo> info = new (std::nothrow) OccupiedAreaChangeInfo();
@@ -705,7 +699,6 @@ HWTEST_F(WindowImplTest5, NotifyDragEvent, Function | SmallTest | Level1)
     sptr<MockWindowDragListener> listener;
     window->windowDragListeners_.push_back(listener);
     listener = new (std::nothrow) MockWindowDragListener();
-
     window->windowDragListeners_.push_back(listener);
     EXPECT_CALL(*listener, OnDrag(_, _, _));
     PointInfo point({10, 20});

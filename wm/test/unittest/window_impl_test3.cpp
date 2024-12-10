@@ -1241,9 +1241,7 @@ HWTEST_F(WindowImplTest3, SetAspectRatio, Function | SmallTest | Level2)
     option->SetWindowName("SetAspectRatio");
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-
     ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(1.1));
     option->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(1.1));
