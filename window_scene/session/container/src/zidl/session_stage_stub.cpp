@@ -395,7 +395,7 @@ int SessionStageStub::HandleNotifySessionForeground(MessageParcel& data, Message
 
 int SessionStageStub::HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "called");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called");
     bool fullScreen = data.ReadBool();
     NotifySessionFullScreen(fullScreen);
     return ERR_NONE;
@@ -413,7 +413,7 @@ int SessionStageStub::HandleNotifySessionBackground(MessageParcel& data, Message
 
 int SessionStageStub::HandleUpdateTitleInTargetPos(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleUpdateTitleInTargetPos!");
+    TLOGD(WmsLogTag::WMS_DECOR, "called");
     bool isShow = data.ReadBool();
     int32_t height = data.ReadInt32();
     WSError errCode = UpdateTitleInTargetPos(isShow, height);
@@ -498,11 +498,10 @@ int SessionStageStub::HandleNotifyDisplayMove(MessageParcel& data, MessageParcel
 
 int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "HandleSwitchFreeMultiWindow!");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called!");
     bool enable = data.ReadBool();
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
-
     return ERR_NONE;
 }
 
