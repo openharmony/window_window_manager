@@ -144,14 +144,14 @@ public:
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
 
-    /**
+    /*
      * PC Window
      */
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
 
-    /**
+    /*
      * PC Window Layout
      */
     WMError Restore() override;
@@ -166,7 +166,7 @@ public:
     WMError Recover(uint32_t reason) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
 
-    /**
+    /*
      * Compatible Mode
      */
     WSError NotifyCompatibleModeEnableInPad(bool enabled) override;
@@ -174,7 +174,7 @@ public:
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
 
-    /**
+    /*
      * Free Multi Window
      */
     WSError SwitchFreeMultiWindow(bool enable) override;
@@ -188,13 +188,13 @@ public:
     bool GetIsUIExtFirstSubWindow() const override;
     bool GetIsUIExtAnySubWindow() const override;
 
-    /**
+    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;
     WMError GetGestureBackEnabled(bool& enable) override;
 
-    /**
+    /*
      * PC Screen Manager
      */
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
@@ -206,7 +206,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
-    /**
+    /*
      * Window Decor
      */
     WMError SetWindowTitle(const std::string& title) override;
@@ -306,7 +306,7 @@ private:
      */
     void InitSystemSessionDragEnable();
 
-    /**
+    /*
      * Sub Window
      */
     void AddSubWindowMapForExtensionWindow();
@@ -322,7 +322,7 @@ private:
     std::unordered_map<int32_t, std::vector<int32_t>> eventMapDeltaXByDisplay_;
     std::unordered_map<int32_t, std::vector<PointInfo>> downPointerByDisplay_;
 
-    /**
+    /*
      * PC Fold Screen
      */
     std::atomic_bool isFullScreenWaterfallMode_ { false };

@@ -254,7 +254,7 @@ public:
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
 
-    /**
+    /*
      * Window Decor
      */
     WMError SetDecorVisible(bool isVisible) override;
@@ -367,7 +367,7 @@ protected:
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
 
-    /**
+    /*
      * Sub Window
      */
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
@@ -530,7 +530,7 @@ private:
     bool IsNotifyInteractiveDuplicative(bool interactive);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
 
-    /**
+    /*
      * PC Window
      */
     void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
@@ -600,7 +600,7 @@ private:
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
 
-    /**
+    /*
      * Window Decor
      */
     DecorButtonStyle decorButtonStyle_;
