@@ -104,7 +104,8 @@ public:
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
-    virtual WMError Resize(uint32_t width, uint32_t height) override;
+    virtual WMError Resize(uint32_t width, uint32_t height,
+        const RectAnimationConfig& rectAnimationConfig = {}) override;
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
     virtual bool IsKeepScreenOn() const override;
@@ -176,7 +177,8 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
-
+    WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
+        AppExecFwk::Ability* ability) override;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;

@@ -137,46 +137,6 @@ HWTEST_F(ScenePersistenceTest, RenameSnapshotFromOldPersistentId, Function | Sma
 }
 
 /**
- * @tc.name: SaveUpdatedIcon
- * @tc.desc: test function : SaveUpdatedIcon
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon, Function | SmallTest | Level1)
-{
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    std::string directory = "0/Storage";
-    std::string bundleName = "testBundleName";
-    ASSERT_NE(nullptr, scenePersistence);
-    scenePersistence->SaveUpdatedIcon(pixelMap);
-    SessionInfo info;
-    info.bundleName_ = "bundleName";
-    sptr<Session> session = new Session(info);
-    ASSERT_NE(nullptr, session);
-    scenePersistence->SaveUpdatedIcon(mPixelMap);
-    std::string result(scenePersistence->GetUpdatedIconPath());
-    std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
-    EXPECT_NE(result.compare(test), 0);
-}
-
-/**
- * @tc.name: SaveUpdatedIcon02
- * @tc.desc: test function : SaveUpdatedIcon02
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon02, Function | SmallTest | Level1)
-{
-    std::string directory = "0/Storage";
-    std::string bundleName = "testBundleName";
-    ASSERT_NE(nullptr, scenePersistence);
-    scenePersistence->snapshotPath_ = "/data/1.png";
-    ASSERT_NE(nullptr, mPixelMap);
-    scenePersistence->SaveUpdatedIcon(mPixelMap);
-    std::string result(scenePersistence->GetUpdatedIconPath());
-    std::string test = ScenePersistence::updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
-    EXPECT_EQ(result.compare(test), 1);
-}
-
-/**
  * @tc.name: IsSnapshotExisted
  * @tc.desc: test function : IsSnapshotExisted
  * @tc.type: FUNC

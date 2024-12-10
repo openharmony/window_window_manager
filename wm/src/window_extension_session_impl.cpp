@@ -224,6 +224,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     }
     ClearVsyncStation();
     SetUIContentComplete();
+    SetUIExtensionDestroyComplete();
     RemoveExtensionWindowStageFromSCB();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed success, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
@@ -245,7 +246,8 @@ WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y,
     return static_cast<WMError>(error);
 }
 
-WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height,
+    const RectAnimationConfig& rectAnimationConfig)
 {
     WLOGFD("Id:%{public}d wh %{public}u %{public}u", property_->GetPersistentId(), width, height);
     if (IsWindowSessionInvalid()) {

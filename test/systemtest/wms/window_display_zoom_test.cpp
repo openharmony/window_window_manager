@@ -74,9 +74,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom01";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -124,9 +122,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, Function | MediumTest | Level3)
 {
     windowInfo_.name = "DisplayZoom02";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     sleep(1);
 
@@ -159,9 +155,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, Function | MediumTest | Level3)
 {
     windowInfo_.name = "DisplayZoom03";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -191,9 +185,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom04";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -231,9 +223,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom05";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());

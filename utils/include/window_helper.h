@@ -79,6 +79,11 @@ public:
         return (type == WindowType::WINDOW_TYPE_FLOAT) || (type == WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     }
 
+    static inline bool IsFloatOrSubWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_FLOAT || IsSubWindow(type);
+    }
+
     static inline bool IsPipWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_PIP);
