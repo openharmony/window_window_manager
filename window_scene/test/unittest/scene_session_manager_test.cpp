@@ -43,15 +43,13 @@ const std::string EMPTY_DEVICE_ID = "";
 class SceneSessionManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
-
     static void TearDownTestCase();
-
     void SetUp() override;
-
     void TearDown() override;
-
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
     int32_t GetTaskCount(sptr<SceneSession>& session);
+    static bool gestureNavigationEnabled_;
+    static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -59,6 +57,11 @@ private:
 
 sptr<SceneSessionManager> SceneSessionManagerTest::ssm_ = nullptr;
 
+bool SceneSessionManagerTest2::gestureNavigationEnabled_ = true;
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest2::callbackFunc_ = [](bool enable,
+    const std::string& bundleName, GestureBackType type) {
+    gestureNavigationEnabled_ = enable;
+};
 void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
 {
 }
@@ -307,6 +310,19 @@ HWTEST_F(SceneSessionManagerTest, GetSessionInfos02, Function | SmallTest | Leve
     SessionInfoBean sessionInfo;
     int result01 = ssm_->GetRemoteSessionInfo(deviceId, persistentId, sessionInfo);
     ASSERT_NE(result01, ERR_OK);
+}
+
+/**
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: SceneSesionManager get unreliable window info
+ * @tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Level3)
+{
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
+    EXPECT_EQ(WMError::WM_OK, result);
 }
 
 /**
@@ -582,11 +598,11 @@ HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog001, Function | Sm
     parentInfo.bundleName_ = "ParentWindows";
 
     int32_t persistentId = 1005;
-    sptr<SceneSession> parentSession = new (std::nothrow) MainSession(parentInfo, nullptr);
+    sptr<SceneSession> parentSession = new (std::nothrow) SceneSession(parentInfo, nullptr);
     EXPECT_NE(parentSession, nullptr);
     ssm_->sceneSessionMap_.insert({ persistentId, parentSession });
 
-    sptr<SceneSession> dialogSession = new (std::nothrow) SystemSession(dialogInfo, nullptr);
+    sptr<SceneSession> dialogSession = new (std::nothrow) SceneSession(dialogInfo, nullptr);
     EXPECT_NE(dialogSession, nullptr);
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
