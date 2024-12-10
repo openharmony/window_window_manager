@@ -170,6 +170,8 @@ public:
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
+    DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+        uint32_t& actualRefreshRate) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };
