@@ -135,7 +135,7 @@ private:
     UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
     mutable std::mutex mutex_;
-    std::unordered_set<sptr<IAvoidAreaChangedListener>, Hasher<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
+    std::unordered_set<sptr<IAvoidAreaChangedListener>, SptrHasher<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
     // Above guarded by mutex_
 };
 } // namespace Rosen
