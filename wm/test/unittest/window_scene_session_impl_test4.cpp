@@ -29,6 +29,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class WindowSceneSessionImplTest4 : public testing::Test {
 public:
@@ -1951,20 +1952,19 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal, Function | SmallTest |
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
     option->SetWindowName("MoveWindowToGlobal");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
     MoveConfiguration moveConfiguration;
-    windowSessionImpl->hostSession_ = nullptr;
+    window->hostSession_ = nullptr;
     auto ret = window->MoveWindowToGlobal(0, 0, moveConfiguration);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
-    windowSessionImpl->hostSession_ = session;
+    window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_INITIAL;
 
@@ -1985,7 +1985,6 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal01, Function | SmallTest
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
     option->SetWindowName("MoveWindowToGlobal01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
@@ -1993,7 +1992,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal01, Function | SmallTest
     MoveConfiguration moveConfiguration;
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSessionImpl->hostSession_ = session;
+    window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_INITIAL;
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -2016,8 +2015,8 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent01, Function | SmallT
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
-    std::string eventName = "";
-    std::string value = "";
+    std::string eventName = "window_scene_session_impl_test4";
+    std::string value = "window_scene_session_impl_test4";
     auto ret = window->OnContainerModalEvent(eventName, value);
     ASSERT_NE(WMError::WM_DO_NOTHING, ret);
 
