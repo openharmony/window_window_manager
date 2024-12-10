@@ -559,8 +559,7 @@ public:
     /**
      * Free Multi Window
      */
-    bool SetWindowFreeze(bool isFreeze);
-    std::shared_ptr<Media::PixelMap> GetSnapshotWithFreeze(float scaleParam, bool isFreeze) const;
+    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam = 0.0f, bool isFreeze = false) const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

@@ -159,8 +159,7 @@ private:
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
-    static napi_value SetWindowFreeze(napi_env env, napi_callback_info info);
-    static napi_value GetSessionSnapshotWithFreeze(napi_env env, napi_callback_info info);
+    static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -222,8 +221,7 @@ private:
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowFreeze(napi_env env, napi_callback_info info);
-    napi_value OnGetSessionSnapshotWithFreeze(napi_env env, napi_callback_info info);
+    napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
