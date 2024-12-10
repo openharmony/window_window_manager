@@ -62,6 +62,7 @@ ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest::callbackFunc_
     const std::string& bundleName, GestureBackType type) {
     gestureNavigationEnabled_ = enable;
 };
+
 void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
 {
 }
