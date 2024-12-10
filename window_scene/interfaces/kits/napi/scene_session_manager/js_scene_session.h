@@ -74,6 +74,7 @@ enum class ListenerFuncType : uint32_t {
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
+    SET_WINDOW_RECT_AUTO_SAVE_CB,
 };
 
 class SceneSession;
@@ -239,6 +240,7 @@ private:
     void ProcessDefaultDensityEnabledRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
+    void ProcessSetWindowRectAutoSaveRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -287,6 +289,7 @@ private:
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void NotifyFrameLayoutFinish();
+    void OnSetWindowRectAutoSave(bool enabled);
 
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
