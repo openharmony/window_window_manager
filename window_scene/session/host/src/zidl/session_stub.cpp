@@ -825,7 +825,7 @@ int SessionStub::HandleIsStartMoving(MessageParcel& data, MessageParcel& reply)
     bool isMoving = false;
     isMoving = IsStartMoving();
     if (!reply.WriteBool(isMoving)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write isMoving failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write isMoving failed");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

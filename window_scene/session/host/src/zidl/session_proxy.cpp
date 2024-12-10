@@ -1556,21 +1556,21 @@ bool SessionProxy::IsStartMoving()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DEFAULT, "writeInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "writeInterfaceToken failed");
         return false;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_START_MOVING),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return false;
     }
     if (!reply.ReadBool(isMoving)) {
-        TLOGE(WmsLogTag::DEFAULT, "Read isMoving failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isMoving failed");
         return false;
     }
     return isMoving;
