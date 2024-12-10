@@ -140,8 +140,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTe
  */
 HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | Level2)
 {
-    int ret = 0;
-    manager_->IsFilterSession(nullptr);
+    bool ret = manager_->IsFilterSession(nullptr);
+    ASSERT_EQ(ret, true);
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
@@ -149,30 +149,92 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | L
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
-    info.sceneType_ = SceneType::INPUT_SCENE;
-    manager_->IsFilterSession(sceneSession);
-    info.sceneType_ = SceneType::WINDOW_SCENE;
+    sceneSession->sessionInfo_ = info;
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
     info.isSystem_ = false;
+    sceneSession->sessionInfo_ = info;
     sceneSession->isVisible_ = false;
     sceneSession->isSystemActive_ = false;
-    manager_->IsFilterSession(sceneSession);
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
     info.isSystem_ = true;
-    manager_->IsFilterSession(sceneSession);
+    sceneSession->sessionInfo_ = info;
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
     sceneSession->isVisible_ = true;
-    manager_->IsFilterSession(sceneSession);
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
     sceneSession->isSystemActive_ = true;
-    manager_->IsFilterSession(sceneSession);
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
     info.isSystem_ = true;
+    sceneSession->sessionInfo_ = info;
     sceneSession->isVisible_ = true;
     sceneSession->SetSystemActive(true);
-    manager_->IsFilterSession(sceneSession);
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
     info.isSystem_ = false;
+    sceneSession->sessionInfo_ = info;
     sceneSession->isVisible_ = false;
     sceneSession->SetSystemActive(false);
-    manager_->IsFilterSession(sceneSession);
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
     sceneSession->isVisible_ = false;
-    manager_->IsFilterSession(sceneSession);
-    ASSERT_EQ(ret, 0);
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsFilterSession02
+ * @tc.desc: IsFilterSession02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession02, Function | SmallTest | Level2)
+{
+    bool ret = manager_->IsFilterSession(nullptr);
+    ASSERT_EQ(ret, true);
+    SessionInfo info;
+    info.abilityName_ = "test3";
+    info.bundleName_ = "test4";
+    info.sceneType_ = SceneType::WINDOW_SCENE;
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
+    sceneSession->sessionInfo_ = info;
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, true);
+    info.isSystem_ = false;
+    sceneSession->sessionInfo_ = info;
+    sceneSession->isVisible_ = false;
+    sceneSession->isSystemActive_ = false;
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, true);
+    info.isSystem_ = true;
+    sceneSession->sessionInfo_ = info;
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, true);
+    sceneSession->isVisible_ = true;
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
+    sceneSession->isSystemActive_ = true;
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
+    info.isSystem_ = true;
+    sceneSession->sessionInfo_ = info;
+    sceneSession->isVisible_ = true;
+    sceneSession->SetSystemActive(true);
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, false);
+    info.isSystem_ = false;
+    sceneSession->sessionInfo_ = info;
+    sceneSession->isVisible_ = false;
+    sceneSession->SetSystemActive(false);
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, true);
+    sceneSession->isVisible_ = false;
+    ret = manager_->IsFilterSession(sceneSession);
+    ASSERT_EQ(ret, true);
 }
 
 /**
@@ -377,9 +439,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, Function | SmallTest | Le
  */
 HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTest | Level2)
 {
-    int ret = 0;
     std::vector<MMI::Rect> empty(0);
     manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
+    ASSERT_EQ(empty.size(), 0);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "UpdateDefaultHotAreas";
     sessionInfo.moduleName_ = "UpdateDefaultHotAreas";
@@ -390,15 +452,23 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTe
     WSRect rect = {0, 0, 320, 240};
     sceneSession->SetSessionRect(rect);
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_NE(empty.size(), 0);
+    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_NE(empty.size(), 0);
+    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_NE(empty.size(), 0);
+    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
+    ASSERT_NE(empty.size(), 0);
+    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
     sceneSession->SetSessionProperty(nullptr);
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_EQ(ret, 0);
+    ASSERT_NE(empty.size(), 0);
 }
 
 /**
@@ -506,9 +576,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
     SessionInfo info;
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    if (!sceneSession || !property) {
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
+    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetDragEnabled(false);
     sceneSession->SetSessionProperty(property);
@@ -546,8 +615,10 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
         pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
     ASSERT_EQ(compare4, pointerChangeAreas);
     manager_->UpdatePointerAreas(nullptr, pointerChangeAreas);
+    ASSERT_EQ(compare4, pointerChangeAreas);
     sceneSession->SetSessionProperty(nullptr);
-    manager_->UpdatePointerAreas(nullptr, pointerChangeAreas);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(compare4, pointerChangeAreas);
 }
 
 /**
@@ -828,7 +899,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, ResetFlushWindowInfoTask1, Function | Sma
  */
 HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, Function | SmallTest | Level2)
 {
-    int ret = 0;
     std::vector<MMI::Rect> rects(0);
     for (int i = 0; i < 2 ; i++) {
         MMI::Rect rect = {
@@ -839,8 +909,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, Function | SmallTest | Level2)
         };
         rects.emplace_back(rect);
     }
-    DumpRect(rects);
-    ASSERT_EQ(ret, 0);
+    std::string ret = DumpRect(rects);
+    std::string checkStr = " hot : [ 0 , 0 , 0 , 0] hot : [ 10 , 10 , 10 , 10]";
+    ASSERT_EQ(ret, checkStr);
 }
 
 } // namespace
