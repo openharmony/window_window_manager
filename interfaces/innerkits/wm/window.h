@@ -621,9 +621,9 @@ public:
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
 	/**
-     * @brief Update configuration for all windows synchronously
+     * @brief Update configuration synchronously for all windows.
 	 *
-     * @param configuration configuration for app
+     * @param configuration configuration for app.
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
