@@ -15,6 +15,7 @@
 
 #include "js_root_scene_session.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "session_manager/include/scene_session_task_remover.h"
 
 #include "context.h"
 #include <js_runtime_utils.h>
@@ -241,6 +242,8 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             TLOGNE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
             return;
         }
+        SessionLifeCycleTaskAutoRemover remover = SessionLifeCycleTaskAutoRemover(
+            sessionInfo->persistentId_, LifeCycleTaskType::START);
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsSessionInfo is nullptr");
