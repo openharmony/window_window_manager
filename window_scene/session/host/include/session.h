@@ -551,6 +551,7 @@ public:
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
+    bool CheckIsSkipUpdate();
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
 
     /**
