@@ -823,7 +823,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus, Function | SmallTest | Lev
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->UpdateFocusStatus(sceneSession, false);
     ssm_->UpdateFocusStatus(sceneSession, true);
- 
+
     sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
     ssm_->UpdateFocusStatus(sceneSession1, true);
@@ -848,7 +848,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest |
     FocusChangeReason reason = FocusChangeReason::MOVE_UP;
     WSError ret = ssm_->RequestSessionUnfocus(0, reason);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
- 
+
     sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(focusedSession, nullptr);
     focusedSession->property_ = property;
@@ -1229,7 +1229,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckSessionPropertyOnRecovery, Function | Sm
     property->SetWindowFlags(123);
     WSError result = ssm_->CheckSessionPropertyOnRecovery(property, false);
     ASSERT_EQ(result, WSError::WS_ERROR_NOT_SYSTEM_APP);
-   
+
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetParentPersistentId(111);
     result = ssm_->CheckSessionPropertyOnRecovery(property, true);
@@ -1590,7 +1590,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSceneSessionBackground03, Function | S
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionInfoPersistentId(0);
     ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
-    
+
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert({0, sceneSession});
     ssm_->RequestSceneSessionBackground(sceneSession, false, false, true);
