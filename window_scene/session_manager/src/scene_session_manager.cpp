@@ -8814,7 +8814,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-        TLOGI(WmsLogTag::WMS_IMMS,
+        TLOGD(WmsLogTag::WMS_IMMS,
             "id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
         needUpdate = false;
         return;
