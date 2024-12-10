@@ -88,20 +88,17 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        HandleScope handleScope(env);
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert rect to jsObject", funcName);
-            napi_close_handle_scope(env, scope);
             return;
         }
         napi_set_named_property(env, objValue, "width", CreateJsValue(env, rect.width_));
         napi_set_named_property(env, objValue, "height", CreateJsValue(env, rect.height_));
         napi_value argv[] = {objValue};
         thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        napi_close_handle_scope(env, scope);
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
@@ -444,11 +441,9 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        HandleScope handleScope(env);
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(windowstatus))};
         thisListener->CallJsMethod(WINDOW_STATUS_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        napi_close_handle_scope(env, scope);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
@@ -457,11 +452,11 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 
 void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
 {
-    TLOGD(WmsLogTag::DEFAULT, "in");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     auto jsCallback = [self = weakRef_, displayId, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
@@ -469,7 +464,7 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
         thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
     }
 }
 
@@ -495,23 +490,23 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 
 void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
     auto jsCallback = [self = weakRef_, titleButtonRect, env = env_, where = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s this listener or env is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s this listener or env is nullptr", where);
             return;
         }
         napi_value titleButtonRectValue = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
         if (titleButtonRectValue == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s titleButtonRectValue is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s titleButtonRectValue is nullptr", where);
             return;
         }
         napi_value argv[] = { titleButtonRectValue };
         thisListener->CallJsMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to send event");
     }
 }
 
@@ -530,15 +525,14 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         rectChangeReason = RectChangeReason::MOVE;
     }
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_, funcName = __func__] () {
+    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_, funcName = __func__] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRectChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        HandleScope handleScope(env);
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
@@ -554,7 +548,6 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         napi_set_named_property(env, objValue, "reason", CreateJsValue(env, rectChangeReason));
         napi_value argv[] = {objValue};
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
-        napi_close_handle_scope(env, scope);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
@@ -597,7 +590,7 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnMainWindowClose");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_PC, "this listener or env is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;
@@ -611,7 +604,7 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
     };
 
     if (!eventHandler_) {
-        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        TLOGE(WmsLogTag::WMS_PC, "get main event handler failed!");
         return;
     }
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnMainWindowClose",

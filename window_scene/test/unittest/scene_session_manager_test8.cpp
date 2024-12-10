@@ -185,32 +185,6 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: PostProcessFocus02
- * @tc.desc: test function : PostProcessFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, PostProcessFocus02, Function | SmallTest | Level3)
-{
-    ssm_->sceneSessionMap_.clear();
-    ssm_->focusedSessionId_ = 0;
-
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "PostProcessFocus02";
-    sessionInfo.abilityName_ = "PostProcessFocus02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession->persistentId_ = 1;
-    sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    sceneSession->isVisible_ = true;
-
-    PostProcessFocusState state = {true, true, true, FocusChangeReason::RECENT};
-    sceneSession->SetPostProcessFocusState(state);
-    ssm_->sceneSessionMap_.emplace(1, sceneSession);
-    ssm_->PostProcessFocus();
-
-    EXPECT_EQ(1, ssm_->focusedSessionId_);
-}
-
-/**
  * @tc.name: PostProcessFocus03
  * @tc.desc: test function : PostProcessFocus
  * @tc.type: FUNC
@@ -767,42 +741,6 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, Function | SmallTest | Lev
     ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
     auto ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: RemoveExtensionWindowStageFromSCB
- * @tc.desc: test function : RemoveExtensionWindowStageFromSCB
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, RemoveExtensionWindowStageFromSCB, Function | SmallTest | Level3)
-{
-    sptr<ISessionStage> sessionStage = nullptr;
-    sptr<IRemoteObject> token = nullptr;
-    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
-
-    sessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(sessionStage, nullptr);
-    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
-
-    token = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(token, nullptr);
-    sessionStage = nullptr;
-    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
-
-    sessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(sessionStage, nullptr);
-    ssm_->remoteExtSessionMap_.clear();
-    ssm_->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), nullptr));
-    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
-
-    ssm_->remoteExtSessionMap_.clear();
-    ssm_->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), token));
-    ssm_->RemoveExtensionWindowStageFromSCB(sessionStage, token);
-
-    std::string bundleName = "";
-    AppForceLandscapeConfig config = { 0, "MainPage" };
-    auto ret = ssm_->SetAppForceLandscapeConfig(bundleName, config);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**

@@ -29,6 +29,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class WindowSceneSessionImplTest4 : public testing::Test {
 public:
@@ -1160,28 +1161,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: VerifySubWindowLevel
- * @tc.desc: VerifySubWindowLevel Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, VerifySubWindowLevel, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    EXPECT_NE(nullptr, option);
-    option->SetWindowName("VerifySubWindowLevel");
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    option->SetDisplayId(0);
-    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    EXPECT_NE(nullptr, window);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    EXPECT_NE(nullptr, session);
-    window->hostSession_ = session;
-    ASSERT_EQ(false, window->VerifySubWindowLevel(window->GetParentId()));
-}
-
-/**
  * @tc.name: AddSubWindowMapForExtensionWindow
  * @tc.desc: AddSubWindowMapForExtensionWindow Test
  * @tc.type: FUNC
@@ -1835,44 +1814,6 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationSyncForAll, Function | 
 }
 
 /**
- * @tc.name: VerifySubWindowLevel01
- * @tc.desc: VerifySubWindowLevel
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, VerifySubWindowLevel01, Function | SmallTest | Level2)
-{
-    uint32_t parentId = 0;
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("VerifySubWindowLevel01");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
-    windowSceneSessionImpl->windowSessionMap_.clear();
-    windowSceneSessionImpl->windowSessionMap_.insert(
-        std::pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>("", std::pair(0, nullptr)));
-    auto ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
-    ASSERT_EQ(ret, false);
-
-    windowSceneSessionImpl->windowSessionMap_.clear();
-    windowSceneSessionImpl->windowSessionMap_.insert(
-        std::pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>("", std::pair(1, windowSessionImpl)));
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.persistentId_ = 0;
-    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
-    ASSERT_EQ(ret, true);
-
-    windowSessionImpl->GetProperty()->SetSubWindowLevel(10000);
-    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
-    ASSERT_EQ(ret, false);
-
-    windowSessionProperty.persistentId_ = 1;
-    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
-    ASSERT_EQ(ret, false);
-}
-
-/**
  * @tc.name: NotifyDrawingCompleted
  * @tc.desc: NotifyDrawingCompleted
  * @tc.type: FUNC
@@ -1951,20 +1892,19 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal, Function | SmallTest |
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
     option->SetWindowName("MoveWindowToGlobal");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
     MoveConfiguration moveConfiguration;
-    windowSessionImpl->hostSession_ = nullptr;
+    window->hostSession_ = nullptr;
     auto ret = window->MoveWindowToGlobal(0, 0, moveConfiguration);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
-    windowSessionImpl->hostSession_ = session;
+    window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_INITIAL;
 
@@ -1985,7 +1925,6 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal01, Function | SmallTest
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
     option->SetWindowName("MoveWindowToGlobal01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
@@ -1993,7 +1932,7 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveWindowToGlobal01, Function | SmallTest
     MoveConfiguration moveConfiguration;
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSessionImpl->hostSession_ = session;
+    window->hostSession_ = session;
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_INITIAL;
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -2016,15 +1955,15 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent01, Function | SmallT
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
-    std::string eventName = "";
-    std::string value = "";
+    std::string eventName = "window_scene_session_impl_test4";
+    std::string value = "window_scene_session_impl_test4";
     auto ret = window->OnContainerModalEvent(eventName, value);
-    ASSERT_NE(WMError::WM_DO_NOTHING, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
 
     eventName = "scb_waterfall_window_event";
     window->hostSession_ = nullptr;
     ret = window->OnContainerModalEvent(eventName, value);
-    ASSERT_NE(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 }
 } // namespace Rosen

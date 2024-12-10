@@ -132,8 +132,6 @@ public:
     std::shared_ptr<Ace::UIContent> GetUIContentSharedPtr() const;
     Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
     void OnNewWant(const AAFwk::Want& want) override;
-    WMError SetAPPWindowLabel(const std::string& label) override;
-    WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
@@ -197,11 +195,8 @@ public:
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
-    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
-        bool isCloseVisible) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
-    WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     virtual Orientation GetRequestedOrientation() override;
 
     int32_t GetParentId() const;
@@ -259,17 +254,22 @@ public:
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
 
-    /**
+    /*
      * Window Decor
      */
-    virtual WMError SetDecorVisible(bool isVisible) override;
-    virtual WMError SetWindowTitleMoveEnabled(bool enable) override;
-    virtual WMError SetDecorHeight(int32_t decorHeight) override;
-    virtual WMError GetDecorHeight(int32_t& height) override;
-    virtual WMError SetDecorButtonStyle(const DecorButtonStyle& decorButtonStyle) override;
-    virtual WMError GetDecorButtonStyle(DecorButtonStyle& decorButtonStyle) override;
+    WMError SetDecorVisible(bool isVisible) override;
+    WMError SetWindowTitleMoveEnabled(bool enable) override;
+    WMError SetDecorHeight(int32_t decorHeight) override;
+    WMError GetDecorHeight(int32_t& height) override;
+    WMError SetDecorButtonStyle(const DecorButtonStyle& decorButtonStyle) override;
+    WMError GetDecorButtonStyle(DecorButtonStyle& decorButtonStyle) override;
+    WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
+    WMError SetAPPWindowLabel(const std::string& label) override;
+    WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
+    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+        bool isCloseVisible) override;
+    WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
 
-    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     virtual WMError RegisterWindowTitleButtonRectChangeListener(
         const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
@@ -367,7 +367,7 @@ protected:
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
 
-    /**
+    /*
      * Sub Window
      */
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
@@ -422,8 +422,14 @@ protected:
     void AddSetUIContentTimeoutCheck();
     void NotifySetUIContentComplete();
     std::atomic_bool setUIContentCompleted_ { false };
+    void SetUIExtensionDestroyComplete();
+    void SetUIExtensionDestroyCompleteInSubWindow();
+    void AddSetUIExtensionDestroyTimeoutCheck();
+    std::atomic_bool setUIExtensionDestroyCompleted_ { false };
+    std::atomic_bool startUIExtensionDestroyTimer_ { false };
     enum TimeoutErrorCode : int32_t {
-        SET_UICONTENT_TIMEOUT = 1000
+        SET_UICONTENT_TIMEOUT = 1000,
+        SET_UIEXTENSION_DESTROY_TIMEOUT
     };
 
     /**
@@ -512,6 +518,8 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction);
+    void UpdateRectForResizeWithAnimation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const RectAnimationConfig& rectAnimationConfig, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
@@ -522,7 +530,7 @@ private:
     bool IsNotifyInteractiveDuplicative(bool interactive);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
 
-    /**
+    /*
      * PC Window
      */
     void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
@@ -592,7 +600,7 @@ private:
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
 
-    /**
+    /*
      * Window Decor
      */
     DecorButtonStyle decorButtonStyle_;

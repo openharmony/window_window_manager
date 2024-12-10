@@ -548,6 +548,8 @@ public:
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError TerminateSessionByPersistentId(int32_t persistentId);
+    void SetUserAuthPassed(bool isUserAuthPassed);
+    bool IsUserAuthPassed() const;
 
 protected:
     SceneSessionManager();
@@ -612,6 +614,7 @@ private:
     /**
      * Window Lifecycle
      */
+    bool isUserAuthPassed_ {false};
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
