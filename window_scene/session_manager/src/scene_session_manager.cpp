@@ -8128,7 +8128,7 @@ void SceneSessionManager::UpdateSubWindowVisibility(const sptr<SceneSession>& se
             if (subSession == nullptr) {
                 continue;
             }
-            if (subSession->IsSessionForeground() || GetSessionRSVisible(subSession, currVisibleData)) {
+            if (GetSessionRSVisible(subSession, currVisibleData)) {
                 TLOGI(WmsLogTag::DEFAULT, "Update subwindow visibility for winId: %{public}d",
                     subSession->GetWindowId());
                 SetSessionVisibilityInfo(subSession, visibleState, windowVisibilityInfos, visibilityInfo);
