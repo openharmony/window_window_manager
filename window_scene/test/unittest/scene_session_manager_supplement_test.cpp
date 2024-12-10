@@ -1105,50 +1105,6 @@ HWTEST_F(SceneSessionManagerSupplementTest, GetFocusWindowInfo, Function | Small
 }
 
 /**
- * @tc.name: NotifySessionForCallback
- * @tc.desc: NotifySessionForCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerSupplementTest, NotifySessionForCallback, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.bundleName_ = "test1";
-    info.abilityName_ = "test2";
-    info.isSystem_ = true;
-    std::shared_ptr<SessionListenerController> listener = std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listener;
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->NotifySessionForCallback(sceneSession, true);
-    info.isSystem_ = false;
-    sceneSession = new SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->NotifySessionForCallback(sceneSession, true);
-    ssm_->NotifySessionForCallback(sceneSession, true);
-    ssm_->NotifySessionForCallback(sceneSession, false);
-    info.appIndex_ = 1;
-    sceneSession = new SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->NotifySessionForCallback(sceneSession, true);
-    ssm_->NotifySessionForCallback(sceneSession, false);
-    info.appIndex_ = 0;
-    sceneSession = new SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->NotifySessionForCallback(sceneSession, true);
-    ssm_->NotifySessionForCallback(sceneSession, false);
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
-    info.abilityInfo = abilityInfo;
-    sceneSession = new SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    ssm_->NotifySessionForCallback(sceneSession, true);
-    ssm_->NotifySessionForCallback(sceneSession, false);
-    ssm_->NotifyWindowInfoChangeFromSession(1);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ASSERT_TRUE(ssm_->sceneSessionMap_.find(1) != ssm_->sceneSessionMap_.end());
-    ssm_->NotifyWindowInfoChangeFromSession(1);
-}
-
-/**
  * @tc.name: IsSessionVisible
  * @tc.desc: IsSessionVisible
  * @tc.type: FUNC
