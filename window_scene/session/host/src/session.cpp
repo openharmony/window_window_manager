@@ -1000,7 +1000,7 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
     if (GetSessionProperty()->IsSystemKeyboard()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "skip update VirtualKeyboard: %{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "skip update SystemKeyboard: %{public}d", GetPersistentId());
         return;
     }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
