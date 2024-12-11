@@ -6721,7 +6721,7 @@ napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_i
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 3) { // 3: params num
+    if (argc < 2) { // 2: min params num
         TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -6736,9 +6736,8 @@ napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isCloseVisible = true;
-    if (!ConvertFromJsValue(env, argv[INDEX_TWO], isCloseVisible)) {
+    if (argc > 2 && !ConvertFromJsValue(env, argv[INDEX_TWO], isCloseVisible)) { // 2: min params num
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isCloseVisible");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
