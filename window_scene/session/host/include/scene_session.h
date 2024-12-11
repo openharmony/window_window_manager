@@ -570,12 +570,6 @@ public:
     void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
     void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
 
-    /**
-     * system keyboard
-     */
-    void SetIsSystemKeyboard(bool isSystemKeyboard);
-    bool IsSystemKeyboard() const;
-
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
