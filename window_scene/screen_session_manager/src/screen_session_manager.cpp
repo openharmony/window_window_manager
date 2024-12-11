@@ -158,13 +158,6 @@ ScreenSessionManager::ScreenSessionManager()
     }
     if (g_foldScreenFlag) {
         HandleFoldScreenPowerInit();
-    } else {
-        std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
-        int32_t phyOffset = static_cast<int32_t>(std::stoi(phyOffsets[0]));
-        ScreenRotation correctRotation = ConvertOffsetToCorrectRotation(phyOffset);
-        rsInterface_.SetScreenCorrection(SCREEN_ID_DEFAULT, correctRotation);
-        TLOGI(WmsLogTag::DMS, "SetScreenCorrection, phyOffset: %{public}u, correctRotation: %{public}u",
-            phyOffset, correctRotation);
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
 }
@@ -198,18 +191,6 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
         return;
     }
     foldScreenController_->SetOnBootAnimation(true);
-    std::ostringstream oss;
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_MAIN,
-            static_cast<ScreenRotation>(ROTATION_90));
-        oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
-    } else {
-        auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL,
-            static_cast<ScreenRotation>(g_screenRotationOffSet));
-        oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
-    }
-    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
-    screenEventTracker_.RecordEvent(oss.str());
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
         SetFoldScreenPowerInit([&]() {
             foldScreenController_->BootAnimationFinishPowerInit();
@@ -639,6 +620,31 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
     }
 }
 
+void ScreenSessionManager::SetScreenCorrection()
+{
+    std::ostringstream oss;
+    if (g_foldScreenFlag) {
+        if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+            auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_MAIN,
+                static_cast<ScreenRotation>(ROTATION_90));
+            oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
+        } else {
+            auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_FULL,
+                static_cast<ScreenRotation>(g_screenRotationOffSet));
+            oss << "SetScreenCorrection g_screenRotationOffSet: " << g_screenRotationOffSet << " ret value: " << ret;
+        }
+    } else {
+        std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
+        int32_t phyOffset = static_cast<int32_t>(std::stoi(phyOffsets[0]));
+        ScreenRotation correctRotation = ConvertOffsetToCorrectRotation(phyOffset);
+        auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_DEFAULT, correctRotation);
+        oss << "SetScreenCorrection phyOffset: " << phyOffset
+            << " correctRotation value: " << static_cast<int32_t>(correctRotation) << " ret value: " << ret;
+    }
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    screenEventTracker_.RecordEvent(oss.str());
+}
+
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent)
 {
     std::ostringstream oss;
@@ -647,6 +653,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     screenEventTracker_.RecordEvent(oss.str());
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " screenEvent: %{public}d",
         screenId, static_cast<int>(screenEvent));
+    SetScreenCorrection();
     auto screenSession = GetOrCreateScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
