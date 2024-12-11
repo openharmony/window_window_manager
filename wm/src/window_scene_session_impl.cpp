@@ -639,9 +639,11 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d init dragEnable false",
-        property_->GetPersistentId());
-    property_->SetDragEnabled(false);
+    if (!WindowHelper::IsDialogWindow(property_->GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d init dragEnable false",
+            property_->GetPersistentId());
+        property_->SetDragEnabled(false);
+    }
 }
 
 void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
