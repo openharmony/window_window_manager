@@ -136,7 +136,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
 
 napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGD("OnLoadContent");
+    WLOGFD("[NAPI]");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
