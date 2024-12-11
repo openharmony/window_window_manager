@@ -385,14 +385,13 @@ HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, Function | SmallTest | Level2)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
+    session->surfaceNode_ = nullptr;
     WSRect preRect = { 20, 20, 800, 800 };
     WSRect rect = { 30, 30, 900, 900 };
     session->SetSessionRect(preRect);
-
-    session->property_->SetDragEnabled(true);
     session->SetSurfaceBounds(rect, false);
-    session->property_->SetDragEnabled(false);
+
+    session->surfaceNode_ = surfaceNode;
     session->SetSurfaceBounds(rect, false);
     EXPECT_EQ(preRect, session->GetSessionRect());
 }
