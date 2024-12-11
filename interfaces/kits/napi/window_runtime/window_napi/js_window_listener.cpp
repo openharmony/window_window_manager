@@ -473,7 +473,7 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
     }
 }
 
-void JsWindowListener::OnDensityChanged(float density)
+void JsWindowListener::OnSystemDensityChanged(float density)
 {
     TLOGD(WmsLogTag::DEFAULT, "in");
     auto jsCallback = [self = weakRef_, density, env = env_] {
@@ -484,7 +484,7 @@ void JsWindowListener::OnDensityChanged(float density)
         }
         HandleScope handleScope(env);
         napi_value argv[] = { CreateJsValue(env, density) };
-        thisListener->CallJsMethod(WINDOW_DENSITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        thisListener->CallJsMethod(SYSTEM_DENSITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to send event");

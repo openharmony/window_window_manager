@@ -4191,7 +4191,9 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
         TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
         return;
     }
-    NotifyDensityChange(displayInfo);
+    if (CheckIsSystemDensityChange(displayInfo)) {
+        NotifySystemDensityChange(displayInfo->GetVirtualPixelRatio());
+    }
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
 
@@ -4547,6 +4549,24 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
         return ret;
     }
     return WMError::WM_DO_NOTHING;
+}
+
+bool WindowSceneSessionImpl::CheckIsSystemDensityChange(const sptr<DisplayInfo>& displayInfo)
+{
+    if (GetDefaultDensityEnabled()) {
+        TLOGD(WmsLogTag::DEFAULT, "setDefaultDensity enabled");
+        return false;
+    }
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "displayInfo nullptr");
+        return false;
+    }
+    float currSystemDensity = displayInfo->GetVirtualPixelRatio();
+    if (MathHelper::NearZero(lastSystemDensity_ - currSystemDensity)) {
+        TLOGD(WmsLogTag::DEFAULT, "System density not change");
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -189,8 +189,8 @@ public:
     WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
-    WMError RegisterDensityChangeListener(const IDensityChangeListenerSptr& listener) override;
-    WMError UnregisterDensityChangeListener(const IDensityChangeListenerSptr& listener) override;
+    WMError RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
+    WMError UnregisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
@@ -451,8 +451,8 @@ protected:
     /**
      * Window Property
      */
-    float lastDensity_ { 1.0f };
-    WSError NotifyDensityChange(const sptr<DisplayInfo>& displayInfo);
+    float lastSystemDensity_ { 1.0f };
+    WSError NotifySystemDensityChange(float density);
 
 private:
     //Trans between colorGamut and colorSpace
@@ -482,7 +482,7 @@ private:
     template<typename T>
     EnableIfSame<T, IDisplayIdChangeListener, std::vector<IDisplayIdChangeListenerSptr>> GetListeners();
     template<typename T>
-    EnableIfSame<T, IDensityChangeListener, std::vector<IDensityChangeListenerSptr>> GetListeners();
+    EnableIfSame<T, ISystemDensityChangeListener, std::vector<ISystemDensityChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> GetListeners();
     template<typename T>
@@ -567,8 +567,8 @@ private:
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
     static std::mutex displayIdChangeListenerMutex_;
     static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
-    static std::mutex densityChangeListenerMutex_;
-    static std::map<int32_t, std::vector<IDensityChangeListenerSptr>> densityChangeListeners_;
+    static std::mutex systemDensityChangeListenerMutex_;
+    static std::map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>

@@ -2026,6 +2026,36 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent01, Function | SmallT
     ret = window->OnContainerModalEvent(eventName, value);
     ASSERT_NE(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
+
+/**
+ * @tc.name: CheckIsSystemDensityChange01
+ * @tc.desc: CheckIsSystemDensityChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, CheckIsSystemDensityChange01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("CheckIsSystemDensityChange01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    sptr<DisplayInfo> displayInfo = nullptr;
+    auto ret = window->CheckIsSystemDensityChange(displayInfo);
+    ASSERT_EQ(false, ret);
+
+    displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetVirtualPixelRatio(1.5);
+    ret = window->CheckIsSystemDensityChange(displayInfo);
+    ASSERT_EQ(true, ret);
+
+    ret = window->CheckIsSystemDensityChange(displayInfo);
+    ASSERT_EQ(false, ret);
+
+    window->isDefaultDensityEnabled_ = true;
+    ret = window->CheckIsSystemDensityChange(displayInfo);
+    ASSERT_EQ(false, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
