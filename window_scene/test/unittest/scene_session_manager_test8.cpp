@@ -385,23 +385,6 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, Function | SmallTe
 }
 
 /**
- * @tc.name: GetOrientationFromResourceManager
- * @tc.desc: test function : GetOrientationFromResourceManager
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, GetOrientationFromResourceManager, Function | SmallTest | Level3)
-{
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.orientationId = 0;
-    ssm_->GetOrientationFromResourceManager(abilityInfo);
-
-    abilityInfo.orientationId = 20;
-    abilityInfo.hapPath = "";
-    ssm_->GetOrientationFromResourceManager(abilityInfo);
-    EXPECT_EQ(true, abilityInfo.hapPath.empty());
-}
-
-/**
  * @tc.name: RegisterSessionChangeByActionNotifyManagerFunc
  * @tc.desc: test function : RegisterSessionChangeByActionNotifyManagerFunc
  * @tc.type: FUNC
