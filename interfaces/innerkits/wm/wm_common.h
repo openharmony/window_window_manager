@@ -299,6 +299,15 @@ inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSetting
 }
 
 /**
+ * @brief Enumerates flag of ControlAppType.
+ */
+enum class ControlAppType : uint8_t {
+    CONTROL_APP_TYPE_BEGIN = 0,
+    APP_LOCK = 1,
+    CONTROL_APP_TYPE_END,
+};
+
+/**
  * @brief Enumerates flag of multiWindowUIType.
  */
 enum class WindowUIType : uint8_t {
@@ -306,15 +315,6 @@ enum class WindowUIType : uint8_t {
     PC_WINDOW,
     PAD_WINDOW,
     INVALID_WINDOW
-};
-
-/**
- * @brief Enumerates flag of ControlAppType.
- */
-enum class ControlAppType : uint8_t {
-    CONTROL_APP_TYPE_BEGIN = 0,
-    APP_LOCK = 1,
-    CONTROL_APP_TYPE_END,
 };
 
 /**
