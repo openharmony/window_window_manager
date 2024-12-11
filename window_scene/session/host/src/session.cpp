@@ -1026,20 +1026,11 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
     return updatedDisplayId;
 }
 
-bool Session::CheckIsSkipUpdate()
-{
-    // skip VirtualKeyboard
-    if (GetSessionProperty()->IsSystemKeyboard()) {
-        TLOGI(Wms::WMS_LAYOUT, "skipUpdate VirtualKeyboard: %{public}d", GetPersistentId());
-        return true;
-    }
-    return false;
-}
-
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
-    if (CheckIsSkipUpdate()) {
-        return;
+    if (IsSystemKeyboard()) {
+        TLOGI(Wms::WMS_LAYOUT, "skip update VirtualKeyboard: %{public}d", GetPersistentId());
+        return true;
     }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
@@ -3788,5 +3779,15 @@ bool Session::IsVisible() const
 std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
 {
     return handler_;
+}
+
+void SceneSession::SetIsSystemKeyboard(bool isSystemKeyboard)
+{
+    GetSessionProperty()->SetIsSystemKeyboard(isSystemKeyboard);
+}
+
+bool SceneSession::IsSystemKeyboard() const
+{
+    return GetSessionProperty()->IsSystemKeyboard();
 }
 } // namespace OHOS::Rosen
