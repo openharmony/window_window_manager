@@ -64,6 +64,8 @@ public:
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
     MOCK_METHOD1(GetUIContentRemoteObj, WSError(sptr<IRemoteObject>& uiContentRemoteObj));
+    MOCK_METHOD2(NotifyDumpInfo, WSError(const std::vector<std::string>& params,
+        std::vector<std::string>& info));
     MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
 };
 } // namespace Rosen

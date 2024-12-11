@@ -102,6 +102,8 @@ public:
     int32_t GetRealParentId() const override;
     WindowType GetParentWindowType() const override;
     void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
+    void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
