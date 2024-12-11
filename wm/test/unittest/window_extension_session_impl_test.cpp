@@ -1903,6 +1903,42 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
     window_->property_->SetRealParentId(12345);
     EXPECT_EQ(window_->GetRealParentId(), 12345);
 }
+
+/**
+ * @tc.name: NotifyExtensionEventAsync
+ * @tc.desc: NotifyExtensionEventAsync Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionEventAsync, Function | SmallTest | Level3)
+{
+    window_->NotifyExtensionEventAsync(0);
+
+    SessionInfo sessionInfo;
+    window_->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, window_->hostSession_);
+    window_->property_->SetPersistentId(1);
+    window_->NotifyExtensionEventAsync(0);
+}
+
+/**
+ * @tc.name: NotifyDumpInfo
+ * @tc.desc: NotifyDumpInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, window_->uiContent_);
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    auto ret = window_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_OK, ret);
+
+    window_->uiContent_ = nullptr;
+    ret = window_->NotifyDumpInfo(params, info);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

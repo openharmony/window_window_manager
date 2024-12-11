@@ -146,6 +146,10 @@ public:
     }
 
     virtual void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) {}
+    virtual WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+    {
+        return WSError::WS_OK;
+    }
 
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
 };
