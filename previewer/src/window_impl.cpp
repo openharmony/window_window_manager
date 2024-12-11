@@ -624,7 +624,7 @@ WMError WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListe
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::mutex> lock(globalMutex_);
@@ -632,7 +632,7 @@ WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListen
     return ret;
 }
 
-WMError WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::mutex> lock(globalMutex_);
