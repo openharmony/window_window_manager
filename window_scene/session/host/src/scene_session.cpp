@@ -5844,7 +5844,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             WLOGFE("UnregisterSessionChangeListeners session is null");
             return;
         }
-        if (session->sessionChangeCallback_) {}
         session->Session::UnregisterSessionChangeListeners();
     };
     PostTask(task, "UnregisterSessionChangeListeners");
