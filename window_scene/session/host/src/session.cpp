@@ -105,7 +105,7 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 
     static const std::regex pattern(R"(^SCBScreenLock[0-9]+$)");
     if (std::regex_match(info.bundleName_, pattern)) {
-        TLOGD(WmsLogTag::DEFAULT, "bundleName: %{public}s", info.bundleName_.c_str());
+        TLOGD(WmsLogTag::WMS_LIFE, "bundleName: %{public}s", info.bundleName_.c_str());
         isScreenLockWindow_ = true;
     }
 }
@@ -1141,7 +1141,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
-    TLOGI(WmsLogTag::DEFAULT, "windId: %{public}d, requestedOrientation: %{public}u,"
+    TLOGI(WmsLogTag::WMS_MAIN, "windId: %{public}d, requestedOrientation: %{public}u,"
         " defaultRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));

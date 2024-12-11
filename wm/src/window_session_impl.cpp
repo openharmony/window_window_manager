@@ -1019,7 +1019,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
             return win;
         }
     }
-    TLOGD(WmsLogTag::DEFAULT, "Can not find main window, not app type");
+    TLOGD(WmsLogTag::WMS_MAIN, "Can not find main window, not app type");
     return nullptr;
 }
 
