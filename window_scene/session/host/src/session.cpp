@@ -1028,8 +1028,8 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
 
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
-    if (IsSystemKeyboard()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "skip update VirtualKeyboard: %{public}d", GetPersistentId());
+    if (GetSessionProperty()->IsSystemKeyboard()) {
+        TLOGI(Wms::WMS_LAYOUT, "skip update VirtualKeyboard: %{public}d", GetPersistentId());
         return;
     }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
@@ -3781,12 +3781,12 @@ std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
     return handler_;
 }
 
-void Session::SetIsSystemKeyboard(bool isSystemKeyboard)
+void SceneSession::SetIsSystemKeyboard(bool isSystemKeyboard)
 {
     GetSessionProperty()->SetIsSystemKeyboard(isSystemKeyboard);
 }
 
-bool Session::IsSystemKeyboard() const
+bool SceneSession::IsSystemKeyboard() const
 {
     return GetSessionProperty()->IsSystemKeyboard();
 }
