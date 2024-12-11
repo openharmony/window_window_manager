@@ -1030,7 +1030,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
     if (IsSystemKeyboard()) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "skip update VirtualKeyboard: %{public}d", GetPersistentId());
-        return true;
+        return;
     }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
