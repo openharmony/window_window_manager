@@ -170,8 +170,8 @@ WSError MainSession::SetTopmost(bool topmost)
             TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session topmost change, id: %{public}d, topmost: %{public}u",
                 session->GetPersistentId(), topmost);
             property->SetTopmost(topmost);
-            if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onSessionTopmostChange_) {
-                session->sessionChangeCallback_->onSessionTopmostChange_(topmost);
+            if (session->onSessionTopmostChange_) {
+                session->onSessionTopmostChange_(topmost);
             }
         }
     }, "SetTopmost");
