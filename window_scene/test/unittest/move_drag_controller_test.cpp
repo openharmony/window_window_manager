@@ -1111,16 +1111,16 @@ HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag, Function |
  */
 HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag02, Function | SmallTest | Level1)
 {
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     std::set<uint64_t> res = moveDragController->GetNewAddedDisplayIdsDuringMoveDrag();
     ASSERT_EQ(true, res.empty());
     moveDragController->displayIdSetDuringMoveDrag_.insert(0);
     moveDragController->displayIdSetDuringMoveDrag_.insert(1001);
     ScreenProperty screenProperty0;
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] = new ScreenSession(0, screenProperty0, 0);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] = new ScreenSession(0, screenProperty0, 0);
     res = moveDragController->GetNewAddedDisplayIdsDuringMoveDrag();
     ASSERT_EQ(true, res.empty());
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
 /**

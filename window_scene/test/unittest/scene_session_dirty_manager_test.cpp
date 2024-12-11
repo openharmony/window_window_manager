@@ -259,14 +259,14 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Lev
     manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     session->SetSessionProperty(windowSessionProperty);
     manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
-    windowSessionProperty->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    windowSessionProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> ret;
     ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.id, session->GetWindowId());
     windowSessionProperty->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.windowType, static_cast<int32_t>(windowSessionProperty->GetWindowType()));
-    windowSessionProperty->SetMaximizeMode(Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    windowSessionProperty->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
     ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.id, session->GetWindowId());
     info.isSetPointerAreas_ = true;
@@ -308,23 +308,23 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     ScreenSessionConfig config;
     sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
     testTransform.SetZero();
-    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
+    ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(90.0f);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
+    ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(180.0f);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
+    ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(270.0f);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
+    ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTransform(sceneSession, transform);
     ASSERT_EQ(transform, testTransform);
     sptr<SceneSession> sceneSessionWithNullProperty = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
@@ -371,12 +371,12 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Leve
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     sessionInfo.isSystem_ = true;
-    auto preScreenSessionManager = Rosen::ScreenSessionManagerClient::GetInstance().screenSessionManager_;
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionManager_ = nullptr;
+    auto preScreenSessionManager = ScreenSessionManagerClient::GetInstance().screenSessionManager_;
+    ScreenSessionManagerClient::GetInstance().screenSessionManager_ = nullptr;
     manager_->CalTransform(sceneSession, transform);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionManager_ = preScreenSessionManager;
+    ScreenSessionManagerClient::GetInstance().screenSessionManager_ = preScreenSessionManager;
     manager_->CalTransform(sceneSession, transform);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
@@ -673,15 +673,15 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, Function | SmallTest |
     sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
     screenSession->SetTouchEnabledFromJs(true);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->UpdateWindowFlags(screenId, sceneSession, windowinfo);
     ASSERT_EQ(windowinfo.flags, 0);
     screenSession->SetTouchEnabledFromJs(false);
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
-    Rosen::ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->UpdateWindowFlags(screenId, sceneSession, windowinfo);
     ASSERT_EQ(windowinfo.flags, 0);
 }
