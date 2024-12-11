@@ -175,8 +175,6 @@ public:
     WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
-    WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
@@ -308,6 +306,12 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
+
+    /**
+     * Window Immersive
+     */
+    WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
 
     /**
      * Window Property
