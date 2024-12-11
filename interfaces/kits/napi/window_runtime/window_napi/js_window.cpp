@@ -6738,6 +6738,7 @@ napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_i
     bool isCloseVisible = true;
     if (argc > 2 && !ConvertFromJsValue(env, argv[INDEX_TWO], isCloseVisible)) { // 2: min params num
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isCloseVisible");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
