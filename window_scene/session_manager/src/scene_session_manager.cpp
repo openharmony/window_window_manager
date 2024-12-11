@@ -656,7 +656,7 @@ WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
 {
-    TLOGI(WmsLogTag::DEFAULT, "in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     auto task = [this, token, continueState, callingUid]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
@@ -667,7 +667,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& 
         sceneSession->SetSessionInfoContinueState(continueState);
         DistributedClient::GetInstance().SetMissionContinueState(sceneSession->GetPersistentId(),
             static_cast<AAFwk::ContinueState>(continueState), callingUid);
-        TLOGI(WmsLogTag::DEFAULT, "SetSessionContinueState id:%{public}d, continueState:%{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "SetSessionContinueState id:%{public}d, continueState:%{public}d",
             sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
     };
@@ -3980,7 +3980,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
     } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     }
-    TLOGI(WmsLogTag::DEFAULT, "bundleName:%{public}s removeMissionAfterTerminate:%{public}d "
+    TLOGI(WmsLogTag::WMS_MAIN, "bundleName:%{public}s removeMissionAfterTerminate:%{public}d "
         "excludeFromMissions:%{public}d label:%{public}s iconPath:%{public}s collaboratorType:%{public}s.",
         abilityInfo->bundleName.c_str(), abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
         abilityInfo->label.c_str(), abilityInfo->iconPath.c_str(), abilityInfo->applicationInfo.codePath.c_str());
@@ -7497,12 +7497,12 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
     std::shared_lock<std::shared_mutex> lock(collaboratorMapLock_);
     auto iter = collaboratorMap_.find(collaboratorType);
     if (iter == collaboratorMap_.end()) {
-        TLOGE(WmsLogTag::DEFAULT, "Fail to found collaborator with type: %{public}d", collaboratorType);
+        TLOGE(WmsLogTag::WMS_MAIN, "Fail to found collaborator with type: %{public}d", collaboratorType);
         return collaborator;
     }
     collaborator = iter->second;
     if (collaborator == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Find collaborator type %{public}d, but value is nullptr!", collaboratorType);
+        TLOGE(WmsLogTag::WMS_MAIN, "Find collaborator type %{public}d, but value is nullptr!", collaboratorType);
     }
     return collaborator;
 }
@@ -8568,7 +8568,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
 sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject>& token)
 {
     if (token == nullptr) {
-        TLOGW(WmsLogTag::DEFAULT, "token is nullptr");
+        TLOGW(WmsLogTag::WMS_MAIN, "token is nullptr");
         return nullptr;
     }
     sptr<SceneSession> session = nullptr;
@@ -8619,7 +8619,7 @@ void SceneSessionManager::PreloadInLakeApp(const std::string& bundleName)
 
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject>& token)
 {
-    TLOGI(WmsLogTag::DEFAULT, "in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     auto pid = IPCSkeleton::GetCallingRealPid();
     if (!SessionPermission::IsSACalling() && !SessionPermission::CheckCallingIsUserTestMode(pid)) {
         TLOGE(WmsLogTag::DEFAULT, "Permission denied for going to foreground!");
