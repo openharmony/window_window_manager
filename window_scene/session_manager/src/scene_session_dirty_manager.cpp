@@ -54,7 +54,7 @@ static bool operator!=(const MMI::Rect& a, const WSRect& b)
 }
 
 struct InputRectHash {
-    size_t operator()(const MMI::Rect& r) const
+    std::size_t operator()(const MMI::Rect& r) const
     {
         std::size_t h1 = std::hash<int32_t>{}(r.x);
         std::size_t h2 = std::hash<int32_t>{}(r.y);
