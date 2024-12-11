@@ -5935,6 +5935,26 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
     PostTask(task, __func__);
 }
 
+void SceneSession::SetIsSystemKeyboard(bool isSystemKeyboard)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "property is nullptr");
+        return;
+    }
+    sessionProperty->SetIsSystemKeyboard(isSystemKeyboard);
+}
+
+bool SceneSession::IsSystemKeyboard() const
+{
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "property is nullptr");
+        return false;
+    }
+    return sessionProperty->IsSystemKeyboard();
+}
+
 void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);

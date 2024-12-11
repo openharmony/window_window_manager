@@ -558,12 +558,6 @@ public:
      */
     bool IsScreenLockWindow() const;
 
-    /**
-     * System Keyboard
-     */
-    void SetIsSystemKeyboard(bool isSystemKeyboard);
-    bool IsSystemKeyboard() const;
-
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
