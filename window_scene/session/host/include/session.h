@@ -559,7 +559,7 @@ public:
     bool IsScreenLockWindow() const;
 
     /**
-     * system keyboard
+     * System Keyboard
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
     bool IsSystemKeyboard() const;
