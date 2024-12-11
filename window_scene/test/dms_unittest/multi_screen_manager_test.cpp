@@ -2016,6 +2016,262 @@ HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange05, Function | Sm
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
     }
 }
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: A is located to the left of B
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching01, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 200, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B is located to the left of A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching02, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 200, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: A is located to the upper of B
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching03, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 100};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B is located to the upper of A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching04, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 100};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B is located in the lower right corner of A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching05, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 200, 100};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: A is located in the lower right corner of B
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching06, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 200, 100};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B has no contact with A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching07, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 300, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B has no contact with A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching08, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 200};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
