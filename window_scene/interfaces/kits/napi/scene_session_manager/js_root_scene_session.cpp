@@ -43,7 +43,7 @@ napi_value JsRootSceneSession::Create(napi_env env, const sptr<RootSceneSession>
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
 
@@ -89,21 +89,21 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        WLOGFE("Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     std::string cbType;
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
-        WLOGFE("[NAPI]Failed to convert parameter to callbackType");
+        WLOGFE("Failed to convert parameter to callbackType");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
     if (value == nullptr || !NapiIsCallable(env, value)) {
-        WLOGFE("[NAPI]Invalid argument");
+        WLOGFE("Invalid argument");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -112,7 +112,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     if (rootSceneSession_ == nullptr) {
-        WLOGFE("[NAPI]root session is nullptr");
+        WLOGFE("Root session is nullptr");
         napi_throw(env, CreateJsError(
             env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "Root scene session is null!"));
         return NapiGetUndefined(env);
@@ -130,18 +130,18 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
-    WLOGFD("[NAPI] end, type = %{public}s", cbType.c_str());
+    WLOGFD("End, type = %{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
 napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]OnLoadContent");
+    WLOGD("OnLoadContent");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        WLOGFE("Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -150,14 +150,14 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     napi_value context = argv[1];
     napi_value storage = argc < 3 ? nullptr : argv[2];
     if (!ConvertFromJsValue(env, argv[0], contentUrl)) {
-        WLOGFE("[NAPI]Failed to convert parameter to content url");
+        WLOGFE("Failed to convert parameter to content url");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
     if (context == nullptr) {
-        WLOGFE("[NAPI]Failed to get context object");
+        WLOGFE("Failed to get context object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -165,7 +165,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     napi_unwrap(env, context, &pointerResult);
     auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(pointerResult);
     if (contextNativePointer == nullptr) {
-        WLOGFE("[NAPI]Failed to get context pointer from js object");
+        WLOGFE("Failed to get context pointer from js object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -182,7 +182,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     NapiAsyncTask::CompleteCallback complete = [rootSceneSession = rootSceneSession_,
         contentUrl, contextWeakPtr, contentStorage](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (rootSceneSession == nullptr) {
-            WLOGFE("[NAPI]rootSceneSession is nullptr");
+            WLOGFE("rootSceneSession is nullptr");
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
             return;
         }
@@ -200,7 +200,7 @@ bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& t
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsRootSceneSession::IsCallbackRegistered[%s]", type.c_str());
     std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("[NAPI]Method %{public}s has not been registered", type.c_str());
+        WLOGFI("Method %{public}s has not been registered", type.c_str());
         return false;
     }
 
@@ -208,7 +208,7 @@ bool JsRootSceneSession::IsCallbackRegistered(napi_env env, const std::string& t
         bool isEquals = false;
         napi_strict_equals(env, jsListenerObject, iter->second->GetNapiValue(), &isEquals);
         if (isEquals) {
-            WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
+            WLOGFE("Method %{public}s has already been registered", type.c_str());
             return true;
         }
     }
@@ -234,16 +234,16 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     napi_env& env_ref = env_;
     auto task = [sessionInfo, jsCallBack = GetJSCallback(PENDING_SCENE_CB), env_ref]() {
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]sessionInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]jsSessionInfo is nullptr");
+            TLOGE(WmsLogTag::WMS_LIFE, "jsSessionInfo is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionInfo};
@@ -259,16 +259,16 @@ static int32_t GetRealCallerSessionId(const sptr<SceneSession>& sceneSession)
 {
     int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (realCallerSessionId == sceneSession->GetPersistentId()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller is self, switch to self caller.");
+        TLOGI(WmsLogTag::WMS_LIFE, "Caller is self, switch to self caller.");
         realCallerSessionId = sceneSession->GetSessionInfo().callerPersistentId_;
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]caller session: %{public}d.", realCallerSessionId);
+    TLOGI(WmsLogTag::WMS_LIFE, "Caller session: %{public}d.", realCallerSessionId);
     return realCallerSessionId;
 }
 
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
         "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
         info.abilityName_.c_str(), info.appIndex_, info.reuse);
     sptr<SceneSession> sceneSession = GenSceneSession(info);
@@ -279,7 +279,7 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 
     if (info.want != nullptr) {
         bool isNeedBackToOther = info.want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]session: %{public}d isNeedBackToOther: %{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "session: %{public}d isNeedBackToOther: %{public}d",
             sceneSession->GetPersistentId(), isNeedBackToOther);
         if (isNeedBackToOther) {
             info.callerPersistentId_ = GetRealCallerSessionId(sceneSession);
@@ -294,13 +294,13 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
         std::string continueSessionId = info.want->GetStringParam(Rosen::PARAM_KEY::PARAM_DMS_CONTINUE_SESSION_ID_KEY);
         if (!continueSessionId.empty()) {
             info.continueSessionId_ = continueSessionId;
-            TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]continueSessionId from ability manager: %{public}s",
+            TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId from ability manager: %{public}s",
                 continueSessionId.c_str());
         }
 
         // app continue report for distributed scheduled service
         if (info.want->GetIntParam(Rosen::PARAM_KEY::PARAM_DMS_PERSISTENT_ID_KEY, 0) > 0) {
-            TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]continue app with persistentId: %{public}d", info.persistentId_);
+            TLOGI(WmsLogTag::WMS_LIFE, "Continue app with persistentId: %{public}d", info.persistentId_);
             SingletonContainer::Get<DmsReporter>().ReportContinueApp(true, static_cast<int32_t>(WSError::WS_OK));
         }
     } else {
@@ -337,7 +337,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
     if (info.persistentId_ == INVALID_SESSION_ID) {
         auto result = SceneSessionManager::GetInstance().CheckIfReuseSession(info);
         if (result == BrokerStates::BROKER_NOT_START) {
-            WLOGE("[NAPI] The BrokerStates is not opened");
+            WLOGE("The BrokerStates is not opened");
             return nullptr;
         }
 
