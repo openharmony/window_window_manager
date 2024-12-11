@@ -2678,7 +2678,7 @@ napi_value JsSceneSessionManager::OnRequestFocusStatus(napi_env env, napi_callba
             return NapiGetUndefined(env);
         }
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]Id: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
+    TLOGI(WmsLogTag::WMS_FOCUS, "[NAPI]Id: %{public}d, isFocused: %{public}d, byForeground: %{public}d, "
         "reason: %{public}d", persistentId, isFocused, byForeground, reason);
     if (Session::IsScbCoreEnabled()) {
         SceneSessionManager::GetInstance().RequestFocusStatusBySCB(persistentId, isFocused, byForeground, reason);
