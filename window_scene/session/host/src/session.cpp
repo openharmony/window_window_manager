@@ -1026,6 +1026,19 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
     return updatedDisplayId;
 }
 
+<<<<<<< HEAD
+=======
+bool Session::CheckIsSkipUpdate()
+{
+    // skip VirtualKeyboard
+    if (GetSessionProperty()->IsSystemKeyboard()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "skipUpdate VirtualKeyboard: %{public}d", GetPersistentId());
+        return true;
+    }
+    return false;
+}
+
+>>>>>>> b28251551c3d9e804f6710e88ac0317246e2a303
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 {
     if (IsSystemKeyboard()) {
