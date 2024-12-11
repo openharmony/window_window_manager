@@ -45,7 +45,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_DISPLAYID_CHANGE_CB,
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
-    WINDOW_DENSITY_CHANGE_CB,
+    SYSTEM_DENSITY_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
     WINDOW_STAGE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
@@ -97,7 +97,7 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
-    WmErrorCode ProcessDensityChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+    WmErrorCode ProcessSystemDensityChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
