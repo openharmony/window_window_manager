@@ -413,6 +413,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, Function | SmallTest | Le
         touchHotAreasInSceneSession.emplace_back(area);
     }
     sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreasInSceneSession);
+    touchHotAreas.clear();
+    pointerHotAreas.clear();
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     ASSERT_EQ(touchHotAreas.size(), 2);
     for (int i = 2; i < 10 ; i++) {
@@ -424,12 +426,16 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, Function | SmallTest | Le
         touchHotAreasInSceneSession.emplace_back(area);
     }
     sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreasInSceneSession);
+    touchHotAreas.clear();
+    pointerHotAreas.clear();
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     ASSERT_EQ(touchHotAreas.size(), 10);
     std::vector<OHOS::Rosen::Rect> fullSceneSession(static_cast<uint32_t>(MMI::WindowInfo::MAX_HOTAREA_COUNT));
     sceneSession->GetSessionProperty()->SetTouchHotAreas(fullSceneSession);
+    touchHotAreas.clear();
+    pointerHotAreas.clear();
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    ASSERT_EQ(touchHotAreas.size(), 11);
+    ASSERT_EQ(touchHotAreas.size(), 1);
 }
 
 /**
