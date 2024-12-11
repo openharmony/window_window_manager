@@ -3780,14 +3780,4 @@ std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
 {
     return handler_;
 }
-
-void SceneSession::SetIsSystemKeyboard(bool isSystemKeyboard)
-{
-    GetSessionProperty()->SetIsSystemKeyboard(isSystemKeyboard);
-}
-
-bool SceneSession::IsSystemKeyboard() const
-{
-    return GetSessionProperty()->IsSystemKeyboard();
-}
 } // namespace OHOS::Rosen
