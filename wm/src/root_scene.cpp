@@ -152,6 +152,24 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
     }
 }
 
+void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+    uiContent_->UpdateConfigurationSyncForAll(configuration);
+}
+
+void RootScene::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "in");
+    if (staticRootScene_ != nullptr) {
+        staticRootScene_->UpdateConfigurationSync(configuration);
+    }
+}
+
 void RootScene::RegisterInputEventListener()
 {
     if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uiContent_.get()))) {
