@@ -241,7 +241,7 @@ static bool GetWindowTypeAndParentId(napi_env env, uint32_t& parentId, WindowTyp
 static void CreateNewSystemWindowTask(void* contextPtr, sptr<WindowOption> windowOption,
     napi_env env, NapiAsyncTask& task)
 {
-    WLOGI("CreateSystemWindowTask");
+    WLOGFI("in");
     if (windowOption == nullptr) {
         task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
             "New window option failed"));
@@ -280,7 +280,7 @@ static void CreateNewSystemWindowTask(void* contextPtr, sptr<WindowOption> windo
 static void CreateSystemWindowTask(void* contextPtr, std::string windowName, WindowType winType,
     napi_env env, NapiAsyncTask& task)
 {
-    WLOGFD("CreateSystemWindowTask");
+    WLOGFD("in");
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (contextPtr == nullptr || context == nullptr) {
         task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "Context is nullptr"));
@@ -398,7 +398,7 @@ static bool isConfigOptionWindowTypeValid(napi_env env, WindowOption& option)
 
 napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
 {
-    WLOGFD("OnCreate");
+    WLOGFD("in");
     napi_value nativeString = nullptr, nativeContext = nullptr, nativeType = nullptr, callback = nullptr;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};

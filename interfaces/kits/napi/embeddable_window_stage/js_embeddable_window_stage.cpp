@@ -37,62 +37,62 @@ JsEmbeddableWindowStage::~JsEmbeddableWindowStage()
 
 void JsEmbeddableWindowStage::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]Finalizer");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     std::unique_ptr<JsEmbeddableWindowStage>(static_cast<JsEmbeddableWindowStage*>(data));
 }
 
 napi_value JsEmbeddableWindowStage::GetMainWindow(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]GetMainWindow");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnGetMainWindow(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::GetMainWindowSync(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]GetMainWindowSync");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnGetMainWindowSync(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::On(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]On");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnEvent(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::Off(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]Off");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OffEvent(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::LoadContent(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]LoadContent");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, false) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::LoadContentByName(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]LoadContentByName");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::CreateSubWindow(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]CreateSubWindow");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnCreateSubWindow(env, info) : nullptr;
 }
 
 napi_value JsEmbeddableWindowStage::GetSubWindow(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]GetSubWindow");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsEmbeddableWindowStage* me = CheckParamsAndGetThis<JsEmbeddableWindowStage>(env, info);
     return (me != nullptr) ? me->OnGetSubWindow(env, info) : nullptr;
 }

@@ -33,12 +33,12 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
     }
     SetMoveDragCallback();
-    TLOGD(WmsLogTag::WMS_LIFE, "Create SubSession");
+    TLOGD(WmsLogTag::WMS_LIFE, "Create");
 }
 
 SubSession::~SubSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "~SubSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
