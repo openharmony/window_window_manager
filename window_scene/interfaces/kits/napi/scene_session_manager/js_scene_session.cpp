@@ -1503,7 +1503,7 @@ void JsSceneSession::ProcessSystemBarPropertyChangeRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "session is null, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_IMMS, "session is null, win %{public}d", persistentId_);
         return;
     }
     session->RegisterSystemBarPropertyChangeCallback([weakThis = wptr(this)](
@@ -1521,7 +1521,7 @@ void JsSceneSession::ProcessNeedAvoidRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "session is null, id: %{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_IMMS, "session is null, win %{public}d", persistentId_);
         return;
     }
     session->RegisterNeedAvoidCallback([weakThis = wptr(this)](bool status) {
@@ -3784,7 +3784,7 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
         }
         napi_value jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
         if (jsSessionStateObj == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "jsSessionStateObj is nullptr");
+            TLOGNE(WmsLogTag::WMS_IMMS, "jsSessionStateObj is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionStateObj};
@@ -4518,7 +4518,7 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_IMMS, "session is nullptr, win %{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     size_t argc = ARGC_FOUR;
@@ -4533,7 +4533,7 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
     }
     session->SetIsDisplayStatusBarTemporarily(isTempDisplay);
 
-    TLOGI(WmsLogTag::WMS_IMMS, "id:%{public}u name:%{public}s isTempDisplay:%{public}u",
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] isTempDisplay:%{public}u",
         session->GetPersistentId(), session->GetWindowName().c_str(), isTempDisplay);
     return NapiGetUndefined(env);
 }
