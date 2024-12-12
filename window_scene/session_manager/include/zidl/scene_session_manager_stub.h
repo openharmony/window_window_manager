@@ -101,6 +101,7 @@ private:
     int HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply);
     int HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply);
     int HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
