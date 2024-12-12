@@ -599,6 +599,7 @@ namespace {
     constexpr int32_t DEFAULT_SCREEN_ID = 0;
     constexpr int32_t FULL_CIRCLE_DEGREE = 360;
     constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+    constexpr float UNDEFINED_DENSITY = -1.0f;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)

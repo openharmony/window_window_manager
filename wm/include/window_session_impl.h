@@ -451,7 +451,7 @@ protected:
     /**
      * Window Property
      */
-    float lastSystemDensity_ { 1.0f };
+    float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
 
 private:
