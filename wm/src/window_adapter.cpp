@@ -946,6 +946,15 @@ WMError WindowAdapter::GetWindowStyleType(WindowStyleType& windowStyleType)
     return wmsProxy->GetWindowStyleType(windowStyleType);
 }
 
+WMError WindowAdapter::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+    int32_t x, int32_t y, std::vector<int32_t>& windowIds)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
+}
+
 sptr<IWindowManager> WindowAdapter::GetWindowManagerServiceProxy() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -975,6 +984,14 @@ WMError WindowAdapter::GetDisplayIdByWindowId(const std::vector<uint64_t>& windo
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+}
+
+WMError WindowAdapter::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
 }
 } // namespace Rosen
 } // namespace OHOS

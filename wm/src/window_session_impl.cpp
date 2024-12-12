@@ -210,8 +210,12 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 
 bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 {
-    return windowSystemConfig_.uiType_ == UI_TYPE_PC ||
-           IsFreeMultiWindowMode() || property_->GetIsPcAppInPad();
+    return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() || property_->GetIsPcAppInPad();
+}
+
+bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
+{
+    return windowSystemConfig_.uiType_ == UI_TYPE_PC || IsFreeMultiWindowMode();
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
@@ -1855,7 +1859,7 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
+WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modalityType)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -1864,9 +1868,30 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal)
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
+    if (modalityType == ModalityType::APPLICATION_MODALITY && !IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
-    return isModal ? AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+    WMError modalRet = isModal ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
         RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    if (modalRet != WMError::WM_OK) {
+        return modalRet;
+    }
+    modalRet = isModal && modalityType == ModalityType::APPLICATION_MODALITY ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    SubWindowModalType subWindowModalType = SubWindowModalType::TYPE_NORMAL;
+    if (isModal) {
+        subWindowModalType = modalityType == ModalityType::WINDOW_MODALITY ?
+            SubWindowModalType::TYPE_WINDOW_MODALITY :
+            SubWindowModalType::TYPE_APPLICATION_MODALITY;
+    }
+    hostSession->NotifySubModalTypeChange(subWindowModalType);
+    return modalRet;
 }
 
 WMError WindowSessionImpl::SetDecorHeight(int32_t decorHeight)

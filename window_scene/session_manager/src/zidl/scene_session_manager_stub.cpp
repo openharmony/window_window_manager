@@ -170,10 +170,14 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PROCESS_SURFACENODEID_BY_PERSISTENTID):
             return HandleGetProcessSurfaceNodeIdByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE):
+            return HandleGetWindowIdsByCoordinate(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
             return HandleReleaseForegroundSessionScreenLock(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID):
             return HandleGetDisplayIdByWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
+            return HandleIsPcOrPadFreeMultiWindowMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE):
             return HandleIsWindowRectAutoSave(data, reply);
         default:
@@ -1095,6 +1099,35 @@ int SceneSessionManagerStub::HandleGetProcessSurfaceNodeIdByPersistentId(Message
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t displayId;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::DEFAULT, "read displayId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t windowNumber;
+    if (!data.ReadInt32(windowNumber)) {
+        TLOGE(WmsLogTag::DEFAULT, "read windowNumber failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t x;
+    int32_t y;
+    if (!data.ReadInt32(x) || !data.ReadInt32(y)) {
+        TLOGE(WmsLogTag::DEFAULT, "read coordinate failed");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> windowIds;
+    WMError errCode = GetWindowIdsByCoordinate(displayId, windowNumber, x, y, windowIds);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed.");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32Vector(windowIds);
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply)
 {
     WMError errCode = ReleaseForegroundSessionScreenLock();
@@ -1127,6 +1160,21 @@ int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, M
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::DEFAULT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply)
+{
+    bool isPcOrPadFreeMultiWindowMode = false;
+    WMError errCode = IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
+    if (!reply.WriteBool(isPcOrPadFreeMultiWindowMode)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write isPcOrPadFreeMultiWindowMode fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

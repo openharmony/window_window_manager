@@ -153,6 +153,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual bool IsStartMoving() { return false; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool visible) { return WSError::WS_OK; }
     virtual WSError UpdateRectChangeListenerRegistered(bool isRegister)
@@ -174,6 +175,14 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for session modal type changes.
+     *
+     * @param subWindowModalType Indicates the {@link SubWindowModalType}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to automatically save the window rect.
