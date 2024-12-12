@@ -339,6 +339,60 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession08
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function | SmallTest | Level2)
+{
+    constexpr int parentId = 10000;
+    constexpr int displayId = 100;
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowName("CreateAndConnectSpecificSession08");
+    option->SetParentId(parentId);
+
+    // scene session manager processing
+    option->SetIsUIExtFirstSubWindow(true);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->Create(abilityContext_, nullptr);
+    ASSERT_EQ(windowSceneSession->property_->GetParentPersistentId(), option->GetParentId());
+    // scene session manager processing
+    option->SetIsUIExtFirstSubWindow(false);
+    option->SetIsUIExtAnySubWindow(true);
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->Create(abilityContext_, nullptr);
+    ASSERT_EQ(windowSceneSession->property_->GetParentPersistentId(), option->GetParentId());
+
+    sptr<WindowOption> mainOption = new WindowOption();
+    mainOption->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    mainOption->SetDisplayId(displayId);
+    sptr<WindowSceneSessionImpl> mainWindow = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->property_->SetPersistentId(parentId);
+    // window processing
+    option->SetIsUIExtFirstSubWindow(false);
+    option->SetIsUIExtAnySubWindow(true);
+    option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->windowSessionMap_["mainWindow"] = {parentId, mainWindow};
+    windowSceneSession->Create(abilityContext_, nullptr);
+    ASSERT_EQ(windowSceneSession->property_->GetDisplayId(), mainWindow->property_->GetDisplayId());
+    // window processing
+    option->SetIsUIExtAnySubWindow(false);
+    windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->windowSessionMap_["mainWindow"] = {parentId, mainWindow};
+    windowSceneSession->Create(abilityContext_, nullptr);
+    ASSERT_EQ(windowSceneSession->property_->GetDisplayId(), mainWindow->property_->GetDisplayId());
+}
+
+/**
  * @tc.name: RecoverAndReconnectSceneSession
  * @tc.desc: RecoverAndReconnectSceneSession
  * @tc.type: FUNC
@@ -938,17 +992,19 @@ HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Le
  */
 HWTEST_F(WindowSceneSessionImplTest, GetAvoidAreaByType, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     option->SetWindowName("GetAvoidAreaByType");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     AvoidArea avoidarea;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
 }
 
 /**
@@ -1262,10 +1318,10 @@ HWTEST_F(WindowSceneSessionImplTest, NotifySpecificWindowSessionProperty, Functi
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_HIDDEN;
     ASSERT_EQ(WMError::WM_OK,
-        window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+        window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property));
     window->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK,
-        window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+        window->NotifySpecificWindowSessionProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property));
 }
 
 /**
@@ -1276,9 +1332,11 @@ HWTEST_F(WindowSceneSessionImplTest, NotifySpecificWindowSessionProperty, Functi
 HWTEST_F(WindowSceneSessionImplTest, LimitCameraFloatWindowMininumSize, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     option->SetWindowName("LimitCameraFloatWindowMininumSize");
     sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
     uint32_t width = 33;
     uint32_t height = 31;
     float vpr = 0.0f;
@@ -1324,6 +1382,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, Function |
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreenByApiVersion(false));
+    ASSERT_EQ(false, window->property_->IsLayoutFullScreen());
 }
 
 /**
@@ -1663,7 +1722,13 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetLayoutFullScreen01");
-    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    window->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetLayoutFullScreen(false));
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetLayoutFullScreen(false));
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -1672,6 +1737,10 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen01, Function | SmallTest
     WMError res = window->SetLayoutFullScreen(false);
     ASSERT_EQ(WMError::WM_OK, res);
     ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
+    ASSERT_EQ(true, window->IsLayoutFullScreen());
+    window->property_->SetWindowModeSupportType(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetLayoutFullScreen(false));
 }
 
 /**
@@ -1727,19 +1796,30 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, Function | SmallTest
  */
 HWTEST_F(WindowSceneSessionImplTest, SetFullScreen, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    window->property_->SetWindowName("SetFullScreen");
-    window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    window->SetFullScreen(false);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("SetLayoutFullScreen01");
+    window->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
     ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(false));
-    ASSERT_EQ(false, window->IsFullScreen());
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowModeSupportType(0);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFullScreen(false));
+    window->property_->SetWindowModeSupportType(1);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetFullScreen(false));
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetFullScreen(false));
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->state_ = WindowState::STATE_SHOWN;
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(false));
+    ASSERT_EQ(false, window->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetFullScreen(true));
+    ASSERT_EQ(true, window->IsLayoutFullScreen());
 }
 
 /**
@@ -1883,6 +1963,30 @@ HWTEST_F(WindowSceneSessionImplTest, CompatibleFullScreenClose, Function | Small
 
     window->property_->SetCompatibleModeInPc(true);
     ASSERT_EQ(WSError::WS_OK, window->CompatibleFullScreenClose());
+}
+
+/**
+ * @tc.name: SetPropertySessionInfo01
+ * @tc.desc: SetPropertySessionInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetPropertySessionInfo01, Function | SmallTest | Level2)
+{
+    const std::string bundleName = "setPropertSessionInfoTest";
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    windowSceneSession->property_->sessionInfo_.bundleName_ = bundleName;
+
+    windowSceneSession->context_ = nullptr;
+    windowSceneSession->CreateAndConnectSpecificSession();
+    ASSERT_EQ(windowSceneSession->property_->sessionInfo_.bundleName_, bundleName);
+
+    windowSceneSession->context_ = abilityContext_;
+    windowSceneSession->property_->sessionInfo_.bundleName_ = bundleName;
+    windowSceneSession->CreateAndConnectSpecificSession();
+    ASSERT_EQ(windowSceneSession->property_->sessionInfo_.bundleName_, abilityContext_->GetBundleName());
 }
 }
 } // namespace Rosen

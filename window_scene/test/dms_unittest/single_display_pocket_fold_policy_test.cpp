@@ -19,6 +19,7 @@
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 #include "window_manager_hilog.h"
 
@@ -474,13 +475,15 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToCoordinatio
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, CloseCoordinationScreen, Function | SmallTest | Level3)
 {
-    std::recursive_mutex displayInfoMutex;
-    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
 
-    policy.screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>("Test");
-    policy.CloseCoordinationScreen();
-    EXPECT_EQ(ScreenSessionManager::GetInstance().isCoordinationFlag_, false);
+        policy.screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>("Test");
+        policy.CloseCoordinationScreen();
+        EXPECT_EQ(ScreenSessionManager::GetInstance().isCoordinationFlag_, false);
+    }
 }
 
 /**
@@ -490,14 +493,16 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, CloseCoordinationScreen, Function | 
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, ExitCoordination, Function | SmallTest | Level3)
 {
-    std::recursive_mutex displayInfoMutex;
-    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+        SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
 
-    policy.currentFoldStatus_ = FoldStatus::EXPAND;
-    policy.ExitCoordination();
-    EXPECT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
-    EXPECT_EQ(policy.lastDisplayMode_, FoldDisplayMode::FULL);
+        policy.currentFoldStatus_ = FoldStatus::EXPAND;
+        policy.ExitCoordination();
+        EXPECT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
+        EXPECT_EQ(policy.lastDisplayMode_, FoldDisplayMode::FULL);
+    }
 }
 
 /**

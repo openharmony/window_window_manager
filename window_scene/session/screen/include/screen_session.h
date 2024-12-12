@@ -143,6 +143,7 @@ public:
 
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDeviceOrientation(Rotation rotation) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
 
@@ -177,9 +178,10 @@ public:
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
 
-    void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateRotationOrientation(int rotation);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
     void UpdateDisplayState(DisplayState displayState);
@@ -204,6 +206,10 @@ public:
     void SetIsExtend(bool isExtend);
     bool GetIsExtend() const;
     void SetIsInternal(bool isInternal);
+    void SetIsRealScreen(bool isReal);
+    bool GetIsRealScreen();
+    void SetIsPcUse(bool isPcUse);
+    bool GetIsPcUse();
     bool GetIsInternal() const;
     void SetIsCurrentInUse(bool isInUse);
     bool GetIsCurrentInUse() const;
@@ -211,11 +217,14 @@ public:
     bool GetIsFakeInUse() const;
     void SetIsBScreenHalf(bool isBScreenHalf);
     bool GetIsBScreenHalf() const;
+    ScreenShape GetScreenShape() const;
 
     bool isPrimary_ { false };
     bool isInternal_ { false };
     bool isExtended_ { false };
     bool isInUse_ { false };
+    bool isReal_ { false };
+    bool isPcUse_ { false };
 
     NodeId nodeId_ {};
 

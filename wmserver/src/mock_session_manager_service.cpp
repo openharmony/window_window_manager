@@ -181,9 +181,9 @@ int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& a
             ShowIllegalArgsInfo(dumpInfo);
         }
     }
-    int ret = dprintf(fd, "%s\n", dumpInfo.c_str());
+    int ret = write(fd, dumpInfo.c_str(), dumpInfo.length());
     if (ret < 0) {
-        WLOGFE("dprintf error");
+        WLOGFE("write error");
         return -1; // WMError::WM_ERROR_INVALID_OPERATION;
     }
     WLOGI("dump end");
@@ -762,7 +762,7 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
         }
     }
     if (windowIdList.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "windowIdList is null, no need to get surfaceNodeId");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowIdList is null, no need to get surfaceNodeId");
         return;
     }
     std::vector<int32_t> persistentIds;
@@ -773,7 +773,7 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
     WMError ret = sceneSessionManagerProxy->GetProcessSurfaceNodeIdByPersistentId(
         pid, persistentIds, surfaceNodeIds);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "Get process surfaceNodeId by persistentId failed!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get process surfaceNodeId by persistentId failed!");
     }
 }
 
@@ -817,7 +817,7 @@ int32_t MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(i
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
     WMError ret = sceneSessionManagerProxy->SkipSnapshotByUserIdAndBundleNames(userId, bundleNameList);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed!");
         return ERR_TRANSACTION_FAILED;
     }
     return ERR_NONE;

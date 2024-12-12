@@ -180,4 +180,25 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
     };
     return PostSyncTask(task, __func__);
 }
+
+void RootSceneSession::SetRootSessionRect(const WSRect& rect)
+{
+    if (!rect.IsInvalid() && winRect_ != rect) {
+        winRect_ = rect;
+        TLOGI(WmsLogTag::WMS_IMMS, "root session update rect: %{public}s", winRect_.ToString().c_str());
+        if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_) {
+            specificCallback_->onUpdateAvoidArea_(GetPersistentId());
+        }
+    }
+}
+
+WSError RootSceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    if (specificCallback_ == nullptr || specificCallback_->onNotifyAvoidAreaChange_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "callback is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    specificCallback_->onNotifyAvoidAreaChange_(avoidArea, type);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

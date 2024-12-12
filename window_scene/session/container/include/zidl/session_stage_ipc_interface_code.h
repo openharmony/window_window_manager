@@ -63,6 +63,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_SET_SPLIT_BUTTON_VISIBLE,
     TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE,
     TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM,
+    TRANS_ID_SET_FULLSCREEN_WATERFALL_MODE,
 };
 }   // namespace Rosen
 }   // namespace OHOS

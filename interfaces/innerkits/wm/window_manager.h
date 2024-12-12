@@ -259,6 +259,48 @@ public:
 };
 
 /**
+ * @class AppUseControlInfo
+ *
+ * @brief Window info used for AppUseControlInfo.
+ */
+struct AppUseControlInfo : public Parcelable {
+    /**
+     * @brief Marshalling AppUseControlInfo.
+     *
+     * @param parcel Package of AppUseControlInfo.
+     * @return True means marshall success, false means marshall failed.
+     */
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteString(bundleName_) &&
+               parcel.WriteInt32(appIndex_) &&
+               parcel.WriteBool(isNeedControl_);
+    }
+
+    /**
+     * @brief Unmarshalling AppUseControlInfo.
+     *
+     * @param parcel Package of AppUseControlInfo.
+     * @return AppUseControlInfo object.
+     */
+    static AppUseControlInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new AppUseControlInfo();
+        if (!parcel.ReadString(info->bundleName_) ||
+            !parcel.ReadInt32(info->appIndex_) ||
+            !parcel.ReadBool(info->isNeedControl_)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    std::string bundleName_ = "";
+    int32_t appIndex_ = 0;
+    bool isNeedControl_ = false;
+};
+
+/**
  * @class UnreliableWindowInfo
  *
  * @brief Unreliable Window Info.
@@ -861,6 +903,47 @@ public:
      */
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
+
+    /**
+     * @brief Set global drag resize type.
+     * this priority is highest.
+     *
+     * @param dragResizeType global drag resize type to set
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
+
+    /**
+     * @brief Get global drag resize type.
+     * if it is RESIZE_TYPE_UNDEFINED, return default value.
+     *
+     * @param dragResizeType global drag resize type to get
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
+
+    /**
+     * @brief Set drag resize type of specific app.
+     * only when global value is RESIZE_TYPE_UNDEFINED, this value take effect.
+     *
+     * @param bundleName bundleName of specific app
+     * @param dragResizeType drag resize type to set
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
+
+    /**
+     * @brief Get drag resize type of specific app.
+     * effective order:
+     *  1. global value
+     *  2. app value
+     *  3. default value
+     *
+     * @param bundleName bundleName of specific app
+     * @param dragResizeType drag resize type to get
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
 private:
     WindowManager();

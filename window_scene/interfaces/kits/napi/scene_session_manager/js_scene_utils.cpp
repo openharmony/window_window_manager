@@ -79,7 +79,7 @@ WSError GetIntValueFromString(const std::string& str, uint32_t& value)
     if (*end == '\0' && value != 0) {
         return WSError::WS_OK;
     }
-    TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
+    TLOGE(WmsLogTag::WMS_PC, "param %{public}s convert int failed", str.c_str());
     return WSError::WS_ERROR_INVALID_PARAM;
 }
 
@@ -291,7 +291,7 @@ bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, Se
     if (GetType(env, jsFullscreenStart) != napi_undefined) {
         bool fullScreenStart = false;
         if (!ConvertFromJsValue(env, jsFullscreenStart, fullScreenStart)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to fullScreenStart");
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to fullScreenStart");
             return false;
         }
         sessionInfo.fullScreenStart_ = fullScreenStart;
@@ -852,6 +852,20 @@ bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAn
     return true;
 }
 
+bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType)
+{
+    uint32_t dragResizeTypeValue;
+    if (!ConvertFromJsValue(env, value, dragResizeTypeValue)) {
+        return false;
+    }
+    if (dragResizeTypeValue > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragResizeType");
+        return false;
+    }
+    dragResizeType = static_cast<DragResizeType>(dragResizeTypeValue);
+    return true;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
@@ -1023,6 +1037,22 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
         napi_set_named_property(env, objValue, "extraFormIdentity",
             CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
+        if (params.HasParam("expectWindowMode")) {
+            napi_set_named_property(env, objValue, "expectWindowMode",
+                CreateJsValue(env, params.GetIntParam("expectWindowMode", INVALID_VAL)));
+        }
+        if (params.HasParam("isStartFromAppDock")) {
+            napi_set_named_property(env, objValue, "isStartFromAppDock",
+                CreateJsValue(env, params.GetIntParam("isStartFromAppDock", INVALID_VAL)));
+        }
+        if (params.HasParam("dockAppDirection")) {
+            napi_set_named_property(env, objValue, "dockAppDirection",
+                CreateJsValue(env, params.GetIntParam("dockAppDirection", INVALID_VAL)));
+        }
+        if (params.HasParam("isAppFromRecentAppsOrDockApps")) {
+            napi_set_named_property(env, objValue, "isAppFromRecentAppsOrDockApps",
+                CreateJsValue(env, params.GetIntParam("isAppFromRecentAppsOrDockApps", INVALID_VAL)));
+        }
     }
 }
 
@@ -1083,12 +1113,18 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::DRAG)));
     napi_set_named_property(env, objValue, "DRAG_START", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::DRAG_START)));
+    napi_set_named_property(env, objValue, "DRAG_MOVE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::DRAG_MOVE)));
     napi_set_named_property(env, objValue, "DRAG_END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::DRAG_END)));
     napi_set_named_property(env, objValue, "RESIZE", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::RESIZE)));
+    napi_set_named_property(env, objValue, "RESIZE_WITH_ANIMATION", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::RESIZE_WITH_ANIMATION)));
     napi_set_named_property(env, objValue, "MOVE", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::MOVE)));
+    napi_set_named_property(env, objValue, "MOVE_WITH_ANIMATION", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::MOVE_WITH_ANIMATION)));
     napi_set_named_property(env, objValue, "HIDE", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::HIDE)));
     napi_set_named_property(env, objValue, "TRANSFORM", CreateJsValue(env,
@@ -1294,6 +1330,24 @@ napi_value CreateJsSessionGravity(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsSessionDragResizeType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "RESIZE_TYPE_UNDEFINED", CreateJsValue(env,
+        static_cast<uint32_t>(DragResizeType::RESIZE_TYPE_UNDEFINED)));
+    napi_set_named_property(env, objValue, "RESIZE_EACH_FRAME", CreateJsValue(env,
+        static_cast<uint32_t>(DragResizeType::RESIZE_EACH_FRAME)));
+    napi_set_named_property(env, objValue, "RESIZE_WHEN_DRAG_END", CreateJsValue(env,
+        static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)));
+    return objValue;
+}
+
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect)
 {
@@ -1312,6 +1366,23 @@ napi_value CreateJsSessionRect(napi_env env, const T& rect)
     return objValue;
 }
 
+napi_value CreateJsRectAnimationConfig(napi_env env, const RectAnimationConfig& rectAnimationConfig)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "duration", CreateJsValue(env, rectAnimationConfig.duration));
+    napi_set_named_property(env, objValue, "x1", CreateJsValue(env, rectAnimationConfig.x1));
+    napi_set_named_property(env, objValue, "y1", CreateJsValue(env, rectAnimationConfig.y1));
+    napi_set_named_property(env, objValue, "x2", CreateJsValue(env, rectAnimationConfig.x2));
+    napi_set_named_property(env, objValue, "y2", CreateJsValue(env, rectAnimationConfig.y2));
+    return objValue;
+}
+
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param)
 {
     WLOGFD("CreateJsSessionEventParam.");
@@ -1326,6 +1397,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
     napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
+    napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
     return objValue;
 }
 
@@ -1409,6 +1481,8 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
         return nullptr;
     }
 
+    napi_set_named_property(env, objValue, "gravity",
+        CreateJsValue(env, params.gravity_));
     napi_set_named_property(env, objValue, "landscapeKeyboardRect",
         CreateJsSessionRect(env, params.LandscapeKeyboardRect_));
     napi_set_named_property(env, objValue, "portraitKeyboardRect",

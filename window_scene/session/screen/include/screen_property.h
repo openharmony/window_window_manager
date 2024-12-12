@@ -106,6 +106,9 @@ public:
     Rotation GetScreenRotation() const;
     void UpdateScreenRotation(Rotation rotation);
 
+    Rotation GetDeviceRotation() const;
+    void UpdateDeviceRotation(Rotation rotation);
+
     void SetOrientation(Orientation orientation);
     Orientation GetOrientation() const;
 
@@ -115,6 +118,9 @@ public:
     void SetDisplayOrientation(DisplayOrientation displayOrientation);
     DisplayOrientation GetDisplayOrientation() const;
     void CalcDefaultDisplayOrientation();
+
+    void SetDeviceOrientation(DisplayOrientation displayOrientation);
+    DisplayOrientation GetDeviceOrientation() const;
 
     void SetPhysicalRotation(float rotation);
     float GetPhysicalRotation() const;
@@ -146,6 +152,9 @@ public:
 
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
+
+    void SetScreenShape(ScreenShape screenShape);
+    ScreenShape GetScreenShape() const;
 
     DMRect GetAvailableArea()
     {
@@ -193,7 +202,9 @@ private:
 
     Orientation orientation_ { Orientation::UNSPECIFIED };
     DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
+    DisplayOrientation deviceOrientation_ { DisplayOrientation::UNKNOWN };
     Rotation screenRotation_ { Rotation::ROTATION_0 };
+    Rotation deviceRotation_ { Rotation::ROTATION_0 };
     Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
     DisplayState displayState_ { DisplayState::UNKNOWN };
 
@@ -205,6 +216,8 @@ private:
 
     uint32_t startX_ { 0 };
     uint32_t startY_ { 0 };
+
+    ScreenShape screenShape_ { ScreenShape::RECTANGLE };
 
     ScreenType type_ { ScreenType::REAL };
 

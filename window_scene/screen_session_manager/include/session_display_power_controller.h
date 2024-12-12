@@ -44,6 +44,7 @@ public:
     bool needCancelNotify_ { false };
     bool canceledSuspend_ { false };
     bool canCancelSuspendNotify_ { false };
+    bool skipScreenOffBlock_ { false };
     std::mutex notifyMutex_;
 
 private:

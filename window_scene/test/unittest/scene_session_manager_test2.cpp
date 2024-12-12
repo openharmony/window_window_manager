@@ -108,11 +108,13 @@ void SceneSessionManagerTest2::TearDownTestCase()
 
 void SceneSessionManagerTest2::SetUp()
 {
+    ssm_->sceneSessionMap_.clear();
 }
 
 void SceneSessionManagerTest2::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+    ssm_->sceneSessionMap_.clear();
 }
 
 namespace {
@@ -2041,7 +2043,7 @@ HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function |
     ssm_->shouldHideNonSecureFloatingWindows_.store(true);
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, res);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
@@ -2071,7 +2073,7 @@ HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, Function | SmallTest |
     Rect reqRect = { 0, 0, 10, 10 };
     property->SetRequestRect(reqRect);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    ASSERT_EQ(false, ssm_->isEnablePiPCreate(property));
+    ASSERT_EQ(false, ssm_->IsEnablePiPCreate(property));
 }
 
 /**
@@ -2155,6 +2157,7 @@ HWTEST_F(SceneSessionManagerTest2, CacheSpecificSessionForRecovering, Function |
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 2);
     ssm_->RecoverCachedSubSession(parentPersistentId);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 0);
+    ssm_->recoverSubSessionCacheMap_.clear();
 }
 
 /**

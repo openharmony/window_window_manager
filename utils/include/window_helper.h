@@ -79,6 +79,11 @@ public:
         return (type == WindowType::WINDOW_TYPE_FLOAT) || (type == WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     }
 
+    static inline bool IsFloatOrSubWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_FLOAT || IsSubWindow(type);
+    }
+
     static inline bool IsPipWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_PIP);
@@ -588,6 +593,16 @@ public:
             return true;
         }
         return false;
+    }
+
+    static bool CheckButtonStyleValid(const DecorButtonStyle& decorButtonStyle)
+    {
+        return decorButtonStyle.buttonBackgroundSize >= MIN_BUTTON_BACKGROUND_SIZE &&
+               decorButtonStyle.buttonBackgroundSize <= MAX_BUTTON_BACKGROUND_SIZE &&
+               decorButtonStyle.closeButtonRightMargin >= MIN_CLOSE_BUTTON_RIGHT_MARGIN &&
+               decorButtonStyle.closeButtonRightMargin <= MAX_CLOSE_BUTTON_RIGHT_MARGIN &&
+               decorButtonStyle.spacingBetweenButtons >= MIN_SPACING_BETWEEN_BUTTONS &&
+               decorButtonStyle.spacingBetweenButtons <= MAX_SPACING_BETWEEN_BUTTONS;
     }
 
 private:

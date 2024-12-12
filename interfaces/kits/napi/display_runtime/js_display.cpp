@@ -291,7 +291,8 @@ DMError JsDisplay::RegisterDisplayListenerWithType(napi_env env, const std::stri
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     if (type == EVENT_AVAILABLE_AREA_CHANGED) {
-        ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayListener);
+        auto displayId = display_->GetId();
+        ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayListener, displayId);
     } else {
         WLOGFE("RegisterDisplayListenerWithType failed, %{public}s not support", type.c_str());
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -356,8 +357,9 @@ DMError JsDisplay::UnregisterAllDisplayListenerWithType(const std::string& type)
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
         if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+            auto displayId = display_->GetId();
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
-            ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+            ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener, displayId);
         } else {
             ret = DMError::DM_ERROR_INVALID_PARAM;
         }
@@ -381,8 +383,10 @@ DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::st
         if (isEquals) {
             it->second->RemoveCallback(env, type, value);
             if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+                auto displayId = display_->GetId();
                 sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
-                ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
+                ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener,
+                    displayId);
             } else {
                 ret = DMError::DM_ERROR_INVALID_PARAM;
             }
@@ -781,6 +785,7 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
     napi_set_named_property(env, objValue, "hdrFormats", CreateJsHDRFormatArray(env, info->GetHdrFormats()));
     napi_set_named_property(env, objValue, "availableWidth", CreateJsValue(env, info->GetAvailableWidth()));
     napi_set_named_property(env, objValue, "availableHeight", CreateJsValue(env, info->GetAvailableHeight()));
+    napi_set_named_property(env, objValue, "screenShape", CreateJsValue(env, info->GetScreenShape()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)

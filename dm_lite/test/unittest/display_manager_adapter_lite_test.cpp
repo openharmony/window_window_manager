@@ -158,6 +158,20 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SetDisplayState, Function | SmallTest | 
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetDisplayState(state);
     ASSERT_FALSE(ret);
 }
+
+/**
+ * @tc.name: GetVirtualScreenFlag
+ * @tc.desc: test GetVirtualScreenFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, GetVirtualScreenFlag, Function | SmallTest | Level2)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        uint64_t screenId = 0;
+        auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().GetVirtualScreenFlag(screenId);
+        ASSERT_EQ(ret, VirtualScreenFlag::DEFAULT);
+    }
+}
 }
 }
 }

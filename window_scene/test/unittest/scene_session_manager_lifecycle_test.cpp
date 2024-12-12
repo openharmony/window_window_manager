@@ -434,6 +434,10 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, Funct
     ASSERT_NE(nullptr, sceneSessionInfo);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, false);
+    std::shared_ptr<SessionListenerController> listenerController =
+        std::make_shared<SessionListenerController>();
+    ASSERT_NE(nullptr, listenerController);
+    ssm_->listenerController_ = listenerController;
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, false);
     ssm_->AddClientDeathRecipient(sessionStage, sceneSession);
@@ -940,6 +944,38 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RecoveryVisibilityPidCount, Function 
 
     ssm_->RecoveryVisibilityPidCount(pid);
     EXPECT_EQ(1, ssm_->visibleWindowCountMap_[pid]);
+}
+
+/**
+ * @tc.name: VisibilityChangedDetectFunc
+ * @tc.desc: VisibilityChangedDetectFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest, VisibilityChangedDetectFunc, Function | SmallTest | Level3)
+{
+    int32_t pid = 20;
+    SessionInfo info;
+    info.abilityName_ = "VisibilityChanged";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession1, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->RegisterVisibilityChangedDetectFunc(sceneSession1);
+    ssm_->RegisterVisibilityChangedDetectFunc(sceneSession2);
+    EXPECT_EQ(0, ssm_->visibleWindowCountMap_[pid]);
+
+    sceneSession1->visibilityChangedDetectFunc_(pid, false, true);
+    EXPECT_EQ(1, ssm_->visibleWindowCountMap_[pid]);
+
+    sceneSession2->visibilityChangedDetectFunc_(pid, false, true);
+    EXPECT_EQ(2, ssm_->visibleWindowCountMap_[pid]);
+
+    sceneSession1->visibilityChangedDetectFunc_(pid, true, false);
+    EXPECT_EQ(1, ssm_->visibleWindowCountMap_[pid]);
+
+    sceneSession2->visibilityChangedDetectFunc_(pid, true, false);
+    EXPECT_EQ(0, ssm_->visibleWindowCountMap_[pid]);
 }
 }
 } // namespace Rosen

@@ -50,6 +50,7 @@ using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
  */
 const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
 constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_MS = 4000;
+constexpr int64_t SET_UICONTENT_TIMEOUT_TIME_AFTER_FREEZE_MS = 5000;
 }
 
 struct WindowTitleVisibleFlags {
@@ -131,8 +132,6 @@ public:
     std::shared_ptr<Ace::UIContent> GetUIContentSharedPtr() const;
     Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
     void OnNewWant(const AAFwk::Want& want) override;
-    WMError SetAPPWindowLabel(const std::string& label) override;
-    WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
@@ -174,8 +173,6 @@ public:
     WMError UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
@@ -186,6 +183,8 @@ public:
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
+    WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
+    WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
@@ -194,11 +193,8 @@ public:
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
-    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
-        bool isCloseVisible) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
-    WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     virtual Orientation GetRequestedOrientation() override;
 
     int32_t GetParentId() const;
@@ -255,11 +251,23 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
-    virtual WMError SetDecorVisible(bool isVisible) override;
-    virtual WMError SetWindowTitleMoveEnabled(bool enable) override;
-    virtual WMError SetDecorHeight(int32_t decorHeight) override;
-    virtual WMError GetDecorHeight(int32_t& height) override;
-    virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
+
+    /*
+     * Window Decor
+     */
+    WMError SetDecorVisible(bool isVisible) override;
+    WMError SetWindowTitleMoveEnabled(bool enable) override;
+    WMError SetDecorHeight(int32_t decorHeight) override;
+    WMError GetDecorHeight(int32_t& height) override;
+    WMError SetDecorButtonStyle(const DecorButtonStyle& decorButtonStyle) override;
+    WMError GetDecorButtonStyle(DecorButtonStyle& decorButtonStyle) override;
+    WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
+    WMError SetAPPWindowLabel(const std::string& label) override;
+    WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
+    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+        bool isCloseVisible) override;
+    WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
+
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     virtual WMError RegisterWindowTitleButtonRectChangeListener(
         const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
@@ -299,6 +307,17 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
+
+    /**
+     * Window Immersive
+     */
+    WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+
+    /**
+     * Window Property
+     */
+    WSError NotifyDisplayIdChange(DisplayId displayId);
 
 protected:
     WMError Connect();
@@ -346,13 +365,13 @@ protected:
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     sptr<WindowSessionImpl> FindExtensionWindowWithContext();
 
-    WMError RegisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
-    WMError UnregisterExtensionAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener);
+    WMError RegisterExtensionAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener);
+    WMError UnregisterExtensionAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener);
 
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
 
-    /**
+    /*
      * Sub Window
      */
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
@@ -388,7 +407,6 @@ protected:
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
-    std::atomic_bool isDragTaskUpdateDone_ = true;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
@@ -408,8 +426,14 @@ protected:
     void AddSetUIContentTimeoutCheck();
     void NotifySetUIContentComplete();
     std::atomic_bool setUIContentCompleted_ { false };
+    void SetUIExtensionDestroyComplete();
+    void SetUIExtensionDestroyCompleteInSubWindow();
+    void AddSetUIExtensionDestroyTimeoutCheck();
+    std::atomic_bool setUIExtensionDestroyCompleted_ { false };
+    std::atomic_bool startUIExtensionDestroyTimer_ { false };
     enum TimeoutErrorCode : int32_t {
-        SET_UICONTENT_TIMEOUT = 1000
+        SET_UICONTENT_TIMEOUT = 1000,
+        SET_UIEXTENSION_DESTROY_TIMEOUT
     };
 
     /**
@@ -421,6 +445,7 @@ protected:
     /**
      * Window Layout
      */
+    std::atomic_bool isDragTaskPostDone_ = true;
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
@@ -456,6 +481,8 @@ private:
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowVisibilityChangedListener, std::vector<IWindowVisibilityListenerSptr>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IDisplayIdChangeListener, std::vector<IDisplayIdChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> GetListeners();
     template<typename T>
@@ -495,6 +522,8 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateRectForOtherReasonTask(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction);
+    void UpdateRectForResizeWithAnimation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const RectAnimationConfig& rectAnimationConfig, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyRotationAnimationEnd();
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     bool IsUserOrientation(Orientation orientation) const;
@@ -505,7 +534,7 @@ private:
     bool IsNotifyInteractiveDuplicative(bool interactive);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
 
-    /**
+    /*
      * PC Window
      */
     void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
@@ -538,6 +567,8 @@ private:
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
+    static std::mutex displayIdChangeListenerMutex_;
+    static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
@@ -567,10 +598,16 @@ private:
      * Window Layout
      */
     WSRect layoutRect_;
+    std::atomic_bool windowSizeChanged_ = false;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    /*
+     * Window Decor
+     */
+    DecorButtonStyle decorButtonStyle_;
 
     /**
      * Multi Window

@@ -552,12 +552,28 @@ public:
     DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
 
     /**
+     * @brief Register a listener for the event of available  area changed.
+     *
+     * @param listener IAvailableAreaListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
+
+    /**
      * @brief UnRegister a listener for the event of available  area changed.
      *
      * @param listener IAvailableAreaListener.
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+
+    /**
+     * @brief UnRegister a listener for the event of available  area changed.
+     *
+     * @param listener IAvailableAreaListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
 
     /**
      * @brief Add a surface node to the target display.

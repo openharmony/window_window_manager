@@ -139,7 +139,7 @@ napi_value JsWindowStage::SetShowOnLockScreen(napi_env env, napi_callback_info i
 
 napi_value JsWindowStage::DisableWindowDecor(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]DisableWindowDecor");
+    TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnDisableWindowDecor(env, info) : nullptr;
 }
@@ -153,21 +153,21 @@ napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_i
 
 napi_value JsWindowStage::RemoveStartingWindow(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnRemoveStartingWindow(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::SetWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetWindowRectAutoSave(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::IsWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnIsWindowRectAutoSave(env, info) : nullptr;
 }
@@ -661,19 +661,19 @@ napi_value JsWindowStage::OnDisableWindowDecor(napi_env env, napi_callback_info 
 {
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
-        WLOGFE("[NAPI]WindowScene is null");
+        TLOGE(WmsLogTag::WMS_DECOR, "WindowScene is null");
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
     }
 
     auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is null");
+        TLOGE(WmsLogTag::WMS_DECOR, "Window is null");
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->DisableAppWindowDecor());
     if (ret != WmErrorCode::WM_OK) {
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
-    WLOGI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
+    TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] end",
         window->GetWindowId(), window->GetWindowName().c_str());
         return NapiGetUndefined(env);
     }
@@ -782,7 +782,7 @@ napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_inf
 {
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "windowScene is null");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "windowScene is null");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
@@ -799,7 +799,7 @@ napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_inf
     auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s window is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_STARTUP_PAGE, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
             return;
@@ -822,22 +822,22 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
 {
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
 
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) { // 1: maximum params num
-        TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     bool enabled = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "[NAPI]Failed to convert parameter to enabled");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]Failed to convert parameter to enabled");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
@@ -849,14 +849,14 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask, enabled] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s window is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
             WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled));
         if (ret != WmErrorCode::WM_OK) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s enable recover position failed!", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s enable recover position failed!", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
                 ret, "window recover position failed."));
         } else {
@@ -874,8 +874,8 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
 {
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
 
@@ -886,7 +886,7 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
     auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s Window is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s Window is nullptr", where);
             task->Reject(env,
                 JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Window is nullptr."));
             return;
@@ -894,7 +894,7 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
         bool enabled = false;
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->IsWindowRectAutoSave(enabled));
         if (ret != WmErrorCode::WM_OK) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s get the auto-save state of the window rect failed!", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s get the auto-save state of the window rect failed!", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
                 ret, "Window recover position failed."));
         } else {
