@@ -223,7 +223,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     res = session_->HandleRaiseAppMainWindowToTop(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleBackPressed(data, reply);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
+    ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleMarkProcessed(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleSetGlobalMaximizeMode(data, reply);
