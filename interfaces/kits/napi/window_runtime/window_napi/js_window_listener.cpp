@@ -30,7 +30,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsListe
 
 JsWindowListener::~JsWindowListener()
 {
-    WLOGI("[NAPI]~JsWindowListener");
+    TLOGI("[NAPI]");
 }
 
 void JsWindowListener::OnLastStrongRef(const void *)
@@ -51,14 +51,14 @@ void JsWindowListener::SetMainEventHandler()
 
 napi_value JsWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
 {
-    WLOGFD("[NAPI]CallJsMethod methodName = %{public}s", methodName);
+    WLOGFD("CallJsMethod methodName = %{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
-        WLOGFE("[NAPI]env_ nullptr or jsCallBack_ is nullptr");
+        WLOGFE("env_ nullptr or jsCallBack_ is nullptr");
         return nullptr;
     }
     napi_value method = jsCallBack_->GetNapiValue();
     if (method == nullptr) {
-        WLOGFE("[NAPI]Failed to get method callback from object");
+        WLOGFE("Failed to get method callback from object");
         return nullptr;
     }
     napi_value result = nullptr;
@@ -111,25 +111,25 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
 
 void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    WLOGI("[NAPI]OnModeChange %{public}u", mode);
+    TLOGI("[NAPI] %{public}u", mode);
 }
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
-    WLOGFD("[NAPI]OnSystemBarPropertyChange");
+    WLOGFD("[NAPI]");
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, displayId, tints, eng = env_] (napi_env env,
             NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                WLOGFE("this listener or eng is nullptr");
                 return;
             }
             napi_value propertyValue = nullptr;
             napi_create_object(eng, &propertyValue);
             if (propertyValue == nullptr) {
-                WLOGFE("[NAPI]Failed to convert prop to jsObject");
+                WLOGFE("Failed to convert prop to jsObject");
                 return;
             }
             napi_set_named_property(env, propertyValue, "displayId",
@@ -154,7 +154,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
     auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_IMMS, "this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
@@ -185,12 +185,12 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
 
 void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI] event type: %{public}u", eventType);
+    TLOGI(WmsLogTag::WMS_LIFE, "event type: %{public}u", eventType);
     auto task = [self = weakRef_, eventType, eng = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::LifeCycleCallBack");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
-            WLOGFE("[NAPI]this listener or eng is nullptr");
+            WLOGFE("this listener or eng is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;
@@ -213,7 +213,7 @@ void JsWindowListener::AfterForeground()
         LifeCycleCallBack(LifeCycleEventType::FOREGROUND);
         state_ = WindowState::STATE_SHOWN;
     } else {
-        WLOGFD("[NAPI]window is already shown");
+        WLOGFD("window is already shown");
     }
 }
 
@@ -223,7 +223,7 @@ void JsWindowListener::AfterBackground()
         LifeCycleCallBack(LifeCycleEventType::BACKGROUND);
         state_ = WindowState::STATE_HIDDEN;
     } else {
-        WLOGFD("[NAPI]window is already hide");
+        WLOGFD("window is already hide");
     }
 }
 
@@ -261,7 +261,7 @@ void JsWindowListener::AfterDestroyed()
 void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGI("[NAPI]OccupiedAreaChangeInfo, type: %{public}u, " \
+    WLOGI("OccupiedAreaChangeInfo, type: %{public}u, " \
         "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]", static_cast<uint32_t>(info->type_),
         info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     // js callback should run in js thread
@@ -270,7 +270,7 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
             NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                WLOGFE("this listener or eng is nullptr");
                 return;
             }
             napi_value argv[] = {CreateJsValue(eng, info->rect_.height_)};
@@ -291,7 +291,7 @@ void JsWindowListener::OnTouchOutside() const
         [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
-                WLOGFE("[NAPI]this listener is nullptr");
+                WLOGFE("this listener is nullptr");
                 return;
             }
             thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
@@ -311,7 +311,7 @@ void JsWindowListener::OnScreenshot()
         [self = wptr<JsWindowListener>(this)] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
-                WLOGFE("[NAPI]this listener is nullptr");
+                WLOGFE("this listener is nullptr");
                 return;
             }
             thisListener->CallJsMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
@@ -330,7 +330,7 @@ void JsWindowListener::OnDialogTargetTouch() const
         [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
-                WLOGFE("[NAPI]this listener is nullptr");
+                WLOGFE("this listener is nullptr");
                 return;
             }
             thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
@@ -349,7 +349,7 @@ void JsWindowListener::OnDialogDeathRecipient() const
         [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
-                WLOGFE("[NAPI]this listener is nullptr");
+                WLOGFE("this listener is nullptr");
                 return;
             }
             thisListener->CallJsMethod(DIALOG_DEATH_RECIPIENT_CB.c_str(), nullptr, 0);
@@ -368,7 +368,7 @@ void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
         [self = weakRef_, enable, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                WLOGFE("this listener or eng is nullptr");
                 return;
             }
             napi_value argv[] = {CreateJsValue(eng, enable)};
@@ -388,7 +388,7 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         [self = weakRef_, showWaterMark, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                WLOGFE("this listener or eng is nullptr");
                 return;
             }
             napi_value argv[] = {CreateJsValue(eng, showWaterMark)};
@@ -418,7 +418,7 @@ void JsWindowListener::OnWindowNoInteractionCallback()
         [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
-                WLOGFE("[NAPI]this listener is nullptr");
+                WLOGFE("this listener is nullptr");
                 return;
             }
             thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
@@ -456,7 +456,7 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
     auto jsCallback = [self = weakRef_, displayId, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "this listener or env is nullptr");
             return;
         }
         HandleScope handleScope(env);
@@ -513,7 +513,7 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
 void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
     if (currRect_ == rect && reason == WindowSizeChangeReason::UNDEFINED) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]skip redundant rect update");
+        TLOGD(WmsLogTag::WMS_LAYOUT, "skip redundant rect update");
         return;
     }
     RectChangeReason rectChangeReason = RectChangeReason::UNDEFINED;

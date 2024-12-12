@@ -50,7 +50,7 @@ JsPipManager::~JsPipManager()
 
 void JsPipManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::Finalizer");
+    TLOGD(WmsLogTag::WMS_PIP, "JsPipManager::Finalizer");
     std::unique_ptr<JsPipManager>(static_cast<JsPipManager*>(data));
 }
 
@@ -62,12 +62,12 @@ napi_value JsPipManager::InitXComponentController(napi_env env, napi_callback_in
 
 napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::OnInitXComponentController");
+    TLOGD(WmsLogTag::WMS_PIP, "JsPipManager::OnInitXComponentController");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < NUMBER_ONE) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid: %{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
     napi_value xComponentController = argv[0];
@@ -75,19 +75,19 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
         XComponentController::GetXComponentControllerFromNapiValue(env, xComponentController);
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
     if (pipWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to find pip window");
         return NapiGetUndefined(env);
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
     sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]set xComponentController to window: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "set xComponentController to window: %{public}u", windowId);
     WMError errCode = pipController->SetXComponentController(xComponentControllerResult);
     if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to set xComponentController");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to set xComponentController");
     }
     return NapiGetUndefined(env);
 }
@@ -103,19 +103,19 @@ napi_value JsPipManager::OnGetCustomUIController(napi_env env, napi_callback_inf
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
     if (pipWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to find pip window");
         return NapiGetUndefined(env);
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]winId: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "winId: %{public}u", windowId);
     sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
     napi_ref ref = pipController->GetCustomNodeController();
     if (ref == nullptr) {
-        TLOGI(WmsLogTag::WMS_PIP, "[NAPI] invalid custom UI controller");
+        TLOGI(WmsLogTag::WMS_PIP, "invalid custom UI controller");
         return NapiGetUndefined(env);
     }
     napi_value uiController = nullptr;
@@ -134,19 +134,19 @@ napi_value JsPipManager::OnGetTypeNode(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
     if (pipWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to find pip window");
         return NapiGetUndefined(env);
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]winId: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "winId: %{public}u", windowId);
     sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
     napi_ref ref = pipController->GetTypeNode();
     if (ref == nullptr) {
-        TLOGI(WmsLogTag::WMS_PIP, "[NAPI] invalid typeNode");
+        TLOGI(WmsLogTag::WMS_PIP, "invalid typeNode");
         return NapiGetUndefined(env);
     }
     napi_value typeNode = nullptr;
@@ -165,14 +165,14 @@ napi_value JsPipManager::OnSetTypeNodeEnabled(napi_env env, napi_callback_info i
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
     if (pipWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to find pip window");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to find pip window");
         return NapiGetUndefined(env);
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
-    TLOGI(WmsLogTag::WMS_PIP, "[NAPI]winId: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "winId: %{public}u", windowId);
     sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to get pictureInPictureController");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
     pipController->OnPictureInPictureStart();
@@ -236,7 +236,7 @@ napi_value JsPipManager::OnUnregisterCallback(napi_env env, napi_callback_info i
 
 napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]JsPipManager::JsPipManagerInit");
+    TLOGD(WmsLogTag::WMS_PIP, "JsPipManager::JsPipManagerInit");
     if (env == nullptr || exportObj == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipManagerInit failed, env or exportObj is null");
         return nullptr;
