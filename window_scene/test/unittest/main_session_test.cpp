@@ -391,22 +391,22 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: OnMainSessionModalTypeChange
- * @tc.desc: OnMainSessionModalTypeChange function01
+ * @tc.name: NotifyMainModalTypeChange
+ * @tc.desc: NotifyMainModalTypeChange function01
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, OnMainSessionModalTypeChange, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, NotifyMainModalTypeChange, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnMainSessionModalTypeChange";
-    info.bundleName_ = "OnMainSessionModalTypeChange";
+    info.abilityName_ = "NotifyMainModalTypeChange";
+    info.bundleName_ = "NotifyMainModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+    sceneSession->RegisterMainModalTypeChangeCallback([](bool isModal) {
         return;
     });
-    EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
-    EXPECT_EQ(WSError::WS_OK, sceneSession->OnMainSessionModalTypeChange(true));
+    EXPECT_NE(sceneSession->onMainModalTypeChange_, nullptr);
+    EXPECT_EQ(WSError::WS_OK, sceneSession->NotifyMainModalTypeChange(true));
 }
 
 /**
