@@ -3151,6 +3151,64 @@ HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo, Function | SmallTest |
     ASSERT_NE(ssm_, nullptr);
     ASSERT_NE(ssm_->GetPrimaryDisplayInfo(), nullptr);
 }
+
+/**
+ * @tc.name: ConvertOffsetToCorrectRotation
+ * @tc.desc: ConvertOffsetToCorrectRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertOffsetToCorrectRotation, Function | SmallTest | Level3)
+{
+    int32_t phyOffset = 90;
+    ASSERT_EQ(ssm_->ConvertOffsetToCorrectRotation(phyOffset), ScreenRotation::ROTATION_270);
+    phyOffset = 180;
+    ASSERT_EQ(ssm_->ConvertOffsetToCorrectRotation(phyOffset), ScreenRotation::ROTATION_180);
+    phyOffset = 270;
+    ASSERT_EQ(ssm_->ConvertOffsetToCorrectRotation(phyOffset), ScreenRotation::ROTATION_90);
+    phyOffset = 0;
+    ASSERT_EQ(ssm_->ConvertOffsetToCorrectRotation(phyOffset), ScreenRotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: ConfigureScreenSnapshotParams
+ * @tc.desc: ConfigureScreenSnapshotParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConfigureScreenSnapshotParams, Function | SmallTest | Level3)
+{
+    ssm_->OnStart();
+    auto stringConfig = ScreenSceneConfig::GetStringConfig();
+    ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 0);
+    ssm_->ConfigureScreenSnapshotParams();
+}
+
+/**
+ * @tc.name: RegisterRefreshRateChangeListener
+ * @tc.desc: RegisterRefreshRateChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RegisterRefreshRateChangeListener, Function | SmallTest | Level3)
+{
+    ssm_->RegisterRefreshRateChangeListener();
+    std::string ret = ssm_->screenEventTracker_.recordInfos_.back().info;
+    ASSERT_NE(ret, "Dms RefreshRateChange register failed.");
+}
+
+/**
+ * @tc.name: FreeDisplayMirrorNodeInner
+ * @tc.desc: FreeDisplayMirrorNodeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, FreeDisplayMirrorNodeInner, Function | SmallTest | Level3)
+{
+    sptr<ScreenSession> mirrorSession = nullptr;
+    ssm_->FreeDisplayMirrorNodeInner(mirrorSession);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_EQ(ssm_->GetScreenSession(screenId)->GetDisplayNode(), nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
