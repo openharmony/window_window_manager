@@ -88,7 +88,7 @@ bool IsJsBundleNameUndefind(napi_env env, napi_value jsBundleName, SessionInfo& 
     if (GetType(env, jsBundleName) != napi_undefined) {
         std::string bundleName;
         if (!ConvertFromJsValue(env, jsBundleName, bundleName)) {
-            WLOGFE("[NAPI]Failed to convert parameter to bundleName");
+            WLOGFE("Failed to convert parameter to bundleName");
             return false;
         }
         sessionInfo.bundleName_ = bundleName;
@@ -101,7 +101,7 @@ bool IsJsModuleNameUndefind(napi_env env, napi_value jsModuleName, SessionInfo& 
     if (GetType(env, jsModuleName) != napi_undefined) {
         std::string moduleName;
         if (!ConvertFromJsValue(env, jsModuleName, moduleName)) {
-            WLOGFE("[NAPI]Failed to convert parameter to moduleName");
+            WLOGFE("Failed to convert parameter to moduleName");
             return false;
         }
         sessionInfo.moduleName_ = moduleName;
@@ -114,7 +114,7 @@ bool IsJsAbilityUndefind(napi_env env, napi_value jsAbilityName, SessionInfo& se
     if (GetType(env, jsAbilityName) != napi_undefined) {
         std::string abilityName;
         if (!ConvertFromJsValue(env, jsAbilityName, abilityName)) {
-            WLOGFE("[NAPI]Failed to convert parameter to abilityName");
+            WLOGFE("Failed to convert parameter to abilityName");
             return false;
         }
         sessionInfo.abilityName_ = abilityName;
@@ -127,7 +127,7 @@ bool IsJsAppIndexUndefind(napi_env env, napi_value jsAppIndex, SessionInfo& sess
     if (GetType(env, jsAppIndex) != napi_undefined) {
         int32_t appIndex;
         if (!ConvertFromJsValue(env, jsAppIndex, appIndex)) {
-            WLOGFE("[NAPI]Failed to convert parameter to appIndex");
+            WLOGFE("Failed to convert parameter to appIndex");
             return false;
         }
         sessionInfo.appIndex_ = appIndex;
@@ -140,7 +140,7 @@ bool IsJsIsSystemUndefind(napi_env env, napi_value jsIsSystem, SessionInfo& sess
     if (GetType(env, jsIsSystem) != napi_undefined) {
         bool isSystem;
         if (!ConvertFromJsValue(env, jsIsSystem, isSystem)) {
-            WLOGFE("[NAPI]Failed to convert parameter to isSystem");
+            WLOGFE("Failed to convert parameter to isSystem");
             return false;
         }
         sessionInfo.isSystem_ = isSystem;
@@ -153,7 +153,7 @@ bool IsJsSceneTypeUndefined(napi_env env, napi_value jsSceneType, SessionInfo& s
     if (GetType(env, jsSceneType) != napi_undefined) {
         uint32_t sceneType;
         if (!ConvertFromJsValue(env, jsSceneType, sceneType)) {
-            WLOGFE("[NAPI]Failed to convert parameter to sceneType");
+            WLOGFE("Failed to convert parameter to sceneType");
             return false;
         }
         sessionInfo.sceneType_ = static_cast<SceneType>(sceneType);
@@ -168,7 +168,7 @@ bool IsJsPersistentIdUndefind(napi_env env, napi_value jsPersistentId, SessionIn
     if (GetType(env, jsPersistentId) != napi_undefined) {
         int32_t persistentId;
         if (!ConvertFromJsValue(env, jsPersistentId, persistentId)) {
-            WLOGFE("[NAPI]Failed to convert parameter to persistentId");
+            WLOGFE("Failed to convert parameter to persistentId");
             return false;
         }
         sessionInfo.persistentId_ = persistentId;
@@ -181,7 +181,7 @@ bool IsJsCallStateUndefind(napi_env env, napi_value jsCallState, SessionInfo& se
     if (GetType(env, jsCallState) != napi_undefined) {
         int32_t callState;
         if (!ConvertFromJsValue(env, jsCallState, callState)) {
-            WLOGFE("[NAPI]Failed to convert parameter to callState");
+            WLOGFE("Failed to convert parameter to callState");
             return false;
         }
         sessionInfo.callState_ = static_cast<uint32_t>(callState);
@@ -194,7 +194,7 @@ bool IsJsWindowInputTypeUndefind(napi_env env, napi_value jsWindowInputType, Ses
     if (GetType(env, jsWindowInputType) != napi_undefined) {
         uint32_t windowInputType = 0;
         if (!ConvertFromJsValue(env, jsWindowInputType, windowInputType)) {
-            WLOGFE("[NAPI]Failed to convert parameter to windowInputType");
+            WLOGFE("Failed to convert parameter to windowInputType");
             return false;
         }
         sessionInfo.windowInputType_ = static_cast<uint32_t>(windowInputType);
@@ -207,7 +207,7 @@ bool IsJsSessionTypeUndefind(napi_env env, napi_value jsSessionType, SessionInfo
     uint32_t windowType = 0;
     if (GetType(env, jsSessionType) != napi_undefined) {
         if (!ConvertFromJsValue(env, jsSessionType, windowType)) {
-            WLOGFE("[NAPI]Failed to convert parameter to windowType");
+            WLOGFE("Failed to convert parameter to windowType");
             return false;
         }
         if (JS_SESSION_TO_WINDOW_TYPE_MAP.count(static_cast<JsSessionType>(windowType)) != 0) {
@@ -226,7 +226,7 @@ bool IsJsScreenIdUndefind(napi_env env, napi_value jsScreenId, SessionInfo& sess
     if (GetType(env, jsScreenId) != napi_undefined) {
         int32_t screenId = -1;
         if (!ConvertFromJsValue(env, jsScreenId, screenId)) {
-            WLOGFE("[NAPI]Failed to convert parameter to screenId");
+            WLOGFE("Failed to convert parameter to screenId");
             return false;
         }
         sessionInfo.screenId_ = static_cast<uint64_t>(screenId);
@@ -239,7 +239,7 @@ bool IsJsIsPersistentRecoverUndefined(napi_env env, napi_value jsIsPersistentRec
     if (GetType(env, jsIsPersistentRecover) != napi_undefined) {
         bool isPersistentRecover = false;
         if (!ConvertFromJsValue(env, jsIsPersistentRecover, isPersistentRecover)) {
-            WLOGFE("[NAPI]Failed to convert parameter to isPersistentRecover");
+            WLOGFE("Failed to convert parameter to isPersistentRecover");
             return false;
         }
         sessionInfo.isPersistentRecover_ = isPersistentRecover;
@@ -252,7 +252,7 @@ bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotatable, SessionInf
     if (GetType(env, jsIsRotatable) != napi_undefined) {
         bool isRotable = false;
         if (!ConvertFromJsValue(env, jsIsRotatable, isRotable)) {
-            WLOGFE("[NAPI]Failed to convert parameter to isRotable");
+            WLOGFE("Failed to convert parameter to isRotable");
             return false;
         }
         sessionInfo.isRotable_ = isRotable;
@@ -265,7 +265,7 @@ bool IsJsProcessOptionUndefined(napi_env env, napi_value jsProcessOption, Sessio
     if (GetType(env, jsProcessOption) != napi_undefined) {
         std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
         if (!ConvertProcessOptionFromJs(env, jsProcessOption, processOptions)) {
-            WLOGFE("[NAPI]Failed to convert parameter to processOptions");
+            WLOGFE("Failed to convert parameter to processOptions");
             return false;
         }
         sessionInfo.processOptions = processOptions;
@@ -278,7 +278,7 @@ bool IsJsIsSetPointerAreasUndefined(napi_env env, napi_value jsIsSetPointerAreas
     if (GetType(env, jsIsSetPointerAreas) != napi_undefined) {
         bool isSetPointerAreas = false;
         if (!ConvertFromJsValue(env, jsIsSetPointerAreas, isSetPointerAreas)) {
-            WLOGFE("[NAPI]Failed to convert parameter to isSetPointerAreas");
+            WLOGFE("Failed to convert parameter to isSetPointerAreas");
             return false;
         }
         sessionInfo.isSetPointerAreas_ = isSetPointerAreas;
@@ -386,13 +386,13 @@ bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
 
     int32_t processMode;
     if (!ConvertFromJsValue(env, jsProcessMode, processMode)) {
-        WLOGFE("[NAPI]Failed to convert parameter to processMode");
+        WLOGFE("Failed to convert parameter to processMode");
         return false;
     }
 
     int32_t startupVisibility;
     if (!ConvertFromJsValue(env, jsStartupVisibility, startupVisibility)) {
-        WLOGFE("[NAPI]Failed to convert parameter to startupVisibility");
+        WLOGFE("Failed to convert parameter to startupVisibility");
         return false;
     }
     processOptions->processMode = static_cast<AAFwk::ProcessMode>(processMode);
@@ -480,7 +480,7 @@ bool IsJsObjNameUndefind(napi_env env, napi_value jsObjName, int32_t& objName)
 {
     if (GetType(env, jsObjName) != napi_undefined) {
         if (!ConvertFromJsValue(env, jsObjName, objName)) {
-            WLOGFE("[NAPI]Failed to convert parameter to objName");
+            WLOGFE("Failed to convert parameter to objName");
             return false;
         }
     }
@@ -539,35 +539,35 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo
 
     uint32_t width = 0;
     if (!ConvertFromJsValue(env, jsWidth, width)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to width");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to width");
         return false;
     }
     hookInfo.width_ = width;
 
     uint32_t height = 0;
     if (!ConvertFromJsValue(env, jsHeight, height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to height");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to height");
         return false;
     }
     hookInfo.height_ = height;
 
     double_t density = 1.0;
     if (!ConvertFromJsValue(env, jsDensity, density)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to density");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to density");
         return false;
     }
     hookInfo.density_ = static_cast<float_t>(density);
 
     uint32_t rotation = 0;
     if (!ConvertFromJsValue(env, jsRotation, rotation)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to rotation");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to rotation");
         return false;
     }
     hookInfo.rotation_ = rotation;
 
     bool enableHookRotation = false;
     if (!ConvertFromJsValue(env, jsEnableHookRotation, enableHookRotation)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI]Failed to convert parameter to enableHookRotation");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to enableHookRotation");
         return false;
     }
     hookInfo.enableHookRotation_ = enableHookRotation;
@@ -592,38 +592,38 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
     napi_get_named_property(env, touchObject, "displayY", &jsDisplayY);
     int32_t id;
     if (!ConvertFromJsValue(env, jsId, id)) {
-        WLOGFE("[NAPI]Failed to convert parameter to id");
+        WLOGFE("Failed to convert parameter to id");
         return false;
     }
     pointerItem.SetPointerId(id);
     pointerEvent.SetPointerId(id);
     int32_t touchType;
     if (!ConvertFromJsValue(env, jsTouchType, touchType)) {
-        WLOGFE("[NAPI]Failed to convert parameter to touchType");
+        WLOGFE("Failed to convert parameter to touchType");
         return false;
     }
     pointerEvent.SetPointerAction(GetMMITouchType(touchType));
     double windowX;
     if (!ConvertFromJsValue(env, jsWindowX, windowX)) {
-        WLOGFE("[NAPI]Failed to convert parameter to windowX");
+        WLOGFE("Failed to convert parameter to windowX");
         return false;
     }
     pointerItem.SetWindowX(std::round(windowX * vpr));
     double windowY;
     if (!ConvertFromJsValue(env, jsWindowY, windowY)) {
-        WLOGFE("[NAPI]Failed to convert parameter to windowY");
+        WLOGFE("Failed to convert parameter to windowY");
         return false;
     }
     pointerItem.SetWindowY(std::round(windowY * vpr));
     double displayX;
     if (!ConvertFromJsValue(env, jsDisplayX, displayX)) {
-        WLOGFE("[NAPI]Failed to convert parameter to displayX");
+        WLOGFE("Failed to convert parameter to displayX");
         return false;
     }
     pointerItem.SetDisplayX(std::round(displayX * vpr));
     double displayY;
     if (!ConvertFromJsValue(env, jsDisplayY, displayY)) {
-        WLOGFE("[NAPI]Failed to convert parameter to displayY");
+        WLOGFE("Failed to convert parameter to displayY");
         return false;
     }
     pointerItem.SetDisplayY(std::round(displayY * vpr));
@@ -635,7 +635,7 @@ bool ConvertTouchesObjectFromJs(napi_env env, napi_value jsTouches, int32_t poin
 {
     // iterator touches
     if (jsTouches == nullptr) {
-        WLOGFE("[NAPI]Failed to convert to touchesObject list");
+        WLOGFE("Failed to convert to touchesObject list");
         return false;
     }
     bool isArray = false;
@@ -649,14 +649,14 @@ bool ConvertTouchesObjectFromJs(napi_env env, napi_value jsTouches, int32_t poin
         napi_value touchesObject = nullptr;
         napi_get_element(env, jsTouches, i, &touchesObject);
         if (touchesObject == nullptr) {
-            WLOGFE("[NAPI]Failed get to touchesObject");
+            WLOGFE("Failed get to touchesObject");
             return false;
         }
         napi_value jsNoChangedId = nullptr;
         napi_get_named_property(env, touchesObject, "id", &jsNoChangedId);
         int32_t noChangedId;
         if (!ConvertFromJsValue(env, jsNoChangedId, noChangedId)) {
-            WLOGFE("[NAPI]Failed to convert parameter to jsNoChangeId");
+            WLOGFE("Failed to convert parameter to jsNoChangeId");
             return false;
         }
         if (pointerId == noChangedId) {
@@ -681,32 +681,32 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
     napi_get_named_property(env, jsObject, "touches", &jsTouches);
     int32_t sourceType;
     if (!ConvertFromJsValue(env, jsSourceType, sourceType)) {
-        WLOGFE("[NAPI]Failed to convert parameter to sourceType");
+        WLOGFE("Failed to convert parameter to sourceType");
         return false;
     }
     pointerEvent.SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
-        WLOGFE("[NAPI]Failed to convert parameter to timestamp");
+        WLOGFE("Failed to convert parameter to timestamp");
         return false;
     }
     pointerEvent.SetActionTime(std::round(timestamp / US_PER_NS));
     if (jsChangedTouches == nullptr) {
-        WLOGFE("[NAPI]Failed to convert parameter to touchesArray");
+        WLOGFE("Failed to convert parameter to touchesArray");
         return false;
     }
     // use changedTouches[0] only
     napi_value touchObject = nullptr;
     napi_get_element(env, jsChangedTouches, 0, &touchObject);
     if (touchObject == nullptr) {
-        WLOGFE("[NAPI]Failed get to touchObject");
+        WLOGFE("Failed get to touchObject");
         return false;
     }
     napi_value jsId = nullptr;
     napi_get_named_property(env, touchObject, "id", &jsId);
     int32_t pointerId;
     if (!ConvertFromJsValue(env, jsId, pointerId)) {
-        WLOGFE("[NAPI]Failed to convert parameter to id");
+        WLOGFE("Failed to convert parameter to id");
         return false;
     }
     if (!ConvertPointerItemFromJs(env, touchObject, pointerEvent)) {
@@ -728,7 +728,7 @@ bool ConvertDeviceIdFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent&
     napi_get_named_property(env, jsObject, "deviceId", &jsDeviceId);
     int32_t deviceId = 0;
     if (!ConvertFromJsValue(env, jsDeviceId, deviceId)) {
-        WLOGFE("[NAPI]Failed to convert parameter to deviceId");
+        WLOGFE("Failed to convert parameter to deviceId");
         return false;
     }
     pointerEvent.SetDeviceId(deviceId);
@@ -740,7 +740,7 @@ bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int3
     bool isArray = false;
     napi_is_array(env, jsObject, &isArray);
     if (jsObject == nullptr || !isArray) {
-        WLOGFE("[NAPI]Failed to convert to integer list");
+        WLOGFE("Failed to convert to integer list");
         return false;
     }
 
@@ -751,7 +751,7 @@ bool ConvertInt32ArrayFromJs(napi_env env, napi_value jsObject, std::vector<int3
         napi_value elementVal = nullptr;
         napi_get_element(env, jsObject, i, &elementVal);
         if (!ConvertFromJsValue(env, elementVal, persistentId)) {
-            WLOGFE("[NAPI]Failed to convert to index %{public}u to integer", i);
+            WLOGFE("Failed to convert to index %{public}u to integer", i);
             return false;
         }
         intList.push_back(persistentId);
@@ -901,7 +901,7 @@ JsSessionType GetApiType(WindowType type)
 {
     auto iter = WINDOW_TO_JS_SESSION_TYPE_MAP.find(type);
     if (iter == WINDOW_TO_JS_SESSION_TYPE_MAP.end()) {
-        WLOGFE("[NAPI]window type: %{public}u cannot map to api type!", type);
+        WLOGFE("Window type: %{public}u cannot map to api type!", type);
         return JsSessionType::TYPE_UNDEFINED;
     } else {
         return iter->second;
@@ -929,7 +929,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Failed to get jsObject");
+        WLOGFE("Failed to get jsObject");
         return nullptr;
     }
     napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, sessionInfo.bundleName_));
@@ -983,7 +983,7 @@ napi_value CreateJsSessionRecoverInfo(
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Failed to get jsObject");
+        WLOGFE("Failed to get jsObject");
         return nullptr;
     }
     napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, sessionInfo.bundleName_));
