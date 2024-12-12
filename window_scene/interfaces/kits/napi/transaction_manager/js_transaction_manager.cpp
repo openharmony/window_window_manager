@@ -37,7 +37,7 @@ napi_value NapiGetUndefined(napi_env env)
 
 napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
 {
-    WLOGI("[NAPI]JsTransactionManager Init");
+    WLOGI("JsTransactionManager Init");
     if (env == nullptr || exportObj == nullptr) {
         WLOGFE("env or exportObj is null!");
         return nullptr;
@@ -59,20 +59,20 @@ JsTransactionManager::JsTransactionManager(napi_env env)
 
 void JsTransactionManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("[NAPI]Finalizer");
+    WLOGFI("[NAPI]");
     std::unique_ptr<JsTransactionManager>(static_cast<JsTransactionManager*>(data));
 }
 
 napi_value JsTransactionManager::OpenSyncTransaction(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]OpenSyncTransaction");
+    WLOGFI("[NAPI]");
     JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
     return (me != nullptr) ? me->OnOpenSyncTransaction(env, info) : nullptr;
 }
 
 napi_value JsTransactionManager::CloseSyncTransaction(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]CloseSyncTransaction");
+    WLOGFI("[NAPI]");
     JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
     return (me != nullptr) ? me->OnCloseSyncTransaction(env, info) : nullptr;
 }
