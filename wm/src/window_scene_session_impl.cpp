@@ -2605,14 +2605,14 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
         }
         return res;
     }
-    WindowPrepareTerminateHandler* handler = sptr<WindowPrepareTerminateHandler>::MakeSptr();
+    auto handler = sptr<WindowPrepareTerminateHandler>::MakeSptr();
     PrepareTerminateFunc func = [hostSessionWptr = wptr<ISession>(hostSession)] {
-        auto weakSession = hostSessionWptr.promote();
-        if (weakSession == nullptr) {
+        auto hostSession = hostSessionWptr.promote();
+        if (hostSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "this session is nullptr");
             return;
         }
-        weakSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
     };
     handler->SetPrepareTerminateFun(func);
     if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
