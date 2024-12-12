@@ -1200,6 +1200,19 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return iter->second;
 }
 
+void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
+    const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName &&
+            sceneSession->GetSessionInfo().appIndex_ == appIndex &&
+            SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            mainSessions.push_back(sceneSession);
+        }
+    }
+}
+
 sptr<SceneSession> SceneSessionManager::GetSceneSessionByName(const ComparedSessionInfo& info)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -7600,6 +7613,47 @@ void SceneSessionManager::DealwithDrawingContentChange(const std::vector<std::pa
     }
 }
 
+WSError SceneSessionManager::NotifyAppUseControlList(
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
+{
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "controlApptype: %{public}d userId: %{public}d controlList size: %{public}zu",
+        static_cast<int>(type), userId, controlList.size());
+    if (!SessionPermission::IsSACalling()) {
+        TLOGW(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) {
+        TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_, userId);
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
+    taskScheduler_->PostAsyncTask([this, type, userId, controlList] {
+        if (notifyAppUseControlListFunc_ != nullptr) {
+            notifyAppUseControlListFunc_(type, userId, controlList);
+        }
+
+        std::vector<sptr<SceneSession>> mainSessions;
+        for (const auto& appUseControlInfo : controlList) {
+            GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
+            if (mainSessions.empty()) {
+                continue;
+            }
+            for (const auto& session : mainSessions) {
+                session->NotifyUpdateAppUseControl(type, appUseControlInfo.isNeedControl_);
+            }
+            mainSessions.clear();
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+void SceneSessionManager::RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func)
+{
+    taskScheduler_->PostAsyncTask([this, callback = std::move(func)] {
+        notifyAppUseControlListFunc_ = std::move(callback);
+    }, __func__);
+}
+
 std::vector<std::pair<uint64_t, bool>> SceneSessionManager::GetWindowDrawingContentChangeInfo(
     std::vector<std::pair<uint64_t, bool>> currDrawingContentData)
 {
@@ -10461,6 +10515,53 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+    int32_t x, int32_t y, std::vector<int32_t>& windowIds)
+{
+    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}" PRIu64 " windowNumber %{public}d x %{public}d y %{public}d",
+          displayId, windowNumber, x, y);
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::DEFAULT, "displayId is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool findAllWindow = windowNumber <= 0;
+    bool checkPoint = (x >= 0 && y >= 0);
+    std::string callerBundleName = SessionPermission::GetCallingBundleName();
+    auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
+        findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
+        if (session == nullptr) {
+            return false;
+        }
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            return false;
+        }
+        if (!findAllWindow && windowNumber == 0) {
+            return true;
+        }
+        bool isSameBundleName = session->GetSessionInfo().bundleName_ == callerBundleName;
+        bool isSameDisplayId = sessionProperty->GetDisplayId() == displayId;
+        bool isRsVisible = session->GetRSVisible();
+        WSRect windowRect = session->GetSessionRect();
+        bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
+        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}" PRIu64
+               " isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+               session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
+               sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
+        if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
+            return false;
+        }
+        windowIds.emplace_back(session->GetPersistentId());
+        windowNumber--;
+        return false;
+    };
+    auto task = [this, func = std::move(func)] {
+        TraverseSessionTree(func, true);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+}
+
 WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const
 {
     if (!infos.empty()) {
@@ -10884,6 +10985,12 @@ void SceneSessionManager::UpdateDarkColorModeToRS()
     bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
     TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d",
         colorMode.c_str(), ret);
+}
+
+WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
+{
+    isPcOrPadFreeMultiWindowMode = (systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.freeMultiWindowEnable_);
+    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,

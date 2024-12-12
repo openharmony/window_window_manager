@@ -243,9 +243,12 @@ public:
     };
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) { return WMError::WM_OK; }
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) { return WMError::WM_OK; }
+    virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+        int32_t x, int32_t y, std::vector<int32_t>& windowIds) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError ReleaseForegroundSessionScreenLock() { return WMError::WM_OK; }
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) { return WMError::WM_OK; }
+    virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
 };
 }
 }

@@ -638,98 +638,63 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
 
 napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
-    std::string windowName;
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "WindowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string windowName;
     if (!ConvertFromJsValue(env, argv[0], windowName)) {
         WLOGFE("[NAPI]Failed to convert parameter to windowName");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
-    WindowOption option;
+    sptr<WindowOption> option = new WindowOption();
     if (!ParseSubWindowOptions(env, argv[1], option)) {
         WLOGFE("[NAPI]get invalid options param");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
+    if ((option->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
+        !windowScene->GetMainWindow()->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
+        return NapiGetUndefined(env);
+    }
 
-    if (option.GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+    if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));
         return NapiGetUndefined(env);
     }
 
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weak = windowScene_, windowName, option](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakScene = weak.lock();
-            if (weakScene == nullptr) {
-                WLOGFE("[NAPI]Window scene is null");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                return;
-            }
-            sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption(option);
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-            windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-            windowOption->SetOnlySupportSceneBoard(true);
-            auto window = weakScene->CreateWindow(windowName, windowOption);
-            if (window == nullptr) {
-                WLOGFE("[NAPI]Get window failed");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "Get window failed"));
-                return;
-            }
-            task.Resolve(env, CreateJsWindowObject(env, window));
-            WLOGI("[NAPI]Create sub window %{public}s end", windowName.c_str());
-        };
+        [where, windowScene, windowName = std::move(windowName), option]
+            (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+        option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+        option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        option->SetOnlySupportSceneBoard(true);
+        auto window = windowScene->CreateWindow(windowName, option);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s [NAPI]Get window failed", where);
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "Get window failed"));
+            return;
+        }
+        task.Resolve(env, CreateJsWindowObject(env, window));
+        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s [NAPI]Create sub window %{public}s end",
+            where, windowName.c_str());
+    };
     napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindowStage::OnCreateSubWindowWithOptions",
         env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
     return result;
-}
-
-bool JsWindowStage::ParseSubWindowOptions(napi_env env, napi_value jsObject, WindowOption& option)
-{
-    if (jsObject == nullptr) {
-        WLOGFW("jsObject is null");
-        return true;
-    }
-
-    std::string title;
-    if (ParseJsValue(jsObject, env, "title", title)) {
-        option.SetSubWindowTitle(title);
-    } else {
-        WLOGFE("Failed to convert parameter to title");
-        return false;
-    }
-
-    bool decorEnabled;
-    if (ParseJsValue(jsObject, env, "decorEnabled", decorEnabled)) {
-        option.SetSubWindowDecorEnable(decorEnabled);
-    } else {
-        WLOGFE("Failed to convert parameter to decorEnabled");
-        return false;
-    }
-
-    bool isModal = false;
-    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
-        TLOGI(WmsLogTag::WMS_SUB, "isModal:%{public}d", isModal);
-        if (isModal) {
-            option.AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
-        }
-    }
-
-    bool isTopmost = false;
-    if (ParseJsValue(jsObject, env, "isTopmost", isTopmost)) {
-        if (!isModal && isTopmost) {
-            TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow is topmost");
-            return false;
-        }
-        option.SetWindowTopmost(isTopmost);
-    }
-
-    return true;
 }
 
 napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_info info)

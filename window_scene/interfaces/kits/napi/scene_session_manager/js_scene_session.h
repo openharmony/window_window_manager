@@ -46,6 +46,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_FOCUSABLE_CHANGE_CB,
     SESSION_TOUCHABLE_CHANGE_CB,
     SESSION_TOP_MOST_CHANGE_CB,
+    SUB_MODAL_TYPE_CHANGE_CB,
     CLICK_CB,
     TERMINATE_SESSION_CB,
     TERMINATE_SESSION_CB_NEW,
@@ -74,6 +75,7 @@ enum class ListenerFuncType : uint32_t {
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
+    UPDATE_APP_USE_CONTROL_CB,
     SET_WINDOW_RECT_AUTO_SAVE_CB,
 };
 
@@ -211,6 +213,7 @@ private:
     void ProcessSessionFocusableChangeRegister();
     void ProcessSessionTouchableChangeRegister();
     void ProcessSessionTopmostChangeRegister();
+    void ProcessSubModalTypeChangeRegister();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -240,6 +243,7 @@ private:
     void ProcessDefaultDensityEnabledRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
+    void RegisterUpdateAppUseControlCallback();
     void ProcessSetWindowRectAutoSaveRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
@@ -262,6 +266,7 @@ private:
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
     void OnSessionTopmostChange(bool topmost);
+    void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnClick();
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
@@ -289,7 +294,8 @@ private:
     void OnLayoutFullScreenChange(bool isLayoutFullScreen);
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void NotifyFrameLayoutFinish();
-    void OnSetWindowRectAutoSave(bool enabled);
+    void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+        void OnSetWindowRectAutoSave(bool enabled);
 
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
