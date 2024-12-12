@@ -4342,7 +4342,7 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
         [weakToken, touchableAreas, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                TLOGNE(WmsLogTag::WMS_EVENT, "CompleteCallback window is nullptr", where);
+                TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is nullptr", where);
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
                 return;
             }
@@ -4353,8 +4353,8 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
                 WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "OnSetTouchableAreas failed"));
             }
-            TLOGNI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] end",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), where);
+            TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s Window [%{public}u, %{public}s] end",
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetTouchableAreas",
