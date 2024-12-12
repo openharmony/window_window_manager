@@ -911,7 +911,7 @@ napi_value JsWindowStage::OnIsWindowRectAutoSave(napi_env env, napi_callback_inf
 
 napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene> windowScene)
 {
-    WLOGFD("CreateJsWindowStage");
+    WLOGFD("[NAPI]");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
