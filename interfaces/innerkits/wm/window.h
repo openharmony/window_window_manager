@@ -423,8 +423,7 @@ using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
 /**
  * @class ISystemDensityChangeListener
  *
- * @brief Listener to observe system density associated with the window changed.
- * 
+ * @brief Listener to observe system density associated with the window changed. 
  */
 class ISystemDensityChangeListener : virtual public RefBase {
 public:
