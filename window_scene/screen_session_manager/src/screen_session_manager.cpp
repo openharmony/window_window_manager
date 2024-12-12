@@ -1605,6 +1605,7 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
     if (g_isPcDevice) {
         // pc is none, pad&&phone is mirror
         screenSession->SetName("ExtendedDisplay");
+        screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     } else {
         screenSession->SetName("CastEngine");
