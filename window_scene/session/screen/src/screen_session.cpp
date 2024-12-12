@@ -271,7 +271,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     int32_t currentUid = IPCSkeleton::GetCallingUid();
     apiVersion = g_uidVersionMap.Get(currentUid);
     if (apiVersion == NO_EXIT_UID_VERSION) {
-        apiVersion = SysCapUtil::GetApiCompatibleVersion();
+        apiVersion = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
         WLOGFI("Get version from IPC");
         g_uidVersionMap.Set(currentUid, apiVersion);
     }
