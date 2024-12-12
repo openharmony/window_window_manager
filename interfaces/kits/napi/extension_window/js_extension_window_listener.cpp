@@ -126,23 +126,24 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         return;
     }
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_] {
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_, where] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::OnRectChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "This listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s This listener or env is nullptr", where);
             return;
         }
         HandleScope handleScope(env);
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to create js object");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Failed to create js object", where);
             return;
         }
         napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
         if (rectObjValue == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to create rect js object");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Failed to create rect js object", where);
             return;
         }
         napi_set_named_property(env, objValue, "rect", rectObjValue);
