@@ -4554,12 +4554,12 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
 bool WindowSceneSessionImpl::CheckIsSystemDensityChange(const sptr<DisplayInfo>& displayInfo)
 {
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "displayInfo nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo nullptr");
         return false;
     }
     float currSystemDensity = displayInfo->GetVirtualPixelRatio();
     if (MathHelper::NearZero(lastSystemDensity_ - currSystemDensity)) {
-        TLOGD(WmsLogTag::DEFAULT, "System density not change");
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "System density not change");
         return false;
     }
     return true;

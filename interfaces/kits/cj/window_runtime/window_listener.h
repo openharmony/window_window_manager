@@ -42,9 +42,9 @@ const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabl
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
 const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
+const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
-const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 
 class CjWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,

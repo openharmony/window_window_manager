@@ -256,6 +256,21 @@ WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<J
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessSystemDensityChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    if (window == nullptr || listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<ISystemDensityChangeListener> thisListener(listener);
+    WmErrorCode ret = isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(thisListener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(thisListener));
+    return ret;
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -460,14 +475,14 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB):
                 return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB):
+                return ProcessSystemDensityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
                 return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
-            case static_cast<uint32_t>(RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB):
-                return ProcessSystemDensityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
                 WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
@@ -610,21 +625,6 @@ WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<J
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
     }
-    return ret;
-}
-
-WmErrorCode JsWindowRegisterManager::ProcessSystemDensityChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
-{
-    TLOGD(WmsLogTag::DEFAULT, "in");
-    if (window == nullptr || listener == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "window or listener is nullptr");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    }
-    sptr<ISystemDensityChangeListener> thisListener(listener);
-    WmErrorCode ret = isRegister ?
-        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(thisListener)) :
-        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(thisListener));
     return ret;
 }
 } // namespace Rosen

@@ -3438,14 +3438,14 @@ WMError WindowSessionImpl::UnregisterDisplayIdChangeListener(const IDisplayIdCha
 
 WMError WindowSessionImpl::RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener)
 {
-    TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
     return RegisterListener(systemDensityChangeListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::UnregisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener)
 {
-    TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
     return UnregisterListener(systemDensityChangeListeners_[GetPersistentId()], listener);
 }
@@ -3492,8 +3492,7 @@ EnableIfSame<T, IDisplayIdChangeListener,
 }
 
 template<typename T>
-EnableIfSame<T, ISystemDensityChangeListener,
-    std::vector<ISystemDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, ISystemDensityChangeListener, std::vector<ISystemDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
     return systemDensityChangeListeners_[GetPersistentId()];
 }
@@ -3523,7 +3522,7 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 
 WSError WindowSessionImpl::NotifySystemDensityChange(float density)
 {
-    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, lastSystemDensity: %{public}f, currSystemDensity: %{public}f",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u, lastSystemDensity: %{public}f, currSystemDensity: %{public}f",
         GetPersistentId(), lastSystemDensity_, density);
     std::lock_guard<std::mutex> lock(systemDensityChangeListenerMutex_);
     auto systemDensityChangeListeners = GetListeners<ISystemDensityChangeListener>();
