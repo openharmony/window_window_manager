@@ -288,21 +288,20 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
     return WSError::WS_OK;
 }
 
-WSError MainSession::OnMainSessionModalTypeChange(bool isModal)
+WSError MainSession::NotifyMainModalTypeChange(bool isModal)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), isModal, where] {
+    PostTask([weakThis = wptr(this), isModal, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s main window isModal:%{public}d", where, isModal);
-        if (session->onMainSessionModalTypeChange_) {
-            session->onMainSessionModalTypeChange_(isModal);
+        if (session->onMainModalTypeChange_) {
+            session->onMainModalTypeChange_(isModal);
         }
-    };
-    PostTask(task, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 
@@ -310,9 +309,7 @@ bool MainSession::IsModal() const
 {
     bool isModal = false;
     auto property = GetSessionProperty();
-    if (property != nullptr) {
-        isModal = WindowHelper::IsModalMainWindow(property->GetWindowType(), property->GetWindowFlags());
-    }
+    isModal = WindowHelper::IsModalMainWindow(property->GetWindowType(), property->GetWindowFlags());
     return isModal;
 }
 
