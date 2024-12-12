@@ -123,6 +123,7 @@ public:
     WMError ReleaseForegroundSessionScreenLock() override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
+    WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
 
 private:
     template<typename T>
