@@ -559,7 +559,7 @@ public:
     /**
      * Free Multi Window
      */
-    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam = 0.0f, bool isFreeze = false) const;
+    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
