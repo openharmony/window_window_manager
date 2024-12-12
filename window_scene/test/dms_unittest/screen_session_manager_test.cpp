@@ -357,7 +357,7 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
         ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result2);
     }
     if (DMError::DM_OK != result2) {
-        ASSERT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(VIRTUAL_SCREEN_ID));
+        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->DestroyVirtualScreen(VIRTUAL_SCREEN_ID));
     }
 }
 
