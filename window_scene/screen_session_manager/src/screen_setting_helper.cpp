@@ -29,6 +29,7 @@ constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr int32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr int32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
 constexpr int32_t EXPECT_RESOLUTION_SIZE = 3;
+constexpr uint32_t DATA_SIZE_INVALID = 0xffffffff;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
@@ -276,7 +277,7 @@ uint32_t ScreenSettingHelper::GetDataFromString(MultiScreenRecoverOption& option
         value = splitValues[index];
         if (!IsNumber(value)) {
             TLOGE(WmsLogTag::DMS, "not number");
-            return -1;
+            return DATA_SIZE_INVALID;
         } else {
             option.screenId_ = static_cast<ScreenId>(strtoll(value.c_str(), nullptr, PARAM_NUM_TEN));
         }
@@ -286,7 +287,7 @@ uint32_t ScreenSettingHelper::GetDataFromString(MultiScreenRecoverOption& option
         value = splitValues[index];
         if (!IsNumber(value)) {
             TLOGE(WmsLogTag::DMS, "not number");
-            return -1;
+            return DATA_SIZE_INVALID;
         } else {
             option.first_ = static_cast<uint32_t>(strtoll(value.c_str(), nullptr, PARAM_NUM_TEN));
         }
@@ -296,7 +297,7 @@ uint32_t ScreenSettingHelper::GetDataFromString(MultiScreenRecoverOption& option
         value = splitValues[index];
         if (!IsNumber(value)) {
             TLOGE(WmsLogTag::DMS, "not number");
-            return -1;
+            return DATA_SIZE_INVALID;
         } else {
             option.second_ = static_cast<uint32_t>(strtoll(value.c_str(), nullptr, PARAM_NUM_TEN));
         }

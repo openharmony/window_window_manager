@@ -46,11 +46,23 @@ public:
     static napi_value CreateSubWindow(napi_env env, napi_callback_info info);
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value GetSubWindow(napi_env env, napi_callback_info info);
-    static napi_value SetWindowModal(napi_env env, napi_callback_info info);
     static napi_value SetShowOnLockScreen(napi_env env, napi_callback_info info);
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
     static napi_value SetDefaultDensityEnabled(napi_env env, napi_callback_info info);
+
+    /*
+     * PC Window
+     */
+    static napi_value SetWindowModal(napi_env env, napi_callback_info info);
+
+    /*
+     * Startup Page
+     */
     static napi_value RemoveStartingWindow(napi_env env, napi_callback_info info);
+
+    /*
+     * PC Window Layout
+     */
     static napi_value SetWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value IsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
@@ -65,11 +77,23 @@ private:
     napi_value OnCreateSubWindow(napi_env env, napi_callback_info info);
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnGetSubWindow(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowModal(napi_env env, napi_callback_info info);
     napi_value OnSetShowOnLockScreen(napi_env env, napi_callback_info info);
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
     napi_value OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info);
+
+    /*
+     * PC Window
+     */
+    napi_value OnSetWindowModal(napi_env env, napi_callback_info info);
+
+    /*
+     * Startup Page
+     */
     napi_value OnRemoveStartingWindow(napi_env env, napi_callback_info info);
+
+    /*
+     * PC Window Layout
+     */
     napi_value OnSetWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnIsWindowRectAutoSave(napi_env env, napi_callback_info info);
 

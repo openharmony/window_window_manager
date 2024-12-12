@@ -414,6 +414,7 @@ private:
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
     bool IsExtendMode();
+    void SetScreenCorrection();
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
