@@ -817,19 +817,14 @@ private:
     std::map<int32_t, int32_t> visibleWindowCountMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
-    struct IRemoteObjectHash {
-        size_t operator()(const sptr<IRemoteObject>& ptr) const
-        {
-            return std::hash<IRemoteObject*>{}(ptr.GetRefPtr());
-        }
-    };
-    std::unordered_map<sptr<IRemoteObject>, int32_t, IRemoteObjectHash> remoteObjectMap_;
+    std::unordered_map<sptr<IRemoteObject>, int32_t, SptrHash<IRemoteObject>> remoteObjectMap_;
 
     /**
      * UIExtension
      */
-    std::unordered_map<sptr<IRemoteObject>, sptr<IRemoteObject>, IRemoteObjectHash> remoteExtSessionMap_;
-    std::unordered_map<sptr<IRemoteObject>, ExtensionWindowAbilityInfo, IRemoteObjectHash> extSessionInfoMap_;
+    std::unordered_map<sptr<IRemoteObject>, sptr<IRemoteObject>, SptrHash<IRemoteObject>> remoteExtSessionMap_;
+    std::unordered_map<sptr<IRemoteObject>,
+        ExtensionWindowAbilityInfo, SptrHash<IRemoteObject>> extSessionInfoMap_;
     std::unordered_map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::atomic_bool shouldHideNonSecureFloatingWindows_ { false };
