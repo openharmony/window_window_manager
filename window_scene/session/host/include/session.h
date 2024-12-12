@@ -561,6 +561,11 @@ public:
      */
     bool IsScreenLockWindow() const;
 
+    /**
+     * Free Multi Window
+     */
+    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
