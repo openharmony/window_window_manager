@@ -2551,6 +2551,16 @@ void WindowSceneSessionImpl::StartMove()
     }
 }
 
+bool WindowSceneSessionImpl::IsStartMoving()
+{
+    bool isMoving = false;
+    if (auto hostSession = GetHostSession()) {
+        isMoving = hostSession->IsStartMoving();
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
+    return isMoving;
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
     auto isPC = windowSystemConfig_.IsPcWindow();
@@ -2577,16 +2587,6 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
         TLOGE(WmsLogTag::WMS_SYSTEM, "hostSession is nullptr");
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
-}
-
-bool WindowSceneSessionImpl::GetStartMoveFlag()
-{
-    bool isMoving = false;
-    if (auto hostSession = GetHostSession()) {
-        hostSession->GetStartMoveFlag(isMoving);
-    }
-    TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
-    return isMoving;
 }
 
 WMError WindowSceneSessionImpl::MainWindowCloseInner()

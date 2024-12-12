@@ -2268,21 +2268,6 @@ WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     return WSError::WS_OK;
 }
 
-WSError SceneSession::GetStartMoveFlag(bool& isMoving)
-{
-    auto task = [weakThis = wptr(this), &isMoving]() {
-        auto session = weakThis.promote();
-        if (!session || !session->moveDragController_) {
-            TLOGE(WmsLogTag::DEFAULT, "session or moveDragController_ is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        isMoving = session->moveDragController_->GetStartMoveFlag();
-        TLOGI(WmsLogTag::DEFAULT, "isMoving: %{public}u", static_cast<uint32_t>(isMoving));
-        return WSError::WS_OK;
-    };
-    return PostSyncTask(task, "GetStartMoveFlag");
-}
-
 void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // notify touchOutside and touchDown event
@@ -5095,12 +5080,12 @@ void SceneSession::RequestHideKeyboard(bool isAppColdStart)
 #endif
 }
 
-bool SceneSession::IsStartMoving() const
+bool SceneSession::IsStartMoving()
 {
     return isStartMoving_.load();
 }
 
-void SceneSession::SetIsStartMoving(const bool startMoving)
+void SceneSession::SetIsStartMoving(bool startMoving)
 {
     isStartMoving_.store(startMoving);
 }
