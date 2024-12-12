@@ -64,6 +64,7 @@ public:
     WMError Restore() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
+    bool IsStartMoving() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;

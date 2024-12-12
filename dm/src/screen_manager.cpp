@@ -698,4 +698,11 @@ void ScreenManager::OnRemoteDied()
 {
     pImpl_->OnRemoteDied();
 }
+
+DMError ScreenManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+    uint32_t& actualRefreshRate)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenMaxRefreshRate(id,
+        refreshRate, actualRefreshRate);
+}
 } // namespace OHOS::Rosen

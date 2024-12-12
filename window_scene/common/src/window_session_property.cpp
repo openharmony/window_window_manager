@@ -163,6 +163,7 @@ void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 
 void WindowSessionProperty::SetRequestRect(const Rect& requestRect)
 {
+    std::lock_guard<std::mutex> lock(requestRectMutex_);
     requestRect_ = requestRect;
 }
 
@@ -269,6 +270,7 @@ Rect WindowSessionProperty::GetWindowRect() const
 
 Rect WindowSessionProperty::GetRequestRect() const
 {
+    std::lock_guard<std::mutex> lock(requestRectMutex_);
     return requestRect_;
 }
 
