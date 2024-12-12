@@ -3772,7 +3772,7 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam,
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
+    auto scaleValue = (scaleParam < 0.0f || scaleParam < std::numeric_limits<float>::min()) ?
         snapshotScale_ : scaleParam;
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
@@ -3782,16 +3782,13 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam,
     };
     bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config);
     if (!ret) {
-        TLOGE(WmsLogTag::WMS_MAIN, "failed");
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed");
         return nullptr;
     }
     if (isFreeze) {
         auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
-        if (pixelMap != nullptr) {
-            TLOGI(WmsLogTag::WMS_MAIN, "success, id: %{public}d", persistentId_);
-            return pixelMap;
-        }
-        TLOGE(WmsLogTag::WMS_MAIN, "get result failed, id: %{public}d", persistentId_);
+        TLOGI(WmsLogTag::WMS_PATTERN, "get result: %{public}d, id: %{public}d", pixelMap != nullptr, persistentId_);
+        return pixelMap;
     }
     return nullptr;
 }
