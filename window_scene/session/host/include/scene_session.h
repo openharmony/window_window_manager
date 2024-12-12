@@ -269,6 +269,7 @@ public:
     virtual bool IsModal() const { return false; }
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
 
     /**
      * Window Immersive
@@ -477,11 +478,6 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
-    /**
-     * PC Window
-     */
-    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
-
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -539,6 +535,7 @@ protected:
      * PC Window
      */
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
+    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
     /*
      * PiP Window
@@ -558,11 +555,6 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, bool> appUseControlMap_;
-
-    /**
-     * PC Window
-     */
-    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();
