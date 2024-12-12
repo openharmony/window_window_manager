@@ -37,7 +37,7 @@ public:
     void SetDefaultProperty();
     WMError Minimize() override;
     void StartMove() override;
-    bool GetStartMoveFlag() override;
+    bool IsStartMoving() override;
     WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
