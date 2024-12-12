@@ -2382,7 +2382,7 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
         }
         return res;
     }
-    auto handler = sprt<WindowPrepareTerminateHandler>::MakeSptr();
+    auto handler = sptr<WindowPrepareTerminateHandler>::MakeSptr();
     PrepareTerminateFunc func = [hostSessionWptr = wptr<ISession>(hostSession)] {
         auto hostSession = hostSessionWptr.promote();
         if (hostSession == nullptr) {
