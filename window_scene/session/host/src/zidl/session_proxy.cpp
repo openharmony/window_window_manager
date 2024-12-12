@@ -1768,7 +1768,6 @@ bool SessionProxy::IsStartMoving()
     }
     bool isMoving = false;
     if (!reply.ReadBool(isMoving)) {
-
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read isMoving failed");
         return false;
     }
