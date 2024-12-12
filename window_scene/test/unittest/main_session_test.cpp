@@ -213,41 +213,46 @@ HWTEST_F(MainSessionTest, SetTopmost02, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: UpdatePointerArea01
+ * @tc.name: UpdatePointerArea
  * @tc.desc: check func UpdatePointerArea
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, UpdatePointerArea01, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
 {
     WSRect Rect={0, 0, 50, 50};
-    mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    mainSession_->UpdatePointerArea(Rect);
     mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     mainSession_->UpdatePointerArea(Rect);
+    mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    mainSession_->UpdatePointerArea(Rect);
+    ASSERT_EQ(Rect, mainSession_->preRect_);
 }
 
 /**
- * @tc.name: CheckPointerEventDispatch03
+ * @tc.name: CheckPointerEventDispatch
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, CheckPointerEventDispatch, Function | SmallTest | Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
     mainSession_->SetSessionState(SessionState::STATE_FOREGROUND);
-    mainSession_->CheckPointerEventDispatch(pointerEvent);
+    bool res = mainSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_EQ(res, true);
 
     mainSession_->SetSessionState(SessionState::STATE_ACTIVE);
-    mainSession_->CheckPointerEventDispatch(pointerEvent);
+    res = mainSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_EQ(res, true);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
     mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
-    mainSession_->CheckPointerEventDispatch(pointerEvent);
+    res = mainSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_EQ(res, true);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_DOWN);
     mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
-    mainSession_->CheckPointerEventDispatch(pointerEvent);
+    res = mainSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_EQ(res, false);
 }
 
 /**
