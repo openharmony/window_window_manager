@@ -380,7 +380,6 @@ int SessionStub::HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel&
 int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
 {
     WSError errCode = OnRestoreMainWindow();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
