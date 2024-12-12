@@ -1329,6 +1329,17 @@ WindowStyleType WindowManager::GetWindowStyleType()
     return styleType;
 }
 
+WMError WindowManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+    int32_t x, int32_t y, std::vector<int32_t>& windowIds) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowIdsByCoordinate(
+        displayId, windowNumber, x, y, windowIds);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "get windowIds by coordinate failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::ReleaseForegroundSessionScreenLock()
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();

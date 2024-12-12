@@ -99,6 +99,7 @@ private:
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowStyleType(MessageParcel& data, MessageParcel& reply);
     int HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply);
+    int HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply);
     int HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
