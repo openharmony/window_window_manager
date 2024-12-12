@@ -1800,7 +1800,6 @@ HWTEST_F(SceneSessionTest5, SetBehindWindowFilterEnabled, Function | SmallTest |
 
     session->SetBehindWindowFilterEnabled(false);
     session->SetBehindWindowFilterEnabled(true);
-
 }
 }
 }
