@@ -114,12 +114,12 @@ napi_value RssSession::DealRssReply(napi_env env, const nlohmann::json& payload,
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
 
     if (!reply.contains("result") || !reply["result"].is_string() || reply.at("result") == "") {
-        WLOGFE("[NAPI]Reply not find result key!");
+        WLOGFE("Reply not find result key!");
         return NapiGetUndefined(env);
     }
     std::string result = reply["result"].get<std::string>();
@@ -140,11 +140,11 @@ void RssSession::ParseMutex(const std::string& mutexStr, const nlohmann::json& p
 {
     nlohmann::json root = nlohmann::json::parse(mutexStr, nullptr, false);
     if (root.is_discarded()) {
-        WLOGFE("[NAPI] Parse json data failed!");
+        WLOGFE("Parse json data failed!");
         return;
     }
     if (!root.is_array()) {
-        WLOGFE("[NAPI]Parse json data failed!");
+        WLOGFE("Parse json data failed!");
         return;
     }
 
@@ -179,11 +179,11 @@ void RssSession::ParseCallbackMutex(const std::string& mutexStr, std::string& bu
 {
     nlohmann::json root = nlohmann::json::parse(mutexStr, nullptr, false);
     if (root.is_discarded()) {
-        WLOGFE("[NAPI] Parse json data failed!");
+        WLOGFE("Parse json data failed!");
         return;
     }
     if (!root.is_array()) {
-        WLOGFE("[NAPI]Parse json data failed!");
+        WLOGFE("Parse json data failed!");
         return;
     }
 

@@ -915,7 +915,7 @@ napi_value JsExtensionWindow::GetProperties(napi_env env, napi_callback_info inf
 napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
     if (extensionWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]extensionWindow is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow is null");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -924,13 +924,13 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     std::string windowName;
     if (!ConvertFromJsValue(env, argv[0], windowName)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Failed to convert parameter to windowName");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to windowName");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     sptr<WindowOption> option = new WindowOption();
     if (!ParseSubWindowOptions(env, argv[1], option)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]Get invalid options param");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Get invalid options param");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -972,7 +972,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             extWindow->NotifyModalUIExtensionMayBeCovered(false);
         }
         task->Resolve(env, CreateJsWindowObject(env, window));
-        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s [NAPI]Create sub window %{public}s end",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s Create sub window %{public}s end",
             where, windowName.c_str());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
