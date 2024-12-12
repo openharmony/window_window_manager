@@ -2382,19 +2382,18 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
         }
         return res;
     }
-    WindowPrepareTerminateHandler* handler = new WindowPrepareTerminateHandler();
+    auto handler = sprt<WindowPrepareTerminateHandler>::MakeSptr();
     PrepareTerminateFunc func = [hostSessionWptr = wptr<ISession>(hostSession)] {
-        auto weakSession = hostSessionWptr.promote();
-        if (weakSession == nullptr) {
+        auto hostSession = hostSessionWptr.promote();
+        if (hostSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "this session is nullptr");
             return;
         }
-        weakSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
     };
     handler->SetPrepareTerminateFun(func);
-    sptr<AAFwk::IPrepareTerminateCallback> callback = handler;
     if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
-        callback) != ERR_OK) {
+        handler) != ERR_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "PrepareTerminateAbility failed, do close window");
         hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
     }
