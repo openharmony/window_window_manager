@@ -55,8 +55,8 @@ using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlT
 using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
-using NotifySessionModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
-using NotifyMainSessionModalTypeChangeFunc = std::function<void(bool isModal)>;
+using NotifySubModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
+using NotifyMainModalTypeChangeFunc = std::function<void(bool isModal)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -287,12 +287,19 @@ public:
     virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
     void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
+
+    /**
+     * PC Window
+     */
+    void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
+    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
     virtual bool IsModal() const { return false; }
     virtual bool IsApplicationModal() const { return false; }
     bool IsDialogWindow() const;
-    WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
-    void SetSessionModalTypeChangeCallback(NotifySessionModalTypeChangeFunc&& func);
-    void SetMainSessionModalTypeChangeCallback(NotifyMainSessionModalTypeChangeFunc&& func);
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
+    void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
+    void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
 
     /**
      * Window Immersive
@@ -564,13 +571,6 @@ public:
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
 
     /**
-     * PC Window
-     */
-    void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
-    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
-    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
-
-    /**
      * system keyboard
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
@@ -633,8 +633,15 @@ protected:
      * Window Hierarchy
      */
     NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
-    NotifyMainSessionModalTypeChangeFunc onMainSessionModalTypeChange_;
-    NotifySessionModalTypeChangeFunc onSessionModalTypeChange_;
+
+    /**
+     * PC Window
+     */
+    NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
+    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
+    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
+    NotifySubModalTypeChangeFunc onSubModalTypeChange_;
+    NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
 
     /**
      * PiP Window
@@ -667,13 +674,6 @@ protected:
     void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic_bool isThrowSlipToFullScreen_ = false;
-
-    /**
-     * PC Window
-     */
-    NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
-    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
-    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
 
     /*
      * Multi Window

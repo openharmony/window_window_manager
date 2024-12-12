@@ -241,9 +241,7 @@ bool SubSession::IsModal() const
 {
     bool isModal = false;
     auto property = GetSessionProperty();
-    if (property != nullptr) {
-        isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
-    }
+    isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
     return isModal;
 }
 
@@ -251,9 +249,7 @@ bool SubSession::IsApplicationModal() const
 {
     bool isAppModal = false;
     auto property = GetSessionProperty();
-    if (property != nullptr) {
-        isAppModal = WindowHelper::IsApplicationModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
-    }
+    isAppModal = WindowHelper::IsApplicationModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
     return isAppModal;
 }
 

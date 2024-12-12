@@ -2083,7 +2083,7 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
             SubWindowModalType::TYPE_WINDOW_MODALITY :
             SubWindowModalType::TYPE_APPLICATION_MODALITY;
     }
-    hostSession->OnSessionModalTypeChange(subWindowModalType);
+    hostSession->NotifySubModalTypeChange(subWindowModalType);
     return modalRet;
 }
 
@@ -2108,7 +2108,7 @@ WMError WindowSessionImpl::SetWindowModal(bool isModal)
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    hostSession->OnMainSessionModalTypeChange(isModal);
+    hostSession->NotifyMainModalTypeChange(isModal);
     return modalRet;
 }
 
