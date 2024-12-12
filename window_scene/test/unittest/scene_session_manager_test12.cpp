@@ -326,7 +326,7 @@ HWTEST_F(SceneSessionManagerTest12, CheckSystemWindowPermission02, Function | Sm
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));

@@ -1504,6 +1504,10 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, Function | Smal
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(sessionInfo.persistentId_, sceneSession));
+    std::shared_ptr<SessionListenerController> listenerController =
+        std::make_shared<SessionListenerController>();
+    ssm_->listenerController_ = listenerController;
+    ASSERT_NE(ssm_->listenerController_, nullptr);
     ssm_->RegisterSessionExceptionFunc(sceneSession);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
@@ -1520,6 +1524,10 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, Function | Smal
     EXPECT_EQ(result, WSError::WS_OK);
 
     sessionInfo.isSystem_ = false;
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    ssm_->listenerController_ = nullptr;
     result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
@@ -1553,10 +1561,15 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionSnapshotFunc, Function | Small
     ASSERT_NE(sceneSession->surfaceNode_, nullptr);
     sceneSession->surfaceNode_->bufferAvailable_ = true;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ASSERT_NE(ssm_->listenerController_, nullptr);
     ssm_->RegisterSessionSnapshotFunc(sceneSession);
     EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
 
     sessionInfo.abilityInfo->excludeFromMissions = false;
+    EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
+
+    ssm_->listenerController_ = nullptr;
     EXPECT_EQ(sceneSession->Snapshot(1.f), nullptr);
 
     sessionInfo.abilityInfo = nullptr;
@@ -1862,3 +1875,4 @@ HWTEST_F(SceneSessionManagerTest4, ProcessModalExtensionPointDown, Function | Sm
 }
 } // namespace Rosen
 } // namespace OHOS
+

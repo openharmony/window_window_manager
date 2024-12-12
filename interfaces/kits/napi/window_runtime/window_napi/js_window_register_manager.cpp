@@ -243,9 +243,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
 WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<JsWindowListener>& listener,
     const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
-    TLOGD(WmsLogTag::DEFAULT, "in");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     if (window == nullptr || listener == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "window or listener is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     IDisplayIdChangeListenerSptr thisListener(listener);

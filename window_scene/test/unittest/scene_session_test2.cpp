@@ -94,9 +94,7 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
     result = sceneSession->RaiseAboveTarget(subWindowId);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
 
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    sceneSession->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
+    sceneSession->onRaiseAboveTarget_ = nullptr;
     result = sceneSession->RaiseAboveTarget(0);
     ASSERT_EQ(result, WSError::WS_OK);
 }

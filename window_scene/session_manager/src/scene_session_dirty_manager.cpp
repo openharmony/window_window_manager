@@ -53,6 +53,25 @@ static bool operator!=(const MMI::Rect& a, const WSRect& b)
     return false;
 }
 
+struct InputRectHash {
+    std::size_t operator()(const MMI::Rect& r) const
+    {
+        std::size_t h1 = std::hash<int32_t>{}(r.x);
+        std::size_t h2 = std::hash<int32_t>{}(r.y);
+        std::size_t h3 = std::hash<int32_t>{}(r.width);
+        std::size_t h4 = std::hash<int32_t>{}(r.height);
+        return ((h1 * 31 + h2) * 31 + h3) * 31 + h4;
+    }
+};
+
+struct InputRectEqual {
+    bool operator()(const MMI::Rect& left, const MMI::Rect& right) const
+    {
+        return left.x == right.x && left.y == right.y &&
+               left.width == right.width && left.height == right.height;
+    }
+};
+
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
     MMI::Direction rotation = MMI::DIRECTION0;
@@ -206,31 +225,30 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     pointerHotAreas.emplace_back(pointerRect);
 }
 
-void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
-    std::vector<MMI::Rect>& pointerHotAreas) const
+void SceneSessionDirtyManager::UpdateHotAreas(const sptr<SceneSession>& sceneSession,
+    std::vector<MMI::Rect>& touchHotAreas, std::vector<MMI::Rect>& pointerHotAreas) const
 {
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession is nullptr");
         return;
     }
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    std::unordered_set<MMI::Rect, InputRectHash, InputRectEqual> hotAreaHashSet;
     const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
-    for (auto area : hotAreas) {
+    for (const auto& area : hotAreas) {
         MMI::Rect rect;
         rect.x = area.posX_;
         rect.y = area.posY_;
         rect.width = static_cast<int32_t>(area.width_);
         rect.height = static_cast<int32_t>(area.height_);
-        auto iter = std::find_if(touchHotAreas.begin(), touchHotAreas.end(),
-            [&rect](const MMI::Rect& var) { return rect == var; });
-        if (iter != touchHotAreas.end()) {
+        if (hotAreaHashSet.count(rect)) {
             continue;
         }
+        hotAreaHashSet.insert(rect);
         touchHotAreas.emplace_back(rect);
         pointerHotAreas.emplace_back(rect);
         if (touchHotAreas.size() == static_cast<uint32_t>(MMI::WindowInfo::MAX_HOTAREA_COUNT)) {
-            auto sessionid = sceneSession->GetWindowId();
-            WLOGFE("id = %{public}d hotAreas size > %{public}d", sessionid, static_cast<int>(hotAreas.size()));
+            auto sessionId = sceneSession->GetWindowId();
+            WLOGFE("id = %{public}d hotAreas size > %{public}d", sessionId, static_cast<int>(hotAreas.size()));
             break;
         }
     }
