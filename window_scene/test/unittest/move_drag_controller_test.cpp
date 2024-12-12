@@ -73,9 +73,13 @@ namespace {
  */
 HWTEST_F(MoveDragControllerTest, SetStartMoveFlag, Function | SmallTest | Level1)
 {
-    int32_t res = 0;
+    moveDragController->hasPointDown_ = false;
     moveDragController->SetStartMoveFlag(true);
-    ASSERT_EQ(0, res);
+    ASSERT_FALSE(moveDragController->isStartMove_);
+    moveDragController->hasPointDown_ = true;
+    moveDragController->SetStartMoveFlag(true);
+    ASSERT_TRUE(moveDragController->isStartMove_);
+    moveDragController->hasPointDown_ = false;
 }
 
 /**
@@ -216,7 +220,6 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, Function | SmallTest 
  */
 HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1)
 {
-    int32_t res = 0;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t pointerType = pointerEvent->GetSourceType();
@@ -224,7 +227,11 @@ HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1
     int32_t pointerPosY = 30;
     WSRect winRect = { 100, 100, 1000, 1000 };
     moveDragController->SetOriginalValue(pointerId, pointerType, pointerPosX, pointerPosY, winRect);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(moveDragController->moveDragProperty_.pointerId_, pointerId);
+    ASSERT_EQ(moveDragController->moveDragProperty_.pointerType_, pointerType);
+    ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerPosX_, pointerPosX);
+    ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerPosY_, pointerPosY);
+    ASSERT_EQ(moveDragController->moveDragProperty_.originalRect_, winRect);
 }
 
 /**
@@ -234,9 +241,8 @@ HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1
  */
 HWTEST_F(MoveDragControllerTest, SetAspectRatio, Function | SmallTest | Level1)
 {
-    int32_t res = 0;
     moveDragController->SetAspectRatio(0.5);
-    ASSERT_EQ(0, res);
+    ASSERT_EQ(moveDragController->aspectRatio_, 0.5);
 }
 
 /**
@@ -1099,6 +1105,25 @@ HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag, Function |
 }
 
 /**
+ * @tc.name: GetNewAddedDisplayIdsDuringMoveDrag02
+ * @tc.desc: test function : GetNewAddedDisplayIdsDuringMoveDrag02
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag02, Function | SmallTest | Level1)
+{
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    std::set<uint64_t> res = moveDragController->GetNewAddedDisplayIdsDuringMoveDrag();
+    ASSERT_EQ(true, res.empty());
+    moveDragController->displayIdSetDuringMoveDrag_.insert(0);
+    moveDragController->displayIdSetDuringMoveDrag_.insert(1001);
+    ScreenProperty screenProperty0;
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] = new ScreenSession(0, screenProperty0, 0);
+    res = moveDragController->GetNewAddedDisplayIdsDuringMoveDrag();
+    ASSERT_EQ(true, res.empty());
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+}
+
+/**
  * @tc.name: CalcUnifiedTranslate
  * @tc.desc: test function : CalcUnifiedTranslate
  * @tc.type: FUNC
@@ -1140,6 +1165,42 @@ HWTEST_F(MoveDragControllerTest, ResetCrossMoveDragProperty, Function | SmallTes
 {
     moveDragController->ResetCrossMoveDragProperty();
     ASSERT_EQ(false, moveDragController->hasPointDown_);
+}
+
+/**
+ * @tc.name: OnConnect
+ * @tc.desc: test function : OnConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, OnConnect, Function | SmallTest | Level1)
+{
+    ScreenId screenId = 1001;
+    moveDragController->OnConnect(screenId);
+    ASSERT_EQ(moveDragController->moveDragIsInterrupted_, true);
+}
+
+/**
+ * @tc.name: OnDisconnect
+ * @tc.desc: test function : OnDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, OnDisconnect, Function | SmallTest | Level1)
+{
+    ScreenId screenId = 1001;
+    moveDragController->OnDisconnect(screenId);
+    ASSERT_EQ(moveDragController->moveDragIsInterrupted_, true);
+}
+
+/**
+ * @tc.name: OnChange
+ * @tc.desc: test function : OnChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, OnChange, Function | SmallTest | Level1)
+{
+    ScreenId screenId = 1001;
+    moveDragController->OnChange(screenId);
+    ASSERT_EQ(moveDragController->moveDragIsInterrupted_, true);
 }
 }
 }

@@ -1150,7 +1150,7 @@ WMError WindowManager::GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObjec
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetUIContentRemoteObj(windowId, uiContentRemoteObj);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to get UIContentRemoteObj. PersistentId=%{public}d; ret=%{public}u",
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get UIContentRemoteObj. PersistentId=%{public}d; ret=%{public}u",
             windowId, static_cast<uint32_t>(ret));
     }
     return ret;
@@ -1412,7 +1412,7 @@ WMError WindowManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SkipSnapshotForAppProcess(pid, skip);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "skip failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "skip failed");
     }
     return ret;
 }
@@ -1421,7 +1421,7 @@ WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& water
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetProcessWatermark(pid, watermarkName, isEnabled);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }
@@ -1451,7 +1451,7 @@ WMError WindowManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windo
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }

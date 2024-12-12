@@ -1161,28 +1161,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: VerifySubWindowLevel
- * @tc.desc: VerifySubWindowLevel Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, VerifySubWindowLevel, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    EXPECT_NE(nullptr, option);
-    option->SetWindowName("VerifySubWindowLevel");
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    option->SetDisplayId(0);
-    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    EXPECT_NE(nullptr, window);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    EXPECT_NE(nullptr, session);
-    window->hostSession_ = session;
-    ASSERT_EQ(false, window->VerifySubWindowLevel(window->GetParentId()));
-}
-
-/**
  * @tc.name: AddSubWindowMapForExtensionWindow
  * @tc.desc: AddSubWindowMapForExtensionWindow Test
  * @tc.type: FUNC
@@ -1833,44 +1811,6 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationSyncForAll, Function | 
     ASSERT_EQ(WMError::WM_OK, windowSession->Create(abilityContext_, session));
     windowSceneSessionImpl->UpdateConfigurationSyncForAll(configuration);
     ASSERT_EQ(WMError::WM_OK, windowSession->Destroy(true));
-}
-
-/**
- * @tc.name: VerifySubWindowLevel01
- * @tc.desc: VerifySubWindowLevel
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, VerifySubWindowLevel01, Function | SmallTest | Level2)
-{
-    uint32_t parentId = 0;
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("VerifySubWindowLevel01");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    sptr<WindowSessionImpl> windowSessionImpl = new WindowSessionImpl(option);
-    windowSceneSessionImpl->windowSessionMap_.clear();
-    windowSceneSessionImpl->windowSessionMap_.insert(
-        std::pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>("", std::pair(0, nullptr)));
-    auto ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
-    ASSERT_EQ(ret, false);
-
-    windowSceneSessionImpl->windowSessionMap_.clear();
-    windowSceneSessionImpl->windowSessionMap_.insert(
-        std::pair<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>("", std::pair(1, windowSessionImpl)));
-    WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.persistentId_ = 0;
-    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
-    ASSERT_EQ(ret, true);
-
-    windowSessionImpl->GetProperty()->SetSubWindowLevel(10000);
-    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
-    ASSERT_EQ(ret, false);
-
-    windowSessionProperty.persistentId_ = 1;
-    ret = windowSceneSessionImpl->VerifySubWindowLevel(parentId);
-    ASSERT_EQ(ret, false);
 }
 
 /**

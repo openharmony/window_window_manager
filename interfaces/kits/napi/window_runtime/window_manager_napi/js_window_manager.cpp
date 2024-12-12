@@ -1100,7 +1100,7 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
             nativeBoolean = (GetType(env, argv[1]) == napi_boolean ? argv[1] : nullptr);
         }
     }
-    
+
     std::shared_ptr<Media::PixelMap> pixelMap;
     pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, nativeObject);
     if (pixelMap == nullptr) {
@@ -1195,9 +1195,9 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
                 SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
-                TLOGD(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo success");
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
             } else {
-                TLOGE(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo failed");
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
             }
         };
@@ -1216,12 +1216,12 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to displayId");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "invalid displayId");
+        TLOGE(WmsLogTag::WMS_PC, "invalid displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t windowNumber = 0;

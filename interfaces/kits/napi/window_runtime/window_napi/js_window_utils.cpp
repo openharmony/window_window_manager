@@ -1254,7 +1254,7 @@ static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<Win
             return false;
         }
     }
-    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{pubilc}d, isTopmost: %{pubilc}d, WindowFlag: %{public}d",
+    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{public}d, isTopmost: %{public}d, WindowFlag: %{public}d",
         isModal, isTopmost, windowOption->GetWindowFlags());
     return true;
 }
@@ -1292,7 +1292,7 @@ static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowO
     }
     Rect rect = { left, top, static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
     windowOption->SetWindowRect(rect);
-    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{pubilc}s", rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{public}s", rect.ToString().c_str());
     return true;
 }
 
