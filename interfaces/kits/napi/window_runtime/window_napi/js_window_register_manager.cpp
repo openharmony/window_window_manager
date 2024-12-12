@@ -583,7 +583,7 @@ WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<J
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     WmErrorCode ret = isRegister ?
-        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(listener));
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(listener)) :
         WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
     return ret;
 }
