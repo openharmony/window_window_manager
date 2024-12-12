@@ -101,6 +101,8 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
+
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

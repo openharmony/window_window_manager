@@ -137,6 +137,11 @@ public:
     virtual WMError ReleaseForegroundSessionScreenLock();
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
+    
+    /*
+     * PC Window
+     */
+    virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
