@@ -922,7 +922,7 @@ bool ScreenSession::IsScreenRotationLocked()
 
 void ScreenSession::SetTouchEnabledFromJs(bool isTouchEnabled)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, " %{public}u", static_cast<uint32_t>(isTouchEnabled));
+    TLOGI(WmsLogTag::WMS_EVENT, "%{public}u", static_cast<uint32_t>(isTouchEnabled));
     touchEnabled_.store(isTouchEnabled);
 }
 
