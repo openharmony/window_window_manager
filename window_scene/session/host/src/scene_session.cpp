@@ -29,6 +29,7 @@
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
+#include <modifier/rs_property.h>
 
 #include "proxy/include/window_info.h"
 
@@ -5923,5 +5924,16 @@ bool SceneSession::IsSystemKeyboard() const
 void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+}
+
+void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enabled: %{public}d", GetPersistentId(), enabled);
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "fail to get surfaceNode");
+        return;
+    }
+    surfaceNode->SetBehindWindowFilterEnabled(enabled);
 }
 } // namespace OHOS::Rosen
