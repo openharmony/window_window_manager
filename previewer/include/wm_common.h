@@ -395,6 +395,8 @@ namespace {
     constexpr uint32_t INVALID_WINDOW_ID = 0;
     constexpr int32_t INVALID_PID = -1;
     constexpr int32_t INVALID_UID = -1;
+
+    constexpr float UNDEFINED_DENSITY = -1.0f;
 }
 
 /**

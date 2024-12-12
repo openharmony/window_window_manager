@@ -3522,7 +3522,7 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
 
 WSError WindowSessionImpl::NotifySystemDensityChange(float density)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u, lastSystemDensity: %{public}f, currSystemDensity: %{public}f",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u, lastDensity: %{public}f, currDensity: %{public}f",
         GetPersistentId(), lastSystemDensity_, density);
     std::lock_guard<std::mutex> lock(systemDensityChangeListenerMutex_);
     auto systemDensityChangeListeners = GetListeners<ISystemDensityChangeListener>();

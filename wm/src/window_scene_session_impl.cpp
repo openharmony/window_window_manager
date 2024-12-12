@@ -4557,8 +4557,7 @@ bool WindowSceneSessionImpl::CheckIsSystemDensityChange(const sptr<DisplayInfo>&
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo nullptr");
         return false;
     }
-    float currSystemDensity = displayInfo->GetVirtualPixelRatio();
-    if (MathHelper::NearZero(lastSystemDensity_ - currSystemDensity)) {
+    if (MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "System density not change");
         return false;
     }
