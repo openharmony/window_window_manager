@@ -169,6 +169,8 @@ public:
      */
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError IsWindowRectAutoSave(bool& enabled) override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
@@ -183,8 +185,7 @@ public:
     /*
      * PC Window
      */
-    WMError SetWindowRectAutoSave(bool enabled) override;
-    WMError IsWindowRectAutoSave(bool& enabled) override;
+
 
     /*
      * Gesture Back
