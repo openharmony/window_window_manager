@@ -560,6 +560,7 @@ public:
     void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
+    void SetBehindWindowFilterEnabled(bool enabled);
 
     /**
      * Gesture Back
