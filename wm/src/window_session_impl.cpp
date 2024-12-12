@@ -2188,9 +2188,7 @@ WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWind
 template<typename T>
 EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> WindowSessionImpl::GetListeners()
 {
-    sptr<IMainWindowCloseListener> mainWindowCloseListener;
-    mainWindowCloseListener = mainWindowCloseListeners_[GetPersistentId()];
-    return mainWindowCloseListener;
+    return mainWindowCloseListeners_[GetPersistentId()];
 }
 
 WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener)
