@@ -1986,18 +1986,18 @@ napi_value JsSceneSession::SetCompatibleModeInPc(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnSetCompatibleModeInPc(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetAppSupportPhoneInPc(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
-    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetAppSupportPhoneInPc(env, info) : nullptr;
-}
-
 napi_value JsSceneSession::SetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCompatibleWindowSizeInPc(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetAppSupportPhoneInPc(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetAppSupportPhoneInPc(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info)

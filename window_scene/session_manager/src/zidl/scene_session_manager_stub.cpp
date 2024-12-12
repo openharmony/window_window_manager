@@ -239,7 +239,11 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     reply.WriteInt32(persistentId);
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteParcelable(&systemConfig);
-    reply.WriteUint32(property->GetSubWindowLevel());
+    if (property) {
+        reply.WriteUint32(property->GetSubWindowLevel());
+    } else {
+        reply.WriteUint32(1); // 1: default sub level
+    }
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
 }
