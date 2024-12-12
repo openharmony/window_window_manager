@@ -570,7 +570,7 @@ napi_value JsWindow::SetTouchable(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetTouchableAreas(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "SetTouchableAreas");
+    TLOGI(WmsLogTag::WMS_EVENT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTouchableAreas(env, info) : nullptr;
 }
@@ -4352,7 +4352,7 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
                 WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "OnSetTouchableAreas failed"));
             }
-            TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] setTouchableAreas end",
+            TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
     napi_value result = nullptr;
