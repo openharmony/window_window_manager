@@ -427,7 +427,7 @@ int SessionStub::HandleDrawingCompleted(MessageParcel& data, MessageParcel& repl
 
 int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "Called!");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "Called!");
     WSError errCode = RemoveStartingWindow();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -492,15 +492,15 @@ int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageP
 {
     bool isTitleHoverShown = true;
     if (!data.ReadBool(isTitleHoverShown)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Read isTitleHoverShown failed.");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read isTitleHoverShown failed.");
         return ERR_INVALID_DATA;
     }
     bool isDockHoverShown = true;
     if (!data.ReadBool(isDockHoverShown)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Read isDockHoverShown failed.");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read isDockHoverShown failed.");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d",
         isTitleHoverShown, isDockHoverShown);
     WSError errCode = OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -664,7 +664,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     bool hasStartWindowOption = false;
     if (!data.ReadBool(hasStartWindowOption)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "Read hasStartWindowOption failed.");
         return ERR_INVALID_DATA;
     }
     if (hasStartWindowOption) {
@@ -697,7 +697,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
         return ERR_INVALID_DATA;
     }
     WSRect rect = {posX, posY, width, height};
-    TLOGI(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
+    TLOGD(WmsLogTag::WMS_LAYOUT, "rect:[%{public}d, %{public}d, %{public}u, %{public}u]", posX, posY,
         width, height);
     uint32_t changeReason = 0;
     if (!data.ReadUint32(changeReason)) {

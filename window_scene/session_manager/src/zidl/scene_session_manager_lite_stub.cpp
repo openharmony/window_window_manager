@@ -211,7 +211,7 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionListener(MessageParcel& da
     WLOGFD("run HandleRegisterSessionListener!");
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "listener is nullptr!");
+        TLOGE(WmsLogTag::WMS_MAIN, "listener is nullptr!");
         reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
         return ERR_NONE;
     }

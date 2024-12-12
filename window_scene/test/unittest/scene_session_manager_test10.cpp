@@ -114,7 +114,7 @@ HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Functio
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr<SceneSession> sceneSession = new SceneSession(info, specificCallback);
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
     sptr<AAFwk::SessionInfo> sceneSessionInfo = new AAFwk::SessionInfo();
     bool needRemoveSession = true;
     bool isForceClean = true;
@@ -127,6 +127,7 @@ HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Functio
     isForceClean = false;
     sessionInfo.collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
 }
 
@@ -665,50 +666,6 @@ HWTEST_F(SceneSessionManagerTest10, EraseSceneSessionAndMarkDirtyLockFree, Funct
 }
 
 /**
- * @tc.name: UpdateAvoidAreaByType
- * @tc.desc: test UpdateAvoidAreaByType
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, UpdateAvoidAreaByType, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "test";
-    info.bundleName_ = "test";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    sceneSession->isVisible_ = true;
-    sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
-    ssm_->avoidAreaListenerSessionSet_.insert(sceneSession->GetPersistentId());
-    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
-    ssm_->avoidAreaListenerSessionSet_.erase(sceneSession->GetPersistentId());
-    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
-}
-
-/**
- * @tc.name: NotifyStatusBarShowStatus
- * @tc.desc: test NotifyStatusBarShowStatus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "test";
-    info.bundleName_ = "test";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    sceneSession->isStatusBarVisible_ = true;
-    EXPECT_EQ(WSError::WS_OK, ssm_->NotifyStatusBarShowStatus(sceneSession->GetPersistentId(), false));
-    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
-}
-
-/**
  * @tc.name: ProcessUpdateLastFocusedAppId
  * @tc.desc: test ProcessUpdateLastFocusedAppId
  * @tc.type: FUNC
@@ -761,6 +718,50 @@ HWTEST_F(SceneSessionManagerTest10, IsNeedSkipWindowModeTypeCheck, Function | Sm
 }
 
 /**
+ * @tc.name: UpdateAvoidAreaByType
+ * @tc.desc: test UpdateAvoidAreaByType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, UpdateAvoidAreaByType, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
+    ssm_->avoidAreaListenerSessionSet_.insert(sceneSession->GetPersistentId());
+    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
+    ssm_->avoidAreaListenerSessionSet_.erase(sceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: NotifyStatusBarShowStatus
+ * @tc.desc: test NotifyStatusBarShowStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyStatusBarShowStatus, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    sceneSession->isStatusBarVisible_ = true;
+    EXPECT_EQ(WSError::WS_OK, ssm_->NotifyStatusBarShowStatus(sceneSession->GetPersistentId(), false));
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
  * @tc.name: NotifyAppUseControlList
  * @tc.desc: NotifyAppUseControlList
  * @tc.type: FUNC
@@ -772,7 +773,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, Function | SmallTes
     controlList.emplace_back();
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
         ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
- 
+
     AppUseControlInfo appUseControlInfo;
     appUseControlInfo.bundleName_ = "bundleName";
     appUseControlInfo.appIndex_ = 1;
