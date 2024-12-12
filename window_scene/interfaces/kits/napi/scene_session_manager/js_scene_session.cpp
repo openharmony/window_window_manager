@@ -5241,7 +5241,7 @@ void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
     session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{pubilc}s: jsSceneSession is null", where);
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnSetWindowRectAutoSave(enabled);
@@ -5283,7 +5283,7 @@ void JsSceneSession::RegisterUpdateAppUseControlCallback()
         [weakThis = wptr(this), where](ControlAppType type, bool isNeedControl) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{pubilc}s: jsSceneSession is null", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: jsSceneSession is null", where);
             return;
         }
         jsSceneSession->OnUpdateAppUseControl(type, isNeedControl);
