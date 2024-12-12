@@ -3359,7 +3359,7 @@ WMError WindowSessionImpl::RegisterTouchOutsideListener(const sptr<ITouchOutside
     bool isUpdate = false;
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_EVENT, "Start, name=%{public}s, id=%{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "listener is null");
@@ -3388,7 +3388,7 @@ WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsi
     bool isUpdate = false;
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_EVENT, "Start, name=%{public}s, id=%{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "listener is null");
