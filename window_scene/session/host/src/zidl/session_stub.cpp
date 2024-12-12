@@ -24,6 +24,7 @@
 
 #include "parcel/accessibility_event_info_parcel.h"
 #include "process_options.h"
+#include "start_window_option.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -113,6 +114,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleProcessPointDownSession(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG):
             return HandleSendPointerEvenForMoveDrag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_START_MOVING):
+            return HandleIsStartMoving(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
             return HandleUpdateClientRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID):
@@ -163,6 +166,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
+            return HandleNotifySubModalTypeChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -492,6 +497,15 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     if (!data.ReadBool(abilitySessionInfo->isFromIcon)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read isFromIcon failed.");
         return ERR_INVALID_DATA;
+    }
+    bool hasStartWindowOption = false;
+    if (!data.ReadBool(hasStartWindowOption)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartWindowOption failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasStartWindowOption) {
+        auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
+        abilitySessionInfo->startWindowOption.reset(startWindowOption);
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -839,6 +853,16 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SessionStub::HandleIsStartMoving(MessageParcel& data, MessageParcel& reply)
+{
+    bool isMoving = IsStartMoving();
+    if (!reply.WriteBool(isMoving)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write isMoving failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply)
 {
     bool isRegister = data.ReadBool();
@@ -937,6 +961,20 @@ int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel&
     }
     WMError ret = SetGestureBackEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t subWindowModalType = 0;
+    if (!data.ReadUint32(subWindowModalType)) {
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "subWindowModalType: %{public}u", subWindowModalType);
+    if (subWindowModalType > static_cast<uint32_t>(SubWindowModalType::END)) {
+        return ERR_INVALID_DATA;
+    }
+    NotifySubModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

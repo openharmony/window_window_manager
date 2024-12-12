@@ -64,6 +64,7 @@ private:
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
     int HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply);
     int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
+    int HandleIsStartMoving(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
@@ -79,6 +80,7 @@ private:
     int HandleRequestFocus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

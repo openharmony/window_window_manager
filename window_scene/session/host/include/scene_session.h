@@ -56,6 +56,7 @@ using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlT
 using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
+using NotifySubModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -91,6 +92,7 @@ using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 
 class SceneSession : public Session {
 public:
@@ -122,7 +124,6 @@ public:
         NotifySessionTopmostChangeFunc onSessionTopmostChange_;
         NotifyRaiseToTopFunc onRaiseToTop_;
         NotifySessionEventFunc OnSessionEvent_;
-        NotifySystemBarPropertyChangeFunc OnSystemBarPropertyChange_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyTouchOutsideFunc OnTouchOutside_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
@@ -262,7 +263,13 @@ public:
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
+
+    /**
+     * PC Window
+     */
     virtual bool IsModal() const { return false; }
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
+    void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
 
     /**
      * Window Immersive
@@ -281,6 +288,7 @@ public:
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
+    void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
@@ -373,6 +381,12 @@ public:
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
 
+    /*
+     * Window Lifecycle
+     */
+    void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback);
+    void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    
     void ClearSpecificSessionCbMap();
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
@@ -380,8 +394,8 @@ public:
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
-    bool IsStartMoving() const;
-    void SetIsStartMoving(const bool startMoving);
+    bool IsStartMoving() override;
+    void SetIsStartMoving(bool startMoving);
     bool IsSystemSpecificSession() const;
     void SetIsSystemSpecificSession(bool isSystemSpecificSession);
     void SetShouldHideNonSecureWindows(bool shouldHide);
@@ -520,6 +534,12 @@ protected:
      * Window Immersive
      */
     NotifyNeedAvoidFunc onNeedAvoid_;
+    NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
+
+    /**
+     * PC Window
+     */
+    NotifySubModalTypeChangeFunc onSubModalTypeChange_;
 
     /*
      * PiP Window
@@ -537,6 +557,8 @@ protected:
     NotifyShowWhenLockedFunc onShowWhenLockedFunc_;
     NotifyForceHideChangeFunc onForceHideChangeFunc_;
     ClearCallbackMapFunc clearCallbackMapFunc_;
+    UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
+    std::unordered_map<ControlAppType, bool> appUseControlMap_;
 
     /**
      * PC Window

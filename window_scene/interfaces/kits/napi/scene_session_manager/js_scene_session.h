@@ -46,6 +46,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_FOCUSABLE_CHANGE_CB,
     SESSION_TOUCHABLE_CHANGE_CB,
     SESSION_TOP_MOST_CHANGE_CB,
+    SUB_MODAL_TYPE_CHANGE_CB,
     CLICK_CB,
     TERMINATE_SESSION_CB,
     TERMINATE_SESSION_CB_NEW,
@@ -75,6 +76,7 @@ enum class ListenerFuncType : uint32_t {
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
     TITLE_DOCK_HOVER_SHOW_CB,
+    UPDATE_APP_USE_CONTROL_CB,
 };
 
 class SceneSession;
@@ -211,6 +213,7 @@ private:
     void ProcessSessionFocusableChangeRegister();
     void ProcessSessionTouchableChangeRegister();
     void ProcessSessionTopmostChangeRegister();
+    void ProcessSubModalTypeChangeRegister();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -241,6 +244,7 @@ private:
     void ProcessTitleAndDockHoverShowChangeRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
+    void RegisterUpdateAppUseControlCallback();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -262,6 +266,7 @@ private:
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
     void OnSessionTopmostChange(bool topmost);
+    void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnClick();
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
@@ -290,7 +295,8 @@ private:
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
     void NotifyFrameLayoutFinish();
-
+    void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
     napi_env env_;
