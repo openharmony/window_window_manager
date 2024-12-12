@@ -320,6 +320,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsPcAppInPad());
         reply.WriteBool(property->GetCompatibleModeEnableInPad());
         reply.WriteBool(property->GetDragEnabled());
+        reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
