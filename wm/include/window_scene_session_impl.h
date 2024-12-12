@@ -61,7 +61,6 @@ public:
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Recover() override;
-    WMError Restore() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
     bool IsStartMoving() override;
@@ -170,6 +169,7 @@ public:
      */
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError Restore() override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
