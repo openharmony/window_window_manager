@@ -265,7 +265,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
             .currentUserId = currentUserId_,
             .displaysInfo = displayInfos
         };
-        TLOGI(WmsLogTag::WMS_EVENT, "currUId:%{public}d width:%{public}d height:%{public}d",
+        TLOGI(WmsLogTag::WMS_EVENT, "userId:%{public}d width:%{public}d height:%{public}d",
             currentUserId_, mainScreenWidth, mainScreenHeight);
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
     };
@@ -376,12 +376,12 @@ void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
         return;
     }
     auto surfaceId = surfaceNode->GetId();
-    TLOGI(WmsLogTag::WMS_EVENT, "wid:%{public}d sid:%{public}" PRIu64 " uiExWindowinfo:%{public}d",
+    TLOGI(WmsLogTag::WMS_EVENT, "wid:%{public}d sid:%{public}" PRIu64 " uiExtWindowinfo:%{public}d",
         windowInfo.id, surfaceId, static_cast<int>(windowInfo.uiExtentionWindowInfo.size()));
-    for (auto uiExWindowinfo : windowInfo.uiExtentionWindowInfo) {
-        auto str = DumpWindowInfo(uiExWindowinfo);
-        str = "sec:" + std::to_string(uiExWindowinfo.privacyUIFlag) + " " + str;
-        TLOGI(WmsLogTag::WMS_EVENT, "uiExWindowinfo:%{public}s", str.c_str());
+    for (auto uiExtWindowinfo : windowInfo.uiExtentionWindowInfo) {
+        auto str = DumpWindowInfo(uiExtWindowinfo);
+        str = "sec:" + std::to_string(uiExtWindowinfo.privacyUIFlag) + " " + str;
+        TLOGI(WmsLogTag::WMS_EVENT, "uiExtWindowinfo:%{public}s", str.c_str());
     }
 }
 

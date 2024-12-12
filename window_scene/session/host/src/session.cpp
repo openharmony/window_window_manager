@@ -668,8 +668,7 @@ WSError Session::SetTouchable(bool touchable)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (touchable != GetSessionProperty()->GetTouchable()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
@@ -683,8 +682,7 @@ bool Session::GetTouchable() const
 void Session::SetForceTouchable(bool forceTouchable)
 {
     if (forceTouchable != forceTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
-            static_cast<int>(forceTouchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), forceTouchable);
     }
     forceTouchable_ = forceTouchable;
 }
@@ -692,8 +690,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     systemTouchable_ = touchable;
     NotifySessionInfoChange();
@@ -713,8 +710,7 @@ void Session::SetRectChangeBySystem(bool rectChangeBySystem)
 {
     if (rectChangeBySystem_.load() != rectChangeBySystem) {
         rectChangeBySystem_.store(rectChangeBySystem);
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
-            rectChangeBySystem);
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), rectChangeBySystem);
     }
 }
 
@@ -774,7 +770,7 @@ int32_t Session::GetWindowId() const
 
 void Session::SetCallingPid(int32_t id)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}u", persistentId_, id);
+    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", persistentId_, id);
     callingPid_ = id;
     if (isVisible_) {
         visibilityChangedDetectFunc_(callingPid_, false, isVisible_);
