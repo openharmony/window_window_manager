@@ -303,10 +303,8 @@ WSError MainSession::NotifyMainModalTypeChange(bool isModal)
 
 bool MainSession::IsModal() const
 {
-    bool isModal = false;
-    auto property = GetSessionProperty();
-    isModal = WindowHelper::IsModalMainWindow(property->GetWindowType(), property->GetWindowFlags());
-    return isModal;
+    return WindowHelper::IsModalMainWindow(GetSessionProperty()->GetWindowType(),
+                                           GetSessionProperty()->GetWindowFlags());
 }
 
 bool MainSession::IsApplicationModal() const
