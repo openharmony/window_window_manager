@@ -56,6 +56,7 @@ using NotifySessionPiPControlStatusChangeFunc = std::function<void(WsPiPControlT
 using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, uint32_t priority)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
+using NotifySubModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -259,7 +260,13 @@ public:
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
+
+    /**
+     * PC Window
+     */
     virtual bool IsModal() const { return false; }
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
+    void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
 
     /**
      * Window Immersive
@@ -514,6 +521,11 @@ protected:
      */
     NotifyNeedAvoidFunc onNeedAvoid_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
+
+    /**
+     * PC Window
+     */
+    NotifySubModalTypeChangeFunc onSubModalTypeChange_;
 
     /*
      * PiP Window

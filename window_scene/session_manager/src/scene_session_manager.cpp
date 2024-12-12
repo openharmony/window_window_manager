@@ -10886,6 +10886,12 @@ void SceneSessionManager::UpdateDarkColorModeToRS()
         colorMode.c_str(), ret);
 }
 
+WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
+{
+    isPcOrPadFreeMultiWindowMode = (systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.freeMultiWindowEnable_);
+    return WMError::WM_OK;
+}
+
 WMError SceneSessionManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
     std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {

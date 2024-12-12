@@ -164,6 +164,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
+            return HandleNotifySubModalTypeChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -938,6 +940,20 @@ int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel&
     }
     WMError ret = SetGestureBackEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t subWindowModalType = 0;
+    if (!data.ReadUint32(subWindowModalType)) {
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "subWindowModalType: %{public}u", subWindowModalType);
+    if (subWindowModalType > static_cast<uint32_t>(SubWindowModalType::END)) {
+        return ERR_INVALID_DATA;
+    }
+    NotifySubModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -137,12 +137,14 @@ enum class WindowModeType : uint8_t {
  * @brief Enumerates modal of sub session.
  */
 enum class SubWindowModalType : uint32_t {
-    TYPE_UNDEFINED = 0,
+    BEGIN = 0,
+    TYPE_UNDEFINED = BEGIN,
     TYPE_NORMAL,
     TYPE_DIALOG,
     TYPE_WINDOW_MODALITY,
     TYPE_TOAST,
     TYPE_APPLICATION_MODALITY,
+    END = TYPE_APPLICATION_MODALITY,
 };
 
 /**
@@ -318,9 +320,10 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_HANDWRITING = 1 << 6,
-    WINDOW_FLAG_IS_TOAST = 1 << 7,
-    WINDOW_FLAG_END = 1 << 8,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
+    WINDOW_FLAG_HANDWRITING = 1 << 7,
+    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_END = 1 << 9,
 };
 
 /**
@@ -1211,6 +1214,19 @@ enum ForceHideState : uint32_t {
     NOT_HIDDEN = 0,
     HIDDEN_WHEN_FOCUSED,
     HIDDEN_WHEN_UNFOCUSED
+};
+
+enum class ModalityType : uint8_t {
+    WINDOW_MODALITY,
+    APPLICATION_MODALITY,
+};
+
+struct SubWindowOptions {
+    std::string title;
+    bool decorEnabled = false;
+    bool isModal = false;
+    bool isTopmost = false;
+    ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
 
 /**

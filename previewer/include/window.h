@@ -301,6 +301,7 @@ public:
     virtual WMError HideNonSystemFloatingWindows(bool shouldHide) = 0;
     virtual bool IsFloatingWindowAppType() const { return false; }
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
@@ -341,9 +342,10 @@ public:
      * @brief Set the modality of window.
      *
      * @param isModal bool.
+     * @param modalityType ModalityType.
      * @return WMError
      */
-    virtual WMError SetSubWindowModal(bool isModal)
+    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
