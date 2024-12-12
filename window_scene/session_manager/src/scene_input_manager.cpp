@@ -399,8 +399,13 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {
-        idListStream << e.id << "|" << e.flags << "|" << static_cast<int32_t>(e.zOrder) << "|"
-                     << e.pid << "|" << e.defaultHotAreas.size();
+        if (std::floor(e.zorder) == e.zorder) {
+            idListStream << e.id << "|" << e.flags << "|" << static_cast<int32_t>(e.zOrder) << "|"
+                         << e.pid << "|" << e.defaultHotAreas.size();
+        } else {
+            idListStream << e.id << "|" << e.flags << "|" << e.zOrder << "|"
+                         << e.pid << "|" << e.defaultHotAreas.size();
+        }
 
         if (e.defaultHotAreas.size() > 0) {
             auto iter = lastWindowDefaultHotArea.find(e.id);
