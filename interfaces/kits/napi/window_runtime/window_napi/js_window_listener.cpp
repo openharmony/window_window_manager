@@ -151,10 +151,11 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
 {
     WLOGFD("[NAPI]");
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] {
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, avoidArea, type, env = env_, where] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s this listener or env is nullptr", where);
             return;
         }
         HandleScope handleScope(env);
@@ -169,7 +170,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             napi_value objValue = nullptr;
             napi_create_object(env, &objValue);
             if (objValue == nullptr) {
-                TLOGNE(WmsLogTag::WMS_IMMS, "Failed to get object");
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s Failed to get object", where);
                 return;
             }
             napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
@@ -453,10 +454,11 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
-    auto jsCallback = [self = weakRef_, displayId, env = env_] {
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, displayId, env = env_, where] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s this listener or env is nullptr", where);
             return;
         }
         HandleScope handleScope(env);
@@ -586,11 +588,12 @@ void JsWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 
 void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
 {
-    auto jsCallback = [self = weakRef_, &terminateCloseProcess, env = env_]() mutable {
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, &terminateCloseProcess, env = env_, where]() mutable {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnMainWindowClose");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_PC, "this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s this listener or env is nullptr", where);
             return;
         }
         napi_handle_scope scope = nullptr;
