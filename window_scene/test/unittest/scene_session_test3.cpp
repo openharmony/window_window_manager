@@ -129,7 +129,8 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(property);
     WindowLimits limits;
     limits.maxHeight_ = 10;
-    limits.minWidth_ = 0;
+    limits.minWidth_ = 1;
+    limits.minHeight_ = 1;
     property->SetWindowLimits(limits);
     auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
@@ -332,39 +333,39 @@ HWTEST_F(SceneSessionTest3, IsMovableWindowType, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetBlankFlag
- * @tc.desc: check func SetBlankFlag
+ * @tc.name: SetBlank
+ * @tc.desc: check func SetBlank
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, SetBlankFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, SetBlank, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetBlankFlag";
-    info.bundleName_ = "SetBlankFlag";
+    info.abilityName_ = "SetBlank";
+    info.bundleName_ = "SetBlank";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     bool isAddBlank = true;
-    sceneSession->SetBlankFlag(isAddBlank);
-    ASSERT_EQ(isAddBlank, sceneSession->GetBlankFlag());
+    sceneSession->SetBlank(isAddBlank);
+    ASSERT_EQ(isAddBlank, sceneSession->GetBlank());
 }
 
 /**
- * @tc.name: GetBlankFlag
- * @tc.desc: check func GetBlankFlag
+ * @tc.name: GetBlank
+ * @tc.desc: check func GetBlank
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, GetBlankFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, GetBlank, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "GetBlankFlag";
-    info.bundleName_ = "GetBlankFlag";
+    info.abilityName_ = "GetBlank";
+    info.bundleName_ = "GetBlank";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     bool isAddBlank = true;
-    sceneSession->SetBlankFlag(isAddBlank);
-    ASSERT_EQ(isAddBlank, sceneSession->GetBlankFlag());
+    sceneSession->SetBlank(isAddBlank);
+    ASSERT_EQ(isAddBlank, sceneSession->GetBlank());
 }
 
 /**
@@ -603,30 +604,6 @@ HWTEST_F(SceneSessionTest3, SetMainWindowTopmostChangeCallback, Function | Small
     };
     sceneSession->SetMainWindowTopmostChangeCallback(func1);
     ASSERT_NE(nullptr, sceneSession->mainWindowTopmostChangeFunc_);
-}
-
-/**
- * @tc.name: SetKeyboardGravityChangeCallback
- * @tc.desc: SetKeyboardGravityChangeCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, SetKeyboardGravityChangeCallback, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetKeyboardGravityChangeCallback";
-    info.bundleName_ = "SetKeyboardGravityChangeCallback";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
-
-    NotifyKeyboardGravityChangeFunc func;
-    sceneSession->SetKeyboardGravityChangeCallback(func);
-
-    NotifyKeyboardGravityChangeFunc func1 = [sceneSession](SessionGravity gravity) {
-        return;
-    };
-    sceneSession->SetKeyboardGravityChangeCallback(func1);
-    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, sceneSession->GetKeyboardGravity());
 }
 
 /**

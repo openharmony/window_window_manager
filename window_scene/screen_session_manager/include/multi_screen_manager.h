@@ -47,6 +47,9 @@ public:
     void InternalScreenOffChange(sptr<ScreenSession> internalSession, sptr<ScreenSession> externalSession);
 
     void ExternalScreenDisconnectChange(sptr<ScreenSession> internalSession, sptr<ScreenSession> externalSession);
+
+    bool AreScreensTouching(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondScreenSession,
+        MultiScreenPositionOptions mainScreenOptions, MultiScreenPositionOptions secondScreenOption);
 private:
     MultiScreenManager();
     ~MultiScreenManager();

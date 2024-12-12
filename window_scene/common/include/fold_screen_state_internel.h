@@ -23,16 +23,30 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
+static const std::string INVALID_DEVICE = "-1";
 static const std::string g_foldScreenType = system::GetParameter("const.window.foldscreen.type", "0,0,0,0");
 static const std::string PHY_ROTATION_OFFSET = system::GetParameter("const.window.phyrotation.offset", "0");
 static const  std::string SINGLE_DISPLAY = "1";
 static const std::string DUAL_DISPLAY = "2";
 static const std::string SINGLE_POCKET_DISPLAY = "4";
 static const std::string SUPER_FOLD_DISPLAY = "5";
+static const std::string SECONDARY_FOLD_DISPLAY = "6";
 static const std::string DEFAULT_OFFSET = "0";
 }
 class FoldScreenStateInternel {
 public:
+    static std::string GetFoldType()
+    {
+        if (!IsValidFoldType(g_foldScreenType)) {
+            return INVALID_DEVICE;
+        }
+        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
+        if (foldTypes.empty()) {
+            return INVALID_DEVICE;
+        }
+        return foldTypes[0];
+    }
+
     static bool IsFoldScreenDevice()
     {
         return g_foldScreenType != "";
@@ -52,14 +66,9 @@ public:
 
     static bool IsSingleDisplayFoldDevice()
     {
-        if (!IsValidFoldType(g_foldScreenType)) {
-            return false;
-        }
-        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
-        if (foldTypes.empty()) {
-            return false;
-        }
-        return foldTypes[0] == SINGLE_DISPLAY;
+        // ALTB ccm property conflict with the chip, waiting for chip conflict resolution
+        return !IsDualDisplayFoldDevice() && !IsSingleDisplayPocketFoldDevice() &&
+            !IsSuperFoldDisplayDevice() && !IsSecondaryDisplayFoldDevice();
     }
 
     static bool IsSingleDisplayPocketFoldDevice()
@@ -84,6 +93,11 @@ public:
             return false;
         }
         return foldTypes[0] == SUPER_FOLD_DISPLAY;
+    }
+
+    static bool IsSecondaryDisplayFoldDevice()
+    {
+        return GetFoldType() == SECONDARY_FOLD_DISPLAY;
     }
 
     static std::vector<std::string> StringSplit(const std::string& str, char delim)
@@ -138,6 +152,24 @@ public:
     {
         std::regex reg("^([0-9],){3}[0-9]{1}$");
         return std::regex_match(foldTypeStr, reg);
+    }
+
+    template<typename T>
+    static std::string TransVec2Str(const std::vector<T> &vec, const std::string &name)
+    {
+        std::stringstream strs;
+        for (uint32_t i = 0; i < vec.size(); i++) {
+            auto str = vec[i];
+            strs << name;
+            if (i == 0) {
+                strs << "_bc";
+            } else if (i == 1) {
+                strs << "_ab";
+            }
+            strs << ": ";
+            strs << std::to_string(str) << " ";
+        }
+        return strs.str();
     }
 };
 } // Rosen

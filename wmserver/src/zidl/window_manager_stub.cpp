@@ -421,7 +421,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_GET_SNAPSHOT: {
             uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
-                TLOGE(WmsLogTag::DEFAULT, "read windowId error");
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowId error");
                 return ERR_INVALID_DATA;
             }
             std::shared_ptr<Media::PixelMap> pixelMap = GetSnapshot(windowId);

@@ -57,9 +57,7 @@ sptr<TestGestureNavigationEnabledChangedListener> GestureNavigationEnabledTest::
 void GestureNavigationEnabledTest::SetUpTestCase()
 {
     lisenter_= new (std::nothrow)TestGestureNavigationEnabledChangedListener();
-    if (lisenter_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(lisenter_, nullptr);
 }
 
 void GestureNavigationEnabledTest::TearDownTestCase()
@@ -92,7 +90,7 @@ HWTEST_F(GestureNavigationEnabledTest, SetGestureNavigationEnabled, Function | M
     sleep(WAIT_SLEEP_TIME);
     windowManager.SetGestureNavigationEnabled(true);
     auto result = lisenter_->future_.GetResult(WAIT_FUTURE_RESULT);
-   
+
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(result, true);
     }
@@ -103,7 +101,7 @@ HWTEST_F(GestureNavigationEnabledTest, SetGestureNavigationEnabled, Function | M
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(result, false);
     }
-    
+
     lisenter_->future_.Reset(false);
     windowManager.UnregisterGestureNavigationEnabledChangedListener(lisenter_);
     sleep(WAIT_SLEEP_TIME);

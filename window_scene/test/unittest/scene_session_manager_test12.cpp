@@ -209,339 +209,127 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource04, Function | Sma
 }
 
 /**
- * @tc.name: CreateAndBackgroundSceneSession
- * @tc.desc: CreateAndBackgroundSceneSession
+ * @tc.name: RequestKeyboardPanelSession
+ * @tc.desc: test RequestKeyboardPanelSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, CreateAndBackgroundSceneSession01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, RequestKeyboardPanelSession, Function | SmallTest | Level2)
 {
-    SessionInfo info;
-    info.abilityName_ = "CreateAndBackgroundSceneSession01";
-    info.bundleName_ = "CreateAndBackgroundSceneSession01";
-    info.moduleName_ = "CreateAndBackgroundSceneSession01";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    sceneSession->SetSessionProperty(property);
-    ssm_->CreateSceneSession(info, nullptr);
-    info.isSystem_ = true;
-    info.windowType_ = 3;
-    sptr<SceneSession> getSceneSession1 = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(nullptr, getSceneSession1);
-    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
-    ssm_->UpdateSceneSessionWant(info);
-
-    ssm_->RequestSceneSessionActivation(sceneSession, true);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo;
-    ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
+    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    ASSERT_NE(nullptr, ssm);
+    std::string panelName = "SystemKeyboardPanel";
+    ASSERT_NE(nullptr, ssm->RequestKeyboardPanelSession(panelName, 0)); // 0 is screenId
+    ssm->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_NE(nullptr, ssm->RequestKeyboardPanelSession(panelName, 0)); // 0 is screenId
 }
 
 /**
- * @tc.name: CreateAndBackgroundSceneSession
- * @tc.desc: CreateAndBackgroundSceneSession
+ * @tc.name: CreateKeyboardPanelSession03
+ * @tc.desc: test CreateKeyboardPanelSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, CreateAndBackgroundSceneSession02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | SmallTest | Level2)
 {
-    SessionInfo info;
-    info.abilityName_ = "CreateAndBackgroundSceneSession02";
-    info.bundleName_ = "CreateAndBackgroundSceneSession02";
-    info.moduleName_ = "CreateAndBackgroundSceneSession02";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    SessionInfo keyboardInfo;
+    keyboardInfo.abilityName_ = "CreateKeyboardPanelSession03";
+    keyboardInfo.bundleName_ = "CreateKeyboardPanelSession03";
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(keyboardInfo, nullptr, nullptr);
+    ASSERT_NE(nullptr, keyboardSession);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
+    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    ASSERT_NE(nullptr, ssm);
+
+    // the keyboard panel enabled flag of ssm is false
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    // keyboard session is nullptr
+    ssm->isKeyboardPanelEnabled_ = true;
+    ssm->CreateKeyboardPanelSession(nullptr);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    // the property of keyboard session is nullptr
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(nullptr));
+    ASSERT_EQ(nullptr, keyboardSession->GetSessionProperty());
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    // the keyboard session is system keyboard
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    sceneSession->SetSessionProperty(property);
-    ssm_->CreateSceneSession(info, nullptr);
-    info.isSystem_ = true;
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    info.windowType_ = 1001;
-    sptr<SceneSession> getSceneSession2 = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(nullptr, getSceneSession2);
-
-    ASSERT_EQ(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, getSceneSession2->GetWindowType());
-
-    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
-    ssm_->UpdateSceneSessionWant(info);
-
-    ssm_->RequestSceneSessionActivation(sceneSession, true);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo;
-    ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
-}
-
-/**
- * @tc.name: CreateAndBackgroundSceneSession
- * @tc.desc: CreateAndBackgroundSceneSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, CreateAndBackgroundSceneSession03, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "CreateAndBackgroundSceneSession03";
-    info.bundleName_ = "CreateAndBackgroundSceneSession03";
-    info.moduleName_ = "CreateAndBackgroundSceneSession03";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    sceneSession->SetSessionProperty(property);
-    ssm_->CreateSceneSession(info, nullptr);
-    info.isSystem_ = true;
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    info.windowType_ = 2105;
-    sptr<SceneSession> getSceneSession3 = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(nullptr, getSceneSession3);
-
-    ASSERT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, getSceneSession3->GetWindowType());
-
-    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
-    ssm_->UpdateSceneSessionWant(info);
-
-    ssm_->RequestSceneSessionActivation(sceneSession, true);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo;
-    ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(property));
+    ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
+    keyboardSession->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, keyboardSession->IsSystemKeyboard());
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_NE(nullptr, keyboardSession->GetKeyboardPanelSession());
 }
 
 /**
- * @tc.name: CreateAndBackgroundSceneSession
- * @tc.desc: CreateAndBackgroundSceneSession
+ * @tc.name: CreateKeyboardPanelSession04
+ * @tc.desc: test CreateKeyboardPanelSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, CreateAndBackgroundSceneSession04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession04, Function | SmallTest | Level2)
 {
-    SessionInfo info;
-    info.abilityName_ = "CreateAndBackgroundSceneSession04";
-    info.bundleName_ = "CreateAndBackgroundSceneSession04";
-    info.moduleName_ = "CreateAndBackgroundSceneSession04";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    SessionInfo keyboardInfo;
+    keyboardInfo.abilityName_ = "CreateKeyboardPanelSession04";
+    keyboardInfo.bundleName_ = "CreateKeyboardPanelSession04";
+    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(keyboardInfo, nullptr, nullptr);
+    ASSERT_NE(nullptr, keyboardSession);
+    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
+    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    ASSERT_NE(nullptr, ssm);
+
+    // the keyboard panel enabled flag of ssm is true
+    ssm->isKeyboardPanelEnabled_ = true;
+    ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
+    ASSERT_EQ(false, keyboardSession->IsSystemKeyboard());
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_NE(nullptr, keyboardSession->GetKeyboardPanelSession());
+
+    // keyboard panel session is already exists
+    ssm->CreateKeyboardPanelSession(keyboardSession);
+    ASSERT_NE(nullptr, keyboardSession->GetKeyboardPanelSession());
+}
+
+/**
+ * @tc.name: CheckSystemWindowPermission02
+ * @tc.desc: test CheckSystemWindowPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CheckSystemWindowPermission02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    sceneSession->SetSessionProperty(property);
-    ssm_->CreateSceneSession(info, nullptr);
-    info.isSystem_ = true;
-    property->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    info.windowType_ = 2500;
-    sptr<SceneSession> getSceneSession4 = ssm_->CreateSceneSession(info, property);
-    ASSERT_NE(nullptr, getSceneSession4);
-    ASSERT_EQ(WindowType::SYSTEM_SUB_WINDOW_BASE, getSceneSession4->GetWindowType());
+    ASSERT_NE(nullptr, property);
 
-    ssm_->NotifySessionUpdate(info, ActionType::SINGLE_START, 0);
-    ssm_->UpdateSceneSessionWant(info);
+    property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW); // main window is not system window
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 
-    ssm_->RequestSceneSessionActivation(sceneSession, true);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 
-    sptr<AAFwk::SessionInfo> abilitySessionInfo;
-    ssm_->NotifyCollaboratorAfterStart(sceneSession, abilitySessionInfo);
-    ASSERT_EQ(WSError::WS_OK, ssm_->RequestSceneSessionBackground(sceneSession, true, true));
-}
+    property->SetIsSystemKeyboard(true);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 
-/**
- * @tc.name: ForegroundAndDisconnect01
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, ForegroundAndDisconnect01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ForegroundAndDisconnect01";
-    info.bundleName_ = "ForegroundAndDisconnect01";
-    info.moduleName_ = "ForegroundAndDisconnect01";
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    ASSERT_NE(specificCallback_, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sceneSession->isActive_ = true;
-    sceneSession->specificCallback_ = specificCallback_;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-
-    auto result = sceneSession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
-    result = sceneSession->DisconnectTask(true, true);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: ForegroundAndDisconnect02
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, ForegroundAndDisconnect02, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ForegroundAndDisconnect02";
-    info.bundleName_ = "ForegroundAndDisconnect02";
-    info.moduleName_ = "ForegroundAndDisconnect02";
-
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    ASSERT_NE(specificCallback_, nullptr);
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = nullptr;
-    auto result = sceneSession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sceneSession->UpdateSessionState(SessionState::STATE_ACTIVE);
-    result = sceneSession->BackgroundTask(true);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(true, true);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: ForegroundAndDisconnect03
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, ForegroundAndDisconnect03, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ForegroundAndDisconnect03";
-    info.bundleName_ = "ForegroundAndDisconnect03";
-    info.moduleName_ = "ForegroundAndDisconnect03";
-    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    ASSERT_NE(specificCallback_, nullptr);
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    auto result = sceneSession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sceneSession->UpdateSessionState(SessionState::STATE_ACTIVE);
-    result = sceneSession->BackgroundTask(true);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(true, true);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: ForegroundAndDisconnect04
- * @tc.desc: ForegroundAndDisconnect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, ForegroundAndDisconnect04, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ForegroundAndDisconnect04";
-    info.bundleName_ = "ForegroundAndDisconnect04";
-    info.moduleName_ = "ForegroundAndDisconnect04";
-    info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
-
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    ASSERT_NE(specificCallback_, nullptr);
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    auto result = sceneSession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sceneSession->UpdateSessionState(SessionState::STATE_INACTIVE);
-    result = sceneSession->BackgroundTask(true);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(true, true);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: ForegroundAndDisconnect05
- * @tc.desc: ForegroundAndDisconnect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, ForegroundAndDisconnect05, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ForegroundAndDisconnect05";
-    info.bundleName_ = "ForegroundAndDisconnect05";
-    info.moduleName_ = "ForegroundAndDisconnect05";
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-
-    sceneSession->Session::SetSessionState(SessionState::STATE_CONNECT);
-
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
-    auto result = sceneSession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->BackgroundTask(true);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(true, true);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: ForegroundAndDisconnect06
- * @tc.desc: ForegroundAndDisconnect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, ForegroundAndDisconnect06, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ForegroundAndDisconnect06";
-    info.bundleName_ = "ForegroundAndDisconnect06";
-    info.moduleName_ = "ForegroundAndDisconnect06";
-
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    sceneSession->Session::SetSessionState(SessionState::STATE_CONNECT);
-
-    sceneSession->SetLeashWinSurfaceNode(nullptr);
-    auto result = sceneSession->Foreground(property);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->BackgroundTask(true);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->DisconnectTask(true, true);
-    ASSERT_EQ(result, WSError::WS_OK);
+    property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 }
 }
 } // namespace Rosen

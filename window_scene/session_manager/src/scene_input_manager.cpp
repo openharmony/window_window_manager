@@ -187,30 +187,20 @@ void SceneInputManager::Init()
 void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)
 {
     std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.empty()) {
         TLOGE(WmsLogTag::WMS_EVENT, "screensProperties is empty");
         return;
     }
-    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
-    for (auto& iter: screensProperties) {
-        auto screenId = iter.first;
-        auto& screenProperty = iter.second;
-        auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
-        MMI::Direction displayRotation;
-        if (screenSession && screenSession->GetDisplayNode()) {
-            displayRotation = ConvertDegreeToMMIRotation(
-                screenSession->GetDisplayNode()->GetStagingProperties().GetRotation());
-        } else {
-            displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation());
-        }
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    for (auto& [screenId, screenProperty] : screensProperties) {
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
         auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
         auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
         auto transform = Matrix3f::IDENTITY;
         Vector2f scale(screenProperty.GetScaleX(), screenProperty.GetScaleY());
         transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
-            screenProperty.GetPivotY() * screenHeight);
-        transform = transform.Inverse();
+            screenProperty.GetPivotY() * screenHeight).Inverse();
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
@@ -222,7 +212,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .name = "display" + std::to_string(screenId),
             .uniq = "default" + std::to_string(screenId),
             .direction = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation()),
-            .displayDirection = displayRotation,
+            .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
             .ppi = screenProperty.GetXDpi()};
@@ -239,11 +229,6 @@ void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& 
         mainScreenWidth = displayInfos[0].width;
         mainScreenHeight = displayInfos[0].height;
     }
-    if (sceneSessionDirty_ == nullptr) {
-        WLOGFE("scene session dirty is null");
-        return;
-    }
-
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = mainScreenWidth,
         .height = mainScreenHeight,
@@ -333,7 +318,7 @@ void SceneInputManager::FlushChangeInfoToMMI(const std::map<uint64_t, std::vecto
 bool SceneInputManager::CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& displayInfos,
     const std::vector<MMI::WindowInfo>& windowInfoList)
 {
-    int32_t focusId = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
+    int32_t focusId = SceneSessionManager::GetInstance().GetFocusedSessionId();
     if (focusId != lastFocusId_) {
         lastFocusId_ = focusId;
         lastDisplayInfos_ = displayInfos;
@@ -380,7 +365,7 @@ void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
 
 void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
 {
-    auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(windowInfo.id);
+    auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowInfo.id);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
         return;
@@ -410,7 +395,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     if (windowEventID == UINT32_MAX) {
         windowEventID = 0;
     }
-    focusedSessionId_ = Rosen::SceneSessionManager::GetInstance().GetFocusedSessionId();
+    focusedSessionId_ = SceneSessionManager::GetInstance().GetFocusedSessionId();
     std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {

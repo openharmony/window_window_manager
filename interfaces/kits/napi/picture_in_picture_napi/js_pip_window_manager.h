@@ -33,6 +33,7 @@ private:
     napi_value OnIsPipEnabled(napi_env env, napi_callback_info info);
     napi_value OnCreatePipController(napi_env env, napi_callback_info info);
     napi_value NapiSendTask(napi_env env, PipOption& pipOption);
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(napi_env env, napi_value* result);
 };
 }
 }

@@ -260,6 +260,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::ROTATION,              RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::DRAG,                  RectChangeReason::DRAG       },
     { WindowSizeChangeReason::DRAG_START,            RectChangeReason::DRAG_START },
+    { WindowSizeChangeReason::DRAG_MOVE,             RectChangeReason::MOVE       },
     { WindowSizeChangeReason::DRAG_END,              RectChangeReason::DRAG_END   },
     { WindowSizeChangeReason::RESIZE,                RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MOVE,                  RectChangeReason::MOVE       },
@@ -338,8 +339,12 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
     napi_value ModalityTypeInit(napi_env env);
+    napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButtonStyle);
+    bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& decorButtonStyle);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
+    bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration);
+    bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties,
         std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);

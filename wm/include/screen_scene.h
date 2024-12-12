@@ -53,7 +53,7 @@ public:
 
     void SetDisplayOrientation(int32_t orientation);
 
-    uint64_t GetDisplayId() const override;
+    DisplayId GetDisplayId() const override;
     void SetDisplayId(DisplayId displayId);
 
     WindowState GetWindowState() const override
@@ -79,12 +79,14 @@ public:
     Ace::UIContent* GetUIContent() const override;
     WMError Destroy() override;
 
+    std::string GetClassType() const override { return "ScreenScene"; }
+
 private:
     mutable std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     float density_ = 1.0f;
     int32_t orientation_;
-    uint64_t displayId_;
+    DisplayId displayId_;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;

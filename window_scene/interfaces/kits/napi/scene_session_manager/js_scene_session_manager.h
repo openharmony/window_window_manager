@@ -42,6 +42,7 @@ enum class ListenerFunctionType : uint32_t {
     CLOSE_TARGET_FLOAT_WINDOW_CB,
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
     START_PIP_FAILED_CB,
+    NOTIFY_APP_USE_CONTROL_LIST_CB
 };
 
 class JsSceneSessionManager final {
@@ -88,12 +89,14 @@ public:
     static napi_value RequestFocusStatus(napi_env env, napi_callback_info info);
     static napi_value RequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     static napi_value SetScreenLocked(napi_env env, napi_callback_info info);
+    static napi_value SetUserAuthPassed(napi_env env, napi_callback_info info);
     static napi_value UpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     static napi_value UpdateMaximizeMode(napi_env env, napi_callback_info info);
     static napi_value ReportData(napi_env env, napi_callback_info info);
     static napi_value GetRssData(napi_env env, napi_callback_info info);
     static napi_value RegisterRssData(napi_env env, napi_callback_info info);
     static napi_value UnregisterRssData(napi_env env, napi_callback_info info);
+    static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifySessionRecoverStatus(napi_env env, napi_callback_info info);
@@ -103,6 +106,7 @@ public:
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
+    static napi_value SetAppDragResizeType(napi_env env, napi_callback_info info);
     static napi_value GetCustomDecorHeight(napi_env env, napi_callback_info info);
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
@@ -165,6 +169,7 @@ private:
     napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
     napi_value OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     napi_value OnSetScreenLocked(napi_env env, napi_callback_info info);
+    napi_value OnSetUserAuthPassed(napi_env env, napi_callback_info info);
     napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
     napi_value OnReportData(napi_env env, napi_callback_info info);
     napi_value OnGetRssData(napi_env env, napi_callback_info info);
@@ -174,12 +179,14 @@ private:
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
     napi_value OnNotifyStackEmpty(napi_env env, napi_callback_info info);
     napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
+    napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
+    napi_value OnSetAppDragResizeType(napi_env env, napi_callback_info info);
     napi_value OnGetCustomDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnSwitchFreeMultiWindow(napi_env env, napi_callback_info info);
     napi_value OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
@@ -236,6 +243,9 @@ private:
     void OnAbilityManagerCollaboratorRegistered();
     void RegisterRootSceneCallbacksOnSSManager();
     void RegisterSSManagerCallbacksOnRootScene();
+    void OnNotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
+    void RegisterNotifyAppUseControlListCallback();
 
     /*
      * PiP Window

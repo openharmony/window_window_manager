@@ -121,6 +121,26 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
     }
 }
 
+void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+    uiContent_->UpdateConfigurationSyncForAll(configuration);
+}
+
+void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    for (const auto& winPair : windowMap_) {
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
+    }
+}
+
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 {
     return surfaceNode_;
@@ -272,6 +292,33 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
 void WindowImpl::OnNewWant(const AAFwk::Want& want)
 {
     return;
+}
+
+WMError WindowImpl::SetUIContentByName(
+    const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "contentInfo: %{public}s", contentInfo.c_str());
+    if (uiContent_) {
+        uiContent_->Destroy();
+    }
+    std::unique_ptr<Ace::UIContent> uiContent;
+    if (ability != nullptr) {
+        uiContent = Ace::UIContent::Create(ability);
+    } else {
+        uiContent = Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    }
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "fail to SetUIContentByName");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent->InitializeByName(this, contentInfo, storage);
+    uiContent_ = std::move(uiContent);
+    NotifySetIgnoreSafeArea(isIgnoreSafeArea_);
+    UpdateViewportConfig();
+    if (contentInfoCallback_) {
+        contentInfoCallback_(contentInfo);
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -475,12 +522,12 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfiguration moveConfiguration)
 {
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
     return WMError::WM_OK;
 }
@@ -624,7 +671,7 @@ WMError WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListe
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::mutex> lock(globalMutex_);
@@ -632,7 +679,7 @@ WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListen
     return ret;
 }
 
-WMError WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::mutex> lock(globalMutex_);

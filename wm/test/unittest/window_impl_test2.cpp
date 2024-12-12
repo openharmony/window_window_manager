@@ -17,6 +17,7 @@
 #include "ability_context_impl.h"
 #include "display_manager_proxy.h"
 #include "mock_window_adapter.h"
+#include "scene_board_judgement.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
 #include "mock_uicontent.h"
@@ -593,24 +594,39 @@ HWTEST_F(WindowImplTest2, PrivacyMode01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
 
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(8).WillRepeatedly(Return(WMError::WM_OK));
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        window->SetPrivacyMode(true);
+        window->SetSystemPrivacyMode(true);
+        ASSERT_EQ(true, window->IsPrivacyMode());
 
-    window->SetPrivacyMode(true);
-    window->SetSystemPrivacyMode(true);
-    ASSERT_EQ(true, window->IsPrivacyMode());
+        window->SetPrivacyMode(true);
+        window->SetSystemPrivacyMode(false);
+        ASSERT_EQ(true, window->IsPrivacyMode());
 
-    window->SetPrivacyMode(true);
-    window->SetSystemPrivacyMode(false);
-    ASSERT_EQ(true, window->IsPrivacyMode());
+        window->SetPrivacyMode(false);
+        window->SetSystemPrivacyMode(true);
+        ASSERT_EQ(false, window->IsPrivacyMode());
 
-    window->SetPrivacyMode(false);
-    window->SetSystemPrivacyMode(true);
-    ASSERT_EQ(false, window->IsPrivacyMode());
+        window->SetPrivacyMode(false);
+        window->SetSystemPrivacyMode(false);
+        ASSERT_EQ(false, window->IsPrivacyMode());
+    } else {
+        window->SetPrivacyMode(true);
+        window->SetSystemPrivacyMode(true);
+        ASSERT_EQ(false, window->IsPrivacyMode());
 
-    window->SetPrivacyMode(false);
-    window->SetSystemPrivacyMode(false);
-    ASSERT_EQ(false, window->IsPrivacyMode());
+        window->SetPrivacyMode(true);
+        window->SetSystemPrivacyMode(false);
+        ASSERT_EQ(false, window->IsPrivacyMode());
+
+        window->SetPrivacyMode(false);
+        window->SetSystemPrivacyMode(true);
+        ASSERT_EQ(false, window->IsPrivacyMode());
+
+        window->SetPrivacyMode(false);
+        window->SetSystemPrivacyMode(false);
+        ASSERT_EQ(false, window->IsPrivacyMode());
+    }
 }
 
 /**
@@ -1469,6 +1485,24 @@ HWTEST_F(WindowImplTest2, NotifyWindowTransition, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Close());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest2, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    WindowImpl::UpdateConfigurationSyncForAll(configuration);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 }

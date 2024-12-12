@@ -1703,7 +1703,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | Smal
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(true));
     ASSERT_TRUE(window_->extensionWindowFlags_.hideNonSecureWindowsFlag);
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows02
  * @tc.desc: HideNonSecureWindows Test
@@ -1725,7 +1725,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | Smal
 
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows03
  * @tc.desc: HideNonSecureWindows Test
@@ -1736,7 +1736,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | Smal
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->HideNonSecureWindows(true));
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows04
  * @tc.desc: HideNonSecureWindows Test
@@ -1777,7 +1777,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, Function | SmallTes
     ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(true));
     ASSERT_TRUE(window_->extensionWindowFlags_.waterMarkFlag);
 }
- 
+
 /**
  * @tc.name: SetWaterMarkFlag02
  * @tc.desc: SetWaterMarkFlag Test
@@ -2147,6 +2147,20 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | 
     window_->uiContent_ = nullptr;
     ret = window_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
+{
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, window_);
+    window_->windowExtensionSessionSet_.insert(window_);
+    window_->UpdateConfigurationSyncForAll(configuration);
+    window_->windowExtensionSessionSet_.erase(window_);
 }
 }
 } // namespace Rosen
