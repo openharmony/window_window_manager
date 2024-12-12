@@ -2718,7 +2718,7 @@ void WindowSessionImpl::ClearVsyncStation()
 
 void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "called");
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     inputEventConsumer_ = inputEventConsumer;
 }
@@ -3359,7 +3359,7 @@ WMError WindowSessionImpl::RegisterTouchOutsideListener(const sptr<ITouchOutside
     bool isUpdate = false;
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_EVENT, "Start, window: name=%{public}s, id=%{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "listener is null");
@@ -3388,7 +3388,7 @@ WMError WindowSessionImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsi
     bool isUpdate = false;
     WMError ret = WMError::WM_OK;
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_EVENT, "Start, window: name=%{public}s, id=%{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "name=%{public}s, id=%{public}u",
         GetWindowName().c_str(), GetPersistentId());
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "listener is null");
@@ -3610,8 +3610,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
 
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-            TLOGI(WmsLogTag::WMS_EVENT, "Input id:%{public}d",
-                pointerEvent->GetId());
+            TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
         }
         if (!uiContent->ProcessPointerEvent(pointerEvent)) {
             TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");

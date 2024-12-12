@@ -1180,7 +1180,7 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
             pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,wid:%{public}u,"
             "pointId:%{public}d,sourceType:%{public}d", pointerEvent->GetId(), GetWindowId(),
             pointerEvent->GetPointerId(), pointerEvent->GetSourceType());
     }
@@ -1204,7 +1204,7 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
             keyEvent->MarkProcessed();
             return true;
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking:%{public}d wid:%{public}d",
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d wid:%{public}d",
             keyEvent->GetId(), keyEvent->GetAgentWindowId());
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
