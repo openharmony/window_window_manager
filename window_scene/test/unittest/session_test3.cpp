@@ -1329,6 +1329,25 @@ HWTEST_F(WindowSessionTest3, GetScreenId, Function | SmallTest | Level2)
     session_->sessionInfo_.screenId_ = 100;
     ASSERT_EQ(session_->GetScreenId(), 100);
 }
+
+/**
+ * @tc.name: SetFreezeImmediately
+ * @tc.desc: SetFreezeImmediately Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetFreezeImmediately, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    session_->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(session_->surfaceNode_, nullptr);
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+    session_->surfaceNode_->bufferAvailable_ = true;
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, true));
+    session_->surfaceNode_ = nullptr;
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
