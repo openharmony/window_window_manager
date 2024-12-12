@@ -774,10 +774,7 @@ void SceneSession::RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChange
 
 bool SceneSession::IsDialogWindow() const
 {
-    bool isDialogWindow = false;
-    auto property = GetSessionProperty();
-    isDialogWindow = WindowHelper::IsDialogWindow(property->GetWindowType());
-    return isDialogWindow;
+    return WindowHelper::IsDialogWindow(GetSessionProperty()->GetWindowType());
 }
 
 SubWindowModalType SceneSession::GetSubWindowModalType() const
