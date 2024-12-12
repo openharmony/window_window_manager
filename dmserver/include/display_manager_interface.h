@@ -207,6 +207,11 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+        uint32_t& actualRefreshRate)
+    {
+        return DMError::DM_OK;
+    }
 };
 } // namespace OHOS::Rosen
 

@@ -240,9 +240,10 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_HANDWRITING = 1 << 6,
-    WINDOW_FLAG_IS_TOAST = 1 << 7,
-    WINDOW_FLAG_END = 1 << 8,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
+    WINDOW_FLAG_HANDWRITING = 1 << 7,
+    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_END = 1 << 9,
 };
 
 /**
@@ -779,6 +780,19 @@ enum class MaximizePresentation {
     ENTER_IMMERSIVE = 2,        // immersiveStateEnable will be set as true
     // immersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
+};
+
+enum class ModalityType : uint8_t {
+    WINDOW_MODALITY,
+    APPLICATION_MODALITY,
+};
+
+struct SubWindowOptions {
+    std::string title;
+    bool decorEnabled = false;
+    bool isModal = false;
+    bool isTopmost = false;
+    ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
 }
 }

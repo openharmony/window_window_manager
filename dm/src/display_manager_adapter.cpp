@@ -809,4 +809,11 @@ DMError DisplayManagerAdapter::SetVirtualScreenSecurityExemption(ScreenId screen
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     return displayManagerServiceProxy_->SetVirtualScreenSecurityExemption(screenId, pid, windowIdList);
 }
+
+DMError ScreenManagerAdapter::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+    uint32_t& actualRefreshRate)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->SetVirtualScreenMaxRefreshRate(id, refreshRate, actualRefreshRate);
+}
 } // namespace OHOS::Rosen

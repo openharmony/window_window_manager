@@ -2090,6 +2090,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetDisplayIdByWindowId, Function | S
     int res = stub_->HandleGetDisplayIdByWindowId(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleIsPcOrPadFreeMultiWindowMode
+ * @tc.desc: test HandleIsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleIsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleIsPcOrPadFreeMultiWindowMode(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }
