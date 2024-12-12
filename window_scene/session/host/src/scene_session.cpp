@@ -95,7 +95,7 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
 
 SceneSession::~SceneSession()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
 }
 
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
@@ -4581,7 +4581,7 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->isTerminating_) {
-            TLOGE(WmsLogTag::WMS_LIFE, "TerminateSession: is terminating, return!");
+            TLOGE(WmsLogTag::WMS_LIFE, "is terminating, return!");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
