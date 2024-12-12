@@ -941,7 +941,6 @@ int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel&
         return ERR_INVALID_DATA;
     }
     WMError ret = SetGestureBackEnabled(isEnabled);
-    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 

@@ -2364,7 +2364,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (!windowSystemConfig_.IsPcWindow()) {
+    if (windowSystemConfig_.uiType_ != UI_TYPE_PC) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2387,7 +2387,7 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (!windowSystemConfig_.IsPcWindow()) {
+    if (windowSystemConfig_.uiType_ != UI_TYPE_PC) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2436,16 +2436,6 @@ void WindowSceneSessionImpl::StartMove()
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
     return;
-}
-
-bool WindowSceneSessionImpl::IsStartMoving()
-{
-    bool isMoving = false;
-    if (auto hostSession = GetHostSession()) {
-        isMoving = hostSession->IsStartMoving();
-    }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
-    return isMoving;
 }
 
 WMError WindowSceneSessionImpl::Close()
