@@ -593,14 +593,12 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
             TLOGNE(WmsLogTag::WMS_PC, "this listener or env is nullptr");
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        HandleScope handleScope(env);
         bool value = terminateCloseProcess;
         napi_value returnValue = thisListener->CallJsMethod(WINDOW_STAGE_CLOSE_CB.c_str(), nullptr, 0);
         if (napi_get_value_bool(env, returnValue, &value) == napi_ok) {
             terminateCloseProcess = value;
         }
-        napi_close_handle_scope(env, scope);
     };
 
     if (!eventHandler_) {

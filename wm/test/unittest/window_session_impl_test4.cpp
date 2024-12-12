@@ -1552,7 +1552,6 @@ HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, Function | SmallTest |
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
 
     bool terminateCloseProcess = false;
