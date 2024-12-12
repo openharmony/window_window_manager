@@ -378,7 +378,7 @@ void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
     auto surfaceId = surfaceNode->GetId();
     TLOGI(WmsLogTag::WMS_EVENT, "wid:%{public}d sid:%{public}" PRIu64 " uiExtWindowInfo:%{public}d",
         windowInfo.id, surfaceId, static_cast<int>(windowInfo.uiExtentionWindowInfo.size()));
-    for (auto uiExtWindowInfo : windowInfo.uiExtentionWindowInfo) {
+    for (const auto& uiExtWindowInfo : windowInfo.uiExtentionWindowInfo) {
         auto str = DumpWindowInfo(uiExtWindowInfo);
         str = "sec:" + std::to_string(uiExtWindowInfo.privacyUIFlag) + " " + str;
         TLOGI(WmsLogTag::WMS_EVENT, "uiExtWindowInfo:%{public}s", str.c_str());
