@@ -349,6 +349,7 @@ private:
         const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession);
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
+    void SetScreenCorrection();
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
