@@ -4553,10 +4553,6 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
 
 bool WindowSceneSessionImpl::CheckIsSystemDensityChange(const sptr<DisplayInfo>& displayInfo)
 {
-    if (GetDefaultDensityEnabled()) {
-        TLOGD(WmsLogTag::DEFAULT, "setDefaultDensity enabled");
-        return false;
-    }
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "displayInfo nullptr");
         return false;
