@@ -1912,58 +1912,58 @@ HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: SetSessionModalTypeChangeCallback
- * @tc.desc: SetSessionModalTypeChangeCallback
+ * @tc.name: RegisterSubModalTypeChangeCallback
+ * @tc.desc: RegisterSubModalTypeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetSessionModalTypeChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RegisterSubModalTypeChangeCallback, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetSessionModalTypeChangeCallback";
-    info.bundleName_ = "SetSessionModalTypeChangeCallback";
+    info.abilityName_ = "RegisterSubModalTypeChangeCallback";
+    info.bundleName_ = "RegisterSubModalTypeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+    sceneSession->RegisterSubModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
         return;
     });
-    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
+    EXPECT_NE(sceneSession->onSubModalTypeChange_, nullptr);
 }
 
 /**
- * @tc.name: OnSessionModalTypeChange
- * @tc.desc: OnSessionModalTypeChange
+ * @tc.name: NotifySubModalTypeChange
+ * @tc.desc: NotifySubModalTypeChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, OnSessionModalTypeChange, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, NotifySubModalTypeChange, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnSessionModalTypeChange";
-    info.bundleName_ = "OnSessionModalTypeChange";
+    info.abilityName_ = "NotifySubModalTypeChange";
+    info.bundleName_ = "NotifySubModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+    sceneSession->RegisterSubModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
         return;
     });
-    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
-    EXPECT_EQ(sceneSession->OnSessionModalTypeChange(SubWindowModalType::TYPE_WINDOW_MODALITY), WSError::WS_OK);
+    EXPECT_NE(sceneSession->onSubModalTypeChange_, nullptr);
+    EXPECT_EQ(sceneSession->NotifySubModalTypeChange(SubWindowModalType::TYPE_WINDOW_MODALITY), WSError::WS_OK);
 }
 
 /**
- * @tc.name: SetMainSessionModalTypeChangeCallback
- * @tc.desc: SetMainSessionModalTypeChangeCallback
+ * @tc.name: RegisterMainModalTypeChangeCallback
+ * @tc.desc: RegisterMainModalTypeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetMainSessionModalTypeChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RegisterMainModalTypeChangeCallback, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetMainSessionModalTypeChangeCallback";
-    info.bundleName_ = "SetMainSessionModalTypeChangeCallback";
+    info.abilityName_ = "RegisterMainModalTypeChangeCallback";
+    info.bundleName_ = "RegisterMainModalTypeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+    sceneSession->RegisterMainModalTypeChangeCallback([](bool isModal) {
         return;
     });
-    EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
+    EXPECT_NE(sceneSession->onMainModalTypeChange_, nullptr);
 }
 
 /**
