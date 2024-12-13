@@ -800,6 +800,298 @@ HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, Function | SmallTest |
     bool tentMode = ScreenSessionManager::GetInstance().GetTentMode();
     ASSERT_EQ(tentMode, false);
 }
+
+/**
+ * @tc.name: IsNumber01
+ * @tc.desc: test function : IsNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, IsNumber01, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    
+    bool ret = dump->IsNumber("");
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsNumber02
+ * @tc.desc: test function : IsNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, IsNumber02, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    
+    bool ret = dump->IsNumber("123");
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsNumber03
+ * @tc.desc: test function : IsNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, IsNumber03, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    
+    bool ret = dump->IsNumber("123aaa");
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: ExcuteInjectCmd201
+ * @tc.desc: test function : ExcuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExcuteInjectCmd201, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-ontent"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExcuteDumpCmd2();
+    ASSERT_EQ(dumper1->fd_, 1);
+}
+
+/**
+ * @tc.name: ExcuteInjectCmd202
+ * @tc.desc: test function : ExcuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExcuteInjectCmd202, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-hoverstatus"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExcuteDumpCmd2();
+    ASSERT_EQ(dumper1->fd_, 1);
+}
+
+/**
+ * @tc.name: ExcuteInjectCmd203
+ * @tc.desc: test function : ExcuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExcuteInjectCmd203, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-supertrans"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExcuteDumpCmd2();
+    ASSERT_EQ(dumper1->fd_, 1);
+}
+
+/**
+ * @tc.name: ExcuteInjectCmd204
+ * @tc.desc: test function : ExcuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExcuteInjectCmd204, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-posture"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExcuteDumpCmd2();
+    ASSERT_EQ(dumper1->fd_, 1);
+}
+
+/**
+ * @tc.name: ExcuteInjectCmd205
+ * @tc.desc: test function : ExcuteInjectCmd2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ExcuteInjectCmd205, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-registerhall"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->ExcuteDumpCmd2();
+    ASSERT_EQ(dumper1->fd_, 1);
+}
+
+/**
+ * @tc.name: DumpMultiUserInfo
+ * @tc.desc: test function : DumpMultiUserInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, DumpMultiUserInfo, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    std::vector<int32_t> oldScbPids = {1, 2, 3};
+    int32_t userId = 1;
+    int32_t scbPid = 1;
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->DumpMultiUserInfo(oldScbPids, userId, scbPid);
+    ASSERT_EQ(dumper1->fd_, std::string());
+}
+
+/**
+ * @tc.name: DumpFoldCreaseRegion
+ * @tc.desc: test function : DumpFoldCreaseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, DumpFoldCreaseRegion, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->DumpFoldCreaseRegion();
+    ASSERT_EQ(dumper1->fd_, 1);
+}
+
+/**
+ * @tc.name: SetHallAndPostureValue
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureValue, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper1 = new ScreenSessionDumper(fd, args);
+    dumper1->SetHallAndPostureValue("-hoverstatus,-1");
+    ASSERT_EQ(dumper1->fd_, 1);
+
+    fd = 1;
+    args = {u"-posture"};
+    sptr<ScreenSessionDumper> dumper2 = new ScreenSessionDumper(fd, args);
+    dumper2->SetHallAndPostureValue("-hoverstatus,-string1,string2");
+    ASSERT_EQ(dumper2->fd_, 1);
+}
+
+/**
+ * @tc.name: SetHallAndPostureStatus01
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus01, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetHallAndPostureStatus("");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetHallAndPostureStatus02
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus02, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetHallAndPostureStatus("-registerhall,a,a");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetHallAndPostureStatus03
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus03, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetHallAndPostureStatus("-registerhall,1");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSuperFoldStatusChange01
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange01, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange01("");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSuperFoldStatusChange02
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange02, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange01("-supertrans,");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSuperFoldStatusChange03
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange03, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange01("-supertrans,a");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSuperFoldStatusChange04
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange04, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange01("-supertrans,ab");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSuperFoldStatusChange05
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange05, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange01("-supertrans,-1");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSuperFoldStatusChange06
+ * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange06, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange01("-supertrans,1");
+    ASSERT_EQ(dumper->fd_, 1);
+}
 }
 }
 }
