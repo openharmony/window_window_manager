@@ -64,6 +64,7 @@ public:
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
+    bool IsStartMoving() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
@@ -163,7 +164,12 @@ public:
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+
+    /*
+     * PC Window
+     */
     bool IsPcOrPadCapabilityEnabled() const override;
+    bool IsPcOrPadFreeMultiWindowMode() const override;
 
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;

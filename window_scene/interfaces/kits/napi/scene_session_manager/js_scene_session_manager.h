@@ -42,6 +42,7 @@ enum class ListenerFunctionType : uint32_t {
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
     CLOSE_TARGET_FLOAT_WINDOW_CB,
     START_PIP_FAILED_CB,
+    NOTIFY_APP_USE_CONTROL_LIST_CB
 };
 
 class JsSceneSessionManager final {
@@ -113,6 +114,7 @@ public:
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value IsScbCoreEnabled(napi_env env, napi_callback_info info);
     static napi_value RemoveAppInfo(napi_env env, napi_callback_info info);
+    static napi_value GetWindowPid(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -176,6 +178,7 @@ private:
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
     napi_value OnRemoveAppInfo(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowPid(napi_env env, napi_callback_info info);
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
@@ -208,6 +211,9 @@ private:
     void OnAbilityManagerCollaboratorRegistered();
     void RegisterRootSceneCallbacksOnSSManager();
     void RegisterSSManagerCallbacksOnRootScene();
+    void OnNotifyAppUseControlList(
+        ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
+    void RegisterNotifyAppUseControlListCallback();
 
     /*
      * PiP Window

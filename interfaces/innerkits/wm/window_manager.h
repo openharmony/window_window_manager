@@ -240,6 +240,48 @@ public:
 };
 
 /**
+ * @class AppUseControlInfo
+ *
+ * @brief Window info used for AppUseControlInfo.
+ */
+struct AppUseControlInfo : public Parcelable {
+    /**
+     * @brief Marshalling AppUseControlInfo.
+     *
+     * @param parcel Package of AppUseControlInfo.
+     * @return True means marshall success, false means marshall failed.
+     */
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteString(bundleName_) &&
+               parcel.WriteInt32(appIndex_) &&
+               parcel.WriteBool(isNeedControl_);
+    }
+
+    /**
+     * @brief Unmarshalling AppUseControlInfo.
+     *
+     * @param parcel Package of AppUseControlInfo.
+     * @return AppUseControlInfo object.
+     */
+    static AppUseControlInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new AppUseControlInfo();
+        if (!parcel.ReadString(info->bundleName_) ||
+            !parcel.ReadInt32(info->appIndex_) ||
+            !parcel.ReadBool(info->isNeedControl_)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    std::string bundleName_ = "";
+    int32_t appIndex_ = 0;
+    bool isNeedControl_ = false;
+};
+
+/**
  * @class UnreliableWindowInfo
  *
  * @brief Unreliable Window Info.
@@ -748,6 +790,19 @@ public:
      * @return @return WM_OK means get window style success, others means failed.
      */
     WindowStyleType GetWindowStyleType();
+
+    /**
+     * @brief Get window ids by coordinate.
+     *
+     * @param displayId display id
+     * @param windowNumber indicates the number of query windows
+     * @param x x-coordinate of the window
+     * @param y y-coordinate of the window
+     * @param windowIds array of window id
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+        int32_t x, int32_t y, std::vector<int32_t>& windowIds) const;
 
     /**
      * @brief Release screen lock of foreground sessions.
