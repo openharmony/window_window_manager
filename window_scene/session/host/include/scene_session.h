@@ -21,6 +21,8 @@
 #include "session/host/include/pc_fold_screen_controller.h"
 #include "vsync_station.h"
 #include "wm_common.h"
+#include <modifier/rs_property.h>
+#include <modifier/rs_property_modifier.h>
 
 namespace OHOS::PowerMgr {
 class RunningLock;
@@ -932,6 +934,8 @@ private:
         bool isGlobal = false, bool needFlush = true);
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
+    std::shard_ptr<Rosen::RsProperty<bool>> rSBehindWindowFilterEnabledProperty_;
+    std::shard_ptr<Rosen::RSBehindWindowFilterEnabledModifier> rSBehindWindowFilterEnabledModifier_;
 
     /**
      * Window Immersive
