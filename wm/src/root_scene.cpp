@@ -152,6 +152,24 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
     }
 }
 
+void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+    uiContent_->UpdateConfigurationSyncForAll(configuration);
+}
+
+void RootScene::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "in");
+    if (staticRootScene_ != nullptr) {
+        staticRootScene_->UpdateConfigurationSync(configuration);
+    }
+}
+
 void RootScene::RegisterInputEventListener()
 {
     if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uiContent_.get()))) {
@@ -234,6 +252,55 @@ void RootScene::RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByT
 void RootScene::RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback)
 {
     updateRootSceneRectCallback_ = std::move(callback);
+}
+
+void RootScene::RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback)
+{
+    updateRootSceneAvoidAreaCallback_ = std::move(callback);
+}
+
+WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    bool firstInserted = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (avoidAreaChangeListeners_.find(listener) == avoidAreaChangeListeners_.end()) {
+            TLOGI(WmsLogTag::WMS_IMMS, "register success.");
+            avoidAreaChangeListeners_.insert(listener);
+            firstInserted = true;
+        }
+    }
+    if (firstInserted) {
+        updateRootSceneAvoidAreaCallback_();
+    }
+    return WMError::WM_OK;
+}
+
+WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
+    std::lock_guard<std::mutex> lock(mutex_);
+    avoidAreaChangeListeners_.erase(listener);
+    return WMError::WM_OK;
+}
+
+void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}d, area: %{public}s.", type, avoidArea->ToString().c_str());
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto& listener : avoidAreaChangeListeners_) {
+        if (listener != nullptr) {
+            listener->OnAvoidAreaChanged(*avoidArea, type);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

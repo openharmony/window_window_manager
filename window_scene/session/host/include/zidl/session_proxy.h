@@ -54,8 +54,9 @@ public:
     WSError OnRestoreMainWindow() override;
     WSError OnSetWindowRectAutoSave(bool enabled) override;
     WSError RaiseToAppTop() override;
-    WSError UpdateSessionRect(const WSRect &rect, SizeChangeReason reason, bool isGlobal = false,
-        bool isFromMoveToGlobal = false) override;
+    WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
+        bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
+        const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
@@ -104,14 +105,14 @@ public:
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionDetachToDisplay() override;
-
-    WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
-    WSError OnMainSessionModalTypeChange(bool isModal) override;
     
     /**
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
+
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
+    WSError NotifyMainModalTypeChange(bool isModal) override;
 
      /**
       * Starting Window

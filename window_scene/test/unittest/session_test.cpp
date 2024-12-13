@@ -198,6 +198,68 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, Function | SmallTest |
 }
 
 /**
+ * @tc.name: UpdateClientDisplayId01
+ * @tc.desc: UpdateClientDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateClientDisplayId01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionStage_ = nullptr;
+    session_->lastUpdatedDisplayId_ = 0;
+    DisplayId updatedDisplayId = 0;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    updatedDisplayId = 10;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_ERROR_NULLPTR);
+    EXPECT_NE(updatedDisplayId, session_->lastUpdatedDisplayId_);
+
+    ASSERT_NE(mockSessionStage_, nullptr);
+    session_->sessionStage_ = mockSessionStage_;
+    updatedDisplayId = 0;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    updatedDisplayId = 100;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+}
+
+/**
+ * @tc.name: UpdateClientRectPosYAndDisplayId01
+ * @tc.desc: UpdateClientRectPosYAndDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(session_->GetScreenId(), 0);
+    session_->GetSessionProperty()->SetIsSystemKeyboard(false);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = {0, 0, 0, 0};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = {0, 100, 0, 0};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 100);
+
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    rect = {0, 1000, 100, 100};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 1000);
+    rect = {0, 2000, 100, 100};
+    auto rect2 = rect;
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, rect2.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_ / 2);
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: update rect
  * @tc.type: FUNC
@@ -313,7 +375,12 @@ HWTEST_F(WindowSessionTest, LifeCycleTask, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, SetSessionProperty01, Function | SmallTest | Level2)
 {
-    ASSERT_EQ(session_->SetSessionProperty(nullptr), WSError::WS_OK);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    property->SetIsNeedUpdateWindowMode(true);
+    session_->SetScreenId(233);
+    session_->SetSessionProperty(property);
+    ASSERT_EQ(session_->SetSessionProperty(property), WSError::WS_OK);
 }
 
 /**
@@ -458,16 +525,13 @@ HWTEST_F(WindowSessionTest, RaiseToAppTop01, Function | SmallTest | Level2)
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetParentSession(parentSession);
-    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
     result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(parentSession->GetUIStateDirty());
 
     parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    NotifyRaiseToTopFunc onRaiseToTop_ = []() {};
-    sceneSessionChangeCallBack->onRaiseToTop_ = onRaiseToTop_;
+    NotifyRaiseToTopFunc onRaiseToTop = []() {};
+    sceneSession->onRaiseToTop_ = onRaiseToTop;
     result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_TRUE(parentSession->GetUIStateDirty());
@@ -518,17 +582,13 @@ HWTEST_F(WindowSessionTest, OnSessionEvent01, Function | SmallTest | Level2)
     auto result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SceneSession::SessionChangeCallback> sceneSessionChangeCallBack =
-        new (std::nothrow) SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSessionChangeCallBack, nullptr);
-    sceneSession->RegisterSessionChangeCallback(sceneSessionChangeCallBack);
     result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 
     int resultValue = 0;
     NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId, SessionEventParam param)
     { resultValue = 1; };
-    sceneSessionChangeCallBack->OnSessionEvent_ = onSessionEvent_;
+    sceneSession->onSessionEvent_ = onSessionEvent_;
     result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1003,19 +1063,6 @@ HWTEST_F(WindowSessionTest, SetFocusable02, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest, GetFocusable01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = new WindowSessionProperty();
-    ASSERT_EQ(true, session_->GetFocusable());
-}
-
-/**
- * @tc.name: GetFocusable02
- * @tc.desc: property_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, GetFocusable02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->property_ = nullptr;
     ASSERT_EQ(true, session_->GetFocusable());
 }
 
@@ -1157,8 +1204,7 @@ HWTEST_F(WindowSessionTest, SetBrightness01, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    session_->property_ = nullptr;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetBrightness(0.1f));
+    ASSERT_EQ(WSError::WS_OK, session_->SetBrightness(0.1f));
 }
 
 /**
@@ -1170,7 +1216,6 @@ HWTEST_F(WindowSessionTest, SetBrightness02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_DISCONNECT;
-    session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetBrightness(0.1f));
 }
 
@@ -1285,7 +1330,6 @@ HWTEST_F(WindowSessionTest, NotifyScreenshot, Function | SmallTest | Level2)
     session_->sessionStage_ = mockSessionStage_;
     session_->NotifyScreenshot();
 
-    session_->property_ = new WindowSessionProperty();
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
 }
 
@@ -1527,10 +1571,6 @@ HWTEST_F(WindowSessionTest, UpdateMaximizeMode, Function | SmallTest | Level2)
     session_->SetSessionProperty(property);
     ret = session_->UpdateMaximizeMode(false);
     ASSERT_EQ(ret, WSError::WS_OK);
-
-    session_->SetSessionProperty(nullptr);
-    ret = session_->UpdateMaximizeMode(false);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -1578,13 +1618,7 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
-    session_->SetSessionProperty(nullptr);
-    std::vector<Rect> touchHotAreas;
-    session_->SetTouchHotAreas(touchHotAreas);
-    ASSERT_EQ(session_->property_, nullptr);
-
-    session_->property_ = new WindowSessionProperty();
-    touchHotAreas = session_->property_->touchHotAreas_;
+    std::vector<Rect> touchHotAreas = session_->property_->touchHotAreas_;
     session_->property_->SetTouchHotAreas(touchHotAreas);
     ASSERT_EQ(touchHotAreas, session_->property_->touchHotAreas_);
 }
@@ -1627,13 +1661,9 @@ HWTEST_F(WindowSessionTest, ProcessBackEvent, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, Function | SmallTest | Level2)
 {
-    session_->SetSessionProperty(nullptr);
-    session_->GetSessionRequestRect();
-    ASSERT_EQ(session_->property_, nullptr);
-
     WSRect rect = {0, 0, 0, 0};
     session_->SetSessionRequestRect(rect);
-    ASSERT_EQ(session_->property_, nullptr);
+    ASSERT_EQ(session_->GetSessionRequestRect(), rect);
 }
 
 /**
@@ -1646,6 +1676,47 @@ HWTEST_F(WindowSessionTest, SetSessionRect01, Function | SmallTest | Level2)
     WSRect rect = session_->GetSessionRect();
     session_->SetSessionRect(rect);
     ASSERT_EQ(rect, session_->winRect_);
+}
+
+/**
+ * @tc.name: UpdateClientRectPosYAndDisplayId02
+ * @tc.desc: UpdateClientRectPosYAndDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(session_->GetScreenId(), 0);
+    session_->GetSessionProperty()->SetIsSystemKeyboard(false);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::UNKNOWN,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = {0, 0, 0, 0};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = {0, 100, 0, 0};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 100);
+}
+
+/**
+ * @tc.name: UpdateClientRectPosYAndDisplayId03
+ * @tc.desc: UpdateClientRectPosYAndDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId03, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(session_->GetScreenId(), 0);
+    session_->GetSessionProperty()->SetIsSystemKeyboard(true);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    WSRect rect = {0, 1000, 100, 100};
+    session_->UpdateClientRectPosYAndDisplayId(rect);
+    EXPECT_EQ(rect.posY_, 1000);
 }
 }
 } // namespace Rosen

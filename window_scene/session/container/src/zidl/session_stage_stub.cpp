@@ -123,6 +123,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSplitButtonVisible(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM):
             return HandleSetEnableDragBySystem(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_FULLSCREEN_WATERFALL_MODE):
+            return HandleSetFullScreenWaterfallMode(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -393,7 +395,7 @@ int SessionStageStub::HandleNotifySessionForeground(MessageParcel& data, Message
 
 int SessionStageStub::HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "called");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called");
     bool fullScreen = data.ReadBool();
     NotifySessionFullScreen(fullScreen);
     return ERR_NONE;
@@ -411,7 +413,7 @@ int SessionStageStub::HandleNotifySessionBackground(MessageParcel& data, Message
 
 int SessionStageStub::HandleUpdateTitleInTargetPos(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("HandleUpdateTitleInTargetPos!");
+    TLOGD(WmsLogTag::WMS_DECOR, "called");
     bool isShow = data.ReadBool();
     int32_t height = data.ReadInt32();
     WSError errCode = UpdateTitleInTargetPos(isShow, height);
@@ -496,17 +498,16 @@ int SessionStageStub::HandleNotifyDisplayMove(MessageParcel& data, MessageParcel
 
 int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "HandleSwitchFreeMultiWindow!");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called!");
     bool enable = data.ReadBool();
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
-
     return ERR_NONE;
 }
 
 int SessionStageStub::HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::DEFAULT, "Called");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Called");
     sptr<IRemoteObject> uiContentRemoteObj;
     WSError errCode = GetUIContentRemoteObj(uiContentRemoteObj);
     reply.WriteRemoteObject(uiContentRemoteObj);
@@ -558,7 +559,7 @@ int SessionStageStub::HandleNotifyCompatibleModeEnableInPad(MessageParcel& data,
 
 int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "HandleSetUniqueVirtualPixelRatio!");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "HandleSetUniqueVirtualPixelRatio!");
     bool useUniqueDensity = data.ReadBool();
     float densityValue = data.ReadFloat();
     SetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
@@ -677,6 +678,18 @@ int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessagePa
         return ERR_INVALID_DATA;
     }
     SetEnableDragBySystem(enableDrag);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetFullScreenWaterfallMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool isWaterfallMode = false;
+    if (!data.ReadBool(isWaterfallMode)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isWaterfallMode failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetFullScreenWaterfallMode(isWaterfallMode);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -467,7 +467,11 @@ void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
 
 WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+<<<<<<< HEAD
     TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+=======
+    TLOGI(WmsLogTag::WMS_UIEXT, "Notify dump, persistenId=%{public}d", GetPersistentId());
+>>>>>>> upgrade/master
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }

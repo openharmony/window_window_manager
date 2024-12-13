@@ -277,6 +277,7 @@ void ScreenSessionDumper::ShowAllScreenInfo()
         DumpCutoutInfoById(screenId);
         DumpScreenInfoById(screenId);
         DumpScreenPropertyById(screenId);
+        DumpFoldCreaseRegion();
     }
 }
 
@@ -320,6 +321,25 @@ void ScreenSessionDumper::DumpTentMode()
     }
     oss << std::left << std::setw(LINE_WIDTH) << "TentMode: "
         << status << std::endl;
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpFoldCreaseRegion()
+{
+    std::ostringstream oss;
+    auto creaseRegion = ScreenSessionManager::GetInstance().GetCurrentFoldCreaseRegion();
+    if (creaseRegion == nullptr) {
+        TLOGE(WmsLogTag::DMS, "creaseRegion is nullptr.");
+        return;
+    }
+    auto creaseRects = creaseRegion->GetCreaseRects();
+    if (creaseRects.empty()) {
+        TLOGE(WmsLogTag::DMS, "current crease region is null");
+        return;
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "CurrentCreaseRects<X, Y, W, H>: "
+        << creaseRects[0].posX_ << ", " << creaseRects[0].posY_ << ", "
+        << creaseRects[0].width_ << ", " << creaseRects[0].height_ << std::endl;
     dumpInfo_.append(oss.str());
 }
 

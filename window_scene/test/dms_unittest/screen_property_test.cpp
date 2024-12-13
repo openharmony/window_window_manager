@@ -54,6 +54,70 @@ HWTEST_F(ScreenPropertyTest, SetScreenRotation, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateDeviceRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, UpdateDeviceRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateDeviceRotation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    Rotation ret = Rotation::ROTATION_0;
+    Rotation rotation = Rotation::ROTATION_0;
+    property->UpdateDeviceRotation(rotation);
+    ret = property->GetDeviceRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_90;
+    property->UpdateDeviceRotation(rotation);
+    ret = property->GetDeviceRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_180;
+    property->UpdateDeviceRotation(rotation);
+    ret = property->GetDeviceRotation();
+    ASSERT_EQ(ret, rotation);
+
+    rotation = Rotation::ROTATION_270;
+    property->UpdateDeviceRotation(rotation);
+    ret = property->GetDeviceRotation();
+    ASSERT_EQ(ret, rotation);
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: UpdateDeviceRotation end";
+}
+
+/**
+ * @tc.name: SetDeviceOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetDeviceOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDeviceOrientation start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    DisplayOrientation ret = DisplayOrientation::PORTRAIT;
+    DisplayOrientation displayOrientation = DisplayOrientation::PORTRAIT;
+    property->SetDeviceOrientation(displayOrientation);
+    ret = property->GetDeviceOrientation();
+    ASSERT_EQ(ret, displayOrientation);
+
+    displayOrientation = DisplayOrientation::LANDSCAPE;
+    property->SetDeviceOrientation(displayOrientation);
+    ret = property->GetDeviceOrientation();
+    ASSERT_EQ(ret, displayOrientation);
+
+    displayOrientation = DisplayOrientation::PORTRAIT_INVERTED;
+    property->SetDeviceOrientation(displayOrientation);
+    ret = property->GetDeviceOrientation();
+    ASSERT_EQ(ret, displayOrientation);
+
+    displayOrientation = DisplayOrientation::LANDSCAPE_INVERTED;
+    property->SetDeviceOrientation(displayOrientation);
+    ret = property->GetDeviceOrientation();
+    ASSERT_EQ(ret, displayOrientation);
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetDeviceOrientation end";
+}
+
+/**
  * @tc.name: UpdateVirtualPixelRatio
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -540,6 +604,40 @@ HWTEST_F(ScreenPropertyTest, SetStartPosition, Function | SmallTest | Level2)
     ASSERT_EQ(100, property->GetStartX());
     ASSERT_EQ(200, property->GetStartY());
     property->SetStartPosition(retx_copy, rety_copy);
+}
+
+/**
+ * @tc.name: SetScreenShape
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetScreenShape, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenShape start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    ScreenShape screenshape = ScreenShape::ROUND;
+    property->SetScreenShape(screenshape);
+    ASSERT_EQ(property->screenShape_, screenshape);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: SetScreenShape end";
+}
+
+/**
+ * @tc.name: GetScreenShape
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, GetScreenShape, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenShape start";
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    ScreenShape screenshape = ScreenShape::ROUND;
+    property->SetScreenShape(screenshape);
+    ASSERT_EQ(property->GetScreenShape(), screenshape);
+    delete property;
+    GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenShape end";
 }
 } // namespace
 } // namespace Rosen

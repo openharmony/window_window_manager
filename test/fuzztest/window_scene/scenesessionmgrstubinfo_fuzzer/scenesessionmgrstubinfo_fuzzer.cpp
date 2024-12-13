@@ -105,6 +105,9 @@ void SceneSessionMgrDumpTestCode(MessageParcel& parcel)
     parcel.RewindRead(0);
     SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
         SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT), parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE), parcel, reply, option);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)

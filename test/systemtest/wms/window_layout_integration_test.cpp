@@ -63,14 +63,14 @@ namespace {
 
 /**
  * @tc.name: moveWindowTo01
- * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 2106
+ * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
 HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("moveWindowTo01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -290,14 +290,14 @@ HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
 
 /**
  * @tc.name: resize01
- * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2106
+ * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
 HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -443,14 +443,14 @@ HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
 
 /**
  * @tc.name: resize05
- * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2106
+ * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2107
  * @tc.type: FUNC
  */
 HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("resize05");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -727,15 +727,15 @@ HWTEST_F(WindowLayoutTest, ResizeDataRoute, Function | MediumTest | Level3)
 }
 
 /**
- * @tc.name: FixRectByAspectRatio
- * @tc.desc: test FixRectByAspectRatio
+ * @tc.name: AdjustRectByAspectRatio
+ * @tc.desc: test AdjustRectByAspectRatio
  * @tc.type: FUNC
  */
-HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level0)
+HWTEST_F(WindowLayoutTest, AdjustRectByAspectRatio, Function | MediumTest | Level0)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::FixRectByAspectRatio begin ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::AdjustRectByAspectRatio begin ###");
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("FixRectByAspectRatio");
+    option->SetWindowName("AdjustRectByAspectRatio");
     option->SetWindowType(WindowType::APP_WINDOW_BASE);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -775,12 +775,12 @@ HWTEST_F(WindowLayoutTest, FixRectByAspectRatio, Function | MediumTest | Level0)
     WSError wsRet2 = session->UpdateSessionRect(wsRect, SizeChangeReason::RESIZE, false);
     EXPECT_EQ(WSError::WS_OK, wsRet2);
     usleep(WAIT_SERVERAL_FRAMES);
-    WSError wsRet3 = session->UpdateRect(wsRect, SizeChangeReason::RESIZE, "FixRectByAspectRatio", nullptr);
+    WSError wsRet3 = session->UpdateRect(wsRect, SizeChangeReason::RESIZE, "AdjustRectByAspectRatio", nullptr);
     EXPECT_EQ(WSError::WS_OK, wsRet3);
     usleep(WAIT_SERVERAL_FRAMES);
     WSError wsRet4 = session->SetAspectRatio(ratio);
     EXPECT_EQ(WSError::WS_OK, wsRet4);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::FixRectByAspectRatio end ###");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "### WindowLayoutTest::AdjustRectByAspectRatio end ###");
 }
 
 }
