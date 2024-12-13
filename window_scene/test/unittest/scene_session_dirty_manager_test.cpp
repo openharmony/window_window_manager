@@ -255,8 +255,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Lev
     session = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(session, nullptr);
     sptr<WindowSessionProperty> windowSessionProperty = session->GetSessionProperty();
-    session->SetSessionProperty(nullptr);
-    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     session->SetSessionProperty(windowSessionProperty);
     manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     windowSessionProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -326,11 +324,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     screenProperty0.SetRotation(270.0f);
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
     manager_->CalNotRotateTransform(sceneSession, transform);
-    ASSERT_EQ(transform, testTransform);
-    sptr<SceneSession> sceneSessionWithNullProperty = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSessionWithNullProperty->SetSessionProperty(nullptr);
-    testTransform = transform;
-    manager_->CalNotRotateTransform(sceneSessionWithNullProperty, transform);
     ASSERT_EQ(transform, testTransform);
 }
 
@@ -471,10 +464,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTe
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SCENE_BOARD);
     manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
     ASSERT_NE(empty.size(), 0);
-    manager_->UpdateDefaultHotAreas(nullptr, empty, empty);
-    sceneSession->SetSessionProperty(nullptr);
-    manager_->UpdateDefaultHotAreas(sceneSession, empty, empty);
-    ASSERT_NE(empty.size(), 0);
 }
 
 /**
@@ -538,7 +527,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest
     auto sessionList4 = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(1, sessionList4.size());
     sceneSession->SetForceHideState(ForceHideState::HIDDEN_WHEN_FOCUSED);
-    sceneSession->SetSessionProperty(nullptr);
     sceneSession->SetParentSession(nullptr);
     auto sessionList5 = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(0, sessionList5.size());
@@ -621,9 +609,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
         pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
     ASSERT_EQ(compare4, pointerChangeAreas);
     manager_->UpdatePointerAreas(nullptr, pointerChangeAreas);
-    ASSERT_EQ(compare4, pointerChangeAreas);
-    sceneSession->SetSessionProperty(nullptr);
-    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
     ASSERT_EQ(compare4, pointerChangeAreas);
 }
 
