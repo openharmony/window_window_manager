@@ -1536,6 +1536,12 @@ public:
      */
     virtual void StartMove() {}
     /**
+     * @brief get main window move flag.
+     *
+     * @return true means main window is moving. Otherwise is not moving.
+     */
+    virtual bool IsStartMoving() { return false; }
+    /**
      * @brief Set flag that need remove window input channel.
      *
      * @param needRemoveWindowInputChannel True means remove input channel, false means not remove.
@@ -1690,6 +1696,13 @@ public:
      * @return True means pc window of app type, false means the opposite.
      */
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
+
+    /**
+     * @brief Is pc window or pad free multi-window.
+     *
+     * @return True means pc window or pad free multi-window, false means the opposite.
+     */
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
     /**
      * @brief Register transfer component data callback.
@@ -2011,9 +2024,10 @@ public:
      * @brief Set the modality of window.
      *
      * @param isModal bool.
+     * @param modalityType ModalityType.
      * @return WMError
      */
-    virtual WMError SetSubWindowModal(bool isModal)
+    virtual WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

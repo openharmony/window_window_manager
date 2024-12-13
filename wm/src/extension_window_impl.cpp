@@ -58,5 +58,10 @@ WMError ExtensionWindowImpl::HidePrivacyContentForHost(bool needHide)
     return windowExtensionSessionImpl_->HidePrivacyContentForHost(needHide);
 }
 
+bool ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    return windowExtensionSessionImpl_->IsPcOrPadFreeMultiWindowMode();
+}
 } // namespace Rosen
 } // namespace OHOS
