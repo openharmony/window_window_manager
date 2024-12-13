@@ -30,7 +30,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsListe
 
 JsWindowListener::~JsWindowListener()
 {
-    TLOGI("[NAPI]");
+    WLOGFI("[NAPI]");
 }
 
 void JsWindowListener::OnLastStrongRef(const void *)
@@ -51,7 +51,7 @@ void JsWindowListener::SetMainEventHandler()
 
 napi_value JsWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
 {
-    WLOGFD("CallJsMethod methodName = %{public}s", methodName);
+    WLOGFD("methodName = %{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
         WLOGFE("env_ nullptr or jsCallBack_ is nullptr");
         return nullptr;
@@ -111,7 +111,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
 
 void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    TLOGI("[NAPI] %{public}u", mode);
+    WLOGFI("[NAPI] %{public}u", mode);
 }
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
@@ -262,8 +262,8 @@ void JsWindowListener::AfterDestroyed()
 void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGI("OccupiedAreaChangeInfo, type: %{public}u, " \
-        "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]", static_cast<uint32_t>(info->type_),
+    WLOGI("OccupiedAreaChangeInfo, type: %{public}u, input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        static_cast<uint32_t>(info->type_),
         info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (

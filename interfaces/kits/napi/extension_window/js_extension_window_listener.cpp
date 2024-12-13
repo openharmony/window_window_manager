@@ -160,7 +160,7 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
 
 void JsExtensionWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "OnModeChange %{public}u", mode);
+    TLOGI(WmsLogTag::WMS_UIEXT, "%{public}u", mode);
 }
 
 void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)

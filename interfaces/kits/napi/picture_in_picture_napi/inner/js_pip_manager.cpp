@@ -50,7 +50,7 @@ JsPipManager::~JsPipManager()
 
 void JsPipManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "JsPipManager::Finalizer");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     std::unique_ptr<JsPipManager>(static_cast<JsPipManager*>(data));
 }
 
@@ -62,7 +62,7 @@ napi_value JsPipManager::InitXComponentController(napi_env env, napi_callback_in
 
 napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "JsPipManager::OnInitXComponentController");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -236,7 +236,7 @@ napi_value JsPipManager::OnUnregisterCallback(napi_env env, napi_callback_info i
 
 napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
 {
-    TLOGD(WmsLogTag::WMS_PIP, "JsPipManager::JsPipManagerInit");
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
     if (env == nullptr || exportObj == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "JsPipManagerInit failed, env or exportObj is null");
         return nullptr;
