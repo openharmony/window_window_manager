@@ -57,6 +57,7 @@ group("systemtest") {
   } else {
     deps += [
       ":wms_window_multi_ability_test",
+    ]
   }
 }
 
