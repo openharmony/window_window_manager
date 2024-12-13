@@ -273,7 +273,7 @@ private:
     bool keepScreenOn_ = false;
     bool topmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
-    Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED;
+    Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
