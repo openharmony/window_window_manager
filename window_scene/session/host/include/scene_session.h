@@ -934,8 +934,8 @@ private:
         bool isGlobal = false, bool needFlush = true);
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
-    std::shard_ptr<Rosen::RsProperty<bool>> rSBehindWindowFilterEnabledProperty_;
-    std::shard_ptr<Rosen::RSBehindWindowFilterEnabledModifier> rSBehindWindowFilterEnabledModifier_;
+    std::shared_ptr<Rosen::RSProperty<bool>> rSBehindWindowFilterEnabledProperty_;
+    std::shared_ptr<Rosen::RSBehindWindowFilterEnabledModifier> rSBehindWindowFilterEnabledModifier_;
 
     /**
      * Window Immersive
