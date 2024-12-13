@@ -37,7 +37,7 @@ napi_value NapiGetUndefined(napi_env env)
 
 napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
 {
-    WLOGI("JsTransactionManager Init");
+    WLOGFI("[NAPI]");
     if (env == nullptr || exportObj == nullptr) {
         WLOGFE("env or exportObj is null!");
         return nullptr;
