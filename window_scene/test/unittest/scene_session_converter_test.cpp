@@ -67,7 +67,7 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfos, Function | SmallTest 
     EXPECT_EQ(WSError::WS_OK, result);
 
     SessionInfo info1;
-    sptr<SceneSession> sceneSession = new SceneSession(info1, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     sceneSessionInfos.push_back(sceneSession);
 
     SessionInfo info2;
@@ -76,7 +76,7 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfos, Function | SmallTest 
     info2.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo);
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     info2.want = want;
-    sptr<SceneSession> sceneSession2 = new SceneSession(info2, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     sceneSessionInfos.push_back(sceneSession2);
 
     auto result2 = SceneSessionConverter::ConvertToMissionInfos(sceneSessionInfos, missionInfos);
@@ -96,7 +96,7 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfo, Function | SmallTest |
     EXPECT_EQ(WSError::WS_OK, result);
 
     SessionInfo info2;
-    sptr<SceneSession> sceneSession2 = new SceneSession(info2, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     auto result2 = SceneSessionConverter::ConvertToMissionInfo(sceneSession2, missionInfo);
     EXPECT_EQ(WSError::WS_OK, result2);
 
@@ -106,7 +106,7 @@ HWTEST_F(SceneSessionConverterTest, ConvertToMissionInfo, Function | SmallTest |
     info3.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo);
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     info3.want = want;
-    sptr<SceneSession> sceneSession3 = new SceneSession(info3, nullptr);
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
     auto result3 = SceneSessionConverter::ConvertToMissionInfo(sceneSession3, missionInfo);
     EXPECT_EQ(WSError::WS_OK, result3);
 }

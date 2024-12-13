@@ -55,8 +55,8 @@ void MoveDragControllerTest::SetUp()
     info.abilityName_ = "testSession1";
     info.moduleName_ = "testSession2";
     info.bundleName_ = "testSession3";
-    session_ = new (std::nothrow) Session(info);
-    moveDragController = new MoveDragController(session_->GetPersistentId(), session_->GetWindowType());
+    session_ = sptr<Session>::MakeSptr(info);
+    moveDragController = sptr<MoveDragController>::MakeSptr(session_->GetPersistentId(), session_->GetWindowType());
 }
 
 void MoveDragControllerTest::TearDown()
@@ -1109,7 +1109,8 @@ HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag02, Function
     moveDragController->displayIdSetDuringMoveDrag_.insert(0);
     moveDragController->displayIdSetDuringMoveDrag_.insert(1001);
     ScreenProperty screenProperty0;
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] = new ScreenSession(0, screenProperty0, 0);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
+        sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
     res = moveDragController->GetNewAddedDisplayIdsDuringMoveDrag();
     ASSERT_EQ(true, res.empty());
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
