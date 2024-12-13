@@ -6283,6 +6283,9 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateFakeScreenSession(sptr<Scre
     };
     fakeScreenSession =
         new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE);
+    if (fakeScreenSession == nullptr) {
+        return nullptr;
+    }
     return fakeScreenSession;
 }
 
