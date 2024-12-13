@@ -60,16 +60,12 @@ void WindowImplTest::TearDown()
 
 void WindowImplTest::CreateStretchableWindow(sptr<WindowImpl>& window, const Rect& rect)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("StretchableWindowTest");
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowRect({ 1, 1, 1, 1 });
-    if (option == nullptr) {
-        window = nullptr;
-        return;
-    }
-    window = new WindowImpl(option);
+    window = sptr<WindowImpl>::MakeSptr(option);
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
