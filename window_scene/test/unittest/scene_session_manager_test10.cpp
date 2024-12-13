@@ -230,7 +230,7 @@ HWTEST_F(SceneSessionManagerTest10, CheckLastFocusedAppSessionFocus, Function | 
     info1.bundleName_ = "focusedSession";
     info1.windowType_ = 1;
     sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info1, nullptr);
-    ASSERT_NE(focusedSessio n, nullptr);
+    ASSERT_NE(focusedSession, nullptr);
 
     SessionInfo info2;
     info2.abilityName_ = "nextSession";
