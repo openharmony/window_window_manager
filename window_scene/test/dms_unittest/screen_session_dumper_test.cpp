@@ -930,7 +930,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpMultiUserInfo, Function | SmallTest | Leve
     int32_t scbPid = 1;
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->DumpMultiUserInfo(oldScbPids, userId, scbPid);
-    ASSERT_NE(dumper->fd_, std::string());
+    ASSERT_NE(dumper->dumpInfo_, std::string());
 }
 
 /**
@@ -963,7 +963,7 @@ HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureValue, Function | SmallTest |
     fd = 1;
     args = {u"-posture"};
     sptr<ScreenSessionDumper> dumper2 = new ScreenSessionDumper(fd, args);
-    dumper2->SetHallAndPostureValue("-hoverstatus,-string1,string2");
+    dumper2->SetHallAndPostureValue("-hoverstatus,string1,string2");
     ASSERT_EQ(dumper2->fd_, 1);
 }
 
@@ -997,7 +997,7 @@ HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus02, Function | SmallTes
 
 /**
  * @tc.name: SetHallAndPostureStatus03
- * @tc.desc: test function : SetHallAndPostureValue
+ * @tc.desc: test function : SetHallAndPostureStatus
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus03, Function | SmallTest | Level1)
