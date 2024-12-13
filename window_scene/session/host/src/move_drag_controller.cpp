@@ -592,7 +592,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     const auto& sourceType = pointerEvent->GetSourceType();
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Mouse click event but not left click");
         return false;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "MoveDragController::EventDownInit");
