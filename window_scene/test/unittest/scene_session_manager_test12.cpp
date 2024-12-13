@@ -249,12 +249,6 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | Sma
     ssm->CreateKeyboardPanelSession(nullptr);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
-    // the property of keyboard session is nullptr
-    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(nullptr));
-    ASSERT_EQ(nullptr, keyboardSession->GetSessionProperty());
-    ssm->CreateKeyboardPanelSession(keyboardSession);
-    ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
-
     // the keyboard session is system keyboard
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);

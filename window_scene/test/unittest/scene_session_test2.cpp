@@ -420,10 +420,6 @@ HWTEST_F(SceneSessionTest2, SetParentPersistentId, Function | SmallTest | Level2
     sceneSession->SetParentPersistentId(0);
     result = sceneSession->GetParentPersistentId();
     ASSERT_EQ(result, 0);
-
-    sceneSession->SetSessionProperty(nullptr);
-    sceneSession->SetParentPersistentId(0);
-    ASSERT_EQ(0, sceneSession->GetParentPersistentId());
 }
 
 /**
@@ -1091,10 +1087,6 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     sceneSession->onForceHideChangeFunc_ = func;
     EXPECT_NE(nullptr, &func);
     sceneSession->NotifyForceHideChange(true);
-
-    sceneSession->SetSessionProperty(nullptr);
-    sceneSession->NotifyForceHideChange(true);
-    ASSERT_EQ(sceneSession->property_, nullptr);
 }
 
 /**
@@ -1608,9 +1600,6 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
     sceneSession->property_ = property;
     sceneSession->GetAINavigationBarArea(rect, avoidArea);
 
-    sceneSession->SetSessionProperty(nullptr);
-    sceneSession->GetAINavigationBarArea(rect, avoidArea);
-
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sceneSession->SetSessionProperty(property);
     sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
@@ -1979,15 +1968,11 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, Function | SmallTest | Level2
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->SetSessionProperty(nullptr);
-    auto result = sceneSession->GetSubWindowModalType();
-    ASSERT_EQ(result, SubWindowModalType::TYPE_UNDEFINED);
-
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sceneSession->SetSessionProperty(property);
-    result = sceneSession->GetSubWindowModalType();
+    auto result = sceneSession->GetSubWindowModalType();
     ASSERT_EQ(result, SubWindowModalType::TYPE_DIALOG);
 }
 
@@ -2045,10 +2030,8 @@ HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
     info.bundleName_ = "IsFullScreenMovable";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-
-    sceneSession->SetSessionProperty(nullptr);
     auto result = sceneSession->IsFullScreenMovable();
-    ASSERT_EQ(false, result);
+    ASSERT_EQ(true, result);
 }
 
 /**
