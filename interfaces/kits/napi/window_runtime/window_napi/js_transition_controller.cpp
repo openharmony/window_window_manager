@@ -37,17 +37,17 @@ static int g_jsTransCtrlDtorCnt = 0;
 JsTransitionContext::JsTransitionContext(sptr<Window> window, bool isShownTransContext)
     : windowToken_(window), isShownTransContext_(isShownTransContext)
 {
-    WLOGI("JsTransitionContext constructorCnt: %{public}d", ++g_jsTransCxtCtorCnt);
+    WLOGFI("constructorCnt: %{public}d", ++g_jsTransCxtCtorCnt);
 }
 
 JsTransitionContext::~JsTransitionContext()
 {
-    WLOGI("~JsTransitionContext deConstructorCnt: %{public}d", ++g_jsTransCxtDtorCnt);
+    WLOGFI("deConstructorCnt: %{public}d", ++g_jsTransCxtDtorCnt);
 }
 
 void JsTransitionContext::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("[NAPI]JsTransitionContext::Finalizer");
+    WLOGFI("[NAPI]");
     std::unique_ptr<JsTransitionContext>(static_cast<JsTransitionContext*>(data));
 }
 
@@ -139,12 +139,12 @@ JsTransitionController::JsTransitionController(napi_env env, std::shared_ptr<Nat
     sptr<Window> window)
     : env_(env), jsWin_(jsWin), windowToken_(window), weakRef_(wptr<JsTransitionController> (this))
 {
-    WLOGI("JsTransitionController constructorCnt: %{public}d", ++g_jsTransCtrlCtorCnt);
+    WLOGFI("constructorCnt: %{public}d", ++g_jsTransCtrlCtorCnt);
 }
 
 JsTransitionController::~JsTransitionController()
 {
-    WLOGI("~JsTransitionController deConstructorCnt: %{public}d", ++g_jsTransCtrlDtorCnt);
+    WLOGFI("deConstructorCnt: %{public}d", ++g_jsTransCtrlDtorCnt);
 }
 
 void JsTransitionController::AnimationForShown()
