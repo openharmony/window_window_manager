@@ -350,7 +350,6 @@ HWTEST_F(SessionManagerTest, InitMockSMSProxy, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, sm_);
     sm_->InitMockSMSProxy();
-    sm_->InitMockSMSProxy();
     ASSERT_NE(sm_->foundationDeath_, nullptr);
 }
 
