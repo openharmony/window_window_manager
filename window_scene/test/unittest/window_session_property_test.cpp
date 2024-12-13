@@ -44,7 +44,7 @@ namespace {
  */
 HWTEST_F(WindowSessionPropertyTest, SetDragEnabled001, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetDragEnabled(), true);
     property->SetDragEnabled(false);
     ASSERT_EQ(property->GetDragEnabled(), false);
@@ -57,7 +57,7 @@ HWTEST_F(WindowSessionPropertyTest, SetDragEnabled001, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetRaiseEnabled(), true);
     property->SetRaiseEnabled(false);
     ASSERT_EQ(property->GetRaiseEnabled(), false);
@@ -70,7 +70,7 @@ HWTEST_F(WindowSessionPropertyTest, SetRaiseEnabled001, Function | SmallTest | L
  */
 HWTEST_F(WindowSessionPropertyTest, WindowSessionProperty, Function | SmallTest | Level2)
 {
-    const sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    const sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetDragEnabled(), true);
 }
 
@@ -82,7 +82,7 @@ HWTEST_F(WindowSessionPropertyTest, WindowSessionProperty, Function | SmallTest 
 HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level2)
 {
     SessionInfo *info = new SessionInfo();
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetSessionInfo(*info);
     property->SetRaiseEnabled(true);
     ASSERT_EQ(property->GetRaiseEnabled(), true);
@@ -96,7 +96,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSessionInfo, Function | SmallTest | Level
 HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTest | Level2)
 {
     Orientation orientation = Orientation::REVERSE_HORIZONTAL;
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetRequestedOrientation(orientation);
     Orientation ret = property->GetRequestedOrientation();
     ASSERT_EQ(ret, orientation);
@@ -134,7 +134,7 @@ HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTes
 HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, Function | SmallTest | Level2)
 {
     Orientation orientation = Orientation::REVERSE_HORIZONTAL;
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetDefaultRequestedOrientation(orientation);
     Orientation ret = property->GetDefaultRequestedOrientation();
     ASSERT_EQ(ret, orientation);
@@ -147,7 +147,7 @@ HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, Function | S
  */
 HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetPrivacyMode(), false);
     property->SetPrivacyMode(true);
     ASSERT_EQ(property->GetPrivacyMode(), true);
@@ -162,7 +162,7 @@ HWTEST_F(WindowSessionPropertyTest, SetPrivacyMode, Function | SmallTest | Level
  */
 HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetSystemPrivacyMode(), false);
 }
 
@@ -225,7 +225,7 @@ HWTEST_F(WindowSessionPropertyTest, GetParentId, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, SetWindowFlags, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetWindowFlags(), 0);
 }
 
@@ -236,7 +236,7 @@ HWTEST_F(WindowSessionPropertyTest, SetWindowFlags, Function | SmallTest | Level
  */
 HWTEST_F(WindowSessionPropertyTest, SetAndGetPipTemplateInfo, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     PiPTemplateInfo pipTemplateInfo;
     pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
     property->SetPiPTemplateInfo(pipTemplateInfo);
@@ -314,7 +314,7 @@ HWTEST_F(WindowSessionPropertyTest, AddWindowFlag, Function | SmallTest | Level2
     WindowFlag flags=WindowFlag();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.AddWindowFlag(flags);
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetWindowFlags(), false);
 }
 
@@ -361,7 +361,7 @@ HWTEST_F(WindowSessionPropertyTest, GetAccessTokenId, Function | SmallTest | Lev
  */
 HWTEST_F(WindowSessionPropertyTest, SetTokenState, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetTokenState(), false);
 }
 
@@ -375,7 +375,7 @@ HWTEST_F(WindowSessionPropertyTest, SetMaximizeMode, Function | SmallTest | Leve
     WindowSessionProperty windowSessionProperty;
     MaximizeMode mode = MaximizeMode::MODE_RECOVER;
     windowSessionProperty.SetMaximizeMode(mode);
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetMaximizeMode(), mode);
 }
 
@@ -390,7 +390,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemBarProperty, Function | SmallTest |
     WindowType windowtype = WindowType::APP_WINDOW_BASE;
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetSystemBarProperty(windowtype, *systemBarProperty);
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(property->GetTokenState(), false);
 }
 
@@ -416,7 +416,7 @@ HWTEST_F(WindowSessionPropertyTest, SetWindowModeSupportType, Function | SmallTe
     uint32_t windowModeSupportType = 1234567890;
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetWindowModeSupportType(windowModeSupportType);
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property->GetWindowModeSupportType(), 0);
 }
 
@@ -467,7 +467,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Lev
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowLimits, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingWindowLimits(parcel, property);
     ASSERT_EQ(property->GetTokenState(), false);
@@ -481,7 +481,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowLimits, Function | SmallT
 HWTEST_F(WindowSessionPropertyTest, UnMarshallingSystemBarMap, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnMarshallingSystemBarMap(parcel, property);
     ASSERT_EQ(property->GetTokenState(), false);
@@ -495,7 +495,7 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSystemBarMap, Function | SmallT
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingTouchHotAreas(parcel, property);
     ASSERT_EQ(property->GetTokenState(), false);
@@ -509,7 +509,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     EXPECT_EQ(WindowType::WINDOW_TYPE_PIP, property->GetWindowType());
@@ -524,7 +524,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
  */
 HWTEST_F(WindowSessionPropertyTest, CopyFrom, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.CopyFrom(property);
     WindowSessionProperty *wproperty = new WindowSessionProperty();
@@ -538,7 +538,7 @@ HWTEST_F(WindowSessionPropertyTest, CopyFrom, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, SetFocusable, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetFocusable(), true);
     property->SetFocusable(false);
@@ -552,7 +552,7 @@ HWTEST_F(WindowSessionPropertyTest, SetFocusable, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, SetTouchable, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetTouchable(), true);
     property->SetTouchable(false);
@@ -566,7 +566,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchable, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, SetForceHide, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetForceHide(), false);
     property->SetForceHide(true);
@@ -580,7 +580,7 @@ HWTEST_F(WindowSessionPropertyTest, SetForceHide, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, SetSystemCalling, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetSystemCalling(), false);
     property->SetSystemCalling(true);
@@ -594,7 +594,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemCalling, Function | SmallTest | Lev
  */
 HWTEST_F(WindowSessionPropertyTest, SetIsNeedUpdateWindowMode, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetIsNeedUpdateWindowMode(), false);
     property->SetIsNeedUpdateWindowMode(true);
@@ -608,7 +608,7 @@ HWTEST_F(WindowSessionPropertyTest, SetIsNeedUpdateWindowMode, Function | SmallT
  */
 HWTEST_F(WindowSessionPropertyTest, SetIsShaped, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetIsShaped(), false);
     property->SetIsShaped(true);
@@ -622,7 +622,7 @@ HWTEST_F(WindowSessionPropertyTest, SetIsShaped, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, SetHideNonSystemFloatingWindows, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetHideNonSystemFloatingWindows(), false);
     property->SetHideNonSystemFloatingWindows(true);
@@ -636,7 +636,7 @@ HWTEST_F(WindowSessionPropertyTest, SetHideNonSystemFloatingWindows, Function | 
  */
 HWTEST_F(WindowSessionPropertyTest, KeepKeyboardOnFocus, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->GetKeepKeyboardFlag(), false);
     property->KeepKeyboardOnFocus(true);
@@ -650,7 +650,7 @@ HWTEST_F(WindowSessionPropertyTest, KeepKeyboardOnFocus, Function | SmallTest | 
  */
 HWTEST_F(WindowSessionPropertyTest, SetTextFieldPositionY, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetTextFieldPositionY(5.5);
     ASSERT_EQ(property->GetTextFieldPositionY(), 5.5);
@@ -663,7 +663,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTextFieldPositionY, Function | SmallTest 
  */
 HWTEST_F(WindowSessionPropertyTest, SetTextFieldHeight, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetTextFieldHeight(5.5);
     ASSERT_EQ(property->GetTextFieldHeight(), 5.5);
@@ -676,7 +676,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTextFieldHeight, Function | SmallTest | L
  */
 HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     ASSERT_EQ(property->IsLayoutFullScreen(), false);
     property->SetIsLayoutFullScreen(true);
@@ -690,7 +690,7 @@ HWTEST_F(WindowSessionPropertyTest, SetIsLayoutFullScreen, Function | SmallTest 
  */
 HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     Parcel parcel = Parcel();
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_RECT);
@@ -732,7 +732,7 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     Parcel parcel = Parcel();
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_RECT);
@@ -774,10 +774,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, GetWindowName, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     std::string name = "test";
     property->SetWindowName(name);
     auto result = property->GetWindowName();
@@ -792,10 +789,7 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowName, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionPropertyTest, GetSessionInfo, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SessionInfo *info = new SessionInfo();
     if (info == nullptr) {
         return;
@@ -830,10 +824,7 @@ HWTEST_F(WindowSessionPropertyTest, EditSessionInfo, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionPropertyTest, GetWindowRect, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     Rect rect = {0, 0, 0, 0};
     property->SetWindowRect(rect);
     auto result = property->GetWindowRect();
@@ -848,10 +839,7 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowRect, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionPropertyTest, GetRequestRect, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     Rect requestRect = {0, 0, 0, 0};
     property->SetWindowRect(requestRect);
     auto result = property->GetWindowRect();
@@ -866,10 +854,7 @@ HWTEST_F(WindowSessionPropertyTest, GetRequestRect, Function | SmallTest | Level
  */
 HWTEST_F(WindowSessionPropertyTest, GetWindowType, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WindowType type = WindowType::APP_WINDOW_BASE;
     property->SetWindowType(type);
     auto result = property->GetWindowType();
@@ -884,10 +869,7 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowType, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionPropertyTest, GetDisplayId, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     DisplayId displayId = 1;
     property->SetDisplayId(displayId);
     auto result = property->GetDisplayId();
@@ -902,10 +884,7 @@ HWTEST_F(WindowSessionPropertyTest, GetDisplayId, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionPropertyTest, GetPersistentId, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     int32_t persistentId = 1;
     property->SetPersistentId(persistentId);
     auto result = property->GetPersistentId();
@@ -920,10 +899,7 @@ HWTEST_F(WindowSessionPropertyTest, GetPersistentId, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionPropertyTest, GetParentPersistentId, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     int32_t persistentId = 1;
     property->SetParentPersistentId(persistentId);
     auto result = property->GetParentPersistentId();
@@ -938,10 +914,7 @@ HWTEST_F(WindowSessionPropertyTest, GetParentPersistentId, Function | SmallTest 
  */
 HWTEST_F(WindowSessionPropertyTest, SetTurnScreenOn, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     bool turnScreenOn = false;
     property->SetTurnScreenOn(turnScreenOn);
     ASSERT_EQ(property->turnScreenOn_, turnScreenOn);
@@ -1001,10 +974,7 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSessionInfo, Function | SmallTe
  */
 HWTEST_F(WindowSessionPropertyTest, SetAccessTokenId, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     uint32_t accessTokenId = 1;
     property->SetAccessTokenId(accessTokenId);
     ASSERT_EQ(property->accessTokenId_, accessTokenId);
@@ -1018,10 +988,7 @@ HWTEST_F(WindowSessionPropertyTest, SetAccessTokenId, Function | SmallTest | Lev
  */
 HWTEST_F(WindowSessionPropertyTest, GetWindowState, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WindowState state = WindowState::STATE_INITIAL;
     property->SetWindowState(state);
     auto result = property->GetWindowState();
@@ -1036,10 +1003,7 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowState, Function | SmallTest | Level
  */
 HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode02, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     bool isSystemPrivate = false;
     property->SetSystemPrivacyMode(isSystemPrivate);
     ASSERT_EQ(property->isSystemPrivacyMode_, isSystemPrivate);
@@ -1053,10 +1017,7 @@ HWTEST_F(WindowSessionPropertyTest, SetSystemPrivacyMode02, Function | SmallTest
  */
 HWTEST_F(WindowSessionPropertyTest, SetTokenState02, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     bool hasToken = false;
     property->SetTokenState(hasToken);
     ASSERT_EQ(property->tokenState_, hasToken);
@@ -1071,10 +1032,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTokenState02, Function | SmallTest | Leve
 HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
-    WindowSessionProperty *property = new WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     for (int i = 0; i < 55; i++) {
         struct Rect rect[i];
         property->touchHotAreas_.push_back(rect[i]);
@@ -1092,10 +1050,7 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTe
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo02, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
-    WindowSessionProperty *property = new WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.UnmarshallingPiPTemplateInfo(parcel, property);
@@ -1111,10 +1066,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo02, Function | S
 HWTEST_F(WindowSessionPropertyTest, MarshallingPiPTemplateInfo, Function | SmallTest | Level2)
 {
     Parcel parcel = Parcel();
-    WindowSessionProperty *property = new WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->type_ = WindowType::WINDOW_TYPE_PIP;
     for (int i = 0; i < 10; i++) {
         property->pipTemplateInfo_.controlGroup.push_back(i);
@@ -1131,10 +1083,7 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingPiPTemplateInfo, Function | Small
  */
 HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, Function | SmallTest | Level2)
 {
-    WindowSessionProperty *property = new (std::nothrow) WindowSessionProperty();
-    if (property == nullptr) {
-        return;
-    }
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     bool isPcAppInPad = true;
     property->SetIsPcAppInPad(isPcAppInPad);
     auto result = property->GetIsPcAppInPad();

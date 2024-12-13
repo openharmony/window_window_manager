@@ -42,8 +42,8 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent01, Function | SmallTes
 {
     WLOGI("TransferAccessibilityEvent01 begin");
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -62,8 +62,8 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent02, Function | SmallTes
 {
     WLOGI("TransferAccessibilityEvent02 begin");
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
 
@@ -83,8 +83,8 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
 {
     WLOGI("TransferAccessibilityEvent03 begin");
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
 

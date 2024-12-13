@@ -2565,7 +2565,7 @@ WSError Session::UpdateFocus(bool isFocused)
 WSError Session::NotifyFocusStatus(bool isFocused)
 {
     if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
