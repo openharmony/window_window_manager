@@ -1041,6 +1041,7 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
         napi_set_named_property(env, objValue, "extraFormIdentity",
             CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
+        napi_set_named_property(env, objValue, "want", OHOS::AppExecFwk::WrapWant(env, *sessionInfo.want));
         if (params.HasParam("expectWindowMode")) {
             napi_set_named_property(env, objValue, "expectWindowMode",
                 CreateJsValue(env, params.GetIntParam("expectWindowMode", INVALID_VAL)));
