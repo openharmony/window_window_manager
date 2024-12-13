@@ -649,23 +649,22 @@ HWTEST_F(SceneSessionTest3, SetAdjustKeyboardLayoutCallback, Function | SmallTes
 }
 
 /**
- * @tc.name: GetStartMoveFlag
- * @tc.desc: GetStartMoveFlag
+ * @tc.name: IsStartMoving
+ * @tc.desc: IsStartMoving
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, GetStartMoveFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, IsStartMoving, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "GetStartMoveFlag";
-    info.bundleName_ = "GetStartMoveFlag";
+    info.abilityName_ = "IsStartMoving";
+    info.bundleName_ = "IsStartMoving";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
-    bool isMoving = false;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
+    ASSERT_EQ(false, sceneSession->IsStartMoving());
 
     sceneSession->moveDragController_ = new MoveDragController(1024, WindowType::WINDOW_TYPE_FLOAT);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
+    ASSERT_EQ(false, sceneSession->IsStartMoving());
 }
 
 /**
