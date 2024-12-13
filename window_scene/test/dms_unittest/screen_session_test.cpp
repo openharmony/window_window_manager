@@ -2536,7 +2536,7 @@ HWTEST_F(ScreenSessionTest, GetIsBScreenHalf02, Function | SmallTest | Level2)
 HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, Function | SmallTest | Level2)
 {
     sptr<ScreenSession> session = new ScreenSession();
-	ASSERT_NE(session, nullptr);
+    ASSERT_NE(session, nullptr);
     DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_0);
     ASSERT_EQ(result, DisplayOrientation::PORTRAIT);
 }
