@@ -65,6 +65,8 @@ public:
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect(TargetRectCoordinate coordinate) const;
+    void SetTargetRect(const WSRect& rect);
+    WSRect GetOriginalRect() const;
     void InitMoveDragProperty();
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
@@ -145,7 +147,7 @@ private:
     WSRect CalcFixedAspectRatioTargetRect(AreaType type, int32_t tranX, int32_t tranY, float aspectRatio,
         WSRect originalRect);
     void CalcFreeformTranslateLimits(AreaType type);
-    void CalcFixedAspectRatioTranslateLimits(AreaType type, AxisType axis);
+    void CalcFixedAspectRatioTranslateLimits(AreaType type);
     void FixTranslateByLimits(int32_t& tranX, int32_t& tranY);
     bool InitMainAxis(AreaType type, int32_t tranX, int32_t tranY);
     void ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio);

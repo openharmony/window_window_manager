@@ -52,7 +52,7 @@ void SceneSessionManagerStubLifecycleTest::TearDownTestCase()
 
 void SceneSessionManagerStubLifecycleTest::SetUp()
 {
-    stub_ = new SceneSessionManager();
+    stub_ = sptr<SceneSessionManager>::MakeSptr();
 }
 
 void SceneSessionManagerStubLifecycleTest::TearDown()
@@ -75,13 +75,13 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSes
     MessageParcel data;
     MessageParcel reply;
 
-    sptr<ISessionStage> sessionStage = new SessionStageMocker();
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(nullptr, sessionStage);
     int res = stub_->HandleRecoverAndReconnectSceneSession(data, reply);
     ASSERT_EQ(res, ERR_INVALID_DATA);
 
     data.WriteRemoteObject(sessionStage->AsObject());
-    sptr<IWindowEventChannel> eventChannel = new WindowEventChannel(sessionStage);
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(sessionStage);
     ASSERT_NE(nullptr, eventChannel);
     data.WriteRemoteObject(eventChannel->AsObject());
     struct RSSurfaceNodeConfig surfaceNodeConfig;
@@ -96,11 +96,11 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSes
     data.WriteRemoteObject(eventChannel->AsObject());
     surfaceNode->Marshalling(data);
     data.WriteBool(true);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetTokenState(true);
     data.WriteStrongParcelable(property);
-    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     ASSERT_NE(nullptr, windowManagerAgent);
     data.WriteRemoteObject(windowManagerAgent->AsObject());
     res = stub_->HandleRecoverAndReconnectSceneSession(data, reply);
@@ -117,7 +117,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground,
     MessageParcel data;
     MessageParcel reply;
 
-    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     int res = stub_->HandlePendingSessionToForeground(data, reply);
@@ -138,7 +138,7 @@ HWTEST_F(
     MessageParcel data;
     MessageParcel reply;
 
-    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     int res = stub_->HandlePendingSessionToBackgroundForDelegator(data, reply);
@@ -172,7 +172,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleSetSessionContinueState, Fu
     MessageParcel reply;
 
     int32_t x = 1;
-    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
     data.WriteInt32(x);
 

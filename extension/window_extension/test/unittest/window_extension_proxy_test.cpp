@@ -63,21 +63,6 @@ void WindowExtensionProxyTest::TearDown()
 }
 
 namespace {
-/**
- * @tc.name: SetBounds
- * @tc.desc: test success
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionProxyTest, SetBounds, Function | SmallTest | Level2)
-{
-    windowExtensionProxy_->Show();
-    windowExtensionProxy_->Hide();
-    sptr<IWindowExtensionCallback> componentCallback_ = nullptr;
-    sptr<IWindowExtensionClient> clientToken(new WindowExtensionClientStubImpl(componentCallback_));
-    windowExtensionProxy_->GetExtensionWindow(clientToken);
-    Rect rect;
-    windowExtensionProxy_->SetBounds(rect);
-}
 
 /**
  * @tc.name: OnWindowReady

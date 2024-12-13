@@ -46,12 +46,14 @@ ohos_shared_library("scene_session") {
     "container/src/zidl/session_stage_stub.cpp",
     "container/src/zidl/window_event_channel_proxy.cpp",
     "container/src/zidl/window_event_channel_stub.cpp",
+    "host/src/ability_info_manager.cpp",
     "host/src/extension_session.cpp",
     "host/src/keyboard_session.cpp",
     "host/src/main_session.cpp",
     "host/src/move_drag_controller.cpp",
     "host/src/multi_instance_manager.cpp",
     "host/src/pc_fold_screen_controller.cpp",
+    "host/src/pc_fold_screen_manager.cpp",
     "host/src/root_scene_session.cpp",
     "host/src/scb_system_session.cpp",
     "host/src/scene_persistence.cpp",
@@ -190,6 +192,7 @@ ohos_shared_library("screen_session") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
+    "ipc:ipc_single",
   ]
   public_external_deps = [
     "ability_base:base",

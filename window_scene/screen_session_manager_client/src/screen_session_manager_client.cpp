@@ -138,7 +138,6 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             WLOGFE("screenSession is null");
             return;
         }
-        screenSession->DestroyScreenScene();
         if (screenConnectionListener_) {
             screenConnectionListener_->OnScreenDisconnected(screenSession);
         }
@@ -326,7 +325,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     auto foldStatus = screenSessionManager_->GetFoldStatus();
     screenSession->SetPhysicalRotation(directionInfo.rotation_, foldStatus);
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
-    screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
+        foldDisplayMode);
 }
 
 void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)

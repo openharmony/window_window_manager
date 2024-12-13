@@ -19,8 +19,10 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
+#include <cinttypes>
 
 #include "setting_observer.h"
+#include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -28,8 +30,6 @@ class ScreenSettingHelper {
 public:
     static void RegisterSettingDpiObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingDpiObserver();
-    static void RegisterExtendSettingDpiObserver(SettingObserver::UpdateFunc func);
-    static void UnregisterExtendSettingDpiObserver();
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
     static bool SetSettingDefaultDpi(uint32_t& dpi, const std::string& key);
     static bool GetSettingValue(uint32_t& value, const std::string& key);
@@ -44,20 +44,21 @@ public:
     static bool GetSettingRotationScreenID(int32_t& screenId, const std::string& key = SETTING_ROTATION_SCREEN_ID_KEY);
     static std::string RemoveInvalidChar(const std::string& input);
     static bool SplitString(std::vector<std::string>& splitValues, const std::string& input, char delimiter = ',');
-    static int32_t GetDataFromString(std::vector<uint64_t>& datas, const std::string& inputString);
+    static bool IsNumber(const std::string& str);
+    static uint32_t GetDataFromString(MultiScreenRecoverOption& option, const std::string& inputString);
     static bool GetSettingRecoveryResolutionString(std::vector<std::string>& resolutionStrings,
         const std::string& key = SETTING_RECOVERY_RESOLUTION_KEY);
-    static bool GetSettingRecoveryResolutionMap(std::map<uint64_t, std::pair<int32_t, int32_t>>& resolution);
+    static bool GetSettingRecoveryResolutionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& resolution);
     static bool GetSettingScreenModeString(std::vector<std::string>& screenModeStrings,
         const std::string& key = SETTING_SCREEN_MODE_KEY);
-    static bool GetSettingScreenModeMap(std::map<uint64_t, uint32_t>& screenMode);
+    static bool GetSettingScreenModeMap(std::map<ScreenId, uint32_t>& screenMode);
     static bool GetSettingRelativePositionString(std::vector<std::string>& relativePositionStrings,
         const std::string& key = SETTING_RELATIVE_POSITION_KEY);
-    static bool GetSettingRelativePositionMap(std::map<uint64_t, std::pair<uint32_t, uint32_t>>& relativePosition);
+    static bool GetSettingRelativePositionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& relativePosition);
+    static ScreenShape GetScreenShape(ScreenId screenId);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
-    static const constexpr char* SETTING_DPI_KEY_EXTEND {"user_set_dpi_value_extend"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
     static const constexpr char* SETTING_ROTATION_KEY {"screen_rotation_value"};
     static const constexpr char* SETTING_ROTATION_SCREEN_ID_KEY {"screen_rotation_screen_id_value"};
@@ -65,7 +66,6 @@ private:
     static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_last_screen_mode"};
     static const constexpr char* SETTING_RELATIVE_POSITION_KEY {"user_set_relative_position"};
     static sptr<SettingObserver> dpiObserver_;
-    static sptr<SettingObserver> extendDpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
 };

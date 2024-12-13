@@ -106,9 +106,6 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, Function | SmallTest
     OHOS::Rosen::Session session(info);
     session.property_ = new WindowSessionProperty();
     sceneSession->HandleActionUpdateTouchHotArea(property, action);
-
-    sceneSession->SetSessionProperty(nullptr);
-    sceneSession->HandleActionUpdateTouchHotArea(property, action);
 }
 
 /**
@@ -220,7 +217,6 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTextfieldAvoidInfo, Function | Sma
     SessionInfo info;
     sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(nullptr, sceneSession1);
-    sceneSession1->SetSessionProperty(nullptr);
     sceneSession1->HandleActionUpdateTextfieldAvoidInfo(property, action);
     sceneSession1->HandleActionUpdateWindowMask(property, action);
 }
@@ -427,9 +423,6 @@ HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction, Function | SmallTest 
     ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->UpdateSessionPropertyByAction(nullptr, action));
-
-    sceneSession->SetSessionProperty(nullptr);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->UpdateSessionPropertyByAction(property, action));
 
     sceneSession->SetSessionProperty(property);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, sceneSession->UpdateSessionPropertyByAction(property, action));
@@ -770,7 +763,6 @@ HWTEST_F(SceneSessionTest4, SetDefaultDisplayIdIfNeed03, Function | SmallTest | 
     info.bundleName_ = "SetDefaultDisplayIdIfNeed03";
     info.screenId_ = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
     sceneSession->SetDefaultDisplayIdIfNeed();
     ASSERT_EQ(20, sceneSession->GetSessionInfo().screenId_);
 }
@@ -787,7 +779,6 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
     info.bundleName_ = "NotifyServerToUpdateRect";
     info.screenId_ = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
     SessionUIParam uiParam;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;;
     sceneSession->SetForegroundInteractiveStatus(false);
@@ -812,6 +803,9 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
 
     sceneSession->winRect_ = {0, 0, 1, 1};
     sceneSession->clientRect_ = {1, 1, 1, 1};
+    ASSERT_FALSE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     sceneSession->winRect_ = {1, 1, 1, 1};
@@ -834,7 +828,6 @@ HWTEST_F(SceneSessionTest4, UpdateRectInner01, Function | SmallTest | Level2)
     info.bundleName_ = "UpdateRectInner01";
     info.screenId_ = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
     SessionUIParam uiParam;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     sceneSession->SetForegroundInteractiveStatus(true);
@@ -862,16 +855,6 @@ HWTEST_F(SceneSessionTest4, UpdateVisibilityInner01, Function | SmallTest | Leve
     sceneSession->isVisible_ = false;
     ASSERT_EQ(false, sceneSession->UpdateVisibilityInner(false));
 
-    sceneSession->SetSessionProperty(nullptr);
-    VisibilityChangedDetectFunc func = [sceneSession](const int32_t pid, const bool isVisible,
-        const bool newIsVisible) {
-            return;
-    };
-    sceneSession->SetVisibilityChangedDetectFunc(func);
-
-    UpdatePrivateStateAndNotifyFunc func1 = [sceneSession](int32_t persistentId) {
-        return;
-    };
     ASSERT_EQ(true, sceneSession->UpdateVisibilityInner(true));
 }
 
@@ -912,21 +895,6 @@ HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation01, Function | SmallTest | 
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>();
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
-}
-
-/**
- * @tc.name: IsPcOrPadEnableActivation02
- * @tc.desc: IsPcOrPadEnableActivation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation02, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "IsPcOrPadEnableActivation02";
-    info.bundleName_ = "IsPcOrPadEnableActivation02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
     ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
 }
 
@@ -1164,7 +1132,6 @@ HWTEST_F(SceneSessionTest4, SetWindowFlags01, Function | SmallTest | Level2)
     info.bundleName_ = "SetWindowFlags01";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetWindowFlags(property);
     ASSERT_EQ(0, property->GetWindowFlags());
@@ -1283,7 +1250,6 @@ HWTEST_F(SceneSessionTest4, IsMovable03, Function | SmallTest | Level2)
     info.bundleName_ = "IsMovable03";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->SetSessionProperty(nullptr);
     sceneSession->moveDragController_ = new MoveDragController(2024, WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateFocus(true));
     ASSERT_EQ(false, sceneSession->IsMovable());

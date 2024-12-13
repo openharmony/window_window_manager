@@ -94,9 +94,7 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, Function | SmallTest | Level2)
     result = sceneSession->RaiseAboveTarget(subWindowId);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
 
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
-    sceneSession->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
+    sceneSession->onRaiseAboveTarget_ = nullptr;
     result = sceneSession->RaiseAboveTarget(0);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -422,10 +420,6 @@ HWTEST_F(SceneSessionTest2, SetParentPersistentId, Function | SmallTest | Level2
     sceneSession->SetParentPersistentId(0);
     result = sceneSession->GetParentPersistentId();
     ASSERT_EQ(result, 0);
-
-    sceneSession->SetSessionProperty(nullptr);
-    sceneSession->SetParentPersistentId(0);
-    ASSERT_EQ(0, sceneSession->GetParentPersistentId());
 }
 
 /**
@@ -1093,10 +1087,6 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     sceneSession->onForceHideChangeFunc_ = func;
     EXPECT_NE(nullptr, &func);
     sceneSession->NotifyForceHideChange(true);
-
-    sceneSession->SetSessionProperty(nullptr);
-    sceneSession->NotifyForceHideChange(true);
-    ASSERT_EQ(sceneSession->property_, nullptr);
 }
 
 /**
@@ -1610,9 +1600,6 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, Function | SmallTest | Level
     sceneSession->property_ = property;
     sceneSession->GetAINavigationBarArea(rect, avoidArea);
 
-    sceneSession->SetSessionProperty(nullptr);
-    sceneSession->GetAINavigationBarArea(rect, avoidArea);
-
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sceneSession->SetSessionProperty(property);
     sceneSession->specificCallback_ = new SceneSession::SpecificSessionCallback();
@@ -1648,7 +1635,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     float ratio = 0.0;
     bool isDecor = true;
     float vpr = 0.0;
-    sceneSession->FixRectByLimits(limits, rect, ratio, isDecor, vpr);
+    sceneSession->AdjustRectByLimits(limits, ratio, isDecor, vpr, rect);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
 
     auto property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1660,7 +1647,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
-    sceneSession->FixRectByLimits(limits, rect, ratio, false, vpr);
+    sceneSession->AdjustRectByLimits(limits, ratio, false, vpr, rect);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
 
@@ -1914,58 +1901,58 @@ HWTEST_F(SceneSessionTest2, GetWindowDragHotAreaType, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: SetSessionModalTypeChangeCallback
- * @tc.desc: SetSessionModalTypeChangeCallback
+ * @tc.name: RegisterSubModalTypeChangeCallback
+ * @tc.desc: RegisterSubModalTypeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetSessionModalTypeChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RegisterSubModalTypeChangeCallback, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetSessionModalTypeChangeCallback";
-    info.bundleName_ = "SetSessionModalTypeChangeCallback";
+    info.abilityName_ = "RegisterSubModalTypeChangeCallback";
+    info.bundleName_ = "RegisterSubModalTypeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+    sceneSession->RegisterSubModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
         return;
     });
-    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
+    EXPECT_NE(sceneSession->onSubModalTypeChange_, nullptr);
 }
 
 /**
- * @tc.name: OnSessionModalTypeChange
- * @tc.desc: OnSessionModalTypeChange
+ * @tc.name: NotifySubModalTypeChange
+ * @tc.desc: NotifySubModalTypeChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, OnSessionModalTypeChange, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, NotifySubModalTypeChange, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnSessionModalTypeChange";
-    info.bundleName_ = "OnSessionModalTypeChange";
+    info.abilityName_ = "NotifySubModalTypeChange";
+    info.bundleName_ = "NotifySubModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetSessionModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
+    sceneSession->RegisterSubModalTypeChangeCallback([](SubWindowModalType subWindowModalType) {
         return;
     });
-    EXPECT_NE(sceneSession->onSessionModalTypeChange_, nullptr);
-    EXPECT_EQ(sceneSession->OnSessionModalTypeChange(SubWindowModalType::TYPE_WINDOW_MODALITY), WSError::WS_OK);
+    EXPECT_NE(sceneSession->onSubModalTypeChange_, nullptr);
+    EXPECT_EQ(sceneSession->NotifySubModalTypeChange(SubWindowModalType::TYPE_WINDOW_MODALITY), WSError::WS_OK);
 }
 
 /**
- * @tc.name: SetMainSessionModalTypeChangeCallback
- * @tc.desc: SetMainSessionModalTypeChangeCallback
+ * @tc.name: RegisterMainModalTypeChangeCallback
+ * @tc.desc: RegisterMainModalTypeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, SetMainSessionModalTypeChangeCallback, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, RegisterMainModalTypeChangeCallback, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetMainSessionModalTypeChangeCallback";
-    info.bundleName_ = "SetMainSessionModalTypeChangeCallback";
+    info.abilityName_ = "RegisterMainModalTypeChangeCallback";
+    info.bundleName_ = "RegisterMainModalTypeChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+    sceneSession->RegisterMainModalTypeChangeCallback([](bool isModal) {
         return;
     });
-    EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
+    EXPECT_NE(sceneSession->onMainModalTypeChange_, nullptr);
 }
 
 /**
@@ -1981,15 +1968,11 @@ HWTEST_F(SceneSessionTest2, GetSubWindowModalType, Function | SmallTest | Level2
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->SetSessionProperty(nullptr);
-    auto result = sceneSession->GetSubWindowModalType();
-    ASSERT_EQ(result, SubWindowModalType::TYPE_UNDEFINED);
-
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sceneSession->SetSessionProperty(property);
-    result = sceneSession->GetSubWindowModalType();
+    auto result = sceneSession->GetSubWindowModalType();
     ASSERT_EQ(result, SubWindowModalType::TYPE_DIALOG);
 }
 
@@ -2047,10 +2030,8 @@ HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
     info.bundleName_ = "IsFullScreenMovable";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-
-    sceneSession->SetSessionProperty(nullptr);
     auto result = sceneSession->IsFullScreenMovable();
-    ASSERT_EQ(false, result);
+    ASSERT_EQ(true, result);
 }
 
 /**

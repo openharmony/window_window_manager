@@ -213,10 +213,18 @@ napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnCreatePipController(env, info) : nullptr;
 }
 
+std::unique_ptr<NapiAsyncTask> JsPipWindowManager::CreateEmptyAsyncTask(napi_env env, napi_value* result)
+{
+    napi_deferred nativeDeferred = nullptr;
+    napi_create_promise(env, &nativeDeferred, result);
+    return std::make_unique<NapiAsyncTask>(nativeDeferred, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+        std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+}
+
 napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
 {
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, &result);
     auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() {
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(

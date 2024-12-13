@@ -171,6 +171,12 @@ void WindowSessionProperty::SetRequestRect(const Rect& requestRect)
     requestRect_ = requestRect;
 }
 
+void WindowSessionProperty::SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig)
+{
+    std::lock_guard<std::mutex> lock(rectAnimationConfigMutex_);
+    rectAnimationConfig_ = rectAnimationConfig;
+}
+
 void WindowSessionProperty::SetWindowType(WindowType type)
 {
     type_ = type;
@@ -281,6 +287,12 @@ Rect WindowSessionProperty::GetRequestRect() const
 {
     std::lock_guard<std::mutex> lock(requestRectMutex_);
     return requestRect_;
+}
+
+RectAnimationConfig WindowSessionProperty::GetRectAnimationConfig() const
+{
+    std::lock_guard<std::mutex> lock(rectAnimationConfigMutex_);
+    return rectAnimationConfig_;
 }
 
 WindowType WindowSessionProperty::GetWindowType() const
@@ -556,6 +568,18 @@ uint32_t WindowSessionProperty::GetWindowModeSupportType() const
     return windowModeSupportType_;
 }
 
+void WindowSessionProperty::SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+{
+    std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
+    supportWindowModes_ = supportWindowModes;
+}
+
+void WindowSessionProperty::GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const
+{
+    std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
+    supportWindowModes = supportWindowModes_;
+}
+
 void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
 {
     animationFlag_ = animationFlag;
@@ -578,10 +602,10 @@ void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
         if (GetPersistentId() != 0 && rects != touchHotAreas_) {
             std::string rectStr;
             for (const auto& rect : rects) {
-                rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) + " , " + std::to_string(rect.posY_) +
-                    " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+                rectStr = rectStr + "[" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_) +
+                    "," + std::to_string(rect.width_) + "," + std::to_string(rect.height_) + "]";
             }
-            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
+            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d hot:%{public}s", GetPersistentId(), rectStr.c_str());
         }
         touchHotAreas_ = rects;
     }
@@ -1019,6 +1043,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
         parcel.WriteUint32(requestRect_.height_) &&
+        parcel.WriteUint32(rectAnimationConfig_.duration) && parcel.WriteFloat(rectAnimationConfig_.x1) &&
+        parcel.WriteFloat(rectAnimationConfig_.y1) && parcel.WriteFloat(rectAnimationConfig_.x2) &&
+        parcel.WriteFloat(rectAnimationConfig_.y2) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
@@ -1057,7 +1084,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
-        parcel.WriteString(appInstanceKey_);
+        parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1071,6 +1098,9 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowRect(rect);
     Rect reqRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     property->SetRequestRect(reqRect);
+    RectAnimationConfig rectAnimationConfig = { parcel.ReadUint32(), parcel.ReadFloat(),
+        parcel.ReadFloat(), parcel.ReadFloat(), parcel.ReadFloat() };
+    property->SetRectAnimationConfig(rectAnimationConfig);
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetFocusable(parcel.ReadBool());
     property->SetFocusableOnShow(parcel.ReadBool());
@@ -1134,6 +1164,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
     property->SetAppInstanceKey(parcel.ReadString());
+    property->SetIsSystemKeyboard(parcel.ReadBool());
     return property;
 }
 
@@ -1142,20 +1173,20 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowName_ = property->windowName_;
     sessionInfo_ = property->sessionInfo_;
     requestRect_ = property->requestRect_;
+    rectAnimationConfig_ = property->rectAnimationConfig_;
     windowRect_ = property->windowRect_;
     type_ = property->type_;
     focusable_ = property->focusable_;
     focusableOnShow_ = property->focusableOnShow_;
     touchable_ = property->touchable_;
     dragEnabled_ = property->dragEnabled_;
-    hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
-    forceHide_ = property->forceHide_;
     raiseEnabled_ = property->raiseEnabled_;
-    topmost_ = property->topmost_;
-    mainWindowTopmost_ = property->mainWindowTopmost_;
+    isSystemCalling_ = property->isSystemCalling_;
     tokenState_ = property->tokenState_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
+    topmost_ = property->topmost_;
+    mainWindowTopmost_ = property->mainWindowTopmost_;
     requestedOrientation_ = property->requestedOrientation_;
     defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
@@ -1170,22 +1201,51 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     accessTokenId_ = property->accessTokenId_;
     maximizeMode_ = property->maximizeMode_;
     windowMode_ = property->windowMode_;
+    windowState_ = property->windowState_;
     limits_ = property->limits_;
+    userLimits_ = property->userLimits_;
+    configLimitsVP_ = property->configLimitsVP_;
+    lastVpr_ = property->lastVpr_;
+    pipTemplateInfo_ = property->pipTemplateInfo_;
+    keyboardLayoutParams_ = property->keyboardLayoutParams_;
     windowModeSupportType_ = property->windowModeSupportType_;
     sysBarPropMap_ = property->sysBarPropMap_;
     isDecorEnable_ = property->isDecorEnable_;
     animationFlag_ = property->animationFlag_;
+    trans_ = property->trans_;
     isFloatingWindowAppType_ = property->isFloatingWindowAppType_;
     touchHotAreas_ = property->touchHotAreas_;
-    isSystemCalling_ = property->isSystemCalling_;
+    hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
+    forceHide_ = property->forceHide_;
+    keepKeyboardFlag_ = property->keepKeyboardFlag_;
+    callingSessionId_ = property->callingSessionId_;
     textFieldPositionY_ = property->textFieldPositionY_;
     textFieldHeight_ = property->textFieldHeight_;
     isNeedUpdateWindowMode_ = property->isNeedUpdateWindowMode_;
-    callingSessionId_ = property->callingSessionId_;
+    touchHotAreasChangeCallback_ = property->touchHotAreasChangeCallback_;
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
-    windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
+    fullScreenStart_ = property->fullScreenStart_;
+    windowMask_ = property->windowMask_;
+    collaboratorType_ = property->collaboratorType_;
+    compatibleModeInPc_ = property->compatibleModeInPc_;
+    compatibleInPcPortraitWidth_ = property->compatibleInPcPortraitWidth_;
+    compatibleInPcPortraitHeight_ = property->compatibleInPcPortraitHeight_;
+    compatibleInPcLandscapeWidth_ = property->compatibleInPcLandscapeWidth_;
+    compatibleInPcLandscapeHeight_ = property->compatibleInPcLandscapeHeight_;
+    isAppSupportPhoneInPc_ = property->isAppSupportPhoneInPc_;
+    isSupportDragInPcCompatibleMode_ = property->isSupportDragInPcCompatibleMode_;
+    isPcAppInPad_ = property->isPcAppInPad_;
+    compatibleModeEnableInPad_ = property->compatibleModeEnableInPad_;
+    subWindowLevel_ = property->subWindowLevel_;
+    realParentId_ = property->realParentId_;
+    uiExtensionUsage_ = property->uiExtensionUsage_;
+    isUIExtFirstSubWindow_ = property->isUIExtFirstSubWindow_;
+    isUIExtensionAbilityProcess_ = property->isUIExtensionAbilityProcess_;
+    isUIExtAnySubWindow_ = property->isUIExtAnySubWindow_;
+    parentWindowType_ = property->parentWindowType_;
     appInstanceKey_ = property->appInstanceKey_;
+    isSystemKeyboard_ = property->isSystemKeyboard_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1640,6 +1700,16 @@ void WindowSessionProperty::SetAppInstanceKey(const std::string& appInstanceKey)
 std::string WindowSessionProperty::GetAppInstanceKey() const
 {
     return appInstanceKey_;
+}
+
+void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
+{
+    isSystemKeyboard_ = isSystemKeyboard;
+}
+
+bool WindowSessionProperty::IsSystemKeyboard() const
+{
+    return isSystemKeyboard_;
 }
 } // namespace Rosen
 } // namespace OHOS

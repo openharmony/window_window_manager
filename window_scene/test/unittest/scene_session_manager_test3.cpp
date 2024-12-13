@@ -112,6 +112,7 @@ void SceneSessionManagerTest3::SetUp()
 void SceneSessionManagerTest3::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -705,6 +706,10 @@ HWTEST_F(SceneSessionManagerTest3, ChangeUIAbilityVisibilityBySCB, Function | Sm
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
     int32_t ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true);
+    EXPECT_EQ(ret, 2097202);
+    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, false);
+    EXPECT_EQ(ret, 2097202);
+    ret = ssm_->ChangeUIAbilityVisibilityBySCB(sceneSession, true, true);
     EXPECT_EQ(ret, 2097202);
 }
 
@@ -1689,8 +1694,10 @@ HWTEST_F(SceneSessionManagerTest3, IsScreenLocked, Function | SmallTest | Level3
 {
     ssm_->sceneSessionMap_.clear();
     ssm_->SetScreenLocked(true);
+    sleep(1);
     EXPECT_TRUE(ssm_->IsScreenLocked());
     ssm_->SetScreenLocked(false);
+    sleep(1);
     EXPECT_FALSE(ssm_->IsScreenLocked());
 }
 
@@ -1980,6 +1987,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSubWindowSizeLimits02, Function | Small
     mainFloat02.SetValue({{"miniHeight", mainFloat02}});
     ssm_->ConfigSubWindowSizeLimits(mainFloat02);
 }
+
 }
 } // namespace Rosen
 } // namespace OHOS

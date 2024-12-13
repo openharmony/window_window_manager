@@ -47,9 +47,9 @@ SCBSystemSession::~SCBSystemSession()
 
 WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
-    const auto& id = GetPersistentId();
-    const auto& type = GetWindowType();
-    WLOGFI("id: %{public}d, type: %{public}d", id, type);
+    const auto id = GetPersistentId();
+    const auto type = GetWindowType();
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id: %{public}d, type: %{public}d", id, type);
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
@@ -57,7 +57,7 @@ WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
+    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -78,8 +78,7 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReas
             session->keyboardPanelRectUpdateCallback_();
         }
         return ret;
-    };
-    PostTask(task, "NotifyClientToUpdateRect");
+    }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
 }
 
@@ -158,7 +157,8 @@ WSError SCBSystemSession::UpdateFocus(bool isFocused)
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", sessionInfo_.bundleName_);
+            "BUNDLE_NAME", sessionInfo_.bundleName_,
+            "WINDOW_TYPE", static_cast<uint32_t>(GetWindowType()));
         NotifyUIRequestFocus();
     } else {
         NotifyUILostFocus();
@@ -190,7 +190,7 @@ void SCBSystemSession::UpdatePointerArea(const WSRect& rect)
 void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
     TLOGD(WmsLogTag::WMS_SCB, "Set Skip Self, isSkip: %{public}d", isSkip);
-    auto task = [weakThis = wptr(this), isSkip]() {
+    PostTask([weakThis = wptr(this), isSkip]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_SCB, "session is null");
@@ -206,17 +206,7 @@ void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
         }
         return WSError::WS_OK;
-    };
-    PostTask(task, "SetSkipSelf");
-}
-
-std::shared_ptr<RSSurfaceNode> SCBSystemSession::GetSurfaceNode()
-{
-    if (!surfaceNode_) {
-        TLOGE(WmsLogTag::WMS_SCB, "surfaceNode_ is null");
-        return nullptr;
-    }
-    return surfaceNode_;
+    }, "SetSkipSelf");
 }
 
 bool SCBSystemSession::IsVisibleForeground() const

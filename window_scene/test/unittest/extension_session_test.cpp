@@ -53,16 +53,16 @@ void ExtensionSessionTest::SetUp()
     SessionInfo info;
     info.abilityName_ = "ExtensionSessionTest";
     info.bundleName_ = "ExtensionSessionTest";
-    extensionSession_ = new (std::nothrow) ExtensionSession(info);
+    extensionSession_ = sptr<ExtensionSession>::MakeSptr(info);
     ASSERT_NE(extensionSession_, nullptr);
 
-    mockSessionStage_ = new (std::nothrow) SessionStageMocker();
+    mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage_, nullptr);
 
-    mockEventChannel_ = new (std::nothrow) WindowEventChannelMocker(mockSessionStage_);
+    mockEventChannel_ = sptr<WindowEventChannelMocker>::MakeSptr(mockSessionStage_);
     ASSERT_NE(mockEventChannel_, nullptr);
 
-    extSessionEventCallback_ = new (std::nothrow) ExtensionSession::ExtensionSessionEventCallback();
+    extSessionEventCallback_ = sptr<ExtensionSession::ExtensionSessionEventCallback>::MakeSptr();
     ASSERT_NE(extSessionEventCallback_, nullptr);
 }
 
@@ -524,7 +524,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo02, Function | 
 HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTest | Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
-    extensionSession_->channelListener_ = new (std::nothrow) WindowEventChannelListener();
+    extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
     ASSERT_NE(extensionSession_->channelListener_, nullptr);
     EXPECT_CALL(*mockEventChannel_, TransferKeyEventForConsumedAsync)
         .WillOnce([](const std::shared_ptr<MMI::KeyEvent>& keyEvent,
@@ -554,7 +554,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, Function | SmallTe
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     EXPECT_CALL(*mockEventChannel_, TransferKeyEventForConsumedAsync);
-    extensionSession_->channelListener_ = new (std::nothrow) WindowEventChannelListener();
+    extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
     ASSERT_NE(extensionSession_->channelListener_, nullptr);
 
     auto keyEvent = MMI::KeyEvent::Create();
@@ -627,7 +627,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed05, Function | SmallTe
 HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed06, Function | SmallTest | Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
-    extensionSession_->channelListener_ = new (std::nothrow) WindowEventChannelListener();
+    extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
     ASSERT_NE(extensionSession_->channelListener_, nullptr);
     EXPECT_CALL(*mockEventChannel_, TransferKeyEventForConsumedAsync).WillOnce(Return(WSError::WS_DO_NOTHING));
 
@@ -686,13 +686,13 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest02, Func
  */
 HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied01, Function | SmallTest | Level1)
 {
-    sptr<WindowEventChannelListener> listener = new (std::nothrow) WindowEventChannelListener();
+    sptr<WindowEventChannelListener> listener = sptr<WindowEventChannelListener>::MakeSptr();
     EXPECT_NE(nullptr, listener);
     sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
-    deathRecipient = new (std::nothrow) ChannelDeathRecipient(listener);
+    deathRecipient = sptr<ChannelDeathRecipient>::MakeSptr(listener);
     EXPECT_NE(nullptr, deathRecipient);
     sptr<IRemoteObject> wptrDeath = nullptr;
-    wptrDeath = new (std::nothrow) WindowEventChannel(nullptr);
+    wptrDeath = sptr<WindowEventChannel>::MakeSptr(nullptr);
     ASSERT_NE(nullptr, wptrDeath);
     deathRecipient->OnRemoteDied(wptrDeath);
     EXPECT_NE(nullptr, deathRecipient);
@@ -705,10 +705,10 @@ HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied01, Function | S
  */
 HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, Function | SmallTest | Level1)
 {
-    sptr<WindowEventChannelListener> listener = new (std::nothrow) WindowEventChannelListener();
+    sptr<WindowEventChannelListener> listener = sptr<WindowEventChannelListener>::MakeSptr();
     EXPECT_NE(nullptr, listener);
     sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
-    deathRecipient = new (std::nothrow) ChannelDeathRecipient(listener);
+    deathRecipient = sptr<ChannelDeathRecipient>::MakeSptr(listener);
     EXPECT_NE(nullptr, deathRecipient);
     deathRecipient->OnRemoteDied(nullptr);
     EXPECT_NE(nullptr, deathRecipient);
@@ -722,7 +722,7 @@ HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, Function | S
 HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, Function | SmallTest | Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
-    extensionSession_->channelListener_ = new (std::nothrow) WindowEventChannelListener();
+    extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
     ASSERT_NE(extensionSession_->channelListener_, nullptr);
 
     auto keyEvent = MMI::KeyEvent::Create();
@@ -753,7 +753,7 @@ HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
     extensionSession_->sessionStage_ = mockSessionStage_;
 
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
-    sptr<AvoidArea> avoidArea = new (std::nothrow) AvoidArea();
+    sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
     ASSERT_NE(avoidArea, nullptr);
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
     EXPECT_CALL(*mockSessionStage_, UpdateAvoidArea).Times(0);
