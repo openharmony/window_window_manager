@@ -4157,10 +4157,10 @@ napi_value JsSceneSession::OnSetSystemActive(napi_env env, napi_callback_info in
     napi_value argv[4] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-       WLOGFE("argc is invalid : %{public}zu", argc);
-       napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-       "Input parameter is missing or invalid"));
-       return NapiGetUndefined(env);
+        WLOGFE("argc is invalid : %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
     }
     bool scbSystemActive = false;
     if (!ConvertFromJsValue(env, argv[0], scbSystemActive)){
@@ -4192,10 +4192,10 @@ napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
 
     bool touchable = false;
     if (!ConvertFromJsValue(env, argv[0], touchable)) {
-      WLOGFE("Failed to  convert parameter to touchable");
-      napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-        "Input parameter is missing or invalid" ));
-      return NapiGetUndefined(env);
+        WLOGFE("Failed to  convert parameter to touchable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
     }
 
     auto session = weakSession_.promote();
