@@ -276,9 +276,6 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, Function | Small
     InitTestSceneSession(1, 103, 14, true, {120, 120, 220, 220});
     InitTestSceneSession(1, 104, 12, true, {100, 100, 200, 200});
     auto it1 = ssm_->sceneSessionMap_.find(104);
-    if (it1 != ssm_->sceneSessionMap_.end()) {
-        it1->second->SetSessionProperty(nullptr);
-    }
     InitTestSceneSession(1, 105, 12, true, {100, 100, 200, 200});
     auto it2 = ssm_->sceneSessionMap_.find(105);
     if (it2 != ssm_->sceneSessionMap_.end()) {
@@ -315,9 +312,6 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate03, Function | Small
     InitTestSceneSession(1, 113, 14, true, {120, 120, 220, 220});
     InitTestSceneSession(1, 114, 12, true, {100, 100, 200, 200});
     auto it1 = ssm_->sceneSessionMap_.find(114);
-    if (it1 != ssm_->sceneSessionMap_.end()) {
-        it1->second->SetSessionProperty(nullptr);
-    }
     InitTestSceneSession(1, 115, 12, true, {100, 100, 200, 200});
     auto it2 = ssm_->sceneSessionMap_.find(115);
     if (it2 != ssm_->sceneSessionMap_.end()) {
@@ -352,9 +346,6 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, Function | Small
     InitTestSceneSession(1, 123, 14, true, {120, 120, 220, 220});
     InitTestSceneSession(1, 124, 12, true, {100, 100, 200, 200});
     auto it1 = ssm_->sceneSessionMap_.find(124);
-    if (it1 != ssm_->sceneSessionMap_.end()) {
-        it1->second->SetSessionProperty(nullptr);
-    }
     InitTestSceneSession(1, 125, 12, true, {100, 100, 200, 200});
     auto it2 = ssm_->sceneSessionMap_.find(125);
     if (it2 != ssm_->sceneSessionMap_.end()) {
@@ -390,9 +381,6 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, Function | Small
     InitTestSceneSession(1, 133, 14, true, {120, 120, 220, 220});
     InitTestSceneSession(1, 134, 12, true, {100, 100, 200, 200});
     auto it1 = ssm_->sceneSessionMap_.find(134);
-    if (it1 != ssm_->sceneSessionMap_.end()) {
-        it1->second->SetSessionProperty(nullptr);
-    }
     InitTestSceneSession(1, 135, 12, true, {100, 100, 200, 200});
     auto it2 = ssm_->sceneSessionMap_.find(135);
     if (it2 != ssm_->sceneSessionMap_.end()) {
