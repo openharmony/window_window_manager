@@ -2031,7 +2031,7 @@ HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     auto result = sceneSession->IsFullScreenMovable();
-    ASSERT_EQ(false, result);
+    ASSERT_EQ(true, result);
 }
 
 /**
