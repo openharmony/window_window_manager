@@ -29,7 +29,6 @@
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
-#include <modifier/rs_property.h>
 
 #include "proxy/include/window_info.h"
 
@@ -5941,13 +5940,15 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
     }
 
     if (rSBehindWindowFilterEnabledModifier_ == nullptr) {
-        rSBehindWindowFilterEnabledProperty_ = std::make_shared<Rosen::RsProperty<bool>>(enabled);
-        rSBehindWindowFilterEnabledModifier_ = std::shard_ptr<Rosen::RSBehindWindowFilterEnabledModifier>(
+        rSBehindWindowFilterEnabledProperty_ = std::make_shared<Rosen::RSProperty<bool>>(enabled);
+        rSBehindWindowFilterEnabledModifier_ = std::make_shared<Rosen::RSBehindWindowFilterEnabledModifier>(
             rSBehindWindowFilterEnabledProperty_);
         surfaceNode->AddModifier(rSBehindWindowFilterEnabledModifier_);
     } else {
         if (rSBehindWindowFilterEnabledProperty_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "get property failed");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "get property failed, try to fix");
+            surfaceNode->RemoveModifier(rSBehindWindowFilterEnabledModifier_);
+            rSBehindWindowFilterEnabledModifier_ = nullptr;
             return;
         }
         rSBehindWindowFilterEnabledProperty_->Set(enabled);
