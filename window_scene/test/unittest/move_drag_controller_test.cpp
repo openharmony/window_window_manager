@@ -55,8 +55,8 @@ void MoveDragControllerTest::SetUp()
     info.abilityName_ = "testSession1";
     info.moduleName_ = "testSession2";
     info.bundleName_ = "testSession3";
-    session_ = new (std::nothrow) Session(info);
-    moveDragController = new MoveDragController(session_->GetPersistentId(), session_->GetWindowType());
+    session_ = sptr<Session>::MakeSptr(info);
+    moveDragController = sptr<MoveDragController>::MakeSptr(session_->GetPersistentId(), session_->GetWindowType());
 }
 
 void MoveDragControllerTest::TearDown()
@@ -325,7 +325,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
  */
 HWTEST_F(MoveDragControllerTest, EventDownInit, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SystemSessionConfig sysConfig;
     moveDragController->InitMoveDragProperty();
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
@@ -356,7 +356,7 @@ HWTEST_F(MoveDragControllerTest, EventDownInit, Function | SmallTest | Level1)
  */
 HWTEST_F(MoveDragControllerTest, EventDownInit01, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetDecorEnable(true);
 
@@ -591,7 +591,7 @@ HWTEST_F(MoveDragControllerTest, ConvertXYByAspectRatio01, Function | SmallTest 
  */
 HWTEST_F(MoveDragControllerTest, InitDecorValue01, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     SystemSessionConfig sysConfig;
     ASSERT_TRUE((moveDragController != nullptr));
     moveDragController->InitDecorValue(property, sysConfig);
@@ -670,7 +670,7 @@ HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1
         return;
     }
     WSRect originalRect = { 100, 100, 1000, 1000 };
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     if (!property) {
         return;
     }
@@ -891,7 +891,7 @@ HWTEST_F(MoveDragControllerTest, CheckDragEventLegal, Function | SmallTest | Lev
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     auto tempPointerEvent = pointerEvent;
     pointerEvent = nullptr;
@@ -1117,7 +1117,8 @@ HWTEST_F(MoveDragControllerTest, GetNewAddedDisplayIdsDuringMoveDrag02, Function
     moveDragController->displayIdSetDuringMoveDrag_.insert(0);
     moveDragController->displayIdSetDuringMoveDrag_.insert(1001);
     ScreenProperty screenProperty0;
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] = new ScreenSession(0, screenProperty0, 0);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
+        sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
     res = moveDragController->GetNewAddedDisplayIdsDuringMoveDrag();
     ASSERT_EQ(true, res.empty());
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();

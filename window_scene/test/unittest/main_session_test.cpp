@@ -59,7 +59,7 @@ void MainSessionTest::SetUp()
     info.abilityName_ = "testMainSession1";
     info.moduleName_ = "testMainSession2";
     info.bundleName_ = "testMainSession3";
-    mainSession_ = new (std::nothrow) MainSession(info, specificCallback);
+    mainSession_ = sptr<MainSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(nullptr, mainSession_);
 }
 
@@ -93,11 +93,11 @@ HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
     info.abilityName_ = "";
     info.moduleName_ = "";
     info.bundleName_ = "";
-    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = 0;
-    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = -1;
@@ -105,11 +105,11 @@ HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
     info.moduleName_ = "MainSession02";
     info.bundleName_ = "MainSession03";
     pSpecificCallback = new(std::nothrow) MainSession::SpecificSessionCallback;
-    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = 0;
-    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 }
 
@@ -152,7 +152,7 @@ HWTEST_F(MainSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
     info.abilityName_ = "testDialogSession1";
     info.moduleName_ = "testDialogSession2";
     info.bundleName_ = "testDialogSession3";
-    sptr<Session> dialogSession = new (std::nothrow) SystemSession(info, nullptr);
+    sptr<Session> dialogSession = sptr<SystemSession>::MakeSptr(info, nullptr);
     dialogSession->SetSessionState(SessionState::STATE_ACTIVE);
     mainSession_->BindDialogToParentSession(dialogSession);
 
@@ -200,12 +200,13 @@ HWTEST_F(MainSessionTest, SetTopmost01, Function | SmallTest | Level1)
  */
 HWTEST_F(MainSessionTest, SetTopmost02, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     mainSession_->SetSessionProperty(property);
     ASSERT_TRUE(mainSession_->GetSessionProperty() != nullptr);
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
 
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback = new SceneSession::SessionChangeCallback();
+    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
+        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     ASSERT_TRUE(sessionChangeCallback != nullptr);
 
     mainSession_->RegisterSessionChangeCallback(sessionChangeCallback);
@@ -267,7 +268,7 @@ HWTEST_F(MainSessionTest, RectCheck03, Function | SmallTest | Level1)
     info.abilityName_ = "testMainSessionRectCheck";
     info.moduleName_ = "testMainSessionRectCheck";
     info.bundleName_ = "testMainSessionRectCheck";
-    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     EXPECT_NE(nullptr, session);
     mainSession_->parentSession_ = session;
     uint32_t curWidth = 100;
