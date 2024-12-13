@@ -812,7 +812,7 @@ HWTEST_F(ScreenSessionDumperTest, IsNumber01, Function | SmallTest | Level1)
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     
-    bool ret = dump->IsNumber("");
+    bool ret = dumper->IsNumber("");
     ASSERT_EQ(ret, false);
 }
 
@@ -827,7 +827,7 @@ HWTEST_F(ScreenSessionDumperTest, IsNumber02, Function | SmallTest | Level1)
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     
-    bool ret = dump->IsNumber("123");
+    bool ret = dumper->IsNumber("123");
     ASSERT_EQ(ret, true);
 }
 
@@ -842,7 +842,7 @@ HWTEST_F(ScreenSessionDumperTest, IsNumber03, Function | SmallTest | Level1)
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     
-    bool ret = dump->IsNumber("123aaa");
+    bool ret = dumper->IsNumber("123aaa");
     ASSERT_EQ(ret, true);
 }
 
