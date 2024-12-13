@@ -79,7 +79,6 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard session, id: %{public}d, calling session id: %{public}d",
             session->GetPersistentId(), session->GetCallingSessionId());
         session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
-        session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         return session->SceneSession::Foreground(property);
     }, "Show");
     return WSError::WS_OK;
@@ -232,7 +231,6 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
             if (curCallingSessionId != INVALID_WINDOW_ID && callingSessionId != curCallingSessionId &&
                 session->IsSessionForeground()) {
                 session->MoveAndResizeKeyboard(sessionProperty->GetKeyboardLayoutParams(), sessionProperty, true);
-                session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
 
                 session->UpdateCallingSessionIdAndPosition(callingSessionId);
             } else {
