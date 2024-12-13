@@ -213,16 +213,14 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
-
-    sptr<WindowSessionProperty> property = nullptr;
-    if (data.ReadBool()) {
-        property = data.ReadStrongParcelable<WindowSessionProperty>();
-    } else {
-        TLOGW(WmsLogTag::WMS_LIFE, "Property not exist!");
+    sptr<WindowSessionProperty> property = data.ReadStrongParcelable<WindowSessionProperty>();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Property is nullptr");
+        return ERR_INVALID_DATA;
     }
 
     sptr<IRemoteObject> token = nullptr;
-    if (property && property->GetTokenState()) {
+    if (property->GetTokenState()) {
         token = data.ReadRemoteObject();
     } else {
         TLOGW(WmsLogTag::WMS_LIFE, "accept token is nullptr");
@@ -239,11 +237,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     reply.WriteInt32(persistentId);
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteParcelable(&systemConfig);
-    if (property) {
-        reply.WriteUint32(property->GetSubWindowLevel());
-    } else {
-        reply.WriteUint32(1); // 1: default sub level
-    }
+    reply.WriteUint32(property->GetSubWindowLevel());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
 }
