@@ -4311,7 +4311,13 @@ napi_value JsSceneSession::OnSyncDefaultRequestedOrientation(napi_env env, napi_
         TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SetDefaultRequestedOrientation(static_cast<Orientation>(defaultRequestedOrientation));
+    auto windowOrientation = static_cast<Orientation>(defaultRequestedOrientation);
+    if (windowOrientation < Orientation::BEGIN || windowOrientation > Orientation::END) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Orientation %{public}u invalid, id:%{public}d",
+            defaultRequestedOrientation, persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetDefaultRequestedOrientation(windowOrientation);
     return NapiGetUndefined(env);
 }
 
