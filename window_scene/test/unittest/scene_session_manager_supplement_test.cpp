@@ -241,17 +241,9 @@ HWTEST_F(SceneSessionManagerSupplementTest, RequestSceneSessionActivationInner,
     sceneSession->SetSessionProperty(property);
     sceneSession->SetCollaboratorType(0);
     auto ret = ssm_->RequestSceneSessionActivationInner(sceneSession, true);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(ret, WSError::WS_OK);
-    } else {
-        ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
-    }
+    ASSERT_EQ(ret, WSError::WS_OK);
     ret = ssm_->RequestSceneSessionActivationInner(sceneSession, false);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(ret, WSError::WS_OK);
-    } else {
-        ASSERT_EQ(ret, WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED);
-    }
+    ASSERT_EQ(ret, WSError::WS_OK);
 }
 
 /**
@@ -330,12 +322,11 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifyCollaboratorAfterStart,
 }
 
 /**
- * @tc.name: DestroyDialogWithMainWindow
- * @tc.desc: SceneSessionManagerSupplementTest DestroyDialogWithMainWindow
+ * @tc.name: TestDestroyDialogWithMainWindow_01
+ * @tc.desc: Test DestroyDialogWithMainWindow with sceneSession is null
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerSupplementTest, DestroyDialogWithMainWindow,
-    Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyDialogWithMainWindow_01, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.bundleName_ = "test1";
@@ -343,6 +334,20 @@ HWTEST_F(SceneSessionManagerSupplementTest, DestroyDialogWithMainWindow,
     sptr<SceneSession> sceneSession;
     auto res = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TestDestroyDialogWithMainWindow_02
+ * @tc.desc: Test DestroyDialogWithMainWindow with window type is WINDOW_TYPE_APP_COMPONENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyDialogWithMainWindow_02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession;
+    ASSERT_NE(ssm_, nullptr);
     ssm_->DestroySubSession(sceneSession);
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
@@ -352,27 +357,86 @@ HWTEST_F(SceneSessionManagerSupplementTest, DestroyDialogWithMainWindow,
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     sceneSession->SetSessionProperty(property);
-    res = ssm_->DestroyDialogWithMainWindow(sceneSession);
+    auto res = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: TestDestroyDialogWithMainWindow_03
+ * @tc.desc: Test DestroyDialogWithMainWindow with subSession is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyDialogWithMainWindow_03, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionProperty(property);
     sptr<SceneSession> sceneSession2;
     sceneSession->dialogVec_.push_back(sceneSession2);
     sceneSession->subSession_.push_back(sceneSession2);
-    ssm_->DestroyDialogWithMainWindow(sceneSession);
-    ssm_->DestroySubSession(sceneSession);
+    auto res = ssm_->DestroyDialogWithMainWindow(sceneSession);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestDestroyDialogWithMainWindow_04
+ * @tc.desc: Test DestroyDialogWithMainWindow with subSession is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyDialogWithMainWindow_04, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    sptr<SceneSession> sceneSession2;
+    sceneSession->dialogVec_.push_back(sceneSession2);
+    sceneSession->subSession_.push_back(sceneSession2);
     sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
-    res = ssm_->DestroyDialogWithMainWindow(sceneSession);
+    ssm_->DestroySubSession(sceneSession);
+    auto res = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestDestroyDialogWithMainWindow_05
+ * @tc.desc: Test DestroyDialogWithMainWindow with insert sceneSession2 in sceneSessionMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyDialogWithMainWindow_05, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    sptr<SceneSession> sceneSession2;
+    sceneSession->dialogVec_.push_back(sceneSession2);
+    sceneSession->subSession_.push_back(sceneSession2);
+    sceneSession2 = new SceneSession(info, nullptr);
+    ASSERT_NE(sceneSession2, nullptr);
     ssm_->DestroySubSession(sceneSession);
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
-    res = ssm_->DestroyDialogWithMainWindow(sceneSession);
+    auto res = ssm_->DestroyDialogWithMainWindow(sceneSession);
     ASSERT_EQ(res, WSError::WS_OK);
-    ssm_->EraseSceneSessionMapById(sceneSession2->GetPersistentId());
-    ssm_->RequestSceneSessionDestruction(sceneSession2, true);
-    ssm_->RequestSceneSessionDestruction(sceneSession2, false);
 }
 
 /**
@@ -544,7 +608,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, TestCreateAndConnectSession_04, Func
 
     auto res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(res, WSError::WS_ERROR_NOT_SYSTEM_APP);
 }
 
 /**
@@ -784,7 +848,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CheckSysWinPermWithFloatTypeThenFals
 
     ASSERT_NE(ssm_, nullptr);
     bool res = ssm_->CheckSystemWindowPermission(property);
-    ASSERT_EQ(res, true);
+    ASSERT_EQ(res, false);
 }
 
 /**
@@ -848,63 +912,170 @@ HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndConnectSpecificSession, Fu
 }
 
 /**
- * @tc.name: CacheSpecificSessionForRecovering
- * @tc.desc: CacheSpecificSessionForRecovering
+ * @tc.name: TestCacheSpecificSessionForRecovering_01
+ * @tc.desc: Test CacheSpecificSessionForRecovering with recoveringFinished_ is false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerSupplementTest, CacheSpecificSessionForRecovering, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerSupplementTest, TestCacheSpecificSessionForRecovering_01, Function | SmallTest | Level3)
 {
     sptr<SceneSession> sceneSession;
     SessionInfo info;
     info.bundleName_ = "test1";
     info.abilityName_ = "test2";
     sptr<WindowSessionProperty> property;
+    ssm_->recoveringFinished_ = true;
+    ssm_->recoverSubSessionCacheMap_.clear();
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
+    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
+}
+
+/**
+ * @tc.name: TestCacheSpecificSessionForRecovering_02
+ * @tc.desc: Test CacheSpecificSessionForRecovering with property is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestCacheSpecificSessionForRecovering_02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property;
     ssm_->recoveringFinished_ = false;
+    ssm_->recoverSubSessionCacheMap_.clear();
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: TestCacheSpecificSessionForRecovering_03
+ * @tc.desc: Test CacheSpecificSessionForRecovering with sceneSession is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestCacheSpecificSessionForRecovering_03, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->recoveringFinished_ = false;
+    ssm_->recoverSubSessionCacheMap_.clear();
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
+}
+
+/**
+ * @tc.name: TestCacheSpecificSessionForRecovering_04
+ * @tc.desc: Test CacheSpecificSessionForRecovering with windowType is WINDOW_TYPE_APP_MAIN_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestCacheSpecificSessionForRecovering_04, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->recoveringFinished_ = false;
+    ssm_->recoverSubSessionCacheMap_.clear();
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
+}
+
+/**
+ * @tc.name: TestCacheSpecificSessionForRecovering_05
+ * @tc.desc: Test CacheSpecificSessionForRecovering with windowType is APP_SUB_WINDOW_END and no parentId in map
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestCacheSpecificSessionForRecovering_05, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->recoveringFinished_ = false;
+    ssm_->recoverSubSessionCacheMap_.clear();
     property->SetWindowType(WindowType::APP_SUB_WINDOW_END);
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+}
+
+/**
+ * @tc.name: TestCacheSpecificSessionForRecovering_06
+ * @tc.desc: Test CacheSpecificSessionForRecovering with windowType is WINDOW_TYPE_APP_SUB_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestCacheSpecificSessionForRecovering_06, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->recoveringFinished_ = false;
+    ssm_->recoverSubSessionCacheMap_.clear();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetParentPersistentId(1);
     NotifyCreateSubSessionFunc func;
+    ssm_->createSubSessionFuncMap_.clear();
     ssm_->createSubSessionFuncMap_.insert({1, func});
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
     ssm_->createSubSessionFuncMap_.clear();
-    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 1);
-    ssm_->RecoverCachedSubSession(1);
-    ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
-    std::vector<sptr<SceneSession>> sessions;
-    sessions.push_back(sceneSession);
-    ssm_->recoverSubSessionCacheMap_.insert({1, sessions});
-    ssm_->RecoverCachedSubSession(1);
-    ssm_->recoverSubSessionCacheMap_.clear();
-    ssm_->NotifySessionUnfocusedToClient(1);
-    std::shared_ptr<SessionListenerController> listener = std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listener;
-    ssm_->NotifySessionUnfocusedToClient(1);
-    ssm_->listenerController_ = nullptr;
 }
 
 /**
- * @tc.name: RecoverAndReconnectSceneSession
- * @tc.desc: RecoverAndReconnectSceneSession
+ * @tc.name: TestCacheSpecificSessionForRecovering_07
+ * @tc.desc: Test CacheSpecificSessionForRecovering with windowType is WINDOW_TYPE_DIALOG
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndReconnectSceneSession, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerSupplementTest, TestCacheSpecificSessionForRecovering_07, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->recoveringFinished_ = false;
+    ssm_->recoverDialogSessionCacheMap_.clear();
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    property->SetParentPersistentId(1);
+    NotifyCreateSubSessionFunc func;
+    ssm_->bindDialogTargetFuncMap_.clear();
+    ssm_->bindDialogTargetFuncMap_.insert({1, func});
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
+    ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_.size(), 0);
+}
+
+/**
+ * @tc.name: TestCacheSpecificSessionForRecovering_08
+ * @tc.desc: Test CacheSpecificSessionForRecovering with windowType is WINDOW_TYPE_DIALOG and no parentId in map
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestCacheSpecificSessionForRecovering_08, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->recoveringFinished_ = false;
+    ssm_->recoverDialogSessionCacheMap_.clear();
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    NotifyCreateSubSessionFunc func;
+    ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
+    ASSERT_EQ(ssm_->recoverDialogSessionCacheMap_.size(), 1);
+}
+
+/**
+ * @tc.name: TestRecoverAndReconnectSceneSession_01
+ * @tc.desc: Test RecoverAndReconnectSceneSession with property is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestRecoverAndReconnectSceneSession_01, Function | SmallTest | Level3)
 {
     sptr<ISessionStage> sessionStage;
     sptr<IWindowEventChannel> eventChannel;
@@ -912,29 +1083,76 @@ HWTEST_F(SceneSessionManagerSupplementTest, RecoverAndReconnectSceneSession, Fun
     sptr<WindowSessionProperty> property;
     sptr<ISession> session;
     sptr<IRemoteObject> token;
+
     auto ret = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session, property, token);
     ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
+}
+
+/**
+ * @tc.name: TestRecoverAndReconnectSceneSession_02
+ * @tc.desc: Test RecoverAndReconnectSceneSession with recoveringFinished_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestRecoverAndReconnectSceneSession_02, Function | SmallTest | Level3)
+{
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<ISession> session;
+    sptr<IRemoteObject> token;
+
     property->SetPersistentId(1);
     ssm_->alivePersistentIds_.push_back(1);
     ssm_->recoveringFinished_ = true;
-    ret = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session, property, token);
+    auto ret = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session, property, token);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_OPERATION);
-    ssm_->recoveringFinished_ = false;
-    ret = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session, property, token);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    ret = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session, property, token);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
-    NotifyRecoverSceneSessionFunc func;
-    ssm_->SetRecoverSceneSessionListener(func);
     ssm_->alivePersistentIds_.clear();
-    NotifyCreateSubSessionFunc func2;
-    ssm_->RegisterCreateSubSessionListener(1, func2);
-    ssm_->createSubSessionFuncMap_.insert({ 1, func2 });
-    ssm_->RegisterCreateSubSessionListener(1, func2);
-    ssm_->createSubSessionFuncMap_.clear();
+}
+
+/**
+ * @tc.name: TestRecoverAndReconnectSceneSession_03
+ * @tc.desc: Test RecoverAndReconnectSceneSession with recoveringFinished_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestRecoverAndReconnectSceneSession_03, Function | SmallTest | Level3)
+{
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<ISession> session;
+    sptr<IRemoteObject> token;
+
+    property->SetPersistentId(1);
+    ssm_->alivePersistentIds_.push_back(1);
+    ssm_->recoveringFinished_ = false;
+    auto ret = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session, property, token);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    ssm_->alivePersistentIds_.clear();
+}
+
+/**
+ * @tc.name: TestRecoverAndReconnectSceneSession_04
+ * @tc.desc: Test RecoverAndReconnectSceneSession with windowType is APP_SUB_WINDOW_END
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestRecoverAndReconnectSceneSession_04, Function | SmallTest | Level3)
+{
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<ISession> session;
+    sptr<IRemoteObject> token;
+
+    property->SetPersistentId(1);
+    ssm_->alivePersistentIds_.push_back(1);
+    ssm_->recoveringFinished_ = false;
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    auto ret = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, node, session, property, token);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    ssm_->alivePersistentIds_.clear();
 }
 
 /**
@@ -1022,37 +1240,86 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifyCreateSubSession, Function | S
 }
 
 /**
- * @tc.name: DestroyAndDisconnectSpecificSessionInner
- * @tc.desc: DestroyAndDisconnectSpecificSessionInner
+ * @tc.name: TestDestroyAndDisconSpecSessionInner_01
+ * @tc.desc: Test DestroyAndDisconnectSpecificSessionInner with invaild persistentId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerSupplementTest, DestroyAndDisconnectSpecificSessionInner, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyAndDisconSpecSessionInner_01, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
-    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    int invaildPersistentId = -1;
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(invaildPersistentId);
     ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: TestDestroyAndDisconSpecSessionInner_02
+ * @tc.desc: Test DestroyAndDisconnectSpecificSessionInner with true persistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyAndDisconSpecSessionInner_02, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.bundleName_ = "test1";
     info.abilityName_ = "test2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
     uint32_t uid = 0;
     ssm_->GetTopWindowId(1, uid);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->GetTopWindowId(1, uid);
-    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
     ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestDestroyAndDisconSpecSessionInner_03
+ * @tc.desc: Test DestroyAndDisconnectSpecificSessionInner with WindowType APP_SUB_WINDOW_BASE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyAndDisconSpecSessionInner_03, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t uid = 0;
+    ssm_->GetTopWindowId(1, uid);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->GetTopWindowId(1, uid);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    property->SetParentPersistentId(100);
+    ASSERT_EQ(property->GetParentPersistentId(), 100);
+    sceneSession->SetSessionProperty(property);
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestDestroyAndDisconSpecSessionInner_04
+ * @tc.desc: Test DestroyAndDisconnectSpecificSessionInner with WindowType WINDOW_TYPE_DIALOG
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestDestroyAndDisconSpecSessionInner_04, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t uid = 0;
+    ssm_->GetTopWindowId(1, uid);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->GetTopWindowId(1, uid);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     property->SetParentPersistentId(100);
     ASSERT_EQ(property->GetParentPersistentId(), 100);
     sceneSession->SetSessionProperty(property);
-    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
-    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    ASSERT_EQ(ret, WSError::WS_OK);
 }
 
 /**
@@ -1105,61 +1372,217 @@ HWTEST_F(SceneSessionManagerSupplementTest, GetFocusWindowInfo, Function | Small
 }
 
 /**
- * @tc.name: IsSessionVisible
- * @tc.desc: IsSessionVisible
+ * @tc.name: TestIsSessionVisible_01
+ * @tc.desc: Test IsSessionVisible with session is null then false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerSupplementTest, IsSessionVisible, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_01, Function | SmallTest | Level3)
 {
-    SessionInfo info;
-    info.bundleName_ = "test1";
     sptr<SceneSession> sceneSession;
     bool ret = ssm_->IsSessionVisible(sceneSession);
     ASSERT_EQ(ret, false);
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: TestIsSessionVisible_02
+ * @tc.desc: Test IsSessionVisible with isScbCoreEnabled_ is true then false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetScbCoreEnabled(true);
+    sceneSession->isVisible_ = false;
+
+    bool ret = ssm_->IsSessionVisible(sceneSession);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TestIsSessionVisible_03
+ * @tc.desc: Test IsSessionVisible with WindowType is APP_SUB_WINDOW_BASE then false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_03, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetScbCoreEnabled(false);
+    sceneSession->isVisible_ = true;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ssm_->IsSessionVisible(sceneSession);
-    property->SetParentPersistentId(1);
     sceneSession->SetSessionProperty(property);
+
+    bool ret = ssm_->IsSessionVisible(sceneSession);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TestIsSessionVisible_04
+ * @tc.desc: Test IsSessionVisible with mainSession is not null then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_04, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetScbCoreEnabled(false);
+    sceneSession->isVisible_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     SessionInfo info1;
     info1.bundleName_ = "test3";
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    ASSERT_NE(sceneSession1, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession1});
+    property->SetParentPersistentId(100);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetParentSession(sceneSession1);
+
+    bool ret = ssm_->IsSessionVisible(sceneSession);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: TestIsSessionVisible_05
+ * @tc.desc: Test IsSessionVisible with session and mainSession state is STATE_ACTIVE then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_05, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetScbCoreEnabled(false);
+    sceneSession->isVisible_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    SessionInfo info1;
+    info1.bundleName_ = "test3";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession1});
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, false);
-    sceneSession->isVisible_ = true;
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, true);
-    sceneSession->isVisible_ = false;
-    sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, false);
+    property->SetParentPersistentId(1);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetParentSession(sceneSession1);
     sceneSession1->state_ = SessionState::STATE_ACTIVE;
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, false);
-    sceneSession->state_ = SessionState::STATE_INACTIVE;
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, false);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, false);
-    sceneSession->isVisible_ = true;
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, true);
-    sceneSession->isVisible_ = false;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, false);
-    sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, false);
+
+    bool ret = ssm_->IsSessionVisible(sceneSession);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: TestIsSessionVisible_06
+ * @tc.desc: Test IsSessionVisible with session state is STATE_ACTIVE and mainSession state is STATE_INACTIVE then false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_06, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetScbCoreEnabled(false);
+    sceneSession->isVisible_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    SessionInfo info1;
+    info1.bundleName_ = "test3";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession1});
+    property->SetParentPersistentId(1);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetParentSession(sceneSession1);
+    sceneSession1->state_ = SessionState::STATE_INACTIVE;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+
+    bool ret = ssm_->IsSessionVisible(sceneSession);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TestIsSessionVisible_07
+ * @tc.desc: Test IsSessionVisible with session state is STATE_INACTIVE and isVisible_ is false then false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_07, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetScbCoreEnabled(false);
+    sceneSession->isVisible_ = false;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    SessionInfo info1;
+    info1.bundleName_ = "test3";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession1});
+    property->SetParentPersistentId(1);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetParentSession(sceneSession1);
     sceneSession->state_ = SessionState::STATE_INACTIVE;
-    ret = ssm_->IsSessionVisible(sceneSession);
-    EXPECT_EQ(ret, false);
+
+    bool ret = ssm_->IsSessionVisible(sceneSession);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: TestIsSessionVisible_08
+ * @tc.desc: Test IsSessionVisible with window type is WINDOW_TYPE_APP_MAIN_WINDOW and isVisible_ is true then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_08, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetScbCoreEnabled(false);
+    sceneSession->isVisible_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->state_ = SessionState::STATE_INACTIVE;
+
+    bool ret = ssm_->IsSessionVisible(sceneSession);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: TestIsSessionVisible_09
+ * @tc.desc: Test IsSessionVisible with window type is WINDOW_TYPE_APP_MAIN_WINDOW and isVisible_ is false then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerSupplementTest, TestIsSessionVisible_09, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetScbCoreEnabled(false);
+    sceneSession->isVisible_ = false;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+
+    bool ret = ssm_->IsSessionVisible(sceneSession);
+    ASSERT_EQ(ret, true);
 }
 
 /**

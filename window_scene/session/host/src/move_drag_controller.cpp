@@ -419,19 +419,20 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
 {
     if (reason == SizeChangeReason::DRAG_START) {
         moveDragProperty_.targetRect_ = moveDragProperty_.originalRect_;
-        TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
+        TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect:%{public}s", moveDragProperty_.targetRect_.ToString().c_str());
         return;
     }
+    std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
     if (!WindowHelper::IsSystemWindow(winType_) ||
         static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()) == moveDragStartDisplayId_) {
-        std::pair<int32_t, int32_t> trans = CalcUnifiedTranslate(pointerEvent);
         moveDragProperty_.targetRect_ =
             MathHelper::GreatNotEqual(aspectRatio_, NEAR_ZERO) ?
             CalcFixedAspectRatioTargetRect(type_, trans.first, trans.second,
             aspectRatio_, moveDragProperty_.originalRect_):
             CalcFreeformTargetRect(type_, trans.first, trans.second, moveDragProperty_.originalRect_);
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect:%{public}s, tranX:%{public}d, tranY:%{public}d",
+        moveDragProperty_.targetRect_.ToString().c_str(), trans.first, trans.second);
 }
 
 bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -591,6 +592,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     const auto& sourceType = pointerEvent->GetSourceType();
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Mouse click event but not left click");
         return false;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "MoveDragController::EventDownInit");
@@ -634,6 +636,7 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
 {
     WSRect targetRect = originalRect;
     FixTranslateByLimits(tranX, tranY);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "areaType:%{public}u", type);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
         targetRect.posX_ += tranX;
         targetRect.width_ -= tranX;
@@ -665,12 +668,14 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     } else {
         targetRect.width_ = static_cast<int32_t>(static_cast<float>(targetRect.height_) * newRatio);
     }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "curRatio:%{public}f, newRatio:%{public}f", curRatio, newRatio);
     return targetRect;
 }
 
 WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t tranX, int32_t tranY,
     float aspectRatio, WSRect originalRect)
 {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     int32_t posX = originalRect.posX_;
     int32_t posY = originalRect.posY_;
     int32_t width = static_cast<int32_t>(originalRect.width_);
@@ -681,6 +686,7 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
         }
     }
 
+    TLOGD(WmsLogTag::WMS_LAYOUT, "ratio:%{public}f, areaType:%{public}u", aspectRatio, type);
     ConvertXYByAspectRatio(tranX, tranY, aspectRatio);
     FixTranslateByLimits(tranX, tranY);
     switch (type) {
@@ -720,6 +726,9 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
 
 void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "areaType:%{public}u, minWidth:%{public}u, maxWidth:%{public}u, "
+        "minHeight:%{public}u, maxHeight:%{public}u", type,
+        limits_.minWidth_, limits_.maxWidth_, limits_.minHeight_, limits_.maxHeight_);
     if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
         minTranX_ = moveDragProperty_.originalRect_.width_ - static_cast<int32_t>(limits_.maxWidth_);
         maxTranX_ = moveDragProperty_.originalRect_.width_ - static_cast<int32_t>(limits_.minWidth_);
@@ -805,6 +814,8 @@ void MoveDragController::FixTranslateByLimits(int32_t& tranX, int32_t& tranY)
     } else if (tranY > maxTranY_) {
         tranY = maxTranY_;
     }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "tranX:%{public}d, tranY:%{public}d, minTranX:%{public}d, maxTranX:%{public}d, "
+        "minTranY:%{public}d, maxTranY:%{public}d", tranX, tranY, minTranX_, maxTranX_, minTranY_, maxTranY_);
 }
 
 bool MoveDragController::InitMainAxis(AreaType type, int32_t tranX, int32_t tranY)
