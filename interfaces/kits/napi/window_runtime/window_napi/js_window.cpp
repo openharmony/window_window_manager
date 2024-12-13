@@ -6962,7 +6962,7 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
         !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "OnSetImmersiveModeEnabledState is not allowed since invalid window type");
+        TLOGE(WmsLogTag::WMS_IMMS, "not allowed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
@@ -6976,13 +6976,13 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
     }
     bool enable = true;
     napi_get_value_bool(env, nativeVal, &enable);
-    TLOGI(WmsLogTag::WMS_IMMS, "OnSetImmersiveModeEnabledState to %{public}d", static_cast<int32_t>(enable));
+    TLOGI(WmsLogTag::WMS_IMMS, "enable to %{public}d", static_cast<int32_t>(enable));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetImmersiveModeEnabledState(enable));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "Window immersive mode set enabled failed, ret = %{public}d", ret);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s] OnSetImmersiveModeEnabledState end",
+    TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s] set end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return NapiGetUndefined(env);
 }
@@ -6995,7 +6995,7 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
         !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "OnGetImmersiveModeEnabledState is not allowed since invalid window type");
+        TLOGE(WmsLogTag::WMS_IMMS, "not allowed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 

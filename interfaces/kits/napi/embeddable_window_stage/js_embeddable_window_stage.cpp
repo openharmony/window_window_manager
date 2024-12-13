@@ -141,7 +141,7 @@ napi_value JsEmbeddableWindowStage::OnGetMainWindow(napi_env env, napi_callback_
             if (windowImpl != nullptr) {
                 task.Resolve(env, Rosen::JsExtensionWindow::CreateJsExtensionWindowObject(env,
                 windowImpl, sessionInfo));
-                TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s [NAPI]Get main window [%{public}u, %{public}s]",
+                TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s [%{public}u, %{public}s]",
                     where, windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str());
             } else {
                 task.Reject(env, CreateJsError(env,
@@ -336,7 +336,7 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
 napi_value JsEmbeddableWindowStage::CreateJsEmbeddableWindowStage(napi_env env, sptr<Rosen::Window> window,
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "CreateJsEmbeddableWindowStage");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
