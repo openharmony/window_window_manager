@@ -586,10 +586,9 @@ bool SessionStageStub::WriteSmallStringVector(
     TLOGD(WmsLogTag::WMS_UIEXT, "entry");
     reply.SetMaxCapacity(CAPACITY_THRESHOLD);
     if (!reply.WriteStringVector(infos)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo write infos failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "write infos failed");
         return false;
     }
-
     return true;
 }
 
@@ -628,7 +627,7 @@ bool SessionStageStub::WriteBigStringVector(
 
 int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo!");
+    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
     std::vector<std::string> params;
     if (!data.ReadStringVector(&params)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to read string vector");
@@ -642,20 +641,15 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
         return ERR_TRANSACTION_FAILED;
     }
 
-    bool writeResult = true;
-    if (isSmallData) {
-        writeResult = WriteSmallStringVector(infos, reply);
-    } else {
-        writeResult = WriteBigStringVector(infos, reply);
-    }
-
+    bool writeResult = isSmallData? WriteSmallStringVector(infos, reply) :
+        WriteBigStringVector(infos, reply);
     if (!writeResult) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo write data failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "write data failed");
         return ERR_TRANSACTION_FAILED;
     }
 
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "HandleNotifyDumpInfo write errCode failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "write errCode failed");
         return ERR_TRANSACTION_FAILED;
     }
 

@@ -1231,7 +1231,6 @@ bool SessionStageProxy::ReadSmallStringVectorFromParcel(
         TLOGE(WmsLogTag::WMS_UIEXT, "Read string vector failed");
         return false;
     }
-
     return true;
 }
 
@@ -1308,13 +1307,8 @@ WSError SessionStageProxy::NotifyDumpInfo(
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    bool readResult = true;
-    if (smallData) {
-        readResult = ReadSmallStringVectorFromParcel(reply, info);
-    } else {
-        readResult = ReadBigStringVectorFromParcel(reply, info);
-    }
-
+    bool readResult = smallData? ReadSmallStringVectorFromParcel(reply, info) :
+        ReadBigStringVectorFromParcel(reply, info);
     if (!readResult) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read data failed");
         return WSError::WS_ERROR_IPC_FAILED;
