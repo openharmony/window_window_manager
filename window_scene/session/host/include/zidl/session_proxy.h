@@ -101,6 +101,10 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * Starting Window
+     */
+    WSError RemoveStartingWindow() override;
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
 
 private:

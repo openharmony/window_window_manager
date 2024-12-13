@@ -146,6 +146,17 @@ bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
     return false;
 }
 
+bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    auto& metadata = abilityInfo->metadata;
+    for (const auto& item : metadata) {
+        if (item.name == "enable.remove.starting.window") {
+            return item.value == "true";
+        }
+    }
+    return false;
+}
+
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
     BundleStatusCallback() = default;
@@ -3448,6 +3459,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
         WLOGFE("abilityInfo is nullptr!");
         return;
     }
+    sceneSession->SetEnableRemoveStartingWindow(GetEnableRemoveStartingWindowFromBMS(abilityInfo));
     sceneSession->SetSessionInfoAbilityInfo(abilityInfo);
     sceneSession->SetSessionInfoTime(GetCurrentTime());
     if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
