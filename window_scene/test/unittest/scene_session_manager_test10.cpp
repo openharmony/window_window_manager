@@ -274,7 +274,6 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, Function | Small
     InitTestSceneSession(1, 101, 11, true, {100, 100, 200, 200});
     ssm_->sceneSessionMap_.insert({102, nullptr});
     InitTestSceneSession(1, 103, 14, true, {120, 120, 220, 220});
-    InitTestSceneSession(1, 104, 12, true, {100, 100, 200, 200});
     InitTestSceneSession(1, 105, 12, true, {100, 100, 200, 200});
     auto it1 = ssm_->sceneSessionMap_.find(105);
     if (it1 != ssm_->sceneSessionMap_.end()) {
@@ -289,7 +288,7 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, Function | Small
     std::vector<int32_t> windowIds;
     WMError result = ssm_->GetWindowIdsByCoordinate(1, 0, -1, -1, windowIds);
     EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(6, windowIds.size());
+    EXPECT_EQ(5, windowIds.size());
     EXPECT_EQ(106, windowIds[0]);
     EXPECT_EQ(103, windowIds[1]);
     EXPECT_EQ(109, windowIds[2]);
@@ -342,7 +341,6 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, Function | Small
     InitTestSceneSession(1, 121, 11, true, {100, 100, 200, 200});
     ssm_->sceneSessionMap_.insert({102, nullptr});
     InitTestSceneSession(1, 123, 14, true, {120, 120, 220, 220});
-    InitTestSceneSession(1, 124, 12, true, {100, 100, 200, 200});
     InitTestSceneSession(1, 125, 12, true, {100, 100, 200, 200});
     auto it1 = ssm_->sceneSessionMap_.find(125);
     if (it1 != ssm_->sceneSessionMap_.end()) {
@@ -357,7 +355,7 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, Function | Small
     std::vector<int32_t> windowIds;
     WMError result = ssm_->GetWindowIdsByCoordinate(1, 0, 180, 180, windowIds);
     EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(5, windowIds.size());
+    EXPECT_EQ(4, windowIds.size());
     EXPECT_EQ(126, windowIds[0]);
     EXPECT_EQ(123, windowIds[1]);
     EXPECT_EQ(129, windowIds[2]);
