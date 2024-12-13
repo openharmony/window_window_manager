@@ -812,6 +812,9 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
 
     sceneSession->winRect_ = {0, 0, 1, 1};
     sceneSession->clientRect_ = {1, 1, 1, 1};
+    ASSERT_FALSE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
+
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     sceneSession->winRect_ = {1, 1, 1, 1};
