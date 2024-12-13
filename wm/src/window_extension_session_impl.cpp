@@ -1285,11 +1285,7 @@ void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
 WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string>& params,
     std::vector<std::string>& info)
 {
-<<<<<<< HEAD
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d", GetPersistentId());
-=======
-    TLOGI(WmsLogTag::WMS_UIEXT, "Received dump request, persistentId=%{public}d", GetPersistentId());
->>>>>>> upgrade/master
     auto uiContentSharedPtr = GetUIContentSharedPtr();
     if (uiContentSharedPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is nullptr");
