@@ -32,7 +32,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
-class ScreenSessionManagerProxyTest : public testing::Test {
+class ScreenSessionManagerProxyUtTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -40,19 +40,19 @@ public:
     void TearDown() override;
 };
 
-void ScreenSessionManagerProxyTest::SetUpTestCase()
+void ScreenSessionManagerProxyUtTest::SetUpTestCase()
 {
 }
 
-void ScreenSessionManagerProxyTest::TearDownTestCase()
+void ScreenSessionManagerProxyUtTest::TearDownTestCase()
 {
 }
 
-void ScreenSessionManagerProxyTest::SetUp()
+void ScreenSessionManagerProxyUtTest::SetUp()
 {
 }
 
-void ScreenSessionManagerProxyTest::TearDown()
+void ScreenSessionManagerProxyUtTest::TearDown()
 {
 }
 
@@ -62,7 +62,7 @@ namespace {
  * @tc.desc: SetPrivacyStateByDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetPrivacyStateByDisplayId, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetPrivacyStateByDisplayId, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     DisplayId id = 0;
@@ -86,7 +86,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetPrivacyStateByDisplayId, Function | S
  * @tc.desc: SetScreenPrivacyWindowList
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowList, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenPrivacyWindowList, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     DisplayId id = 0;
@@ -110,7 +110,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowList, Function | S
  * @tc.desc: SetVirtualScreenBlackList
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualScreenBlackList, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -134,7 +134,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenBlackList, Function | Sm
  * @tc.desc: ProxyForFreeze
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, ProxyForFreeze, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, ProxyForFreeze, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     const std::set<int32_t>& pidList = {1, 2, 3};
@@ -152,7 +152,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, ProxyForFreeze, Function | SmallTest | L
  * @tc.desc: SetVirtualScreenStatus
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenStatus, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualScreenStatus, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -172,7 +172,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenStatus, Function | Small
  * @tc.desc: SetVirtualScreenSecurityExemption
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenSecurityExemption, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualScreenSecurityExemption, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -191,7 +191,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenSecurityExemption, Funct
  * @tc.desc: GetAllDisplayPhysicalResolution
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetAllDisplayPhysicalResolution, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -212,7 +212,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayPhysicalResolution, Functio
  * @tc.desc: GetDefaultDisplayInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDefaultDisplayInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetDefaultDisplayInfo, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
 
@@ -235,7 +235,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDefaultDisplayInfo, Function | SmallT
  * @tc.desc: SetScreenActiveMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenActiveMode, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenActiveMode, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -260,7 +260,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenActiveMode, Function | SmallTes
  * @tc.desc: SetVirtualPixelRatio
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatio, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualPixelRatio, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -285,7 +285,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatio, Function | SmallTe
  * @tc.desc: SetVirtualPixelRatioSystem
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatioSystem, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualPixelRatioSystem, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -310,7 +310,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatioSystem, Function | S
  * @tc.desc: SetResolution
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetResolution, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetResolution, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -337,7 +337,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetResolution, Function | SmallTest | Le
  * @tc.desc: GetDensityInCurResolution
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDensityInCurResolution, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetDensityInCurResolution, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -363,7 +363,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDensityInCurResolution, Function | Sm
  * @tc.desc: GetScreenColorGamut
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenColorGamut, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetScreenColorGamut, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -389,7 +389,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenColorGamut, Function | SmallTes
  * @tc.desc: SetScreenColorGamut
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorGamut, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenColorGamut, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -414,7 +414,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorGamut, Function | SmallTes
  * @tc.desc: GetScreenGamutMap
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGamutMap, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetScreenGamutMap, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -439,7 +439,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGamutMap, Function | SmallTest 
  * @tc.desc: SetScreenGamutMap
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenGamutMap, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenGamutMap, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -464,7 +464,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenGamutMap, Function | SmallTest 
  * @tc.desc: SetScreenColorTransform
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorTransform, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenColorTransform, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -488,7 +488,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorTransform, Function | Smal
  * @tc.desc: GetPixelFormat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetPixelFormat, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetPixelFormat, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -513,7 +513,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPixelFormat, Function | SmallTest | L
  * @tc.desc: SetPixelFormat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetPixelFormat, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetPixelFormat, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -538,7 +538,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetPixelFormat, Function | SmallTest | L
  * @tc.desc: GetSupportedHDRFormats
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetSupportedHDRFormats, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -563,7 +563,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSupportedHDRFormats, Function | Small
  * @tc.desc: GetScreenHDRFormat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenHDRFormat, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetScreenHDRFormat, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -588,7 +588,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenHDRFormat, Function | SmallTest
  * @tc.desc: SetScreenHDRFormat
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenHDRFormat, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenHDRFormat, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenId id = 1001;
@@ -613,7 +613,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenHDRFormat, Function | SmallTest
  * @tc.desc: RegisterDisplayManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, RegisterDisplayManagerAgent, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, RegisterDisplayManagerAgent, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -633,7 +633,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, RegisterDisplayManagerAgent, Function | 
  * @tc.desc: UnregisterDisplayManagerAgent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, UnregisterDisplayManagerAgent, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, UnregisterDisplayManagerAgent, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -653,7 +653,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, UnregisterDisplayManagerAgent, Function 
  * @tc.desc: WakeUpBegin
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, WakeUpBegin, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, WakeUpBegin, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -670,7 +670,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpBegin, Function | SmallTest | Leve
  * @tc.desc: WakeUpEnd
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, WakeUpEnd, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, WakeUpEnd, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -685,7 +685,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpEnd, Function | SmallTest | Level1
  * @tc.desc: SuspendBegin
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SuspendBegin, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SuspendBegin, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -701,7 +701,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SuspendBegin, Function | SmallTest | Lev
  * @tc.desc: SuspendEnd
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SuspendEnd, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SuspendEnd, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -717,7 +717,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SuspendEnd, Function | SmallTest | Level
  * @tc.desc: SetScreenPowerById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenPowerById, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     ScreenPowerState state {0};
@@ -737,7 +737,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, Function | SmallTest
  * @tc.desc: SetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetDisplayState, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetDisplayState, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -754,7 +754,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetDisplayState, Function | SmallTest | 
  * @tc.desc: SetSpecifiedScreenPower
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetSpecifiedScreenPower, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetSpecifiedScreenPower, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -773,7 +773,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetSpecifiedScreenPower, Function | Smal
  * @tc.desc: SetScreenPowerForAll
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerForAll, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenPowerForAll, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -791,7 +791,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerForAll, Function | SmallTe
  * @tc.desc: GetDisplayState
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayState, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetDisplayState, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -807,7 +807,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayState, Function | SmallTest | 
  * @tc.desc: TryToCancelScreenOff
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, TryToCancelScreenOff, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -823,7 +823,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, Function | SmallTe
  * @tc.desc: NotifyDisplayEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, NotifyDisplayEvent, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, NotifyDisplayEvent, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -845,7 +845,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, NotifyDisplayEvent, Function | SmallTest
  * @tc.desc: GetScreenPower
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenPower, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetScreenPower, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -861,7 +861,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenPower, Function | SmallTest | L
  * @tc.desc: SetVirtualMirrorScreenCanvasRotation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenCanvasRotation, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualMirrorScreenCanvasRotation, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -879,7 +879,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenCanvasRotation, Fu
  * @tc.desc: SetVirtualMirrorScreenScaleMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenScaleMode, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualMirrorScreenScaleMode, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -897,7 +897,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenScaleMode, Functio
  * @tc.desc: DestroyVirtualScreen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, DestroyVirtualScreen, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, DestroyVirtualScreen, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -914,7 +914,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, DestroyVirtualScreen, Function | SmallTe
  * @tc.desc: MakeMirror
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, MakeMirror, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, MakeMirror, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -933,7 +933,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeMirror, Function | SmallTest | Level
  * @tc.desc: StopMirror
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, StopMirror, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, StopMirror, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -950,7 +950,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, StopMirror, Function | SmallTest | Level
  * @tc.desc: DisableMirror
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, DisableMirror, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, DisableMirror, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -967,7 +967,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, DisableMirror, Function | SmallTest | Le
  * @tc.desc: MakeExpand
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, MakeExpand, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, MakeExpand, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -986,7 +986,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeExpand, Function | SmallTest | Level
  * @tc.desc: StopExpand
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, StopExpand, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, StopExpand, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1003,7 +1003,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, StopExpand, Function | SmallTest | Level
  * @tc.desc: GetDisplaySnapshot
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetDisplaySnapshot, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
 
@@ -1028,7 +1028,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, Function | SmallTest
  * @tc.desc: GetDisplayInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetDisplayInfoById, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
 
@@ -1052,7 +1052,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, Function | SmallTest
  * @tc.desc: GetDisplayInfoByScreen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetDisplayInfoByScreen, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
 
@@ -1077,7 +1077,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, Function | Small
  * @tc.desc: GetScreenInfoById
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenInfoById, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetScreenInfoById, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
 
@@ -1101,7 +1101,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenInfoById, Function | SmallTest 
  * @tc.desc: GetAllScreenInfos
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetAllScreenInfos, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetAllScreenInfos, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1118,7 +1118,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllScreenInfos, Function | SmallTest 
  * @tc.desc: GetScreenSupportedColorGamuts
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenSupportedColorGamuts, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetScreenSupportedColorGamuts, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1136,7 +1136,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenSupportedColorGamuts, Function 
  * @tc.desc: SetOrientation
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetOrientation, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetOrientation, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1154,7 +1154,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetOrientation, Function | SmallTest | L
  * @tc.desc: SetScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLocked, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenRotationLocked, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1171,7 +1171,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLocked, Function | Smal
  * @tc.desc: SetScreenRotationLockedFromJs
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLockedFromJs, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetScreenRotationLockedFromJs, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1188,7 +1188,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLockedFromJs, Function 
  * @tc.desc: SetMultiScreenMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenMode, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetMultiScreenMode, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1213,7 +1213,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenMode, Function | SmallTest
  * @tc.desc: SetMultiScreenRelativePosition
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenRelativePosition, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetMultiScreenRelativePosition, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1239,7 +1239,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenRelativePosition, Function
  * @tc.desc: SetVirtualScreenMaxRefreshRate
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenMaxRefreshRate, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualScreenMaxRefreshRate, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1264,7 +1264,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenMaxRefreshRate, Function
  * @tc.desc: IsScreenRotationLocked
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, IsScreenRotationLocked, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, IsScreenRotationLocked, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1281,7 +1281,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsScreenRotationLocked, Function | Small
  * @tc.desc: GetCutoutInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetCutoutInfo, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
 
@@ -1305,7 +1305,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, Function | SmallTest | Le
  * @tc.desc: HasImmersiveWindow
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, HasImmersiveWindow, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1322,7 +1322,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, Function | SmallTest
  * @tc.desc: HasPrivateWindow
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, HasPrivateWindow, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, HasPrivateWindow, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1340,7 +1340,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasPrivateWindow, Function | SmallTest |
  * @tc.desc: DumpSpecialScreenInfo
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, DumpSpecialScreenInfo, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1363,7 +1363,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, Function | SmallT
  * @tc.desc: SetFoldDisplayMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetFoldDisplayMode, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1385,7 +1385,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, Function | SmallTest
  * @tc.desc: SetFoldDisplayModeFromJs
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, SetFoldDisplayModeFromJs, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     const FoldDisplayMode displayMode {0};
@@ -1402,7 +1402,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, Function | Sma
  * @tc.desc: MakeUniqueScreen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, MakeUniqueScreen, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1419,7 +1419,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, Function | SmallTest |
  * @tc.desc: GetScreenCapture test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetScreenCapture, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
@@ -1443,7 +1443,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, Function | SmallTest |
  * @tc.desc: GetPrimaryDisplayInfo test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, Function | SmallTest | Level1)
+HWTEST_F(ScreenSessionManagerProxyUtTest, GetPrimaryDisplayInfo, Function | SmallTest | Level1)
 {
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();

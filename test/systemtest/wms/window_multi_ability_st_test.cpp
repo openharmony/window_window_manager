@@ -25,27 +25,27 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
-class WindowMultiAbilityTest : public testing::Test {
+class WindowMultiAbilitySTTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 };
 
-void WindowMultiAbilityTest::SetUpTestCase()
+void WindowMultiAbilitySTTest::SetUpTestCase()
 {
 }
 
-void WindowMultiAbilityTest::TearDownTestCase()
+void WindowMultiAbilitySTTest::TearDownTestCase()
 {
 }
 
-void WindowMultiAbilityTest::SetUp()
+void WindowMultiAbilitySTTest::SetUp()
 {
 }
 
-void WindowMultiAbilityTest::TearDown()
+void WindowMultiAbilitySTTest::TearDown()
 {
 }
 
@@ -65,7 +65,7 @@ static void DoSceneResource(sptr<WindowScene> windowscene)
  * @tc.desc: Five scene process in one thread
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | Level2)
+HWTEST_F(WindowMultiAbilitySTTest, MultiAbilityWindow01, Function | MediumTest | Level2)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     sptr<WindowScene> scene2 = Utils::CreateWindowScene();
@@ -97,7 +97,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilitySTTest, MultiAbilityWindow02, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
 
@@ -128,7 +128,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilitySTTest, MultiAbilityWindow2, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene4 = Utils::CreateWindowScene();
 
@@ -152,7 +152,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow2, Function | MediumTest | Le
  * @tc.desc: Five scene process in one thread, create/show/hide/destroy out of order
  * @tc.type: FUNC
  */
-HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level3)
+HWTEST_F(WindowMultiAbilitySTTest, MultiAbilityWindow03, Function | MediumTest | Level3)
 {
     sptr<WindowScene> scene1 = Utils::CreateWindowScene();
 
