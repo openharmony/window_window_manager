@@ -972,8 +972,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             extWindow->NotifyModalUIExtensionMayBeCovered(false);
         }
         task->Resolve(env, CreateJsWindowObject(env, window));
-        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s Create sub window %{public}s end",
-            where, windowName.c_str());
+        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s %{public}s end", where, windowName.c_str());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
