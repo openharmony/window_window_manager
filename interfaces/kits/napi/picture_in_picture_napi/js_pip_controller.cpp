@@ -179,7 +179,7 @@ napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     if (pipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "OnSetAutoStartEnabled error, controller is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "error, controller is nullptr");
         return NapiGetUndefined(env);
     }
     pipController_->SetAutoStartEnabled(enable);

@@ -2774,7 +2774,7 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
         return;
     }
 
-    TLOGI(WmsLogTag::WMS_LIFE, "OnCreateSubSession, id: %{public}d, parentId: %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, parentId: %{public}d",
         sceneSession->GetPersistentId(), sceneSession->GetParentPersistentId());
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, weakSession, env = env_] {
