@@ -2019,6 +2019,22 @@ HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: IsFullScreenMovable
+ * @tc.desc: IsFullScreenMovable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, IsFullScreenMovable, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsFullScreenMovable";
+    info.bundleName_ = "IsFullScreenMovable";
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto result = sceneSession->IsFullScreenMovable();
+    ASSERT_EQ(false, result);
+}
+
+/**
  * @tc.name: SetTitleAndDockHoverShowChangeCallback
  * @tc.desc: SetTitleAndDockHoverShowChangeCallback
  * @tc.type: FUNC
