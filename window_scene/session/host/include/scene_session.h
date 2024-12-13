@@ -726,6 +726,11 @@ private:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * UIExtension
+     */
+    void UpdateAllModalUIExtensions(const WSRect& globalRect);
+
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
