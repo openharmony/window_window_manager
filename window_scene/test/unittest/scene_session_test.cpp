@@ -393,12 +393,12 @@ HWTEST_F(SceneSessionTest, SetDefaultRequestedOrientation, Function | SmallTest 
     SessionInfo info;
     info.abilityName_ = "Background01";
     info.bundleName_ = "SetDefaultRequestedOrientation";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
-    EXPECT_NE(scensession, nullptr);
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
     Orientation orientation = Orientation::AUTO_ROTATION_UNSPECIFIED;
-    scensession->SetDefaultRequestedOrientation(orientation);
-    Orientation ret = scensession->GetRequestedOrientation();
+    sceneSession->SetDefaultRequestedOrientation(orientation);
+    Orientation ret = sceneSession->GetRequestedOrientation();
     ASSERT_EQ(orientation, ret);
 }
 

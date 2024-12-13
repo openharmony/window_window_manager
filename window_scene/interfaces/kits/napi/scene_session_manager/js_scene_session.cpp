@@ -1751,7 +1751,7 @@ napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_c
 
 napi_value JsSceneSession::SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSyncDefaultRequestedOrientation(env, info) : nullptr;
 }
