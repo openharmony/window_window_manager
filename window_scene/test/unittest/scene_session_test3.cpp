@@ -650,7 +650,7 @@ HWTEST_F(SceneSessionTest3, SetAdjustKeyboardLayoutCallback, Function | SmallTes
 
 /**
  * @tc.name: IsStartMoving
- * @tc.desc: IsStartMoving
+ * @tc.desc: get main window move flag, test IsStartMoving
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest3, IsStartMoving, Function | SmallTest | Level2)
