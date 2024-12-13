@@ -39,8 +39,9 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<WindowEventChannelProxy> windowEventChannelProxy_ = new WindowEventChannelProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<WindowEventChannelProxy> windowEventChannelProxy_ =
+        sptr<WindowEventChannelProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
 void WindowEventChannelProxyTest::SetUpTestCase()
@@ -120,7 +121,7 @@ HWTEST_F(WindowEventChannelProxyTest, TransferKeyEventForConsumedAsync, Function
     auto keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     bool isPreImeEvent = false;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     WSError res = windowEventChannelProxy_->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent,
         iRemoteObjectMocker);
     ASSERT_EQ(WSError::WS_OK, res);

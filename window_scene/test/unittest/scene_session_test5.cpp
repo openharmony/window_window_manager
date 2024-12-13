@@ -424,7 +424,7 @@ HWTEST_F(SceneSessionTest5, RegisterLayoutFullScreenChangeCallback, Function | S
     SessionInfo info;
     info.abilityName_ = "RegisterLayoutFullScreenChangeCallback";
     info.bundleName_ = "RegisterLayoutFullScreenChangeCallback";
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->onLayoutFullScreenChangeFunc_ = nullptr;
     NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
 
@@ -522,7 +522,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     };
     session->SetSessionRectChangeCallback(nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSessionProperty(property);
@@ -660,7 +660,7 @@ HWTEST_F(SceneSessionTest5, CheckAspectRatioValid, Function | SmallTest | Level2
     session->SetSessionProperty(nullptr);
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->SetAspectRatio(0.0f));
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     WindowLimits limits = {8, 1, 6, 1, 1, 1.0f, 1.0f};
     property->SetWindowLimits(limits);
@@ -845,7 +845,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     session->OnMoveDragCallback(reason);
     EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     session->SetSessionProperty(property);
     property->compatibleModeInPc_ = true;
@@ -953,7 +953,7 @@ HWTEST_F(SceneSessionTest5, SetPrivacyMode, Function | SmallTest | Level2)
     session->SetSessionProperty(nullptr);
     session->SetPrivacyMode(true);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetPrivacyMode(true);
     session->SetSessionProperty(property);
@@ -1304,7 +1304,7 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 79));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 79));
 
-    session->sessionStage_ = new SessionStageMocker();
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, session->sessionStage_);
 }
 
@@ -1730,7 +1730,7 @@ HWTEST_F(SceneSessionTest5, SetAndIsSystemKeyboard, Function | SmallTest | Level
     SessionInfo info;
     info.abilityName_ = "SetAndIsSystemKeyboard";
     info.bundleName_ = "SetAndIsSystemKeyboard";
-    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, session);
 
     ASSERT_EQ(false, session->IsSystemKeyboard());
