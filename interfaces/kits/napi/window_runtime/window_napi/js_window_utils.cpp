@@ -1114,7 +1114,6 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     return ParseModalityParam(env, jsObject, windowOption);
 }
 
-
 std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,
     napi_value lastParam, napi_value* result)
 {
