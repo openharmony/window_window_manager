@@ -42,10 +42,6 @@ WSError WindowEventChannelProxy::TransferKeyEvent(const std::shared_ptr<MMI::Key
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!keyEvent) {
-        TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     if (!keyEvent->WriteToParcel(data)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to write key event");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -80,10 +76,6 @@ WSError WindowEventChannelProxy::TransferPointerEvent(const std::shared_ptr<MMI:
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!pointerEvent) {
-        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is nullptr");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     if (!pointerEvent->WriteToParcel(data)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to write pointer event");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -139,10 +131,6 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumed(
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!keyEvent) {
-        TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     if (!keyEvent->WriteToParcel(data)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to write key event");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -177,10 +165,6 @@ WSError WindowEventChannelProxy::TransferKeyEventForConsumedAsync(
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!keyEvent) {
-        TLOGE(WmsLogTag::WMS_EVENT, "keyEvent is nullptr");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     if (!keyEvent->WriteToParcel(data)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to write key event");
         return WSError::WS_ERROR_IPC_FAILED;
