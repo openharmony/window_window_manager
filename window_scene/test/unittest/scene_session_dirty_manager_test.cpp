@@ -81,7 +81,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, Function | SmallT
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     if (sceneSession == nullptr) {
         return;
     }
@@ -105,7 +105,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTe
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
     {
-        sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+        sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
         ASSERT_NE(sceneSession, nullptr);
         sceneSession->UpdateVisibilityInner(true);
         ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
@@ -114,7 +114,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTe
         ssm_->sceneSessionMap_.insert({111, nullptr});
     }
     {
-        sptr<SceneSession> sceneSessionDialog1 = new (std::nothrow) SceneSession(info, nullptr);
+        sptr<SceneSession> sceneSessionDialog1 = sptr<SceneSession>::MakeSptr(info, nullptr);
         ASSERT_NE(sceneSessionDialog1, nullptr);
         sceneSessionDialog1->UpdateVisibilityInner(true);
         sptr<WindowSessionProperty> propertyDialog1 = sceneSessionDialog1->GetSessionProperty();
@@ -122,7 +122,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTe
         ssm_->sceneSessionMap_.insert({sceneSessionDialog1->GetPersistentId(), sceneSessionDialog1});
     }
     {
-        sptr<SceneSession> sceneSessionModal1 = new (std::nothrow) SceneSession(info, nullptr);
+        sptr<SceneSession> sceneSessionModal1 = sptr<SceneSession>::MakeSptr(info, nullptr);
         ASSERT_NE(sceneSessionModal1, nullptr);
         sceneSessionModal1->UpdateVisibilityInner(true);
         sptr<WindowSessionProperty> propertyModal1 = sceneSessionModal1->GetSessionProperty();
@@ -146,7 +146,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession, Function | SmallTest | L
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     info.sceneType_ = SceneType::INPUT_SCENE;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
     sceneSession->sessionInfo_ = info;
@@ -198,7 +198,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession02, Function | SmallTest |
     info.abilityName_ = "test3";
     info.bundleName_ = "test4";
     info.sceneType_ = SceneType::WINDOW_SCENE;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sceneSession->GetSessionProperty();
     sceneSession->sessionInfo_ = info;
@@ -249,10 +249,10 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Lev
     SessionInfo info;
     info.abilityName_ = "111";
     info.bundleName_ = "111";
-    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
-    session = new (std::nothrow) SceneSession(info, nullptr);
+    session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     sptr<WindowSessionProperty> windowSessionProperty = session->GetSessionProperty();
     session->SetSessionProperty(windowSessionProperty);
@@ -293,7 +293,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     sessionInfo.moduleName_ = "sessionInfo";
     Matrix3f transform;
     Matrix3f testTransform = transform;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     manager_->CalNotRotateTransform(nullptr, transform);
     ASSERT_EQ(transform, testTransform);
@@ -304,7 +304,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     ScreenProperty screenProperty0;
     screenProperty0.SetRotation(0.0f);
     ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
     ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
@@ -337,7 +338,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Leve
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CalTransform";
     sessionInfo.moduleName_ = "CalTransform";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
     Vector2f translate = sceneSession->GetSessionGlobalPosition(false);
@@ -389,7 +390,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, Function | SmallTest | Le
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "UpdateHotAreas";
     sessionInfo.moduleName_ = "UpdateHotAreas";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     if (sceneSession == nullptr) {
         return;
     }
@@ -444,7 +445,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTe
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "UpdateDefaultHotAreas";
     sessionInfo.moduleName_ = "UpdateDefaultHotAreas";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     if (sceneSession == nullptr) {
         return;
     }
@@ -500,7 +501,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest
     sessionMap.emplace(1, nullptr);
     auto sessionList = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(0, sessionList.size());
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     if (!sceneSession) {
         GTEST_LOG_(INFO) << "sceneSession is nullptr";
         return;
@@ -508,14 +509,14 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, Function | SmallTest
     sessionMap.emplace(2, sceneSession);
     auto sessionList2 = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(0, sessionList2.size());
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     if (!property) {
         GTEST_LOG_(INFO) << "property is nullptr";
         return;
     }
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sceneSession->SetSessionProperty(property);
-    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     if (!session) {
         GTEST_LOG_(INFO) << "session is nullptr";
         return;
@@ -568,8 +569,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
 {
     std::vector<int32_t> pointerChangeAreas;
     SessionInfo info;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(sceneSession, nullptr);
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -620,7 +621,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
 HWTEST_F(SceneSessionDirtyManagerTest, UpdatePrivacyMode, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     MMI::WindowInfo windowinfo;
     auto tempProperty = sceneSession->GetSessionProperty();
@@ -652,7 +653,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePrivacyMode, Function | SmallTest |
 HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     MMI::WindowInfo windowinfo;
     auto screenId = 0;
@@ -661,7 +662,8 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateWindowFlags, Function | SmallTest |
     ScreenProperty screenProperty0;
     screenProperty0.SetRotation(0.0f);
     ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
     screenSession->SetTouchEnabledFromJs(true);
     ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
@@ -755,7 +757,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetSecComponentWindowInfo, Function | Sma
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
     ret = manager_->GetSecComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, transform);
@@ -795,7 +797,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetSecSurfaceWindowinfoList, Function | S
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
