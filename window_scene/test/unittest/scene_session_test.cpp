@@ -647,9 +647,6 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     property->SetDecorEnable(false);
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ASSERT_EQ(true, sceneSession1->IsDecorEnable());
-
-    sceneSession1->SetSessionProperty(nullptr);
-    ASSERT_EQ(false, sceneSession1->IsDecorEnable());
 }
 
 /**
@@ -741,9 +738,6 @@ HWTEST_F(SceneSessionTest, IsFloatingWindowAppType, Function | SmallTest | Level
     sptr<SceneSession> sceneSession;
     sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(false, sceneSession->IsFloatingWindowAppType());
-
-    sceneSession->SetSessionProperty(nullptr);
     ASSERT_EQ(false, sceneSession->IsFloatingWindowAppType());
 }
 
@@ -1636,7 +1630,7 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
 
 /**
  * @tc.name: SetAspectRatio6
- * @tc.desc: test for sessionProperty is nullptr
+ * @tc.desc: normal function
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
@@ -1644,25 +1638,6 @@ HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio6";
     info.bundleName_ = "SetAspectRatio6";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->isActive_ = true;
-    sceneSession->SetSessionProperty(nullptr);
-
-    float ratio = 0.1;
-    auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: SetAspectRatio7
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetAspectRatio7";
-    info.bundleName_ = "SetAspectRatio7";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->isActive_ = true;
 
@@ -1735,10 +1710,6 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
 
     sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
     EXPECT_NE(sceneSession, nullptr);
-
-    sceneSession->SetSessionProperty(nullptr);
-    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    ASSERT_EQ(res, false);
 
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
     sceneSession->SetSessionProperty(property);
@@ -2153,10 +2124,6 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTe
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
     bool result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
-    ASSERT_EQ(result, true);
-
-    sceneSession->SetSessionProperty(nullptr);
-    result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
     ASSERT_EQ(result, true);
 }
 

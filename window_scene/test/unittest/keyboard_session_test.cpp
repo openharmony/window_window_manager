@@ -202,7 +202,6 @@ HWTEST_F(KeyboardSessionTest, DisConnect01, Function | SmallTest | Level2)
     info.bundleName_ = "DisConnect01";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
     ASSERT_NE(nullptr, keyboardSession);
-    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(nullptr));
     ASSERT_EQ(WSError::WS_OK, keyboardSession->Disconnect());
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
