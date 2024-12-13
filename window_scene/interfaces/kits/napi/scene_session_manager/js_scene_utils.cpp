@@ -19,6 +19,7 @@
 
 #include <event_handler.h>
 #include <js_runtime_utils.h>
+#include <napi_common_want.h>
 
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
@@ -974,6 +975,9 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportWindowModes));
+    if (sessionInfo.want != nullptr) {
+        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));    
+    }
     return objValue;
 }
 
