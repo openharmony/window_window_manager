@@ -5897,4 +5897,26 @@ void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
 }
+
+void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
+{
+    auto task = [weakThis = wptr(this), globalRect = globalRect,
+        modalUIExtensionInfoListMutex_ = modalUIExtensionInfoListMutex_]() -> void {
+        auto session = weakThis.promote();
+        std::unique_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
+        for (auto iter = session.modalUIExtensionInfoList_.begin();
+            iter != session.modalUIExtensionInfoList_.end(); iter++) {
+            if (iter->hasUpdatedRect) {
+                auto parentTransX = globalRect.posX_ - session->GetSessionRect().posX_;
+                auto parentTransY = globalRect.posY_ - session->GetSessionRect().posY_;
+                Rect globalRectForUIExtension = { iter->rect.posX_ + parentTransX, iter->rect.posY_ + parentTransY,
+                    iter->rect.width_, iter->rect.height_ };
+                iter->windowRect = globalRectForUIExtension;
+            }
+        }
+        NotifySessionInfoChange();
+        TLOGNI(WmsLogTag::UI_EXT, "update all modal uiexetnsions, id: %{public}d", session->GetPersistentId());
+    };
+    PostTask(task, "UpdateAllModalUIExtensions");
+}
 } // namespace OHOS::Rosen
