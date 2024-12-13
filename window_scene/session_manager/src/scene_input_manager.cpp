@@ -399,13 +399,8 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {
-        if (std::floor(e.zOrder) == e.zOrder) {
-            idListStream << e.id << "|" << e.flags << "|" << static_cast<int32_t>(e.zOrder) << "|"
-                         << e.pid << "|" << e.defaultHotAreas.size();
-        } else {
-            idListStream << e.id << "|" << e.flags << "|" << e.zOrder << "|"
-                         << e.pid << "|" << e.defaultHotAreas.size();
-        }
+        idListStream << e.id << "|" << e.flags << "|" << e.zOrder << "|"
+                     << e.pid << "|" << e.defaultHotAreas.size();
 
         if (e.defaultHotAreas.size() > 0) {
             auto iter = lastWindowDefaultHotArea.find(e.id);
@@ -428,7 +423,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     std::string idList = idListStream.str();
     if (lastIdList != idList) {
         windowEventID++;
-        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,size:%{public}d,idList:%{public}s",
+        TLOGNI(WmsLogTag::WMS_EVENT, "LogWinInfo: eid:%{public}d,size:%{public}d,idList:%{public}s",
             windowEventID, windowListSize, idList.c_str());
         lastIdList = idList;
     }
