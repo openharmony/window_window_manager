@@ -1713,7 +1713,7 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
 
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
     sceneSession->SetSessionProperty(property);
-    res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
     ASSERT_EQ(res, false);
 }
 
