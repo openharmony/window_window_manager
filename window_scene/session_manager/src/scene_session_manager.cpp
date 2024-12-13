@@ -5151,7 +5151,7 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
 WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground,
     FocusChangeReason reason)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
     auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
             if (reason == FocusChangeReason::FOREGROUND) {
