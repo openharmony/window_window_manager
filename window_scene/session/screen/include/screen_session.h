@@ -294,6 +294,7 @@ private:
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
     sptr<ScreenSession> fakeScreenSession_ = nullptr;
     void EnableMirrorScreenRegion();
+    int32_t GetApiVersion();
 };
 
 class ScreenSessionGroup : public ScreenSession {
