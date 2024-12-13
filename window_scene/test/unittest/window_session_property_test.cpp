@@ -128,11 +128,11 @@ HWTEST_F(WindowSessionPropertyTest, SetRequestedOrientation, Function | SmallTes
  * @tc.name: SetDefaultRequestedOrientation
  * @tc.desc: SetDefaultRequestedOrientation test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetDefaultRequestedOrientation, Function | SmallTest | Level2)
 {
     Orientation orientation = Orientation::REVERSE_HORIZONTAL;
-    WindowSessionProperty *property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetDefaultRequestedOrientation(orientation);
     Orientation ret = property->GetDefaultRequestedOrientation();
     ASSERT_EQ(ret, orientation);
