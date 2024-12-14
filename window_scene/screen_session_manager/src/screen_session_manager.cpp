@@ -2781,7 +2781,7 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float sc
             screenId);
         return;
     }
-    screenSession->SetPhysicalRotation(rotation, GetFoldStatus());
+    screenSession->SetPhysicalRotation(rotation, GetFoldDisplayMode());
     screenSession->SetScreenComponentRotation(screenComponentRotation);
     screenSession->UpdateRotationOrientation(rotation);
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", rotation: %{public}f, screenComponentRotation: %{public}f",
