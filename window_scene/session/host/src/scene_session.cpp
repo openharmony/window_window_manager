@@ -1720,7 +1720,7 @@ WSError SceneSession::OnNeedAvoid(bool status)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status %{public}d ",
-             session->GetPersistentId(), static_cast<int32_t>(status));
+            session->GetPersistentId(), static_cast<int32_t>(status));
         if (session->onNeedAvoid_) {
             session->onNeedAvoid_(status);
         }
@@ -2096,7 +2096,7 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type)
         }
         default: {
             TLOGE(WmsLogTag::WMS_IMMS, "cannot find win %{public}d type %{public}u",
-                 GetPersistentId(), type);
+                GetPersistentId(), type);
             return avoidArea;
         }
     }

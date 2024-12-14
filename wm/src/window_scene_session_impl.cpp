@@ -2101,7 +2101,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] set "
             "%{public}u %{public}u %{public}x %{public}x %{public}u, for %{public}u times",
             GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), property.enable_,
-            property.backgroundColor_, property.contentColor_, property.enableAnimation_, 
+            property.backgroundColor_, property.contentColor_, property.enableAnimation_,
             setSameSystembarPropertyCnt_);
         return WMError::WM_OK;
     }
