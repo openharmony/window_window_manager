@@ -2042,7 +2042,7 @@ HWTEST_F(WindowSceneSessionImplTest4, CheckIsSystemDensityChange01, Function | S
 
     auto displayInfo = sptr<DisplayInfo>::MakeSptr();
     displayInfo->SetVirtualPixelRatio(1.5f);
-    ret = window->CheckIsSystemDensityChange(displayInfo);
+    auto ret = window->CheckIsSystemDensityChange(displayInfo);
     ASSERT_EQ(true, ret);
 
     ret = window->CheckIsSystemDensityChange(displayInfo);
