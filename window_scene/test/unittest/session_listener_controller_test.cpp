@@ -196,7 +196,7 @@ HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest
 HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, Function | SmallTest | Level2)
 {
     int32_t persistentId = -1;
-    ASSERT_NE(slController,nullptr);
+    ASSERT_NE(slController, nullptr);
     slController->NotifySessionCreated(persistentId);
 
     persistentId = 1;
@@ -214,7 +214,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, Function | SmallTe
 HWTEST_F(SessionListenerControllerTest, NotifySessionDestroyed, Function | SmallTest | Level2)
 {
     int32_t persistentId = -1;
-    ASSERT_NE(slController,nullptr);
+    ASSERT_NE(slController, nullptr);
     slController->NotifySessionDestroyed(persistentId);
 
     persistentId = 1;
@@ -262,7 +262,7 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, Function | SmallTes
 HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, Function | SmallTest | Level2)
 {
     int32_t persistentId = -1;
-    ASSERT_NE(slController,nullptr);
+    ASSERT_NE(slController, nullptr);
     slController->NotifySessionSnapshotChanged(persistentId);
 
     persistentId = 1;
@@ -280,7 +280,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionSnapshotChanged, Function |
 HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, Function | SmallTest | Level2)
 {
     int32_t persistentId = -1;
-    ASSERT_NE(slController,nullptr);
+    ASSERT_NE(slController, nullptr);
     slController->NotifySessionMovedToFront(persistentId);
 
     persistentId = 1;
@@ -298,7 +298,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionMovedToFront, Function | Sm
 HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, Function | SmallTest | Level2)
 {
     int32_t persistentId = -1;
-    ASSERT_NE(slController,nullptr);
+    ASSERT_NE(slController, nullptr);
     slController->NotifySessionFocused(persistentId);
 
     persistentId = 1;
@@ -316,7 +316,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionFocused, Function | SmallTe
 HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | SmallTest | Level2)
 {
     int32_t persistentId = -1;
-    ASSERT_NE(slController,nullptr);
+    ASSERT_NE(slController, nullptr);
     slController->NotifySessionUnfocused(persistentId);
 
     persistentId = 1;
@@ -334,7 +334,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | Small
 HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTest | Level2)
 {
     int32_t persistentId = -1;
-    ASSERT_NE(slController,nullptr);
+    ASSERT_NE(slController, nullptr);
     slController->NotifySessionClosed(persistentId);
 
     persistentId = 1;
@@ -352,7 +352,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTes
 HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, Function | SmallTest | Level2)
 {
     int32_t persistentId = -1;
-    ASSERT_NE(slController,nullptr);
+    ASSERT_NE(slController, nullptr);
     slController->NotifySessionLabelUpdated(persistentId);
 
     persistentId = 1;
