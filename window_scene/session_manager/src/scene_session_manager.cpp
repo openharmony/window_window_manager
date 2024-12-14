@@ -10981,7 +10981,7 @@ int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
         return 0;
     }
     height = sceneSession->GetCustomDecorHeight();
-    TLOGD(WmsLogTag::WMS_DECOR, "GetCustomDecorHeight: %{public}d", height);
+    TLOGD(WmsLogTag::WMS_DECOR, "decor height: %{public}d", height);
     return height;
 }
 
