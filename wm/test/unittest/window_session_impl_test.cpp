@@ -1378,7 +1378,8 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterUnfocused, Function | SmallTest | Lev
     ASSERT_EQ(res, 0);
 
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr, aceRet);
+    window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT,
+                          BackupAndRestoreType::NONE, nullptr, aceRet);
     window->NotifyAfterUnfocused(true);
     ASSERT_NE(window->GetUIContentSharedPtr(), nullptr);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
@@ -1435,7 +1436,8 @@ HWTEST_F(WindowSessionImplTest, NotifyBeforeDestroy, Function | SmallTest | Leve
 
     // uiContent!=nullptr
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr, aceRet);
+    window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT,
+                          BackupAndRestoreType::NONE, nullptr, aceRet);
     ASSERT_NE(window->uiContent_, nullptr);
     window->NotifyBeforeDestroy(windowName);
     ASSERT_EQ(window->uiContent_, nullptr);
