@@ -146,6 +146,17 @@ bool GetSingleIntItem(const WindowSceneConfig::ConfigItem& item, int32_t& value)
     return false;
 }
 
+bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    auto& metadata = abilityInfo->metadata;
+    for (const auto& item : metadata) {
+        if (item.name == "enable.remove.starting.window") {
+            return item.value == "true";
+        }
+    }
+    return false;
+}
+
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
     BundleStatusCallback() = default;
@@ -3448,6 +3459,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
         WLOGFE("abilityInfo is nullptr!");
         return;
     }
+    sceneSession->SetEnableRemoveStartingWindow(GetEnableRemoveStartingWindowFromBMS(abilityInfo));
     sceneSession->SetSessionInfoAbilityInfo(abilityInfo);
     sceneSession->SetSessionInfoTime(GetCurrentTime());
     if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
@@ -10513,6 +10525,53 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
     TraverseSessionTree(func, true);
 
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
+    int32_t x, int32_t y, std::vector<int32_t>& windowIds)
+{
+    TLOGD(WmsLogTag::DEFAULT, "displayId %{public}" PRIu64 " windowNumber %{public}d x %{public}d y %{public}d",
+          displayId, windowNumber, x, y);
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::DEFAULT, "displayId is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool findAllWindow = windowNumber <= 0;
+    bool checkPoint = (x >= 0 && y >= 0);
+    std::string callerBundleName = SessionPermission::GetCallingBundleName();
+    auto func = [displayId, callerBundleName = std::move(callerBundleName), checkPoint, x, y,
+        findAllWindow, &windowNumber, &windowIds](const sptr<SceneSession>& session) {
+        if (session == nullptr) {
+            return false;
+        }
+        auto sessionProperty = session->GetSessionProperty();
+        if (sessionProperty == nullptr) {
+            return false;
+        }
+        if (!findAllWindow && windowNumber == 0) {
+            return true;
+        }
+        bool isSameBundleName = session->GetSessionInfo().bundleName_ == callerBundleName;
+        bool isSameDisplayId = sessionProperty->GetDisplayId() == displayId;
+        bool isRsVisible = session->GetRSVisible();
+        WSRect windowRect = session->GetSessionRect();
+        bool isPointInWindowRect = SessionHelper::IsPointInRect(x, y, SessionHelper::TransferToRect(windowRect));
+        TLOGND(WmsLogTag::DEFAULT, "persistentId %{public}d bundleName %{public}s displayId %{public}" PRIu64
+               " isRsVisible %{public}d checkPoint %{public}d isPointInWindowRect %{public}d",
+               session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str(),
+               sessionProperty->GetDisplayId(), isRsVisible, checkPoint, isPointInWindowRect);
+        if (!isSameBundleName || !isSameDisplayId || !isRsVisible || (checkPoint && !isPointInWindowRect)) {
+            return false;
+        }
+        windowIds.emplace_back(session->GetPersistentId());
+        windowNumber--;
+        return false;
+    };
+    auto task = [this, func = std::move(func)] {
+        TraverseSessionTree(func, true);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WMError SceneSessionManager::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const

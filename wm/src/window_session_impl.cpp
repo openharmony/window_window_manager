@@ -97,6 +97,7 @@ std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImpl::windowRectChangeListeners_;
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
+std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
@@ -113,6 +114,7 @@ std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
+std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
@@ -1284,6 +1286,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         WLOGFE("[WMSLife]interrupt set uicontent because window is invalid! window state: %{public}d", state_);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    NotifySetUIContentComplete();
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     WMError initUIContentRet = InitUIContent(contentInfo, env, storage, type, ability, aceRet);
     if (initUIContentRet != WMError::WM_OK) {
@@ -1353,8 +1356,6 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGD(WmsLogTag::WMS_LIFE, "notify uiContent window size change end");
-
-    NotifySetUIContentComplete();
     return WMError::WM_OK;
 }
 
@@ -2209,6 +2210,58 @@ WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWind
 }
 
 template<typename T>
+EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> WindowSessionImpl::GetListeners()
+{
+    return mainWindowCloseListeners_[GetPersistentId()];
+}
+
+WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::DEFAULT, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!(isPC|| IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    std::lock_guard<std::mutex> lockListener(mainWindowCloseListenersMutex_);
+    mainWindowCloseListeners_[GetPersistentId()] = listener;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!(isPC|| IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::DEFAULT, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    std::lock_guard<std::mutex> lockListener(mainWindowCloseListenersMutex_);
+    mainWindowCloseListeners_[GetPersistentId()] = nullptr;
+    return WMError::WM_OK;
+}
+
+template<typename T>
 EnableIfSame<T, ISwitchFreeMultiWindowListener,
     std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::GetListeners()
 {
@@ -2411,6 +2464,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(subWindowCloseListenersMutex_);
         ClearUselessListeners(subWindowCloseListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(mainWindowCloseListenersMutex_);
+        ClearUselessListeners(mainWindowCloseListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
@@ -2872,6 +2929,17 @@ void WindowSessionImpl::NotifySubWindowClose(bool& terminateCloseProcess)
     if (subWindowCloseListeners != nullptr) {
         subWindowCloseListeners->OnSubWindowClose(terminateCloseProcess);
     }
+}
+
+WMError WindowSessionImpl::NotifyMainWindowClose(bool& terminateCloseProcess)
+{
+    std::lock_guard<std::mutex> lockListener(mainWindowCloseListenersMutex_);
+    auto mainWindowCloseListener = GetListeners<IMainWindowCloseListener>();
+    if (mainWindowCloseListener != nullptr) {
+        mainWindowCloseListener->OnMainWindowClose(terminateCloseProcess);
+        return WMError::WM_OK;
+    }
+    return WMError::WM_ERROR_NULLPTR;
 }
 
 void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
@@ -3916,30 +3984,45 @@ void WindowSessionImpl::SetUIContentComplete()
         TLOGI(WmsLogTag::WMS_LIFE, "persistentId=%{public}d", GetPersistentId());
         handler_->RemoveTask(SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME + std::to_string(GetPersistentId()));
     } else {
-        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+        TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent, persistentId=%{public}d", GetPersistentId());
     }
 }
 
 void WindowSessionImpl::AddSetUIContentTimeoutCheck()
 {
-    auto task = [weakThis = wptr(this)] {
+    const auto checkBeginTime =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now())
+            .time_since_epoch().count();
+    auto task = [weakThis = wptr(this), checkBeginTime] {
         auto window = weakThis.promote();
         if (window == nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "window is nullptr");
+            TLOGNI(WmsLogTag::WMS_LIFE, "window is nullptr");
             return;
         }
-
         if (window->setUIContentCompleted_.load()) {
-            TLOGI(WmsLogTag::WMS_LIFE, "already SetUIContent");
+            TLOGNI(WmsLogTag::WMS_LIFE, "already SetUIContent, persistentId=%{public}d", window->GetPersistentId());
             return;
         }
 
-        TLOGI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
+        const auto checkEndTime =
+            std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now())
+                .time_since_epoch().count();
+        if (checkEndTime - checkBeginTime > SET_UICONTENT_TIMEOUT_TIME_AFTER_FREEZE_MS) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "will start re-check after freeze, persistentId=%{public}d",
+                window->GetPersistentId());
+            window->AddSetUIContentTimeoutCheck();
+            return;
+        }
+
+        TLOGNI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
         std::ostringstream oss;
         oss << "SetUIContent timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
         if (window->context_) {
             oss << ", bundleName: " << window->context_->GetBundleName();
+            if (window->context_->GetApplicationInfo()) {
+                oss << ", abilityName: " << window->context_->GetApplicationInfo()->name;
+            }
         }
         SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
             static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
@@ -3954,23 +4037,14 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
 
 void WindowSessionImpl::NotifySetUIContentComplete()
 {
-    if (WindowHelper::IsMainWindow(GetType())) { // main window
-        SetUIContentComplete();
-    } else if (WindowHelper::IsSubWindow(GetType()) ||
-               WindowHelper::IsSystemWindow(GetType())) { // sub window or system window
+    if (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) {
         // created by UIExtension
         auto extWindow = FindExtensionWindowWithContext();
         if (extWindow != nullptr) {
             extWindow->SetUIContentComplete();
-            return;
-        }
-
-        // created by main window
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow != nullptr) {
-            mainWindow->SetUIContentComplete();
         }
     }
+    SetUIContentComplete();
 }
 
 WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
