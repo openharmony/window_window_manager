@@ -106,7 +106,7 @@ public:
     WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionDetachToDisplay() override;
     
-    /**
+    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
@@ -114,7 +114,7 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 
-     /**
+     /*
       * Starting Window
       */
     WSError RemoveStartingWindow() override;
