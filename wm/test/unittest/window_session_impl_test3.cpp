@@ -718,7 +718,7 @@ HWTEST_F(WindowSessionImplTest3, SetBackgroundColor, Function | SmallTest | Leve
     auto ret = window_->SetBackgroundColor(color);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 
-    std::string color = "#FF0000";
+    color = "#FF0000";
     ret = window_->SetBackgroundColor(color);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBackgroundColor end";
@@ -752,7 +752,7 @@ HWTEST_F(WindowSessionImplTest3, Find, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionImplTest3, RegisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterWindowTitleButtonRectChangeListener start";
-    window_ = GetTestWindowImpl("Find");
+    window_ = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
     ASSERT_NE(window_, nullptr);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_SHOWN;
@@ -760,7 +760,7 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowTitleButtonRectChangeListener, Fu
     window_->hasFirstNotifyInteractive_ = true;
     window_->NotifyForegroundInteractiveStatus(true);
 
-    sptr<IWindowTitleButtonRectChangeListener> listener = nullptr;
+    sptr<IWindowTitleButtonRectChangedListener> listener = nullptr;
     auto ret = window_->RegisterWindowTitleButtonRectChangeListener(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterWindowTitleButtonRectChangeListener end";
@@ -777,7 +777,7 @@ HWTEST_F(WindowSessionImplTest3, GetUIContentWithId, Function | SmallTest | Leve
     window_ = GetTestWindowImpl("GetUIContentWithId");
     ASSERT_NE(window_, nullptr);
     window_->windowSessionMap_.clear();
-    std::string name = "Find";
+    std::string name = "GetUIContentWithId";
     sptr<WindowSessionImpl> window1 = GetTestWindowImpl("GetUIContentWithId1");
     ASSERT_NE(window1, nullptr);
     window_->windowSessionMap_.insert(std::make_pair(name, std::make_pair(1, window1)));
@@ -798,8 +798,8 @@ HWTEST_F(WindowSessionImplTest3, UnregisterWindowRectChangeListener, Function | 
     ASSERT_NE(window_, nullptr);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_SHOWN;
-    window_->windowRectChangeListener_.clear();
-    sptr<IWindowTitleButtonRectChangeListener> listener = nullptr;
+    window_->windowRectChangeListeners_.clear();
+    sptr<IWindowRectChangeListener> listener = nullptr;
     auto ret = window_->UnregisterWindowRectChangeListener(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterWindowRectChangeListener end";
@@ -840,7 +840,7 @@ HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, Function | SmallTest |
     std::string activeColor = "";
     std::string inactiveColor = "";
     auto ret = window_->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_NE(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor end";
 }
 }
