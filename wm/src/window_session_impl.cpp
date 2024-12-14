@@ -1658,6 +1658,27 @@ bool WindowSessionImpl::IsTopmost() const
 }
 
 /** @note @window.hierarchy */
+WMError WindowSessionImpl::SetAvoidAreaOption(uint32_t avoidAreaOption)
+{
+    if (!property_) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    property_->SetAvoidAreaOption(avoidAreaOption);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d, set system avoid option to %{public}d",
+        GetPersistentId(), avoidAreaOption);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION);
+}
+
+/** @note @window.hierarchy */
+uint32_t WindowSessionImpl::GetAvoidAreaOption()
+{
+    if (IsWindowSessionInvalid()) {
+        return false;
+    }
+    return property_->GetAvoidAreaOption();
+}
+
+/** @note @window.hierarchy */
 WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
 {
     if (IsWindowSessionInvalid()) {

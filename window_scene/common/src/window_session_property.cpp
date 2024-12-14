@@ -83,6 +83,8 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateMainWindowTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
+        &WindowSessionProperty::WriteActionUpdateAvoidAreaOption),
 };
 
 const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -142,6 +144,8 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateMainWindowTopmost),
+    std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
+        &WindowSessionProperty::ReadActionUpdateAvoidAreaOption),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -398,6 +402,16 @@ void WindowSessionProperty::SetTopmost(bool topmost)
 bool WindowSessionProperty::IsTopmost() const
 {
     return topmost_;
+}
+
+void WindowSessionProperty::SetAvoidAreaOption(uint32_t avoidAreaOption)
+{
+    avoidAreaOption_ = avoidAreaOption;
+}
+
+uint32_t WindowSessionProperty::GetAvoidAreaOption() const
+{
+    return avoidAreaOption_;
 }
 
 void WindowSessionProperty::SetMainWindowTopmost(bool isTopmost)
@@ -1084,7 +1098,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
-        parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_);
+        parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
+        parcel.WriteUint32(avoidAreaOption_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1165,6 +1180,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
     property->SetAppInstanceKey(parcel.ReadString());
     property->SetIsSystemKeyboard(parcel.ReadBool());
+    property->SetAvoidAreaOption(parcel.ReadUint32());
     return property;
 }
 
@@ -1246,6 +1262,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     parentWindowType_ = property->parentWindowType_;
     appInstanceKey_ = property->appInstanceKey_;
     isSystemKeyboard_ = property->isSystemKeyboard_;
+    avoidAreaOption_ = property->avoidAreaOption_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1381,6 +1398,11 @@ bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parce
     return parcel.WriteUint32(windowModeSupportType_);
 }
 
+bool WindowSessionProperty::WriteActionUpdateAvoidAreaOption(Parcel& parcel)
+{
+    return parcel.WriteUint32(avoidAreaOption_);
+}
+
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
 {
     const auto funcIter = readFuncMap_.find(static_cast<uint32_t>(action));
@@ -1505,6 +1527,11 @@ void WindowSessionProperty::ReadActionUpdateWindowMask(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
 {
     SetTopmost(parcel.ReadBool());
+}
+
+void WindowSessionProperty::ReadActionUpdateAvoidAreaOption(Parcel& parcel)
+{
+    SetAvoidAreaOption(parcel.ReadUint32());
 }
 
 void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)

@@ -100,6 +100,8 @@ public:
      */
     WMError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
+    WMError SetAvoidAreaOpion(uint32_t avoidAreaOption) override;
+    uint32_t GetAvoidAreaOption() override;
     WMError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;

@@ -50,7 +50,7 @@ public:
     MOCK_METHOD1(OnSessionEvent, WSError(SessionEvent event));
     MOCK_METHOD1(RequestSessionBack, WSError(bool needMoveToBackground));
     MOCK_METHOD0(RaiseToAppTop, WSError(void));
-    MOCK_METHOD1(GetAvoidAreaByType, AvoidArea(AvoidAreaType type));
+    MOCK_METHOD2(GetAvoidAreaByType, AvoidArea(AvoidAreaType type, const WSRect& rect));
     MOCK_METHOD1(SetAspectRatio, WSError(float ratio));
     MOCK_METHOD1(ResetAspectRatio, WSError(float ratio));
     MOCK_METHOD1(OnNeedAvoid, WSError(bool status));

@@ -181,7 +181,10 @@ public:
     WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) override { return WMError::WM_OK; }
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
-    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override { return {}; }
+    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, const Rect& rect = {0, 0, 0, 0}) override
+    {
+        return {};
+    }
 
     /**
      * @brief get top window information by id of main window.

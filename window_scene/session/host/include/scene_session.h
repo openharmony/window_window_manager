@@ -304,15 +304,15 @@ public:
      * Window Immersive
      */
     WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type);
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0});
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
     WSError SetIsStatusBarVisibleInner(bool isVisible);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
-    bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
+    bool CheckGetAvoidAreaAvailable(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
@@ -804,6 +804,8 @@ private:
     WMError HandleActionUpdateWindowModeSupportType(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
+    WMError HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);

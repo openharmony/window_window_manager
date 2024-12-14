@@ -197,7 +197,7 @@ WMError WindowManagerProxy::RequestFocus(uint32_t windowId)
     return static_cast<WMError>(ret);
 }
 
-AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type)
+AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, const Rect& rect)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -216,6 +216,23 @@ AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaTyp
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write AvoidAreaType failed");
+        return avoidArea;
+    }
+
+    if (!data.WriteInt32(rect.posX_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write posX_ error");
+        return avoidArea;
+    }
+    if (!data.WriteInt32(rect.posY_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write posY_ error");
+        return avoidArea;
+    }
+    if (!data.WriteInt32(rect.width_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write width_ error");
+        return avoidArea;
+    }
+    if (!data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write height_ error");
         return avoidArea;
     }
 
