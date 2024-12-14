@@ -621,7 +621,7 @@ void WindowSceneSessionImpl::InitSystemSessionDragEnable()
 {
     if (WindowHelper::IsDialogWindow(GetType())) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "dialogWindow default draggable, should not init false, id: %{public}d",
-            property_->GetPersistentId());
+            GetPersistentId());
         return;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d init dragEnable false",
