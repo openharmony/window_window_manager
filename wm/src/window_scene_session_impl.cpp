@@ -3536,6 +3536,21 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
     return result;
 }
 
+WMError WindowSceneSessionImpl::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas)
+{
+    if (GetType() != WindowType::WINDOW_TYPE_DIALOG) {
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    KeyboardTouchHotAreas lastKeyboardTouchHotAreas = property_->GetKeyboardTouchHotAreas();
+    property_->SetKeyboardTouchHotAreas(hotAreas);
+    WMError result = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEYBOARD_TOUCH_HOT_AREA);
+    if (result != WMError::WM_OK) {
+        property_->SetKeyboardTouchHotAreas(lastKeyboardTouchHotAreas);
+        TLOGE(WmsLogTag::WMS_EVENT,"errCode:%{public}d", static_cast<int32_t>(result));
+    }
+    return result;
+}
+
 WmErrorCode WindowSceneSessionImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
     property_->KeepKeyboardOnFocus(keepKeyboardFlag);

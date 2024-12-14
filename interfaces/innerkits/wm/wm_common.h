@@ -1430,6 +1430,29 @@ public:
         return nullptr;
     }
 };
+
+/**
+ * @struct KeyboardTouchHotAreas
+ *
+ * @brief keyboard need set hotArea
+ */
+struct KeyboardTouchHotAreas {
+public:
+    std::vector<Rect> landscapeKeyboardHotAreas_;
+    std::vector<Rect> portraitKeyboardHotAreas_;
+    std::vector<Rect> landscapePanelHotAreas_;
+    std::vector<Rect> portraitPanelHotAreas_;
+
+    bool isKeyboardEmpty() const
+    {
+        return (landscapeKeyboardHotAreas_.empty() || portraitKeyboardHotAreas_.empty());
+    }
+
+    bool isPanelEmpty() const
+    {
+        return (landscapePanelHotAreas_.empty() || portraitPanelHotAreas_.empty());
+    }
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

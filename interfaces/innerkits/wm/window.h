@@ -1707,6 +1707,13 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) { return WMError::WM_OK; }
+    /**
+     * @brief Set keyboard touch hot areas.
+     *
+     * @param rects Keybaord hot areas of touching.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) { return WMError::WM_OK; }
 
     /**
      * @brief Get requested touch hot areas.
