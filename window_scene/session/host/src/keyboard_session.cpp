@@ -261,7 +261,7 @@ uint32_t KeyboardSession::GetCallingSessionId()
 
 WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
-   PostTask([weakThis = wptr(this), params]() -> WSError {
+    PostTask([weakThis = wptr(this), params]() -> WSError {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");

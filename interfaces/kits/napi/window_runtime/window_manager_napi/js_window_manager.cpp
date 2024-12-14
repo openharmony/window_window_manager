@@ -574,13 +574,13 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
     napi_value argv[maxArgumentsNum] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Argc is invalid:%{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid:%{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     int32_t windowId = 0;
     if (!ConvertFromJsValue(env, argv[0], windowId)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Failed to convert parameter to integer");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameter to integer");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
@@ -593,18 +593,18 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (dataPack->result != WMError::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result)));
-                TLOGW(WmsLogTag::WMS_SYSTEM, "[NAPI]Get snapshot not ok!");
+                TLOGW(WmsLogTag::WMS_SYSTEM, "Get snapshot not ok!");
                 return;
             }
             if (dataPack->pixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Get snapshot is nullptr!");
+                TLOGE(WmsLogTag::WMS_SYSTEM, "Get snapshot is nullptr!");
                 return;
             }
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, dataPack->pixelMap);
             if (nativePixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Create native pixelmap is nullptr!");
+                TLOGE(WmsLogTag::WMS_SYSTEM, "Create native pixelmap is nullptr!");
                 return;
             }
             task.Resolve(env, nativePixelMap);
