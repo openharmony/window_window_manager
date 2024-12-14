@@ -304,6 +304,7 @@ private:
      * Window Property.
      */
     void InitSystemSessionDragEnable();
+    bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
 
     /*
      * Sub Window
