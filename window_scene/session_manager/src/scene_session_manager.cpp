@@ -11050,11 +11050,6 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::RemoveAppInfo(const std::string& bundleName)
-{
-    AbilityInfoManager::GetInstance().RemoveAppInfo(bundleName);
-}
-
 WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled)
 {
     std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
@@ -11080,5 +11075,10 @@ void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool e
             isWindowRectAutoSaveMap_.insert({key, enabled});
         }
     }
+}
+
+void SceneSessionManager::RemoveAppInfo(const std::string& bundleName)
+{
+    AbilityInfoManager::GetInstance().RemoveAppInfo(bundleName);
 }
 } // namespace OHOS::Rosen
