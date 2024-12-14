@@ -2646,11 +2646,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
     SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
 {
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "property is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
