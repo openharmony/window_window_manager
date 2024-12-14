@@ -215,7 +215,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     }
     sptr<WindowSessionProperty> property = data.ReadStrongParcelable<WindowSessionProperty>();
     if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Property is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "property is nullptr");
         return ERR_INVALID_DATA;
     }
 

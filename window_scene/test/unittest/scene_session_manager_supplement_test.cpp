@@ -530,7 +530,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, TestCreateAndConnectSession_01, Func
     sptr<ISessionStage> sessionStage;
     sptr<IWindowEventChannel> eventChannel;
     std::shared_ptr<RSSurfaceNode> node = nullptr;
-    sptr<WindowSessionProperty> property;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sptr<ISession> session;
     SystemSessionConfig systemConfig;
     sptr<IRemoteObject> token;

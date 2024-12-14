@@ -38,11 +38,6 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
     SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
 {
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Property is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
     MessageParcel reply;
@@ -62,8 +57,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         TLOGE(WmsLogTag::WMS_LIFE, "Write surfaceNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
-    if (!data.WriteParcelable(property.GetRefPtr())) {
+    if (!property || !data.WriteStrongParcelable(property.GetRefPtr())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write property failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
