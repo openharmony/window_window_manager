@@ -3499,7 +3499,8 @@ EnableIfSame<T, IDisplayIdChangeListener,
 }
 
 template<typename T>
-EnableIfSame<T, ISystemDensityChangeListener, std::vector<ISystemDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, ISystemDensityChangeListener,
+    std::vector<ISystemDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
     return systemDensityChangeListeners_[GetPersistentId()];
 }
