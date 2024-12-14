@@ -146,7 +146,7 @@ napi_value JsWindowStage::DisableWindowDecor(napi_env env, napi_callback_info in
 
 napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "SetDefaultDensityEnabled");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
 }
@@ -711,7 +711,7 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] SetDefaultDensityEnabled=%{public}u ret=%{public}u",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] enabled=%{public}u ret=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
 
     return CreateJsValue(env, static_cast<int32_t>(ret));
