@@ -77,8 +77,8 @@ public:
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     WMError Destroy() override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true);
-    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
         AppExecFwk::Ability* ability) override;
     WMError SetUIContentByAbc(const std::string& abcPath, napi_env env, napi_value storage,
@@ -115,7 +115,8 @@ public:
     uint64_t GetDisplayId() const override;
     Rect GetRect() const override;
     bool GetFocusable() const override;
-    std::string GetContentInfo() override;
+    std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
+    WMError SetRestoredRouterStack(const std::string& routerStack) override;
     Ace::UIContent* GetUIContent() const override;
     std::shared_ptr<Ace::UIContent> GetUIContentSharedPtr() const;
     Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
@@ -435,10 +436,13 @@ private:
     void NotifyAfterPaused();
 
     WMError InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-        WindowSetUIContentType type, AppExecFwk::Ability* ability, OHOS::Ace::UIContentErrorCode& aceRet);
+        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+        OHOS::Ace::UIContentErrorCode& aceRet);
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        WindowSetUIContentType type, AppExecFwk::Ability* ability);
+        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
+    inline void DestroyExistUIContent();
+    std::string GetRestoredRouterStack();
 
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const SceneAnimationConfig& config);
@@ -513,6 +517,7 @@ private:
     std::atomic_bool windowSizeChanged_ = true;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
+    std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
 };

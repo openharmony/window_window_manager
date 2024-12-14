@@ -1374,8 +1374,8 @@ public:
      * @param ability
      * @return WMError
      */
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {
         return WMError::WM_OK;
@@ -1414,7 +1414,19 @@ public:
      *
      * @return UI content info.
      */
-    virtual std::string GetContentInfo() { return std::string(); }
+    virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION)
+    {
+        return {};
+    }
+    /**
+     * @brief Set uiability restored router stack.
+     *
+     * @return WMError.
+     */
+    virtual WMError SetRestoredRouterStack(const std::string& routerStack)
+    {
+        return WMError::WM_OK;
+    }
     /**
      * @brief Get ui content object.
      *
@@ -2285,7 +2297,7 @@ public:
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
     virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
-
+    
     /**
      * @brief Get the window status of current window.
      *
