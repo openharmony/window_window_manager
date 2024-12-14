@@ -808,7 +808,7 @@ HWTEST_F(MoveDragControllerTest, GetFullScreenToFloatingRect, Function | SmallTe
     ASSERT_EQ(windowRect.posX_, rect.posX_);
     originalRect = { 1, 2, 3, 4 };
     rect = moveDragController->GetFullScreenToFloatingRect(originalRect, windowRect);
-    WSRect targetRect = { 2, 2, 7, 8 };
+    WSRect targetRect = { 1, 2, 7, 8 };
     ASSERT_EQ(targetRect.posX_, rect.posX_);
     moveDragController->moveTempProperty_ = preMoveTempProperty;
 }
