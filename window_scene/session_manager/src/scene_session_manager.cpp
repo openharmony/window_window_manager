@@ -10972,11 +10972,11 @@ int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
     int32_t height = 0;
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Session with persistentId %{public}d not found", persistentId);
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid, id: %{public}d", persistentId);
         return 0;
     }
     height = sceneSession->GetCustomDecorHeight();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "GetCustomDecorHeight: %{public}d", height);
+    TLOGD(WmsLogTag::WMS_DECOR, "decor height: %{public}d", height);
     return height;
 }
 
