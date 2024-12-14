@@ -5945,12 +5945,6 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
             behindWindowFilterEnabledProperty_);
         surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
     } else {
-        if (behindWindowFilterEnabledProperty_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "get property failed, try to fix");
-            surfaceNode->RemoveModifier(behindWindowFilterEnabledModifier_);
-            behindWindowFilterEnabledModifier_ = nullptr;
-            return;
-        }
         behindWindowFilterEnabledProperty_->Set(enabled);
     }
 
