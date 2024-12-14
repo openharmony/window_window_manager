@@ -2697,6 +2697,36 @@ HWTEST_F(WindowTest, IsPcOrPadCapabilityEnabled, Function | SmallTest | Level2)
     EXPECT_EQ(false, ret);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: RegisterMainWindowCloseListeners
+ * @tc.desc: RegisterMainWindowCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterMainWindowCloseListeners, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
+    auto ret = window->RegisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnregisterMainWindowCloseListeners
+ * @tc.desc: UnregisterMainWindowCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
+    auto ret = window->UnregisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

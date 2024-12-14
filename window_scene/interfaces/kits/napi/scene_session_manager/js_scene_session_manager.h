@@ -114,6 +114,7 @@ public:
     static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value IsScbCoreEnabled(napi_env env, napi_callback_info info);
     static napi_value RemoveAppInfo(napi_env env, napi_callback_info info);
+    static napi_value GetWindowPid(napi_env env, napi_callback_info info);
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
 private:
@@ -178,6 +179,7 @@ private:
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
     napi_value OnRemoveAppInfo(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowPid(napi_env env, napi_callback_info info);
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
 
     void OnRootSceneBackEvent();

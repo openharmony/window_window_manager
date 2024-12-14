@@ -40,6 +40,7 @@ private:
     int HandleShow(MessageParcel& data, MessageParcel& reply);
     int HandleHide(MessageParcel& data, MessageParcel& reply);
     int HandleDrawingCompleted(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& reply);
 
     // scene session
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
@@ -73,6 +74,7 @@ private:
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
     int HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);

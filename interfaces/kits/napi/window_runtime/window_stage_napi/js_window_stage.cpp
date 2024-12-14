@@ -24,8 +24,8 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 const int CONTENT_STORAGE_ARG = 2;
-const size_t INDEX_ZERO = 0;
-const size_t FOUR_PARAMS_SIZE = 4;
+constexpr size_t INDEX_ZERO = 0;
+constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowStage"};
 } // namespace
 
@@ -142,6 +142,13 @@ napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_i
     TLOGD(WmsLogTag::WMS_LAYOUT, "SetDefaultDensityEnabled");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindowStage::RemoveStartingWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnRemoveStartingWindow(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::SetWindowRectAutoSave(napi_env env, napi_callback_info info)
@@ -277,7 +284,12 @@ napi_value JsWindowStage::OnEvent(napi_env env, napi_callback_info info)
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
-    g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
+    auto ret = g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "register event %{public}s failed, ret = %{public}d", eventString.c_str(), ret);
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        return NapiGetUndefined(env);
+    }
     WLOGI("[NAPI]Window [%{public}u, %{public}s] register event %{public}s",
         window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str());
 
@@ -302,11 +314,6 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
-    if (eventString.compare("windowStageEvent") != 0) {
-        WLOGFE("[NAPI]Envent %{public}s is invalid", eventString.c_str());
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
-    }
 
     auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
@@ -315,15 +322,21 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     napi_value value = nullptr;
+    WmErrorCode ret = WmErrorCode::WM_OK;
     if (argc == 1) {
-        g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, nullptr);
+        ret = g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, nullptr);
     } else {
         value = argv[1];
         if (value != nullptr && GetType(env, value) == napi_function) {
-            g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
+            ret = g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
         } else {
-            g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, nullptr);
+            ret = g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, env, nullptr);
         }
+    }
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "unregister event %{public}s failed, ret = %{public}d", eventString.c_str(), ret);
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        return NapiGetUndefined(env);
     }
     WLOGI("[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s",
         window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str());
@@ -697,6 +710,44 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
     return result;
 }
 
+napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_info info)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "windowScene is null");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiGetUndefined(env);
+    }
+
+    const char* const where = __func__;
+    NapiAsyncTask::CompleteCallback complete =
+        [where, windowScene](napi_env env, NapiAsyncTask& task, int32_t status) {
+        auto window = windowScene->GetMainWindow();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s [NAPI]Get main window failed", where);
+            task.Reject(env,
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Get main window failed"));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NotifyRemoveStartingWindow());
+        if (ret == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Notify remove starting window failed"));
+        }
+    };
+
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr :
+        (argv[INDEX_ZERO] != nullptr && GetType(env, argv[INDEX_ZERO]) == napi_function ? argv[INDEX_ZERO] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnRemoveStartingWindow",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_info info)
 {
     auto windowScene = windowScene_.lock();
@@ -825,10 +876,11 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
     BindNativeFunction(env,
         objValue, "setDefaultDensityEnabled", moduleName, JsWindowStage::SetDefaultDensityEnabled);
     BindNativeFunction(env,
+        objValue, "removeStartingWindow", moduleName, JsWindowStage::RemoveStartingWindow);
+    BindNativeFunction(env,
         objValue, "setWindowRectAutoSave", moduleName, JsWindowStage::SetWindowRectAutoSave);
     BindNativeFunction(env,
         objValue, "isWindowRectAutoSave", moduleName, JsWindowStage::IsWindowRectAutoSave);
-
     return objValue;
 }
 }  // namespace Rosen

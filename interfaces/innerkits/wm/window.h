@@ -462,6 +462,21 @@ public:
 };
 
 /**
+ * @class IMainWindowCloseListener
+ *
+ * @brief IMainWindowCloseListener is used for preprocessing when the main window exits.
+ */
+class IMainWindowCloseListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when main window closed.
+     *
+     * @param terminateCloseProcess Whether need to terminate the main window close process.
+     */
+    virtual void OnMainWindowClose(bool& terminateCloseProcess) {}
+};
+
+/**
  * @class ISwitchFreeMultiWindowListener
  *
  * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
@@ -842,6 +857,12 @@ public:
      * @return WMError
      */
     virtual WMError NotifyDrawingCompleted() { return WMError::WM_OK; }
+    /**
+     * @brief notify window remove starting window.
+     *
+     * @return WMError
+     */
+    virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     /**
      * @brief move the window to (x, y)
      *
@@ -1518,6 +1539,15 @@ public:
      * @return WMError
      */
     virtual WMError Recover() { return WMError::WM_OK; }
+
+    /**
+     * @brief After the app main window is minimized, if the Ability is not in the backgroud state,
+     * you can restore app main window.
+     *
+     * @return WMError
+     */
+    virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    
     /**
      * @brief close the main window. It is called by ACE when close button is clicked.
      *
@@ -2083,6 +2113,24 @@ public:
      */
     virtual WMError UnregisterSubWindowCloseListeners(
         const sptr<ISubWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register main window close listener.
+     *
+     * @param listener IMainWindowCloseListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterMainWindowCloseListeners(
+        const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister main window close listener.
+     *
+     * @param listener IMainWindowCloseListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterMainWindowCloseListeners(
+        const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register switch free multi-window listener.

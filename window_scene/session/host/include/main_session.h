@@ -37,6 +37,11 @@ public:
     bool IsExitSplitOnBackground() const override;
     WSError OnSetWindowRectAutoSave(bool enabled) override;
 
+    /**
+     * PC Window
+     */
+    WSError OnRestoreMainWindow() override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
