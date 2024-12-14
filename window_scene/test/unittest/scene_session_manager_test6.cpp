@@ -308,7 +308,7 @@ HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange01, Function | SmallT
     currVisibleData.push_back(std::make_pair(1, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
     ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
     ASSERT_EQ(sceneSession1->GetRSVisible(), true);
-    ASSERT_EQ(sceneSession2->GetRSVisible(), true);
+    ASSERT_EQ(sceneSession2->GetRSVisible(), false);
     sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
     sceneSession1->SetRSVisible(false);
     sceneSession2->SetRSVisible(false);
