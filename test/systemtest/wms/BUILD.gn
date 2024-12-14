@@ -52,7 +52,7 @@ group("systemtest") {
       ":wms_window_gamut_test",
       ":wms_window_layout_test",
       ":wms_window_move_drag_test",
-      ":wms_window_multi_ability_ut_test",
+      ":wms_window_multi_ability_st_test",
     ]
   } else {
     deps += [ ":wms_window_multi_ability_test" ]
