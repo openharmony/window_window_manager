@@ -563,7 +563,7 @@ public:
     void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
-    void SetBehindWindowFilterEnabled(bool enabled);
+    void SetBehindWindowFilterEnabled(bool enabled); // Only accessed on main thread
 
     /**
      * Gesture Back
@@ -935,8 +935,8 @@ private:
         bool isGlobal = false, bool needFlush = true);
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
-    std::shared_ptr<Rosen::RSProperty<bool>> behindWindowFilterEnabledProperty_;
-    std::shared_ptr<Rosen::RSBehindWindowFilterEnabledModifier> behindWindowFilterEnabledModifier_;
+    std::shared_ptr<Rosen::RSProperty<bool>> behindWindowFilterEnabledProperty_; // Only accessed on main thread
+    std::shared_ptr<Rosen::RSBehindWindowFilterEnabledModifier> behindWindowFilterEnabledModifier_; // Only accessed on main thread
 
     /**
      * Window Immersive
