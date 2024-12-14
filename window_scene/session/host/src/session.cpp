@@ -701,19 +701,6 @@ bool Session::GetSystemTouchable() const
     return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
-bool Session::GetRectChangeBySystem() const
-{
-    return rectChangeBySystem_.load();
-}
-
-void Session::SetRectChangeBySystem(bool rectChangeBySystem)
-{
-    if (rectChangeBySystem_.load() != rectChangeBySystem) {
-        rectChangeBySystem_.store(rectChangeBySystem);
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), rectChangeBySystem);
-    }
-}
-
 bool Session::IsSystemActive() const
 {
     return isSystemActive_;
