@@ -457,7 +457,7 @@ int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& repl
     TLOGD(WmsLogTag::WMS_EVENT, "In!");
     uint32_t eventId;
     if (!data.ReadUint32(eventId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
@@ -469,7 +469,7 @@ int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply)
 {
     bool isLayoutFullScreen = data.ReadBool();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
     WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1173,10 +1173,10 @@ int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& r
 
 int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
+    TLOGD(WmsLogTag::WMS_DECOR, "In");
     int32_t height = 0;
     if (!data.ReadInt32(height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read height error");
+        TLOGE(WmsLogTag::WMS_DECOR, "read height error");
         return ERR_INVALID_DATA;
     }
     SetCustomDecorHeight(height);
