@@ -2453,7 +2453,7 @@ HWTEST_F(WindowSessionImplTest4, NotifySystemDensityChange01, Function | SmallTe
     ASSERT_NE(session, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
-    float density = 1.5;
+    float density = 1.5f;
     auto ret = window->NotifySystemDensityChange(density);
     ASSERT_EQ(WSError::WS_OK, ret);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
