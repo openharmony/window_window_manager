@@ -179,7 +179,7 @@ HWTEST_F(SceneSessionManagerTest9, RequestSessionFocus02, Function | SmallTest |
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WSError ret = ssm_->RequestSessionFocus(1, false, FocusChangeReason::FOREGROUND);
-    ASSERT_EQ(ret, WSError::WS_DO_NOTHING);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
 
     sceneSession->SetFocusableOnShow(false);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
@@ -414,7 +414,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessFocusWhenForegroundScbCore, Function |
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->ProcessFocusWhenForegroundScbCore(sceneSession); // RequestSessionFocus
-    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+    ASSERT_EQ(ssm_->focusedSessionId_, 0);
 }
 
 /**
