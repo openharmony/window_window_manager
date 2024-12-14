@@ -267,6 +267,7 @@ public:
     /**
      * PC Window
      */
+    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
     virtual bool IsModal() const { return false; }
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
@@ -479,11 +480,6 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
-    /**
-     * PC Window
-     */
-    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
-
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -540,6 +536,7 @@ protected:
     /**
      * PC Window
      */
+    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
@@ -547,11 +544,6 @@ protected:
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
-
-    /*
-     * PC Window
-     */
-    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     
     /*
      * Window Layout

@@ -185,11 +185,6 @@ public:
     bool GetIsUIExtensionSubWindowFlag() const override;
 
     /*
-     * PC Window
-     */
-
-
-    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override;

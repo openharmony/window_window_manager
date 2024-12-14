@@ -137,11 +137,6 @@ public:
     virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds);
     virtual WMError ReleaseForegroundSessionScreenLock();
-
-    /*
-     * PC Window
-     */
-    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
     
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
@@ -150,6 +145,7 @@ public:
      * PC Window
      */
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
+    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
