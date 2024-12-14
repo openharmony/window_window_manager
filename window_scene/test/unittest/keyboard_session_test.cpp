@@ -374,9 +374,6 @@ HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest
     callingSession->lastSafeRect = lastSR;
     keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
 
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(windowSessionProperty, nullptr);
-    keyboardSession->property_ = windowSessionProperty;
     keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
 }
 
@@ -626,18 +623,13 @@ HWTEST_F(KeyboardSessionTest, GetCallingSessionId01, Function | SmallTest | Leve
     info.bundleName_ = "GetCallingSessionId";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
     ASSERT_NE(keyboardSession, nullptr);
-    keyboardSession->property_ = nullptr;
     auto ret = keyboardSession->GetCallingSessionId();
     EXPECT_EQ(ret, INVALID_SESSION_ID);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(windowSessionProperty, nullptr);
-    keyboardSession->property_ = windowSessionProperty;
     ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->property_->SetCallingSessionId(1);
     ret = keyboardSession->GetCallingSessionId();
     EXPECT_EQ(ret, 1);
 }
-
 }  // namespace
 }  // namespace Rosen
 }  // namespace OHOS
