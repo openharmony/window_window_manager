@@ -97,6 +97,7 @@ public:
     virtual void OnExtensionTimeout(int32_t errorCode) {}
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
+    virtual void OnAppRemoveStartingWindow() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -500,6 +501,11 @@ public:
     /*
      * Starting Window
      */
+    WSError RemoveStartingWindow() override;
+    void SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow);
+    bool GetEnableRemoveStartingWindow() const;
+    void SetAppBufferReady(bool appBufferReady);
+    bool GetAppBufferReady() const;
     void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
     bool UseStartingWindowAboveLocked() const;
 
@@ -772,6 +778,8 @@ private:
     /*
      * Starting Window
      */
+    bool enableRemoveStartingWindow_ { false };
+    bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
 };
 } // namespace OHOS::Rosen

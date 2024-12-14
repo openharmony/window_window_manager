@@ -629,11 +629,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         UpdateWindowState();
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
+        AddSetUIContentTimeoutCheck();
         InputTransferStation::GetInstance().AddInputWindow(this);
-
-        if (WindowHelper::IsMainWindow(GetType())) {
-            AddSetUIContentTimeoutCheck();
-        }
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
         id:%{public}d], state:%{public}u, windowmode:%{public}u",
@@ -1256,6 +1253,23 @@ WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
     return res;
 }
 
+WMError WindowSceneSessionImpl::NotifyRemoveStartingWindow()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is invalid, id:%{public}d", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WMError res = WindowHelper::IsMainWindow(GetType()) ?
+                  static_cast<WMError>(hostSession->RemoveStartingWindow()) :
+                  WMError::WM_ERROR_INVALID_WINDOW;
+    if (res == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_LIFE, "success id:%{public}d", GetPersistentId());
+    }
+    return res;
+}
+
 void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
 {
     UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
@@ -1419,11 +1433,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         context_.reset();
     }
     ClearVsyncStation();
-
-    if (WindowHelper::IsMainWindow(GetType())) {
-        SetUIContentComplete();
-    }
-
+    SetUIContentComplete();
     surfaceNode_ = nullptr;
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy success, id: %{public}d", property_->GetPersistentId());
     return WMError::WM_OK;
@@ -2386,47 +2396,53 @@ bool WindowSceneSessionImpl::IsStartMoving()
     return isMoving;
 }
 
+WMError WindowSceneSessionImpl::MainWindowCloseInner()
+{
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (!abilityContext) {
+        return Destroy(true);
+    }
+    bool terminateCloseProcess = false;
+    WMError res = NotifyMainWindowClose(terminateCloseProcess);
+    if (res == WMError::WM_OK) {
+        if (!terminateCloseProcess) {
+            hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        }
+        return res;
+    }
+    auto handler = sptr<WindowPrepareTerminateHandler>::MakeSptr();
+    PrepareTerminateFunc func = [hostSessionWptr = wptr<ISession>(hostSession)] {
+        auto hostSession = hostSessionWptr.promote();
+        if (hostSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "this session is nullptr");
+            return;
+        }
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+    };
+    handler->SetPrepareTerminateFun(func);
+    if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
+        handler) != ERR_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "PrepareTerminateAbility failed, do close window");
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::Close()
 {
-    WLOGFI("WindowSceneSessionImpl::Close id: %{public}d", GetPersistentId());
+    WLOGFI("id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isSystemSubWindow = WindowHelper::IsSystemSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     if (WindowHelper::IsMainWindow(windowType)) {
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (!abilityContext) {
-            return Destroy(true);
-        }
-        WindowPrepareTerminateHandler* handler = new(std::nothrow) WindowPrepareTerminateHandler();
-        if (handler == nullptr) {
-            WLOGFW("new WindowPrepareTerminateHandler failed, do close window");
-            hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
-            return WMError::WM_OK;
-        }
-        wptr<ISession> hostSessionWptr = hostSession;
-        PrepareTerminateFunc func = [hostSessionWptr]() {
-            auto weakSession = hostSessionWptr.promote();
-            if (weakSession == nullptr) {
-                WLOGFW("this session wptr is nullptr");
-                return;
-            }
-            weakSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
-        };
-        handler->SetPrepareTerminateFun(func);
-        sptr<AAFwk::IPrepareTerminateCallback> callback = handler;
-        if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
-            callback) != ERR_OK) {
-            WLOGFW("RegisterWindowManagerServiceHandler failed, do close window");
-            hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
-            return WMError::WM_OK;
-        }
+        return MainWindowCloseInner();
     } else if (isSubWindow || isSystemSubWindow || isDialogWindow) {
         WLOGFI("WindowSceneSessionImpl::Close subwindow or dialog");
         bool terminateCloseProcess = false;
