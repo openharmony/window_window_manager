@@ -206,6 +206,39 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
     return pipTemplateInfoValue;
 }
 
+static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
+{
+    auto abilityInfo = session->GetSessionInfo().abilityInfo;
+    if (!abilityInfo) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "abilityInfo is nullptr");
+        return;
+    }
+    uint32_t value = 0;
+    for (const auto& item : abilityInfo->metadata) {
+        if (item.name == "ohos.ability.window.width") {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.width = %{public}d", value);
+                napi_set_named_property(env, objValue, "windowWidth", CreateJsValue(env, value));
+            }
+        } else if (item.name == "ohos.ability.window.height") {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.height = %{public}d", value);
+                napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
+            }
+        } else if (item.name == "ohos.ability.window.left") {
+            if (item.value.size() > 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.left = %{public}s", item.value.c_str());
+                napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, item.value));
+            }
+        } else if (item.name == "ohos.ability.window.top") {
+            if (item.value.size() > 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.top = %{public}s", item.value.c_str());
+                napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, item.value));
+            }
+        }
+    }
+}
+
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
     napi_value objValue = nullptr;
@@ -232,7 +265,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
     napi_set_named_property(env, objValue, "subWindowModalType",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
-
+    SetWindowSizeAndPosition(env, objValue, session);
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
     BindNativeMethodForKeyboard(env, objValue, moduleName);
