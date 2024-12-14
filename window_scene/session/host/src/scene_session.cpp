@@ -5940,8 +5940,8 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
     }
 
     if (behindWindowFilterEnabledModifier_ == nullptr) {
-        behindWindowFilterEnabledProperty_ = std::make_shared<Rosen::RSProperty<bool>>(enabled);
-        behindWindowFilterEnabledModifier_ = std::make_shared<Rosen::RSBehindWindowFilterEnabledModifier>(
+        behindWindowFilterEnabledProperty_ = std::make_shared<RSProperty<bool>>(enabled);
+        behindWindowFilterEnabledModifier_ = std::make_shared<RSBehindWindowFilterEnabledModifier>(
             behindWindowFilterEnabledProperty_);
         surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
     } else {
