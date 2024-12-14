@@ -114,9 +114,9 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 
-     /**
-      * Starting Window
-      */
+    /**
+     * Starting Window
+     */
     WSError RemoveStartingWindow() override;
 
 private:
