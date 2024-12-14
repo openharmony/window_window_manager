@@ -701,19 +701,6 @@ bool Session::GetSystemTouchable() const
     return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
-bool Session::GetRectChangeBySystem() const
-{
-    return rectChangeBySystem_.load();
-}
-
-void Session::SetRectChangeBySystem(bool rectChangeBySystem)
-{
-    if (rectChangeBySystem_.load() != rectChangeBySystem) {
-        rectChangeBySystem_.store(rectChangeBySystem);
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), rectChangeBySystem);
-    }
-}
-
 bool Session::IsSystemActive() const
 {
     return isSystemActive_;
@@ -1167,12 +1154,11 @@ void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& pro
     auto defaultDragEnable = false;
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
-    bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
     bool isSystemCalling = property->GetSystemCalling();
     TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, defaultDragEnable: %{public}d, isSystemWindow: %{public}d, "
-        "isDialog: %{public}d, isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(),
-        defaultDragEnable, isSystemWindow, isDialog, isSubWindow, isSystemCalling);
-    if (isSystemWindow && !isSubWindow && !isDialog && !isSystemCalling) {
+        "isDialog: %{public}d, isSystemCalling: %{public}d", GetPersistentId(), defaultDragEnable,
+        isSystemWindow, isDialog, isSystemCalling);
+    if (isSystemWindow && !isDialog && !isSystemCalling) {
         property->SetDragEnabled(defaultDragEnable);
     }
 }
@@ -2565,7 +2551,7 @@ WSError Session::UpdateFocus(bool isFocused)
 WSError Session::NotifyFocusStatus(bool isFocused)
 {
     if (!IsSessionValid()) {
-        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGD(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }

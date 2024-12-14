@@ -16,6 +16,9 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
+#include <modifier/rs_property.h>
+#include <modifier/rs_property_modifier.h>
+
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/pc_fold_screen_controller.h"
@@ -560,6 +563,7 @@ public:
     void OnNextVsyncReceivedWhenDrag();
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
+    void SetBehindWindowFilterEnabled(bool enabled); // Only accessed on main thread
 
     /**
      * Gesture Back
@@ -931,6 +935,9 @@ private:
         bool isGlobal = false, bool needFlush = true);
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
+    std::shared_ptr<RSProperty<bool>> behindWindowFilterEnabledProperty_; // Only accessed on main thread
+    std::shared_ptr<RSBehindWindowFilterEnabledModifier>
+        behindWindowFilterEnabledModifier_; // Only accessed on main thread
 
     /**
      * Window Immersive

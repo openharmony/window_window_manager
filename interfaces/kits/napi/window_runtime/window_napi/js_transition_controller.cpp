@@ -37,23 +37,23 @@ static int g_jsTransCtrlDtorCnt = 0;
 JsTransitionContext::JsTransitionContext(sptr<Window> window, bool isShownTransContext)
     : windowToken_(window), isShownTransContext_(isShownTransContext)
 {
-    WLOGI("[NAPI] JsTransitionContext constructorCnt: %{public}d", ++g_jsTransCxtCtorCnt);
+    WLOGFI("constructorCnt: %{public}d", ++g_jsTransCxtCtorCnt);
 }
 
 JsTransitionContext::~JsTransitionContext()
 {
-    WLOGI("[NAPI] ~JsTransitionContext deConstructorCnt: %{public}d", ++g_jsTransCxtDtorCnt);
+    WLOGFI("deConstructorCnt: %{public}d", ++g_jsTransCxtDtorCnt);
 }
 
 void JsTransitionContext::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("[NAPI]JsTransitionContext::Finalizer");
+    WLOGFI("[NAPI]");
     std::unique_ptr<JsTransitionContext>(static_cast<JsTransitionContext*>(data));
 }
 
 napi_value JsTransitionContext::CompleteTransition(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]CompleteTransition");
+    WLOGFI("[NAPI]");
     JsTransitionContext* me = CheckParamsAndGetThis<JsTransitionContext>(env, info);
     return (me != nullptr) ? me->OnCompleteTransition(env, info) : nullptr;
 }
@@ -84,7 +84,7 @@ napi_value JsTransitionContext::OnCompleteTransition(napi_env env, napi_callback
     auto state = window->GetWindowState();
     if (!isShownTransContext_) {
         if (state != WindowState::STATE_HIDDEN) {
-            WLOGI("[NAPI]Window [%{public}u, %{public}s] Hidden context called but window is not hidden: %{public}u",
+            WLOGI("Window [%{public}u, %{public}s] Hidden context called but window is not hidden: %{public}u",
                 window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(state));
             return NapiGetUndefined(env);
         }
@@ -94,7 +94,7 @@ napi_value JsTransitionContext::OnCompleteTransition(napi_env env, napi_callback
         }
     } else {
         if (state != WindowState::STATE_SHOWN) {
-            WLOGI("[NAPI]Window [%{public}u, %{public}s] shown context called but window is not shown: %{public}u",
+            WLOGI("Window [%{public}u, %{public}s] shown context called but window is not shown: %{public}u",
                 window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(state));
             return NapiGetUndefined(env);
         }
@@ -105,7 +105,7 @@ napi_value JsTransitionContext::OnCompleteTransition(napi_env env, napi_callback
     if (ret != WMError::WM_OK) {
         return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret));
     }
-    WLOGI("[NAPI]Window [%{public}u, %{public}s] CompleteTransition %{public}d end",
+    WLOGI("Window [%{public}u, %{public}s] CompleteTransition %{public}d end",
         window->GetWindowId(), window->GetWindowName().c_str(), transitionCompleted);
     return NapiGetUndefined(env);
 }
@@ -113,11 +113,11 @@ napi_value JsTransitionContext::OnCompleteTransition(napi_env env, napi_callback
 static napi_value CreateJsTransitionContextObject(napi_env env, std::shared_ptr<NativeReference> jsWin,
     sptr<Window> window, bool isShownTransContext)
 {
-    WLOGI("[NAPI]CreateJsTransitionContextObject");
+    WLOGFI("[NAPI]");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Failed to get object");
+        WLOGFE("Failed to get object");
         return nullptr;
     }
     std::unique_ptr<JsTransitionContext> jsTransContext = std::make_unique<JsTransitionContext>(window,
@@ -126,7 +126,7 @@ static napi_value CreateJsTransitionContextObject(napi_env env, std::shared_ptr<
     if (jsWin != nullptr && jsWin->GetNapiValue() != nullptr) {
         napi_set_named_property(env, objValue, "toWindow", jsWin->GetNapiValue());
     } else {
-        WLOGFE("[NAPI]jsWin is nullptr");
+        WLOGFE("jsWin is nullptr");
         return nullptr;
     }
 
@@ -139,17 +139,17 @@ JsTransitionController::JsTransitionController(napi_env env, std::shared_ptr<Nat
     sptr<Window> window)
     : env_(env), jsWin_(jsWin), windowToken_(window), weakRef_(wptr<JsTransitionController> (this))
 {
-    WLOGI("[NAPI] JsTransitionController constructorCnt: %{public}d", ++g_jsTransCtrlCtorCnt);
+    WLOGFI("constructorCnt: %{public}d", ++g_jsTransCtrlCtorCnt);
 }
 
 JsTransitionController::~JsTransitionController()
 {
-    WLOGI("[NAPI] ~JsTransitionController deConstructorCnt: %{public}d", ++g_jsTransCtrlDtorCnt);
+    WLOGFI("deConstructorCnt: %{public}d", ++g_jsTransCtrlDtorCnt);
 }
 
 void JsTransitionController::AnimationForShown()
 {
-    WLOGI("[NAPI]AnimationForShown");
+    WLOGFI("[NAPI]");
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_](napi_env, NapiAsyncTask&, int32_t) {
             auto thisController = self.promote();
@@ -189,7 +189,7 @@ void JsTransitionController::AnimationForShown()
 
 void JsTransitionController::AnimationForHidden()
 {
-    WLOGI("[NAPI]AnimationForHidden");
+    WLOGFI("[NAPI]");
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_](napi_env, NapiAsyncTask&, int32_t) {
             auto thisController = self.promote();

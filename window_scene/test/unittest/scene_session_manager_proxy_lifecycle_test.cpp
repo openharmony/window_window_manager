@@ -63,9 +63,9 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityLis
 {
     int32_t persistentId = 0;
     bool haveListener = true;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
     ASSERT_EQ(WSError::WS_OK, sceneSessionManagerProxy->UpdateSessionWindowVisibilityListener(persistentId,
@@ -80,9 +80,9 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityLis
 HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> token = nullptr;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->PendingSessionToForeground(token));
@@ -96,9 +96,9 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, Func
 HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDelegator, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> token = nullptr;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED,
@@ -112,9 +112,9 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToBackgroundForDel
  */
 HWTEST_F(sceneSessionManagerProxyLifecycleTest, GetVisibilityWindowInfo, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        new (std::nothrow) SceneSessionManagerProxy(iRemoteObjectMocker);
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
     std::vector<sptr<WindowVisibilityInfo>> infos;

@@ -266,8 +266,8 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
 
     if (isTransfer && action) {
         action(event);
-        HandleDisplayNotify(event);
         TransferState(nextState);
+        HandleDisplayNotify(event);
         // notify
         auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
         if (screenSession == nullptr) {
