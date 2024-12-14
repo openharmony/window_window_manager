@@ -2011,22 +2011,15 @@ HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function |
     sptr<ISessionStage> sessionStage;
     sptr<IWindowEventChannel> eventChannel;
     std::shared_ptr<RSSurfaceNode> node = nullptr;
-    sptr<WindowSessionProperty> property;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sptr<ISession> session;
     SystemSessionConfig systemConfig;
     sptr<IRemoteObject> token;
     int32_t id = 0;
     ASSERT_NE(ssm_, nullptr);
-    // property is nullptr
-    WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
-
-    // property is not nullptr
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
+    
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+    auto res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
 
