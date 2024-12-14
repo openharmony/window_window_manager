@@ -31,7 +31,6 @@ public:
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
     WMError NotifyDrawingCompleted() override;
-    WMError NotifyRemoveStartingWindow() override;
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     void PreProcessCreate();
     void SetDefaultProperty();
@@ -212,6 +211,11 @@ public:
     WMError SetWindowTitle(const std::string& title) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
+
+    /*
+     * Starting Window
+     */
+    WMError NotifyRemoveStartingWindow() override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
