@@ -92,6 +92,7 @@ public:
     void SetCompatibleModeInPc(bool compatibleModeInPc);
     void SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
+    void SetIsAppSupportPhoneInPc(bool isSupportPhone);
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
@@ -149,6 +150,7 @@ public:
     int32_t GetCompatibleInPcPortraitHeight() const;
     int32_t GetCompatibleInPcLandscapeWidth() const;
     int32_t GetCompatibleInPcLandscapeHeight() const;
+    bool GetIsAppSupportPhoneInPc() const;
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
     bool GetCompatibleModeEnableInPad() const;
@@ -326,6 +328,7 @@ private:
     int32_t compatibleInPcPortraitHeight_ = 0;
     int32_t compatibleInPcLandscapeWidth_ = 0;
     int32_t compatibleInPcLandscapeHeight_ = 0;
+    bool isAppSupportPhoneInPc_ = false;
     bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;
