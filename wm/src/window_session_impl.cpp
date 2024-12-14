@@ -1547,22 +1547,16 @@ bool WindowSessionImpl::IsTopmost() const
 
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
+    TLOGD(WmsLogTag::DEFAULT, "%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
-    TLOGD(WmsLogTag::DEFAULT, "%{public}d", dragEnabled);
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (WindowHelper::IsSubWindow(GetType()) && !windowOption_->GetSubWindowDecorEnable()) {
-        return WMError::WM_OK;
-    }
-    if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsSubWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) ||
+        (WindowHelper::IsSubWindow(GetType()) && windowOption_->GetSubWindowDecorEnable())) {
         property_->SetDragEnabled(dragEnabled);
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "This is not main window or sub window.");
+        TLOGE(WmsLogTag::DEFAULT, "This is not main window or decor enabled sub window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
