@@ -57,7 +57,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         TLOGE(WmsLogTag::WMS_LIFE, "Write surfaceNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!property || !data.WriteStrongParcelable(property.GetRefPtr())) {
+    if (!property || !data.WriteStrongParcelable(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write property failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
