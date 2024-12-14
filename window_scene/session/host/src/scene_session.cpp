@@ -5923,4 +5923,33 @@ void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
 }
+
+void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enabled: %{public}d", GetPersistentId(), enabled);
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "fail to get surfaceNode");
+        return;
+    }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "begin rsTransaction");
+        rsTransaction->Begin();
+    }
+
+    if (behindWindowFilterEnabledModifier_ == nullptr) {
+        behindWindowFilterEnabledProperty_ = std::make_shared<RSProperty<bool>>(enabled);
+        behindWindowFilterEnabledModifier_ = std::make_shared<RSBehindWindowFilterEnabledModifier>(
+            behindWindowFilterEnabledProperty_);
+        surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
+    } else {
+        behindWindowFilterEnabledProperty_->Set(enabled);
+    }
+
+    if (rsTransaction != nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "commit rsTransaction");
+        rsTransaction->Commit();
+    }
+}
 } // namespace OHOS::Rosen

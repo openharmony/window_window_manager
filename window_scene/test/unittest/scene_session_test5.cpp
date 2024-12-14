@@ -1746,6 +1746,23 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, Function | Smal
     controller->RecordMoveRects(rect);
     EXPECT_TRUE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
 }
+
+/**
+ * @tc.name: SetBehindWindowFilterEnabled
+ * @tc.desc: SetBehindWindowFilterEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetBehindWindowFilterEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBehindWindowFilterEnabled";
+    info.bundleName_ = "SetBehindWindowFilterEnabled";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    session->SetBehindWindowFilterEnabled(false);
+    session->SetBehindWindowFilterEnabled(true);
+}
 }
 }
 }
