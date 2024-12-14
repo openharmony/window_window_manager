@@ -264,11 +264,9 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemDensityChangeRegister(const sp
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    sptr<ISystemDensityChangeListener> thisListener(listener);
-    WmErrorCode ret = isRegister ?
-        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(thisListener)) :
-        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(thisListener));
-    return ret;
+    return isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(listener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(listener));
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener,

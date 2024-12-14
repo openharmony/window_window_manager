@@ -4191,9 +4191,9 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
         TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
         return;
     }
-    if (CheckIsSystemDensityChange(displayInfo)) {
-        NotifySystemDensityChange(displayInfo->GetVirtualPixelRatio());
+    if (IsSystemDensityChange(displayInfo)) {
         lastSystemDensity_ = displayInfo->GetVirtualPixelRatio();
+        NotifySystemDensityChange(displayInfo->GetVirtualPixelRatio());
     }
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
@@ -4552,12 +4552,14 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
     return WMError::WM_DO_NOTHING;
 }
 
-bool WindowSceneSessionImpl::CheckIsSystemDensityChange(const sptr<DisplayInfo>& displayInfo)
+bool WindowSceneSessionImpl::IsSystemDensityChange(const sptr<DisplayInfo>& displayInfo)
 {
     if (MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "System density not change");
         return false;
     }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u, lastDensity: %{public}f, currDensity: %{public}f",
+        GetPersistentId(), lastSystemDensity_, displayInfo->GetVirtualPixelRatio());
     return true;
 }
 } // namespace Rosen
