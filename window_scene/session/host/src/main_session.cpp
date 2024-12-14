@@ -231,4 +231,20 @@ WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool 
     PostTask(task, funcName);
     return WSError::WS_OK;
 }
+
+WSError MainSession::OnRestoreMainWindow()
+{
+    auto task = [weakThis = wptr(this)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        if (session->onRestoreMainWindowFunc_) {
+            session->onRestoreMainWindowFunc_();
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
