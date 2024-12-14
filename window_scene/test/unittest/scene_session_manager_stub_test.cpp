@@ -1076,7 +1076,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleCreateAndConnectSpecificSession, Fun
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     int res = stub_->HandleCreateAndConnectSpecificSession(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_STATE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
