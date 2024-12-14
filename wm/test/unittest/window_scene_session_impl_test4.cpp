@@ -2028,24 +2028,24 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent01, Function | SmallT
 }
 
 /**
- * @tc.name: IsSystemDensityChange01
- * @tc.desc: IsSystemDensityChange
+ * @tc.name: IsSystemDensityChanged01
+ * @tc.desc: IsSystemDensityChanged
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChange01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChanged01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("IsSystemDensityChange01");
+    option->SetWindowName("IsSystemDensityChanged01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
     auto displayInfo = sptr<DisplayInfo>::MakeSptr();
     displayInfo->SetVirtualPixelRatio(1.5f);
-    auto ret = window->IsSystemDensityChange(displayInfo);
+    auto ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(true, ret);
 
-    ret = window->IsSystemDensityChange(displayInfo);
+    ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(false, ret);
 }
 }
