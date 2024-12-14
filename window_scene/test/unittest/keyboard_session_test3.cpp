@@ -287,7 +287,7 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, Function | SmallTest |
     // callingsession is not nullptr
     sptr<SceneSession::SpecificSessionCallback> specificCb =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
+    ASSERT_NE(specificCb, nullptr);
     SessionInfo info;
     info.abilityName_ = "OnCallingSessionUpdated01";
     info.bundleName_ = "OnCallingSessionUpdated01";
@@ -305,7 +305,7 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, Function | SmallTest |
     ASSERT_EQ(keyboardSession->state_, SessionState::STATE_FOREGROUND);
 
     // keyboardSession's gravity is WindowGravity::Window_GRAVITY_FLOAT
-    EXPECT_NE(keyboardSession->property_, nullptr);
+    ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
 
     ASSERT_EQ(keyboardSession->GetKeyboardGravity(), SessionGravity::SESSION_GRAVITY_FLOAT);
