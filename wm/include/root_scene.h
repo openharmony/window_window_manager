@@ -54,7 +54,7 @@ public:
     int64_t GetVSyncPeriod() override;
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
 
-    /**
+    /*
      * Window Immersive
      */
     bool IsLastFrameLayoutFinished();
@@ -118,7 +118,7 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
 
-    /**
+    /*
      * Window Immersive
      */
     GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
