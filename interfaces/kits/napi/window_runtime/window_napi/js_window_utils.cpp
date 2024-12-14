@@ -1135,6 +1135,5 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     return ParseModalityParam(env, jsObject, windowOption);
 }
-
 } // namespace Rosen
 } // namespace OHOS

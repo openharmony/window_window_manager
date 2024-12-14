@@ -66,6 +66,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleHide(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DRAWING_COMPLETED):
             return HandleDrawingCompleted(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_APP_REMOVE_STARTING_WINDOW):
+            return HandleRemoveStartingWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_RECTCHANGE_LISTENER_REGISTERED):
             return HandleUpdateRectChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT):
@@ -106,6 +108,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleChangeSessionVisibilityWithStatusBar(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION):
             return HandlePendingSessionActivation(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_MAIN_WINDOW):
+            return HandleRestoreMainWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE):
             return HandleTerminateSession(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION):
@@ -320,6 +324,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
         reply.WriteInt32(property->GetCompatibleInPcLandscapeWidth());
         reply.WriteInt32(property->GetCompatibleInPcLandscapeHeight());
+        reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsSupportDragInPcCompatibleMode());
         reply.WriteBool(property->GetIsPcAppInPad());
         reply.WriteBool(property->GetCompatibleModeEnableInPad());
@@ -341,6 +346,14 @@ int SessionStub::HandleDrawingCompleted(MessageParcel& data, MessageParcel& repl
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Called!");
     const WSError errCode = DrawingCompleted();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "Called!");
+    WSError errCode = RemoveStartingWindow();
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -392,6 +405,12 @@ int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageP
         isTitleHoverShown, isDockHoverShown);
     WSError errCode = OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
+{
+    WSError errCode = OnRestoreMainWindow();
     return ERR_NONE;
 }
 

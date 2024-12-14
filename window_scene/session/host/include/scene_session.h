@@ -85,6 +85,7 @@ using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScr
 using NotifyDefaultDensityEnabledFunc = std::function<void(bool isDefaultDensityEnabled)>;
 using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHoverShown,
     bool isDockHoverShown)>;
+using NotifyRestoreMainWindowFunc = std::function<void()>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
@@ -270,6 +271,7 @@ public:
     virtual bool IsModal() const { return false; }
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
 
     /**
      * Window Immersive
@@ -540,6 +542,7 @@ protected:
      * PC Window
      */
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
+    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
     /*
      * PiP Window

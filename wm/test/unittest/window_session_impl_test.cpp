@@ -1261,6 +1261,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     res = window->UnregisterSwitchFreeMultiWindowListener(listener11);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    sptr<IMainWindowCloseListener> listener12 = nullptr;
+    res = window->RegisterMainWindowCloseListeners(listener12);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterMainWindowCloseListeners(listener12);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
 }
@@ -2076,7 +2082,13 @@ HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest
     window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
     window->NotifySetUIContentComplete();
-    EXPECT_EQ(window->setUIContentCompleted_.load(), false);
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
+
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->NotifySetUIContentComplete();
+    EXPECT_EQ(window->setUIContentCompleted_.load(), true);
 }
 }
 } // namespace Rosen

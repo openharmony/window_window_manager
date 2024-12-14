@@ -50,6 +50,7 @@ public:
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
+    WSError OnRestoreMainWindow() override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false) override;
@@ -103,6 +104,10 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * Starting Window
+     */
+    WSError RemoveStartingWindow() override;
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
 
 private:

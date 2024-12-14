@@ -925,6 +925,16 @@ int32_t WindowSessionProperty::GetCompatibleInPcLandscapeHeight() const
     return compatibleInPcLandscapeHeight_;
 }
 
+void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
+{
+    isAppSupportPhoneInPc_ = isSupportPhone;
+}
+
+bool WindowSessionProperty::GetIsAppSupportPhoneInPc() const
+{
+    return isAppSupportPhoneInPc_;
+}
+
 void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
 {
     isPcAppInPad_ = isPcAppInPad;
@@ -1007,6 +1017,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(compatibleModeInPc_) &&
         parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
+        parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_);
 }
@@ -1078,6 +1089,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCompatibleModeInPc(parcel.ReadBool());
     property->SetCompatibleWindowSizeInPc(parcel.ReadInt32(), parcel.ReadInt32(),
                                           parcel.ReadInt32(), parcel.ReadInt32());
+    property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());

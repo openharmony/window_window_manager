@@ -1041,6 +1041,226 @@ HWTEST_F(WindowSceneSessionImplTest3, Recover, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RestorePcMainWindow
+ * @tc.desc: RestorePcMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, RestorePcMainWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Restore");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    auto ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+}
+
+/**
+ * @tc.name: RestorePcSubWindow
+ * @tc.desc: RestorePcSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, RestorePcSubWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Restore");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    auto ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+}
+
+/**
+ * @tc.name: RestorePadMainWindow
+ * @tc.desc: RestorePadMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, RestorePadMainWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Restore");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    auto ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RestorePadSubWindow
+ * @tc.desc: RestorePadSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, RestorePadSubWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Restore");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    auto ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+}
+
+/**
+ * @tc.name: RestorePadFloatingMainWindow
+ * @tc.desc: RestorePadFloatingMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, RestorePadFloatingMainWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Restore");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    auto ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RestorePadFloatingSubWindow
+ * @tc.desc: RestorePadFloatingSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, RestorePadFloatingSubWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Restore");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    auto ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(false);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(true);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetIsAppSupportPhoneInPc(false);
+    ret = windowSceneSessionImpl->Restore();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+}
+
+/**
  * @tc.name: StartMove
  * @tc.desc: StartMove
  * @tc.type: FUNC

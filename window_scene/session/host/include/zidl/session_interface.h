@@ -44,6 +44,7 @@ public:
     virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Hide() = 0;
     virtual WSError DrawingCompleted() = 0;
+    virtual WSError RemoveStartingWindow() = 0;
 
     // scene session
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
@@ -69,6 +70,13 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Callback for processing restore main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
 
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(

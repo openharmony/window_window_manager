@@ -41,6 +41,7 @@ public:
      */
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
+    WSError OnRestoreMainWindow() override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
