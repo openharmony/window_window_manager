@@ -429,7 +429,7 @@ WSError ExtensionSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avoi
     return sessionStage_->UpdateAvoidArea(avoidArea, type);
 }
 
-AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
+AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
 {
     Rosen::AvoidArea avoidArea;
     if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ != nullptr) {

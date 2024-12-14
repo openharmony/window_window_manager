@@ -31,7 +31,8 @@ public:
     MOCK_METHOD1(DestroyWindow, WMError(uint32_t windowId));
     MOCK_METHOD2(UpdateProperty, WMError(sptr<WindowProperty>& windowProperty, PropertyChangeAction action));
     MOCK_METHOD2(GetTopWindowId, WMError(uint32_t mainWinId, uint32_t& topWinId));
-    MOCK_METHOD3(GetAvoidAreaByType, WMError(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidArea));
+    MOCK_METHOD3(GetAvoidAreaByType, WMError(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidArea, 
+                                        const Rect& rect));
     MOCK_METHOD2(BindDialogTarget, WMError(uint32_t& windowId, sptr<IRemoteObject> targetToken));
     MOCK_METHOD2(UpdateRsTree, WMError(uint32_t windowId, bool isAdd));
     MOCK_METHOD1(MinimizeAllAppWindows, WMError(DisplayId displayId));

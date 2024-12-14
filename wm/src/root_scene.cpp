@@ -233,7 +233,7 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
     if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");

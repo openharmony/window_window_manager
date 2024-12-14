@@ -387,14 +387,14 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
     return curProperties[type];
 }
 
-WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WLOGI("GetAvoidAreaByType Search Type: %{public}u", static_cast<uint32_t>(type));
     uint32_t windowId = property_->GetWindowId();
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea, rect);
     if (ret != WMError::WM_OK) {
         WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u.",
             static_cast<int32_t>(ret), property_->GetWindowId(), static_cast<uint32_t>(type));

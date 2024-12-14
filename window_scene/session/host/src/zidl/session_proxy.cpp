@@ -1048,28 +1048,40 @@ WSError SessionProxy::OnNeedAvoid(bool status)
     return static_cast<WSError>(ret);
 }
 
-AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type)
+AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     AvoidArea avoidArea;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
         return avoidArea;
     }
     if (!(data.WriteUint32(static_cast<uint32_t>(type)))) {
-        WLOGFE("Write type failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "write type error");
         return avoidArea;
+    }
+    if (!data.WriteInt32(rect.posX_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write posX_ error");
+    }
+    if (!data.WriteInt32(rect.posY_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write posY_ error");
+    }
+    if (!data.WriteInt32(rect.width_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write width_ error");
+    }
+    if (!data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write height_ error");
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
         return avoidArea;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
         return avoidArea;
     }
     sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();

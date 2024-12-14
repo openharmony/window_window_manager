@@ -895,7 +895,25 @@ public:
      * @param avoidArea
      * @return WMError
      */
-    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) { return WMError::WM_OK; }
+    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0})
+    { 
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Set whether the system or app sub window can obtain area
+     * 
+     * @param avoidAreaOption Flags of 
+     */
+    virtual WMError SetAvoidAreaOption(uint32_t AvoidAreaOption) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the Avoid Area of system or app sub window Enabled object
+     * 
+     * @param
+     * @return 01 means system window can obtain avoid area, 10 means app sub window can obtain avoid area
+     */
+    virtual WMError GetAvoidAreaOption() { return 0; }
 
     /**
      * @brief Set this window layout full screen, with hide status bar and nav bar above on this window

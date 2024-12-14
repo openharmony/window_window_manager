@@ -59,7 +59,7 @@ public:
      */
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;

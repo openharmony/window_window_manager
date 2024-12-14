@@ -62,7 +62,7 @@ public:
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;

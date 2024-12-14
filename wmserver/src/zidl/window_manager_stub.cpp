@@ -107,7 +107,28 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
                 return ERR_INVALID_DATA;
             }
             auto avoidAreaType = static_cast<AvoidAreaType>(avoidAreaTypeId);
-            AvoidArea avoidArea = GetAvoidAreaByType(windowId, avoidAreaType);
+            int32_t posX = 0;
+            int32_t posY = 0;
+            uint32_t width = 0;
+            uint32_t height = 0;
+            if (!data.ReadInt32(posX)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read posX error");
+                return ERR_INVALID_DATA;
+            }
+            if (!data.ReadInt32(posY)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read posY error");
+                return ERR_INVALID_DATA;
+            }
+            if (!data.ReadInt32(width)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read width error");
+                return ERR_INVALID_DATA;
+            }
+            if (!data.ReadInt32(height)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read height error");
+                return ERR_INVALID_DATA;
+            }
+            WSRect rect = {posX, posY, static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+            AvoidArea avoidArea = GetAvoidAreaByType(windowId, avoidAreaType, rect);
             reply.WriteParcelable(&avoidArea);
             break;
         }

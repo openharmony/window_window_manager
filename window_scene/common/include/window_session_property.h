@@ -101,6 +101,7 @@ public:
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
+    void SetAvoidAreaOption(uint32_t avoidAreaOption);
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -161,6 +162,7 @@ public:
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
     bool GetCompatibleModeEnableInPad() const;
+    uint32_t GetAvoidAreaOption() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -263,6 +265,7 @@ private:
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
+    bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -287,6 +290,7 @@ private:
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
+    void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -382,6 +386,7 @@ private:
     bool isUIExtFirstSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtAnySubWindow_ = false;
+    uint32_t avoidAreaOption_ = 0;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
     /**

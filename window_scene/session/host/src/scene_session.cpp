@@ -1785,7 +1785,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty == nullptr ||
-        (sessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID))) {
+        (sessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID) &&
+        WindowHelper::IsAppWindow(GetWindowType()))) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d window type %{public}u window flag %{public}d",
+            GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlag());
         return;
     }
     DisplayId displayId = sessionProperty->GetDisplayId();
@@ -1813,7 +1816,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
-    if (!isStatusBarVisible_) {
+    if (WindowHelper::IsMainWindow(Session::GetWindowType()) && !isStatusBarVisible_) {
         TLOGI(WmsLogTag::WMS_IMMS, "status bar not visible");
         return;
     }
@@ -1824,6 +1827,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     for (auto& statusBar : statusBarVector) {
         WSRect statusBarRect = statusBar->GetSessionRect();
+        if ((WindowHelper::IsSystemWindow(Session::GetWindowType()) ||
+            WindowHelper::IsSubWindow(Session::GetWindowType())) && !statusBar->isVisible_) {
+            return;
+            }
         TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
@@ -1930,13 +1937,25 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
 
-bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
+bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, const WSRect& rect)
 {
     if (type == AvoidAreaType::TYPE_KEYBOARD) {
         return true;
     }
     WindowMode mode = GetWindowMode();
     WindowType winType = GetWindowType();
+    if (WindowHelper::IsSubWindow(winType)) {
+        if (GetSessionProperty()->GetAvoidAreaOption() &
+            static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
+            TLOGI(WmsLogTag::WMS_IMMS, "app sub window can obtain avoid area");
+            return true;
+            }
+        auto parentSession = GetParentSession();
+        if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
+            return parentSession->CheckGetAvoidAreaAvailable(type);
+        }
+        TLOGD(WmsLogTag::WMS_IMMS, "parentSession is nullptr");
+    }
     if (WindowHelper::IsMainWindow(winType)) {
         if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
             return false;
@@ -1946,11 +1965,9 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
             return true;
         }
     }
-    if (WindowHelper::IsSubWindow(winType)) {
-        auto parentSession = GetParentSession();
-        if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
-            return parentSession->CheckGetAvoidAreaAvailable(type);
-        }
+    if (WindowHelper::IsSystemWindow(winType) &&
+        (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) {
+        return systemConfig.IsPhoneWindow() || systemConfig_.IsPadWindow();
     }
     TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}u "
         "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
@@ -2066,32 +2083,38 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
-AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type)
+AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect)
 {
-    if (!CheckGetAvoidAreaAvailable(type)) {
+    if (!CheckGetAvoidAreaAvailable(type, rect)) {
         return {};
     }
 
     AvoidArea avoidArea;
-    WSRect rect = GetSessionRect();
+    WSRect sessionRect;
+    if (rect.IsEmpty()) {
+        sessionRect = GetSessionRect();
+    }
+    else {
+        sessionRect = rect;
+    }
     switch (type) {
         case AvoidAreaType::TYPE_SYSTEM: {
-            GetSystemAvoidArea(rect, avoidArea);
+            GetSystemAvoidArea(sessionRect, avoidArea);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_CUTOUT: {
-            GetCutoutAvoidArea(rect, avoidArea);
+            GetCutoutAvoidArea(sessionRect, avoidArea);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
             return avoidArea;
         }
         case AvoidAreaType::TYPE_KEYBOARD: {
-            GetKeyboardAvoidArea(rect, avoidArea);
+            GetKeyboardAvoidArea(sessionRect, avoidArea);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-            GetAINavigationBarArea(rect, avoidArea);
+            GetAINavigationBarArea(sessionRect, avoidArea);
             return avoidArea;
         }
         default: {
@@ -2102,15 +2125,15 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type)
     }
 }
 
-AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
+AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
 {
-    auto task = [weakThis = wptr(this), type]() -> AvoidArea {
+    auto task = [weakThis = wptr(this), type, rect]() -> AvoidArea {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_IMMS, "session is null");
             return {};
         }
-        return session->GetAvoidAreaByTypeInner(type);
+        return session->GetAvoidAreaByTypeInner(type, rect);
     };
     return PostSyncTask(task, "GetAvoidAreaByType");
 }
@@ -4221,6 +4244,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateMainWindowTopmost(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
             return HandleActionUpdateWindowModeSupportType(property, action);
+        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION):
+            return HandleActionUpdateAvoidAreaOption(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -4514,6 +4539,21 @@ WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessi
     WSPropertyChangeAction action)
 {
     SetMainWindowTopmost(property->IsMainWindowTopmost());
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    sptr<WindowSessionProperty> sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!(SessionHelper::IsSubWindow(sessionProperty->GetWindowType()) ||
+        SessionHelper::IsSystemWindow(sessionProperty->GetwindowType()))) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    sessionProperty->SetAvoidAreaOption(property->GetAvoidAreaOption());
     return WMError::WM_OK;
 }
 

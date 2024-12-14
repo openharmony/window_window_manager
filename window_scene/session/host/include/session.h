@@ -509,7 +509,7 @@ public:
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
 
-    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) { return true; }
 
     virtual bool IsVisibleForeground() const;
     void SetIsStarting(bool isStarting);

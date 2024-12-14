@@ -203,13 +203,13 @@ WMError WindowAdapter::SetWindowAnimationController(const sptr<RSIWindowAnimatio
     return wmsProxy->SetWindowAnimationController(controller);
 }
 
-WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidArea)
+WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    avoidArea = wmsProxy->GetAvoidAreaByType(windowId, type);
+    avoidArea = wmsProxy->GetAvoidAreaByType(windowId, type, rect);
     return WMError::WM_OK;
 }
 
