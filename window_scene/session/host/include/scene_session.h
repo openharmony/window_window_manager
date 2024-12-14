@@ -16,13 +16,14 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
+#include <modifier/rs_property.h>
+#include <modifier/rs_property_modifier.h>
+
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/pc_fold_screen_controller.h"
 #include "vsync_station.h"
 #include "wm_common.h"
-#include <modifier/rs_property.h>
-#include <modifier/rs_property_modifier.h>
 
 namespace OHOS::PowerMgr {
 class RunningLock;
@@ -934,8 +935,8 @@ private:
         bool isGlobal = false, bool needFlush = true);
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
-    std::shared_ptr<Rosen::RSProperty<bool>> rSBehindWindowFilterEnabledProperty_;
-    std::shared_ptr<Rosen::RSBehindWindowFilterEnabledModifier> rSBehindWindowFilterEnabledModifier_;
+    std::shared_ptr<Rosen::RSProperty<bool>> behindWindowFilterEnabledProperty_;
+    std::shared_ptr<Rosen::RSBehindWindowFilterEnabledModifier> behindWindowFilterEnabledModifier_;
 
     /**
      * Window Immersive

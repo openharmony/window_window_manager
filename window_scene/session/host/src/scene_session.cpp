@@ -5939,19 +5939,19 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
         rsTransaction->Begin();
     }
 
-    if (rSBehindWindowFilterEnabledModifier_ == nullptr) {
-        rSBehindWindowFilterEnabledProperty_ = std::make_shared<Rosen::RSProperty<bool>>(enabled);
-        rSBehindWindowFilterEnabledModifier_ = std::make_shared<Rosen::RSBehindWindowFilterEnabledModifier>(
-            rSBehindWindowFilterEnabledProperty_);
-        surfaceNode->AddModifier(rSBehindWindowFilterEnabledModifier_);
+    if (behindWindowFilterEnabledModifier_ == nullptr) {
+        behindWindowFilterEnabledProperty_ = std::make_shared<Rosen::RSProperty<bool>>(enabled);
+        behindWindowFilterEnabledModifier_ = std::make_shared<Rosen::RSBehindWindowFilterEnabledModifier>(
+            behindWindowFilterEnabledProperty_);
+        surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
     } else {
-        if (rSBehindWindowFilterEnabledProperty_ == nullptr) {
+        if (behindWindowFilterEnabledProperty_ == nullptr) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "get property failed, try to fix");
-            surfaceNode->RemoveModifier(rSBehindWindowFilterEnabledModifier_);
-            rSBehindWindowFilterEnabledModifier_ = nullptr;
+            surfaceNode->RemoveModifier(behindWindowFilterEnabledModifier_);
+            behindWindowFilterEnabledModifier_ = nullptr;
             return;
         }
-        rSBehindWindowFilterEnabledProperty_->Set(enabled);
+        behindWindowFilterEnabledProperty_->Set(enabled);
     }
 
     if (rsTransaction != nullptr) {
