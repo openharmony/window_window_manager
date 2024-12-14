@@ -35,12 +35,12 @@ public:
     bool IsTopmost() const override;
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
-    WSError OnSetWindowRectAutoSave(bool enabled) override;
 
     /**
      * PC Window
      */
     WSError OnRestoreMainWindow() override;
+    WSError OnSetWindowRectAutoSave(bool enabled) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

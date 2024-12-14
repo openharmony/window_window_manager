@@ -1702,8 +1702,8 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, Function | SmallTest
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
-    windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->context_ = abilityContext_;
+    windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PC;
     bool enabled = false;
     auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);

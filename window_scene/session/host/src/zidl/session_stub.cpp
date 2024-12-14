@@ -960,6 +960,7 @@ int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel&
         return ERR_INVALID_DATA;
     }
     WMError ret = SetGestureBackEnabled(isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 
@@ -986,7 +987,6 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
     }
     TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
     WSError errCode = OnSetWindowRectAutoSave(enabled);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

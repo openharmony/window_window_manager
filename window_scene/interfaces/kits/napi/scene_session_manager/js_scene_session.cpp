@@ -70,9 +70,9 @@ const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
+const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
 const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
-const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -128,9 +128,9 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
+    {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
     {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
-    {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -2101,11 +2101,11 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB):
             ProcessFrameLayoutFinishRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::UPDATE_APP_USE_CONTROL_CB):
-            RegisterUpdateAppUseControlCallback();
-            break;
         case static_cast<uint32_t>(ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB):
             ProcessSetWindowRectAutoSaveRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_APP_USE_CONTROL_CB):
+            RegisterUpdateAppUseControlCallback();
             break;
         default:
             break;
@@ -4661,6 +4661,47 @@ napi_value JsSceneSession::OnSetWindowEnableDragBySystem(napi_env env, napi_call
     return NapiGetUndefined(env);
 }
 
+void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{pubilc}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSetWindowRectAutoSave(enabled);
+    });
+    TLOGI(WmsLogTag::WMS_MAIN, "success");
+}
+
+void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_RECT_AUTO_SAVE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsEnabled = CreateJsValue(env, enabled);
+        napi_value argv[] = {jsEnabled};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
 void JsSceneSession::RegisterUpdateAppUseControlCallback()
 {
     auto session = weakSession_.promote();
@@ -4699,47 +4740,6 @@ void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedContr
         napi_value jsTypeArgv = CreateJsValue(env, static_cast<uint8_t>(type));
         napi_value jsIsNeedControlArgv = CreateJsValue(env, isNeedControl);
         napi_value argv[] = { jsTypeArgv, jsIsNeedControlArgv };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, __func__);
-}
-
-void JsSceneSession::ProcessSetWindowRectAutoSaveRegister()
-{
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    const char* const where = __func__;
-    session->SetWindowRectAutoSaveCallback([weakThis = wptr(this), where](bool enabled) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{pubilc}s: jsSceneSession is null", where);
-            return;
-        }
-        jsSceneSession->OnSetWindowRectAutoSave(enabled);
-    });
-    TLOGI(WmsLogTag::WMS_MAIN, "success");
-}
-
-void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
-{
-    const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, enabled, env = env_, where] {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
-                where, persistentId);
-            return;
-        }
-        auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_RECT_AUTO_SAVE_CB);
-        if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
-            return;
-        }
-        napi_value jsEnabled = CreateJsValue(env, enabled);
-        napi_value argv[] = {jsEnabled};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

@@ -75,9 +75,9 @@ enum class ListenerFuncType : uint32_t {
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
+    SET_WINDOW_RECT_AUTO_SAVE_CB,
     UPDATE_APP_USE_CONTROL_CB,
     RESTORE_MAIN_WINDOW_CB,
-    SET_WINDOW_RECT_AUTO_SAVE_CB,
 };
 
 class SceneSession;
@@ -247,8 +247,8 @@ private:
     void ProcessRestoreMainWindowRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
-    void RegisterUpdateAppUseControlCallback();
     void ProcessSetWindowRectAutoSaveRegister();
+    void RegisterUpdateAppUseControlCallback();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -299,8 +299,8 @@ private:
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void RestoreMainWindow();
     void NotifyFrameLayoutFinish();
+    void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
-        void OnSetWindowRectAutoSave(bool enabled);
 
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
