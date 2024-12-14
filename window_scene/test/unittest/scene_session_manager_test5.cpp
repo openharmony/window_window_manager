@@ -1419,6 +1419,55 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession03, Function | SmallTest | Level3)
+{
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token;
+    int32_t id = 0;
+    ASSERT_NE(ssm_, nullptr);
+    
+    property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    auto res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetTopmost(true);
+    uint32_t flags = property->GetWindowFlags() & (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL)));
+    property->SetWindowFlags(flags);
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetFloatingWindowAppType(true);
+    ssm_->shouldHideNonSecureFloatingWindows_.store(true);
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ssm_->isScreenLocked_ = true;
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, res);
+}
+
+/**
  * @tc.name: ProcessDialogRequestFocusImmdediately
  * @tc.desc: ProcessDialogRequestFocusImmdediately
  * @tc.type: FUNC
