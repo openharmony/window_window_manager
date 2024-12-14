@@ -103,7 +103,8 @@ std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl:
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
-std::map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> WindowSessionImpl::systemDensityChangeListeners_;
+std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>>
+    WindowSessionImpl::systemDensityChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
@@ -3531,7 +3532,6 @@ WSError WindowSessionImpl::NotifySystemDensityChange(float density)
             listener->OnSystemDensityChanged(density);
         }
     }
-    lastSystemDensity_ = density;
     return WSError::WS_OK;
 }
 

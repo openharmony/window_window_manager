@@ -256,8 +256,8 @@ WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<J
     return ret;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessSystemDensityChangeRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+WmErrorCode JsWindowRegisterManager::ProcessSystemDensityChangeRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     if (window == nullptr || listener == nullptr) {

@@ -386,17 +386,17 @@ enum class WindowLayoutMode : uint32_t {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
 
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
+constexpr uint32_t INVALID_WINDOW_ID = 0;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
 
-    constexpr float UNDEFINED_DENSITY = -1.0f;
+constexpr float UNDEFINED_DENSITY = -1.0f;
 }
 
 /**

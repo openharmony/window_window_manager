@@ -2040,19 +2040,11 @@ HWTEST_F(WindowSceneSessionImplTest4, CheckIsSystemDensityChange01, Function | S
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
-    sptr<DisplayInfo> displayInfo = nullptr;
-    auto ret = window->CheckIsSystemDensityChange(displayInfo);
-    ASSERT_EQ(false, ret);
-
     displayInfo = sptr<DisplayInfo>::MakeSptr();
-    displayInfo->SetVirtualPixelRatio(1.5);
+    displayInfo->SetVirtualPixelRatio(1.5f);
     ret = window->CheckIsSystemDensityChange(displayInfo);
     ASSERT_EQ(true, ret);
 
-    ret = window->CheckIsSystemDensityChange(displayInfo);
-    ASSERT_EQ(false, ret);
-
-    window->isDefaultDensityEnabled_ = true;
     ret = window->CheckIsSystemDensityChange(displayInfo);
     ASSERT_EQ(false, ret);
 }

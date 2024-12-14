@@ -4193,6 +4193,7 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     }
     if (CheckIsSystemDensityChange(displayInfo)) {
         NotifySystemDensityChange(displayInfo->GetVirtualPixelRatio());
+        lastSystemDensity_ = displayInfo->GetVirtualPixelRatio();
     }
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
@@ -4553,10 +4554,6 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
 
 bool WindowSceneSessionImpl::CheckIsSystemDensityChange(const sptr<DisplayInfo>& displayInfo)
 {
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo nullptr");
-        return false;
-    }
     if (MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "System density not change");
         return false;

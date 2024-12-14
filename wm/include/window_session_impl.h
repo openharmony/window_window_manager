@@ -448,7 +448,7 @@ protected:
      */
     uint32_t GetStatusBarHeight() override;
 
-    /**
+    /*
      * Window Property
      */
     float lastSystemDensity_ = UNDEFINED_DENSITY;
@@ -568,7 +568,7 @@ private:
     static std::mutex displayIdChangeListenerMutex_;
     static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
     static std::mutex systemDensityChangeListenerMutex_;
-    static std::map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
+    static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
