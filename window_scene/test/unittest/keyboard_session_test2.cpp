@@ -281,12 +281,10 @@ HWTEST_F(KeyboardSessionTest2, GetKeyboardGravity01, Function | SmallTest | Leve
     info.bundleName_ = "GetKeyboardGravity";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
     ASSERT_NE(keyboardSession, nullptr);
-    ASSERT_NE(keyboardSession->property_, nullptr);
     auto ret = keyboardSession->GetKeyboardGravity();
     EXPECT_EQ(SessionGravity::SESSION_GRAVITY_BOTTOM, ret);
     keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     ASSERT_NE(keyboardSession, nullptr);
-    ASSERT_NE(keyboardSession->property_, nullptr);
     ret = keyboardSession->GetKeyboardGravity();
     EXPECT_EQ(SessionGravity::SESSION_GRAVITY_BOTTOM, ret);
 }
@@ -459,7 +457,6 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, Function | SmallTest | Lev
         resultRect.width_ = rect.width_;
         resultRect.height_ = rect.height_;
     };
-    ASSERT_NE(callingSession->property_, nullptr);
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
@@ -477,7 +474,6 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, Function | SmallTest | Lev
     };
     keyboardSession->RaiseCallingSession(keyboardPanelRect, true, rsTransaction);
     // for cover CheckIfNeedRaiseCallingSession
-    ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
     // for empty rect check;
@@ -595,7 +591,6 @@ HWTEST_F(KeyboardSessionTest2, IsCallingSessionSplitMode01, Function | SmallTest
 
     auto callingParentSession = GetSceneSession("callingParentSession", "callingParentSession");
     ASSERT_NE(callingSession, nullptr);
-    ASSERT_NE(callingSession->property_, nullptr);
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
