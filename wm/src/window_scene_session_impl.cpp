@@ -3956,19 +3956,19 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
 
 WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id=%{public}d set default density enabled=%{public}d", GetWindowId(), enabled);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d, enabled=%{public}d", GetWindowId(), enabled);
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "window is invalid");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "must be app main window");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "must be app main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (isDefaultDensityEnabled_ == enabled) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled not change");
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isDefaultDensityEnabled not change");
         return WMError::WM_OK;
     }
 
@@ -3982,10 +3982,10 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id=%{public}d UpdateDensity", window->GetWindowId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
         window->UpdateDensity();
     }
     return WMError::WM_OK;

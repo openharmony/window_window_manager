@@ -689,7 +689,7 @@ void JsSceneSession::ProcessDefaultDensityEnabledRegister()
         }
         jsSceneSession->OnDefaultDensityEnabled(isDefaultDensityEnabled);
     });
-    TLOGI(WmsLogTag::WMS_LAYOUT, "success");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "success");
 }
 
 void JsSceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
@@ -3025,7 +3025,7 @@ void JsSceneSession::OnRaiseToTopForPointDown()
 
 void JsSceneSession::OnClickModalWindowOutside()
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
@@ -3036,7 +3036,7 @@ void JsSceneSession::OnClickModalWindowOutside()
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(CLICK_MODAL_WINDOW_OUTSIDE_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s jsCallBack is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s jsCallBack is nullptr", where);
             return;
         }
         napi_value argv[] = {};
