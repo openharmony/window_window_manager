@@ -3438,14 +3438,14 @@ WMError WindowSessionImpl::RegisterDisplayIdChangeListener(const IDisplayIdChang
 
 WMError WindowSessionImpl::UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener)
 {
-    TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    TLOGD(WmsLogTag::DEFAULT, "name=%{public}s, id=%{public}d", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(displayIdChangeListenerMutex_);
     return UnregisterListener(displayIdChangeListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}d", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
     return RegisterListener(systemDensityChangeListeners_[GetPersistentId()], listener);
 }
