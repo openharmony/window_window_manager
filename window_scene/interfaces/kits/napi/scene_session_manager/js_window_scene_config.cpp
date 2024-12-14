@@ -26,11 +26,11 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWind
 
 napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppWindowSceneConfig& config)
 {
-    WLOGI("[NAPI]CreateWindowSceneConfig");
+    WLOGFI("[NAPI]");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
 
@@ -62,7 +62,7 @@ napi_value JsWindowSceneConfig::CreateShadowValue(napi_env env, const AppWindowS
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
 
@@ -83,7 +83,7 @@ napi_value JsWindowSceneConfig::CreateWindowAnimationValue(napi_env env, const A
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "duration", CreateJsValue(env, config.windowAnimation_.duration_));
@@ -110,7 +110,7 @@ napi_value JsWindowSceneConfig::CreateKeyboardAnimationValue(napi_env env,
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
 
@@ -130,7 +130,7 @@ napi_value JsWindowSceneConfig::CreateSystemUIStatusBarValue(napi_env env,
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "showInLandscapeMode", CreateJsValue(env, config.showInLandscapeMode_));
@@ -145,13 +145,13 @@ napi_value JsWindowSceneConfig::CreateWindowStatusBar(napi_env env,
     const StatusBarConfig& config)
 {
     if (config.backgroundColor_.empty() || config.contentColor_.empty()) {
-        WLOGFE("[NAPI]WindowStatusBar is null!");
+        WLOGFE("WindowStatusBar is null!");
         return NapiGetUndefined(env);
     }
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "showHide", CreateJsValue(env, config.showHide_));
