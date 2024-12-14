@@ -4558,7 +4558,7 @@ bool WindowSceneSessionImpl::IsSystemDensityChanged(const sptr<DisplayInfo>& dis
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "System density not change");
         return false;
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u, lastDensity: %{public}f, currDensity: %{public}f",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}d, lastDensity: %{public}f, currDensity: %{public}f",
         GetPersistentId(), lastSystemDensity_, displayInfo->GetVirtualPixelRatio());
     return true;
 }
