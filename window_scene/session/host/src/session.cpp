@@ -1032,6 +1032,7 @@ void Session::SetWindowSessionProperty(const sptr<WindowSessionProperty>& proper
         property->SetCompatibleWindowSizeInPc(sessionProperty->GetCompatibleInPcPortraitWidth(),
             sessionProperty->GetCompatibleInPcPortraitHeight(), sessionProperty->GetCompatibleInPcLandscapeWidth(),
             sessionProperty->GetCompatibleInPcLandscapeHeight());
+        property->SetIsAppSupportPhoneInPc(sessionProperty->GetIsAppSupportPhoneInPc());
         property->SetDragEnabled(sessionProperty->GetDragEnabled());
     }
     if (sessionProperty && SessionHelper::IsMainWindow(GetWindowType())) {
@@ -1225,6 +1226,17 @@ WSError Session::DrawingCompleted()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnDrawingCompleted();
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError Session::RemoveStartingWindow()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnAppRemoveStartingWindow();
         }
     }
     return WSError::WS_OK;
@@ -2450,6 +2462,18 @@ WSError Session::SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t port
     return WSError::WS_OK;
 }
 
+WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
+{
+    TLOGI(WmsLogTag::WMS_SCB, "isSupportPhone: %{public}d", isSupportPhone);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetIsAppSupportPhoneInPc(isSupportPhone);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetIsPcAppInPad(bool enable)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetIsPcAppInPad enable: %{public}d", enable);
@@ -2719,6 +2743,26 @@ void Session::SetClientRect(const WSRect& rect)
 WSRect Session::GetClientRect() const
 {
     return clientRect_;
+}
+
+void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)
+{
+    enableRemoveStartingWindow_ = enableRemoveStartingWindow;
+}
+
+bool Session::GetEnableRemoveStartingWindow() const
+{
+    return enableRemoveStartingWindow_;
+}
+
+void Session::SetAppBufferReady(bool appBufferReady)
+{
+    appBufferReady_ = appBufferReady;
+}
+
+bool Session::GetAppBufferReady() const
+{
+    return appBufferReady_;
 }
 
 void Session::SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked)
