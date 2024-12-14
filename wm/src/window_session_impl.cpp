@@ -901,7 +901,7 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
     auto task = [weak = wptr(this)] {
         auto window = weak.promote();
         if (!window) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "window is null");
+            TLOGE(WmsLogTag::WMS_DIALOG, "window is null");
             return;
         }
         std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
@@ -912,7 +912,7 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
         uiContent->NotifyRotationAnimationEnd();
     };
     if (handler_ == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "handler is null!");
+        TLOGW(WmsLogTag::WMS_DIALOG, "handler is null!");
         task();
     } else {
         handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyRotationAnimationEnd");

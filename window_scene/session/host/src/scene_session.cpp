@@ -2780,7 +2780,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     }
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
     if (!ret) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "no throw slip");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
         return false;
     }
 
@@ -4502,7 +4502,7 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
     WSPropertyChangeAction action)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "UpdateTopmostProperty permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 
@@ -5493,7 +5493,7 @@ int32_t SceneSession::GetDockHeight()
     int32_t height = 0;
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
         GetSessionProperty() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "specificCallback_ or session property is null");
+        TLOGE(WmsLogTag::WMS_DECOR, "specificCallback_ or session property is null");
         return height;
     }
     std::vector<sptr<SceneSession>> dockVector = specificCallback_->onGetSceneSessionVectorByType_(

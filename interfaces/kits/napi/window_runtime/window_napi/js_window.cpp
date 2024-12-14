@@ -6057,7 +6057,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Minimize failed."));
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
+        TLOGNI(WmsLogTag::WMS_PC, "%{public}s Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
