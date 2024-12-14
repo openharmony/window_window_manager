@@ -90,7 +90,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
     }
-    auto task = [weakThis = wptr(this), property]() {
+    PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -106,8 +106,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
         session->UpdatePiPWindowStateChanged(true);
         auto ret = session->SceneSession::Foreground(property);
         return ret;
-    };
-    PostTask(task, "Show");
+    }, "Show");
     return WSError::WS_OK;
 }
 
@@ -125,7 +124,7 @@ WSError SystemSession::Hide()
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    auto task = [weakThis = wptr(this)]() {
+    PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -148,14 +147,13 @@ WSError SystemSession::Hide()
         session->UpdatePiPWindowStateChanged(false);
         ret = session->SceneSession::Background();
         return ret;
-    };
-    PostTask(task, "Hide");
+    }, "Hide");
     return WSError::WS_OK;
 }
 
 WSError SystemSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
-    auto task = [weakThis = wptr(this), isFromClient]() {
+    PostTask([weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -166,8 +164,7 @@ WSError SystemSession::Disconnect(bool isFromClient, const std::string& identity
         session->UpdateCameraWindowStatus(false);
         session->UpdatePiPWindowStateChanged(false);
         return WSError::WS_OK;
-    };
-    PostTask(task, "Disconnect");
+    }, "Disconnect");
     return WSError::WS_OK;
 }
 
@@ -241,7 +238,7 @@ WSError SystemSession::ProcessBackEvent()
 WSError SystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
+    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -259,8 +256,7 @@ WSError SystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
             }
         }
         return ret;
-    };
-    PostTask(task, "NotifyClientToUpdateRect");
+    }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
 }
 
@@ -297,7 +293,7 @@ bool SystemSession::NeedSystemPermission(WindowType type)
     return !(type == WindowType::WINDOW_TYPE_SCENE_BOARD || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
         type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_TOAST ||
         type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_APP_LAUNCHING ||
-        type == WindowType::WINDOW_TYPE_PIP);
+        type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_FLOAT);
 }
 
 bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const

@@ -105,9 +105,9 @@ HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
 HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    // Create app float window but only support sceneBoard
-    // Create app float window no need context and isession
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    // Create app TRANSPARENT_VIEW window but only support sceneBoard
+    // Create app TRANSPARENT_VIEW window no need context and isession
+    option->SetWindowType(WindowType::WINDOW_TYPE_TRANSPARENT_VIEW);
     option->SetOnlySupportSceneBoard(true);
     auto window = Window::Create("WindowTest04", option);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {

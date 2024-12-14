@@ -370,7 +370,7 @@ struct SessionInfo {
     bool isFoundationCall_ = false;
     int32_t specifiedId = 0;
 
-    /**
+    /*
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -379,13 +379,13 @@ struct SessionInfo {
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
 
-    /**
+    /*
      * Multi Instance
      */
     bool isNewAppInstance_ = false;
     std::string appInstanceKey_;
 
-    /**
+    /*
      * PC Window
      */
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
@@ -409,7 +409,9 @@ enum class SizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
+    RESIZE_WITH_ANIMATION,
     MOVE,
+    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -429,7 +431,8 @@ enum class SizeChangeReason : uint32_t {
 
 inline bool IsMoveToOrDragMove(SizeChangeReason reason)
 {
-    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE ||
+           reason == SizeChangeReason::MOVE_WITH_ANIMATION;
 }
 
 enum class SessionEvent : uint32_t {

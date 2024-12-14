@@ -171,6 +171,12 @@ void WindowSessionProperty::SetRequestRect(const Rect& requestRect)
     requestRect_ = requestRect;
 }
 
+void WindowSessionProperty::SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig)
+{
+    std::lock_guard<std::mutex> lock(rectAnimationConfigMutex_);
+    rectAnimationConfig_ = rectAnimationConfig;
+}
+
 void WindowSessionProperty::SetWindowType(WindowType type)
 {
     type_ = type;
@@ -281,6 +287,12 @@ Rect WindowSessionProperty::GetRequestRect() const
 {
     std::lock_guard<std::mutex> lock(requestRectMutex_);
     return requestRect_;
+}
+
+RectAnimationConfig WindowSessionProperty::GetRectAnimationConfig() const
+{
+    std::lock_guard<std::mutex> lock(rectAnimationConfigMutex_);
+    return rectAnimationConfig_;
 }
 
 WindowType WindowSessionProperty::GetWindowType() const
@@ -590,10 +602,10 @@ void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
         if (GetPersistentId() != 0 && rects != touchHotAreas_) {
             std::string rectStr;
             for (const auto& rect : rects) {
-                rectStr = rectStr + " hot : [ " + std::to_string(rect.posX_) + " , " + std::to_string(rect.posY_) +
-                    " , " + std::to_string(rect.width_) + " , " + std::to_string(rect.height_) + "]";
+                rectStr = rectStr + "[" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_) +
+                    "," + std::to_string(rect.width_) + "," + std::to_string(rect.height_) + "]";
             }
-            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
+            TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d hot:%{public}s", GetPersistentId(), rectStr.c_str());
         }
         touchHotAreas_ = rects;
     }
@@ -1031,6 +1043,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
         parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
         parcel.WriteUint32(requestRect_.height_) &&
+        parcel.WriteUint32(rectAnimationConfig_.duration) && parcel.WriteFloat(rectAnimationConfig_.x1) &&
+        parcel.WriteFloat(rectAnimationConfig_.y1) && parcel.WriteFloat(rectAnimationConfig_.x2) &&
+        parcel.WriteFloat(rectAnimationConfig_.y2) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteBool(focusable_) && parcel.WriteBool(focusableOnShow_) &&
         parcel.WriteBool(touchable_) && parcel.WriteBool(tokenState_) &&
@@ -1083,6 +1098,9 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowRect(rect);
     Rect reqRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     property->SetRequestRect(reqRect);
+    RectAnimationConfig rectAnimationConfig = { parcel.ReadUint32(), parcel.ReadFloat(),
+        parcel.ReadFloat(), parcel.ReadFloat(), parcel.ReadFloat() };
+    property->SetRectAnimationConfig(rectAnimationConfig);
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetFocusable(parcel.ReadBool());
     property->SetFocusableOnShow(parcel.ReadBool());
@@ -1155,6 +1173,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowName_ = property->windowName_;
     sessionInfo_ = property->sessionInfo_;
     requestRect_ = property->requestRect_;
+    rectAnimationConfig_ = property->rectAnimationConfig_;
     windowRect_ = property->windowRect_;
     type_ = property->type_;
     focusable_ = property->focusable_;

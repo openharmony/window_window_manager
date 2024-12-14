@@ -265,7 +265,7 @@ void SceneInputManager::FlushEmptyInfoToMMI()
             .currentUserId = currentUserId_,
             .displaysInfo = displayInfos
         };
-        TLOGI(WmsLogTag::WMS_EVENT, "currUserId:%{public}d width:%{public}d height:%{public}d",
+        TLOGI(WmsLogTag::WMS_EVENT, "userId:%{public}d width:%{public}d height:%{public}d",
             currentUserId_, mainScreenWidth, mainScreenHeight);
         MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
     };
@@ -376,13 +376,12 @@ void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
         return;
     }
     auto surfaceId = surfaceNode->GetId();
-    TLOGI(WmsLogTag::WMS_EVENT, "HostId:%{public}d surfaceId:%{public}" PRIu64
-        " uiExtentionWindowInfo:%{public}d",
+    TLOGI(WmsLogTag::WMS_EVENT, "wid:%{public}d sid:%{public}" PRIu64 " uiExtWindowInfo:%{public}d",
         windowInfo.id, surfaceId, static_cast<int>(windowInfo.uiExtentionWindowInfo.size()));
-    for (auto uiExWindowinfo : windowInfo.uiExtentionWindowInfo) {
-        auto str = DumpWindowInfo(uiExWindowinfo);
-        str = "sec:" + std::to_string(uiExWindowinfo.privacyUIFlag) + " " + str;
-        TLOGI(WmsLogTag::WMS_EVENT, "uiExWindowinfo:%{public}s", str.c_str());
+    for (const auto& uiExtWindowInfo : windowInfo.uiExtentionWindowInfo) {
+        auto str = DumpWindowInfo(uiExtWindowInfo);
+        str = "sec:" + std::to_string(uiExtWindowInfo.privacyUIFlag) + " " + str;
+        TLOGI(WmsLogTag::WMS_EVENT, "uiExtWindowInfo:%{public}s", str.c_str());
     }
 }
 
@@ -399,7 +398,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     std::unordered_map<int32_t, MMI::Rect> currWindowDefaultHotArea;
     static std::unordered_map<int32_t, MMI::Rect> lastWindowDefaultHotArea;
     for (auto& e : windowInfoList) {
-        idListStream << e.id << "|" << e.flags << "|" << static_cast<int32_t>(e.zOrder) << "|"
+        idListStream << e.id << "|" << e.flags << "|" << e.zOrder << "|"
                      << e.pid << "|" << e.defaultHotAreas.size();
 
         if (e.defaultHotAreas.size() > 0) {
@@ -423,7 +422,7 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     std::string idList = idListStream.str();
     if (lastIdList != idList) {
         windowEventID++;
-        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,size:%{public}d,idList:%{public}s",
+        TLOGNI(WmsLogTag::WMS_EVENT, "LogWinInfo: eid:%{public}d,size:%{public}d,idList:%{public}s",
             windowEventID, windowListSize, idList.c_str());
         lastIdList = idList;
     }
@@ -444,7 +443,7 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
 
     std::string displayList = displayListStream.str();
     if (lastDisplayList != displayList) {
-        TLOGI(WmsLogTag::WMS_EVENT, "num:%{public}d,displayList:%{public}s", displayListSize, displayList.c_str());
+        TLOGI(WmsLogTag::WMS_EVENT, "num:%{public}d,list:%{public}s", displayListSize, displayList.c_str());
         lastDisplayList = displayList;
     }
 }
@@ -515,7 +514,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
         sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
-        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList(lastWindowInfoList_);
+        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList();
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }

@@ -59,7 +59,7 @@ void MainSessionTest::SetUp()
     info.abilityName_ = "testMainSession1";
     info.moduleName_ = "testMainSession2";
     info.bundleName_ = "testMainSession3";
-    mainSession_ = new (std::nothrow) MainSession(info, specificCallback);
+    mainSession_ = sptr<MainSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(nullptr, mainSession_);
 }
 
@@ -93,11 +93,11 @@ HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
     info.abilityName_ = "";
     info.moduleName_ = "";
     info.bundleName_ = "";
-    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = 0;
-    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = -1;
@@ -105,11 +105,11 @@ HWTEST_F(MainSessionTest, MainSession01, Function | SmallTest | Level1)
     info.moduleName_ = "MainSession02";
     info.bundleName_ = "MainSession03";
     pSpecificCallback = new(std::nothrow) MainSession::SpecificSessionCallback;
-    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = 0;
-    pMainSession = new (std::nothrow) MainSession(info, pSpecificCallback);
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 }
 
@@ -152,7 +152,7 @@ HWTEST_F(MainSessionTest, TransferKeyEvent03, Function | SmallTest | Level1)
     info.abilityName_ = "testDialogSession1";
     info.moduleName_ = "testDialogSession2";
     info.bundleName_ = "testDialogSession3";
-    sptr<Session> dialogSession = new (std::nothrow) SystemSession(info, nullptr);
+    sptr<Session> dialogSession = sptr<SystemSession>::MakeSptr(info, nullptr);
     dialogSession->SetSessionState(SessionState::STATE_ACTIVE);
     mainSession_->BindDialogToParentSession(dialogSession);
 
@@ -200,12 +200,13 @@ HWTEST_F(MainSessionTest, SetTopmost01, Function | SmallTest | Level1)
  */
 HWTEST_F(MainSessionTest, SetTopmost02, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     mainSession_->SetSessionProperty(property);
     ASSERT_TRUE(mainSession_->GetSessionProperty() != nullptr);
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
 
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback = new SceneSession::SessionChangeCallback();
+    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
+        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     ASSERT_TRUE(sessionChangeCallback != nullptr);
 
     mainSession_->RegisterSessionChangeCallback(sessionChangeCallback);
@@ -213,41 +214,46 @@ HWTEST_F(MainSessionTest, SetTopmost02, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: UpdatePointerArea01
+ * @tc.name: UpdatePointerArea
  * @tc.desc: check func UpdatePointerArea
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, UpdatePointerArea01, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
 {
     WSRect Rect={0, 0, 50, 50};
-    mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    mainSession_->UpdatePointerArea(Rect);
     mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     mainSession_->UpdatePointerArea(Rect);
+    mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    mainSession_->UpdatePointerArea(Rect);
+    ASSERT_EQ(Rect, mainSession_->preRect_);
 }
 
 /**
- * @tc.name: CheckPointerEventDispatch03
+ * @tc.name: CheckPointerEventDispatch
  * @tc.desc: check func CheckPointerEventDispatch
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, CheckPointerEventDispatch03, Function | SmallTest | Level1)
+HWTEST_F(MainSessionTest, CheckPointerEventDispatch, Function | SmallTest | Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
     mainSession_->SetSessionState(SessionState::STATE_FOREGROUND);
-    mainSession_->CheckPointerEventDispatch(pointerEvent);
+    bool res = mainSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_EQ(res, true);
 
     mainSession_->SetSessionState(SessionState::STATE_ACTIVE);
-    mainSession_->CheckPointerEventDispatch(pointerEvent);
+    res = mainSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_EQ(res, true);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
     mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
-    mainSession_->CheckPointerEventDispatch(pointerEvent);
+    res = mainSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_EQ(res, true);
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_DOWN);
     mainSession_->SetSessionState(SessionState::STATE_DISCONNECT);
-    mainSession_->CheckPointerEventDispatch(pointerEvent);
+    res = mainSession_->CheckPointerEventDispatch(pointerEvent);
+    ASSERT_EQ(res, false);
 }
 
 /**
@@ -262,7 +268,7 @@ HWTEST_F(MainSessionTest, RectCheck03, Function | SmallTest | Level1)
     info.abilityName_ = "testMainSessionRectCheck";
     info.moduleName_ = "testMainSessionRectCheck";
     info.bundleName_ = "testMainSessionRectCheck";
-    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     EXPECT_NE(nullptr, session);
     mainSession_->parentSession_ = session;
     uint32_t curWidth = 100;
@@ -391,22 +397,22 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
 }
 
 /**
- * @tc.name: OnMainSessionModalTypeChange
- * @tc.desc: OnMainSessionModalTypeChange function01
+ * @tc.name: NotifyMainModalTypeChange
+ * @tc.desc: NotifyMainModalTypeChange function01
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, OnMainSessionModalTypeChange, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, NotifyMainModalTypeChange, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnMainSessionModalTypeChange";
-    info.bundleName_ = "OnMainSessionModalTypeChange";
+    info.abilityName_ = "NotifyMainModalTypeChange";
+    info.bundleName_ = "NotifyMainModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetMainSessionModalTypeChangeCallback([](bool isModal) {
+    sceneSession->RegisterMainModalTypeChangeCallback([](bool isModal) {
         return;
     });
-    EXPECT_NE(sceneSession->onMainSessionModalTypeChange_, nullptr);
-    EXPECT_EQ(WSError::WS_OK, sceneSession->OnMainSessionModalTypeChange(true));
+    EXPECT_NE(sceneSession->onMainModalTypeChange_, nullptr);
+    EXPECT_EQ(WSError::WS_OK, sceneSession->NotifyMainModalTypeChange(true));
 }
 
 /**

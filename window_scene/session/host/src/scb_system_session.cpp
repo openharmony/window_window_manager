@@ -57,7 +57,7 @@ WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
+    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -78,8 +78,7 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReas
             session->keyboardPanelRectUpdateCallback_();
         }
         return ret;
-    };
-    PostTask(task, "NotifyClientToUpdateRect");
+    }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
 }
 
@@ -191,7 +190,7 @@ void SCBSystemSession::UpdatePointerArea(const WSRect& rect)
 void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
     TLOGD(WmsLogTag::WMS_SCB, "Set Skip Self, isSkip: %{public}d", isSkip);
-    auto task = [weakThis = wptr(this), isSkip]() {
+    PostTask([weakThis = wptr(this), isSkip]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_SCB, "session is null");
@@ -207,8 +206,7 @@ void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
         }
         return WSError::WS_OK;
-    };
-    PostTask(task, "SetSkipSelf");
+    }, "SetSkipSelf");
 }
 
 bool SCBSystemSession::IsVisibleForeground() const

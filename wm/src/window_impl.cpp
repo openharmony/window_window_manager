@@ -1073,7 +1073,7 @@ WMError WindowImpl::SetAspectRatio(float ratio)
 WMError WindowImpl::ResetAspectRatio()
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is invalid");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -1795,7 +1795,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfig
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
-WMError WindowImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
     WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
@@ -2085,7 +2085,7 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 WMError WindowImpl::RaiseToAppTop()
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -2363,7 +2363,7 @@ WMError WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListe
     return UnregisterListener(windowChangeListeners_[GetWindowId()], listener);
 }
 
-WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
@@ -2374,7 +2374,7 @@ WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListen
     return ret;
 }
 
-WMError WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
@@ -3364,7 +3364,7 @@ int64_t WindowImpl::GetVSyncPeriod()
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Window is invalid");
         return;
     }
 
@@ -3392,7 +3392,7 @@ void WindowImpl::UpdateFocusStatus(bool focused)
 bool WindowImpl::IsFocused() const
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Window is invalid");
         return false;
     }
 

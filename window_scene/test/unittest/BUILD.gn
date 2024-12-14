@@ -66,12 +66,11 @@ group("unittest") {
     ":ws_scene_session_manager_test8",
     ":ws_scene_session_manager_test9",
     ":ws_scene_session_test",
+    ":ws_scene_system_ability_listener_test",
     ":ws_session_lifecycle_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
-    ":ws_session_manager_lite_test",
     ":ws_session_manager_service_recover_proxy_test",
-    ":ws_session_manager_test",
     ":ws_session_permission_test",
     ":ws_session_proxy_immersive_test",
     ":ws_session_proxy_lifecycle_test",
@@ -101,6 +100,18 @@ group("unittest") {
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
   ]
+
+  if (window_manager_use_sceneboard) {
+    deps += [
+      ":ws_session_manager_lite_test",
+      ":ws_session_manager_test",
+    ]
+  } else {
+    deps += [
+      ":ws_session_manager_lite_ut_test",
+      ":ws_session_manager_ut_test",
+    ]
+  }
 }
 
 ohos_unittest("ws_anomaly_detection_test") {
@@ -883,6 +894,25 @@ ohos_unittest("ws_session_manager_test") {
   ]
 }
 
+ohos_unittest("ws_session_manager_ut_test") {
+  module_out_path = module_out_path
+
+  sources = [ "session_manager_ut_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "input:libmmi-client",
+  ]
+}
+
 ohos_unittest("ws_session_manager_lite_test") {
   module_out_path = module_out_path
 
@@ -895,6 +925,36 @@ ohos_unittest("ws_session_manager_lite_test") {
     "${window_base_path}/window_scene/session_manager/src/session_manager_lite.cpp",
     "${window_base_path}/window_scene/session_manager/src/zidl/scene_session_manager_lite_proxy.cpp",
     "session_manager_lite_test.cpp",
+  ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "ability_runtime:mission_info",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+}
+
+ohos_unittest("ws_session_manager_lite_ut_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/window_scene/screen_session_manager/include/zidl",
+    "${window_base_path}/window_scene/session_manager/include/zidl",
+  ]
+
+  sources = [
+    "${window_base_path}/window_scene/session_manager/src/session_manager_lite.cpp",
+    "${window_base_path}/window_scene/session_manager/src/zidl/scene_session_manager_lite_proxy.cpp",
+    "session_manager_lite_ut_test.cpp",
   ]
 
   deps = [
@@ -1062,7 +1122,10 @@ ohos_unittest("ws_move_drag_controller_test") {
 
   sources = [ "move_drag_controller_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -1637,5 +1700,26 @@ ohos_static_library("ws_unittest_common") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+}
+
+ohos_unittest("ws_scene_system_ability_listener_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_system_ability_listener_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines = [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+  }
 }
 ## Build ws_unittest_common.a }}}

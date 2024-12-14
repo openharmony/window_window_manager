@@ -51,7 +51,7 @@ public:
     void NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession,
         const WindowUpdateType& type, const bool startMoving = false);
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
-        GetFullWindowInfoList(const std::vector<MMI::WindowInfo>& lastWindowInfoList);
+        GetFullWindowInfoList();
     void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
@@ -60,8 +60,7 @@ private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>>
-        GetWindowInfo(const sptr<SceneSession>& sceneSession, const std::vector<MMI::WindowInfo>& lastWindowInfoList,
-        const WindowAction& action) const;
+        GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
     void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         bool useUIExtension = false) const;
     void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform, bool useUIExtension = false) const;
@@ -69,7 +68,7 @@ private:
         MMI::WindowInfo& windowInfo) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
         const std::map<int32_t, sptr<SceneSession>>& sessionMap) const;
-    void UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
+    void UpdateHotAreas(const sptr<SceneSession>& sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
     void UpdateDefaultHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
         std::vector<MMI::Rect>& pointerHotAreas) const;
