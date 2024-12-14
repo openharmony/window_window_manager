@@ -164,7 +164,6 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, SetVirtualScreenStatus, Function | Sma
     bool expectation = true;
 
     EXPECT_EQ(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
-
 }
 
 /**
