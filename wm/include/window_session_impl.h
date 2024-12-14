@@ -489,6 +489,7 @@ private:
     EnableIfSame<T, IWindowTitleButtonRectChangedListener,
         std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
+    template<typename T> void ClearUselessListeners(std::unordered_map<int32_t, T>& listeners, int32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(const std::string& name, WindowType type);
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
