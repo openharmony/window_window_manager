@@ -52,7 +52,7 @@ void SCBSystemSessionTest::SetUp()
     info.abilityName_ = "testSCBSystemSession1";
     info.moduleName_ = "testSCBSystemSession2";
     info.bundleName_ = "testSCBSystemSession3";
-    scbSystemSession_ = new (std::nothrow) SCBSystemSession(info, specificCallback);
+    scbSystemSession_ = sptr<SCBSystemSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(nullptr, scbSystemSession_);
 }
 
@@ -69,7 +69,7 @@ namespace {
  */
 HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | Level1)
 {
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     scbSystemSession_->sessionStage_ = mockSessionStage;
     auto ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
@@ -171,8 +171,8 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, Function | SmallTest | Lev
     info.moduleName_ = "InputEventListener";
     info.isSystem_ = true;
     sptr<SceneSession::SpecificSessionCallback> callback =
-        new SceneSession::SpecificSessionCallback();
-    sptr<SceneSession> session = new SceneSession(info, callback);
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, callback);
     scbSystemSession_->BindKeyboardSession(session);
 }
 
@@ -242,9 +242,9 @@ HWTEST_F(SCBSystemSessionTest, ProcessPointDownSession, Function | SmallTest | L
 HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest | Level3)
 {
     sptr<SCBSystemSession::SpecificSessionCallback> specificCallback1 =
-        new (std::nothrow) SCBSystemSession::SpecificSessionCallback();
+        sptr<SCBSystemSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback1, nullptr);
-    sptr<SCBSystemSession> scbSystemSession = new (std::nothrow) SCBSystemSession(info, specificCallback1);
+    sptr<SCBSystemSession> scbSystemSession = sptr<SCBSystemSession>::MakeSptr(info, specificCallback1);
     ASSERT_NE(scbSystemSession, nullptr);
     UpdateAvoidAreaCallback onUpdateAvoidArea;
     ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags;
@@ -280,7 +280,7 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest 
  */
 HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback;
     property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_KEYBOARD_PANEL);

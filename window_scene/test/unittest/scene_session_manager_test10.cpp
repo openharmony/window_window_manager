@@ -121,54 +121,148 @@ HWTEST_F(SceneSessionManagerTest10, RequestSceneSessionDestructionInner, Functio
 
     SessionInfo sessionInfo;
     sessionInfo.collaboratorType_ = CollaboratorType::RESERVE_TYPE;
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
+    auto res = ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo,
+        needRemoveSession, isForceClean);
+    ASSERT_EQ(res, WSError::WS_OK);
+    
 
     needRemoveSession = false;
     isForceClean = false;
     sessionInfo.collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ssm_->listenerController_ = std::make_shared<SessionListenerController>();
-    ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
+    res = ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**
- * @tc.name: RegisterWindowManagerAgent
- * @tc.desc: RegisterWindowManagerAgent
+ * @tc.name: TestRegisterWindowManagerAgent_01
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, RegisterWindowManagerAgent01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_01, Function | SmallTest | Level3)
 {
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR;
     sptr<IWindowManagerAgent> windowManagerAgent;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_02
+ * @tc.desc: Test RegisterWindowManagerAgent with AgentType WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_02, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_03
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_03, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_04
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_04, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_05
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_05, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PERMISSION);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_06
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_FOCUS
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_06, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PERMISSION);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_07
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_07, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PERMISSION);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_08
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_08, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PERMISSION);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_09
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_09, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PERMISSION);
+}
 
-    type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT;
-    ASSERT_EQ(windowManagerAgent, nullptr);
-    ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+/**
+ * @tc.name: TestRegisterWindowManagerAgent_010
+ * @tc.desc: Test RegisterWindowManagerAgent with WindowManagerAgentType WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, TestRegisterWindowManagerAgent_010, Function | SmallTest | Level3)
+{
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto res = ssm_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 /**
@@ -274,15 +368,10 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, Function | Small
     InitTestSceneSession(1, 101, 11, true, {100, 100, 200, 200});
     ssm_->sceneSessionMap_.insert({102, nullptr});
     InitTestSceneSession(1, 103, 14, true, {120, 120, 220, 220});
-    InitTestSceneSession(1, 104, 12, true, {100, 100, 200, 200});
-    auto it1 = ssm_->sceneSessionMap_.find(104);
-    if (it1 != ssm_->sceneSessionMap_.end()) {
-        it1->second->SetSessionProperty(nullptr);
-    }
     InitTestSceneSession(1, 105, 12, true, {100, 100, 200, 200});
-    auto it2 = ssm_->sceneSessionMap_.find(105);
-    if (it2 != ssm_->sceneSessionMap_.end()) {
-        it2->second->sessionInfo_.bundleName_ = "other";
+    auto it1 = ssm_->sceneSessionMap_.find(105);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->sessionInfo_.bundleName_ = "other";
     }
     InitTestSceneSession(1, 106, 15, true, {140, 140, 240, 240});
     InitTestSceneSession(2, 107, 15, true, {150, 150, 250, 250});
@@ -297,8 +386,8 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate02, Function | Small
     EXPECT_EQ(106, windowIds[0]);
     EXPECT_EQ(103, windowIds[1]);
     EXPECT_EQ(109, windowIds[2]);
-    EXPECT_EQ(110, windowIds[3]);
-    EXPECT_EQ(101, windowIds[4]);
+    EXPECT_EQ(104, windowIds[3]);
+    EXPECT_EQ(110, windowIds[4]);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -314,14 +403,11 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate03, Function | Small
     ssm_->sceneSessionMap_.insert({102, nullptr});
     InitTestSceneSession(1, 113, 14, true, {120, 120, 220, 220});
     InitTestSceneSession(1, 114, 12, true, {100, 100, 200, 200});
-    auto it1 = ssm_->sceneSessionMap_.find(114);
-    if (it1 != ssm_->sceneSessionMap_.end()) {
-        it1->second->SetSessionProperty(nullptr);
-    }
+    ASSERT_TRUE(ssm_->sceneSessionMap_.find(114) != ssm_->sceneSessionMap_.end());
     InitTestSceneSession(1, 115, 12, true, {100, 100, 200, 200});
-    auto it2 = ssm_->sceneSessionMap_.find(115);
-    if (it2 != ssm_->sceneSessionMap_.end()) {
-        it2->second->sessionInfo_.bundleName_ = "other";
+    auto it1 = ssm_->sceneSessionMap_.find(115);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->sessionInfo_.bundleName_ = "other";
     }
     InitTestSceneSession(1, 116, 15, true, {140, 140, 240, 240});
     InitTestSceneSession(2, 117, 15, true, {150, 150, 250, 250});
@@ -350,15 +436,10 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, Function | Small
     InitTestSceneSession(1, 121, 11, true, {100, 100, 200, 200});
     ssm_->sceneSessionMap_.insert({102, nullptr});
     InitTestSceneSession(1, 123, 14, true, {120, 120, 220, 220});
-    InitTestSceneSession(1, 124, 12, true, {100, 100, 200, 200});
-    auto it1 = ssm_->sceneSessionMap_.find(124);
-    if (it1 != ssm_->sceneSessionMap_.end()) {
-        it1->second->SetSessionProperty(nullptr);
-    }
     InitTestSceneSession(1, 125, 12, true, {100, 100, 200, 200});
-    auto it2 = ssm_->sceneSessionMap_.find(125);
-    if (it2 != ssm_->sceneSessionMap_.end()) {
-        it2->second->sessionInfo_.bundleName_ = "other";
+    auto it1 = ssm_->sceneSessionMap_.find(125);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->sessionInfo_.bundleName_ = "other";
     }
     InitTestSceneSession(1, 126, 15, true, {140, 140, 240, 240});
     InitTestSceneSession(2, 127, 15, true, {150, 150, 250, 250});
@@ -373,7 +454,7 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate04, Function | Small
     EXPECT_EQ(126, windowIds[0]);
     EXPECT_EQ(123, windowIds[1]);
     EXPECT_EQ(129, windowIds[2]);
-    EXPECT_EQ(121, windowIds[3]);
+    EXPECT_EQ(124, windowIds[3]);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -389,14 +470,11 @@ HWTEST_F(SceneSessionManagerTest10, GetWindowIdsByCoordinate05, Function | Small
     ssm_->sceneSessionMap_.insert({102, nullptr});
     InitTestSceneSession(1, 133, 14, true, {120, 120, 220, 220});
     InitTestSceneSession(1, 134, 12, true, {100, 100, 200, 200});
-    auto it1 = ssm_->sceneSessionMap_.find(134);
-    if (it1 != ssm_->sceneSessionMap_.end()) {
-        it1->second->SetSessionProperty(nullptr);
-    }
+    ASSERT_TRUE(ssm_->sceneSessionMap_.find(134) != ssm_->sceneSessionMap_.end());
     InitTestSceneSession(1, 135, 12, true, {100, 100, 200, 200});
-    auto it2 = ssm_->sceneSessionMap_.find(135);
-    if (it2 != ssm_->sceneSessionMap_.end()) {
-        it2->second->sessionInfo_.bundleName_ = "other";
+    auto it1 = ssm_->sceneSessionMap_.find(135);
+    if (it1 != ssm_->sceneSessionMap_.end()) {
+        it1->second->sessionInfo_.bundleName_ = "other";
     }
     InitTestSceneSession(1, 136, 15, true, {140, 140, 240, 240});
     InitTestSceneSession(2, 137, 15, true, {150, 150, 250, 250});

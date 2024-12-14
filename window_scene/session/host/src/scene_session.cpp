@@ -3014,7 +3014,6 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     }
     auto surfaceNode = GetSurfaceNode();
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    auto property = GetSessionProperty();
     if (surfaceNode && leashWinSurfaceNode) {
         leashWinSurfaceNode->SetGlobalPositionEnabled(isGlobal);
         leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -3036,9 +3035,8 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    } else if (WindowHelper::IsSystemWindow(GetWindowType()) &&
-        property && property->GetDragEnabled() && surfaceNode) {
-        TLOGD(WmsLogTag::WMS_SYSTEM, "drag enabled systemwindow setSurfaceBounds");
+    } else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode) {
+        TLOGD(WmsLogTag::WMS_SYSTEM, "system window setSurfaceBounds");
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -5356,6 +5354,7 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
             return;
         }
         sessionProperty->SetDragEnabled(enableDrag);
+        session->NotifySessionInfoChange();
     }, "SetSystemWindowEnableDrag");
     return WMError::WM_OK;
 }
@@ -5923,5 +5922,34 @@ bool SceneSession::IsSystemKeyboard() const
 void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+}
+
+void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enabled: %{public}d", GetPersistentId(), enabled);
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "fail to get surfaceNode");
+        return;
+    }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "begin rsTransaction");
+        rsTransaction->Begin();
+    }
+
+    if (behindWindowFilterEnabledModifier_ == nullptr) {
+        behindWindowFilterEnabledProperty_ = std::make_shared<RSProperty<bool>>(enabled);
+        behindWindowFilterEnabledModifier_ = std::make_shared<RSBehindWindowFilterEnabledModifier>(
+            behindWindowFilterEnabledProperty_);
+        surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
+    } else {
+        behindWindowFilterEnabledProperty_->Set(enabled);
+    }
+
+    if (rsTransaction != nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "commit rsTransaction");
+        rsTransaction->Commit();
+    }
 }
 } // namespace OHOS::Rosen

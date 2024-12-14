@@ -510,7 +510,7 @@ int32_t CJWindowImpl::SetWaterMarkFlag(bool enable)
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_DIALOG, "Window SetWaterMarkFlag failed");
     } else {
-        TLOGI(WmsLogTag::WMS_DIALOG, "[NAPI]Window [%{public}u, %{public}s] set waterMark flag end, ret = %{public}d",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set waterMark flag end, ret = %{public}d",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     }
     return static_cast<int32_t>(ret);
@@ -699,7 +699,7 @@ int32_t CJWindowImpl::Minimize()
         return Hide();
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Minimize());
-    TLOGI(WmsLogTag::WMS_DIALOG, "[NAPI]Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(ret);
 }

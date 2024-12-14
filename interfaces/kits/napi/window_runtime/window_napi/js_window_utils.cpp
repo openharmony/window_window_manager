@@ -542,7 +542,7 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, infos.size(), &arrayValue);
     if (arrayValue == nullptr) {
-        WLOGFE("[NAPI]Failed to convert windowVisibilityInfo to jsArrayObject");
+        WLOGFE("Failed to convert windowVisibilityInfo to jsArrayObject");
         return nullptr;
     }
     uint32_t index = 0;

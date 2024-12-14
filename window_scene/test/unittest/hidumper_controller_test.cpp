@@ -55,9 +55,9 @@ sptr<SceneSession> HidumpControllerTest::GetSceneSession(std::string name)
     SessionInfo info;
     info.abilityName_ = name;
     info.bundleName_ = name;
-    auto result = new (std::nothrow) SceneSession(info, nullptr);
+    auto result = sptr<SceneSession>::MakeSptr(info, nullptr);
     if (result != nullptr) {
-        result->property_ = new (std::nothrow) WindowSessionProperty();
+        result->property_ = sptr<WindowSessionProperty>::MakeSptr();
         if (result->property_ == nullptr) {
             return nullptr;
         }

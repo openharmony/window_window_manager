@@ -38,7 +38,7 @@ private:
 constexpr const char* UNDERLINE_SEPARATOR = "_";
 constexpr const char* IMAGE_SUFFIX = ".jpg";
 
-static sptr<ScenePersistence> scenePersistence = new ScenePersistence("testBundleName", 1423);
+static sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr("testBundleName", 1423);
 
 void ScenePersistenceTest::SetUpTestCase()
 {
@@ -97,13 +97,13 @@ HWTEST_F(ScenePersistenceTest, SaveSnapshot, Function | SmallTest | Level1)
     SessionInfo info;
     info.abilityName_ = bundleName;
     info.bundleName_ = bundleName;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     int32_t persistentId = 1423;
     ASSERT_NE(nullptr, scenePersistence);
     scenePersistence->SaveSnapshot(pixelMap);
 
-    sptr<Session> session = new Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     ASSERT_NE(nullptr, session);
     scenePersistence->snapshotPath_ = "/data/1.png";
 
@@ -126,11 +126,11 @@ HWTEST_F(ScenePersistenceTest, RenameSnapshotFromOldPersistentId, Function | Sma
     int ret = 0;
     int32_t persistentId = 1424;
     std::string bundleName = "testBundleName";
-    sptr<ScenePersistence> scenePersistence2 = new ScenePersistence(bundleName, persistentId);
+    sptr<ScenePersistence> scenePersistence2 = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     scenePersistence2->RenameSnapshotFromOldPersistentId(persistentId);
     ASSERT_EQ(ret, 0);
 
-    sptr<ScenePersistence> scenePersistence3 = new ScenePersistence(bundleName, persistentId);
+    sptr<ScenePersistence> scenePersistence3 = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ASSERT_NE(nullptr, scenePersistence3);
     scenePersistence3->snapshotPath_ = "/data/1.png";
     scenePersistence3->RenameSnapshotFromOldPersistentId(persistentId);
@@ -145,7 +145,7 @@ HWTEST_F(ScenePersistenceTest, IsSnapshotExisted, Function | SmallTest | Level1)
 {
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
     bool result = scenePersistence->IsSnapshotExisted();
     ASSERT_EQ(result, false);
@@ -161,13 +161,13 @@ HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, Function | SmallTest | 
     SessionInfo info;
     info.abilityName_ = "GetPixelMap";
     info.bundleName_ = "GetPixelMap1";
-    sptr<Session> session = new Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     ASSERT_NE(nullptr, session);
     auto abilityInfo = session->GetSessionInfo();
     auto persistentId = abilityInfo.persistentId_;
     ScenePersistence::CreateSnapshotDir("storage");
     sptr<ScenePersistence> scenePersistence =
-        new ScenePersistence(abilityInfo.bundleName_, persistentId);
+        sptr<ScenePersistence>::MakeSptr(abilityInfo.bundleName_, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
     auto result = scenePersistence->GetLocalSnapshotPixelMap(0.5, 0.5);
     EXPECT_EQ(result, nullptr);
@@ -211,7 +211,7 @@ HWTEST_F(ScenePersistenceTest, IsSavingSnapshot, Function | SmallTest | Level1)
 {
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
     bool result = scenePersistence->IsSavingSnapshot();
     ASSERT_EQ(result, false);
@@ -226,7 +226,7 @@ HWTEST_F(ScenePersistenceTest, GetSnapshotFilePath, Function | SmallTest | Level
 {
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
     scenePersistence->RenameSnapshotFromOldPersistentId(0);
     auto result = scenePersistence->GetSnapshotFilePath();
@@ -242,7 +242,7 @@ HWTEST_F(ScenePersistenceTest, HasSnapshot, Function | SmallTest | Level1)
 {
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = new ScenePersistence(bundleName, persistentId);
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ASSERT_NE(nullptr, scenePersistence);
     scenePersistence->SetHasSnapshot(true);
     ASSERT_EQ(scenePersistence->HasSnapshot(), true);

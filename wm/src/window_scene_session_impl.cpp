@@ -619,8 +619,13 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
 {
+    if (WindowHelper::IsDialogWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "dialogWindow default draggable, should not init false, id: %{public}d",
+            property_->GetPersistentId());
+        return;
+    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d init dragEnable false",
-        property_->GetPersistentId());
+        GetPersistentId());
     property_->SetDragEnabled(false);
 }
 
@@ -3755,13 +3760,35 @@ WSError WindowSceneSessionImpl::NotifyCompatibleModeEnableInPad(bool enable)
 
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (handler_) {
+        handler_->PostTask([weakThis = wptr(this), reason, withAnimation] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+                return;
+            }
+            window->Show(reason, withAnimation);
+        }, __func__);
+        return;
+    }
     Show(reason, withAnimation);
 }
 
 void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
-    WLOGFI("in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (handler_) {
+        handler_->PostTask([weakThis = wptr(this), reason, withAnimation, isFromInnerkits] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+                return;
+            }
+            window->Hide(reason, withAnimation, isFromInnerkits);
+        }, __func__);
+        return;
+    }
     Hide(reason, withAnimation, isFromInnerkits);
 }
 

@@ -1953,7 +1953,7 @@ WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListen
 }
 
 /**
- * Currently only supports system wiindows.
+ * Currently only supports system windows.
  */
 WMError WindowSessionImpl::EnableDrag(bool enableDrag)
 {
@@ -4433,7 +4433,7 @@ void WindowSessionImpl::AddSetUIExtensionDestroyTimeoutCheck()
 
 WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
 {
-    TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag:%{publlic}d", enableDrag);
+    TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
     property_->SetDragEnabled(enableDrag);
     return WSError::WS_OK;
 }

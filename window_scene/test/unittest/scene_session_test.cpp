@@ -33,6 +33,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+constexpr int WAIT_ASYNC_US = 1000000;
 class SceneSessionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -67,14 +68,9 @@ namespace {
 HWTEST_F(SceneSessionTest, SetGlobalMaximizeMode01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "Background01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    info.abilityName_ = "SetGlobalMaximizeMode01";
+    info.bundleName_ = "SetGlobalMaximizeMode01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     auto result = sceneSession->SetGlobalMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
@@ -89,20 +85,57 @@ HWTEST_F(SceneSessionTest, SetGlobalMaximizeMode01, Function | SmallTest | Level
 HWTEST_F(SceneSessionTest, GetGlobalMaximizeMode01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "Background01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    info.abilityName_ = "GetGlobalMaximizeMode01";
+    info.bundleName_ = "GetGlobalMaximizeMode01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     MaximizeMode mode;
     auto result = sceneSession->GetGlobalMaximizeMode(mode);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GlobalMaximizeMode01
+ * @tc.desc: GlobalMaximizeMode MODE_AVOID_SYSTEM_BAR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GlobalMaximizeMode01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GlobalMaximizeMode01";
+    info.bundleName_ = "GlobalMaximizeMode01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    auto result = sceneSession->SetGlobalMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    MaximizeMode mode;
+    result = sceneSession->GetGlobalMaximizeMode(mode);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(mode, MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+}
+
+/**
+ * @tc.name: GlobalMaximizeMode02
+ * @tc.desc: GlobalMaximizeMode MODE_FULL_FILL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GlobalMaximizeMode02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GlobalMaximizeMode02";
+    info.bundleName_ = "GlobalMaximizeMode02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    auto result = sceneSession->SetGlobalMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+    ASSERT_EQ(result, WSError::WS_OK);
+    MaximizeMode mode;
+    result = sceneSession->GetGlobalMaximizeMode(mode);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(mode, MaximizeMode::MODE_FULL_FILL);
 }
 
 /**
@@ -115,13 +148,7 @@ HWTEST_F(SceneSessionTest, SetAndGetPipTemplateInfo, Function | SmallTest | Leve
     SessionInfo info;
     info.abilityName_ = "Background01";
     info.bundleName_ = "Background01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     PiPTemplateInfo pipTemplateInfo;
@@ -129,6 +156,11 @@ HWTEST_F(SceneSessionTest, SetAndGetPipTemplateInfo, Function | SmallTest | Leve
     sceneSession->SetPiPTemplateInfo(pipTemplateInfo);
     ASSERT_EQ(sceneSession->GetPiPTemplateInfo().pipTemplateType,
         static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL));
+
+    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING);
+    sceneSession->SetPiPTemplateInfo(pipTemplateInfo);
+    ASSERT_EQ(sceneSession->GetPiPTemplateInfo().pipTemplateType,
+        static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING));
 }
 
 /**
@@ -141,12 +173,7 @@ HWTEST_F(SceneSessionTest, UpdateWindowSceneAfterCustomAnimation01, Function | S
     SessionInfo info;
     info.abilityName_ = "Background01";
     info.bundleName_ = "Background01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     auto result = sceneSession->UpdateWindowSceneAfterCustomAnimation(false);
@@ -163,18 +190,17 @@ HWTEST_F(SceneSessionTest, UpdateWindowSceneAfterCustomAnimation01, Function | S
 HWTEST_F(SceneSessionTest, SetZOrder01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "Background01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    int resultValue = 0;
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    info.abilityName_ = "SetZOrder01";
+    info.bundleName_ = "SetZOrder01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetZOrder(2);
-    ASSERT_EQ(0, resultValue);
+    uint32_t zOrder = 2;
+    sceneSession->SetZOrder(zOrder);
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(zOrder, sceneSession->zOrder_);
+    sceneSession->SetZOrder(zOrder);
+    usleep(WAIT_ASYNC_US);
+    ASSERT_EQ(zOrder, sceneSession->zOrder_);
 }
 
 /**
@@ -217,42 +243,57 @@ HWTEST_F(SceneSessionTest, GetTouchHotAreas01, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest, SetTurnScreenOn01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "Background01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    info.abilityName_ = "SetTurnScreenOn01";
+    info.bundleName_ = "SetTurnScreenOn01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->SetTurnScreenOn(false));
-    ASSERT_EQ(false, sceneSession->IsTurnScreenOn());
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetTurnScreenOn(true));
     ASSERT_EQ(true, sceneSession->IsTurnScreenOn());
 }
 
 /**
+ * @tc.name: SetTurnScreenOn02
+ * @tc.desc: SetTurnScreenOn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetTurnScreenOn02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTurnScreenOn02";
+    info.bundleName_ = "SetTurnScreenOn02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->SetTurnScreenOn(false));
+    ASSERT_EQ(false, sceneSession->IsTurnScreenOn());
+}
+
+/**
  * @tc.name: UpdateWindowAnimationFlag01
- * @tc.desc: UpdateWindowAnimationFlag
+ * @tc.desc: UpdateWindowAnimationFlag true
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "Background01";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    info.abilityName_ = "UpdateWindowAnimationFlag01";
+    info.bundleName_ = "UpdateWindowAnimationFlag01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateWindowAnimationFlag(true));
+}
+
+/**
+ * @tc.name: UpdateWindowAnimationFlag02
+ * @tc.desc: UpdateWindowAnimationFlag false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateWindowAnimationFlag02";
+    info.bundleName_ = "UpdateWindowAnimationFlag02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateWindowAnimationFlag(false));
 }
 
@@ -264,10 +305,9 @@ HWTEST_F(SceneSessionTest, UpdateWindowAnimationFlag01, Function | SmallTest | L
 HWTEST_F(SceneSessionTest, SetRequestedOrientation01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "SetRequestedOrientation";
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    info.abilityName_ = "SetRequestedOrientation01";
+    info.bundleName_ = "SetRequestedOrientation01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     Orientation ori = Orientation::UNSPECIFIED;
     sceneSession->SetRequestedOrientation(ori);
@@ -307,11 +347,9 @@ HWTEST_F(SceneSessionTest, SetRequestedOrientation01, Function | SmallTest | Lev
 HWTEST_F(SceneSessionTest, GetRequestedOrientation, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
+    info.abilityName_ = "GetRequestedOrientation";
     info.bundleName_ = "GetRequestedOrientation";
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     Orientation ori = Orientation::HORIZONTAL;
     sceneSession->SetRequestedOrientation(ori);
     Orientation ret = sceneSession->GetRequestedOrientation();
@@ -350,36 +388,69 @@ HWTEST_F(SceneSessionTest, GetRequestedOrientation, Function | SmallTest | Level
 HWTEST_F(SceneSessionTest, SetDefaultRequestedOrientation, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
+    info.abilityName_ = "SetDefaultRequestedOrientation";
     info.bundleName_ = "SetDefaultRequestedOrientation";
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     Orientation orientation = Orientation::AUTO_ROTATION_UNSPECIFIED;
     sceneSession->SetDefaultRequestedOrientation(orientation);
     Orientation ret = sceneSession->GetRequestedOrientation();
     ASSERT_EQ(orientation, ret);
+
+    orientation = Orientation::USER_ROTATION_PORTRAIT;
+    sceneSession->SetDefaultRequestedOrientation(orientation);
+    ret = sceneSession->GetRequestedOrientation();
+    ASSERT_EQ(orientation, ret);
+
+    orientation = Orientation::USER_ROTATION_LANDSCAPE;
+    sceneSession->SetDefaultRequestedOrientation(orientation);
+    ret = sceneSession->GetRequestedOrientation();
+    ASSERT_EQ(orientation, ret);
+
+    orientation = Orientation::USER_ROTATION_PORTRAIT_INVERTED;
+    sceneSession->SetDefaultRequestedOrientation(orientation);
+    ret = sceneSession->GetRequestedOrientation();
+    ASSERT_EQ(orientation, ret);
+
+    orientation = Orientation::USER_ROTATION_LANDSCAPE_INVERTED;
+    sceneSession->SetDefaultRequestedOrientation(orientation);
+    ret = sceneSession->GetRequestedOrientation();
+    ASSERT_EQ(orientation, ret);
+
+    orientation = Orientation::FOLLOW_DESKTOP;
+    sceneSession->SetDefaultRequestedOrientation(orientation);
+    ret = sceneSession->GetRequestedOrientation();
+    ASSERT_EQ(orientation, ret);
 }
 
 /**
- * @tc.name: IsKeepScreenOn
- * @tc.desc: IsKeepScreenOn
+ * @tc.name: IsKeepScreenOn01
+ * @tc.desc: IsKeepScreenOn true
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, IsKeepScreenOn, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, IsKeepScreenOn01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsKeepScreenOn";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    ASSERT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    info.abilityName_ = "IsKeepScreenOn01";
+    info.bundleName_ = "IsKeepScreenOn01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetKeepScreenOn(true));
     ASSERT_EQ(true, sceneSession->IsKeepScreenOn());
+}
+
+/**
+ * @tc.name: IsKeepScreenOn02
+ * @tc.desc: IsKeepScreenOn false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsKeepScreenOn02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsKeepScreenOn02";
+    info.bundleName_ = "IsKeepScreenOn02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetKeepScreenOn(false));
     ASSERT_EQ(false, sceneSession->IsKeepScreenOn());
 }
@@ -392,15 +463,10 @@ HWTEST_F(SceneSessionTest, IsKeepScreenOn, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest, IsAppSession01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsAppSession";
+    info.abilityName_ = "IsAppSession01";
+    info.bundleName_ = "IsAppSession01";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(true, sceneSession->IsAppSession());
 }
@@ -413,15 +479,10 @@ HWTEST_F(SceneSessionTest, IsAppSession01, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest, IsAppSession02, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsAppSession";
+    info.abilityName_ = "IsAppSession02";
+    info.bundleName_ = "IsAppSession02";
     info.windowType_ = 2106;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(false, sceneSession->IsAppSession());
 
@@ -457,8 +518,7 @@ HWTEST_F(SceneSessionTest, IsAppOrLowerSystemSession01, Function | SmallTest | L
     info.bundleName_ = "IsAppOrLowerSystemSession01";
     info.windowType_ = 2126;
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(true, sceneSession->IsAppOrLowerSystemSession());
 }
@@ -475,8 +535,7 @@ HWTEST_F(SceneSessionTest, IsAppOrLowerSystemSession02, Function | SmallTest | L
     info.bundleName_ = "IsAppOrLowerSystemSession02";
     info.windowType_ = 2106;
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(false, sceneSession->IsAppOrLowerSystemSession());
 
@@ -577,9 +636,6 @@ HWTEST_F(SceneSessionTest, GetWindowName, Function | SmallTest | Level2)
     info.abilityName_ = "Background01";
     info.bundleName_ = "GetWindowName";
     sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
@@ -594,13 +650,9 @@ HWTEST_F(SceneSessionTest, GetWindowName, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest, IsDecorEnable, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
+    info.abilityName_ = "IsDecorEnable";
     info.bundleName_ = "IsDecorEnable";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(true, sceneSession->IsDecorEnable());
@@ -624,32 +676,13 @@ HWTEST_F(SceneSessionTest, IsDecorEnable01, Function | SmallTest | Level2)
     info.abilityName_ = "Background01";
     info.bundleName_ = "IsDecorEnable01";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    property->SetDecorEnable(true);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    sceneSession->property_ = property;
+    EXPECT_NE(sceneSession->property_, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->property_->SetDecorEnable(true);
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ASSERT_EQ(true, sceneSession->IsDecorEnable());
-
-    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession1, nullptr);
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    property->SetDecorEnable(false);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(true, sceneSession1->IsDecorEnable());
-
-    sceneSession1->SetSessionProperty(nullptr);
-    ASSERT_EQ(false, sceneSession1->IsDecorEnable());
 }
 
 /**
@@ -663,12 +696,7 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
     info.abilityName_ = "Background01";
     info.bundleName_ = "UpdateNativeVisibility";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->UpdateNativeVisibility(false);
     ASSERT_EQ(false, sceneSession->IsVisible());
@@ -688,11 +716,10 @@ HWTEST_F(SceneSessionTest, UpdateNativeVisibility, Function | SmallTest | Level2
 HWTEST_F(SceneSessionTest, SetPrivacyMode01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "SetPrivacyMode";
+    info.abilityName_ = "SetPrivacyMode01";
+    info.bundleName_ = "SetPrivacyMode01";
     info.windowType_ = 1;
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
@@ -710,7 +737,7 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode01, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest, SetPrivacyMode02, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background02";
+    info.abilityName_ = "SetPrivacyMode02";
     info.bundleName_ = "SetPrivacyMode";
     info.windowType_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -724,26 +751,37 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: IsFloatingWindowAppType
- * @tc.desc: IsFloatingWindowAppType
+ * @tc.name: IsFloatingWindowAppType01
+ * @tc.desc: IsFloatingWindowAppType true
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, IsFloatingWindowAppType, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, IsFloatingWindowAppType01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "Background01";
-    info.bundleName_ = "IsFloatingWindowAppType";
+    info.abilityName_ = "IsFloatingWindowAppType01";
+    info.bundleName_ = "IsFloatingWindowAppType01";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    ASSERT_EQ(false, sceneSession->IsFloatingWindowAppType());
+    EXPECT_NE(sceneSession->property_, nullptr);
+    sceneSession->property_->SetFloatingWindowAppType(true);
+    ASSERT_EQ(true, sceneSession->IsFloatingWindowAppType());
+}
 
-    sceneSession->SetSessionProperty(nullptr);
+/**
+ * @tc.name: IsFloatingWindowAppType02
+ * @tc.desc: IsFloatingWindowAppType false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsFloatingWindowAppType02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsFloatingWindowAppType02";
+    info.bundleName_ = "IsFloatingWindowAppType02";
+    info.windowType_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    EXPECT_NE(sceneSession->property_, nullptr);
     ASSERT_EQ(false, sceneSession->IsFloatingWindowAppType());
 }
 
@@ -1107,7 +1145,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
         info_.abilityName_ = "Background01";
         info_.bundleName_ = "IsFloatingWindowAppType";
         std::vector<sptr<SceneSession>> backgroundSession;
-        sptr<SceneSession> session2=sptr<SceneSession>::MakeSptr(info_, nullptr);
+        sptr<SceneSession> session2= sptr<SceneSession>::MakeSptr(info_, nullptr);
         backgroundSession.push_back(session2);
         return backgroundSession;
     };
@@ -1449,11 +1487,11 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     sceneSession->moveDragController_->isStartDrag_ = true;
     sceneSession->moveDragController_->hasPointDown_ = true;
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE), WSError::WS_OK);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_END_MOVE), WSError::WS_OK);
@@ -1473,7 +1511,7 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
@@ -1502,7 +1540,7 @@ HWTEST_F(SceneSessionTest, SetTopmost, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     sceneSession->SetSessionProperty(property);
     auto result = sceneSession->SetTopmost(false);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -1629,14 +1667,13 @@ HWTEST_F(SceneSessionTest, SetAspectRatio5, Function | SmallTest | Level2)
     limits.minWidth_ = 0;
     property->SetWindowLimits(limits);
     sceneSession->SetSessionProperty(property);
-    sceneSession->SetAspectRatio(ratio);
     auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 }
 
 /**
  * @tc.name: SetAspectRatio6
- * @tc.desc: test for sessionProperty is nullptr
+ * @tc.desc: normal function
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
@@ -1644,25 +1681,6 @@ HWTEST_F(SceneSessionTest, SetAspectRatio6, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SetAspectRatio6";
     info.bundleName_ = "SetAspectRatio6";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->isActive_ = true;
-    sceneSession->SetSessionProperty(nullptr);
-
-    float ratio = 0.1;
-    auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: SetAspectRatio7
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, SetAspectRatio7, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetAspectRatio7";
-    info.bundleName_ = "SetAspectRatio7";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->isActive_ = true;
 
@@ -1696,7 +1714,7 @@ HWTEST_F(SceneSessionTest, UpdateRect, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     sceneSession->SetSessionProperty(property);
@@ -1724,7 +1742,7 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1736,13 +1754,9 @@ HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | 
     sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
     EXPECT_NE(sceneSession, nullptr);
 
-    sceneSession->SetSessionProperty(nullptr);
-    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    ASSERT_EQ(res, false);
-
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
     sceneSession->SetSessionProperty(property);
-    res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
+    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
     ASSERT_EQ(res, false);
 }
 
@@ -1804,7 +1818,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1833,7 +1847,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect1, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1862,7 +1876,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -2144,7 +2158,7 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTe
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
@@ -2153,10 +2167,6 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTe
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
     bool result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
-    ASSERT_EQ(result, true);
-
-    sceneSession->SetSessionProperty(nullptr);
-    result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
     ASSERT_EQ(result, true);
 }
 
@@ -2172,7 +2182,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetDefaultDisplayIdIfNeed();
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     EXPECT_NE(property, nullptr);
     property->SetDisplayId(-99);
     sceneSession->SetSessionProperty(property);

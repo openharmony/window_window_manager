@@ -329,8 +329,6 @@ public:
     void SetNeedNotify(bool needNotify);
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
-    bool GetRectChangeBySystem() const;
-    void SetRectChangeBySystem(bool rectChangeBySystem);
     void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
@@ -835,7 +833,6 @@ private:
     float vpr_ { 1.5f };
     bool forceTouchable_ { true };
     bool systemTouchable_ { true };
-    std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
 
     /**

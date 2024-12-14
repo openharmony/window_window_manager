@@ -1660,6 +1660,8 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
         nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
     TLOGI(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode ScreenId: %{public}" PRIu64 "", screenId);
     auto screenMode = rsInterface_.GetScreenActiveMode(screenId);
+    TLOGI(WmsLogTag::DMS, "get screenWidth: %{public}d, screenHeight: %{public}d",
+        static_cast<uint32_t>(screenMode.GetScreenWidth()), static_cast<uint32_t>(screenMode.GetScreenHeight()));
     auto screenBounds = RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
     auto screenRefreshRate = screenMode.GetScreenRefreshRate();
     TLOGI(WmsLogTag::DMS, "Call rsInterface_ GetScreenCapability ScreenId: %{public}" PRIu64 "", screenId);
@@ -2535,6 +2537,14 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
                 TLOGI(WmsLogTag::DMS, "set setting defaultDpi:%{public}d", that.defaultDpi);
             }
         }
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            auto screenSession = that.GetDefaultScreenSession();
+            ScreenId screenId = screenSession->GetScreenId();
+            SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+            that.OnSuperFoldStatusChange(screenId, status);
+            screenSession->PropertyChange(screenSession->GetScreenProperty(),
+                ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+        }
     }
 }
 
@@ -2771,7 +2781,7 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float sc
             screenId);
         return;
     }
-    screenSession->SetPhysicalRotation(rotation, GetFoldStatus());
+    screenSession->SetPhysicalRotation(rotation, GetFoldDisplayMode());
     screenSession->SetScreenComponentRotation(screenComponentRotation);
     screenSession->UpdateRotationOrientation(rotation);
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", rotation: %{public}f, screenComponentRotation: %{public}f",

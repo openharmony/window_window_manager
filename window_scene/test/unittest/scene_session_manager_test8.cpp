@@ -330,7 +330,6 @@ HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, Function | SmallTe
     sceneSessionList.clear();
     sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(WSError::WS_OK, sceneSession->SetSessionProperty(nullptr));
     sceneSessionList.emplace_back(sceneSession);
     ssm_->FilterSceneSessionCovered(sceneSessionList);
 }
