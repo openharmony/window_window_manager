@@ -180,8 +180,9 @@ public:
     virtual WMError MoveWindowToGlobal(int32_t x, int32_t y,
         MoveConfiguration moveConfiguration) { return WMError::WM_OK; }
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError Resize(uint32_t width, uint32_t height) = 0;
-    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) = 0;
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height,
+        const RectAnimationConfig& rectAnimationConfig = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) = 0;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) = 0;
     virtual bool IsKeepScreenOn() const = 0;
@@ -224,8 +225,8 @@ public:
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
     virtual WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
-    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
-    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual WMError RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual WMError UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;

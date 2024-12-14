@@ -39,7 +39,7 @@ public:
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
-    WMError Resize(uint32_t width, uint32_t height) override;
+    WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
@@ -74,8 +74,8 @@ public:
         int64_t uiExtensionIdLevel) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
 
-    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;

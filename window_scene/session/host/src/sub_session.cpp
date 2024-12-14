@@ -46,7 +46,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto task = [weakThis = wptr(this), property]() {
+    PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_SUB, "session is null");
@@ -66,8 +66,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         }
         auto ret = session->SceneSession::Foreground(property);
         return ret;
-    };
-    PostTask(task, "Show");
+    }, "Show");
     return WSError::WS_OK;
 }
 
@@ -84,21 +83,22 @@ void SubSession::CheckParentDisplayIdAndMove()
     }
 }
 
-void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId)
+void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId,
+    const RectAnimationConfig& rectAnimationConfig)
 {
     if (reason == SizeChangeReason::DRAG_END) {
         shouldFollowParentWhenShow_ = false;
     }
-    SceneSession::NotifySessionRectChange(rect, reason, displayId);
+    SceneSession::NotifySessionRectChange(rect, reason, displayId, rectAnimationConfig);
 }
 
 void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
-    const MoveConfiguration& moveConfiguration)
+    const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
 {
     if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
         shouldFollowParentWhenShow_ = false;
     }
-    SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration);
+    SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration, rectAnimationConfig);
 }
 
 WSError SubSession::Hide()
@@ -238,22 +238,14 @@ bool SubSession::IsTopmost() const
 
 bool SubSession::IsModal() const
 {
-    bool isModal = false;
-    auto property = GetSessionProperty();
-    if (property != nullptr) {
-        isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
-    }
-    return isModal;
+    return WindowHelper::IsModalSubWindow(GetSessionProperty()->GetWindowType(),
+                                          GetSessionProperty()->GetWindowFlags());
 }
 
 bool SubSession::IsApplicationModal() const
 {
-    bool isAppModal = false;
-    auto property = GetSessionProperty();
-    if (property != nullptr) {
-        isAppModal = WindowHelper::IsApplicationModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
-    }
-    return isAppModal;
+    return WindowHelper::IsApplicationModalSubWindow(GetSessionProperty()->GetWindowType(),
+                                                     GetSessionProperty()->GetWindowFlags());
 }
 
 bool SubSession::IsVisibleForeground() const

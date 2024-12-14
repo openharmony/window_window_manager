@@ -177,7 +177,7 @@ HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
 {
     RootSceneSession rootSceneSession;
     AvoidArea avoidArea;
-    auto ret = rootSceneSession.UpdateAvoidArea(new AvoidArea(avoidArea), AvoidAreaType::TYPE_SYSTEM);
+    auto ret = rootSceneSession.UpdateAvoidArea(sptr<AvoidArea>::MakeSptr(avoidArea), AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
 }
 }

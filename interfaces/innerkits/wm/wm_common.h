@@ -156,12 +156,14 @@ enum class WindowModeType : uint8_t {
  * @brief Enumerates modal of sub session.
  */
 enum class SubWindowModalType : uint32_t {
-    TYPE_UNDEFINED = 0,
+    BEGIN = 0,
+    TYPE_UNDEFINED = BEGIN,
     TYPE_NORMAL,
     TYPE_DIALOG,
     TYPE_WINDOW_MODALITY,
     TYPE_TOAST,
     TYPE_APPLICATION_MODALITY,
+    END = TYPE_APPLICATION_MODALITY,
 };
 
 /**
@@ -299,6 +301,15 @@ inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSetting
 }
 
 /**
+ * @brief Enumerates flag of ControlAppType.
+ */
+enum class ControlAppType : uint8_t {
+    CONTROL_APP_TYPE_BEGIN = 0,
+    APP_LOCK = 1,
+    CONTROL_APP_TYPE_END,
+};
+
+/**
  * @brief Enumerates flag of multiWindowUIType.
  */
 enum class WindowUIType : uint8_t {
@@ -306,15 +317,6 @@ enum class WindowUIType : uint8_t {
     PC_WINDOW,
     PAD_WINDOW,
     INVALID_WINDOW
-};
-
-/**
- * @brief Enumerates flag of ControlAppType.
- */
-enum class ControlAppType : uint8_t {
-    CONTROL_APP_TYPE_BEGIN = 0,
-    APP_LOCK = 1,
-    CONTROL_APP_TYPE_END,
 };
 
 /**
@@ -372,7 +374,9 @@ enum class WindowSizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
+    RESIZE_WITH_ANIMATION,
     MOVE,
+    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -775,6 +779,19 @@ struct Rect {
 };
 
 /**
+ * @struct RectAnimationConfig
+ *
+ * @brief Window RectAnimationConfig
+ */
+struct RectAnimationConfig {
+    uint32_t duration = 0; // Duartion of the animation, in milliseconds.
+    float x1 = 0.0f;       // X coordinate of the first point on the Bezier curve.
+    float y1 = 0.0f;       // Y coordinate of the first point on the Bezier curve.
+    float x2 = 0.0f;       // X coordinate of the second point on the Bezier curve.
+    float y2 = 0.0f;       // Y coordinate of the second point on the Bezier curve.
+};
+
+/**
  * @brief UIExtension usage
  */
 enum class UIExtensionUsage : uint32_t {
@@ -1108,8 +1125,8 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = UINT32_MAX;
-    uint32_t maxHeight_ = UINT32_MAX;
+    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX);
+    uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
     uint32_t minWidth_ = 1;
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
@@ -1243,12 +1260,15 @@ struct KeyboardAnimationConfig {
 
 struct MoveConfiguration {
     DisplayId displayId = DISPLAY_ID_INVALID;
+    RectAnimationConfig rectAnimationConfig = { 0, 0.0f, 0.0f, 0.0f, 0.0f };
     std::string ToString() const
     {
         std::string str;
-        constexpr int BUFFER_SIZE = 11;
+        constexpr int BUFFER_SIZE = 1024;
         char buffer[BUFFER_SIZE] = { 0 };
-        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[displayId: %llu, rectAnimationConfig: [%u, %f, %f, %f, %f]]", displayId, rectAnimationConfig.duration,
+            rectAnimationConfig.x1, rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2) > 0) {
             str.append(buffer);
         }
         return str;
@@ -1311,6 +1331,14 @@ struct ExtensionWindowConfig {
     Rect windowRect;
     SubWindowOptions subWindowOptions;
     SystemWindowOptions systemWindowOptions;
+};
+
+template <typename T>
+struct SptrHash {
+    std::size_t operator()(const sptr<T>& ptr) const
+    {
+        return std::hash<T*>{}(ptr.GetRefPtr());
+    }
 };
 
 /**

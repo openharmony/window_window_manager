@@ -574,13 +574,13 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
     napi_value argv[maxArgumentsNum] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Argc is invalid:%{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid:%{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     int32_t windowId = 0;
     if (!ConvertFromJsValue(env, argv[0], windowId)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Failed to convert parameter to integer");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameter to integer");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
@@ -593,18 +593,18 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (dataPack->result != WMError::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result)));
-                TLOGW(WmsLogTag::WMS_SYSTEM, "[NAPI]Get snapshot not ok!");
+                TLOGW(WmsLogTag::WMS_SYSTEM, "Get snapshot not ok!");
                 return;
             }
             if (dataPack->pixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Get snapshot is nullptr!");
+                TLOGE(WmsLogTag::WMS_SYSTEM, "Get snapshot is nullptr!");
                 return;
             }
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, dataPack->pixelMap);
             if (nativePixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGE(WmsLogTag::WMS_SYSTEM, "[NAPI]Create native pixelmap is nullptr!");
+                TLOGE(WmsLogTag::WMS_SYSTEM, "Create native pixelmap is nullptr!");
                 return;
             }
             task.Resolve(env, nativePixelMap);
@@ -1100,7 +1100,7 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
             nativeBoolean = (GetType(env, argv[1]) == napi_boolean ? argv[1] : nullptr);
         }
     }
-    
+
     std::shared_ptr<Media::PixelMap> pixelMap;
     pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, nativeObject);
     if (pixelMap == nullptr) {
@@ -1195,9 +1195,9 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
                 SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
-                TLOGD(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo success");
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
             } else {
-                TLOGE(WmsLogTag::DEFAULT, "OnGetVisibleWindowInfo failed");
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
             }
         };
@@ -1216,12 +1216,12 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to displayId");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "invalid displayId");
+        TLOGE(WmsLogTag::WMS_PC, "invalid displayId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t windowNumber = 0;

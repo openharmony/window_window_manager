@@ -1034,7 +1034,8 @@ public:
      * @param height
      * @return WMError
      */
-    virtual WMError Resize(uint32_t width, uint32_t height) { return WMError::WM_OK; }
+    virtual WMError Resize(uint32_t width, uint32_t height,
+        const RectAnimationConfig& rectAnimationConfig = {}) { return WMError::WM_OK; }
 
     /**
      * @brief resize the window instance (w,h)
@@ -1043,7 +1044,8 @@ public:
      * @param height
      * @return WMError
      */
-    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height,
+        const RectAnimationConfig& rectAnimationConfig = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief set the window gravity
@@ -1389,7 +1391,7 @@ public:
      * @param listener IAvoidAreaChangedListener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+    virtual WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
     {
         return WMError::WM_OK;
     }
@@ -1400,7 +1402,7 @@ public:
      * @param listener IAvoidAreaChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+    virtual WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
     {
         return WMError::WM_OK;
     }

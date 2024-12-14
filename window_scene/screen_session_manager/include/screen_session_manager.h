@@ -96,6 +96,7 @@ public:
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool TryToCancelScreenOff() override;
+    void ForceSkipScreenOffAnimation();
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
@@ -413,6 +414,7 @@ private:
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
     bool IsExtendMode();
+    void SetScreenCorrection();
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -479,6 +481,7 @@ private:
     bool isExpandCombination_ = false;
     bool isScreenShot_ = false;
     bool isCoordinationFlag_ = false;
+    bool isFoldScreenOuterScreenReady_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;

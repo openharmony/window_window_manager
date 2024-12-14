@@ -36,9 +36,10 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_5S = 5;
-const int32_t MAP_SIZE = 80;
-const int32_t NO_EXIT_UID_VERSION = -1;
-ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIT_UID_VERSION);
+const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
+const int32_t MAP_SIZE = 300;
+const int32_t NO_EXIST_UID_VERSION = -1;
+ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
@@ -267,14 +268,6 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     RRect bounds = property_.GetBounds();
     RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
-    int32_t apiVersion = 0;
-    int32_t currentUid = IPCSkeleton::GetCallingUid();
-    apiVersion = g_uidVersionMap.Get(currentUid);
-    if (apiVersion == NO_EXIT_UID_VERSION) {
-        apiVersion = SysCapUtil::GetApiCompatibleVersion();
-        WLOGFI("Get version from IPC");
-        g_uidVersionMap.Set(currentUid, apiVersion);
-    }
     if (isBScreenHalf_) {
         displayInfo->SetWidth(bounds.rect_.GetWidth());
         displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
@@ -293,6 +286,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
     displayInfo->SetDpi(property_.GetVirtualPixelRatio() * DOT_PER_INCH);
+    int32_t apiVersion = GetApiVersion();
     if (apiVersion >= 14 || apiVersion == 0) { // 14 is API version
         displayInfo->SetRotation(property_.GetDeviceRotation());
         displayInfo->SetDisplayOrientation(property_.GetDeviceOrientation());
@@ -548,8 +542,13 @@ void ScreenSession::Connect()
 void ScreenSession::Disconnect()
 {
     screenState_ = ScreenState::DISCONNECTION;
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnDisconnect(screenId_);
@@ -559,8 +558,13 @@ void ScreenSession::Disconnect()
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
     property_ = newProperty;
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnPropertyChange(newProperty, reason, screenId_);
@@ -569,8 +573,13 @@ void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenProp
 
 void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason)
 {
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnPowerStatusChange(event, status, reason);
@@ -719,16 +728,16 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     }
 }
 
-void ScreenSession::SetPhysicalRotation(int rotation, FoldStatus foldStatus)
+void ScreenSession::SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode)
 {
     int32_t realRotation = static_cast<int32_t>(rotation);
     std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
+    bool isOuterScreen = FoldScreenStateInternel::IsOuterScreen(foldDisplayMode);
     int32_t offsetRotation = 0;
-    if (phyOffsets.size() == 1 || foldStatus == FoldStatus::FOLDED) {
+    if (phyOffsets.size() == 1 || isOuterScreen) {
         offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[0]));
     }
-    if ((foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) &&
-        phyOffsets.size() == 2) { // 2 is arg number
+    if (!isOuterScreen && phyOffsets.size() == 2) { // 2 is arg number
         offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[1]));
     }
     realRotation = (rotation + offsetRotation) % 360; // 360 is 360 degree
@@ -882,8 +891,13 @@ void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 void ScreenSession::SetScreenRotationLocked(bool isLocked)
 {
     isScreenLocked_ = isLocked;
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnScreenRotationLockedChange(isLocked, screenId_);
@@ -902,7 +916,7 @@ bool ScreenSession::IsScreenRotationLocked()
 
 void ScreenSession::SetTouchEnabledFromJs(bool isTouchEnabled)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "isTouchEnabled:%{public}u", static_cast<uint32_t>(isTouchEnabled));
+    TLOGI(WmsLogTag::WMS_EVENT, "%{public}u", isTouchEnabled);
     touchEnabled_.store(isTouchEnabled);
 }
 
@@ -1680,8 +1694,13 @@ void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
 
 void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
 {
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnScreenCaptureNotify(mainScreenId, uid, clientName);
@@ -1690,8 +1709,13 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
 
 void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
+            WLOGFE("screenChangeListener is null.");
             continue;
         }
         listener->OnSuperFoldStatusChange(screenId, superFoldStatus);
@@ -1706,5 +1730,24 @@ void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
 bool ScreenSession::GetIsPhysicalMirrorSwitch()
 {
     return isPhysicalMirrorSwitch_;
+}
+
+int32_t ScreenSession::GetApiVersion()
+{
+    static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
+    int32_t apiVersion = NO_EXIST_UID_VERSION;
+    int32_t currentPid = IPCSkeleton::GetCallingPid();
+    if (interval < MAX_INTERVAL_US) {
+        apiVersion = g_uidVersionMap.Get(currentPid);
+    }
+    if (apiVersion == NO_EXIST_UID_VERSION) {
+        apiVersion = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
+        WLOGFI("Get version from IPC");
+        g_uidVersionMap.Set(currentPid, apiVersion);
+    }
+    lastRequestTime = currentTime;
+    return apiVersion;
 }
 } // namespace OHOS::Rosen

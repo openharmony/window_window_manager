@@ -224,6 +224,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     }
     ClearVsyncStation();
     SetUIContentComplete();
+    SetUIExtensionDestroyComplete();
     RemoveExtensionWindowStageFromSCB();
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed success, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
@@ -245,7 +246,8 @@ WMError WindowExtensionSessionImpl::MoveTo(int32_t x, int32_t y,
     return static_cast<WMError>(error);
 }
 
-WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height,
+    const RectAnimationConfig& rectAnimationConfig)
 {
     WLOGFD("Id:%{public}d wh %{public}u %{public}u", property_->GetPersistentId(), width, height);
     if (IsWindowSessionInvalid()) {
@@ -877,12 +879,12 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowExtensionSessionImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     return RegisterExtensionAvoidAreaChangeListener(listener);
 }
 
-WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     return UnregisterExtensionAvoidAreaChangeListener(listener);
 }
@@ -1178,7 +1180,7 @@ void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::
             pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     }
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking id:%{public}d,windowId:%{public}u,"
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,wid:%{public}u,"
             "pointId:%{public}d,sourceType:%{public}d", pointerEvent->GetId(), GetWindowId(),
             pointerEvent->GetPointerId(), pointerEvent->GetSourceType());
     }
@@ -1202,7 +1204,7 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
             keyEvent->MarkProcessed();
             return true;
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "InputTracking:%{public}d wid:%{public}d",
+        TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d wid:%{public}d",
             keyEvent->GetId(), keyEvent->GetAgentWindowId());
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
@@ -1302,7 +1304,7 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     bool isPcOrPadFreeMultiWindowMode = false;
     WMError ret = SingletonContainer::Get<WindowAdapter>().IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "cant't find isPcOrPadFreeMultiWindowMode, err: %{public}d",
+        TLOGE(WmsLogTag::WMS_UIEXT, "cant't find isPcOrPadFreeMultiWindowMode, err: %{public}u",
             static_cast<uint32_t>(ret));
     }
     return isPcOrPadFreeMultiWindowMode;

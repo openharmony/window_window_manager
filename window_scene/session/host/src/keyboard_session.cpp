@@ -69,7 +69,7 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto task = [weakThis = wptr(this), property]() {
+    PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, show keyboard failed");
@@ -79,10 +79,8 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard session, id: %{public}d, calling session id: %{public}d",
             session->GetPersistentId(), session->GetCallingSessionId());
         session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
-        session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         return session->SceneSession::Foreground(property);
-    };
-    PostTask(task, "Show");
+    }, "Show");
     return WSError::WS_OK;
 }
 
@@ -91,7 +89,7 @@ WSError KeyboardSession::Hide()
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto task = [weakThis = wptr(this)]() {
+    PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, hide keyboard failed!");
@@ -118,14 +116,13 @@ WSError KeyboardSession::Hide()
             }
         }
         return ret;
-    };
-    PostTask(task, "Hide");
+    }, "Hide");
     return WSError::WS_OK;
 }
 
 WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
-    auto task = [weakThis = wptr(this), isFromClient]() {
+    PostTask([weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, disconnect keyboard session failed!");
@@ -142,15 +139,14 @@ WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identi
             sessionProperty->SetCallingSessionId(INVALID_WINDOW_ID);
         }
         return WSError::WS_OK;
-    };
-    PostTask(task, "Disconnect");
+    }, "Disconnect");
     return WSError::WS_OK;
 }
 
 WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
+    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "session is null");
@@ -159,8 +155,7 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
         return ret;
-    };
-    PostTask(task, "NotifyClientToUpdateRect");
+    }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
 }
 
@@ -213,7 +208,7 @@ void KeyboardSession::OnCallingSessionUpdated()
 
 void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
 {
-    auto task = [weakThis = wptr(this), callingSessionId]() mutable {
+    PostTask([weakThis = wptr(this), callingSessionId]() mutable {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "session is null");
@@ -236,7 +231,6 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
             if (curCallingSessionId != INVALID_WINDOW_ID && callingSessionId != curCallingSessionId &&
                 session->IsSessionForeground()) {
                 session->MoveAndResizeKeyboard(sessionProperty->GetKeyboardLayoutParams(), sessionProperty, true);
-                session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
 
                 session->UpdateCallingSessionIdAndPosition(callingSessionId);
             } else {
@@ -249,8 +243,7 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
             return;
         }
         session->keyboardCallback_->onCallingSessionIdChange_(callingSessionId);
-    };
-    PostTask(task, "SetCallingSessionId");
+    }, "SetCallingSessionId");
     return;
 }
 
@@ -266,7 +259,7 @@ uint32_t KeyboardSession::GetCallingSessionId()
 
 WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
-    auto task = [weakThis = wptr(this), params]() -> WSError {
+    PostTask([weakThis = wptr(this), params]() -> WSError {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
@@ -300,8 +293,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
             params.PortraitPanelRect_.ToString().c_str(), session->GetSessionRequestRect().ToString().c_str());
         return WSError::WS_OK;
-    };
-    PostTask(task, "AdjustKeyboardLayout");
+    }, "AdjustKeyboardLayout");
     return WSError::WS_OK;
 }
 
@@ -525,7 +517,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
 void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
     bool isKeyboardShow, bool isRotating)
 {
-    auto task = [weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, isRotating]() {
+    PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, isRotating]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
@@ -559,8 +551,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             transactionController->CloseSyncTransaction(session->GetEventHandler());
         }
         return WSError::WS_OK;
-    };
-    PostTask(task, "CloseKeyboardSyncTransaction");
+    }, "CloseKeyboardSyncTransaction");
 }
 
 std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()

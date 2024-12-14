@@ -175,11 +175,11 @@ napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_in
     }
     bool enable = false;
     if (!ConvertFromJsValue(env, argv[0], enable)) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to convert parameter to bool");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to bool");
         return NapiGetUndefined(env);
     }
     if (pipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]OnSetAutoStartEnabled error, controller is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "error, controller is nullptr");
         return NapiGetUndefined(env);
     }
     pipController_->SetAutoStartEnabled(enable);

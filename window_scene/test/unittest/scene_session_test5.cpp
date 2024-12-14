@@ -385,14 +385,13 @@ HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, Function | SmallTest | Level2)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
+    session->surfaceNode_ = nullptr;
     WSRect preRect = { 20, 20, 800, 800 };
     WSRect rect = { 30, 30, 900, 900 };
     session->SetSessionRect(preRect);
-
-    session->property_->SetDragEnabled(true);
     session->SetSurfaceBounds(rect, false);
-    session->property_->SetDragEnabled(false);
+
+    session->surfaceNode_ = surfaceNode;
     session->SetSurfaceBounds(rect, false);
     EXPECT_EQ(preRect, session->GetSessionRect());
 }
@@ -487,7 +486,8 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason, DisplayId displayId) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason,
+        DisplayId displayId, const RectAnimationConfig& rectAnimationConfig) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -515,7 +515,8 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason, DisplayId displayId) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, SizeChangeReason reason,
+        DisplayId displayId, const RectAnimationConfig& rectAnimationConfig) {
         return;
     };
     session->SetSessionRectChangeCallback(nullptr);
@@ -556,7 +557,8 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback03, Function | SmallTest
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionProperty(property);
     WSRect rec = { 1, 1, 1, 1 };
-    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason, DisplayId displayId) {
+    NotifySessionRectChangeFunc func = [](const WSRect& rect, const SizeChangeReason reason,
+        DisplayId displayId, const RectAnimationConfig& rectAnimationConfig) {
         return;
     };
     session->SetSessionRequestRect(rec);
@@ -653,9 +655,6 @@ HWTEST_F(SceneSessionTest5, CheckAspectRatioValid, Function | SmallTest | Level2
     windowLimits.maxHeight_ = 10000;
     windowLimits.minHeight_ = -10000;
     EXPECT_EQ(WSError::WS_OK, session->SetAspectRatio(0.0f));
-
-    session->SetSessionProperty(nullptr);
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->SetAspectRatio(0.0f));
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     EXPECT_NE(property, nullptr);
@@ -760,7 +759,6 @@ HWTEST_F(SceneSessionTest5, AdjustRectByAspectRatio, Function | SmallTest | Leve
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    session->SetSessionProperty(nullptr);
     WSRect rect;
     EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
     session->SetSessionProperty(property);
@@ -800,10 +798,6 @@ HWTEST_F(SceneSessionTest5, AdjustRectByAspectRatio01, Function | SmallTest | Le
 
     systemConfig.isSystemDecorEnable_ = false;
     EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-
-    systemConfig.isSystemDecorEnable_ = true;
-    session->SetSessionProperty(nullptr);
-    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
 }
 
 /**
@@ -838,10 +832,6 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
 
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
-    session->SetSessionProperty(nullptr);
-    session->OnMoveDragCallback(reason);
-    EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
-
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     session->SetSessionProperty(property);
@@ -920,9 +910,7 @@ HWTEST_F(SceneSessionTest5, UpdateNativeVisibility, Function | SmallTest | Level
     specificCallback->onUpdateAvoidArea_ = areaFunc;
     session->specificCallback_ = specificCallback;
     session->UpdateNativeVisibility(true);
-    session->SetSessionProperty(nullptr);
     session->UpdateNativeVisibility(false);
-    EXPECT_EQ(nullptr, session->property_);
 }
 
 /**
@@ -946,8 +934,6 @@ HWTEST_F(SceneSessionTest5, SetPrivacyMode, Function | SmallTest | Level2)
     session->leashWinSurfaceNode_ = nullptr;
     session->SetPrivacyMode(false);
     session->leashWinSurfaceNode_ = surfaceNode;
-    session->SetPrivacyMode(true);
-    session->SetSessionProperty(nullptr);
     session->SetPrivacyMode(true);
 
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
@@ -983,9 +969,6 @@ HWTEST_F(SceneSessionTest5, SetSnapshotSkip, Function | SmallTest | Level2)
     session->surfaceNode_ = nullptr;
     EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
     session->SetSnapshotSkip(true);
-    session->SetSessionProperty(nullptr);
-    session->SetSnapshotSkip(true);
-    EXPECT_EQ(nullptr, session->GetSessionProperty());
 }
 
 /**
@@ -1267,14 +1250,6 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateMaximizeState, Function | SmallTes
     EXPECT_EQ(WMError::WM_OK, res);
     res = session->HandleActionUpdateAnimationFlag(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
-
-    session->SetSessionProperty(nullptr);
-    res = session->HandleActionUpdateMaximizeState(property, action);
-    EXPECT_EQ(WMError::WM_OK, res);
-    res = session->HandleActionUpdateMode(property, action);
-    EXPECT_EQ(WMError::WM_OK, res);
-    res = session->HandleActionUpdateAnimationFlag(property, action);
-    EXPECT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -1318,11 +1293,6 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateWindowModeSupportType, Function | 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->isSystemCalling_ = true;
-    ASSERT_NE(session, nullptr);
-    session->SetSessionProperty(nullptr);
-    ASSERT_EQ(WMError::WM_OK, session->HandleActionUpdateWindowModeSupportType(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RECT));
 
     property->isSystemCalling_ = false;
     session->SetSessionProperty(property);
@@ -1733,11 +1703,6 @@ HWTEST_F(SceneSessionTest5, SetAndIsSystemKeyboard, Function | SmallTest | Level
     ASSERT_EQ(false, session->IsSystemKeyboard());
     session->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, session->IsSystemKeyboard());
-
-    WSError ret = session->SetSessionProperty(nullptr);
-    ASSERT_EQ(WSError::WS_OK, ret);
-    session->SetIsSystemKeyboard(true);
-    ASSERT_EQ(false, session->IsSystemKeyboard());
 }
 
 /**
@@ -1780,6 +1745,23 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, Function | Smal
     rect = rect1;
     controller->RecordMoveRects(rect);
     EXPECT_TRUE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
+}
+
+/**
+ * @tc.name: SetBehindWindowFilterEnabled
+ * @tc.desc: SetBehindWindowFilterEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetBehindWindowFilterEnabled, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBehindWindowFilterEnabled";
+    info.bundleName_ = "SetBehindWindowFilterEnabled";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    session->SetBehindWindowFilterEnabled(false);
+    session->SetBehindWindowFilterEnabled(true);
 }
 }
 }
