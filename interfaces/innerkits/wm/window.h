@@ -896,14 +896,14 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0})
-    { 
+    {
         return WMError::WM_OK;
     }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
      * 
-     * @param avoidAreaOption Flags of 
+     * @param avoidAreaOption Flags of whether the system or app sub window can obtain area
      */
     virtual WMError SetAvoidAreaOption(uint32_t AvoidAreaOption) { return WMError::WM_OK; }
 

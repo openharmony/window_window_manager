@@ -871,7 +871,7 @@ int SessionStub::HandleNeedAvoid(MessageParcel& data, MessageParcel& reply)
 }
 
 int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& reply)
-{   
+{
     uint32_t typeId = 0;
     if (!data.ReadUint32(typeId) ||
         typeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
