@@ -90,7 +90,7 @@ WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
-    auto isModal = isModal();
+    auto isModal = IsModal();
     if (!isModal && CheckDialogOnForeground()) {
         HandlePointDownDialog();
         return WSError::WS_OK;
