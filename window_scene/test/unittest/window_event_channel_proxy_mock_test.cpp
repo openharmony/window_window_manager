@@ -38,8 +38,9 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<WindowEventChannelProxy> windowEventChannelProxy_ = new WindowEventChannelProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<WindowEventChannelProxy> windowEventChannelProxy_ =
+        sptr<WindowEventChannelProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
 void WindowEventChannelProxyMockTest::SetUpTestCase()

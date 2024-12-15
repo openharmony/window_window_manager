@@ -40,7 +40,7 @@ void SessionStubImmersiveTest::TearDownTestCase() {}
 
 void SessionStubImmersiveTest::SetUp()
 {
-    session_ = new (std::nothrow) SessionStubMocker();
+    session_ = sptr<SessionStubMocker>::MakeSptr();
     EXPECT_NE(nullptr, session_);
 
     EXPECT_CALL(*session_, OnRemoteRequest(_, _, _, _)).WillOnce(Invoke(

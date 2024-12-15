@@ -70,10 +70,10 @@ sptr<KeyboardSession> KeyboardSessionTest2::GetKeyboardSession(const std::string
     info.abilityName_ = abilityName;
     info.bundleName_ = bundleName;
     sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     EXPECT_NE(keyboardCb, nullptr);
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     EXPECT_NE(keyboardSession, nullptr);
@@ -93,7 +93,7 @@ sptr<SceneSession> KeyboardSessionTest2::GetSceneSession(const std::string& abil
     info.abilityName_ = abilityName;
     info.bundleName_ = bundleName;
     sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
 
@@ -107,7 +107,7 @@ sptr<KSSceneSessionMocker> KeyboardSessionTest2::GetSceneSessionMocker(const std
     info.abilityName_ = abilityName;
     info.bundleName_ = bundleName;
     sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KSSceneSessionMocker> mockSession = sptr<KSSceneSessionMocker>::MakeSptr(info, nullptr);
 
@@ -126,10 +126,10 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout01, Function | SmallTest | Le
     info.abilityName_ = "AdjustKeyboardLayout01";
     info.bundleName_ = "AdjustKeyboardLayout01";
     sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     EXPECT_NE(keyboardCb, nullptr);
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     EXPECT_NE(keyboardSession, nullptr);
@@ -163,10 +163,10 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout02, Function | SmallTest | Le
     info.abilityName_ = "AdjustKeyboardLayout02";
     info.bundleName_ = "AdjustKeyboardLayout02";
     sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     EXPECT_NE(keyboardCb, nullptr);
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     EXPECT_NE(keyboardSession, nullptr);
@@ -187,10 +187,10 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession, Function | SmallT
     info.abilityName_ = "CheckIfNeedRaiseCallingSession";
     info.bundleName_ = "CheckIfNeedRaiseCallingSession";
     sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     EXPECT_NE(keyboardCb, nullptr);
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     EXPECT_NE(keyboardSession, nullptr);
@@ -324,7 +324,7 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession01, Function | Smal
     SessionInfo info;
     info.abilityName_ = "CheckIfNeedRaiseCallingSession";
     info.bundleName_ = "CheckIfNeedRaiseCallingSession";
-    sptr<SceneSession::SpecificSessionCallback> specificCb = new (std::nothrow) SceneSession::SpecificSessionCallback();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCb, nullptr);
     sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     ASSERT_NE(callingSession, nullptr);
@@ -408,10 +408,10 @@ HWTEST_F(KeyboardSessionTest2, Hide01, Function | SmallTest | Level1)
     SessionInfo info;
     info.abilityName_ = "Hide";
     info.bundleName_ = "Hide";
-    sptr<SceneSession::SpecificSessionCallback> specificCb = new (std::nothrow) SceneSession::SpecificSessionCallback();
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCb, nullptr);
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     ASSERT_NE(keyboardCb, nullptr);
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     ASSERT_NE(keyboardSession, nullptr);
