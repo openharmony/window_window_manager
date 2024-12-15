@@ -902,7 +902,7 @@ public:
 
     /**
      * @brief Set whether the system or app sub window can obtain area
-     * 
+     *
      * @param avoidAreaOption Flags of whether the system or app sub window can obtain area
      */
     virtual WMError SetAvoidAreaOption(uint32_t AvoidAreaOption) { return WMError::WM_OK; }
@@ -913,7 +913,7 @@ public:
      * @param
      * @return 01 means system window can obtain avoid area, 10 means app sub window can obtain avoid area
      */
-    virtual WMError GetAvoidAreaOption() { return 0; }
+    virtual uint32_t GetAvoidAreaOption() { return 0; }
 
     /**
      * @brief Set this window layout full screen, with hide status bar and nav bar above on this window
