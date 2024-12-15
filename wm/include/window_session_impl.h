@@ -100,7 +100,7 @@ public:
      */
     WMError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
-    WMError SetAvoidAreaOpion(uint32_t avoidAreaOption) override;
+    WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override;
     uint32_t GetAvoidAreaOption() override;
     WMError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
