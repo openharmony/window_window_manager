@@ -127,7 +127,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
                 TLOGE(WmsLogTag::WMS_IMMS, "read height error");
                 return ERR_INVALID_DATA;
             }
-            WSRect rect = {posX, posY, static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+            Rect rect = {posX, posY, static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
             AvoidArea avoidArea = GetAvoidAreaByType(windowId, avoidAreaType, rect);
             reply.WriteParcelable(&avoidArea);
             break;
