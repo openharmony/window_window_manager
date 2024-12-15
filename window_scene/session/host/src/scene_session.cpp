@@ -1967,7 +1967,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, const WSRect& 
     }
     if (WindowHelper::IsSystemWindow(winType) &&
         (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) {
-        return systemConfig.IsPhoneWindow() || systemConfig_.IsPadWindow();
+        return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     }
     TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}u "
         "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
@@ -4549,7 +4549,7 @@ WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSession
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!(SessionHelper::IsSubWindow(sessionProperty->GetWindowType()) ||
-        SessionHelper::IsSystemWindow(sessionProperty->GetwindowType()))) {
+        SessionHelper::IsSystemWindow(sessionProperty->GetWindowType()))) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     sessionProperty->SetAvoidAreaOption(property->GetAvoidAreaOption());
