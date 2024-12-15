@@ -119,12 +119,12 @@ void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& s
     bool useUIExtension) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty == nullptr) {
-        WLOGFE("sessionProperty is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is nullptr");
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
@@ -150,7 +150,7 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     bool useUIExtension) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
     transform = Matrix3f::IDENTITY;
@@ -176,7 +176,7 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     std::vector<MMI::Rect>& pointerHotAreas) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
     WSRect windowRect = sceneSession->GetSessionGlobalRect();
@@ -221,7 +221,7 @@ void SceneSessionDirtyManager::UpdateHotAreas(const sptr<SceneSession>& sceneSes
     std::vector<MMI::Rect>& touchHotAreas, std::vector<MMI::Rect>& pointerHotAreas) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
     std::unordered_set<MMI::Rect, InputRectHash, InputRectEqual> hotAreaHashSet;
@@ -240,7 +240,8 @@ void SceneSessionDirtyManager::UpdateHotAreas(const sptr<SceneSession>& sceneSes
         pointerHotAreas.emplace_back(rect);
         if (touchHotAreas.size() == static_cast<uint32_t>(MMI::WindowInfo::MAX_HOTAREA_COUNT)) {
             auto sessionId = sceneSession->GetWindowId();
-            WLOGFE("id = %{public}d hotAreas size > %{public}d", sessionId, static_cast<int>(hotAreas.size()));
+            TLOGE(WmsLogTag::WMS_EVENT, "id = %{public}d hotAreas size > %{public}d",
+                sessionId, static_cast<int>(hotAreas.size()));
             break;
         }
     }
@@ -386,13 +387,13 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
     const WindowUpdateType& type, const bool startMoving)
 {
     if (sceneSession == nullptr) {
-        WLOGFW("sceneSession is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
         return;
     }
 
     if (type == WindowUpdateType::WINDOW_UPDATE_ADDED || type == WindowUpdateType::WINDOW_UPDATE_REMOVED||
         type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
-            WLOGFD("[EventDispatch] wid = %{public}d, winType = %{public}d",
+            TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] wid = %{public}d, winType = %{public}d",
                 sceneSession->GetWindowId(), static_cast<int>(type));
     }
     ResetFlushWindowInfoTask();
@@ -472,7 +473,8 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
         if (sceneSessionValue == nullptr) {
             continue;
         }
-        WLOGFD("[EventDispatch] FullSceneSessionInfoUpdate windowName = %{public}s bundleName = %{public}s"
+        TLOGD(WmsLogTag::WMS_EVENT,
+            "[EventDispatch] FullSceneSessionInfoUpdate windowName = %{public}s bundleName = %{public}s"
             " windowId = %{public}d activeStatus = %{public}d", sceneSessionValue->GetWindowName().c_str(),
             sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
             sceneSessionValue->GetForegroundInteractiveStatus());
@@ -593,7 +595,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     const sptr<SceneSession>& sceneSession, const SceneSessionDirtyManager::WindowAction& action) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return {};
     }
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
