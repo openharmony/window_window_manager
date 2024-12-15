@@ -192,6 +192,14 @@ public:
      */
     virtual WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
+    /**
+     * @brief Callback for main session modal type changes.
+     *
+     * @param isModal Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifyMainModalTypeChange(bool isModal) { return WSError::WS_OK; }
+
     /*
      *  Gesture Back
      */

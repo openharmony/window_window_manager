@@ -42,6 +42,7 @@ const std::string SESSION_FOCUSABLE_CHANGE_CB = "sessionFocusableChange";
 const std::string SESSION_TOUCHABLE_CHANGE_CB = "sessionTouchableChange";
 const std::string SESSION_TOP_MOST_CHANGE_CB = "sessionTopmostChange";
 const std::string SUB_MODAL_TYPE_CHANGE_CB = "subModalTypeChange";
+const std::string MAIN_MODAL_TYPE_CHANGE_CB = "mainModalTypeChange";
 const std::string CLICK_CB = "click";
 const std::string TERMINATE_SESSION_CB = "terminateSession";
 const std::string TERMINATE_SESSION_CB_NEW = "terminateSessionNew";
@@ -98,6 +99,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SESSION_TOUCHABLE_CHANGE_CB,           ListenerFuncType::SESSION_TOUCHABLE_CHANGE_CB},
     {SESSION_TOP_MOST_CHANGE_CB,            ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB},
     {SUB_MODAL_TYPE_CHANGE_CB,              ListenerFuncType::SUB_MODAL_TYPE_CHANGE_CB},
+    {MAIN_MODAL_TYPE_CHANGE_CB,             ListenerFuncType::MAIN_MODAL_TYPE_CHANGE_CB},
     {CLICK_CB,                              ListenerFuncType::CLICK_CB},
     {TERMINATE_SESSION_CB,                  ListenerFuncType::TERMINATE_SESSION_CB},
     {TERMINATE_SESSION_CB_NEW,              ListenerFuncType::TERMINATE_SESSION_CB_NEW},
@@ -1219,6 +1221,25 @@ void JsSceneSession::ProcessSubModalTypeChangeRegister()
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistentId:%{public}d", persistentId_);
 }
 
+void JsSceneSession::RegisterMainModalTypeChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, persistentId:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->RegisterMainModalTypeChangeCallback([weakThis = wptr(this), where](bool isModal) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnMainModalTypeChange(isModal);
+    });
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistentId:%{public}d", persistentId_);
+}
+
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
 {
     NotifySessionFocusableChangeFunc func = [weakThis = wptr(this)](bool isFocusable) {
@@ -2015,6 +2036,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SUB_MODAL_TYPE_CHANGE_CB):
             ProcessSubModalTypeChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::MAIN_MODAL_TYPE_CHANGE_CB):
+            ProcessMainModalTypeChangeRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::CLICK_CB):
             ProcessClickRegister();
             break;
@@ -2797,6 +2821,28 @@ void JsSceneSession::OnSubModalTypeChange(SubWindowModalType subWindowModalType)
     };
     taskScheduler_->PostMainThreadTask(task,
         "OnSubModalTypeChange: " + std::to_string(static_cast<uint32_t>(subWindowModalType)));
+}
+
+void JsSceneSession::OnMainModalTypeChange(bool isModal)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isModal, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(MAIN_MODAL_TYPE_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsMainSessionModalType = CreateJsValue(env, isModal);
+        napi_value argv[] = {jsMainSessionModalType};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnMainModalTypeChange: " + std::to_string(isModal));
 }
 
 void JsSceneSession::OnClick()
