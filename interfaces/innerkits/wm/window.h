@@ -909,7 +909,7 @@ public:
 
     /**
      * @brief Get the Avoid Area of system or app sub window Enabled object
-     * 
+     *
      * @param
      * @return 01 means system window can obtain avoid area, 10 means app sub window can obtain avoid area
      */

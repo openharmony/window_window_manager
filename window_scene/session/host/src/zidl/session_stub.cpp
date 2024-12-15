@@ -879,8 +879,8 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     }
     int32_t posX = 0;
     int32_t posY = 0;
-    uint32_t width = 0;
-    uint32_t height = 0;
+    int32_t width = 0;
+    int32_t height = 0;
     if (!data.ReadInt32(posX)) {
         TLOGE(WmsLogTag::WMS_IMMS, "read posX error");
         return ERR_INVALID_DATA;
