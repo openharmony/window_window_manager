@@ -87,7 +87,7 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
     AvoidArea mockArea;
     mockArea.topRect_.width_ = 1200;
     mockArea.topRect_.height_ = 127;
-    EXPECT_CALL(*session_, GetAvoidAreaByType(_,_)).WillOnce(Return(mockArea));
+    EXPECT_CALL(*session_, GetAvoidAreaByType(_, _)).WillOnce(Return(mockArea));
 
     MessageParcel data;
     MessageParcel reply;
