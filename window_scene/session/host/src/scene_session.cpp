@@ -1788,7 +1788,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         (sessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID) &&
         WindowHelper::IsAppWindow(GetWindowType()))) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d window type %{public}u window flag %{public}d",
-            GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlag());
+            GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
     DisplayId displayId = sessionProperty->GetDisplayId();
