@@ -119,11 +119,11 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
                 TLOGE(WmsLogTag::WMS_IMMS, "read posY error");
                 return ERR_INVALID_DATA;
             }
-            if (!data.ReadInt32(width)) {
+            if (!data.ReadUint32(width)) {
                 TLOGE(WmsLogTag::WMS_IMMS, "read width error");
                 return ERR_INVALID_DATA;
             }
-            if (!data.ReadInt32(height)) {
+            if (!data.ReadUint32(height)) {
                 TLOGE(WmsLogTag::WMS_IMMS, "read height error");
                 return ERR_INVALID_DATA;
             }

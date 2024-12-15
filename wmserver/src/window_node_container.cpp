@@ -1624,7 +1624,8 @@ void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector
     }
 }
 
-AvoidArea WindowNodeContainer::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const
+AvoidArea WindowNodeContainer::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType, 
+    const Rect& rect) const
 {
     if (CheckWindowNodeWhetherInWindowTree(node)) {
         return avoidController_->GetAvoidAreaByType(node, avoidAreaType);

@@ -227,11 +227,11 @@ AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaTyp
         TLOGE(WmsLogTag::WMS_IMMS, "write posY_ error");
         return avoidArea;
     }
-    if (!data.WriteInt32(rect.width_)) {
+    if (!data.WriteUint32(rect.width_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "write width_ error");
         return avoidArea;
     }
-    if (!data.WriteInt32(rect.height_)) {
+    if (!data.WriteUint32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "write height_ error");
         return avoidArea;
     }
