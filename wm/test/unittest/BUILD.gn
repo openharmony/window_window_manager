@@ -59,6 +59,7 @@ group("unittest") {
     ":wm_window_test",
     "ui_extension:wm_extension_window_impl_test",
     "ui_extension:wm_window_extension_session_impl_test",
+    "special_window:window_scene_session_impl_special_window_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [ ":wm_window_proxy_test" ]
@@ -709,6 +710,7 @@ ohos_static_library("wm_unittest_common") {
   visibility = [
     ":*",
     "ui_extension:*",
+    "special_window:*",
   ]
 
   testonly = true
