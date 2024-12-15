@@ -2093,8 +2093,7 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
     WSRect sessionRect;
     if (rect.IsEmpty()) {
         sessionRect = GetSessionRect();
-    }
-    else {
+    } else {
         sessionRect = rect;
     }
     switch (type) {
