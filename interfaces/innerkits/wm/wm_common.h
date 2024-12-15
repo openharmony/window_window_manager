@@ -346,7 +346,7 @@ enum class WindowFlag : uint32_t {
 enum class AvoidAreaOption : uint32_t {
     ENABLE_SYSTEM_WINDOW = 1,
     ENABLE_APP_SUB_WINDOW = 1 << 1,
-}
+};
 
 /**
  * @brief Flag of uiextension window.
