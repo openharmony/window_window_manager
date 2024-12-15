@@ -458,7 +458,7 @@ private:
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
     bool IsNotifyInteractiveDuplicative(bool interactive);
 
-    /**
+    /*
      * PC Window
      */
     void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
