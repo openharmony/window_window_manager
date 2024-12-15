@@ -893,6 +893,7 @@ public:
      *
      * @param type avoid area type.@see reference
      * @param avoidArea
+     * @param rect
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0})
