@@ -158,8 +158,6 @@ public:
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
-    virtual WMError SetAvoidAreaOption(uint32_t AvoidAreaOption) = 0;
-    virtual uint32_t GetAvoidAreaOption() = 0;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
