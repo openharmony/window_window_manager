@@ -63,7 +63,7 @@ void SubSessionTest::SetUp()
     info.abilityName_ = "testMainSession1";
     info.moduleName_ = "testMainSession2";
     info.bundleName_ = "testMainSession3";
-    subSession_ = new SubSession(info, specificCallback);
+    subSession_ = sptr<SubSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(nullptr, subSession_);
 }
 
@@ -133,7 +133,7 @@ HWTEST_F(SubSessionTest, TransferKeyEvent04, Function | SmallTest | Level1)
     sessionInfo.abilityName_ = "TransferKeyEvent04";
     sessionInfo.moduleName_ = "TransferKeyEvent04";
     sessionInfo.bundleName_ = "TransferKeyEvent04";
-    sptr<SubSession> session = new SubSession(sessionInfo, specificCallback);
+    sptr<SubSession> session = sptr<SubSession>::MakeSptr(sessionInfo, specificCallback);
     ASSERT_NE(session, nullptr);
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -164,7 +164,7 @@ HWTEST_F(SubSessionTest, IsTopmost01, Function | SmallTest | Level1)
  */
 HWTEST_F(SubSessionTest, IsTopmost02, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     subSession_->SetSessionProperty(property);
     ASSERT_TRUE(subSession_->GetSessionProperty() != nullptr);
 
@@ -284,7 +284,7 @@ HWTEST_F(SubSessionTest, IsVisibleForeground01, Function | SmallTest | Level1)
     info.abilityName_ = "testMainSession1";
     info.moduleName_ = "testMainSession2";
     info.bundleName_ = "testMainSession3";
-    auto parentSession = new SubSession(info, specificCallback);
+    auto parentSession = sptr<SubSession>::MakeSptr(info, specificCallback);
 
     subSession_->SetParentSession(parentSession);
     ASSERT_FALSE(subSession_->IsVisibleForeground());
@@ -302,7 +302,7 @@ HWTEST_F(SubSessionTest, RectCheck, Function | SmallTest | Level1)
     info.abilityName_ = "testRectCheck";
     info.moduleName_ = "testRectCheck";
     info.bundleName_ = "testRectCheck";
-    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     EXPECT_NE(nullptr, session);
     subSession_->parentSession_ = session;
     uint32_t curWidth = 100;

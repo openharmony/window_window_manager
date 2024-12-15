@@ -51,11 +51,11 @@ namespace {
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover01, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(iRemoteObjectMocker);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnSessionManagerServiceRecover(sessionManagerService);
 }
@@ -67,11 +67,11 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover01
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover02, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(iRemoteObjectMocker);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sessionManagerServiceRecoverProxy_->OnSessionManagerServiceRecover(sessionManagerService);
@@ -85,9 +85,9 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover02
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover03, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(iRemoteObjectMocker);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
     sptr<IRemoteObject> sessionManagerService = nullptr;
     sessionManagerServiceRecoverProxy_->OnSessionManagerServiceRecover(sessionManagerService);
@@ -100,12 +100,12 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover03
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover04, Function | SmallTest | Level2)
 {
-    sptr<MockIRemoteObject> mockIRemoteObject = new (std::nothrow) MockIRemoteObject();
+    sptr<MockIRemoteObject> mockIRemoteObject = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(mockIRemoteObject, nullptr);
     mockIRemoteObject->sendRequestResult_ = 1;
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(mockIRemoteObject);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(mockIRemoteObject);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnSessionManagerServiceRecover(sessionManagerService);
 }
@@ -117,11 +117,11 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnSessionManagerServiceRecover04
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged01, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(iRemoteObjectMocker);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(1, 0, true, sessionManagerService);
 }
@@ -133,12 +133,12 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged01, Functi
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged02, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(iRemoteObjectMocker);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(1, 0, true, sessionManagerService);
     MockMessageParcel::ClearAllErrorFlag();
@@ -151,11 +151,11 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged02, Functi
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged03, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(iRemoteObjectMocker);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(-1, 0, true, sessionManagerService);
 }
@@ -167,11 +167,11 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged03, Functi
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged04, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(iRemoteObjectMocker);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(1, -1, true, sessionManagerService);
 }
@@ -183,11 +183,11 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged04, Functi
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged05, Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(iRemoteObjectMocker);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(1, 1, true, sessionManagerService);
@@ -201,10 +201,10 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged05, Functi
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged06, Function | SmallTest | Level2)
 {
-    sptr<MockIRemoteObject> mockIRemoteObject = new (std::nothrow) MockIRemoteObject();
+    sptr<MockIRemoteObject> mockIRemoteObject = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(mockIRemoteObject, nullptr);
     mockIRemoteObject->sendRequestResult_ = 1;
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(mockIRemoteObject);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(mockIRemoteObject);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
     sptr<IRemoteObject> sessionManagerService = nullptr;
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(1, 1, true, sessionManagerService);
@@ -217,12 +217,12 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged06, Functi
  */
 HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged07, Function | SmallTest | Level2)
 {
-    sptr<MockIRemoteObject> mockIRemoteObject = new (std::nothrow) MockIRemoteObject();
+    sptr<MockIRemoteObject> mockIRemoteObject = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(mockIRemoteObject, nullptr);
     mockIRemoteObject->sendRequestResult_ = 1;
-    sessionManagerServiceRecoverProxy_ = new (std::nothrow) SessionManagerServiceRecoverProxy(mockIRemoteObject);
+    sessionManagerServiceRecoverProxy_ = sptr<SessionManagerServiceRecoverProxy>::MakeSptr(mockIRemoteObject);
     ASSERT_NE(sessionManagerServiceRecoverProxy_, nullptr);
-    sptr<IRemoteObject> sessionManagerService = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> sessionManagerService = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(1, 1, true, sessionManagerService);
 }
