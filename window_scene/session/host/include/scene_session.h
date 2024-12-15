@@ -57,6 +57,7 @@ using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, 
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifySubModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
+using NotifyMainModalTypeChangeFunc = std::function<void(bool isModal)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -266,10 +267,13 @@ public:
     /**
      * PC Window
      */
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
     virtual bool IsModal() const { return false; }
+    virtual bool IsApplicationModal() const { return false; }
+    bool IsDialogWindow() const;
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
-    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
+    void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
 
     /**
      * Window Immersive
@@ -534,8 +538,9 @@ protected:
     /**
      * PC Window
      */
-    NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
+    NotifySubModalTypeChangeFunc onSubModalTypeChange_;
+    NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
 
     /*
      * PiP Window

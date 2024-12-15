@@ -40,6 +40,9 @@ public:
      * PC Window
      */
     WSError OnRestoreMainWindow() override;
+    bool IsModal() const override;
+    bool IsApplicationModal() const override;
+    WSError NotifyMainModalTypeChange(bool isModal) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

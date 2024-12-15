@@ -125,8 +125,9 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
     MMI::PointerEvent::PointerItem pointerItem;
     bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     if ((window_->GetType() == WindowType::WINDOW_TYPE_DIALOG ||
-         WindowHelper::IsModalSubWindow(window_->GetType(), window_->GetWindowFlags())) &&
-        (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId()) &&
+         WindowHelper::IsModalSubWindow(window_->GetType(), window_->GetWindowFlags()) ||
+         WindowHelper::IsModalMainWindow(window_->GetType(), window_->GetWindowFlags())) &&
+        pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId() &&
         action != MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         if (isPointDown && isValidPointItem) {
             window_->NotifyTouchDialogTarget(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
