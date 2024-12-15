@@ -1221,7 +1221,7 @@ void JsSceneSession::ProcessSubModalTypeChangeRegister()
     TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistentId:%{public}d", persistentId_);
 }
 
-void JsSceneSession::RegisterMainModalTypeChangeRegister()
+void JsSceneSession::ProcessMainModalTypeChangeRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
