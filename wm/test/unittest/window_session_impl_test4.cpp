@@ -633,7 +633,7 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible, Function | SmallTest | L
     bool &hideMinimizeButton = isMinimizeVisible;
     bool &hideSplitButton = isSplitVisible;
     bool &hideCloseButton = isCloseVisible;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.uiType_ = "pc";
     window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton,
         hideSplitButton, hideCloseButton);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
@@ -929,7 +929,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest |
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
     bool hideCloseButton = false;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.uiType_ = "pc";
     window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton,
         hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, true);
@@ -999,7 +999,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, Function | SmallTest |
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
     bool hideCloseButton = false;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.uiType_ = "pc";
     window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, false);
     ASSERT_EQ(hideMinimizeButton, false);
@@ -1032,7 +1032,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
     bool hideMinimizeButton = true;
     bool hideSplitButton = true;
     bool hideCloseButton = true;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.uiType_ = "phone";
     window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
     ASSERT_EQ(hideMaximizeButton, true);
     ASSERT_EQ(hideMinimizeButton, true);
