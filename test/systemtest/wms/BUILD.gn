@@ -456,7 +456,11 @@ ohos_systemtest("wms_window_mode_support_info_test") {
 ohos_systemtest("wms_window_app_floating_window_test") {
   module_out_path = module_out_path
 
-  sources = [ "window_app_floating_window_test.cpp" ]
+  if (!window_manager_use_sceneboard) {
+    sources = [ "window_app_floating_window_test.cpp" ]
+  } else {
+    sources = [ "window_app_floating_window_scb_test.cpp" ]
+  }
 
   sanitize = {
     cfi = true
