@@ -91,7 +91,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         sptr<ExtensionSession> extensionSession = new ExtensionSession(tempSessionInfo);
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
-        TLOGI(WmsLogTag::WMS_UIEXT,
+        TLOGNI(WmsLogTag::WMS_UIEXT,
             "persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, "
             "isDensityFollowHost_: %{public}d, density_: %{public}f",
             persistentId, tempSessionInfo.bundleName_.c_str(), tempSessionInfo.moduleName_.c_str(),
