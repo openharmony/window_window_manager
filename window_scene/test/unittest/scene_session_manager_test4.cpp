@@ -641,7 +641,6 @@ HWTEST_F(SceneSessionManagerTest4, GetImmersiveState01, Function | SmallTest | L
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
 
-    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
@@ -670,10 +669,7 @@ HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | L
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
 
-    sceneSession02->property_ = nullptr;
     EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
-    sceneSession02->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(sceneSession02->property_, nullptr);
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
     EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
