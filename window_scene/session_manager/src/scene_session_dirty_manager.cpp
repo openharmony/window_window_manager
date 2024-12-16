@@ -393,8 +393,8 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
 
     if (type == WindowUpdateType::WINDOW_UPDATE_ADDED || type == WindowUpdateType::WINDOW_UPDATE_REMOVED||
         type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
-            TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] wid = %{public}d, winType = %{public}d",
-                sceneSession->GetWindowId(), static_cast<int>(type));
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] wid=%{public}d, winType=%{public}d",
+            sceneSession->GetWindowId(), static_cast<int>(type));
     }
     ResetFlushWindowInfoTask();
 }
@@ -474,8 +474,8 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             continue;
         }
         TLOGD(WmsLogTag::WMS_EVENT,
-            "[EventDispatch] FullSceneSessionInfoUpdate windowName = %{public}s bundleName = %{public}s"
-            " windowId = %{public}d activeStatus = %{public}d", sceneSessionValue->GetWindowName().c_str(),
+            "[EventDispatch] windowName=%{public}s bundleName=%{public}s"
+            " windowId=%{public}d activeStatus=%{public}d", sceneSessionValue->GetWindowName().c_str(),
             sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
             sceneSessionValue->GetForegroundInteractiveStatus());
         auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD);
@@ -490,7 +490,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
         } else if (sceneSessionValue->HasModalUIExtension()) {
             AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "windowId = %{public}d, agentWindowId = %{public}d, zOrder = %{public}f",
+        TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
         windowInfoList.emplace_back(windowInfo);
         pixelMapList.emplace_back(pixelMap);
