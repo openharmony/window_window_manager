@@ -1457,6 +1457,7 @@ HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId());
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     auto result = sceneSession->OnSystemSessionEvent(event);
