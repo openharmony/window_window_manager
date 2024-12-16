@@ -554,7 +554,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         return NapiGetUndefined(env);
     }
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE];
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
@@ -568,7 +568,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
-    std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
     auto asyncTask = [where, weakWindow = wptr(window), isModal, env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
@@ -578,13 +578,13 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
             return;
         }
         WMError ret = window->SetWindowModal(isModal);
-        if (ret == WMError::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
-        } else {
+        if (ret != WMError::WM_OK) {
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, ret is %{public}d", where, wmErrorCode);
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set main window modal failed"));
+            return;
         }
+        task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), isModal);
     };
