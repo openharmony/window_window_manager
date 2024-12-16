@@ -292,6 +292,9 @@ HWTEST_F(RootSceneTest, SetDisplayOrientationTest02, Function | SmallTest | Leve
 HWTEST_F(RootSceneTest, RegisterAvoidAreaChangeListener, Function | SmallTest | Level3)
 {
     RootScene rootScene;
+    rootScene.updateRootSceneAvoidAreaCallback_ = [] {
+        return;
+    };
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
     auto ret = rootScene.RegisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
