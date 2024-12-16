@@ -1292,7 +1292,7 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | L
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;
-    Rect globalRect = {100, 100, 100, 100};
+    WSRect globalRect = {100, 100, 100, 100};
     session->SetSessionGlobalRect(globalRect);
 
     Rect windowRect = {100, 100, 100, 100};
@@ -1302,8 +1302,8 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | L
     session->modalUIExtensionInfoList_.push_back(extensionInfo);
     session->modalUIExtensionInfoList_.push_back(extensionInfo2);
 
-    Rect newGlobalRect = {150, 150, 100, 100};
-    sesssion->UpdateAllModalUIExtensions(newGlobalRect);
+    WSRect newGlobalRect = {150, 150, 100, 100};
+    session->UpdateAllModalUIExtensions(newGlobalRect);
 }
 }
 }
