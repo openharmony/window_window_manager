@@ -388,15 +388,17 @@ enum class WindowLayoutMode : uint32_t {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
 
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
+constexpr uint32_t INVALID_WINDOW_ID = 0;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
+
+constexpr float UNDEFINED_DENSITY = -1.0f;
 }
 
 /**
@@ -711,8 +713,8 @@ enum class WindowUpdateType : int32_t {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = UINT32_MAX;
-    uint32_t maxHeight_ = UINT32_MAX;
+    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX);
+    uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
     uint32_t minWidth_ = 1;
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
@@ -869,14 +871,6 @@ enum class MaximizePresentation {
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
 
-
-enum class BackupAndRestoreType : int32_t {
-    NONE = 0,                       // no backup and restore
-    CONTINUATION = 1,               // distribute
-    APP_RECOVERY = 2,               // app recovery
-    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
-};
-
 enum class ExtensionWindowAttribute : int32_t {
     SYSTEM_WINDOW = 0,
     SUB_WINDOW = 1,
@@ -906,6 +900,13 @@ struct ExtensionWindowConfig {
     Rect windowRect;
     SubWindowOptions subWindowOptions;
     SystemWindowOptions systemWindowOptions;
+};
+
+enum class BackupAndRestoreType : int32_t {
+    NONE = 0,                       // no backup and restore
+    CONTINUATION = 1,               // distribute
+    APP_RECOVERY = 2,               // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
 }
 }

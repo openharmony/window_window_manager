@@ -707,21 +707,21 @@ WSError SessionProxy::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isDefaultDensityEnabled)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write isDefaultDensityEnabled failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write isDefaultDensityEnabled failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -1830,11 +1830,11 @@ void SessionProxy::SetCustomDecorHeight(int32_t height)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "writeInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "writeInterfaceToken failed");
         return;
     }
     if (!data.WriteInt32(height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write height failed.");
+        TLOGE(WmsLogTag::WMS_DECOR, "Write height failed.");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -1844,7 +1844,7 @@ void SessionProxy::SetCustomDecorHeight(int32_t height)
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CUSTOM_DECOR_HEIGHT),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "SendRequest failed");
         return;
     }
 }
@@ -2106,7 +2106,7 @@ WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
     return static_cast<WMError>(ret);
 }
 
-WSError SessionProxy::OnSessionModalTypeChange(SubWindowModalType subWindowModalType)
+WSError SessionProxy::NotifySubModalTypeChange(SubWindowModalType subWindowModalType)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2124,16 +2124,15 @@ WSError SessionProxy::OnSessionModalTypeChange(SubWindowModalType subWindowModal
         TLOGE(WmsLogTag::WMS_HIERARCHY, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MODAL_TYPE_CHANGE),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
-WSError SessionProxy::OnMainSessionModalTypeChange(bool isModal)
+WSError SessionProxy::NotifyMainModalTypeChange(bool isModal)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2151,13 +2150,12 @@ WSError SessionProxy::OnMainSessionModalTypeChange(bool isModal)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_SESSION_MODAL_TYPE_CHANGE),
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_MODAL_TYPE_CHANGE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)

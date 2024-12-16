@@ -105,16 +105,16 @@ public:
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionDetachToDisplay() override;
-
-    WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
-    WSError OnMainSessionModalTypeChange(bool isModal) override;
     
-    /**
+    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
-     /**
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
+    WSError NotifyMainModalTypeChange(bool isModal) override;
+
+     /*
       * Starting Window
       */
     WSError RemoveStartingWindow() override;

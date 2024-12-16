@@ -79,7 +79,6 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard session, id: %{public}d, calling session id: %{public}d",
             session->GetPersistentId(), session->GetCallingSessionId());
         session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
-        session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         return session->SceneSession::Foreground(property);
     }, "Show");
     return WSError::WS_OK;
@@ -232,7 +231,6 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
             if (curCallingSessionId != INVALID_WINDOW_ID && callingSessionId != curCallingSessionId &&
                 session->IsSessionForeground()) {
                 session->MoveAndResizeKeyboard(sessionProperty->GetKeyboardLayoutParams(), sessionProperty, true);
-                session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
 
                 session->UpdateCallingSessionIdAndPosition(callingSessionId);
             } else {
@@ -261,7 +259,7 @@ uint32_t KeyboardSession::GetCallingSessionId()
 
 WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
-   PostTask([weakThis = wptr(this), params]() -> WSError {
+    PostTask([weakThis = wptr(this), params]() -> WSError {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");

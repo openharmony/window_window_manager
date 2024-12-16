@@ -259,7 +259,7 @@ public:
     void SetMirrorScreenType(MirrorScreenType mirrorType);
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
-    void SetPhysicalRotation(int rotation, FoldStatus foldStatus);
+    void SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode);
     void SetScreenComponentRotation(int rotation);
     void SetStartPosition(uint32_t startX, uint32_t startY);
     void SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion);
@@ -294,6 +294,7 @@ private:
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
     sptr<ScreenSession> fakeScreenSession_ = nullptr;
     void EnableMirrorScreenRegion();
+    int32_t GetApiVersion();
 };
 
 class ScreenSessionGroup : public ScreenSession {

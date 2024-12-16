@@ -288,7 +288,7 @@ public:
      * @param subWindowModalType Indicates the {@link SubWindowModalType}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
+    virtual WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for main session modal type changes.
@@ -296,7 +296,7 @@ public:
      * @param isModal Indicates the {@link bool}
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnMainSessionModalTypeChange(bool isModal) { return WSError::WS_OK; }
+    virtual WSError NotifyMainModalTypeChange(bool isModal) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to automatically save the window rect.

@@ -45,8 +45,8 @@ enum class ListenerFuncType : uint32_t {
     SESSION_FOCUSABLE_CHANGE_CB,
     SESSION_TOUCHABLE_CHANGE_CB,
     SESSION_TOP_MOST_CHANGE_CB,
-    SESSION_MODAL_TYPE_CHANGE_CB,
-    MAIN_SESSION_MODAL_TYPE_CHANGE_CB,
+    SUB_MODAL_TYPE_CHANGE_CB,
+    MAIN_MODAL_TYPE_CHANGE_CB,
     FULLSCREEN_WATERFALL_MODE_CHANGE_CB,
     CLICK_CB,
     TERMINATE_SESSION_CB,
@@ -125,7 +125,6 @@ private:
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
     static napi_value SetZOrder(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
-    static napi_value SetRectChangeBySystem(napi_env env, napi_callback_info info);
     static napi_value SetSystemActive(napi_env env, napi_callback_info info);
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
@@ -184,13 +183,14 @@ private:
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
+    static napi_value SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
     napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
     napi_value OnSetZOrder(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
-    napi_value OnSetRectChangeBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetSystemActive(napi_env env, napi_callback_info info);
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
@@ -245,6 +245,8 @@ private:
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
+    napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -262,8 +264,8 @@ private:
     void ProcessSessionTouchableChangeRegister();
     void ProcessSessionTopmostChangeRegister();
     void ProcessMainWindowTopmostChangeRegister();
-    void ProcessSessionModalTypeChangeRegister();
-    void ProcessMainSessionModalTypeChangeRegister();
+    void ProcessSubModalTypeChangeRegister();
+    void ProcessMainModalTypeChangeRegister();
     void RegisterFullScreenWaterfallModeChangeCallback();
     void ProcessClickRegister();
     void ProcessUpdateSessionLabelRegister();
@@ -311,8 +313,8 @@ private:
     void OnSessionTouchableChange(bool touchable);
     void OnSessionTopmostChange(bool topmost);
     void OnMainWindowTopmostChange(bool isTopmost);
-    void OnSessionModalTypeChange(SubWindowModalType subWindowModalType);
-    void OnMainSessionModalTypeChange(bool isModal);
+    void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
+    void OnMainModalTypeChange(bool isModal);
     void OnFullScreenWaterfallModeChange(bool isWaterfallMode);
     void OnClick(bool requestFocus, bool isClick);
     void UpdateSessionLabel(const std::string& label);

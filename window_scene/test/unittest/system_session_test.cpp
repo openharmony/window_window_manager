@@ -145,7 +145,7 @@ HWTEST_F(SystemSessionTest, ProcessBackEvent01, Function | SmallTest | Level1)
  */
 HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect01, Function | SmallTest | Level1)
 {
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     systemSession_->sessionStage_ = mockSessionStage;
     auto ret = systemSession_->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
@@ -165,9 +165,9 @@ HWTEST_F(SystemSessionTest, CheckPointerEventDispatch, Function | SmallTest | Le
     info.bundleName_ = "CheckPointerEventDispatchBundleName";
     info.windowType_ = 2122;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SystemSession> sysSession =
-        new (std::nothrow) SystemSession(info, specificCallback_);
+        sptr<SystemSession>::MakeSptr(info, specificCallback_);
     sysSession->SetSessionState(SessionState::STATE_FOREGROUND);
     bool ret1 = sysSession->CheckPointerEventDispatch(pointerEvent_);
     ASSERT_EQ(true, ret1);
@@ -186,13 +186,13 @@ HWTEST_F(SystemSessionTest, UpdatePointerArea, Function | SmallTest | Level1)
     info.bundleName_ = "UpdatePointerAreaBundleName";
     info.windowType_ = 2122;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SystemSession> sysSession =
-        new (std::nothrow) SystemSession(info, specificCallback_);
+        sptr<SystemSession>::MakeSptr(info, specificCallback_);
     sysSession->UpdatePointerArea(rect);
     ASSERT_NE(sysSession->preRect_, rect);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     property->SetDecorEnable(true);
     sysSession->property_ = property;
@@ -227,7 +227,7 @@ HWTEST_F(SystemSessionTest, GetMissionId, Function | SmallTest | Level1)
     info.abilityName_ = "testSystemSession1";
     info.moduleName_ = "testSystemSession2";
     info.bundleName_ = "testSystemSession3";
-    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     systemSession_->parentSession_ = session;
     auto ret = systemSession_->GetMissionId();
     ASSERT_EQ(0, ret);
@@ -245,7 +245,7 @@ HWTEST_F(SystemSessionTest, RectCheck, Function | SmallTest | Level1)
     info.abilityName_ = "testRectCheck";
     info.moduleName_ = "testRectCheck";
     info.bundleName_ = "testRectCheck";
-    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     EXPECT_NE(nullptr, session);
     systemSession_->parentSession_ = session;
     uint32_t curWidth = 100;
@@ -281,7 +281,7 @@ HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled01, Function | Sma
     info.abilityName_ = "SetDialogSessionBackGestureEnabled";
     info.moduleName_ = "SetDialogSessionBackGestureEnabled";
     info.bundleName_ = "SetDialogSessionBackGestureEnabled";
-    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     EXPECT_NE(nullptr, session);
 
     systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
@@ -301,7 +301,7 @@ HWTEST_F(SystemSessionTest, SetDialogSessionBackGestureEnabled02, Function | Sma
     info.abilityName_ = "SetDialogSessionBackGestureEnabled02";
     info.moduleName_ = "SetDialogSessionBackGestureEnabled02";
     info.bundleName_ = "SetDialogSessionBackGestureEnabled02";
-    sptr<Session> session = new (std::nothrow) Session(info);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
     EXPECT_NE(nullptr, session);
 
     systemSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);

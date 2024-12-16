@@ -157,7 +157,7 @@ HWTEST_F(SessionListenerControllerTest, AddSessionListener, Function | SmallTest
     WSError res = slController->AddSessionListener(listener);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PARAM);
 
-    listener = new MyMissionListener();
+    listener = sptr<MyMissionListener>::MakeSptr();
     EXPECT_NE(nullptr, listener);
     res = slController->AddSessionListener(listener);
     EXPECT_EQ(WSError::WS_OK, res);
@@ -181,7 +181,7 @@ HWTEST_F(SessionListenerControllerTest, DelSessionListener, Function | SmallTest
     slController->NotifySessionLabelUpdated(persistentId);
     ASSERT_EQ(persistentId, 1);
 
-    listener = new MyMissionListener();
+    listener = sptr<MyMissionListener>::MakeSptr();
     slController->DelSessionListener(listener);
     EXPECT_NE(nullptr, listener);
 }
@@ -382,13 +382,13 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionIconChanged, Function | Sma
     pixelMap->SetImageInfo(info);
     std::shared_ptr<OHOS::Media::PixelMap> icon = std::move(pixelMap);
     slController->NotifySessionIconChanged(persistentId, icon);
-    sptr<MyMissionListener> myListener = new MyMissionListener();
+    sptr<MyMissionListener> myListener = sptr<MyMissionListener>::MakeSptr();
     EXPECT_NE(myListener, nullptr);
     bool res = myListener->IsMissionIconUpdated();
     EXPECT_EQ(res, false);
 
     persistentId = 1;
-    sptr<ISessionListener> listener = new MyMissionListener();
+    sptr<ISessionListener> listener = sptr<MyMissionListener>::MakeSptr();
     EXPECT_NE(listener, nullptr);
     slController->sessionListeners_.push_back(listener);
     slController->NotifySessionIconChanged(persistentId, icon);
@@ -407,7 +407,7 @@ HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, Function | Small
 {
     GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 start";
     EXPECT_EQ(nullptr, slController->listenerDeathRecipient_);
-    sptr<ISessionListener> listener = new MyMissionListener();
+    sptr<ISessionListener> listener = sptr<MyMissionListener>::MakeSptr();
     slController->AddSessionListener(listener);
     EXPECT_NE(nullptr, slController->listenerDeathRecipient_);
 

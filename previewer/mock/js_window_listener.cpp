@@ -28,7 +28,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsListe
 
 JsWindowListener::~JsWindowListener()
 {
-    WLOGI("[NAPI]~JsWindowListener");
+    WLOGFI("[NAPI]");
 }
 
 void JsWindowListener::SetMainEventHandler()
@@ -42,14 +42,14 @@ void JsWindowListener::SetMainEventHandler()
 
 void JsWindowListener::CallJsMethod(const char* methodName, napi_value const* argv, size_t argc)
 {
-    WLOGFD("[NAPI]methodName = %{public}s", methodName);
+    WLOGFD("MethodName = %{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
-        WLOGFE("[NAPI]env_ nullptr or jsCallBack_ is nullptr");
+        WLOGFE("env_ nullptr or jsCallBack_ is nullptr");
         return;
     }
     napi_value method = jsCallBack_->GetNapiValue();
     if (method == nullptr) {
-        WLOGFE("[NAPI]Failed to get method callback from object");
+        WLOGFE("Failed to get method callback from object");
         return;
     }
     napi_value result = nullptr;
@@ -59,14 +59,14 @@ void JsWindowListener::CallJsMethod(const char* methodName, napi_value const* ar
 
 void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    WLOGFD("[NAPI]type = %{public}d", type);
+    WLOGFD("type = %{public}d", type);
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, avoidArea, type, eng = env_] (napi_env env,
             NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("[NAPI]this listener or eng is nullptr");
+                WLOGFE("This listener or eng is nullptr");
                 return;
             }
             napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);

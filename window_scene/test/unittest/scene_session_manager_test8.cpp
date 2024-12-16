@@ -277,8 +277,8 @@ HWTEST_F(SceneSessionManagerTest8, NotifyUpdateRectAfterLayout, Function | Small
 HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest | Level3)
 {
     ssm_->remoteExtSessionMap_.clear();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    sptr<IRemoteObject> token = new IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(nullptr, iRemoteObjectMocker);
     ssm_->DestroyExtensionSession(iRemoteObjectMocker);
     ssm_->remoteExtSessionMap_.emplace(iRemoteObjectMocker, token);
@@ -330,7 +330,6 @@ HWTEST_F(SceneSessionManagerTest8, FilterSceneSessionCovered, Function | SmallTe
     sceneSessionList.clear();
     sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession);
-    EXPECT_EQ(WSError::WS_OK, sceneSession->SetSessionProperty(nullptr));
     sceneSessionList.emplace_back(sceneSession);
     ssm_->FilterSceneSessionCovered(sceneSessionList);
 }
@@ -382,23 +381,6 @@ HWTEST_F(SceneSessionManagerTest8, UpdateSubWindowVisibility, Function | SmallTe
     ssm_->sceneSessionMap_.emplace(0, sceneSession2);
     ssm_->UpdateSubWindowVisibility(sceneSession,
         visibleState, visibilityChangeInfo, windowVisibilityInfos, visibilityInfo, currVisibleData);
-}
-
-/**
- * @tc.name: GetOrientationFromResourceManager
- * @tc.desc: test function : GetOrientationFromResourceManager
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, GetOrientationFromResourceManager, Function | SmallTest | Level3)
-{
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.orientationId = 0;
-    ssm_->GetOrientationFromResourceManager(abilityInfo);
-
-    abilityInfo.orientationId = 20;
-    abilityInfo.hapPath = "";
-    ssm_->GetOrientationFromResourceManager(abilityInfo);
-    EXPECT_EQ(true, abilityInfo.hapPath.empty());
 }
 
 /**

@@ -66,7 +66,7 @@ private:
 
     std::shared_ptr<FoldScreenStatusChangeCallback> onFoldScreenStatusChangeCallback_;
 
-    /**
+    /*
      * Waterfall Mode
      * accessed on SSM thread
      */
