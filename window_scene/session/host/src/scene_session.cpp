@@ -5960,7 +5960,7 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
 
 void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
 {
-    PostTask([weakThis = wptr(this), globalRect = globalRect]() {
+    PostTask([weakThis = wptr(this), &globalRect]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
