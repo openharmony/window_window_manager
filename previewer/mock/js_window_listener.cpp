@@ -42,7 +42,7 @@ void JsWindowListener::SetMainEventHandler()
 
 void JsWindowListener::CallJsMethod(const char* methodName, napi_value const* argv, size_t argc)
 {
-    WLOGFD("MethodName = %{public}s", methodName);
+    WLOGFD("methodName = %{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
         WLOGFE("env_ nullptr or jsCallBack_ is nullptr");
         return;

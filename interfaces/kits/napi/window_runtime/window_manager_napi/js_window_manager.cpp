@@ -593,18 +593,18 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (dataPack->result != WMError::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result)));
-                TLOGW(WmsLogTag::WMS_SYSTEM, "Get snapshot not ok!");
+                TLOGNW(WmsLogTag::WMS_SYSTEM, "Get snapshot not ok!");
                 return;
             }
             if (dataPack->pixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGE(WmsLogTag::WMS_SYSTEM, "Get snapshot is nullptr!");
+                TLOGNE(WmsLogTag::WMS_SYSTEM, "Get snapshot is nullptr!");
                 return;
             }
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, dataPack->pixelMap);
             if (nativePixelMap == nullptr) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                TLOGE(WmsLogTag::WMS_SYSTEM, "Create native pixelmap is nullptr!");
+                TLOGNE(WmsLogTag::WMS_SYSTEM, "Create native pixelmap is nullptr!");
                 return;
             }
             task.Resolve(env, nativePixelMap);
@@ -1195,9 +1195,9 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
                 SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
-                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
+                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
             } else {
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
             }
         };

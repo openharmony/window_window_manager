@@ -1492,13 +1492,13 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
     PostTask([weakThis = wptr(this), isAttach]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGD(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        TLOGD(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
+        TLOGND(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
             session->GetPersistentId());
         if (!isAttach && session->detachCallback_ != nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
         }
@@ -1654,7 +1654,7 @@ WSError Session::TerminateSessionNew(
     auto task = [weakThis = wptr(this), abilitySessionInfo, needStartCaller, isFromBroker]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "session is null.");
+            TLOGNI(WmsLogTag::WMS_LIFE, "session is null.");
             return;
         }
         session->isTerminating_ = true;
@@ -1671,7 +1671,7 @@ WSError Session::TerminateSessionNew(
         if (session->terminateSessionFuncNew_) {
             session->terminateSessionFuncNew_(info, needStartCaller, isFromBroker);
         }
-        TLOGI(WmsLogTag::WMS_LIFE,
+        TLOGNI(WmsLogTag::WMS_LIFE,
             "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d, isFromBroker: %{public}d",
             session->GetPersistentId(), needStartCaller, isFromBroker);
     };
@@ -2269,7 +2269,7 @@ void Session::SaveSnapshot(bool useFfrt)
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
@@ -2283,7 +2283,7 @@ void Session::SaveSnapshot(bool useFfrt)
         }
         std::function<void()> func = [weakThis]() {
             if (auto session = weakThis.promote()) {
-                TLOGI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
                 std::lock_guard<std::mutex> lock(session->snapshotMutex_);
                 session->snapshot_ = nullptr;
             }
@@ -2318,7 +2318,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
             return;
         }
         session->NotifySessionStateChange(changedState);
-        TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, state_: %{public}d, changedState: %{public}d",
+        TLOGNI(WmsLogTag::WMS_LIFE, "id: %{public}d, state_: %{public}d, changedState: %{public}d",
             session->GetPersistentId(), session->GetSessionState(), changedState);
     }, "SetSessionStateChangeListenser");
 }
@@ -3261,7 +3261,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         auto session = weakThis.promote();
         if (session == nullptr) {
             if (isAttach) {
-                TLOGE(WmsLogTag::WMS_LIFE, "Window attach state and session"
+                TLOGNE(WmsLogTag::WMS_LIFE, "Window attach state and session"
                     "state mismatch, session is nullptr, attach:%{public}d", isAttach);
             }
             return;
@@ -3269,7 +3269,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         // Skip state detect when screen locked.
         if (session->isScreenLockedCallback_ && !session->isScreenLockedCallback_()) {
             if (!session->IsStateMatch(isAttach)) {
-                TLOGE(WmsLogTag::WMS_LIFE, "Window attach state and session state mismatch, "
+                TLOGNE(WmsLogTag::WMS_LIFE, "Window attach state and session state mismatch, "
                     "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());

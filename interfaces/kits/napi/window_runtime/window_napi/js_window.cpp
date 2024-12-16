@@ -1093,7 +1093,7 @@ napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
                 return;
             }
             if (WindowHelper::IsMainWindowAndNotShown(weakWindow->GetType(), weakWindow->GetWindowState())) {
-                TLOGW(WmsLogTag::WMS_LIFE,
+                TLOGNW(WmsLogTag::WMS_LIFE,
                     "window Type %{public}u and window state %{public}u is not supported, [%{public}u, %{public}s]",
                     static_cast<uint32_t>(weakWindow->GetType()), static_cast<uint32_t>(weakWindow->GetWindowState()),
                     weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -1127,7 +1127,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
                 return;
             }
             if (WindowHelper::IsMainWindowAndNotShown(weakWindow->GetType(), weakWindow->GetWindowState())) {
-                TLOGW(WmsLogTag::WMS_LIFE,
+                TLOGNW(WmsLogTag::WMS_LIFE,
                     "window Type %{public}u and window state %{public}u is not supported, [%{public}u, %{public}s]",
                     static_cast<uint32_t>(weakWindow->GetType()), static_cast<uint32_t>(weakWindow->GetWindowState()),
                     weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
@@ -1231,7 +1231,7 @@ napi_value JsWindow::OnDestroy(napi_env env, napi_callback_info info)
                 return;
             }
             if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
-                TLOGW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
+                TLOGNW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
                     static_cast<uint32_t>(weakWindow->GetType()),
                     weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
                 task.Resolve(env, NapiGetUndefined(env));
@@ -1268,7 +1268,7 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
                 return;
             }
             if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
-                TLOGW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
+                TLOGNW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
                     static_cast<uint32_t>(weakWindow->GetType()),
                     weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
                 task.Resolve(env, NapiGetUndefined(env));
@@ -1320,7 +1320,7 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, W
                 return;
             }
             if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
-                TLOGW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
+                TLOGNW(WmsLogTag::WMS_LIFE, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
                     static_cast<uint32_t>(weakWindow->GetType()),
                     weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
                 task.Resolve(env, NapiGetUndefined(env));
@@ -2675,7 +2675,7 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
         [weakToken, isFullScreen, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
+                TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
                 return;
             }
@@ -2687,7 +2687,7 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGE(WmsLogTag::WMS_IMMS, "SetFullScreen failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "SetFullScreen failed, ret = %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window SetFullScreen failed."));
             }
         };
@@ -2725,7 +2725,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
         [weakToken, isLayoutFullScreen, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
+                TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
                 return;
             }
@@ -2737,7 +2737,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen failed, ret = %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env,
                     ret, "Window OnSetLayoutFullScreen failed."));
             }
@@ -3286,20 +3286,20 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
         [weakToken, errCode, avoidAreaType](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
+                TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
                 return;
             }
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
-                TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr or get invalid param");
+                TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr or get invalid param");
                 return;
             }
             // getAvoidRect by avoidAreaType
             AvoidArea avoidArea;
             WMError ret = weakWindow->GetAvoidAreaByType(avoidAreaType, avoidArea);
             if (ret != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_IMMS, "GetAvoidArea failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "GetAvoidArea failed, ret = %{public}d", ret);
                 avoidArea.topRect_ = g_emptyRect;
                 avoidArea.leftRect_ = g_emptyRect;
                 avoidArea.rightRect_ = g_emptyRect;
@@ -3309,7 +3309,7 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
             if (avoidAreaObj != nullptr) {
                 task.Resolve(env, avoidAreaObj);
             } else {
-                TLOGE(WmsLogTag::WMS_IMMS, "ConvertAvoidAreaToJsValue failed");
+                TLOGNE(WmsLogTag::WMS_IMMS, "ConvertAvoidAreaToJsValue failed");
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
                     "JsWindow::OnGetAvoidArea failed"));
             }
@@ -6277,7 +6277,7 @@ NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Set Enable Drag failed."));
                 return;
             }
-            TLOGI(WmsLogTag::WMS_LAYOUT, "call enabledrag ret: %{public}u", *errCodePtr);
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "call enabledrag ret: %{public}u", *errCodePtr);
             if (*errCodePtr == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {

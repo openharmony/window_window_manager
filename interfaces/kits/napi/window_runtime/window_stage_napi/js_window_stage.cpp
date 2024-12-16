@@ -41,7 +41,7 @@ JsWindowStage::~JsWindowStage()
 
 void JsWindowStage::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("Finalizer");
+    WLOGFI("[NAPI]");
     std::unique_ptr<JsWindowStage>(static_cast<JsWindowStage*>(data));
 }
 
