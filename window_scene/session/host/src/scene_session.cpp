@@ -1986,7 +1986,7 @@ void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extens
             return;
         }
         iter->windowRect = extensionInfo.windowRect;
-        iter->uiExtRect = extensionInfo.rect;
+        iter->uiExtRect = extensionInfo.uiExtRect;
         iter->hasUpdatedRect = extensionInfo.hasUpdatedRect;
     }
     NotifySessionInfoChange();
@@ -5979,7 +5979,7 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
         }
         session->NotifySessionInfoChange();
         TLOGNI(WmsLogTag::WMS_UIEXT, "id: %{public}d, globalRect: %{public}s, parentTransX: %{public}d, "
-            "parentTransY: %{public}d" session->GetPersistentId(), globalRect.ToString().c_str(),
+            "parentTransY: %{public}d", session->GetPersistentId(), globalRect.ToString().c_str(),
             parentTransX, parentTransY);
     }, "UpdateAllModalUIExtensions");
 }

@@ -1297,8 +1297,8 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | L
 
     Rect windowRect = {100, 100, 100, 100};
     Rect uiExtRect = {0, 0, 100, 100};
-    ExtensionWindowEventInfo extensionInfo { 1, 1, globalRect, rect, false };
-    ExtensionWindowEventInfo extensionInfo2 { 2, 2, globalRect, rect, true };
+    ExtensionWindowEventInfo extensionInfo { 1, 1, windowRect, uiExtRect, false };
+    ExtensionWindowEventInfo extensionInfo2 { 2, 2, windowRect, uiExtRect, true };
     session->modalUIExtensionInfoList_.push_back(extensionInfo);
     session->modalUIExtensionInfoList_.push_back(extensionInfo2);
 
