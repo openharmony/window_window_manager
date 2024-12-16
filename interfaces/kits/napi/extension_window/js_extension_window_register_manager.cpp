@@ -71,14 +71,9 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    sptr<IWindowRectChangeListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(thisListener));
-    } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(thisListener));
-    }
-    return ret;
+    return isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(listener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(listener));
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<JsExtensionWindowListener> listener,
