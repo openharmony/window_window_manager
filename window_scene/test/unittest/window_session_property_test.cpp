@@ -1288,7 +1288,7 @@ HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest
 HWTEST_F(WindowSessionPropertyTest, SetAvoidAreaOption, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);;
+    ASSERT_NE(property, nullptr);
     uint32_t avoidAreaOption = 2;
     property->SetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(avoidAreaOption, property->avoidAreaOption_);
