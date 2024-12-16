@@ -89,8 +89,8 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, Scr
         return false;
     }
     if (screenSessionManager_->GetScreenProperty(screenId).GetScreenType() == ScreenType::VIRTUAL) {
-        if (name == "HiCar" || name == "SuperLauncher" || name == "CastEngine") {
-            WLOGFI("HiCar or SuperLauncher or CastEngine, need to connect the screen");
+        if (name == "HiCar" || name == "SuperLauncher" || name == "CastEngine" || name == "DevEcoViewer") {
+            WLOGFI("HiCar or SuperLauncher or CastEngine or DevEcoViewer, need to connect the screen");
             return true;
         } else {
             WLOGFE("ScreenType is virtual, no need to connect the screen");
@@ -323,10 +323,10 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
-    auto foldStatus = screenSessionManager_->GetFoldStatus();
-    screenSession->SetPhysicalRotation(directionInfo.rotation_, foldStatus);
+    screenSession->SetPhysicalRotation(directionInfo.rotation_, foldDisplayMode);
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
-    screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
+        foldDisplayMode);
 }
 
 void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)

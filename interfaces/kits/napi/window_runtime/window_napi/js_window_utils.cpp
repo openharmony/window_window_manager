@@ -547,7 +547,7 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, infos.size(), &arrayValue);
     if (arrayValue == nullptr) {
-        WLOGFE("[NAPI]Failed to convert windowVisibilityInfo to jsArrayObject");
+        WLOGFE("Failed to convert windowVisibilityInfo to jsArrayObject");
         return nullptr;
     }
     uint32_t index = 0;
@@ -559,6 +559,41 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
         }
     }
     return arrayValue;
+}
+
+napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButtonStyle)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "colorMode", CreateJsValue(env, decorButtonStyle.colorMode));
+    napi_set_named_property(env, objValue, "buttonBackgroundSize",
+        CreateJsValue(env, decorButtonStyle.buttonBackgroundSize));
+    napi_set_named_property(env, objValue, "spacingBetweenButtons",
+        CreateJsValue(env, decorButtonStyle.spacingBetweenButtons));
+    napi_set_named_property(env, objValue, "closeButtonRightMargin",
+        CreateJsValue(env, decorButtonStyle.closeButtonRightMargin));
+    return objValue;
+}
+
+bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
+{
+    int32_t colorMode;
+    if (ParseJsValue(jsObject, env, "colorMode", colorMode)) {
+        style.colorMode = colorMode;
+    }
+    uint32_t buttonBackgroundSize;
+    if (ParseJsValue(jsObject, env, "buttonBackgroundSize", buttonBackgroundSize)) {
+        style.buttonBackgroundSize = buttonBackgroundSize;
+    }
+    uint32_t spacingBetweenButtons;
+    if (ParseJsValue(jsObject, env, "spacingBetweenButtons", spacingBetweenButtons)) {
+        style.spacingBetweenButtons = spacingBetweenButtons;
+    }
+    uint32_t closeButtonRightMargin;
+    if (ParseJsValue(jsObject, env, "closeButtonRightMargin", closeButtonRightMargin)) {
+        style.closeButtonRightMargin = closeButtonRightMargin;
+    }
+    return true;
 }
 
 napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
@@ -615,7 +650,7 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
     systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = false;
     systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = false;
-    for (uint32_t i = INDEX_ZERO; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         std::string name;
         napi_value getElementValue = nullptr;
         napi_get_element(env, nativeArray, i, &getElementValue);
@@ -623,10 +658,10 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to SystemBarName");
             return false;
         }
-        if (name.compare("status") == INDEX_ZERO) {
+        if (name.compare("status") == 0) {
             systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = true;
             systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = true;
-        } else if (name.compare("navigation") == INDEX_ZERO) {
+        } else if (name.compare("navigation") == 0) {
             systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = true;
         }
     }
@@ -731,11 +766,11 @@ bool GetSpecificBarStatus(napi_env env, napi_callback_info info, bool& systemBar
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < INDEX_TWO || !ConvertFromJsValue(env, argv[INDEX_ONE], systemBarEnable)) {
-        WLOGFE("Argc is invalid: %{public}zu or Failed to convert enable parameter to bool", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu or Failed to convert enable parameter to bool", argc);
         return false;
     }
     if (argc >= INDEX_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], systemBarEnableAnimation)) {
-        WLOGFE("Failed to convert enableAnimation parameter to bool");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert enableAnimation parameter to bool");
         return false;
     }
     return true;
@@ -833,13 +868,18 @@ bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
     std::map<WindowType, SystemBarProperty>& properties,
     std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
-    for (auto systemBarType : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {
-        properties[systemBarType].backgroundColor_ = GetColorFromJs(env, jsObject, "statusBarColor",
-            properties[systemBarType].backgroundColor_, propertyFlags[systemBarType].backgroundColorFlag);
-        if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||
-            !SetWindowNavigationBarContentColor(env, jsObject, properties, propertyFlags)) {
-            return false;
-        }
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
+        GetColorFromJs(env, jsObject, "statusBarColor",
+        properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_,
+        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
+        GetColorFromJs(env, jsObject, "statusBarColor",
+        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_,
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
+
+    if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||
+        !SetWindowNavigationBarContentColor(env, jsObject, properties, propertyFlags)) {
+        return false;
     }
     bool enableStatusBarAnimation = false;
     if (ParseJsValue(jsObject, env, "enableStatusBarAnimation", enableStatusBarAnimation)) {
@@ -970,6 +1010,75 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
     return true;
 }
 
+bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "jsObject is null");
+        return false;
+    }
+    napi_value jsConfig = nullptr;
+    napi_get_named_property(env, jsObject, "displayId", &jsConfig);
+    if (GetType(env, jsConfig) != napi_undefined) {
+        int64_t displayId = DISPLAY_ID_INVALID;
+        if (!ConvertFromJsValue(env, jsConfig, displayId)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
+            return false;
+        }
+        moveConfiguration.displayId = static_cast<DisplayId>(displayId);
+    }
+    napi_get_named_property(env, jsObject, "rectAnimationConfig", &jsConfig);
+    if (GetType(env, jsConfig) != napi_undefined) {
+        RectAnimationConfig rectAnimationConfig;
+        if (!ParseRectAnimationConfig(env, jsConfig, rectAnimationConfig)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to rectAnimationConfig");
+            return false;
+        }
+        moveConfiguration.rectAnimationConfig = rectAnimationConfig;
+    }
+    return true;
+}
+
+bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig)
+{
+    uint32_t duration = 0;
+    if (ParseJsValue(jsObject, env, "duration", duration)) {
+        if (duration <= 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "RectAnimationConfig duration invalid");
+            return false;
+        }
+        rectAnimationConfig.duration = duration;
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig duration");
+        return false;
+    }
+    double coordinate = 0.0;
+    if (ParseJsValue(jsObject, env, "x1", coordinate)) {
+        rectAnimationConfig.x1 = static_cast<float>(std::clamp(coordinate, 0.0, 1.0));
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig x1");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "y1", coordinate)) {
+        rectAnimationConfig.y1 = static_cast<float>(coordinate);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig y1");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "x2", coordinate)) {
+        rectAnimationConfig.x2 = static_cast<float>(std::clamp(coordinate, 0.0, 1.0));
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig x2");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "y2", coordinate)) {
+        rectAnimationConfig.y2 = static_cast<float>(coordinate);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig y2");
+        return false;
+    }
+    return true;
+}
+
 napi_value ExtensionWindowAttributeInit(napi_env env)
 {
     if (env == nullptr) {
@@ -1076,6 +1185,45 @@ static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<Win
             return false;
         }
     }
+    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{public}d, isTopmost: %{public}d, WindowFlag: %{public}d",
+        isModal, isTopmost, windowOption->GetWindowFlags());
+    return true;
+}
+
+static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+{
+    napi_value windowRect = nullptr;
+    napi_get_named_property(env, jsObject, "windowRect", &windowRect);
+    if (windowRect == nullptr || GetType(env, windowRect) != napi_object) {
+        return true;
+    }
+    int32_t width = 0;
+    if (!ParseJsValue(windowRect, env, "width", width)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to width");
+        return false;
+    }
+    int32_t height = 0;
+    if (!ParseJsValue(windowRect, env, "height", height)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to height");
+        return false;
+    }
+    if (width <= 0 || height <= 0) {
+        TLOGE(WmsLogTag::WMS_SUB, "width or height should greater than 0!");
+        return false;
+    }
+    int32_t left = 0;
+    if (!ParseJsValue(windowRect, env, "left", left)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to left");
+        return false;
+    }
+    int32_t top = 0;
+    if (!ParseJsValue(windowRect, env, "top", top)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to top");
+        return false;
+    }
+    Rect rect = { left, top, static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+    windowOption->SetWindowRect(rect);
+    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{public}s", rect.ToString().c_str());
     return true;
 }
 
@@ -1098,6 +1246,9 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
 
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
+    if (!ParseRectParam(env, jsObject, windowOption)) {
+        return false;
+    }
     return ParseModalityParam(env, jsObject, windowOption);
 }
 } // namespace Rosen

@@ -89,7 +89,10 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 void SessionDisplayPowerController::WaitScreenOffNotify(DisplayState& state)
 {
     if (!ScreenSessionManager::GetInstance().IsPreBrightAuthFail()) {
-        ScreenSessionManager::GetInstance().BlockScreenOffByCV();
+        if (!skipScreenOffBlock_) {
+            ScreenSessionManager::GetInstance().BlockScreenOffByCV();
+        }
+        skipScreenOffBlock_ = false;
         if (ScreenSessionManager::GetInstance().IsScreenLockSuspend()) {
             state = DisplayState::ON_SUSPEND;
         }

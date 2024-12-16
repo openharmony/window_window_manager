@@ -407,6 +407,34 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IDisplayIdChangeListener
+ *
+ * @brief Listener to observe one window displayId changed.
+ */
+class IDisplayIdChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window displayId changed.
+     */
+    virtual void OnDisplayIdChanged(DisplayId displayId) {}
+};
+using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
+
+/**
+ * @class ISystemDensityChangeListener
+ *
+ * @brief Listener to observe system density associated with the window changed.
+ */
+class ISystemDensityChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when system density changed.
+     */
+    virtual void OnSystemDensityChanged(float density) {}
+};
+using ISystemDensityChangeListenerSptr = sptr<ISystemDensityChangeListener>;
+
+/**
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
@@ -619,6 +647,12 @@ public:
      * @param configuration configuration for app
      */
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+    /**
+     * @brief Update theme configuration for all windows
+     * @param configuration configuration for app
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
     /**
      * @brief Get surface node from RS
@@ -956,27 +990,34 @@ public:
      *
      * @param x
      * @param y
+     * @param isMoveToGlobal Indicates move global flag
+     * @param moveConfiguration Indicates the optional move configuration
      * @return WMError
      */
-    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) { return WMError::WM_OK; }
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) { return WMError::WM_OK; }
 
     /**
      * @brief move the window to (x, y)
      *
      * @param x
      * @param y
+     * @param moveConfiguration Indicates the optional move configuration
      * @return WMError
      */
-    virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError MoveToAsync(int32_t x, int32_t y,
+        MoveConfiguration moveConfiguration = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief move the window to global (x, y)
      *
      * @param x
      * @param y
+     * @param moveConfiguration Indicates the optional move configuration
      * @return WMError
      */
-    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y,
+        MoveConfiguration moveConfiguration) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get window global scaled rect.
@@ -993,7 +1034,8 @@ public:
      * @param height
      * @return WMError
      */
-    virtual WMError Resize(uint32_t width, uint32_t height) { return WMError::WM_OK; }
+    virtual WMError Resize(uint32_t width, uint32_t height,
+        const RectAnimationConfig& rectAnimationConfig = {}) { return WMError::WM_OK; }
 
     /**
      * @brief resize the window instance (w,h)
@@ -1002,7 +1044,8 @@ public:
      * @param height
      * @return WMError
      */
-    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height,
+        const RectAnimationConfig& rectAnimationConfig = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief set the window gravity
@@ -1299,6 +1342,12 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 
     /**
+     * @brief Update theme configuration.
+     * @param configuration Window configuration.
+     */
+    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
+    /**
      * @brief Register window lifecycle listener.
      *
      * @param listener WindowLifeCycle listener.
@@ -1342,7 +1391,7 @@ public:
      * @param listener IAvoidAreaChangedListener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+    virtual WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
     {
         return WMError::WM_OK;
     }
@@ -1353,7 +1402,7 @@ public:
      * @param listener IAvoidAreaChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+    virtual WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
     {
         return WMError::WM_OK;
     }
@@ -1747,12 +1796,11 @@ public:
     virtual void StartMove() {}
 
     /**
-     * @brief get start move flag.
+     * @brief get main window move flag.
      *
-     * @return true means window is moving. Otherwise is not moving
-     *
+     * @return true means main window is moving. Otherwise is not moving.
      */
-    virtual bool GetStartMoveFlag() { return false; }
+    virtual bool IsStartMoving() { return false; }
 
     /**
      * @brief start move system window. It is called by application.
@@ -2027,6 +2075,42 @@ public:
     }
 
     /**
+     * @brief Register window displayId change listener.
+     *
+     * @param listener IDisplayIdChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterDisplayIdChangeListener(
+        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister window displayId change listener.
+     *
+     * @param listener IDisplayIdChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterDisplayIdChangeListener(
+        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register system density change listener.
+     *
+     * @param listener ISystemDensityChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSystemDensityChangeListener(
+        const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister system density change listener.
+     *
+     * @param listener ISystemDensityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSystemDensityChangeListener(
+        const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
@@ -2182,6 +2266,14 @@ public:
     }
 
     /**
+     * @brief Set Window new title
+     *
+     * @param title Window new title
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowTitle(const std::string& title) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set decor height of window.
      *
      * @param decorHeight Decor height of window
@@ -2195,6 +2287,25 @@ public:
      * @return Decor height of window.
      */
     virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set decor button style of window.
+     *
+     * @param style Decor style of the window
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetDecorButtonStyle(const DecorButtonStyle& style)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Get decor button style of window.
+     *
+     * @param style Decor style of the window
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError GetDecorButtonStyle(DecorButtonStyle& style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the title buttons area of window.
@@ -2641,6 +2752,22 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief this interface is invoked by the ACE to the native host.
+     * @param eventName invoking event name, which is used to distinguish different invoking types.
+     * @param value used to transfer parameters.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError OnContainerModalEvent(const std::string& eventName,
+        const std::string& value) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the type of window.
+     *
+     * @return The string corresponding to the window.
+     */
+    virtual std::string GetClassType() const { return "Window"; }
 };
 }
 }

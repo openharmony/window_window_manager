@@ -370,7 +370,7 @@ struct SessionInfo {
     bool isFoundationCall_ = false;
     int32_t specifiedId = 0;
 
-    /**
+    /*
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -379,17 +379,16 @@ struct SessionInfo {
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
 
-    /**
+    /*
      * Multi Instance
      */
     bool isNewAppInstance_ = false;
     std::string appInstanceKey_;
 
-    /**
+    /*
      * PC Window
      */
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-    uint32_t windowModeSupportType = 0;
 };
 
 enum class SessionFlag : uint32_t {
@@ -410,7 +409,9 @@ enum class SizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
+    RESIZE_WITH_ANIMATION,
     MOVE,
+    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -423,8 +424,16 @@ enum class SizeChangeReason : uint32_t {
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
+    UPDATE_DPI_SYNC,
+    DRAG_MOVE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(SizeChangeReason reason)
+{
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE ||
+           reason == SizeChangeReason::MOVE_WITH_ANIMATION;
+}
 
 enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE = 100,
@@ -441,6 +450,8 @@ enum class SessionEvent : uint32_t {
     EVENT_DRAG_START,
     EVENT_DRAG,
     EVENT_MAXIMIZE_WITHOUT_ANIMATION,
+    EVENT_MAXIMIZE_WATERFALL,
+    EVENT_END
 };
 
 enum class BrokerStates: uint32_t {
@@ -647,6 +658,7 @@ struct SessionEventParam {
     int32_t pointerY_ = 0;
     int32_t sessionWidth_ = 0;
     int32_t sessionHeight_ = 0;
+    uint32_t dragResizeType = 0;
 };
 
 /**

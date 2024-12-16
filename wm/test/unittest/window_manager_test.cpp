@@ -210,6 +210,20 @@ HWTEST_F(WindowManagerTest, GetAccessibilityWindowInfo01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetUnreliableWindowInfo
+ * @tc.desc: GetUnreliableWindowInfo ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    EXPECT_CALL(mocker->Mock(), GetUnreliableWindowInfo(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetUnreliableWindowInfo(windowId, infos));
+}
+
+/**
  * @tc.name: GetSnapshotByWindowId01
  * @tc.desc: Check GetSnapshotByWindowId01
  * @tc.type: FUNC
@@ -225,20 +239,6 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, Function | SmallTest | Leve
     } else {
         ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     }
-}
-
-/**
- * @tc.name: GetUnreliableWindowInfo
- * @tc.desc: GetUnreliableWindowInfo ok
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerTest, GetUnreliableWindowInfo, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
-    int32_t windowId = 0;
-    std::vector<sptr<UnreliableWindowInfo>> infos;
-    EXPECT_CALL(mocker->Mock(), GetUnreliableWindowInfo(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, WindowManager::GetInstance().GetUnreliableWindowInfo(windowId, infos));
 }
 
 /**
@@ -1489,6 +1489,56 @@ HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level
     const std::vector<uint64_t> windowIds = {1, 2};
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetGlobalDragResizeType
+ * @tc.desc: check SetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    auto ret = WindowManager::GetInstance().SetGlobalDragResizeType(dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetGlobalDragResizeType
+ * @tc.desc: check GetGlobalDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetGlobalDragResizeType, Function | SmallTest | Level2)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    auto ret = WindowManager::GetInstance().GetGlobalDragResizeType(dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetAppDragResizeType
+ * @tc.desc: check SetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetAppDragResizeType, Function | SmallTest | Level2)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    const std::string bundleName = "test";
+    auto ret = WindowManager::GetInstance().SetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetAppDragResizeType
+ * @tc.desc: check GetAppDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    const std::string bundleName = "test";
+    auto ret = WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 }

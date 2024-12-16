@@ -41,7 +41,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<SessionStageStub> sessionStageStub_ = new SessionStageMocker();
+    sptr<SessionStageStub> sessionStageStub_ = sptr<SessionStageMocker>::MakeSptr();
 };
 
 void SessionStageStubTest::SetUpTestCase()
@@ -75,7 +75,7 @@ HWTEST_F(SessionStageStubTest, OnRemoteRequest, Function | SmallTest | Level1)
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     data.WriteUint32(static_cast<uint32_t>(type));
-    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     uint32_t code = static_cast<uint32_t>(
@@ -667,7 +667,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardPanelInfoChange, Function | S
     MessageOption option;
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE);
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    KeyboardPanelInfo* keyboardPanelInfo = new KeyboardPanelInfo();
+    sptr<KeyboardPanelInfo> keyboardPanelInfo = sptr<KeyboardPanelInfo>::MakeSptr();
     data.WriteParcelable(keyboardPanelInfo);
     ASSERT_NE(sessionStageStub_, nullptr);
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
@@ -831,6 +831,25 @@ HWTEST_F(SessionStageStubTest, HandleSetEnableDragBySystem, Function | SmallTest
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
     data.WriteBool(false);
     ASSERT_EQ(0, sessionStageStub_->HandleSetEnableDragBySystem(data, reply));
+}
+
+/**
+ * @tc.name: HandleSetFullScreenWaterfallMode
+ * @tc.desc: test function : HandleSetFullScreenWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetFullScreenWaterfallMode, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_FULLSCREEN_WATERFALL_MODE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    data.WriteBool(false);
+    ASSERT_EQ(0, sessionStageStub_->HandleSetFullScreenWaterfallMode(data, reply));
 }
 }
 }

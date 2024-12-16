@@ -95,7 +95,7 @@ void WindowInfoListZeroTest(sptr<SceneSessionManager> ssm_)
     SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
 
     for (auto sceneSession : sceneSessionMap) {
-        sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
+        sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
         windowSessionProperty->SetWindowType(sceneSession.second->GetWindowType());
         ssm_->RequestSceneSession(sceneSession.second->GetSessionInfo(), windowSessionProperty);
     }
@@ -112,7 +112,7 @@ void MaxWindowInfoTest(sptr<SceneSessionManager> ssm_)
         info.abilityName_ = "test" + std::to_string(i);
         info.bundleName_ = "test" + std::to_string(i);
         info.appIndex_ = idStart + i;
-        sptr<WindowSessionProperty> windowSessionProperty = new WindowSessionProperty();
+        sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
         ASSERT_NE(windowSessionProperty, nullptr);
         windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
         auto sceneSession = ssm_->RequestSceneSession(info, windowSessionProperty);
@@ -174,9 +174,9 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, Function | SmallTest | L
     info.bundleName_ = "NotifyWindowInfoChange";
     info.appIndex_ = 10;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_
-            = new (std::nothrow) SceneSession::SpecificSessionCallback();
+            = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = new SceneSession(info, specificCallback_);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
 
     // sceneSessionDirty_ = nullptr
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
@@ -204,9 +204,9 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, Function | Sm
     info.bundleName_ = "NotifyWindowInfoChangeFromSession";
     info.appIndex_ = 100;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_
-            = new (std::nothrow) SceneSession::SpecificSessionCallback();
+            = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = new SceneSession(info, specificCallback_);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
 
     // sceneSessionDirty_ = nullptr
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
@@ -232,9 +232,9 @@ HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, Function | SmallTest |
     info.bundleName_ = "NotifyMMIWindowPidChange";
     info.appIndex_ = 1000;
     sptr<SceneSession::SpecificSessionCallback> specificCallback_
-            = new (std::nothrow) SceneSession::SpecificSessionCallback();
+            = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = new SceneSession(info, specificCallback_);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
 
     // sceneSessionDirty_ = nullptr
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
@@ -315,7 +315,8 @@ HWTEST_F(SceneInputManagerTest, ConstructDisplayInfos, Function | SmallTest | Le
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     int ret = displayInfos.size();
     ScreenProperty screenProperty0;
-    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] = new ScreenSession(0, screenProperty0, 0);
+    Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
+        sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     ASSERT_EQ(ret + 1, displayInfos.size());
 }
@@ -649,7 +650,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate7, Function | SmallTest | Level3)
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
     bool result = false;
-    
+
     auto tempPixeMap = std::make_shared<Media::PixelMap>();
     windowInfoList[0].pixelMap = static_cast<void*>(tempPixeMap.get());
     result = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);

@@ -47,7 +47,7 @@ public:
     MoveDragController(int32_t persistentId, WindowType winType);
     ~MoveDragController() = default;
 
-    /**
+    /*
      * Cross Display Move Drag
      */
     enum class TargetRectCoordinate {
@@ -65,6 +65,8 @@ public:
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect(TargetRectCoordinate coordinate) const;
+    void SetTargetRect(const WSRect& rect);
+    WSRect GetOriginalRect() const;
     void InitMoveDragProperty();
     void SetOriginalValue(int32_t pointerId, int32_t pointerType,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
@@ -82,7 +84,7 @@ public:
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
 
-    /**
+    /*
      * Cross Display Move Drag
      */
     uint64_t GetMoveDragStartDisplayId() const;
@@ -95,7 +97,7 @@ public:
     void ResetCrossMoveDragProperty();
     void MoveDragInterrupted();
 
-    /**
+    /*
      * Monitor screen connection status
      */
     void OnConnect(ScreenId screenId) override;
@@ -145,7 +147,7 @@ private:
     WSRect CalcFixedAspectRatioTargetRect(AreaType type, int32_t tranX, int32_t tranY, float aspectRatio,
         WSRect originalRect);
     void CalcFreeformTranslateLimits(AreaType type);
-    void CalcFixedAspectRatioTranslateLimits(AreaType type, AxisType axis);
+    void CalcFixedAspectRatioTranslateLimits(AreaType type);
     void FixTranslateByLimits(int32_t& tranX, int32_t& tranY);
     bool InitMainAxis(AreaType type, int32_t tranX, int32_t tranY);
     void ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio);
@@ -163,7 +165,7 @@ private:
     void ResSchedReportData(int32_t type, bool onOffTag);
     void NotifyWindowInputPidChange(bool isServerPid);
 
-    /**
+    /*
      * Cross Display Move Drag
      */
     std::pair<int32_t, int32_t> CalcUnifiedTranslate(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -225,7 +227,7 @@ private:
         {AreaType::LEFT_BOTTOM,   Gravity::TOP_RIGHT}
     };
 
-    /**
+    /*
      * Cross Display Move Drag
      */
     bool moveDragIsInterrupted_ = false;

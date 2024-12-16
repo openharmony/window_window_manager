@@ -52,6 +52,10 @@ private:
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,
         bool isRegister);
+    WmErrorCode ProcessDisplayIdChangeRegister(const sptr<CjWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister);
+    WmErrorCode ProcessSystemDensityChangeRegister(const sptr<CjWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,
         bool isRegister);
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<CjWindowListener> listener, sptr<Window> window,

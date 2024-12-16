@@ -33,6 +33,7 @@ declare_args() {
   device_status_enable = true
   window_manager_feature_subscribe_motion = false
   window_manager_feature_tp_enable = false
+  window_manager_feature_virtual_keyboard = false
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.msdp_device_status)) {

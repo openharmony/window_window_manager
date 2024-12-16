@@ -661,6 +661,70 @@ HWTEST_F(DisplayManagerTest, GetVirtualScreenFlag, Function | SmallTest | Level1
     ASSERT_EQ(ret, VirtualScreenFlag::DEFAULT);
 }
 
+/**
+ * @tc.name: RegisterScreenMagneticStateListener
+ * @tc.desc: RegisterScreenMagneticStateListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, RegisterScreenMagneticStateListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
+    auto ret = DisplayManagerLite::GetInstance().RegisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManagerLite::IScreenMagneticStateListener();
+    ret = DisplayManagerLite::GetInstance().RegisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DisplayManagerLite::GetInstance().pImpl_->RegisterScreenMagneticStateListener(listener));
+    listener.clear();
 }
+
+/**
+ * @tc.name: ImplRegisterScreenMagneticStateListener
+ * @tc.desc: ImplRegisterScreenMagneticStateListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplRegisterScreenMagneticStateListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
+    DisplayManagerLite::GetInstance().pImpl_->screenMagneticStateListenerAgent_ = nullptr;
+    sptr<DisplayManagerLite::Impl> impl_;
+    sptr<DisplayManagerLite::Impl::DisplayManagerScreenMagneticStateAgent> screenMagneticStateListenerAgent =
+        new DisplayManagerLite::Impl::DisplayManagerScreenMagneticStateAgent(impl_);
+    auto ret = DisplayManagerLite::GetInstance().pImpl_->RegisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, SingletonContainer::Get<DisplayManagerAdapterLite>().RegisterDisplayManagerAgent(
+            screenMagneticStateListenerAgent,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER));
+    listener.clear();
+    screenMagneticStateListenerAgent.clear();
+}
+
+/**
+ * @tc.name: UnregisterScreenMagneticStateListener
+ * @tc.desc: UnregisterScreenMagneticStateListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, UnregisterScreenMagneticStateListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
+    auto ret = DisplayManagerLite::GetInstance().UnregisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    listener = new DisplayManagerLite::IScreenMagneticStateListener();
+    ret = DisplayManagerLite::GetInstance().UnregisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DisplayManagerLite::GetInstance().pImpl_->UnregisterScreenMagneticStateListener(listener));
+    listener.clear();
+}
+
+/**
+ * @tc.name: ImplUnregisterScreenMagneticStateListener
+ * @tc.desc: ImplUnregisterScreenMagneticStateListener fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ImplUnregisterScreenMagneticStateListener, Function | SmallTest | Level1)
+{
+    sptr<DisplayManagerLite::IScreenMagneticStateListener> listener;
+    auto ret = DisplayManagerLite::GetInstance().pImpl_->UnregisterScreenMagneticStateListener(listener);
+    ASSERT_EQ(ret, DMError::DM_OK);
+    listener.clear();
+}
+
 } // namespace Rosen
 } // namespace OHOS

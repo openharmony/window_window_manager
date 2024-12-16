@@ -57,6 +57,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->displayId = sessionInfo.config_.displayId_;
     abilitySessionInfo->density = sessionInfo.config_.density_;
     abilitySessionInfo->orientation = sessionInfo.config_.orientation_;
+    abilitySessionInfo->isDensityFollowHost = sessionInfo.config_.isDensityFollowHost_;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     }
@@ -90,7 +91,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         sptr<ExtensionSession> extensionSession = new ExtensionSession(tempSessionInfo);
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
-        TLOGI(WmsLogTag::WMS_UIEXT,
+        TLOGNI(WmsLogTag::WMS_UIEXT,
             "persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, "
             "isDensityFollowHost_: %{public}d, density_: %{public}f",
             persistentId, tempSessionInfo.bundleName_.c_str(), tempSessionInfo.moduleName_.c_str(),

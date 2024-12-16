@@ -97,6 +97,7 @@ int g_constructorCnt = 0;
 int g_deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     property_ = sptr<WindowProperty>::MakeSptr();
     InitWindowProperty(option);
 
@@ -1072,7 +1073,7 @@ WMError WindowImpl::SetAspectRatio(float ratio)
 WMError WindowImpl::ResetAspectRatio()
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is invalid");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -1764,7 +1765,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
     return ret;
 }
 
-WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
+WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfiguration moveConfiguration)
 {
     WLOGFD("id:%{public}d MoveTo %{public}d %{public}d",
           property_->GetWindowId(), x, y);
@@ -1794,7 +1795,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal)
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
-WMError WindowImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
     WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
@@ -2084,7 +2085,7 @@ WMError WindowImpl::SetSnapshotSkip(bool isSkip)
 WMError WindowImpl::RaiseToAppTop()
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -2362,7 +2363,7 @@ WMError WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListe
     return UnregisterListener(windowChangeListeners_[GetWindowId()], listener);
 }
 
-WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start register");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
@@ -2373,7 +2374,7 @@ WMError WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListen
     return ret;
 }
 
-WMError WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+WMError WindowImpl::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     WLOGFD("Start unregister");
     std::lock_guard<std::recursive_mutex> lock(globalMutex_);
@@ -2766,8 +2767,7 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
         window->postTaskDone_ = true;
     };
     ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-    if (handler_ != nullptr && reason == WindowSizeChangeReason::ROTATION) {
+    if (reason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         handler_->PostTask(task, "wms:UpdateRect");
     } else {
@@ -2856,7 +2856,6 @@ void WindowImpl::PerformBack()
         WLOGD("id: %{public}u closed, to kill Ability: %{public}u",
               window->property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
     };
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     handler_->PostTask(task, "WindowImpl::PerformBack");
 }
 
@@ -3365,7 +3364,7 @@ int64_t WindowImpl::GetVSyncPeriod()
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Window is invalid");
         return;
     }
 
@@ -3378,7 +3377,8 @@ void WindowImpl::UpdateFocusStatus(bool focused)
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", property_->GetAbilityInfo().bundleName_);
+            "BUNDLE_NAME", property_->GetAbilityInfo().bundleName_,
+            "WINDOW_TYPE", static_cast<uint32_t>(GetType()));
         if (state_ <= WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
             needNotifyFocusLater_ = true;
             return;
@@ -3392,7 +3392,7 @@ void WindowImpl::UpdateFocusStatus(bool focused)
 bool WindowImpl::IsFocused() const
 {
     if (!IsWindowValid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Window is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Window is invalid");
         return false;
     }
 
@@ -3410,6 +3410,30 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
         subWindow->UpdateConfiguration(configuration);
+    }
+}
+
+void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        uiContent_->UpdateConfigurationSyncForAll(configuration);
+    }
+    if (subWindowMap_.count(GetWindowId()) == 0) {
+        TLOGI(WmsLogTag::WMS_IMMS, "no subWindow, winId: %{public}d", GetWindowId());
+        return;
+    }
+    for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        subWindow->UpdateConfigurationSync(configuration);
+    }
+}
+
+void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    for (const auto& winPair : windowMap_) {
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
     }
 }
 
@@ -3885,7 +3909,7 @@ bool WindowImpl::IsStretchableReason(WindowSizeChangeReason reason)
 {
     return reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END ||
            reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
-           reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED;
+           IsMoveToOrDragMove(reason) || reason == WindowSizeChangeReason::UNDEFINED;
 }
 
 void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
@@ -4029,10 +4053,10 @@ void WindowImpl::SetDefaultOption()
             break;
         }
         case WindowType::WINDOW_TYPE_SCREEN_CONTROL: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetTouchable(false);
             property_->SetFocusable(false);
-            property_->SetAlpha(0);
+            SetAlpha(0);
             break;
         }
         default:
