@@ -29,7 +29,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr uint8_t FOLDING_AXIS_SIZE = 2;
+constexpr uint8_t HALLS_AXIS_SIZE = 2;
+constexpr uint8_t ANGLES_AXIS_SIZE = 2;
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float GRL_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
 constexpr float CLOSE_GRL_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
@@ -40,36 +41,28 @@ constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
 constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
 constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
-
 } // namespace
 
 SecondaryDisplaySensorFoldStateManager::SecondaryDisplaySensorFoldStateManager() {}
 SecondaryDisplaySensorFoldStateManager::~SecondaryDisplaySensorFoldStateManager() {}
 
-void SecondaryDisplaySensorFoldStateManager::HandleAngleChange(const std::vector<float> &angles,
+void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float> &angles,
     const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     FoldStatus nextState = GetNextFoldState(angles, halls);
     HandleSensorChange(nextState, angles, foldScreenPolicy);
 }
 
-void SecondaryDisplaySensorFoldStateManager::HandleHallChange(const std::vector<float> &angles,
-    const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
-{
-    FoldStatus nextState = GetNextFoldState(angles, halls);
-    HandleSensorChange(nextState, angles, foldScreenPolicy);
-}
-
-FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(std::vector<float> &angles,
+FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::vector<float> &angles,
     const std::vector<uint16_t> &halls)
 {
     TLOGD(WmsLogTag::DMS, "%{public}s, %{public}s",
-        FoldScreenStateInternel::TransVec2Str(angles, "angles").c_str(),
-        FoldScreenStateInternel::TransVec2Str(halls, "halls").c_str());
+        FoldScreenStateInternel::TransVec2Str(angles, "angle").c_str(),
+        FoldScreenStateInternel::TransVec2Str(halls, "hall").c_str());
 
     FoldStatus state = FoldStatus::UNKNOWN;
-    if (angles.size() != FOLDING_AXIS_SIZE || halls.size() != FOLDING_AXIS_SIZE) {
-        TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}lu, halls size %{public}lu",
+    if (angles.size() != ANGLES_AXIS_SIZE || halls.size() != HALLS_AXIS_SIZE) {
+        TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}zu, halls size %{public}zu",
             angles.size(), halls.size());
         return state;
     }
@@ -155,6 +148,4 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState (FoldStatu
     FoldStatus globalFoldStatus = static_cast<FoldStatus>(globalFoldState);
     return globalFoldStatus;
 }
-
-void SecondaryDisplaySensorFoldStateManager::RegisterApplicationStateObserver() {}
 } // namespace OHOS::Rosen
