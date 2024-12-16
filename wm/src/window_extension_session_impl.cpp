@@ -700,16 +700,16 @@ void WindowExtensionSessionImpl::UpdateSystemViewportConfig()
             return;
         }
         if (window->isDensityFollowHost_) {
-            TLOGW(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Density is follow host");
+            TLOGNW(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Density is follow host");
             return;
         }
         SessionViewportConfig config;
         if (window->GetSystemViewportConfig(config) != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Get system viewportConfig failed");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: Get system viewportConfig failed");
             return;
         }
         if (!MathHelper::NearZero(window->lastDensity_ - config.density_)) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: System density is changed");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateSystemViewportConfig: System density is changed");
             window->UpdateSessionViewportConfig(config);
         }
     };
@@ -734,7 +734,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
         auto viewportConfig = config;
         window->UpdateExtensionDensity(viewportConfig);
 
-        TLOGI(WmsLogTag::WMS_UIEXT, "UpdateSessionViewportConfig: Id:%{public}d, isDensityFollowHost_:%{public}d, "
+        TLOGNI(WmsLogTag::WMS_UIEXT, "UpdateSessionViewportConfig: Id:%{public}d, isDensityFollowHost_:%{public}d, "
             "displayId:%{public}" PRIu64", density:%{public}f, lastDensity:%{public}f, orientation:%{public}d, "
             "lastOrientation:%{public}d",
             window->GetPersistentId(), viewportConfig.isDensityFollowHost_, viewportConfig.displayId_,
@@ -1067,10 +1067,10 @@ WSError WindowExtensionSessionImpl::NotifyAccessibilityChildTreeRegister(
     }
     handler_->PostTask([uiContent = uiContentSharedPtr, windowId, treeId, accessibilityId]() {
         if (uiContent == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityChildTreeRegister error, no uiContent");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityChildTreeRegister error, no uiContent");
             return;
         }
-        TLOGI(WmsLogTag::WMS_UIEXT,
+        TLOGNI(WmsLogTag::WMS_UIEXT,
             "NotifyAccessibilityChildTreeRegister: %{public}d %{public}" PRId64, treeId, accessibilityId);
         uiContent->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
     });
@@ -1084,7 +1084,7 @@ WSError WindowExtensionSessionImpl::NotifyAccessibilityChildTreeUnregister()
     }
     handler_->PostTask([uiContent = GetUIContentSharedPtr()]() {
         if (uiContent == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityChildTreeUnregister error, no uiContent");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityChildTreeUnregister error, no uiContent");
             return;
         }
         uiContent->DeregisterAccessibilityChildTree();
@@ -1100,7 +1100,7 @@ WSError WindowExtensionSessionImpl::NotifyAccessibilityDumpChildInfo(
     }
     handler_->PostSyncTask([uiContent = GetUIContentSharedPtr(), params, &info]() {
         if (uiContent == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityDumpChildInfo error, no uiContent");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "NotifyAccessibilityDumpChildInfo error, no uiContent");
             return;
         }
         uiContent->AccessibilityDumpChildInfo(params, info);
