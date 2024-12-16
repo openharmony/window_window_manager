@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "mutex": "cpp",
+        "shared_mutex": "cpp",
+        "compare": "cpp",
+        "cstdint": "cpp"
+    }
+}
