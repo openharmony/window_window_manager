@@ -1094,7 +1094,7 @@ napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_ca
 
 napi_value JsSceneSessionManager::NotifyEnterRecentTask(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyEnterRecentTask(env, info) : nullptr;
 }
@@ -1184,7 +1184,7 @@ napi_value JsSceneSessionManager::ResetPcFoldScreenArrangeRule(napi_env env, nap
 
 napi_value JsSceneSessionManager::RefreshPcZOrder(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnRefreshPcZOrder(env, info) : nullptr;
 }
@@ -3354,14 +3354,14 @@ napi_value JsSceneSessionManager::OnNotifyEnterRecentTask(napi_env env, napi_cal
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool enterRecent = false;
     if (!ConvertFromJsValue(env, argv[0], enterRecent)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to enterRecent");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enterRecent");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3574,21 +3574,21 @@ napi_value JsSceneSessionManager::OnRefreshPcZOrder(napi_env env, napi_callback_
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     uint32_t startZOrder;
     if (!ConvertFromJsValue(env, argv[0], startZOrder)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert start Z order to %{public}d", startZOrder);
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert start Z order to %{public}d", startZOrder);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     std::vector<int32_t> persistentIds;
     if (!ConvertInt32ArrayFromJs(env, argv[1], persistentIds)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert persistentIds");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert persistentIds");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3727,7 +3727,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     if (argc < ARGC_FIVE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3735,7 +3735,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
 
     int64_t displayId { INVALID_SCREEN_ID };
     if (!ConvertFromJsValue(env, argv[0], displayId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to displayId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3743,7 +3743,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
 
     uint32_t statusNum;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], statusNum)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to status");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to status");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3752,7 +3752,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
 
     WSRect defaultDisplayRect;
     if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], defaultDisplayRect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to display rect");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to display rect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3760,7 +3760,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
 
     WSRect virtualDisplayRect;
     if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], virtualDisplayRect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to virtual rect");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to virtual rect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3768,7 +3768,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
 
     WSRect foldCreaseRect;
     if (argv[ARG_INDEX_FOUR] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_FOUR], foldCreaseRect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to fold crease rect");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to fold crease rect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3786,7 +3786,7 @@ napi_value JsSceneSessionManager::OnResetPcFoldScreenArrangeRule(napi_env env, n
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3794,7 +3794,7 @@ napi_value JsSceneSessionManager::OnResetPcFoldScreenArrangeRule(napi_env env, n
 
     WSRect rect;
     if (argv[0] == nullptr || !ConvertRectInfoFromJs(env, argv[0], rect)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to rect");
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to rect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);

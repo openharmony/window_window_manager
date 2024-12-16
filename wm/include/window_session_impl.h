@@ -45,7 +45,7 @@ namespace {
 template<typename T1, typename T2, typename Ret>
 using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
 
-/**
+/*
  * DFX
  */
 const std::string SET_UICONTENT_TIMEOUT_LISTENER_TASK_NAME = "SetUIContentTimeoutListener";
@@ -72,7 +72,7 @@ public:
         const sptr<Rosen::ISession>& iSession,
         const std::string& identityToken = "") { return WMError::WM_OK; }
 
-    /**
+    /*
      * inherits from window
      */
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
@@ -95,7 +95,7 @@ public:
     WMError SetFocusable(bool isFocusable) override;
     WMError SetTouchable(bool isTouchable) override;
 
-    /**
+    /*
      * Window Hierarchy
      */
     WMError SetTopmost(bool topmost) override;
@@ -113,7 +113,7 @@ public:
     WMError SetSingleFrameComposerEnabled(bool enable) override;
     bool IsFloatingWindowAppType() const override;
 
-    /**
+    /*
      * PC Window
      */
     bool IsPcOrPadCapabilityEnabled() const override;
@@ -141,7 +141,7 @@ public:
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
 
-    /**
+    /*
      * inherits from session stage
      */
     WSError SetActive(bool active) override;
@@ -187,6 +187,8 @@ public:
     WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
+    WMError RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
+    WMError UnregisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     WMError UnregisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
@@ -239,7 +241,7 @@ public:
     WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
 
-    /**
+    /*
      * PiP Window
      */
     WSError NotifyCloseExistPipWindow() override;
@@ -290,17 +292,17 @@ public:
     virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
 
-    /**
+    /*
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
 
-    /**
+    /*
      * Window Layout
      */
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
-    /**
+    /*
      * Free Multi Window
      */
     WMError RegisterSwitchFreeMultiWindowListener(const sptr<ISwitchFreeMultiWindowListener>& listener) override;
@@ -310,13 +312,13 @@ public:
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
 
-    /**
+    /*
      * Window Immersive
      */
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
 
-    /**
+    /*
      * Window Property
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
@@ -332,7 +334,7 @@ protected:
     void NotifyAfterDestroy();
     void ClearListenersById(int32_t persistentId);
 
-    /**
+    /*
      * Free Multi Window
      */
     void ClearSwitchFreeMultiWindowListenersById(int32_t persistentId);
@@ -421,7 +423,7 @@ protected:
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
 
-    /**
+    /*
      * DFX
      */
     void SetUIContentComplete();
@@ -438,13 +440,13 @@ protected:
         SET_UIEXTENSION_DESTROY_TIMEOUT
     };
 
-    /**
+    /*
      * Window Lifecycle
      */
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
 
-    /**
+    /*
      * Window Layout
      */
     std::atomic_bool isDragTaskPostDone_ = true;
@@ -457,6 +459,12 @@ protected:
      * Window Immersive
      */
     uint32_t GetStatusBarHeight() override;
+
+    /*
+     * Window Property
+     */
+    float lastSystemDensity_ = UNDEFINED_DENSITY;
+    WSError NotifySystemDensityChange(float density);
 
 private:
     //Trans between colorGamut and colorSpace
@@ -486,11 +494,14 @@ private:
     template<typename T>
     EnableIfSame<T, IDisplayIdChangeListener, std::vector<IDisplayIdChangeListenerSptr>> GetListeners();
     template<typename T>
+    EnableIfSame<T, ISystemDensityChangeListener, std::vector<ISystemDensityChangeListenerSptr>> GetListeners();
+    template<typename T>
     EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowTitleButtonRectChangedListener,
         std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
+    template<typename T> void ClearUselessListeners(std::unordered_map<int32_t, T>& listeners, int32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(const std::string& name, WindowType type);
     template<typename T>
     EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> GetListeners();
@@ -571,6 +582,8 @@ private:
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
     static std::mutex displayIdChangeListenerMutex_;
     static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
+    static std::mutex systemDensityChangeListenerMutex_;
+    static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
@@ -596,7 +609,7 @@ private:
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 
-    /**
+    /*
      * Window Layout
      */
     WSRect layoutRect_;
@@ -611,7 +624,7 @@ private:
      */
     DecorButtonStyle decorButtonStyle_;
 
-    /**
+    /*
      * Multi Window
      */
     bool isSplitButtonVisible_ = true;
