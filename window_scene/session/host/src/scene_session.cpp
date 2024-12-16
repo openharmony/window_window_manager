@@ -5939,12 +5939,18 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
     }
 
     if (behindWindowFilterEnabledModifier_ == nullptr) {
-        behindWindowFilterEnabledProperty_ = std::make_shared<RSProperty<bool>>(enabled);
+        auto behindWindowFilterEnabledProperty = std::make_shared<RSProperty<bool>>(enabled);
         behindWindowFilterEnabledModifier_ = std::make_shared<RSBehindWindowFilterEnabledModifier>(
-            behindWindowFilterEnabledProperty_);
+            behindWindowFilterEnabledProperty);
         surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
     } else {
-        behindWindowFilterEnabledProperty_->Set(enabled);
+        auto behindWindowFilterEnabledProperty = std::static_point_cast<RSProperty<bool>>(
+            behindWindowFilterEnabledModifier_->GetProperty());
+        if (!behindWindowFilterEnabledProperty) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "fail to get property");
+            return;
+        }
+        behindWindowFilterEnabledProperty->Set(enabled);
     }
 
     if (rsTransaction != nullptr) {
