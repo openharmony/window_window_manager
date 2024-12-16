@@ -99,12 +99,12 @@ public:
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
-    int32_t GetStatusBarHeight() override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+    int32_t GetStatusBarHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
-    WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionDetachToDisplay() override;
+    WSError RequestFocus(bool isFocused) override;
     
     /*
      * Gesture Back
