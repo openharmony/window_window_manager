@@ -219,7 +219,7 @@ AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaTyp
         return avoidArea;
     }
 
-    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) || !data.WriteInt32(rect.width_) || 
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) || !data.WriteInt32(rect.width_) ||
         !data.WriteInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
         return avoidArea;
