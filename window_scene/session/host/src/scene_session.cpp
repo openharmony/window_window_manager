@@ -1986,7 +1986,7 @@ void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extens
             return;
         }
         iter->windowRect = extensionInfo.windowRect;
-        iter->rect = extensionInfo.rect;
+        iter->uiExtRect = extensionInfo.rect;
         iter->hasUpdatedRect = extensionInfo.hasUpdatedRect;
     }
     NotifySessionInfoChange();
@@ -5969,8 +5969,8 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
         for (auto iter = session.modalUIExtensionInfoList_.begin();
             iter != session.modalUIExtensionInfoList_.end(); iter++) {
             if (iter->hasUpdatedRect) {
-                Rect windowRect = { iter->rect.posX_ + parentTransX, iter->rect.posY_ + parentTransY,
-                    iter->rect.width_, iter->rect.height_ };
+                Rect windowRect = { iter->uiExtRect.posX_ + parentTransX, iter->uiExtRect.posY_ + parentTransY,
+                    iter->uiExtRect.width_, iter->uiExtRect.height_ };
                 iter->windowRect = windowRect;
             }
         }
