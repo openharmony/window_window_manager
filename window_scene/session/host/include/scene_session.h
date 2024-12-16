@@ -480,7 +480,7 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
-    /**
+    /*
      * PC Window
      */
     void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);

@@ -66,10 +66,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
-        bool isDockHoverShown = true)
-    {
-        return WSError::WS_OK;
-    }
+        bool isDockHoverShown = true) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for processing restore main window.
