@@ -9841,12 +9841,14 @@ void DisplayChangeListener::OnImmersiveStateChange(ScreenId screenId, bool& imme
 
 bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
 {
-    auto task = [this, screenId] {
+    auto task = [this, screenId, where = __func__] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        bool isPC = false;
+        IsPcOrPadFreeMultiWindowMode(isPC);
         for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
             auto sceneSession = item->second;
             if (sceneSession == nullptr) {
-                WLOGFE("Session is nullptr");
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is nullptr", where);
                 continue;
             }
             if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
@@ -9861,25 +9863,31 @@ bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
             }
             auto property = sceneSession->GetSessionProperty();
             if (property == nullptr) {
-                WLOGFE("Property is nullptr");
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s property is nullptr", where);
                 continue;
             }
             if (property->GetDisplayId() != screenId) {
                 continue;
             }
-            auto sysBarProperty = property->GetSystemBarProperty();
-            if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
-                WLOGI("GetImmersiveState, window is immersive. id:%{public}d", sceneSession->GetPersistentId());
-                return true;
+            if (isPC) {
+                if (sceneSession->IsLayoutFullScreen()) {
+                    return true;
+                }
             } else {
-                WLOGI("GetImmersiveState, statusBar is enabled. id:%{public}d", sceneSession->GetPersistentId());
-                break;
+                auto sysBarProperty = property->GetSystemBarProperty();
+                if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
+                    TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s window is immersive. id: %{public}d", where, sceneSession->GetPersistentId());
+                    return true;
+                } else {
+                    TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s statusBar is enabled. id: %{public}d", where, sceneSession->GetPersistentId());
+                    break;
+                }
             }
         }
-        WLOGI("GetImmersiveState, not immersive");
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s not immersive", where);
         return false;
     };
-    return taskScheduler_->PostSyncTask(task, "GetImmersiveState");
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 void SceneSessionManager::NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason,

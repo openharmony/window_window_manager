@@ -626,6 +626,32 @@ HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest 
 }
 
 /**
+ * @tc.name: GetImmersiveState01
+ * @tc.desc: GetImmersiveState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetImmersiveState01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    SessionInfo info;
+    info.abilityName_ = "GetImmersiveState01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(false, ssm_->GetImmersiveState(0u));
+    sceneSession->SetIsLayoutFullScreen(true);
+    EXPECT_EQ(true, ssm_->GetImmersiveState(0u));
+}
+
+/**
  * @tc.name: GetImmersiveState02
  * @tc.desc: GetImmersiveState
  * @tc.type: FUNC
@@ -633,9 +659,10 @@ HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest 
 HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
 
     SessionInfo info;
-    info.abilityName_ = "SetBrightness";
+    info.abilityName_ = "GetImmersiveState02";
     sptr<SceneSession> sceneSession01;
     sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_EQ(sceneSession01, nullptr);
