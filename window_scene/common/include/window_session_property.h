@@ -102,8 +102,8 @@ public:
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
     
-    /**
-     * WindowImmersive
+    /*
+     * Window Immersive
      */
     void SetAvoidAreaOption(uint32_t avoidAreaOption);
     uint32_t GetAvoidAreaOption() const;

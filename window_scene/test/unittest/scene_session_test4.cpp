@@ -1322,10 +1322,10 @@ HWTEST_F(SceneSessionTest4, GetSystemAvoidArea, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "GetSystemAvoidArea";
     info.bundleName_ = "GetSystemAvoidArea";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     SystemSessionConfig systemConfig;
@@ -1338,7 +1338,7 @@ HWTEST_F(SceneSessionTest4, GetSystemAvoidArea, Function | SmallTest | Level2)
     EXPECT_NE(screenSession, nullptr);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(2024, screenSession));
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
