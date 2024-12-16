@@ -5944,7 +5944,7 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
             behindWindowFilterEnabledProperty);
         surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
     } else {
-        auto behindWindowFilterEnabledProperty = std::static_point_cast<RSProperty<bool>>(
+        auto behindWindowFilterEnabledProperty = std::static_pointer_cast<RSProperty<bool>>(
             behindWindowFilterEnabledModifier_->GetProperty());
         if (!behindWindowFilterEnabledProperty) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "fail to get property");
