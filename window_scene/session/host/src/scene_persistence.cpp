@@ -111,7 +111,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             return;
         }
 
-        TLOGD(WmsLogTag::WMS_MAIN, "Save snapshot begin");
+        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot begin");
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SaveSnapshot %s", scenePersistence->snapshotPath_.c_str());
         OHOS::Media::ImagePacker imagePacker;
         OHOS::Media::PackOption option;
@@ -119,7 +119,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         option.quality = IsAstcEnabled() ? ASTC_IMAGE_QUALITY : IMAGE_QUALITY;
         option.numberHint = 1;
 
-        std::lock_guard<std::mutex> lock(scenePersistence->savingSnapshotMutex_);
+        std::lock_guard lock(scenePersistence->savingSnapshotMutex_);
         remove(scenePersistence->snapshotPath_.c_str());
         scenePersistence->snapshotSize_ = { pixelMap->GetWidth(), pixelMap->GetHeight() };
         if (imagePacker.StartPacking(scenePersistence->snapshotPath_, option)) {
@@ -143,7 +143,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             resetSnapshotCallback();
             scenePersistence->isSavingSnapshot_.store(false);
         }
-        TLOGD(WmsLogTag::WMS_MAIN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
+        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
     snapshotFfrtHelper_->SubmitTask(std::move(task), "SaveSnapshot" + snapshotPath_);
 }
@@ -169,6 +169,7 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersi
             oldSnapshotPath = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
                 std::to_string(oldPersistentId) + IMAGE_SUFFIX;
         }
+        std::lock_guard lock(scenePersistence->savingSnapshotMutex_);
         int ret = std::rename(oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         if (ret == 0) {
             WLOGFI("Rename snapshot from %{public}s to %{public}s.",
@@ -260,6 +261,7 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
     uint32_t errorCode = 0;
     Media::SourceOptions sourceOpts;
     sourceOpts.formatHint = IsAstcEnabled() ? ASTC_IMAGE_FORMAT : IMAGE_FORMAT;
+    std::lock_guard lock(savingSnapshotMutex_);
     auto imageSource = Media::ImageSource::CreateImageSource(snapshotPath_, sourceOpts, errorCode);
     if (!imageSource) {
         WLOGE("create image source fail, errCode : %{public}d", errorCode);

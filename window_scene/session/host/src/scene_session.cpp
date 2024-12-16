@@ -1616,8 +1616,8 @@ WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSes
 
 WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "persistentId():%{public}u type:%{public}u"
-        "enable:%{public}u bgColor:%{public}x Color:%{public}x enableAnimation:%{public}u settingFlag:%{public}u",
+    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u "
+        "%{public}u %{public}x %{public}x %{public}u settingFlag %{public}u",
         GetPersistentId(), static_cast<uint32_t>(type),
         systemBarProperty.enable_, systemBarProperty.backgroundColor_, systemBarProperty.contentColor_,
         systemBarProperty.enableAnimation_, systemBarProperty.settingFlag_);
@@ -1651,20 +1651,20 @@ void SceneSession::SetIsStatusBarVisible(bool isVisible)
 WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
 {
     bool isNeedNotify = isStatusBarVisible_ != isVisible;
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}d, %{public}s] status bar visible %{public}u, "
-        "need notify %{public}u", GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d, %{public}s] visible %{public}u need notify %{public}u",
+        GetPersistentId(), GetWindowName().c_str(), isVisible, isNeedNotify);
     isStatusBarVisible_ = isVisible;
     if (!isNeedNotify) {
         return WSError::WS_OK;
     }
     if (isLastFrameLayoutFinishedFunc_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, win %{public}d", GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
     bool isLayoutFinished = false;
     WSError ret = isLastFrameLayoutFinishedFunc_(isLayoutFinished);
     if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed: %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed, ret %{public}d", ret);
         return ret;
     }
     if (isLayoutFinished) {
@@ -1719,8 +1719,8 @@ WSError SceneSession::OnNeedAvoid(bool status)
             TLOGE(WmsLogTag::WMS_IMMS, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "SceneSession OnNeedAvoid status:%{public}d, id:%{public}d",
-            static_cast<int32_t>(status), session->GetPersistentId());
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status %{public}d ",
+            session->GetPersistentId(), static_cast<int32_t>(status));
         if (session->onNeedAvoid_) {
             session->onNeedAvoid_(status);
         }
@@ -1828,7 +1828,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGI(WmsLogTag::WMS_IMMS, "status bar not visible");
             continue;
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s status bar %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
@@ -1838,7 +1838,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (Session::CheckEmptyKeyboardAvoidAreaIfNeeded()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "Keyboard avoid area needs to be empty when in floating mode");
+        TLOGD(WmsLogTag::WMS_IMMS, "Keyboard avoid area need to empty when in floating mode");
         return;
     }
     auto sessionProperty = GetSessionProperty();
@@ -1865,12 +1865,12 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
             }
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s keyboard %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s keyboard %{public}s",
                   rect.ToString().c_str(), keyboardRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s input method %{public}s",
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s input method %{public}s",
                   rect.ToString().c_str(), inputMethodRect.ToString().c_str());
             CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
         }
@@ -1887,7 +1887,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
     if (cutoutInfo == nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "There is no CutoutInfo");
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
         return;
     }
     std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
@@ -1902,7 +1902,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             cutoutArea.width_,
             cutoutArea.height_
         };
-        TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s cutout %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s cutout %{public}s",
               rect.ToString().c_str(), cutoutAreaRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
     }
@@ -1913,11 +1913,11 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const
 {
     if (isDisplayStatusBarTemporarily_.load()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "temporary show navigation bar, no need to avoid");
+        TLOGD(WmsLogTag::WMS_IMMS, "temporary show navigation bar, no need to avoid");
         return;
     }
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
-        TLOGI(WmsLogTag::WMS_IMMS, "window mode pip return");
+        TLOGD(WmsLogTag::WMS_IMMS, "window mode pip return");
         return;
     }
     auto sessionProperty = GetSessionProperty();
@@ -1929,7 +1929,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(sessionProperty->GetDisplayId());
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s AI bar %{public}s",
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s AI bar %{public}s",
           rect.ToString().c_str(), barArea.ToString().c_str());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
@@ -1967,7 +1967,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, const WSRect& 
         (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) {
         return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "Window [%{public}u, %{public}s] type %{public}u "
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] type %{public}u "
         "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
         GetPersistentId(), GetWindowName().c_str(), static_cast<uint32_t>(winType),
         static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
@@ -2110,8 +2110,8 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
             return avoidArea;
         }
         default: {
-            TLOGE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",
-                type, GetPersistentId());
+            TLOGE(WmsLogTag::WMS_IMMS, "cannot find win %{public}d type %{public}u",
+                GetPersistentId(), type);
             return avoidArea;
         }
     }
@@ -2276,21 +2276,6 @@ WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     NotifyOutsideDownEvent(pointerEvent);
     TransferPointerEvent(pointerEvent, false);
     return WSError::WS_OK;
-}
-
-WSError SceneSession::GetStartMoveFlag(bool& isMoving)
-{
-    auto task = [weakThis = wptr(this), &isMoving]() {
-        auto session = weakThis.promote();
-        if (!session || !session->moveDragController_) {
-            TLOGE(WmsLogTag::DEFAULT, "session or moveDragController_ is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        isMoving = session->moveDragController_->GetStartMoveFlag();
-        TLOGI(WmsLogTag::DEFAULT, "isMoving: %{public}u", static_cast<uint32_t>(isMoving));
-        return WSError::WS_OK;
-    };
-    return PostSyncTask(task, "GetStartMoveFlag");
 }
 
 void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -2795,7 +2780,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     }
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
     if (!ret) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "no throw slip");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
         return false;
     }
 
@@ -4099,7 +4084,7 @@ WMError SceneSession::SetGestureBackEnabled(bool isEnabled)
             return;
         }
         if (sceneSession->isEnableGestureBack_ == isEnabled) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "isEnabled equals last.");
+            TLOGND(WmsLogTag::WMS_IMMS, "isEnabled equals last.");
             return;
         }
         TLOGNI(WmsLogTag::WMS_IMMS, "id: %{public}d, isEnabled: %{public}d",
@@ -4519,7 +4504,7 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
     WSPropertyChangeAction action)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "UpdateTopmostProperty permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 
@@ -4554,7 +4539,7 @@ void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<W
     auto systemBarProperties = property->GetSystemBarProperty();
     if (auto iter = systemBarProperties.find(type); iter != systemBarProperties.end()) {
         SetSystemBarProperty(iter->first, iter->second);
-        TLOGD(WmsLogTag::WMS_IMMS, "%{public}d, enable: %{public}d",
+        TLOGD(WmsLogTag::WMS_IMMS, "type %{public}d enable %{public}d",
             static_cast<int32_t>(iter->first), iter->second.enable_);
     }
 }
@@ -5120,12 +5105,12 @@ void SceneSession::RequestHideKeyboard(bool isAppColdStart)
 #endif
 }
 
-bool SceneSession::IsStartMoving() const
+bool SceneSession::IsStartMoving()
 {
     return isStartMoving_.load();
 }
 
-void SceneSession::SetIsStartMoving(const bool startMoving)
+void SceneSession::SetIsStartMoving(bool startMoving)
 {
     isStartMoving_.store(startMoving);
 }
@@ -5516,7 +5501,7 @@ int32_t SceneSession::GetStatusBarHeight()
             height = statusBar->GetSessionRect().height_;
         }
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
+    TLOGD(WmsLogTag::WMS_IMMS, "height %{public}d", height);
     return height;
 }
 
@@ -5525,7 +5510,7 @@ int32_t SceneSession::GetDockHeight()
     int32_t height = 0;
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
         GetSessionProperty() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "specificCallback_ or session property is null");
+        TLOGE(WmsLogTag::WMS_DECOR, "specificCallback_ or session property is null");
         return height;
     }
     std::vector<sptr<SceneSession>> dockVector = specificCallback_->onGetSceneSessionVectorByType_(

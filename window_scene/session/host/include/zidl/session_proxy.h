@@ -91,7 +91,7 @@ public:
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    WSError GetStartMoveFlag(bool& isMoving) override;
+    bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
@@ -106,7 +106,7 @@ public:
     WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionDetachToDisplay() override;
     
-    /**
+    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
@@ -114,7 +114,7 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 
-     /**
+     /*
       * Starting Window
       */
     WSError RemoveStartingWindow() override;

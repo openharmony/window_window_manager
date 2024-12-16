@@ -162,8 +162,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleProcessPointDownSession(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG):
             return HandleSendPointerEvenForMoveDrag(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_START_MOVE_FLAG):
-            return HandleGetStartMoveFlag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_START_MOVING):
+            return HandleIsStartMoving(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE):
             return HandleSetSystemEnableDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
@@ -457,7 +457,7 @@ int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& repl
     TLOGD(WmsLogTag::WMS_EVENT, "In!");
     uint32_t eventId;
     if (!data.ReadUint32(eventId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
@@ -469,7 +469,7 @@ int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply)
 {
     bool isLayoutFullScreen = data.ReadBool();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
     WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1149,12 +1149,13 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleIsStartMoving(MessageParcel& data, MessageParcel& reply)
 {
-    bool isMoving = false;
-    WSError errCode = GetStartMoveFlag(isMoving);
-    reply.WriteBool(isMoving);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    bool isMoving = IsStartMoving();
+    if (!reply.WriteBool(isMoving)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write isMoving failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1181,10 +1182,10 @@ int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& r
 
 int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
+    TLOGD(WmsLogTag::WMS_DECOR, "In");
     int32_t height = 0;
     if (!data.ReadInt32(height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read height error");
+        TLOGE(WmsLogTag::WMS_DECOR, "read height error");
         return ERR_INVALID_DATA;
     }
     SetCustomDecorHeight(height);

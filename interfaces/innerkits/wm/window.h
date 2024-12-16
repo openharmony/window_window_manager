@@ -421,6 +421,20 @@ public:
 using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
 
 /**
+ * @class ISystemDensityChangeListener
+ *
+ * @brief Listener to observe system density associated with the window changed.
+ */
+class ISystemDensityChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when system density changed.
+     */
+    virtual void OnSystemDensityChanged(float density) {}
+};
+using ISystemDensityChangeListenerSptr = sptr<ISystemDensityChangeListener>;
+
+/**
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
@@ -1798,12 +1812,11 @@ public:
     virtual void StartMove() {}
 
     /**
-     * @brief get start move flag.
+     * @brief get main window move flag.
      *
-     * @return true means window is moving. Otherwise is not moving
-     *
+     * @return true means main window is moving. Otherwise is not moving.
      */
-    virtual bool GetStartMoveFlag() { return false; }
+    virtual bool IsStartMoving() { return false; }
 
     /**
      * @brief start move system window. It is called by application.
@@ -2094,6 +2107,24 @@ public:
      */
     virtual WMError UnregisterDisplayIdChangeListener(
         const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register system density change listener.
+     *
+     * @param listener ISystemDensityChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSystemDensityChangeListener(
+        const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister system density change listener.
+     *
+     * @param listener ISystemDensityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSystemDensityChangeListener(
+        const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the window limits of current window.
