@@ -156,12 +156,14 @@ enum class WindowModeType : uint8_t {
  * @brief Enumerates modal of sub session.
  */
 enum class SubWindowModalType : uint32_t {
-    TYPE_UNDEFINED = 0,
+    BEGIN = 0,
+    TYPE_UNDEFINED = BEGIN,
     TYPE_NORMAL,
     TYPE_DIALOG,
     TYPE_WINDOW_MODALITY,
     TYPE_TOAST,
     TYPE_APPLICATION_MODALITY,
+    END = TYPE_APPLICATION_MODALITY,
 };
 
 /**
@@ -299,6 +301,15 @@ inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSetting
 }
 
 /**
+ * @brief Enumerates flag of ControlAppType.
+ */
+enum class ControlAppType : uint8_t {
+    CONTROL_APP_TYPE_BEGIN = 0,
+    APP_LOCK = 1,
+    CONTROL_APP_TYPE_END,
+};
+
+/**
  * @brief Enumerates flag of multiWindowUIType.
  */
 enum class WindowUIType : uint8_t {
@@ -306,15 +317,6 @@ enum class WindowUIType : uint8_t {
     PC_WINDOW,
     PAD_WINDOW,
     INVALID_WINDOW
-};
-
-/**
- * @brief Enumerates flag of ControlAppType.
- */
-enum class ControlAppType : uint8_t {
-    CONTROL_APP_TYPE_BEGIN = 0,
-    APP_LOCK = 1,
-    CONTROL_APP_TYPE_END,
 };
 
 /**
@@ -587,20 +589,21 @@ struct MainWindowState : public Parcelable {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
-    constexpr int32_t INVALID_USER_ID = -1;
-    constexpr int32_t SYSTEM_USERID = 0;
-    constexpr int32_t BASE_USER_RANGE = 200000;
-    constexpr int32_t DEFAULT_SCREEN_ID = 0;
-    constexpr int32_t FULL_CIRCLE_DEGREE = 360;
-    constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+constexpr uint32_t INVALID_WINDOW_ID = 0;
+constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
+constexpr int32_t INVALID_USER_ID = -1;
+constexpr int32_t SYSTEM_USERID = 0;
+constexpr int32_t BASE_USER_RANGE = 200000;
+constexpr int32_t DEFAULT_SCREEN_ID = 0;
+constexpr int32_t FULL_CIRCLE_DEGREE = 360;
+constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+constexpr float UNDEFINED_DENSITY = -1.0f;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -804,8 +807,8 @@ enum class UIExtensionUsage : uint32_t {
 struct ExtensionWindowEventInfo {
     int32_t persistentId  = 0;
     int32_t pid = -1;
-    Rect windowRect {0, 0, 0, 0}; // rect for event
-    Rect rect {0, 0, 0, 0}; // rect for window property
+    Rect windowRect {0, 0, 0, 0}; // Calculated from global rect and UIExtension windowRect
+    Rect uiExtRect {0, 0, 0, 0}; // UIExtension windowRect
     bool hasUpdatedRect = false;
 };
 
@@ -1124,8 +1127,8 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = UINT32_MAX;
-    uint32_t maxHeight_ = UINT32_MAX;
+    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX);
+    uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
     uint32_t minWidth_ = 1;
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
@@ -1330,6 +1333,14 @@ struct ExtensionWindowConfig {
     Rect windowRect;
     SubWindowOptions subWindowOptions;
     SystemWindowOptions systemWindowOptions;
+};
+
+template <typename T>
+struct SptrHash {
+    std::size_t operator()(const sptr<T>& ptr) const
+    {
+        return std::hash<T*>{}(ptr.GetRefPtr());
+    }
 };
 
 /**

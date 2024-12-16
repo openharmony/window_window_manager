@@ -55,7 +55,7 @@ void SceneSessionLifecycleTest::TearDownTestCase()
 
 void SceneSessionLifecycleTest::SetUp()
 {
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 }
 
 void SceneSessionLifecycleTest::TearDown()
@@ -76,15 +76,15 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
     info.bundleName_ = "Foreground01";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     int resultValue = 0;
     sptr<SceneSession> sceneSession;
 
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
 
     auto result = sceneSession->Foreground(property);
@@ -92,12 +92,12 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
     specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo& info,
         sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
-        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        sptr<SceneSession> sceneSessionReturn = sptr<SceneSession>::MakeSptr(info, specificCallback);
         EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
         return sceneSessionReturn;
     };
-    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->UpdateSessionState(SessionState::STATE_DISCONNECT);
     sceneSession->isActive_ = true;
@@ -117,11 +117,11 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground02, Function | SmallTest | Level2)
     info.bundleName_ = "Foreground02";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession;
 
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     sptr<WindowSessionProperty> property = nullptr;
@@ -141,14 +141,14 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground03, Function | SmallTest | Level2)
     info.bundleName_ = "Foreground03";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession;
 
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     auto result = sceneSession->Foreground(property);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -232,7 +232,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
     session->SetLeashWinSurfaceNode(nullptr);
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
 
-    sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property2, nullptr);
     property2->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property2, false));
@@ -242,7 +242,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
     session->SetLeashWinSurfaceNode(surfaceNode);
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property2, false));
 
-    sptr<WindowSessionProperty> property3 = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property3 = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property3, nullptr);
     property3->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     session->SetSessionProperty(property3);
@@ -261,12 +261,12 @@ HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
     info.bundleName_ = "Background01";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     int resultValue = 0;
     sptr<SceneSession> sceneSession;
 
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     auto result = sceneSession->Background();
@@ -274,12 +274,12 @@ HWTEST_F(SceneSessionLifecycleTest, Background01, Function | SmallTest | Level2)
     specificCallback->onCreate_ = [&resultValue, specificCallback](const SessionInfo& info,
         sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
-        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        sptr<SceneSession> sceneSessionReturn = sptr<SceneSession>::MakeSptr(info, specificCallback);
         EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
         return sceneSessionReturn;
     };
-    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
     sceneSession->isActive_ = true;
@@ -299,12 +299,12 @@ HWTEST_F(SceneSessionLifecycleTest, Background02, Function | SmallTest | Level2)
     info.bundleName_ = "Background02";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = true;
@@ -322,16 +322,16 @@ HWTEST_F(SceneSessionLifecycleTest, Background04, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "Background04";
     info.bundleName_ = "Background04";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     sceneSession->SetSessionProperty(property);
     EXPECT_EQ(WSError::WS_OK, sceneSession->Background(true));
 
-    sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property2, nullptr);
     property2->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     sceneSession->SetSessionProperty(property2);
@@ -350,11 +350,11 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, Function | SmallTest | Lev
     info.abilityName_ = "BackgroundTask01";
     info.bundleName_ = "BackgroundTask01";
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     int resultValue = 0;
     sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     auto result = sceneSession->BackgroundTask();
@@ -366,12 +366,12 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask01, Function | SmallTest | Lev
     [&resultValue, specificCallback](const SessionInfo& info,
                                      sptr<WindowSessionProperty> property) -> sptr<SceneSession>
     {
-        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        sptr<SceneSession> sceneSessionReturn = sptr<SceneSession>::MakeSptr(info, specificCallback);
         EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
         return sceneSessionReturn;
     };
-    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
     sceneSession->isActive_ = true;
@@ -394,11 +394,11 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask02, Function | SmallTest | Lev
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = true;
@@ -449,7 +449,7 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, Function | SmallTest | Lev
     session->surfaceNode_ = surfaceNode;
     EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(true));
 
-    sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property2, nullptr);
     property2->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     session->SetSessionProperty(property2);
@@ -485,12 +485,12 @@ HWTEST_F(SceneSessionLifecycleTest, DisconnectTask01, Function | SmallTest | Lev
     specificCallback->onCreate_ =
     [&resultValue, specificCallback](const SessionInfo& info,
                                      sptr<WindowSessionProperty> property) -> sptr<SceneSession> {
-        sptr<SceneSession> sceneSessionReturn = new (std::nothrow) SceneSession(info, specificCallback);
+        sptr<SceneSession> sceneSessionReturn = sptr<SceneSession>::MakeSptr(info, specificCallback);
         EXPECT_NE(sceneSessionReturn, nullptr);
         resultValue = 1;
         return sceneSessionReturn;
     };
-    sceneSession = new (std::nothrow) SceneSession(info, specificCallback);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->UpdateSessionState(SessionState::STATE_CONNECT);
     sceneSession->isActive_ = true;
@@ -544,12 +544,12 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect, Function | SmallTest | Level2)
     info.bundleName_ = "Disconnect";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = true;
@@ -569,12 +569,12 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect2, Function | SmallTest | Level2)
     info.bundleName_ = "Disconnect2";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
@@ -596,12 +596,12 @@ HWTEST_F(SceneSessionLifecycleTest, Disconnect3, Function | SmallTest | Level2)
     info.bundleName_ = "Disconnect3";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
@@ -635,12 +635,12 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus01, Function | SmallTest |
     info.bundleName_ = "UpdateActiveStatus01";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = true;
@@ -663,12 +663,12 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus02, Function | SmallTest |
     info.bundleName_ = "UpdateActiveStatus02";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
@@ -688,12 +688,12 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus03, Function | SmallTest |
     info.bundleName_ = "UpdateActiveStatus03";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
@@ -735,10 +735,10 @@ HWTEST_F(SceneSessionLifecycleTest, UpdateActiveStatus04, Function | SmallTest |
     SessionInfo info;
     info.abilityName_ = "UpdateActiveStatus04";
     info.bundleName_ = "UpdateActiveStatus04";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
@@ -760,14 +760,14 @@ HWTEST_F(SceneSessionLifecycleTest, Connect, Function | SmallTest | Level2)
     info.bundleName_ = "Connect";
     info.abilityName_ = "Connect1";
     info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     sptr<ISessionStage> sessionStage = nullptr;
     sptr<IWindowEventChannel> eventChannel = nullptr;
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
     SystemSessionConfig systemConfig;
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sptr<IRemoteObject> token;
     WSError res = sceneSession->Connect(sessionStage, eventChannel,
                                        surfaceNode, systemConfig, property, token);
@@ -785,12 +785,12 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
     info.bundleName_ = "ConnectInner01";
     info.abilityName_ = "ConnectInner01";
     info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     SystemSessionConfig systemConfig;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     sceneSession->clientIdentityToken_ = "session1";
 
@@ -818,12 +818,12 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
     info.bundleName_ = "ConnectInner02";
     info.abilityName_ = "ConnectInner02";
 
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     SystemSessionConfig systemConfig;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
     sceneSession->Session::isTerminating_ = false;
@@ -831,7 +831,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, Function | SmallTest | Level
         property, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
-    sptr<IWindowEventChannel> eventChannel = new WindowEventChannel(mockSessionStage);
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(mockSessionStage);
     ASSERT_NE(eventChannel, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
     result = sceneSession->ConnectInner(mockSessionStage, eventChannel, nullptr, systemConfig,
@@ -850,13 +850,13 @@ HWTEST_F(SceneSessionLifecycleTest, Reconnect, Function | SmallTest | Level2)
     info.bundleName_ = "Reconnect";
     info.abilityName_ = "Reconnect1";
     info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     sptr<ISessionStage> sessionStage = nullptr;
     sptr<IWindowEventChannel> eventChannel = nullptr;
     std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sptr<IRemoteObject> token;
     int32_t pid = -1;
     int32_t uid = -1;
@@ -865,8 +865,8 @@ HWTEST_F(SceneSessionLifecycleTest, Reconnect, Function | SmallTest | Level2)
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 
     property->windowState_ = WindowState::STATE_SHOWN;
-    sessionStage = new SessionStageMocker();
-    eventChannel = new TestWindowEventChannel();
+    sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    eventChannel = sptr<TestWindowEventChannel>::MakeSptr();
     res = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property);
     ASSERT_EQ(res, WSError::WS_OK);
 }
@@ -882,14 +882,14 @@ HWTEST_F(SceneSessionLifecycleTest, ReconnectInner, Function | SmallTest | Level
     info.bundleName_ = "ReconnectInner";
     info.abilityName_ = "ReconnectInner1";
     info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
     sptr<WindowSessionProperty> property = nullptr;
     WSError res = sceneSession->ReconnectInner(property);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 
-    property = new WindowSessionProperty();
+    property = sptr<WindowSessionProperty>::MakeSptr();
     property->windowState_ = WindowState::STATE_INITIAL;
     res = sceneSession->ReconnectInner(property);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_PARAM);
@@ -923,18 +923,18 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTe
     info.bundleName_ = "PendingSessionActivation";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     sceneSession->SetSessionProperty(property);
 
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
 
     sptr<AAFwk::SessionInfo> info1 = nullptr;
     WSError result = sceneSession->PendingSessionActivation(info1);
@@ -968,18 +968,18 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Lev
     info.bundleName_ = "TerminateSession";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     sceneSession->SetSessionProperty(property);
 
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
 
     sptr<AAFwk::SessionInfo> info1 = nullptr;
     WSError result = sceneSession->TerminateSession(info1);
@@ -1001,7 +1001,7 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Lev
  */
 HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | Level2)
 {
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
     OHOS::Rosen::Session session(info);
     session.isTerminating_ = true;
@@ -1027,18 +1027,18 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException, Function | SmallTest
     info.bundleName_ = "NotifySessionException";
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     sceneSession->SetSessionProperty(property);
 
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
 
     sptr<AAFwk::SessionInfo> info1 = nullptr;
     WSError result = sceneSession->NotifySessionException(info1);
@@ -1055,7 +1055,7 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException, Function | SmallTest
  */
 HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTest | Level2)
 {
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
     bool needRemoveSession = true;
     OHOS::Rosen::Session session(info);
@@ -1079,12 +1079,12 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionForeground, Function | SmallTes
     info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     uint32_t reason = 1;
     bool withAnimation = true;
@@ -1107,11 +1107,11 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionFullScreen, Function | SmallTes
     info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     bool fullScreen = true;
     int ret = 1;
@@ -1135,12 +1135,12 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTes
     info.windowType_ = 1;
     sptr<Rosen::ISession> session_;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            new (std::nothrow) SceneSession::SpecificSessionCallback();
+            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback, nullptr);
     sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     uint32_t reason = 1;
     bool withAnimation = true;
@@ -1159,20 +1159,20 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTes
  */
 HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | SmallTest | Level2)
 {
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
     bool needRemoveSession = true;
 
     SessionInfo info;
     info.abilityName_ = "NotifySessionExceptionInner";
     info.bundleName_ = "NotifySessionExceptionInner";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isTerminating_ = false;
     auto res = sceneSession->NotifySessionExceptionInner(nullptr, needRemoveSession, true);
     ASSERT_EQ(res, WSError::WS_OK);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);

@@ -130,7 +130,7 @@ HWTEST_F(SceneSessionManagerTest, SetBrightness, Function | SmallTest | Level3)
     SessionInfo info;
     info.abilityName_ = "SetBrightness";
     info.bundleName_ = "SetBrightness1";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     float brightness = 0.5;
     WSError result = ssm_->SetBrightness(sceneSession, brightness);
@@ -190,7 +190,7 @@ HWTEST_F(SceneSessionManagerTest, SetWindowFlags01, Function | SmallTest | Level
 {
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     property->SetWindowFlags(flags);
     sptr<SceneSession> sceneSession = nullptr;
@@ -207,10 +207,10 @@ HWTEST_F(SceneSessionManagerTest, SetWindowFlags02, Function | SmallTest | Level
 {
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     property->SetWindowFlags(flags);
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     WSError result02 = ssm_->SetWindowFlags(sceneSession, property);
     EXPECT_EQ(result02, WSError::WS_ERROR_NOT_SYSTEM_APP);
 }
@@ -224,10 +224,10 @@ HWTEST_F(SceneSessionManagerTest, SetWindowFlags03, Function | SmallTest | Level
 {
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     uint32_t flags = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     property->SetWindowFlags(flags);
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     property->SetSystemCalling(true);
     WSError result03 = ssm_->SetWindowFlags(sceneSession, property);
     ASSERT_EQ(result03, WSError::WS_OK);
@@ -411,7 +411,7 @@ HWTEST_F(SceneSessionManagerTest, TerminateSessionNew01, Function | SmallTest | 
 HWTEST_F(SceneSessionManagerTest, TerminateSessionNew, Function | SmallTest | Level3)
 {
     bool needStartCaller = true;
-    sptr<AAFwk::SessionInfo> info = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
     WSError result02 = ssm_->TerminateSessionNew(info, needStartCaller);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, result02);
 }
@@ -499,7 +499,7 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall02, Function | SmallT
     sptr<SceneSession> sceneSession = nullptr;
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    sceneSession = new SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     WSError result02 = ssm_->RequestSceneSessionByCall(sceneSession);
     ASSERT_EQ(result02, WSError::WS_OK);
 }
@@ -551,9 +551,9 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken02, Function | SmallTes
     info.bundleName_ = "test2";
     info.moduleName_ = "test3";
     info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
 }
 
@@ -564,15 +564,15 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken02, Function | SmallTes
  */
 HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken03, Function | SmallTest | Level3)
 {
-    sptr<IRemoteObject> targetToken = new IRemoteObjectMocker();
+    sptr<IRemoteObject> targetToken = sptr<IRemoteObjectMocker>::MakeSptr();
     uint64_t persistentId = 1423;
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     info.moduleName_ = "test3";
     info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     persistentId = 1;
@@ -599,14 +599,14 @@ HWTEST_F(SceneSessionManagerTest, UpdateParentSessionForDialog001, Function | Sm
     parentInfo.bundleName_ = "ParentWindows";
 
     int32_t persistentId = 1005;
-    sptr<SceneSession> parentSession = new (std::nothrow) SceneSession(parentInfo, nullptr);
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
     EXPECT_NE(parentSession, nullptr);
     ssm_->sceneSessionMap_.insert({ persistentId, parentSession });
 
-    sptr<SceneSession> dialogSession = new (std::nothrow) SceneSession(dialogInfo, nullptr);
+    sptr<SceneSession> dialogSession = sptr<SceneSession>::MakeSptr(dialogInfo, nullptr);
     EXPECT_NE(dialogSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetParentPersistentId(persistentId);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
 
@@ -801,10 +801,10 @@ HWTEST_F(SceneSessionManagerTest, UpdateTopmostProperty, Function | SmallTest | 
     SessionInfo info;
     info.abilityName_ = "UpdateTopmostProperty";
     info.bundleName_ = "UpdateTopmostProperty";
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetTopmost(true);
     property->SetSystemCalling(true);
-    sptr<SceneSession> scenesession = new (std::nothrow) MainSession(info, nullptr);
+    sptr<SceneSession> scenesession = sptr<MainSession>::MakeSptr(info, nullptr);
     scenesession->SetSessionProperty(property);
     WMError result = ssm_->UpdateTopmostProperty(property, scenesession);
     ASSERT_EQ(WMError::WM_OK, result);
@@ -833,7 +833,7 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap01, Function | Small
     SessionInfo info;
     info.abilityName_ = "GetPixelMap";
     info.bundleName_ = "GetPixelMap1";
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
 
     int32_t persistentId = 65535;
@@ -852,7 +852,7 @@ HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap02, Function | Small
     SessionInfo info;
     info.abilityName_ = "GetPixelMap";
     info.bundleName_ = "GetPixelMap1";
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
 
     float scaleValue = 0.5f;
@@ -886,7 +886,7 @@ HWTEST_F(SceneSessionManagerTest, GetUIContentRemoteObj, Function | SmallTest | 
     SessionInfo info;
     info.abilityName_ = "GetUIContentRemoteObj";
     info.bundleName_ = "GetUIContentRemoteObj";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({65535, sceneSession});
     EXPECT_EQ(ssm_->GetUIContentRemoteObj(65535, remoteObj), WSError::WS_ERROR_INVALID_PERMISSION);
@@ -937,13 +937,13 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureFloatingWindows, Function | Small
     info.bundleName_ = "HideNonSecureFloatingWindows";
 
     sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
 
     sptr<SceneSession> floatSession;
-    floatSession = new (std::nothrow) SceneSession(info, nullptr);
+    floatSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(floatSession, nullptr);
     floatSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ssm_->nonSystemFloatSceneSessionMap_.insert(std::make_pair(floatSession->GetPersistentId(), floatSession));
@@ -974,13 +974,13 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureSubWindows, Function | SmallTest 
     info.bundleName_ = "HideNonSecureSubWindows";
 
     sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
 
     sptr<SceneSession> subSession;
-    subSession = new (std::nothrow) SceneSession(info, nullptr);
+    subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(subSession, nullptr);
     ASSERT_NE(subSession->GetSessionProperty(), nullptr);
     sceneSession->AddSubSession(subSession);
@@ -1007,13 +1007,13 @@ HWTEST_F(SceneSessionManagerTest, HandleSecureSessionShouldHide, Function | Smal
     info.bundleName_ = "HandleSecureSessionShouldHide";
 
     sptr<SceneSession> sceneSession;
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
 
     sptr<SceneSession> subSession;
-    subSession = new (std::nothrow) SceneSession(info, nullptr);
+    subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(subSession, nullptr);
     ASSERT_NE(subSession->GetSessionProperty(), nullptr);
     sceneSession->AddSubSession(subSession);
@@ -1022,7 +1022,7 @@ HWTEST_F(SceneSessionManagerTest, HandleSecureSessionShouldHide, Function | Smal
     ssm_->sceneSessionMap_.insert(std::make_pair(subSession->GetPersistentId(), subSession));
 
     sptr<SceneSession> floatSession;
-    floatSession = new (std::nothrow) SceneSession(info, nullptr);
+    floatSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(floatSession, nullptr);
     ASSERT_NE(floatSession->GetSessionProperty(), nullptr);
     floatSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
@@ -1149,7 +1149,7 @@ HWTEST_F(SceneSessionManagerTest, SetScreenLocked001, Function | SmallTest | Lev
     sptr<SceneSession> sceneSession = nullptr;
     SessionInfo info;
     info.bundleName_ = "bundleName";
-    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
@@ -1400,7 +1400,7 @@ HWTEST_F(SceneSessionManagerTest, AccessibilityFillTwoHotAreas, Function | Small
     sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
     sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
 
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     std::vector<Rect> hotAreas;
     Rect rectFitst = {100, 200, 100, 200};
     Rect rectSecond = {50, 50, 20, 30};
@@ -1582,7 +1582,7 @@ HWTEST_F(SceneSessionManagerTest, GetAllWindowVisibilityInfos, Function | SmallT
 HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, Function | SmallTest | Level3)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifyEnterRecentTask start";
-    sptr<SceneSessionManager> sceneSessionManager = new SceneSessionManager();
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(nullptr, sceneSessionManager);
 
     ASSERT_EQ(sceneSessionManager->NotifyEnterRecentTask(true), WSError::WS_OK);
@@ -1598,7 +1598,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsEnablePiPCreate start";
     ssm_->isScreenLocked_ = true;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_TRUE(!ssm_->IsEnablePiPCreate(property));
 
     ssm_->isScreenLocked_ = false;
@@ -1617,7 +1617,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     SessionInfo info1;
     info1.abilityName_ = "test1";
     info1.bundleName_ = "test2";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info1, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sceneSession->pipTemplateInfo_ = {0, 100, {}};
@@ -1675,7 +1675,7 @@ HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos001, Function | SmallTest
     applicationInfo.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
     abilityInfo->applicationInfo = applicationInfo;
     info.abilityInfo = abilityInfo;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     if (sceneSession == nullptr) {
         return;
     }
@@ -1732,7 +1732,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo02, Function | SmallTes
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.windowType_ = 2107;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
@@ -1757,7 +1757,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo03, Function | SmallTes
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.windowType_ = 1000;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
@@ -1766,7 +1766,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo03, Function | SmallTes
 
     SessionInfo info2;
     info2.windowType_ = 1001;
-    sptr<WindowSessionProperty> property2 = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property2);
     property2->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property2->SetParentId(sceneSession->GetPersistentId());
@@ -1792,7 +1792,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo04, Function | SmallTes
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.windowType_ = 2105;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
@@ -1817,7 +1817,7 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo05, Function | SmallTes
     ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     info.windowType_ = 2122;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
@@ -2355,14 +2355,14 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
     SessionInfo info;
     info.abilityName_ = "test";
     info.bundleName_ = "test";
-    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession1);
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     DisplayId displayId = 0;
     property->SetDisplayId(displayId);
     sceneSession1->SetSessionProperty(property);

@@ -38,7 +38,7 @@ protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
 
-    /**
+    /*
      * Window Layout
      */
     void NotifySessionRectChange(const WSRect& rect,

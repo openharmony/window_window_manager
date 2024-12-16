@@ -656,7 +656,7 @@ WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
 WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& token,
     const ContinueState& continueState)
 {
-    TLOGI(WmsLogTag::DEFAULT, "in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     auto task = [this, token, continueState, callingUid]() {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
@@ -667,7 +667,7 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& 
         sceneSession->SetSessionInfoContinueState(continueState);
         DistributedClient::GetInstance().SetMissionContinueState(sceneSession->GetPersistentId(),
             static_cast<AAFwk::ContinueState>(continueState), callingUid);
-        TLOGI(WmsLogTag::DEFAULT, "SetSessionContinueState id:%{public}d, continueState:%{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "SetSessionContinueState id:%{public}d, continueState:%{public}d",
             sceneSession->GetPersistentId(), continueState);
         return WSError::WS_OK;
     };
@@ -2646,11 +2646,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
     SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
 {
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "property is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -3980,7 +3975,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
     } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
     }
-    TLOGI(WmsLogTag::DEFAULT, "bundleName:%{public}s removeMissionAfterTerminate:%{public}d "
+    TLOGI(WmsLogTag::WMS_MAIN, "bundleName:%{public}s removeMissionAfterTerminate:%{public}d "
         "excludeFromMissions:%{public}d label:%{public}s iconPath:%{public}s collaboratorType:%{public}s.",
         abilityInfo->bundleName.c_str(), abilityInfo->removeMissionAfterTerminate, abilityInfo->excludeFromMissions,
         abilityInfo->label.c_str(), abilityInfo->iconPath.c_str(), abilityInfo->applicationInfo.codePath.c_str());
@@ -5151,7 +5146,7 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
 WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground,
     FocusChangeReason reason)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
     auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
             if (reason == FocusChangeReason::FOREGROUND) {
@@ -5950,7 +5945,7 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
     FillSecCompEnhanceData(pointerEvent, pointerItem);
 #endif
-    TLOGI(WmsLogTag::WMS_EVENT, "PointerId=%{public}d, action=%{public}d, deviceId=%{public}d, zIndex=%{public}ud",
+    TLOGI(WmsLogTag::WMS_EVENT, "eid=%{public}d,action=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
         pointerEvent->GetPointerId(), pointerEvent->GetPointerAction(), pointerEvent->GetDeviceId(), zIndex);
     pointerEvent->AddFlag(MMI::PointerEvent::EVENT_FLAG_NO_INTERCEPT);
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent, static_cast<float>(zIndex));
@@ -7497,12 +7492,12 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
     std::shared_lock<std::shared_mutex> lock(collaboratorMapLock_);
     auto iter = collaboratorMap_.find(collaboratorType);
     if (iter == collaboratorMap_.end()) {
-        TLOGE(WmsLogTag::DEFAULT, "Fail to found collaborator with type: %{public}d", collaboratorType);
+        TLOGE(WmsLogTag::WMS_MAIN, "Fail to found collaborator with type: %{public}d", collaboratorType);
         return collaborator;
     }
     collaborator = iter->second;
     if (collaborator == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "Find collaborator type %{public}d, but value is nullptr!", collaboratorType);
+        TLOGE(WmsLogTag::WMS_MAIN, "Find collaborator type %{public}d, but value is nullptr!", collaboratorType);
     }
     return collaborator;
 }
@@ -8568,7 +8563,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
 sptr<SceneSession> SceneSessionManager::FindSessionByToken(const sptr<IRemoteObject>& token)
 {
     if (token == nullptr) {
-        TLOGW(WmsLogTag::DEFAULT, "token is nullptr");
+        TLOGW(WmsLogTag::WMS_MAIN, "token is nullptr");
         return nullptr;
     }
     sptr<SceneSession> session = nullptr;
@@ -8619,7 +8614,7 @@ void SceneSessionManager::PreloadInLakeApp(const std::string& bundleName)
 
 WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject>& token)
 {
-    TLOGI(WmsLogTag::DEFAULT, "in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     auto pid = IPCSkeleton::GetCallingRealPid();
     if (!SessionPermission::IsSACalling() && !SessionPermission::CheckCallingIsUserTestMode(pid)) {
         TLOGE(WmsLogTag::DEFAULT, "Permission denied for going to foreground!");
@@ -10977,11 +10972,11 @@ int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
     int32_t height = 0;
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Session with persistentId %{public}d not found", persistentId);
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid, id: %{public}d", persistentId);
         return 0;
     }
     height = sceneSession->GetCustomDecorHeight();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "GetCustomDecorHeight: %{public}d", height);
+    TLOGD(WmsLogTag::WMS_DECOR, "decor height: %{public}d", height);
     return height;
 }
 

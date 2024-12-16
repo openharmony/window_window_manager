@@ -220,10 +220,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyExtensionEventAsync(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MODAL_TYPE_CHANGE):
-            return HandleSessionModalTypeChange(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_SESSION_MODAL_TYPE_CHANGE):
-            return HandleMainSessionModalTypeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
+            return HandleNotifySubModalTypeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_MODAL_TYPE_CHANGE):
+            return HandleNotifyMainModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE):
             return HandleSetWindowRectAutoSave(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY):
@@ -457,7 +457,7 @@ int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& repl
     TLOGD(WmsLogTag::WMS_EVENT, "In!");
     uint32_t eventId;
     if (!data.ReadUint32(eventId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
@@ -469,7 +469,7 @@ int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply)
 {
     bool isLayoutFullScreen = data.ReadBool();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
     WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -1173,10 +1173,10 @@ int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& r
 
 int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
+    TLOGD(WmsLogTag::WMS_DECOR, "In");
     int32_t height = 0;
     if (!data.ReadInt32(height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read height error");
+        TLOGE(WmsLogTag::WMS_DECOR, "read height error");
         return ERR_INVALID_DATA;
     }
     SetCustomDecorHeight(height);
@@ -1293,27 +1293,28 @@ int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
-int SessionStub::HandleSessionModalTypeChange(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t subWindowModalType = 0;
     if (!data.ReadUint32(subWindowModalType)) {
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_HIERARCHY, "subWindowModalType: %{public}u", subWindowModalType);
-    WSError errCode = OnSessionModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
-    reply.WriteInt32(static_cast<int32_t>(errCode));
+    if (subWindowModalType > static_cast<uint32_t>(SubWindowModalType::END)) {
+        return ERR_INVALID_DATA;
+    }
+    NotifySubModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
     return ERR_NONE;
 }
 
-int SessionStub::HandleMainSessionModalTypeChange(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply)
 {
     bool isModal = false;
     if (!data.ReadBool(isModal)) {
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_MAIN, "isModal: %{public}d", isModal);
-    WSError errCode = OnMainSessionModalTypeChange(isModal);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
+    NotifyMainModalTypeChange(isModal);
     return ERR_NONE;
 }
 

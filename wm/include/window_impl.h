@@ -221,8 +221,8 @@ public:
     virtual WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     virtual WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     virtual WMError RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual WMError UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
@@ -336,6 +336,10 @@ private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> void ClearUselessListeners(std::map<uint32_t, T>& listeners, uint32_t winId)
+    {
+        listeners.erase(winId);
+    }
+    template<typename T> void ClearUselessListeners(std::unordered_map<uint32_t, T>& listeners, uint32_t winId)
     {
         listeners.erase(winId);
     }

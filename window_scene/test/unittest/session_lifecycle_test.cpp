@@ -38,7 +38,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-const std::string UNDEFINED = "undefined";
+    const std::string UNDEFINED = "undefined";
 }
 
 class WindowSessionLifecycleTest : public testing::Test {
@@ -89,10 +89,10 @@ void WindowSessionLifecycleTest::SetUp()
     info.abilityName_ = "testSession1";
     info.moduleName_ = "testSession2";
     info.bundleName_ = "testSession3";
-    session_ = new (std::nothrow) Session(info);
+    session_ = sptr<Session>::MakeSptr(info);
     session_->surfaceNode_ = CreateRSSurfaceNode();
     EXPECT_NE(nullptr, session_);
-    ssm_ = new SceneSessionManager();
+    ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
     auto isScreenLockedCallback = [this]() {
         return ssm_->IsScreenLocked();
@@ -142,7 +142,7 @@ HWTEST_F(WindowSessionLifecycleTest, Connect01, Function | SmallTest | Level2)
     auto surfaceNode = CreateRSSurfaceNode();
     session_->state_ = SessionState::STATE_CONNECT;
     SystemSessionConfig systemConfig;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     auto result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -151,12 +151,12 @@ HWTEST_F(WindowSessionLifecycleTest, Connect01, Function | SmallTest | Level2)
     result = session_->Connect(nullptr, nullptr, nullptr, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, mockSessionStage);
     result = session_->Connect(mockSessionStage, nullptr, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
+    sptr<TestWindowEventChannel> testWindowEventChannel = sptr<TestWindowEventChannel>::MakeSptr();
     EXPECT_NE(nullptr, testWindowEventChannel);
     result = session_->Connect(mockSessionStage, testWindowEventChannel, surfaceNode, systemConfig, property);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -171,17 +171,17 @@ HWTEST_F(WindowSessionLifecycleTest, Reconnect01, Function | SmallTest | Level2)
 {
     auto surfaceNode = CreateRSSurfaceNode();
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     auto result = session_->Reconnect(nullptr, nullptr, nullptr, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, mockSessionStage);
     result = session_->Reconnect(mockSessionStage, nullptr, surfaceNode, property);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
+    sptr<TestWindowEventChannel> testWindowEventChannel = sptr<TestWindowEventChannel>::MakeSptr();
     EXPECT_NE(nullptr, testWindowEventChannel);
     result = session_->Reconnect(mockSessionStage, testWindowEventChannel, surfaceNode, nullptr);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
@@ -201,7 +201,7 @@ HWTEST_F(WindowSessionLifecycleTest, Reconnect01, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionLifecycleTest, Foreground01, Function | SmallTest | Level2)
 {
     session_->state_ = SessionState::STATE_DISCONNECT;
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     auto result = session_->Foreground(property);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
@@ -346,7 +346,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, Function | SmallTest
 
     bool needStartCaller = false;
     bool isFromBroker = false;
-    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
     session_->terminateSessionFuncNew_ = nullptr;
     session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
 
@@ -363,7 +363,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew02, Function | SmallTest
 {
     bool needStartCaller = true;
     bool isFromBroker = true;
-    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
     session_->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {});
     usleep(WAIT_SYNC_IN_NS);
     auto result = session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
@@ -377,7 +377,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew02, Function | SmallTest
  */
 HWTEST_F(WindowSessionLifecycleTest, NotifyDestroy, Function | SmallTest | Level2)
 {
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), NotifyDestroy()).Times(1).WillOnce(Return(WSError::WS_OK));
@@ -550,7 +550,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal01, Function | SmallTe
 HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     session_->isTerminating_ = true;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION,
             session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
@@ -564,7 +564,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal02, Function | SmallTe
 HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     session_->isTerminating_ = false;
     session_->SetTerminateSessionListenerTotal(nullptr);
     ASSERT_EQ(WSError::WS_OK,
@@ -664,7 +664,7 @@ HWTEST_F(WindowSessionLifecycleTest, Hide45, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionLifecycleTest, Show46, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     auto result = session_->Show(property);
     ASSERT_EQ(result, WSError::WS_OK);
