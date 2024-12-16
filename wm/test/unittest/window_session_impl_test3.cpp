@@ -685,6 +685,36 @@ HWTEST_F(WindowSessionImplTest3, SetRequestedOrientation, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetTargetAPIVersion
+ * @tc.desc: SetTargetAPIVersion
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetTargetAPIVersion, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTargetAPIVersion start";
+    window_ = GetTestWindowImpl("SetAPPWindowIcon");
+    ASSERT_NE(window_, nullptr);
+    uint32_t version = 14;
+    window_->SetTargetAPIVersion(version);
+    EXPECT_EQ(version, window_->GetTargetAPIVersion());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTargetAPIVersion end";
+}
+
+/**
+ * @tc.name: SetAPPWindowIcon
+ * @tc.desc: SetAPPWindowIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetTargetAPIVersion, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetTargetAPIVersion start";
+    window_ = GetTestWindowImpl("GetTargetAPIVersion");
+    ASSERT_NE(window_, nullptr);
+    EXPECT_EQ(0, window_->GetTargetAPIVersion());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetTargetAPIVersion end";
+}
+
+/**
  * @tc.name: SetAPPWindowIcon
  * @tc.desc: SetAPPWindowIcon
  * @tc.type: FUNC
