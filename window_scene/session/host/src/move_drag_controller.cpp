@@ -188,11 +188,11 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         return false;
     }
 
-    SizeChangeReason reason = SizeChangeReason::MOVE;
+    SizeChangeReason reason = SizeChangeReason::DRAG_MOVE;
     bool ret = true;
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
-            reason = SizeChangeReason::MOVE;
+            reason = SizeChangeReason::DRAG_MOVE;
             uint32_t oldWindowDragHotAreaType = windowDragHotAreaType_;
             UpdateHotAreaType(pointerEvent);
             ProcessWindowDragHotAreaFunc(oldWindowDragHotAreaType != windowDragHotAreaType_, reason);
@@ -757,7 +757,7 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
     WLOGFD("first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_, targetRect.posY_,
         targetRect.width_, targetRect.height_);
     moveDragProperty_.targetRect_ = targetRect;
-    ProcessSessionRectChange(SizeChangeReason::MOVE);
+    ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
 }
 
 bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
