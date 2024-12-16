@@ -2865,9 +2865,9 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = nullptr;
-    if (argc > INDEX_ZERO && GetType(env, argv[INDEX_ZERO]) == napi_function) {
+    if (argc > 0 && GetType(env, argv[INDEX_ZERO]) == napi_function) {
         lastParam = argv[INDEX_ZERO];
-    } else if (argc > INDEX_ONE && GetType(env, argv[INDEX_ONE]) == napi_function) {
+    } else if (argc > 1 && GetType(env, argv[INDEX_ONE]) == napi_function) {
         lastParam = argv[INDEX_ONE];
     }
     napi_value result = nullptr;
@@ -2919,9 +2919,9 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value lastParam = nullptr;
-    if (argc >= INDEX_ONE && argv[INDEX_ZERO] != nullptr && GetType(env, argv[INDEX_ZERO]) == napi_function) {
+    if (argc >= 1 && argv[INDEX_ZERO] != nullptr && GetType(env, argv[INDEX_ZERO]) == napi_function) {
         lastParam = argv[INDEX_ZERO];
-    } else if (argc >= INDEX_TWO && argv[INDEX_ONE] != nullptr && GetType(env, argv[INDEX_ONE]) == napi_function) {
+    } else if (argc >= 2 && argv[INDEX_ONE] != nullptr && GetType(env, argv[INDEX_ONE]) == napi_function) {
         lastParam = argv[INDEX_ONE];
     }
     napi_value result = nullptr;
@@ -2959,14 +2959,13 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     std::string name;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], name) ||
-        (name.compare("status") != 0 && name.compare("navigation") != 0 &&
-        name.compare("navigationIndicator") != 0)) {
+        (name.compare("status") != 0 && name.compare("navigation") != 0 && name.compare("navigationIndicator") != 0)) {
         TLOGE(WmsLogTag::WMS_IMMS, "invalid systemBar name.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     auto systemBarType = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
-        (name.compare("navigation") == INDEX_ZERO) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
-        WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
+        ((name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
+        WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     bool systemBarEnable = false;
     bool systemBarEnableAnimation = false;
     if (argc < INDEX_ONE || !GetSpecificBarStatus(env, info, systemBarEnable, systemBarEnableAnimation)) {
@@ -3017,7 +3016,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
 
     std::map<WindowType, SystemBarProperty> systemBarProperties;
     std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-    if (argc < INDEX_ONE || argc > INDEX_TWO || argv[INDEX_ZERO] == nullptr ||
+    if (argc < 1 || argc > 2 || argv[INDEX_ZERO] == nullptr ||
         !GetSystemBarPropertiesFromJs(env, argv[INDEX_ZERO], systemBarProperties, systemBarPropertyFlags)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_INVALID_PARAM));
@@ -3060,7 +3059,7 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
 
     std::map<WindowType, SystemBarProperty> systemBarProperties;
     std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
-    if (argc < INDEX_ONE || argv[INDEX_ZERO] == nullptr ||
+    if (argc < 1 || argv[INDEX_ZERO] == nullptr ||
         !GetSystemBarPropertiesFromJs(env, argv[INDEX_ZERO], systemBarProperties, systemBarPropertyFlags)) {
         TLOGE(WmsLogTag::WMS_IMMS, "argc is invalid or failed to convert parameter");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
