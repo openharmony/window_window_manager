@@ -37,12 +37,12 @@ public:
     void LoadContent(
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
 
-    /**
+    /*
      * Window Layout
      */
     void SetRootSessionRect(const WSRect& rect);
 
-    /**
+    /*
      * Window Immersive
      */
     AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
@@ -51,7 +51,7 @@ public:
 private:
     LoadContentFunc loadContentFunc_;
 
-    /**
+    /*
      * Window Immersive
      */
     void GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);

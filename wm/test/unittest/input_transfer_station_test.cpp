@@ -93,10 +93,13 @@ HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Lev
 {
     InputTransferStation::GetInstance().destroyed_ = true;
     InputTransferStation::GetInstance().RemoveInputWindow(window_->GetWindowId());
+
     InputTransferStation::GetInstance().destroyed_ = false;
+    sptr<WindowInputChannel> inputChannel = sptr<WindowInputChannel>::MakeSptr(window_);
+    InputTransferStation::GetInstance().windowInputChannels_.insert({window_->GetWindowId(), inputChannel});
     InputTransferStation::GetInstance().RemoveInputWindow(window_->GetWindowId());
-    InputTransferStation::GetInstance().AddInputWindow(window_);
-    InputTransferStation::GetInstance().RemoveInputWindow(window_->GetWindowId());
+    auto iter = InputTransferStation::GetInstance().windowInputChannels_.find(window_->GetWindowId());
+    ASSERT_EQ(iter, InputTransferStation::GetInstance().windowInputChannels_.end());
 }
 
 /**

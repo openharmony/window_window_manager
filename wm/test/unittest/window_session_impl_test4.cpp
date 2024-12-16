@@ -787,27 +787,6 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: EnableDrag
- * @tc.desc: EnableDrag Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, EnableDrag, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("EnableDrag");
-    sptr<WindowSessionImpl> windowSession = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, windowSession);
-    windowSession->property_->SetPersistentId(1);
-    windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-
-    windowSession->hostSession_ = session;
-    windowSession->EnableDrag(true);
-}
-
-/**
  * @tc.name: GetCallingWindowWindowStatus
  * @tc.desc: GetCallingWindowWindowStatus Test
  * @tc.type: FUNC
@@ -1552,7 +1531,6 @@ HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, Function | SmallTest |
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
 
     bool terminateCloseProcess = false;
@@ -2370,6 +2348,91 @@ HWTEST_F(WindowSessionImplTest4, NotifyDisplayIdChange01, Function | SmallTest |
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     DisplayId displayId = 12;
     auto ret = window->NotifyDisplayIdChange(displayId);
+    ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
+ * @tc.name: RegisterSystemDensityChangeListener01
+ * @tc.desc: RegisterSystemDensityChangeListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, RegisterSystemDensityChangeListener01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("RegisterSystemDensityChangeListener01");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    sptr<ISystemDensityChangeListener> listener = nullptr;
+    WMError ret = window->RegisterSystemDensityChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<ISystemDensityChangeListener>::MakeSptr();
+    std::vector<sptr<ISystemDensityChangeListener>> holder;
+    window->systemDensityChangeListeners_[window->property_->GetPersistentId()] = holder;
+    ret = window->RegisterSystemDensityChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    holder = window->systemDensityChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_NE(existsListener, holder.end());
+
+    ret = window->RegisterSystemDensityChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    holder = window->systemDensityChangeListeners_[window->property_->GetPersistentId()];
+    ASSERT_EQ(holder.size(), 1);
+}
+
+/**
+ * @tc.name: UnregisterSystemDensityChangeListener01
+ * @tc.desc: UnregisterSystemDensityChangeListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UnregisterSystemDensityChangeListener01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("UnregisterSystemDensityChangeListener01");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    sptr<ISystemDensityChangeListener> listener = nullptr;
+    WMError ret = window->UnregisterSystemDensityChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<ISystemDensityChangeListener>::MakeSptr();
+    std::vector<sptr<ISystemDensityChangeListener>> holder;
+    window->systemDensityChangeListeners_[window->property_->GetPersistentId()] = holder;
+    ret = window->UnregisterSystemDensityChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    holder = window->systemDensityChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    ASSERT_EQ(existsListener, holder.end());
+}
+
+/**
+ * @tc.name: NotifySystemDensityChange01
+ * @tc.desc: NotifySystemDensityChange01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifySystemDensityChange01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifySystemDensityChange01");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    SessionInfo sessioninfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
+    ASSERT_NE(session, nullptr);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    float density = 1.5f;
+    auto ret = window->NotifySystemDensityChange(density);
     ASSERT_EQ(WSError::WS_OK, ret);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }

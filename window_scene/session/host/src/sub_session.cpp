@@ -238,22 +238,14 @@ bool SubSession::IsTopmost() const
 
 bool SubSession::IsModal() const
 {
-    bool isModal = false;
-    auto property = GetSessionProperty();
-    if (property != nullptr) {
-        isModal = WindowHelper::IsModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
-    }
-    return isModal;
+    return WindowHelper::IsModalSubWindow(GetSessionProperty()->GetWindowType(),
+                                          GetSessionProperty()->GetWindowFlags());
 }
 
 bool SubSession::IsApplicationModal() const
 {
-    bool isAppModal = false;
-    auto property = GetSessionProperty();
-    if (property != nullptr) {
-        isAppModal = WindowHelper::IsApplicationModalSubWindow(property->GetWindowType(), property->GetWindowFlags());
-    }
-    return isAppModal;
+    return WindowHelper::IsApplicationModalSubWindow(GetSessionProperty()->GetWindowType(),
+                                                     GetSessionProperty()->GetWindowFlags());
 }
 
 bool SubSession::IsVisibleForeground() const

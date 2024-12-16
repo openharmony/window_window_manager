@@ -70,7 +70,8 @@ HWTEST_F(PrivateWindowTest, RegisterPrivateWindowListener, Function | MediumTest
 {
     auto& dm = DisplayManager::GetInstance();
     sptr<PrivateWindowListener> listener_ = new PrivateWindowListener();
-    dm.RegisterPrivateWindowListener(listener_);
+    auto ret = dm.RegisterPrivateWindowListener(listener_);
+    ASSERT_EQ(DMError::DM_OK, ret);
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("private", option);
     if (window == nullptr) {
@@ -78,7 +79,8 @@ HWTEST_F(PrivateWindowTest, RegisterPrivateWindowListener, Function | MediumTest
     }
     window->SetPrivacyMode(true);
     window->Show();
-    dm.UnregisterPrivateWindowListener(listener_);
+    auto ret1 = dm.UnregisterPrivateWindowListener(listener_);
+    ASSERT_EQ(DMError::DM_OK, ret1);
     window->Destroy();
 }
 } // namespace

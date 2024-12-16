@@ -668,8 +668,7 @@ WSError Session::SetTouchable(bool touchable)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (touchable != GetSessionProperty()->GetTouchable()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d touchable:%{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     UpdateSessionTouchable(touchable);
     return WSError::WS_OK;
@@ -683,8 +682,7 @@ bool Session::GetTouchable() const
 void Session::SetForceTouchable(bool forceTouchable)
 {
     if (forceTouchable != forceTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
-            static_cast<int>(forceTouchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), forceTouchable);
     }
     forceTouchable_ = forceTouchable;
 }
@@ -692,8 +690,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
-            static_cast<int>(touchable));
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     systemTouchable_ = touchable;
     NotifySessionInfoChange();
@@ -702,20 +699,6 @@ void Session::SetSystemTouchable(bool touchable)
 bool Session::GetSystemTouchable() const
 {
     return forceTouchable_ && systemTouchable_ && GetTouchable();
-}
-
-bool Session::GetRectChangeBySystem() const
-{
-    return rectChangeBySystem_.load();
-}
-
-void Session::SetRectChangeBySystem(bool rectChangeBySystem)
-{
-    if (rectChangeBySystem_.load() != rectChangeBySystem) {
-        rectChangeBySystem_.store(rectChangeBySystem);
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rectChangeBySystem_:%{public}d", GetPersistentId(),
-            rectChangeBySystem);
-    }
 }
 
 bool Session::IsSystemActive() const
@@ -774,7 +757,7 @@ int32_t Session::GetWindowId() const
 
 void Session::SetCallingPid(int32_t id)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, callingPid:%{public}u", persistentId_, id);
+    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", persistentId_, id);
     callingPid_ = id;
     if (isVisible_) {
         visibilityChangedDetectFunc_(callingPid_, false, isVisible_);
@@ -1171,12 +1154,11 @@ void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& pro
     auto defaultDragEnable = false;
     auto isSystemWindow = WindowHelper::IsSystemWindow(property->GetWindowType());
     bool isDialog = WindowHelper::IsDialogWindow(property->GetWindowType());
-    bool isSubWindow = WindowHelper::IsSubWindow(property->GetWindowType());
     bool isSystemCalling = property->GetSystemCalling();
     TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, defaultDragEnable: %{public}d, isSystemWindow: %{public}d, "
-        "isDialog: %{public}d, isSubWindow: %{public}d, isSystemCalling: %{public}d", GetPersistentId(),
-        defaultDragEnable, isSystemWindow, isDialog, isSubWindow, isSystemCalling);
-    if (isSystemWindow && !isSubWindow && !isDialog && !isSystemCalling) {
+        "isDialog: %{public}d, isSystemCalling: %{public}d", GetPersistentId(), defaultDragEnable,
+        isSystemWindow, isDialog, isSystemCalling);
+    if (isSystemWindow && !isDialog && !isSystemCalling) {
         property->SetDragEnabled(defaultDragEnable);
     }
 }
@@ -1465,7 +1447,7 @@ void Session::NotifyForegroundInteractiveStatus(bool interactive)
 void Session::SetForegroundInteractiveStatus(bool interactive)
 {
     if (interactive != GetForegroundInteractiveStatus()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d interactive:%{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(),
             static_cast<int>(interactive));
     }
     foregroundInteractiveStatus_.store(interactive);
@@ -2569,7 +2551,7 @@ WSError Session::UpdateFocus(bool isFocused)
 WSError Session::NotifyFocusStatus(bool isFocused)
 {
     if (!IsSessionValid()) {
-        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGD(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -3068,15 +3050,15 @@ sptr<ScenePersistence> Session::GetScenePersistence() const
     return scenePersistence_;
 }
 
-bool Session::CheckIfNeedKeyboardAvoidAreaEmpty() const
+bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
 {
     bool isMainFloating =
-            GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && WindowHelper::IsMainWindow(GetWindowType());
-    bool isParentFloating = (WindowHelper::IsSubWindow(GetWindowType()) && GetParentSession() != nullptr &&
-                            GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+        GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && WindowHelper::IsMainWindow(GetWindowType());
+    bool isParentFloating = WindowHelper::IsSubWindow(GetWindowType()) && GetParentSession() != nullptr &&
+        GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     bool isMidScene = GetIsMidScene();
     bool isPhoneOrPadNotFreeMultiWindow =
-            systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+        systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 
@@ -3087,9 +3069,9 @@ void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
         TLOGD(WmsLogTag::WMS_KEYBOARD, "session stage is nullptr");
         return;
     }
-    if (CheckIfNeedKeyboardAvoidAreaEmpty()) {
+    if (CheckEmptyKeyboardAvoidAreaIfNeeded()) {
         info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Occupied area need to empty when in floating mode");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Occupied area needs to be empty when in floating mode");
     }
     sessionStage_->NotifyOccupiedAreaChangeInfo(info, rsTransaction);
 }
@@ -3580,9 +3562,9 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::TOUCH_HOT_AREA);
     std::string rectStr;
     for (const auto& rect : touchHotAreas) {
-        rectStr = rectStr + " hot : " + rect.ToString();
+        rectStr = rectStr + " " + rect.ToString();
     }
-    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d rects:%{public}s", GetPersistentId(), rectStr.c_str());
+    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d hot:%{public}s", GetPersistentId(), rectStr.c_str());
     GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
 }
 
@@ -3656,5 +3638,35 @@ bool Session::IsVisible() const
 std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
 {
     return handler_;
+}
+
+std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam, bool isFreeze) const
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "GetSnapshotWithFreeze[%d][%s]",
+        persistentId_, sessionInfo_.bundleName_.c_str());
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+        return nullptr;
+    }
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    auto scaleValue = (scaleParam < 0.0f || scaleParam < std::numeric_limits<float>::min()) ?
+        snapshotScale_ : scaleParam;
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleValue,
+        .scaleY = scaleValue,
+        .useDma = true,
+        .useCurWindow = true,
+    };
+    bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config);
+    if (!ret) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed");
+        return nullptr;
+    }
+    if (isFreeze) {
+        auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+        TLOGI(WmsLogTag::WMS_PATTERN, "get result: %{public}d, id: %{public}d", pixelMap != nullptr, persistentId_);
+        return pixelMap;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Rosen

@@ -992,9 +992,6 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "testVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
 
     std::vector<ScreenId> mirrorScreenIds;
     ScreenId mainScreenId(DEFAULT_SCREEN_ID);
@@ -1003,16 +1000,15 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
     mirrorScreenIds.push_back(VIRTUAL_SCREEN_ID);
     ASSERT_NE(DMError::DM_OK, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
 
-    auto result1 = ssm_->SetVirtualScreenSurface(VIRTUAL_SCREEN_ID, nullptr);
+    mirrorScreenIds.push_back(screenId);
+    ASSERT_EQ(DMError::DM_OK, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
+
+    auto result1 = ssm_->SetVirtualScreenSurface(screenId, nullptr);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, result1);
     sptr<IConsumerSurface> surface = OHOS::IConsumerSurface::Create();
-    auto result2 = ssm_->SetVirtualScreenSurface(VIRTUAL_SCREEN_ID, surface->GetProducer());
-    if (DMError::DM_ERROR_RENDER_SERVICE_FAILED == result2) {
-        ASSERT_EQ(DMError::DM_ERROR_RENDER_SERVICE_FAILED, result2);
-    }
-    if (DMError::DM_OK != result2) {
-        ASSERT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(VIRTUAL_SCREEN_ID));
-    }
+    auto result2 = ssm_->SetVirtualScreenSurface(screenId, surface->GetProducer());
+    ASSERT_EQ(DMError::DM_OK, result2);
+    ASSERT_EQ(DMError::DM_OK, ssm_->DestroyVirtualScreen(screenId));
 }
 
 /**
@@ -3256,7 +3252,7 @@ HWTEST_F(ScreenSessionManagerTest, GetPrimaryDisplayInfo, Function | SmallTest |
     ASSERT_NE(ssm_->GetPrimaryDisplayInfo(), nullptr);
 }
 
-/**
+/*
  * @tc.name: TransferTypeToString
  * @tc.desc: TransferTypeToString
  * @tc.type: FUNC
@@ -3353,6 +3349,64 @@ HWTEST_F(ScreenSessionManagerTest, TransferPropertyChangeTypeToString4, Function
         ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
     std::string expectType = "ROTATION_UPDATE_PROPERTY_ONLY";
     ASSERT_EQ(screenType, expectType);
+}
+
+/**
+ * @tc.name: ConvertOffsetToCorrectRotation
+ * @tc.desc: ConvertOffsetToCorrectRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertOffsetToCorrectRotation, Function | SmallTest | Level3)
+{
+    int32_t phyOffset = 90;
+    ASSERT_EQ(ssm_->ConvertOffsetToCorrectRotation(phyOffset), ScreenRotation::ROTATION_270);
+    phyOffset = 180;
+    ASSERT_EQ(ssm_->ConvertOffsetToCorrectRotation(phyOffset), ScreenRotation::ROTATION_180);
+    phyOffset = 270;
+    ASSERT_EQ(ssm_->ConvertOffsetToCorrectRotation(phyOffset), ScreenRotation::ROTATION_90);
+    phyOffset = 0;
+    ASSERT_EQ(ssm_->ConvertOffsetToCorrectRotation(phyOffset), ScreenRotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: ConfigureScreenSnapshotParams
+ * @tc.desc: ConfigureScreenSnapshotParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConfigureScreenSnapshotParams, Function | SmallTest | Level3)
+{
+    ssm_->OnStart();
+    auto stringConfig = ScreenSceneConfig::GetStringConfig();
+    ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 0);
+    ssm_->ConfigureScreenSnapshotParams();
+}
+
+/**
+ * @tc.name: RegisterRefreshRateChangeListener
+ * @tc.desc: RegisterRefreshRateChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RegisterRefreshRateChangeListener, Function | SmallTest | Level3)
+{
+    ssm_->RegisterRefreshRateChangeListener();
+    std::string ret = ssm_->screenEventTracker_.recordInfos_.back().info;
+    ASSERT_NE(ret, "Dms RefreshRateChange register failed.");
+}
+
+/**
+ * @tc.name: FreeDisplayMirrorNodeInner
+ * @tc.desc: FreeDisplayMirrorNodeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, FreeDisplayMirrorNodeInner, Function | SmallTest | Level3)
+{
+    sptr<ScreenSession> mirrorSession = nullptr;
+    ssm_->FreeDisplayMirrorNodeInner(mirrorSession);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_EQ(ssm_->GetScreenSession(screenId)->GetDisplayNode(), nullptr);
 }
 }
 } // namespace Rosen
