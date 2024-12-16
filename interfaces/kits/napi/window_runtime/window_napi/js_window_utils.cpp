@@ -1063,6 +1063,7 @@ std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,
             std::unique_ptr<NapiAsyncTask::CompleteCallback>());
     }
 }
+
 napi_value ModalityTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);

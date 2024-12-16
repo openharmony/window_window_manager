@@ -36,7 +36,7 @@ public:
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
 
-    /**
+    /*
      * PC Window
      */
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,

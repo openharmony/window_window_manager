@@ -1116,7 +1116,7 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
 void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func)
 {
     const char* const funcName = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), funcName] {
+    PostTask([weakThis = wptr(this), func = std::move(func), funcName] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_IMMS, "session or TitleAndDockHoverShowChangeFunc is null");
@@ -1125,8 +1125,7 @@ void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHove
         session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d",
             funcName, session->GetPersistentId());
-    };
-    PostTask(task, funcName);
+    }, funcName);
 }
 
 void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
