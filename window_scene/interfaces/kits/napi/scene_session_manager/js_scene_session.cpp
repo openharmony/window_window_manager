@@ -3774,7 +3774,7 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
             persistentId, LifeCycleTaskType::START);
         auto session = weakSession.promote();
         if (session == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]session is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return;
         }
         bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
@@ -3785,7 +3785,8 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
         }
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "[NAPI]jsSceneSession id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "PendingSessionActivationInner jsSceneSession "
+                "id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(PENDING_SCENE_CB);
