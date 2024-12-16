@@ -1308,7 +1308,7 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateAvoidAreaOption, Function | SmallT
 
     sessionProperty->SetAvoidAreaOption(3);
     session->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    WMError ret = session->HandleActionUpdateAvoidAreaOption(sessionProperty, action);
+    ret = session->HandleActionUpdateAvoidAreaOption(sessionProperty, action);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 
@@ -1346,7 +1346,7 @@ HWTEST_F(SceneSessionTest4, GetSystemAvoidArea, Function | SmallTest | Level2)
 
     WSRect rect1({1, 1, 1, 1});
     AvoidArea avoidArea;
-    sceneSession->GetSystemAvoidArea(rect, avoidArea);
+    sceneSession->GetSystemAvoidArea(rect1, avoidArea);
     
     WSRect rect2({1, 1, 1, 1});
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
