@@ -1124,7 +1124,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
-    TLOGI(WmsLogTag::WMS_MAIN, "windId: %{public}d, requestedOrientation: %{public}u,"
+    TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
         " defaultRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
