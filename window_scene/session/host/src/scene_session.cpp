@@ -5968,13 +5968,15 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
         }
         auto parentTransX = globalRect.posX_ - session->GetSessionRect().posX_;
         auto parentTransY = globalRect.posY_ - session->GetSessionRect().posY_;
-        std::unique_lock<std::shared_mutex> lock(session->modalUIExtensionInfoListMutex_);
-        for (auto iter = session->modalUIExtensionInfoList_.begin();
-            iter != session->modalUIExtensionInfoList_.end(); iter++) {
-            if (iter->hasUpdatedRect) {
-                Rect windowRect = { iter->uiExtRect.posX_ + parentTransX, iter->uiExtRect.posY_ + parentTransY,
-                    iter->uiExtRect.width_, iter->uiExtRect.height_ };
-                iter->windowRect = windowRect;
+        {
+            std::unique_lock<std::shared_mutex> lock(session->modalUIExtensionInfoListMutex_);
+            for (auto& extensionInfo : session->modalUIExtensionInfoList_) {
+                if (!extensionInfo.hasUpdatedRect) {
+                    continue;
+                }
+                extensionInfo.windowRect = extensionInfo.uiExtRect;
+                extensionInfo.windowRect.posX_ += parentTransX;
+                extensionInfo.windowRect.posX_ += parentTransY;
             }
         }
         session->NotifySessionInfoChange();
