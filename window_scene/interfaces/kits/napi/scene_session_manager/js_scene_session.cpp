@@ -5366,7 +5366,6 @@ napi_value JsSceneSession::OnSetBehindWindowFilterEnabled(napi_env env, napi_cal
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
     bool enabled = true;
     if (!ConvertFromJsValue(env, argv[0], enabled)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to enabled");
