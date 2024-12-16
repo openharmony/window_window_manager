@@ -9871,10 +9871,12 @@ bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
             }
             auto sysBarProperty = sceneSession->GetSessionProperty()->GetSystemBarProperty();
             if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
-                TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s window is immersive. id: %{public}d", where, sceneSession->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s window is immersive. id: %{public}d", where,
+                    sceneSession->GetPersistentId());
                 return true;
             } else {
-                TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s statusBar is enabled. id: %{public}d", where, sceneSession->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s statusBar is enabled. id: %{public}d", where,
+                    sceneSession->GetPersistentId());
                 break;
             }
         }
