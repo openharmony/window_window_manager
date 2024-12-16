@@ -31,7 +31,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Session
 constexpr int32_t MAX_INFO_SIZE = 50;
 constexpr size_t MAX_PARCEL_CAPACITY = 100 * 1024 * 1024; // 100M
 
-bool CopyBufferFromRawData(void *&buffer, size_t size, const void *data)
+bool CopyBufferFromRawData(void*& buffer, size_t size, const void* data)
 {
     if (data == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "data is nullptr");
@@ -53,6 +53,58 @@ bool CopyBufferFromRawData(void *&buffer, size_t size, const void *data)
         free(buffer);
         TLOGE(WmsLogTag::WMS_UIEXT, "memcpy_s failed");
         return false;
+    }
+
+    return true;
+}
+
+bool ReadLittleStringVectorFromParcel(MessageParcel& reply, std::vector<std::string>& infos)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
+    if (!reply.ReadStringVector(&infos)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read string vector failed");
+        return false;
+    }
+    return true;
+}
+
+bool ReadLargeStringVectorFromParcel(MessageParcel& reply, std::vector<std::string>& infos)
+{
+    int32_t dataSizeInt = 0;
+    if (!reply.ReadInt32(dataSizeInt) || dataSizeInt == 0) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read dataSize failed");
+        return false;
+    }
+
+    size_t dataSize = static_cast<size_t>(dataSizeInt);
+    void* buffer = nullptr;
+    if (!CopyBufferFromRawData(buffer, dataSize, reply.ReadRawData(dataSize))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read rawData failed, dataSize: %{public}zu", dataSize);
+        return false;
+    }
+
+    MessageParcel readParcel;
+    if (!readParcel.ParseFrom(reinterpret_cast<uintptr_t>(buffer), dataSize)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Parse from buffer failed");
+        return false;
+    }
+
+    int32_t infoSize = 0;
+    if (!readParcel.ReadInt32(infoSize)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read infoSize failed");
+        return false;
+    }
+
+    TLOGD(WmsLogTag::WMS_UIEXT, "dataSize: %{public}zu, infoSize: %{public}d", dataSize, infoSize);
+    if (infoSize >= MAX_INFO_SIZE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Too big infos, infoSize: %{public}d", infoSize);
+        return false;
+    }
+
+    infos.clear();
+    infos.reserve(infoSize);
+    for (int32_t i = 0; i < infoSize; i++) {
+        infos.emplace_back(readParcel.ReadString());
     }
 
     return true;
@@ -1120,57 +1172,6 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     }
 }
 
-bool SessionStageProxy::ReadSmallStringVectorFromParcel(MessageParcel& reply, std::vector<std::string>& infos)
-{
-    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
-    if (!reply.ReadStringVector(&infos)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Read string vector failed");
-        return false;
-    }
-    return true;
-}
-
-bool SessionStageProxy::ReadBigStringVectorFromParcel(MessageParcel& reply, std::vector<std::string>& infos)
-{
-    int32_t dataSizeInt = 0;
-    if (!reply.ReadInt32(dataSizeInt) || dataSizeInt == 0) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Read dataSize failed");
-        return false;
-    }
-
-    size_t dataSize = static_cast<size_t>(dataSizeInt);
-    void *buffer = nullptr;
-    if (!CopyBufferFromRawData(buffer, dataSize, reply.ReadRawData(dataSize))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Read rawData failed, dataSize: %{public}zu", dataSize);
-        return false;
-    }
-
-    MessageParcel tempParcel;
-    if (!tempParcel.ParseFrom(reinterpret_cast<uintptr_t>(buffer), dataSize)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Parse from buffer failed");
-        return false;
-    }
-
-    int32_t infoSize = 0;
-    if (!tempParcel.ReadInt32(infoSize)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Read infoSize failed");
-        return false;
-    }
-
-    TLOGD(WmsLogTag::WMS_UIEXT, "dataSize: %{public}zu, infoSize: %{public}d", dataSize, infoSize);
-    if (infoSize >= MAX_INFO_SIZE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Too big infos, infoSize: %{public}d", infoSize);
-        return false;
-    }
-
-    infos.clear();
-    for (int32_t i = 0; i < infoSize; i++) {
-        infos.emplace_back(tempParcel.ReadString());
-    }
-
-    return true;
-}
-
 WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -1195,14 +1196,14 @@ WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    bool smallData = false;
-    if (!reply.ReadBool(smallData)) {
+    bool isLittleSize = false;
+    if (!reply.ReadBool(isLittleSize)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "ReadBool failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    bool readResult = smallData? ReadSmallStringVectorFromParcel(reply, info) :
-        ReadBigStringVectorFromParcel(reply, info);
+    bool readResult = isLittleSize ? ReadLittleStringVectorFromParcel(reply, info) :
+        ReadLargeStringVectorFromParcel(reply, info);
     if (!readResult) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read data failed");
         return WSError::WS_ERROR_IPC_FAILED;
