@@ -20,6 +20,7 @@
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "window.h"
+#include "window_helper.h"
 
 #ifndef WINDOW_PREVIEW
 #include "window_manager.h"
@@ -315,6 +316,7 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
         const SystemBarRegionTints& tints);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
     bool CheckCallingPermission(std::string permission);
+    bool ParseSystemWindowTypeForApiWindowType(int32_t apiWindowType, WindowType& windowType);
     napi_value WindowTypeInit(napi_env env);
     napi_value AvoidAreaTypeInit(napi_env env);
     napi_value WindowModeInit(napi_env env);
@@ -332,6 +334,7 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ModalityTypeInit(napi_env env);
+    napi_value ExtensionWindowAttributeInit(napi_env env);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,

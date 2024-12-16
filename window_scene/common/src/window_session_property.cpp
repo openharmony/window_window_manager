@@ -1020,6 +1020,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isLayoutFullScreen_) &&
         parcel.WriteInt32(realParentId_) &&
         parcel.WriteBool(isExtensionFlag_) &&
+        parcel.WriteBool(isUIExtensionAbilityProcess_) &&
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
         MarshallingWindowMask(parcel) &&
@@ -1087,6 +1088,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsLayoutFullScreen(parcel.ReadBool());
     property->SetRealParentId(parcel.ReadInt32());
     property->SetExtensionFlag(parcel.ReadBool());
+    property->SetIsUIExtensionAbilityProcess(parcel.ReadBool());
     property->SetUIExtensionUsage(static_cast<UIExtensionUsage>(parcel.ReadUint32()));
     property->SetParentWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     UnmarshallingWindowMask(parcel, property);
@@ -1483,6 +1485,16 @@ void WindowSessionProperty::SetIsUIExtensionSubWindowFlag(bool isUIExtensionSubW
 bool WindowSessionProperty::GetIsUIExtensionSubWindowFlag() const
 {
     return isUIExtensionSubWindowFlag_;
+}
+
+void WindowSessionProperty::SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess)
+{
+    isUIExtensionAbilityProcess_ = isUIExtensionAbilityProcess;
+}
+
+bool WindowSessionProperty::GetIsUIExtensionAbilityProcess() const
+{
+    return isUIExtensionAbilityProcess_;
 }
 
 void WindowSessionProperty::SetUIExtensionUsage(UIExtensionUsage uiExtensionUsage)
