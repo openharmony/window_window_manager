@@ -3422,7 +3422,6 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
-        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
@@ -3815,11 +3814,6 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
 WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property dragEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetDragEnabled(property->GetDragEnabled());

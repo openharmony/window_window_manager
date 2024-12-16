@@ -171,21 +171,14 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateWindowLimits, Function | SmallTest
 HWTEST_F(SceneSessionTest4, HandleActionUpdateDragenabled, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     OHOS::Rosen::Session session(info);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    session.property_ = property;
 
-    sceneSession->HandleActionUpdateDragenabled(property, sceneSession, action);
-
-    session.property_ = new WindowSessionProperty();
-    sceneSession->HandleActionUpdateDragenabled(property, sceneSession, action);
-
-    OHOS::Rosen::WindowSessionProperty windowSessionProperty;
-    windowSessionProperty.isSystemCalling_ = {true};
-    sceneSession->HandleActionUpdateDragenabled(property, sceneSession, action);
+    WMError res = sceneSession->HandleActionUpdateDragenabled(property, sceneSession, action);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -598,7 +591,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
         WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS));
 
     property->SetSystemCalling(false);
-    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property, sceneSession,
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property, sceneSession,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
     property->SetSystemCalling(true);
