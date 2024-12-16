@@ -25,7 +25,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
-#include "screen_session_manager/include/screen_session_manager_client.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "window_helper.h"
 #include "wm_common.h"
 #include "ui/rs_surface_node.h"

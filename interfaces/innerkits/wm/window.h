@@ -910,7 +910,7 @@ public:
      * @param rect
      * @return WMError
      */
-    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
+    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
         const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
 
     /**

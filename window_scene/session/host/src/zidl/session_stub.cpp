@@ -879,12 +879,11 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
         return ERR_INVALID_DATA;
     }
     WSRect rect {};
-    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.poxY_) || !data.ReadInt32(rect.width_) ||
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) || !data.ReadInt32(rect.width_) ||
         !data.ReadInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
         return ERR_INVALID_DATA;
     }
-    WSRect rect = { posX, posY, width, height };
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
     WLOGFD("HandleGetAvoidArea type:%{public}d", typeId);
     AvoidArea avoidArea = GetAvoidAreaByType(type, rect);
