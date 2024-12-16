@@ -403,6 +403,7 @@ public:
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
+    WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId);
 
     /*
      * Multi Window
@@ -649,6 +650,7 @@ private:
     void NotifyAllAccessibilityInfo();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
+    void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
 
     /**
      * PiP Window
