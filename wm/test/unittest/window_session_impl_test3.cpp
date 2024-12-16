@@ -701,6 +701,55 @@ HWTEST_F(WindowSessionImplTest3, SetAPPWindowIcon, Function | SmallTest | Level2
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetAPPWindowIcon end";
 }
+
+/**
+ * @tc.name: SetAvoidAreaOption
+ * @tc.desc: SetAvoidAreaOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+
+    option->SetWindowName("SetAvoidAreaOption");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    WMError res = window->SetAvoidAreaOption(3);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetAvoidAreaOption
+ * @tc.desc: GetAvoidAreaOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+
+    option->SetWindowName("GetAvoidAreaOption");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    uint32_t res = window->GetAvoidAreaOption();
+    ASSERT_EQ(res, 0);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

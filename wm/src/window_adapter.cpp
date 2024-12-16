@@ -209,8 +209,8 @@ WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    Rect newRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
-    avoidArea = wmsProxy->GetAvoidAreaByType(windowId, type, newRect);
+    WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+    avoidArea = wmsProxy->GetAvoidAreaByType(windowId, type, sessionRect);
     return WMError::WM_OK;
 }
 

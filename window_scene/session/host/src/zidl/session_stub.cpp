@@ -875,29 +875,16 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     uint32_t typeId = 0;
     if (!data.ReadUint32(typeId) ||
         typeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read typeId error");
         return ERR_INVALID_DATA;
     }
-    int32_t posX = 0;
-    int32_t posY = 0;
-    int32_t width = 0;
-    int32_t height = 0;
-    if (!data.ReadInt32(posX)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "read posX error");
+    WSRect rect {};
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.poxY_) || !data.ReadInt32(rect.width_) ||
+        !data.ReadInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
         return ERR_INVALID_DATA;
     }
-    if (!data.ReadInt32(posY)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "read posY error");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadInt32(width)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "read width error");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.ReadInt32(height)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "read height error");
-        return ERR_INVALID_DATA;
-    }
-    WSRect rect = {posX, posY, width, height};
+    WSRect rect = { posX, posY, width, height };
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
     WLOGFD("HandleGetAvoidArea type:%{public}d", typeId);
     AvoidArea avoidArea = GetAvoidAreaByType(type, rect);

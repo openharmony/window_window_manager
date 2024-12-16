@@ -1181,6 +1181,36 @@ HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest
     property->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, property->IsSystemKeyboard());
 }
+
+/**
+ * @tc.name: SetAvoidAreaOption
+ * @tc.desc: SetAvoidAreaOption Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);;
+    uint32_t avoidAreaOption = 2;
+    property->SetAvoidAreaOption(avoidAreaOption);
+    ASSERT_EQ(avoidAreaOption, property->avoidAreaOption_);
+    avoidAreaOption = 1;
+    property->SetAvoidAreaOption(avoidAreaOption);
+    ASSERT_EQ(avoidAreaOption, property->avoidAreaOption_);
+}
+
+/**
+ * @tc.name: GetAvoidAreaOption
+ * @tc.desc: GetAvoidAreaOption Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);;
+    ASSERT_EQ(0, property->GetAvoidAreaOption());
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
