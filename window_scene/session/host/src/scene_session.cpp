@@ -3031,6 +3031,28 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
     }
 }
 
+WSError SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
+{
+    auto task = [weakThis = wptr(this), orientation]() -> WSError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::DEFAULT, "session is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        TLOGNI(WmsLogTag::DEFAULT, "id: %{public}d defaultRequestedOrientation: %{public}u",
+            session->GetPersistentId(), static_cast<uint32_t>(orientation));
+        auto property = session->GetSessionProperty();
+        if (property == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "get session property failed");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        property->SetRequestedOrientation(orientation);
+        property->SetDefaultRequestedOrientation(orientation);
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, __func__);
+}
+
 void SceneSession::NotifyForceHideChange(bool hide)
 {
     WLOGFI("id: %{public}d forceHide: %{public}u", persistentId_, hide);
