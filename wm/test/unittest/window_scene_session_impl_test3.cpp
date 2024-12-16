@@ -1475,19 +1475,19 @@ HWTEST_F(WindowSceneSessionImplTest3, StartMove, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetStartMoveFlag
- * @tc.desc: GetStartMoveFlag
+ * @tc.name: IsStartMoving
+ * @tc.desc: get main window move flag, test IsStartMoving
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, GetStartMoveFlag, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest3, IsStartMoving, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("GetStartMoveFlag");
+    option->SetWindowName("IsStartMoving");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
-    bool isMoving = windowSceneSessionImpl->GetStartMoveFlag();
+    bool isMoving = windowSceneSessionImpl->IsStartMoving();
     EXPECT_EQ(false, isMoving);
 }
 
