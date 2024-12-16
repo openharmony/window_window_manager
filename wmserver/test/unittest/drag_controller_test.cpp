@@ -181,7 +181,7 @@ HWTEST_F(DragControllerTest, ConvertPointerPosToDisplayGroupPos, Function | Smal
 {
     ASSERT_TRUE(moveDragController_);
 
-    auto displayInfo = new DisplayInfo();
+    auto displayInfo = sptr<DisplayInfo>::MakeSptr();
     displayInfo->SetDisplayId(0);
     displayInfo->SetWidth(720);   // displayWidth: 720
     displayInfo->SetHeight(1280); // displayHeight: 1280
@@ -514,7 +514,7 @@ HWTEST_F(DragControllerTest, UpdateDragInfo01, Function | SmallTest | Level2)
 {
     ASSERT_TRUE(moveDragController_);
     uint32_t windowId = 0;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     dragcontroller->UpdateDragInfo(windowId);
 }
 
@@ -526,7 +526,7 @@ HWTEST_F(DragControllerTest, UpdateDragInfo01, Function | SmallTest | Level2)
 HWTEST_F(DragControllerTest, UpdateDragInfo02, Function | SmallTest | Level2)
 {
     uint32_t windowId = 1;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     dragcontroller->UpdateDragInfo(windowId);
     sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
     ASSERT_EQ(dragNode, nullptr);
@@ -540,7 +540,7 @@ HWTEST_F(DragControllerTest, UpdateDragInfo02, Function | SmallTest | Level2)
 HWTEST_F(DragControllerTest, StartDrag01, Function | SmallTest | Level2)
 {
     uint32_t windowId = 1;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     dragcontroller->StartDrag(windowId);
     sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
     ASSERT_EQ(dragNode, nullptr);
@@ -554,7 +554,7 @@ HWTEST_F(DragControllerTest, StartDrag01, Function | SmallTest | Level2)
 HWTEST_F(DragControllerTest, FinishDrag01, Function | SmallTest | Level2)
 {
     uint32_t windowId = 1;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     dragcontroller->FinishDrag(windowId);
     sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
     ASSERT_EQ(dragNode, nullptr);
@@ -571,7 +571,7 @@ HWTEST_F(DragControllerTest, GetHitWindow01, Function | SmallTest | Level2)
     PointInfo point;
     point.x = 1;
     point.y = 1;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point));
 }
 
@@ -586,7 +586,7 @@ HWTEST_F(DragControllerTest, GetHitWindow02, Function | SmallTest | Level2)
     PointInfo point;
     point.x = 1;
     point.y = 2;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point));
 }
 
@@ -601,7 +601,7 @@ HWTEST_F(DragControllerTest, GetHitWindow03, Function | SmallTest | Level2)
     PointInfo point;
     point.x = 1;
     point.y = 2;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     sptr<WindowNodeContainer> container = windowRoot_->GetOrCreateWindowNodeContainer(id);
     ASSERT_EQ(nullptr, container);
     ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point));
@@ -627,7 +627,7 @@ HWTEST_F(DragControllerTest, Init02, Function | SmallTest | Level2)
 HWTEST_F(DragControllerTest, StartDrag02, Function | SmallTest | Level2)
 {
     uint32_t windowId = 0;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     dragcontroller->StartDrag(windowId);
     sptr<WindowNode> dragNode = nullptr;
     ASSERT_TRUE(moveDragController_);
@@ -641,7 +641,7 @@ HWTEST_F(DragControllerTest, StartDrag02, Function | SmallTest | Level2)
 HWTEST_F(DragControllerTest, FinishDrag02, Function | SmallTest | Level2)
 {
     uint32_t windowId = 0;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     dragcontroller->StartDrag(windowId);
     uint64_t hitWindowId_ = 10;
     sptr<WindowNode> hitWindow = windowRoot_->GetWindowNode(hitWindowId_);
@@ -657,7 +657,7 @@ HWTEST_F(DragControllerTest, GetHitWindow04, Function | SmallTest | Level2)
 {
     DisplayId id = 0;
     PointInfo point;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     ASSERT_EQ(nullptr, dragcontroller->GetHitWindow(id, point));
 }
 
@@ -670,7 +670,7 @@ HWTEST_F(DragControllerTest, GetHitPoint, Function | SmallTest | Level2)
 {
     uint32_t windowId = 0;
     PointInfo point;
-    sptr<DragController> dragcontroller = new DragController(windowRoot_);
+    sptr<DragController> dragcontroller = sptr<DragController>::MakeSptr(windowRoot_);
     auto result = dragcontroller->GetHitPoint(windowId, point);
     sptr<WindowNode> windowNode = nullptr;
     ASSERT_EQ(result, false);

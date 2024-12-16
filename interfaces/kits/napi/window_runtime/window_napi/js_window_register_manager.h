@@ -42,6 +42,8 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_STATUS_CHANGE_CB,
     WINDOW_TITLE_BUTTON_RECT_CHANGE_CB,
     WINDOW_VISIBILITY_CHANGE_CB,
+    WINDOW_DISPLAYID_CHANGE_CB,
+    SYSTEM_DENSITY_CHANGE_CB,
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
@@ -84,6 +86,10 @@ private:
     WmErrorCode ProcessWaterMarkFlagChangeRegister(sptr<JsWindowListener> listener,
         sptr<Window> window, bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessDisplayIdChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessSystemDensityChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);

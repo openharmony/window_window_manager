@@ -129,7 +129,8 @@ HWTEST_F(SceneSessionTest3, SetAspectRatio15, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(property);
     WindowLimits limits;
     limits.maxHeight_ = 10;
-    limits.minWidth_ = 0;
+    limits.minWidth_ = 1;
+    limits.minHeight_ = 1;
     property->SetWindowLimits(limits);
     auto result = sceneSession->SetAspectRatio(ratio);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
@@ -206,14 +207,11 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRectTask";
     info.bundleName_ = "NotifyClientToUpdateRectTask";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
@@ -248,13 +246,13 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     info.abilityName_ = "BindDialogSessionTarget1";
     info.bundleName_ = "BindDialogSessionTarget1";
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
@@ -269,7 +267,7 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     result = sceneSession->BindDialogSessionTarget(sceneSession2);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sceneSession1->sessionChangeCallback_ = new (std::nothrow) MainSession::SessionChangeCallback();
+    sceneSession1->sessionChangeCallback_ = sptr<MainSession::SessionChangeCallback>::MakeSptr();
     EXPECT_NE(sceneSession1->sessionChangeCallback_, nullptr);
     sceneSession1->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
     result = sceneSession->BindDialogSessionTarget(sceneSession1);
@@ -286,7 +284,7 @@ HWTEST_F(SceneSessionTest3, RegisterBindDialogSessionCallback1, Function | Small
     SessionInfo info;
     info.abilityName_ = "RegisterBindDialogSessionCallback1";
     info.bundleName_ = "RegisterBindDialogSessionCallback1";
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->onBindDialogTarget_ = nullptr;
     NotifyBindDialogSessionFunc func = [](const sptr<SceneSession>& sceneSession) {};
     sceneSession->RegisterBindDialogSessionCallback(func);
@@ -303,12 +301,12 @@ HWTEST_F(SceneSessionTest3, ClearSpecificSessionCbMap1, Function | SmallTest | L
     SessionInfo info;
     info.abilityName_ = "ClearSpecificSessionCbMap1";
     info.bundleName_ = "ClearSpecificSessionCbMap1";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
     sceneSession->ClearSpecificSessionCbMap();
 
     sptr<MainSession::SessionChangeCallback> sessionChangeCallback =
-        new (std::nothrow) MainSession::SessionChangeCallback();
+        sptr<MainSession::SessionChangeCallback>::MakeSptr();
     sceneSession->clearCallbackMapFunc_ = [](bool) {};
     sceneSession->sessionChangeCallback_ = sessionChangeCallback;
     sceneSession->ClearSpecificSessionCbMap();
@@ -324,7 +322,7 @@ HWTEST_F(SceneSessionTest3, IsMovableWindowType, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "IsMovableWindowType";
     info.bundleName_ = "IsMovableWindowType";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     sceneSession->property_ = nullptr;
@@ -332,39 +330,39 @@ HWTEST_F(SceneSessionTest3, IsMovableWindowType, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetBlankFlag
- * @tc.desc: check func SetBlankFlag
+ * @tc.name: SetBlank
+ * @tc.desc: check func SetBlank
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, SetBlankFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, SetBlank, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "SetBlankFlag";
-    info.bundleName_ = "SetBlankFlag";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    info.abilityName_ = "SetBlank";
+    info.bundleName_ = "SetBlank";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     bool isAddBlank = true;
-    sceneSession->SetBlankFlag(isAddBlank);
-    ASSERT_EQ(isAddBlank, sceneSession->GetBlankFlag());
+    sceneSession->SetBlank(isAddBlank);
+    ASSERT_EQ(isAddBlank, sceneSession->GetBlank());
 }
 
 /**
- * @tc.name: GetBlankFlag
- * @tc.desc: check func GetBlankFlag
+ * @tc.name: GetBlank
+ * @tc.desc: check func GetBlank
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, GetBlankFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, GetBlank, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "GetBlankFlag";
-    info.bundleName_ = "GetBlankFlag";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    info.abilityName_ = "GetBlank";
+    info.bundleName_ = "GetBlank";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     bool isAddBlank = true;
-    sceneSession->SetBlankFlag(isAddBlank);
-    ASSERT_EQ(isAddBlank, sceneSession->GetBlankFlag());
+    sceneSession->SetBlank(isAddBlank);
+    ASSERT_EQ(isAddBlank, sceneSession->GetBlank());
 }
 
 /**
@@ -377,7 +375,7 @@ HWTEST_F(SceneSessionTest3, SetBufferAvailableCallbackEnable, Function | SmallTe
     SessionInfo info;
     info.abilityName_ = "SetBufferAvailableCallbackEnable";
     info.bundleName_ = "SetBufferAvailableCallbackEnable";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     bool enable = true;
@@ -395,7 +393,7 @@ HWTEST_F(SceneSessionTest3, GetBufferAvailableCallbackEnable, Function | SmallTe
     SessionInfo info;
     info.abilityName_ = "GetBufferAvailableCallbackEnable";
     info.bundleName_ = "GetBufferAvailableCallbackEnable";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
 
     bool enable = true;
@@ -606,30 +604,6 @@ HWTEST_F(SceneSessionTest3, SetMainWindowTopmostChangeCallback, Function | Small
 }
 
 /**
- * @tc.name: SetKeyboardGravityChangeCallback
- * @tc.desc: SetKeyboardGravityChangeCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, SetKeyboardGravityChangeCallback, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetKeyboardGravityChangeCallback";
-    info.bundleName_ = "SetKeyboardGravityChangeCallback";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
-
-    NotifyKeyboardGravityChangeFunc func;
-    sceneSession->SetKeyboardGravityChangeCallback(func);
-
-    NotifyKeyboardGravityChangeFunc func1 = [sceneSession](SessionGravity gravity) {
-        return;
-    };
-    sceneSession->SetKeyboardGravityChangeCallback(func1);
-    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, sceneSession->GetKeyboardGravity());
-}
-
-/**
  * @tc.name: SetRestoreMainWindowCallback
  * @tc.desc: SetRestoreMainWindowCallback
  * @tc.type: FUNC
@@ -672,23 +646,22 @@ HWTEST_F(SceneSessionTest3, SetAdjustKeyboardLayoutCallback, Function | SmallTes
 }
 
 /**
- * @tc.name: GetStartMoveFlag
- * @tc.desc: GetStartMoveFlag
+ * @tc.name: IsStartMoving
+ * @tc.desc: get main window move flag, test IsStartMoving
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, GetStartMoveFlag, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, IsStartMoving, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "GetStartMoveFlag";
-    info.bundleName_ = "GetStartMoveFlag";
+    info.abilityName_ = "IsStartMoving";
+    info.bundleName_ = "IsStartMoving";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->moveDragController_ = new MoveDragController(1, WindowType::WINDOW_TYPE_FLOAT);
-    bool isMoving = false;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_EQ(false, sceneSession->IsStartMoving());
 
-    sceneSession->moveDragController_ = new MoveDragController(1024, WindowType::WINDOW_TYPE_FLOAT);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->GetStartMoveFlag(isMoving));
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1024, WindowType::WINDOW_TYPE_FLOAT);
+    ASSERT_EQ(false, sceneSession->IsStartMoving());
 }
 
 /**
@@ -707,9 +680,6 @@ HWTEST_F(SceneSessionTest3, SetCompatibleWindowSizeInPc, Function | SmallTest | 
     int32_t landscapeWidth = 10;
     int32_t landscapeHeight = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR,
-        sceneSession->SetCompatibleWindowSizeInPc(portraitWidth, portraitHeight, landscapeWidth, landscapeHeight));
 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
@@ -729,9 +699,6 @@ HWTEST_F(SceneSessionTest3, SetAppSupportPhoneInPc, Function | SmallTest | Level
     info.bundleName_ = "SetAppSupportPhoneInPc";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, sceneSession->SetAppSupportPhoneInPc(false));
-
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetAppSupportPhoneInPc(false));
@@ -749,7 +716,6 @@ HWTEST_F(SceneSessionTest3, CompatibleFullScreenRecover, Function | SmallTest | 
     info.bundleName_ = "CompatibleFullScreenRecover";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
@@ -791,8 +757,6 @@ HWTEST_F(SceneSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
     info.bundleName_ = "SetIsPcAppInPad";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, sceneSession->SetIsPcAppInPad(false));
 
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
@@ -811,14 +775,12 @@ HWTEST_F(SceneSessionTest3, CompatibleFullScreenClose, Function | SmallTest | Le
     info.bundleName_ = "CompatibleFullScreenClose";
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(nullptr);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     sceneSession->sessionStage_ = mockSessionStage;
-    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenClose());
-
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
     ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
 }

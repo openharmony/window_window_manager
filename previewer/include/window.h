@@ -128,6 +128,7 @@ public:
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parentId);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;
@@ -172,12 +173,16 @@ public:
     virtual WMError Destroy() = 0;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) = 0;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
-    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) = 0;
-    virtual WMError MoveToAsync(int32_t x, int32_t y) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y) { return WMError::WM_OK; }
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) = 0;
+    virtual WMError MoveToAsync(int32_t x, int32_t y,
+        MoveConfiguration moveConfiguration = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError MoveWindowToGlobal(int32_t x, int32_t y,
+        MoveConfiguration moveConfiguration) { return WMError::WM_OK; }
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError Resize(uint32_t width, uint32_t height) = 0;
-    virtual WMError ResizeAsync(uint32_t width, uint32_t height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) = 0;
+    virtual WMError ResizeAsync(uint32_t width, uint32_t height,
+        const RectAnimationConfig& rectAnimationConfig = {}) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) = 0;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) = 0;
     virtual bool IsKeepScreenOn() const = 0;
@@ -215,12 +220,13 @@ public:
     virtual int64_t GetVSyncPeriod() = 0;
     virtual void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType) {}
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
+    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
     virtual WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
     virtual WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
-    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
-    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual WMError RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual WMError UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
@@ -331,6 +337,7 @@ public:
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) = 0;
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowTitle(const std::string& title) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
         bool isCloseVisible)
     {
@@ -338,6 +345,11 @@ public:
     }
     virtual WMError SetDecorHeight(int32_t decorHeight) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetDecorHeight(int32_t& height) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetDecorButtonStyle(const DecorButtonStyle& style)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError GetDecorButtonStyle(DecorButtonStyle& style) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;

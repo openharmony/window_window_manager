@@ -89,6 +89,7 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_AOD_SLIDING = 40,
     STATE_CHANGE_REASON_PEN = 41,
     STATE_CHANGE_REASON_SHUT_DOWN = 42,
+    STATE_CHANGE_REASON_SCREEN_CONNECT = 43,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -113,6 +114,14 @@ enum class ScreenPropertyChangeType : uint32_t {
     ROTATION_END,
     /* Only update screen rotation property info to DMS. */
     ROTATION_UPDATE_PROPERTY_ONLY,
+};
+
+/**
+ * @brief Enumerates screen shape.
+ */
+enum class ScreenShape : uint32_t {
+    RECTANGLE = 0,
+    ROUND = 1,
 };
 
 /**
@@ -361,6 +370,12 @@ enum class FoldStatus: uint32_t {
     EXPAND = 1,
     FOLDED = 2,
     HALF_FOLD = 3,
+    FOLD_STATE_EXPAND_WITH_SECOND_EXPAND = 11,
+    FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED = 21,
+    FOLD_STATE_FOLDED_WITH_SECOND_EXPAND = 12,
+    FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED = 22,
+    FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND = 13,
+    FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED = 23,
 };
 
 /**
@@ -396,6 +411,7 @@ enum class FoldDisplayMode: uint32_t {
     MAIN = 2,
     SUB = 3,
     COORDINATION = 4,
+    GLOBAL_FULL = 5,
 };
 
 enum class DisplayType : uint32_t {
@@ -440,6 +456,12 @@ struct ExpandOption {
     ScreenId screenId_;
     uint32_t startX_;
     uint32_t startY_;
+};
+
+struct MultiScreenRecoverOption {
+    ScreenId screenId_;
+    uint32_t first_;
+    uint32_t second_;
 };
 
 struct MultiScreenPositionOptions {

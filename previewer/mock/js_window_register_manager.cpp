@@ -43,11 +43,11 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<J
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        WLOGFE("Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listener == nullptr) {
-        WLOGFE("[NAPI]listener is nullptr");
+        WLOGFE("listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     listener->SetIsDeprecatedInterface(true);
@@ -65,7 +65,7 @@ WmErrorCode JsWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<JsWindo
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        WLOGFE("Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IAvoidAreaChangedListener> thisListener(listener);
@@ -87,12 +87,12 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     }
     auto iterCaseType = ListenerFunctionMap.find(caseType);
     if (iterCaseType == ListenerFunctionMap.end()) {
-        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        WLOGFE("CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     auto iterCallbackType = iterCaseType->second.find(type);
     if (iterCallbackType == iterCaseType->second.end()) {
-        WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
+        WLOGFE("Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     ListenerFunctionType listenerFunctionType = iterCallbackType->second;
@@ -101,18 +101,18 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef);
     if (windowManagerListener == nullptr) {
-        WLOGFE("[NAPI]New JsWindowListener failed");
+        WLOGFE("New JsWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
     WmErrorCode ret = ProcessRegisterCallback(listenerFunctionType, caseType, windowManagerListener, window,
         true, env, parameter);
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
+        WLOGFE("Register type %{public}s failed", type.c_str());
         return ret;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;
-    WLOGI("[NAPI]Register type %{public}s success! callback map size: %{public}zu",
+    WLOGI("Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;
 }
@@ -139,17 +139,17 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFE("[NAPI]Type %{public}s was not registerted", type.c_str());
+        WLOGFE("Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
     auto iterCaseType = ListenerFunctionMap.find(caseType);
     if (iterCaseType == ListenerFunctionMap.end()) {
-        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        WLOGFE("CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     auto iterCallbackType = iterCaseType->second.find(type);
     if (iterCallbackType == iterCaseType->second.end()) {
-        WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
+        WLOGFE("Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     ListenerFunctionType listenerFunctionType = iterCallbackType->second;
@@ -158,7 +158,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
             WmErrorCode ret = ProcessRegisterCallback(listenerFunctionType, caseType, it->second, window, false,
                 env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
-                WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
+                WLOGFE("Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
             jsCbMap_[type].erase(it++);
@@ -175,18 +175,18 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
             WmErrorCode ret = ProcessRegisterCallback(listenerFunctionType, caseType, it->second, window, false,
                 env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
-                WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
+                WLOGFE("Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
             jsCbMap_[type].erase(it);
             break;
         }
         if (!findFlag) {
-            WLOGFE("[NAPI]Unregister type %{public}s failed because not found callback!", type.c_str());
+            WLOGFE("Unregister type %{public}s failed because not found callback!", type.c_str());
             return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         }
     }
-    WLOGI("[NAPI]Unregister type %{public}s success! callback map size: %{public}zu",
+    WLOGI("Unregister type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     // erase type when there is no callback in one type
     if (jsCbMap_[type].empty()) {
@@ -198,7 +198,7 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
 bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGI("[NAPI]Method %{public}s has not been registerted", type.c_str());
+        WLOGI("Method %{public}s has not been registerted", type.c_str());
         return false;
     }
 
@@ -206,7 +206,7 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string& ty
         bool isEquals = false;
         napi_strict_equals(env, jsListenerObject, iter->first->GetNapiValue(), &isEquals);
         if (isEquals) {
-            WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
+            WLOGFE("Method %{public}s has already been registered", type.c_str());
             return true;
         }
     }

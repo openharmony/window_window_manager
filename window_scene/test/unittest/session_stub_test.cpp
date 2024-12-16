@@ -58,7 +58,7 @@ void SessionStubTest::TearDownTestCase()
 
 void SessionStubTest::SetUp()
 {
-    session_ = new (std::nothrow) SessionStubMocker();
+    session_ = sptr<SessionStubMocker>::MakeSptr();
     EXPECT_NE(nullptr, session_);
 }
 
@@ -121,7 +121,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT), data, reply, option);
@@ -213,7 +213,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, Function | SmallTest | Lev
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
     ASSERT_EQ(data.WriteUint32(1), true);
     AAFwk::Want options;
@@ -302,7 +302,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, Function | SmallTest | Lev
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
     ASSERT_EQ(data.WriteUint32(1), true);
     AAFwk::Want options;
@@ -340,7 +340,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, Function | SmallTest | Lev
     AAFwk::Want want;
     data.WriteParcelable(&want);
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
     ASSERT_EQ(data.WriteUint32(1), true);
     ASSERT_EQ(data.WriteUint32(1), true);
@@ -412,7 +412,7 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
     ASSERT_EQ(data.WriteUint32(1), true);
     AAFwk::Want options;
@@ -488,7 +488,7 @@ HWTEST_F(SessionStubTest, HandleTriggerBindModalUIExtension001, Function | Small
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto res = session_->HandleTriggerBindModalUIExtension(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
@@ -504,7 +504,7 @@ HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent003, Function | SmallT
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto res = session_->HandleTransferAccessibilityEvent(data, reply);
     ASSERT_EQ(ERR_INVALID_DATA, res);
 }
@@ -520,7 +520,7 @@ HWTEST_F(SessionStubTest, HandleNotifyPiPWindowPrepareClose003, Function | Small
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto res = session_->HandleNotifyPiPWindowPrepareClose(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
@@ -568,7 +568,6 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPRect002, Function | SmallTest | Level2)
     data.WriteInt32(20);
     data.WriteUint32(30);
     data.WriteUint32(40);
-    data.WriteUint32(22);
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleUpdatePiPRect(data, reply));
     data.WriteInt32(10);
     data.WriteInt32(20);
@@ -646,7 +645,7 @@ HWTEST_F(SessionStubTest, HandleProcessPointDownSession006, Function | SmallTest
     MessageParcel reply;
     data.WriteInt32(10);
     data.WriteInt32(20);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto res = session_->HandleProcessPointDownSession(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
@@ -662,7 +661,7 @@ HWTEST_F(SessionStubTest, HandleSendPointerEvenForMoveDrag007, Function | SmallT
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto res = session_->HandleSendPointerEvenForMoveDrag(data, reply);
     ASSERT_EQ(ERR_INVALID_DATA, res);
 }
@@ -678,7 +677,7 @@ HWTEST_F(SessionStubTest, HandleUpdateRectChangeListenerRegistered008, Function 
     MessageParcel data;
     MessageParcel reply;
     data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto res = session_->HandleUpdateRectChangeListenerRegistered(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
@@ -778,54 +777,6 @@ HWTEST_F(SessionStubTest, HandleSetDialogSessionBackGestureEnabled01, Function |
     data.WriteBool(true);
     auto res = session_->HandleSetDialogSessionBackGestureEnabled(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleUpdatePropertyByAction01
- * @tc.desc: No error
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction01, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteUint32(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
-    ASSERT_NE(session_, nullptr);
-    auto res = session_->HandleUpdatePropertyByAction(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleUpdatePropertyByAction02
- * @tc.desc: Invalid data
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction02, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    const std::uint32_t invalidData = 0;
-    data.WriteUint32(invalidData);
-    ASSERT_NE(session_, nullptr);
-    auto res = session_->HandleUpdatePropertyByAction(data, reply);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
-}
-
-/**
- * @tc.name: HandleUpdatePropertyByAction03
- * @tc.desc: No action
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleUpdatePropertyByAction03, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(session_, nullptr);
-    auto res = session_->HandleUpdatePropertyByAction(data, reply);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**

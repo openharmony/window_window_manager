@@ -41,6 +41,8 @@ const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
+const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
+const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 
@@ -55,6 +57,8 @@ class CjWindowListener : public IWindowChangeListener,
                          public IDialogDeathRecipientListener,
                          public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener,
+                         public IDisplayIdChangeListener,
+                         public ISystemDensityChangeListener,
                          public IWindowVisibilityChangedListener,
                          public IWindowTitleButtonRectChangedListener,
                          public IWindowStatusChangeListener {
@@ -85,6 +89,7 @@ public:
     void OnGestureNavigationEnabledUpdate(bool enable) override;
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
+    void OnSystemDensityChanged(float density) override;
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
 private:

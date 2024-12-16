@@ -48,6 +48,7 @@ private:
     void ShowAllScreenInfo();
     void DumpFoldStatus();
     void DumpTentMode();
+    void DumpFoldCreaseRegion();
     void OutputDumpInfo();
     void DumpScreenSessionById(ScreenId id);
     void DumpRsInfoById(ScreenId id);
@@ -75,19 +76,11 @@ private:
     int SetFoldStatusLocked();
     void SetHallAndPostureValue(std::string input);
     void SetHallAndPostureStatus(std::string input);
-
+    void SetSecondaryFoldStatusChange(const std::string &input);
 private:
     int fd_;
     std::vector<std::string> params_;
     std::string dumpInfo_;
-/*
-    依赖的外部定义
-*/
-private:
-    typedef struct EXTHALLData {
-        float flag = 0.0;
-        float hall = 0.0;
-    } ExtHallData;
 };
 } // Rosen
 } // OHOS

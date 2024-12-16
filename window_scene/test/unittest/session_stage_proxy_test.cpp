@@ -36,8 +36,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SessionStageProxy> sessionStage_ = new SessionStageProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionStageProxy> sessionStage_ = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
 void SessionStageProxyTest::SetUpTestCase()
@@ -277,7 +277,7 @@ HWTEST_F(SessionStageProxyTest, NotifyTransferComponentDataSync, Function | Smal
  */
 HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level1)
 {
-    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo();
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifyOccupiedAreaChangeInfo(info);
 }
@@ -289,7 +289,7 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTe
  */
 HWTEST_F(SessionStageProxyTest, UpdateAvoidArea, Function | SmallTest | Level1)
 {
-    sptr<AvoidArea> avoidArea = new AvoidArea();
+    sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->UpdateAvoidArea(avoidArea, type);
@@ -630,6 +630,18 @@ HWTEST_F(SessionStageProxyTest, SetEnableDragBySystem, Function | SmallTest | Le
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SetEnableDragBySystem(false);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: SetFullScreenWaterfallMode
+ * @tc.desc: test function : SetFullScreenWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetFullScreenWaterfallMode, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetFullScreenWaterfallMode(false);
     ASSERT_EQ(WSError::WS_OK, res);
 }
 }

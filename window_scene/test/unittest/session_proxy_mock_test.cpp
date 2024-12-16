@@ -42,8 +42,8 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent01, Function | SmallTes
 {
     WLOGI("TransferAccessibilityEvent01 begin");
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -62,8 +62,8 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent02, Function | SmallTes
 {
     WLOGI("TransferAccessibilityEvent02 begin");
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
 
@@ -83,8 +83,8 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
 {
     WLOGI("TransferAccessibilityEvent03 begin");
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
 
@@ -94,50 +94,6 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
 
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityEvent03 end");
-}
-
-/**
- * @tc.name: UpdateSessionPropertyByAction
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
-{
-    MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sessionProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    ASSERT_NE(sessionProxy, nullptr);
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
-    MockMessageParcel::ClearAllErrorFlag();
-
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
-    MockMessageParcel::ClearAllErrorFlag();
-
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
-    MockMessageParcel::ClearAllErrorFlag();
-
-    MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
-    MockMessageParcel::ClearAllErrorFlag();
-
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
-    MockMessageParcel::ClearAllErrorFlag();
-
-    MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
-    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace
 } // namespace Rosen

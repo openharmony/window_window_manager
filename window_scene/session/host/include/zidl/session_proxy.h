@@ -54,8 +54,9 @@ public:
     WSError OnRestoreMainWindow() override;
     WSError OnSetWindowRectAutoSave(bool enabled) override;
     WSError RaiseToAppTop() override;
-    WSError UpdateSessionRect(const WSRect &rect, SizeChangeReason reason, bool isGlobal = false,
-        bool isFromMoveToGlobal = false) override;
+    WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
+        bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
+        const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
@@ -90,7 +91,7 @@ public:
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    WSError GetStartMoveFlag(bool& isMoving) override;
+    bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
@@ -98,22 +99,22 @@ public:
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
-    int32_t GetStatusBarHeight() override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+    int32_t GetStatusBarHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
-    WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionDetachToDisplay() override;
-
-    WSError OnSessionModalTypeChange(SubWindowModalType subWindowModalType) override;
-    WSError OnMainSessionModalTypeChange(bool isModal) override;
+    WSError RequestFocus(bool isFocused) override;
     
-    /**
+    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
-     /**
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
+    WSError NotifyMainModalTypeChange(bool isModal) override;
+
+     /*
       * Starting Window
       */
     WSError RemoveStartingWindow() override;

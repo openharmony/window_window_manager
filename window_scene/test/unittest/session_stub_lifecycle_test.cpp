@@ -51,7 +51,7 @@ void SessionStubLifecycleTest::TearDownTestCase()
 
 void SessionStubLifecycleTest::SetUp()
 {
-    session_ = new (std::nothrow) SessionStubMocker();
+    session_ = sptr<SessionStubMocker>::MakeSptr();
     EXPECT_NE(nullptr, session_);
 }
 

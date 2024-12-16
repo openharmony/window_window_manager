@@ -37,8 +37,9 @@ public:
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
-    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
-    WMError Resize(uint32_t width, uint32_t height) override;
+    WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) override;
+    WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
@@ -73,8 +74,8 @@ public:
         int64_t uiExtensionIdLevel) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
 
-    WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
@@ -116,6 +117,12 @@ public:
      * PC Window
      */
     bool IsPcOrPadFreeMultiWindowMode() const override;
+
+    /*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
