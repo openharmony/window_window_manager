@@ -1944,7 +1944,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, const WSRect& 
     if (WindowHelper::IsSubWindow(winType)) {
         if (GetSessionProperty()->GetAvoidAreaOption() &
             static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
-            TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] option true", 
+            TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] option true",
                 GetPersistentId(), GetWindowName().c_str());
             return true;
         }
