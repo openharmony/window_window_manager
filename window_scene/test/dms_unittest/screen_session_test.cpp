@@ -734,6 +734,34 @@ HWTEST_F(ScreenSessionTest, GetSourceMode, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetSourceMode02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetSourceMode02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode02 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->screenId_ = session->defaultScreenId_;
+    ScreenSourceMode mode = session->GetSourceMode();
+    ASSERT_EQ(mode, ScreenSourceMode::SCREEN_MAIN);
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    mode = screenSession->GetSourceMode();
+    ASSERT_EQ(mode, ScreenSourceMode::SCREEN_MAIN);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    mode = screenSession->GetSourceMode();
+    ASSERT_EQ(mode, ScreenSourceMode::SCREEN_EXTEND);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode02 end";
+}
+
+/**
  * @tc.name: GetPixelFormat
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2368,6 +2396,227 @@ HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, Function | SmallTest | Level2)
     int32_t uid = 0;
     std::string clientName = "test";
     session->ScreenCaptureNotify(screenId, uid, clientName);
+}
+
+/**
+ * @tc.name: GetIsInternal01
+ * @tc.desc: Test when isInternal is true, GetIsInternal should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsInternal01, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsInternal(true);
+    ASSERT_EQ(session->GetIsInternal(), true);
+}
+
+/**
+ * @tc.name: GetIsInternal02
+ * @tc.desc: Test when isInternal is false, GetIsInternal should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsInternal02, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsInternal(false);
+    ASSERT_EQ(session->GetIsInternal(), false);
+}
+
+/**
+ * @tc.name: GetIsFakeInUse01
+ * @tc.desc: Test when isFakeInUse is true, GetIsFakeInUse should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsFakeInUse01, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsFakeInUse(true);
+    ASSERT_EQ(session->GetIsFakeInUse(), true);
+}
+
+/**
+ * @tc.name: GetIsFakeInUse02
+ * @tc.desc: Test when isFakeInUse is false, GetIsFakeInUse should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsFakeInUse02, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsFakeInUse(false);
+    ASSERT_EQ(session->GetIsFakeInUse(), false);
+}
+
+/**
+ * @tc.name: GetIsRealScreen01
+ * @tc.desc: Test when isReal is true, GetIsRealScreen should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsRealScreen01, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsRealScreen(true);
+    ASSERT_EQ(session->GetIsRealScreen(), true);
+}
+
+/**
+ * @tc.name: GetIsRealScreen02
+ * @tc.desc: Test when isReal is false, GetIsRealScreen should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsRealScreen02, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsRealScreen(false);
+    ASSERT_EQ(session->GetIsRealScreen(), false);
+}
+
+/**
+ * @tc.name: GetIsPcUse01
+ * @tc.desc: Test when isPcUse is true, GetIsPcUse should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsPcUse01, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsPcUse(true);
+    ASSERT_EQ(session->GetIsPcUse(), true);
+}
+
+/**
+ * @tc.name: GetIsPcUse02
+ * @tc.desc: Test when isPcUse is false, GetIsPcUse should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsPcUse02, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsPcUse(false);
+    ASSERT_EQ(session->GetIsPcUse(), false);
+}
+
+/**
+ * @tc.name: GetIsBScreenHalf01
+ * @tc.desc: Test when isBScreenHalf is true, GetIsBScreenHalf should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsBScreenHalf01, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsBScreenHalf(true);
+    ASSERT_EQ(session->GetIsBScreenHalf(), true);
+}
+
+/**
+ * @tc.name: GetIsBScreenHalf02
+ * @tc.desc: Test when isBScreenHalf is false, GetIsBScreenHalf should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsBScreenHalf02, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsBScreenHalf(false);
+    ASSERT_EQ(session->GetIsBScreenHalf(), false);
+}
+
+/**
+ * @tc.name: CalcDeviceOrientation01
+ * @tc.desc: Test when rotation is ROTATION_0 then CalcDeviceOrientation returns PORTRAIT
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_0);
+    ASSERT_EQ(result, DisplayOrientation::PORTRAIT);
+}
+
+/**
+ * @tc.name: CalcDeviceOrientation02
+ * @tc.desc: Test when rotation is ROTATION_90 then CalcDeviceOrientation returns LANDSCAPE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation02, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_90);
+    ASSERT_EQ(result, DisplayOrientation::LANDSCAPE);
+}
+
+/**
+ * @tc.name: CalcDeviceOrientation03
+ * @tc.desc: Test when rotation is ROTATION_180 then CalcDeviceOrientation returns PORTRAIT_INVERTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation03, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_180);
+    ASSERT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
+}
+
+/**
+ * @tc.name: CalcDeviceOrientation04
+ * @tc.desc: Test when rotation is ROTATION_270 then CalcDeviceOrientation returns LANDSCAPE_INVERTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation04, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_270);
+    ASSERT_EQ(result, DisplayOrientation::LANDSCAPE_INVERTED);
+}
+
+/**
+ * @tc.name: CalcDeviceOrientation05
+ * @tc.desc: Test when rotation is unknown then CalcDeviceOrientation returns UNKNOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    DisplayOrientation result = session->CalcDeviceOrientation(static_cast<Rotation>(100));
+    ASSERT_EQ(result, DisplayOrientation::UNKNOWN);
+}
+
+/**
+ * @tc.name: GetIsPhysicalMirrorSwitch01
+ * @tc.desc: Test when isPhysicalMirrorSwitch is true, GetIsPhysicalMirrorSwitch should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch01, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsPhysicalMirrorSwitch(true);
+    ASSERT_EQ(session->GetIsPhysicalMirrorSwitch(), true);
+}
+
+/**
+ * @tc.name: GetIsPhysicalMirrorSwitch02
+ * @tc.desc: Test when isPhysicalMirrorSwitch is false, GetIsPhysicalMirrorSwitch should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch02, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsPhysicalMirrorSwitch(false);
+    ASSERT_EQ(session->GetIsPhysicalMirrorSwitch(), false);
 }
 } // namespace
 } // namespace Rosen
