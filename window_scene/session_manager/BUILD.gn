@@ -73,7 +73,6 @@ ohos_shared_library("scene_session_manager") {
     "src/scene_session_dirty_manager.cpp",
     "src/scene_session_manager.cpp",
     "src/scene_session_manager_lite.cpp",
-    "src/scene_session_task_remover.cpp",
     "src/scene_system_ability_listener.cpp",
     "src/session_listener_controller.cpp",
     "src/session_manager_agent_controller.cpp",

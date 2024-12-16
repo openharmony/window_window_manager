@@ -54,7 +54,6 @@
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/pc_fold_screen_controller.h"
-#include "session_manager/include/scene_session_task_remover.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
@@ -5023,13 +5022,14 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        SessionLifeCycleTaskAutoRemover remover = SessionLifeCycleTaskAutoRemover(session->persistentId_, LifeCycleTaskType::STOP);
         if (abilitySessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
@@ -5061,19 +5061,21 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        SessionLifeCycleTaskAutoRemover remover = SessionLifeCycleTaskAutoRemover(session->persistentId_, LifeCycleTaskType::STOP);
         if (abilitySessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (SessionHelper::IsMainWindow(session->GetWindowType()) && !session->clientIdentityToken_.empty() &&
             isFromClient && session->clientIdentityToken_ != abilitySessionInfo->identityToken) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s client exception not matched: %{public}s, %{public}s",
                 where, session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         if (session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
