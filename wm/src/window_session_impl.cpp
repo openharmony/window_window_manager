@@ -3234,7 +3234,7 @@ void WindowSessionImpl::NotifySwitchFreeMultiWindow(bool enable)
 WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_IMMS, "Start, id:%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d", persistentId);
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -3261,7 +3261,7 @@ WMError WindowSessionImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidArea
 WMError WindowSessionImpl::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     auto persistentId = GetPersistentId();
-    TLOGI(WmsLogTag::WMS_IMMS, "Start, id:%{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d", persistentId);
     if (listener == nullptr) {
         WLOGFE("listener is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -3315,7 +3315,7 @@ EnableIfSame<T, IAvoidAreaChangedListener,
 void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     TLOGI(WmsLogTag::WMS_IMMS,
-          "window [%{public}d, %{public}s] type %{public}d area %{public}s",
+          "window [%{public}d %{public}s] type %{public}d area %{public}s",
           GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
     std::lock_guard<std::recursive_mutex> lockListener(avoidAreaChangeListenerMutex_);
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
@@ -4171,7 +4171,7 @@ uint32_t WindowSessionImpl::GetStatusBarHeight()
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, height);
     height = static_cast<uint32_t>(hostSession->GetStatusBarHeight());
-    TLOGI(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}u", height);
+    TLOGI(WmsLogTag::WMS_IMMS, "height %{public}u", height);
     return height;
 }
 

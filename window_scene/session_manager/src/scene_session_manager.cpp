@@ -1192,7 +1192,7 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
     if (item.IsInts() && item.intsValue_->size() == 1) {
         bool showInLandscapeMode = (*item.intsValue_)[0] > 0;
         appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_ = showInLandscapeMode;
-        TLOGI(WmsLogTag::WMS_IMMS, "showInLandscapeMode:%{public}d",
+        TLOGI(WmsLogTag::WMS_IMMS, "showInLandscapeMode %{public}d",
             appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_);
     }
 
@@ -1204,7 +1204,7 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
             return;
         }
         appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_ = color;
-        TLOGI(WmsLogTag::WMS_IMMS, "immersiveStatusBarBgColor:%{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "immersiveStatusBarBgColor %{public}s",
             appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str());
     }
 
@@ -1216,7 +1216,7 @@ void SceneSessionManager::ConfigSystemUIStatusBar(const WindowSceneConfig::Confi
             return;
         }
         appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_ = color;
-        TLOGI(WmsLogTag::WMS_IMMS, "immersiveStatusBarContentColor:%{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "immersiveStatusBarContentColor %{public}s",
             appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_.c_str());
     }
 }
@@ -4126,7 +4126,7 @@ void SceneSessionManager::HandleSpecificSystemBarProperty(WindowType type, const
     for (auto iter : systemBarProperties) {
         if (iter.first == type) {
             sceneSession->SetSystemBarProperty(iter.first, iter.second);
-            TLOGD(WmsLogTag::WMS_IMMS, "SetSystemBarProperty: %{public}d, enable: %{public}d",
+            TLOGD(WmsLogTag::WMS_IMMS, "type %{public}d enable %{public}d",
                 static_cast<int32_t>(iter.first), iter.second.enable_);
         }
     }
@@ -5014,8 +5014,8 @@ void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId disp
 {
     taskScheduler_->PostAsyncTask([this, displayId, visible] {
         statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
-        TLOGNI(WmsLogTag::WMS_IMMS,
-            "set default visibility on display: %{public}" PRIu64 " visible: %{public}d", displayId, visible);
+        TLOGNI(WmsLogTag::WMS_IMMS, "set default visibility, display id %{public}" PRIu64 " visible %{public}d",
+            displayId, visible);
     }, __func__);
 }
 
@@ -8706,12 +8706,10 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
 {
     const auto callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, haveListener, callingPid]() {
-        TLOGI(WmsLogTag::WMS_IMMS,
-            "UpdateSessionAvoidAreaListener persistentId: %{public}d haveListener:%{public}d",
-            persistentId, haveListener);
+        TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d haveListener %{public}d", persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            TLOGD(WmsLogTag::WMS_IMMS, "sceneSession is nullptr.");
+            TLOGD(WmsLogTag::WMS_IMMS, "sceneSession is nullptr");
             return WSError::WS_DO_NOTHING;
         }
         if (callingPid != sceneSession->GetCallingPid()) {
@@ -8734,7 +8732,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
     const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType)
 {
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "session null no need update avoid area, persistentId: %{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_IMMS, "session null no need update avoid area, win %{public}d", persistentId);
         return false;
     }
     if (lastUpdatedAvoidArea_.find(persistentId) == lastUpdatedAvoidArea_.end()) {
@@ -8747,7 +8745,7 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
         needUpdate = iter->second != avoidArea;
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
-            TLOGI(WmsLogTag::WMS_IMMS, "window %{public}d type %{public}d empty avoid area",
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}d empty avoid area",
                 persistentId, avoidAreaType);
             needUpdate = false;
             return needUpdate;
@@ -8803,14 +8801,14 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-        TLOGI(WmsLogTag::WMS_IMMS, "id: %{public}u, isVisible: %{public}u, sessionState: %{public}u",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isVisible %{public}u sessionState %{public}u",
             persistentId, sceneSession->IsVisible(), sceneSession->GetSessionState());
         needUpdate = false;
         return;
     }
     if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
         TLOGD(WmsLogTag::WMS_IMMS,
-            "id:%{public}d is not in avoidAreaListenerNodes, don't update avoid area.", persistentId);
+            "win %{public}d not in avoidAreaListenerNodes, cannot update avoid area", persistentId);
         needUpdate = false;
         return;
     }
@@ -8889,20 +8887,23 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
     auto task = [this, persistentId, type] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d is nullptr or invisible", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d is nullptr or invisible", persistentId);
             return;
         }
         if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d has no listener, no need update", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d has no listener, no need update", persistentId);
             return;
         }
         if (sceneSession->IsImmersiveType()) {
-            TLOGND(WmsLogTag::WMS_IMMS, "window %{public}d is immersive type", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d is immersive type", persistentId);
             return;
         }
         auto avoidArea = sceneSession->GetAvoidAreaByType(type);
         if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
             isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
+            TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d  AIbar check false, visible %{public}d "
+                "avoidarea %{public}s rect %{public}s", persistentId, isAINavigationBarVisible_,
+                avoidArea.ToString().c_str(), sceneSession->GetSessionRect().ToString().c_str());
             return;
         }
         UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, type);
@@ -8915,7 +8916,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
     auto task = [this, persistentId] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !sceneSession->GetEnableGestureBackHadSet()) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable.");
+            TLOGNI(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable");
             return;
         }
         auto needEnableGestureBack = sceneSession->GetGestureBackEnabled();
@@ -8971,8 +8972,8 @@ void SceneSessionManager::UpdateOccupiedAreaIfNeed(int32_t persistentId)
 
 WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "isVisible %{public}u, persistentId %{public}u",
-        isVisible, persistentId);
+    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u isVisible %{public}u",
+        persistentId, isVisible);
     auto task = [this, persistentId, isVisible] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
@@ -8987,9 +8988,8 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
 {
-    WLOGFI("isVisible: %{public}u, "
-        "area{%{public}d,%{public}d,%{public}d,%{public}d}, displayId: %{public}" PRIu64,
-        isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_, displayId);
+    TLOGI(WmsLogTag::WMS_IMMS, "isVisible %{public}u "
+        "area %{public}s, displayId %{public}" PRIu64, isVisible, barArea.ToString().c_str(), displayId);
     auto task = [this, isVisible, barArea, displayId]() {
         bool isNeedUpdate = true;
         {
@@ -9003,13 +9003,13 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 currAINavigationBarAreaMap_[displayId] = barArea;
             }
             if (isNeedUpdate && !isVisible && !barArea.IsEmpty()) {
-                WLOGFD("NotifyAINavigationBar: barArea should be empty if invisible");
+                TLOGND(WmsLogTag::WMS_IMMS, "barArea should be empty if invisible");
                 currAINavigationBarAreaMap_[displayId] = WSRect();
             }
         }
         if (isNeedUpdate) {
-            WLOGFI("NotifyAINavigationBar inner: %{public}u, {%{public}d,%{public}d,%{public}d,%{public}d}",
-                isVisible, barArea.posX_, barArea.posY_, barArea.width_, barArea.height_);
+            TLOGNI(WmsLogTag::WMS_IMMS, "isVisible %{public}u bar area %{public}s",
+                isVisible, barArea.ToString().c_str());
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionAINavigationBarChange(persistentId);
             }
@@ -9023,11 +9023,12 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
+        TLOGD(WmsLogTag::WMS_IMMS, "scene session is nullptr or not visible");
         return;
     }
     bool isLastFrameLayoutFinished = true;
     IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
-    TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}d] is layout finished: %{public}d",
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] layout finished %{public}d",
         persistentId, isLastFrameLayoutFinished);
     if (isLastFrameLayoutFinished) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
@@ -9035,7 +9036,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
             sceneSession->GetSessionRect().height_)) {
             return;
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}d] immediate update aibar area %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] aibar avoid area %{public}s",
             persistentId, avoidArea.ToString().c_str());
         UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
             AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
@@ -11304,7 +11305,7 @@ void SceneSessionManager::CheckSceneZOrder()
 
 WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "enterRecent: %{public}u", enterRecent);
+    TLOGI(WmsLogTag::WMS_IMMS, "enterRecent %{public}u", enterRecent);
     enterRecent_.store(enterRecent);
     SetSystemAnimatedScenes(enterRecent ?
         SystemAnimatedSceneType::SCENE_ENTER_RECENTS : SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
