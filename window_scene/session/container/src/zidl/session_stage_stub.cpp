@@ -52,7 +52,6 @@ bool WriteLittleStringVector(const std::vector<std::string>& infos, MessageParce
         TLOGE(WmsLogTag::WMS_UIEXT, "write infos failed");
         return false;
     }
-
     return true;
 }
 
@@ -60,7 +59,7 @@ bool WriteLargeStringVector(const std::vector<std::string>& infos, MessageParcel
 {
     Parcel writeParcel;
     writeParcel.SetMaxCapacity(MAX_PARCEL_CAPACITY);
-    if (!tempParcel.WriteInt32(static_cast<int32_t>(infos.size()))) {
+    if (!writeParcel.WriteInt32(static_cast<int32_t>(infos.size()))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write infosSize failed");
         return false;
     }
