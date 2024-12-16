@@ -1305,7 +1305,7 @@ HWTEST_F(WindowSessionPropertyTest, SetAvoidAreaOption, Function | SmallTest | L
 HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);;
+    ASSERT_NE(property, nullptr);
     ASSERT_EQ(0, property->GetAvoidAreaOption());
 }
 
