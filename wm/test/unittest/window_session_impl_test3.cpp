@@ -709,11 +709,10 @@ HWTEST_F(WindowSessionImplTest3, SetAPPWindowIcon, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-
     option->SetWindowName("SetAvoidAreaOption");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
     window->property_->SetPersistentId(1);
@@ -722,7 +721,7 @@ HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Leve
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    WMError res = window->SetAvoidAreaOption(3);
+    WMError res = window->SetAvoidAreaOption(3); 
     ASSERT_EQ(res, WMError::WM_OK);
 }
 

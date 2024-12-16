@@ -1795,9 +1795,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
          Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-         WindowHelper::IsMainWindow(Session::GetWindowType()) &&
+        WindowHelper::IsMainWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
-         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
+        (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
         if (Session::GetFloatingScale() <= miniScale) {
@@ -4523,15 +4523,11 @@ WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessi
 WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    sptr<WindowSessionProperty> sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (!SessionHelper::IsSubWindow(sessionProperty->GetWindowType()) &&
-        !SessionHelper::IsSystemWindow(sessionProperty->GetWindowType())) {
+    if (!SessionHelper::IsSubWindow(GetSessionProperty()->GetWindowType()) &&
+        !SessionHelper::IsSystemWindow(GetSessionProperty()->GetWindowType())) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    sessionProperty->SetAvoidAreaOption(property->GetAvoidAreaOption());
+    GetSessionProperty()->SetAvoidAreaOption(property->GetAvoidAreaOption());
     return WMError::WM_OK;
 }
 
