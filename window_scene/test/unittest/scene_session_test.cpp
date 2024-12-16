@@ -383,6 +383,24 @@ HWTEST_F(SceneSessionTest, GetRequestedOrientation, Function | SmallTest | Level
     ASSERT_EQ(ret6, Orientation::FOLLOW_DESKTOP);
 }
 
+/**
+ * @tc.name: SetDefaultRequestedOrientation
+ * @tc.desc: SetDefaultRequestedOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetDefaultRequestedOrientation, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "Background01";
+    info.bundleName_ = "SetDefaultRequestedOrientation";
+    sptr<SceneSession> sceneSession;
+    sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    Orientation orientation = Orientation::AUTO_ROTATION_UNSPECIFIED;
+    sceneSession->SetDefaultRequestedOrientation(orientation);
+    Orientation ret = sceneSession->GetRequestedOrientation();
+    ASSERT_EQ(orientation, ret);
+}
 
 /**
  * @tc.name: IsKeepScreenOn

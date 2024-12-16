@@ -48,6 +48,7 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
+    WSError OnRestoreMainWindow() override;
     WSError RaiseToAppTop() override;
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false) override;
@@ -85,6 +86,7 @@ public:
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
@@ -100,6 +102,12 @@ public:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
+
+    /*
+     * Starting Window
+     */
+    WSError RemoveStartingWindow() override;
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

@@ -1134,5 +1134,16 @@ WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string
     uiContentSharedPtr->DumpInfo(params, info);
     return WSError::WS_OK;
 }
+
+bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
+{
+    bool isPcOrPadFreeMultiWindowMode = false;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "cant't find isPcOrPadFreeMultiWindowMode, err: %{public}u",
+            static_cast<uint32_t>(ret));
+    }
+    return isPcOrPadFreeMultiWindowMode;
+}
 } // namespace Rosen
 } // namespace OHOS
