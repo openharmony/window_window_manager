@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
+#include <common/rs_rect.h>
 #include <gtest/gtest.h>
+#include <iremote_broker.h>
 #include <message_option.h>
 #include <message_parcel.h>
-#include <common/rs_rect.h>
 #include <transaction/rs_marshalling_helper.h>
-#include <iremote_broker.h>
+
+#include "display_manager_adapter.h"
+#include "display_manager_agent_default.h"
+#include "scene_board_judgement.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "window_manager_agent.h"
 #include "zidl/screen_session_manager_proxy.h"
 #include "zidl/window_manager_agent_interface.h"
-#include "display_manager_adapter.h"
-#include "display_manager_agent_default.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
