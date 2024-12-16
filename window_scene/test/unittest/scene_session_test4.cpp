@@ -1275,6 +1275,36 @@ HWTEST_F(SceneSessionTest4, SetFrameGravity, Function | SmallTest | Level2)
     session->surfaceNode_ = nullptr;
     ASSERT_EQ(false, session->SetFrameGravity(Gravity::TOP_LEFT));
 }
+
+/**
+ * @tc.name: UpdateAllModalUIExtensions
+ * @tc.desc: UpdateAllModalUIExtensions Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateAllModalUIExtensions";
+    info.bundleName_ = "UpdateAllModalUIExtensions";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    Rect globalRect = {100, 100, 100, 100};
+    session->SetSessionGlobalRect(globalRect);
+
+    Rect windowRect = {100, 100, 100, 100};
+    Rect uiExtRect = {0, 0, 100, 100};
+    ExtensionWindowEventInfo extensionInfo { 1, 1, globalRect, rect, false };
+    ExtensionWindowEventInfo extensionInfo2 { 2, 2, globalRect, rect, true };
+    session->modalUIExtensionInfoList_.push_back(extensionInfo);
+    session->modalUIExtensionInfoList_.push_back(extensionInfo2);
+
+    Rect newGlobalRect = {150, 150, 100, 100};
+    sesssion->UpdateAllModalUIExtensions(newGlobalRect);
+}
 }
 }
 }

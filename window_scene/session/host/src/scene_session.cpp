@@ -5628,6 +5628,9 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     }
     auto globalRect = GetSessionGlobalRect();
     SetSessionGlobalRect(uiParam.rect_);
+    if (globalRect != uiParam.rect_) {
+        UpdateAllModalUIExtensions(uiParam.rect_);
+    }
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
             "rectAfter:%{public}s preRect:%{public}s preGlobalRect:%{public}s", GetPersistentId(), uiParam.needSync_,
@@ -5960,14 +5963,14 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
     PostTask([weakThis = wptr(this), globalRect = globalRect]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "session is null");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
             return;
         }
         auto parentTransX = globalRect.posX_ - session->GetSessionRect().posX_;
         auto parentTransY = globalRect.posY_ - session->GetSessionRect().posY_;
         std::unique_lock<std::shared_mutex> lock(session->modalUIExtensionInfoListMutex_);
-        for (auto iter = session.modalUIExtensionInfoList_.begin();
-            iter != session.modalUIExtensionInfoList_.end(); iter++) {
+        for (auto iter = session->modalUIExtensionInfoList_.begin();
+            iter != session->modalUIExtensionInfoList_.end(); iter++) {
             if (iter->hasUpdatedRect) {
                 Rect windowRect = { iter->uiExtRect.posX_ + parentTransX, iter->uiExtRect.posY_ + parentTransY,
                     iter->uiExtRect.width_, iter->uiExtRect.height_ };
@@ -5975,8 +5978,8 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
             }
         }
         session->NotifySessionInfoChange();
-        TLOGNI(WmsLogTag::WMS_UIEXT, "id: %{public}d, globalRect: %{public}s, parentTransX: %{public}d, ",
-            "parentTransY: %{public}d," session->GetPersistentId(), globalRect.ToString().c_str(),
+        TLOGNI(WmsLogTag::WMS_UIEXT, "id: %{public}d, globalRect: %{public}s, parentTransX: %{public}d, "
+            "parentTransY: %{public}d" session->GetPersistentId(), globalRect.ToString().c_str(),
             parentTransX, parentTransY);
     }, "UpdateAllModalUIExtensions");
 }
