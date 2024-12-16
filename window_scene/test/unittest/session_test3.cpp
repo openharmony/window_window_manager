@@ -1031,7 +1031,7 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
     session_->RectCheckProcess();
 
     session_->property_->displayId_ = 0;
-    sptr<ScreenSession> screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(0, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     ASSERT_NE(&screenProperty, nullptr);
@@ -1328,6 +1328,25 @@ HWTEST_F(WindowSessionTest3, GetScreenId, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     session_->sessionInfo_.screenId_ = 100;
     ASSERT_EQ(session_->GetScreenId(), 100);
+}
+
+/**
+ * @tc.name: SetFreezeImmediately
+ * @tc.desc: SetFreezeImmediately Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetFreezeImmediately, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    session_->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(session_->surfaceNode_, nullptr);
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+    session_->surfaceNode_->bufferAvailable_ = true;
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, true));
+    session_->surfaceNode_ = nullptr;
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
 }
 }
 } // namespace Rosen

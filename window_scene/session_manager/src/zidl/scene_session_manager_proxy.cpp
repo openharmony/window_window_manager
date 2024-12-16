@@ -42,30 +42,24 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     MessageParcel data;
     MessageParcel reply;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("Write InterfaceToken failed!");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write InterfaceToken failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteRemoteObject(sessionStage->AsObject())) {
-        WLOGFE("Write ISessionStage failed!");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ISessionStage failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteRemoteObject(eventChannel->AsObject())) {
-        WLOGFE("Write IWindowEventChannel failed!");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write IWindowEventChannel failed!");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!surfaceNode || !surfaceNode->Marshalling(data)) {
-        WLOGFE("Write surfaceNode failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Write surfaceNode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
-    if (property) {
-        if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
+    if (!property || !data.WriteStrongParcelable(property)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write property failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     if (token != nullptr) {
         if (!data.WriteRemoteObject(token)) {
@@ -75,18 +69,18 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION), data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     persistentId = reply.ReadInt32();
     sptr<IRemoteObject> sessionObject = reply.ReadRemoteObject();
     if (sessionObject == nullptr) {
-        WLOGFE("ReadRemoteObject failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "ReadRemoteObject failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     session = iface_cast<ISession>(sessionObject);

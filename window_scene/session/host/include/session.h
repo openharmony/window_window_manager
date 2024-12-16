@@ -135,7 +135,7 @@ public:
     void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
         const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler = nullptr);
 
-    /**
+    /*
      * Window LifeCycle
      */
     virtual WSError ConnectInner(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -170,7 +170,7 @@ public:
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
 
-    /**
+    /*
      * Callbacks for ILifecycleListener
      */
     void NotifyActivation();
@@ -186,7 +186,7 @@ public:
         int64_t uiExtensionIdLevel) override;
     void NotifyExtensionDetachToDisplay() override;
 
-    /**
+    /*
      * Cross Display Move Drag
      */
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
@@ -329,8 +329,6 @@ public:
     void SetNeedNotify(bool needNotify);
     WSError SetTouchable(bool touchable);
     bool GetTouchable() const;
-    bool GetRectChangeBySystem() const;
-    void SetRectChangeBySystem(bool rectChangeBySystem);
     void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
@@ -350,12 +348,12 @@ public:
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
     
-    /**
+    /*
      * Window Rotate Animation
      */
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
 
-    /**
+    /*
      * Window Focus
      */
     virtual WSError SetSystemSceneBlockingFocus(bool blocking);
@@ -382,13 +380,16 @@ public:
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
 
-    /**
+    /*
      * Multi Window
      */
     void SetIsMidScene(bool isMidScene);
     bool GetIsMidScene() const;
 
-    bool CheckIfNeedKeyboardAvoidAreaEmpty() const;
+    /*
+     * Keyboard Window
+     */
+    bool CheckEmptyKeyboardAvoidAreaIfNeeded() const;
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -413,7 +414,7 @@ public:
     sptr<IRemoteObject> GetAbilityToken() const;
     WindowMode GetWindowMode() const;
 
-    /**
+    /*
      * Window ZOrder
      */
     virtual void SetZOrder(uint32_t zOrder);
@@ -483,7 +484,7 @@ public:
     bool GetForegroundInteractiveStatus() const;
     virtual void SetForegroundInteractiveStatus(bool interactive);
 
-    /**
+    /*
      * Window Lifecycle
      */
     bool GetIsPendingToBackgroundState() const;
@@ -522,7 +523,7 @@ public:
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
 
-    /**
+    /*
      * Starting Window
      */
     WSError RemoveStartingWindow() override;
@@ -533,13 +534,13 @@ public:
     void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
     bool UseStartingWindowAboveLocked() const;
 
-    /**
+    /*
      * Window Hierarchy
      */
     void ProcessClickModalWindowOutside(int32_t posX, int32_t posY);
     void SetClickModalWindowOutsideListener(NotifyClickModalWindowOutsideFunc&& func);
 
-    /**
+    /*
      * Window Layout
      */
     void SetClientRect(const WSRect& rect);
@@ -553,10 +554,15 @@ public:
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
 
-    /**
+    /*
      * Screen Lock
      */
     bool IsScreenLockWindow() const;
+
+    /*
+     * Free Multi Window
+     */
+    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -576,7 +582,7 @@ protected:
     void UpdateSessionTouchable(bool touchable);
     virtual WSError UpdateActiveStatus(bool isActive) { return WSError::WS_OK; }
 
-    /**
+    /*
      * Gesture Back
      */
     virtual void UpdateGestureBackEnabled() {}
@@ -657,7 +663,7 @@ protected:
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_;
 
-    /**
+    /*
      * Window LifeCycle
      */
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
@@ -670,7 +676,7 @@ protected:
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
 
-    /**
+    /*
      * Window Rotate Animation
      */
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
@@ -680,7 +686,7 @@ protected:
     float snapshotScale_ = 0.5;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
-    /**
+    /*
      * Window Layout
      */
     RequestVsyncFunc requestNextVsyncFunc_;
@@ -699,13 +705,13 @@ protected:
     DisplayId lastUpdatedDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
-    /**
+    /*
      * Window ZOrder
      */
     uint32_t zOrder_ = 0;
     uint32_t lastZOrder_ = 0;
 
-    /**
+    /*
      * Window Focus
      */
     bool isFocused_ = false;
@@ -731,12 +737,12 @@ protected:
     mutable std::shared_mutex keyEventMutex_;
     bool rectChangeListenerRegistered_ = false;
 
-    /**
+    /*
      * Window Hierarchy
      */
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
 
-    /**
+    /*
      * Window Pipeline
      */
     uint32_t dirtyFlags_ = 0; // only accessed on SSM thread
@@ -760,12 +766,12 @@ private:
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
 
-    /**
+    /*
      * Window Rotate Animation
      */
     int32_t GetRotateAnimationDuration();
 
-    /**
+    /*
      * Window Property
      */
     void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
@@ -796,7 +802,7 @@ private:
 
     sptr<WindowSessionProperty> property_;
 
-    /**
+    /*
      * Window Focus
      */
     mutable std::shared_mutex uiRequestFocusMutex_;
@@ -809,7 +815,7 @@ private:
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
 
-    /**
+    /*
      * Multi Window
      */
     bool isMidScene_ = false;
@@ -827,10 +833,9 @@ private:
     float vpr_ { 1.5f };
     bool forceTouchable_ { true };
     bool systemTouchable_ { true };
-    std::atomic<bool> rectChangeBySystem_ { false };
     std::atomic_bool foregroundInteractiveStatus_ { true };
 
-    /**
+    /*
      * Window Lifecycle
      */
     std::atomic<bool> isAttach_ { false };
@@ -843,19 +848,19 @@ private:
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
 
-    /**
+    /*
      * Starting Window
      */
     bool enableRemoveStartingWindow_ { false };
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
 
-    /**
+    /*
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
 
-    /**
+    /*
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };

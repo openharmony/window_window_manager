@@ -2646,11 +2646,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
     SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
 {
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "property is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -5151,7 +5146,7 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
 WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground,
     FocusChangeReason reason)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
     auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
             if (reason == FocusChangeReason::FOREGROUND) {
@@ -5950,7 +5945,7 @@ WSError SceneSessionManager::SendTouchEvent(const std::shared_ptr<MMI::PointerEv
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
     FillSecCompEnhanceData(pointerEvent, pointerItem);
 #endif
-    TLOGI(WmsLogTag::WMS_EVENT, "PointerId=%{public}d, action=%{public}d, deviceId=%{public}d, zIndex=%{public}ud",
+    TLOGI(WmsLogTag::WMS_EVENT, "eid=%{public}d,action=%{public}d,deviceId=%{public}d,zIndex=%{public}ud",
         pointerEvent->GetPointerId(), pointerEvent->GetPointerAction(), pointerEvent->GetDeviceId(), zIndex);
     pointerEvent->AddFlag(MMI::PointerEvent::EVENT_FLAG_NO_INTERCEPT);
     MMI::InputManager::GetInstance()->SimulateInputEvent(pointerEvent, static_cast<float>(zIndex));
@@ -10977,11 +10972,11 @@ int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
     int32_t height = 0;
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Session with persistentId %{public}d not found", persistentId);
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid, id: %{public}d", persistentId);
         return 0;
     }
     height = sceneSession->GetCustomDecorHeight();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "GetCustomDecorHeight: %{public}d", height);
+    TLOGD(WmsLogTag::WMS_DECOR, "decor height: %{public}d", height);
     return height;
 }
 

@@ -619,8 +619,13 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
 {
+    if (WindowHelper::IsDialogWindow(GetType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "dialogWindow default draggable, should not init false, id: %{public}d",
+            GetPersistentId());
+        return;
+    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d init dragEnable false",
-        property_->GetPersistentId());
+        GetPersistentId());
     property_->SetDragEnabled(false);
 }
 
@@ -2605,14 +2610,14 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
         }
         return res;
     }
-    WindowPrepareTerminateHandler* handler = sptr<WindowPrepareTerminateHandler>::MakeSptr();
+    auto handler = sptr<WindowPrepareTerminateHandler>::MakeSptr();
     PrepareTerminateFunc func = [hostSessionWptr = wptr<ISession>(hostSession)] {
-        auto weakSession = hostSessionWptr.promote();
-        if (weakSession == nullptr) {
+        auto hostSession = hostSessionWptr.promote();
+        if (hostSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "this session is nullptr");
             return;
         }
-        weakSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
     };
     handler->SetPrepareTerminateFun(func);
     if (AAFwk::AbilityManagerClient::GetInstance()->PrepareTerminateAbility(abilityContext->GetToken(),
@@ -3755,13 +3760,35 @@ WSError WindowSceneSessionImpl::NotifyCompatibleModeEnableInPad(bool enable)
 
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (handler_) {
+        handler_->PostTask([weakThis = wptr(this), reason, withAnimation] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+                return;
+            }
+            window->Show(reason, withAnimation);
+        }, __func__);
+        return;
+    }
     Show(reason, withAnimation);
 }
 
 void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
-    WLOGFI("in");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (handler_) {
+        handler_->PostTask([weakThis = wptr(this), reason, withAnimation, isFromInnerkits] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+                return;
+            }
+            window->Hide(reason, withAnimation, isFromInnerkits);
+        }, __func__);
+        return;
+    }
     Hide(reason, withAnimation, isFromInnerkits);
 }
 
@@ -3929,19 +3956,19 @@ WSError WindowSceneSessionImpl::NotifyDialogStateChange(bool isForeground)
 
 WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id=%{public}d set default density enabled=%{public}d", GetWindowId(), enabled);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d, enabled=%{public}d", GetWindowId(), enabled);
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "window is invalid");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "must be app main window");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "must be app main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (isDefaultDensityEnabled_ == enabled) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "isDefaultDensityEnabled not change");
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isDefaultDensityEnabled not change");
         return WMError::WM_OK;
     }
 
@@ -3955,10 +3982,10 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
             continue;
         }
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id=%{public}d UpdateDensity", window->GetWindowId());
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
         window->UpdateDensity();
     }
     return WMError::WM_OK;
@@ -4185,6 +4212,10 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
         return;
+    }
+    if (IsSystemDensityChanged(displayInfo)) {
+        lastSystemDensity_ = displayInfo->GetVirtualPixelRatio();
+        NotifySystemDensityChange(displayInfo->GetVirtualPixelRatio());
     }
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
@@ -4541,6 +4572,17 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
         return ret;
     }
     return WMError::WM_DO_NOTHING;
+}
+
+bool WindowSceneSessionImpl::IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo)
+{
+    if (MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "System density not change");
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}d, lastDensity: %{public}f, currDensity: %{public}f",
+        GetPersistentId(), lastSystemDensity_, displayInfo->GetVirtualPixelRatio());
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

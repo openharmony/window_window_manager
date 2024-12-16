@@ -725,10 +725,10 @@ void SceneSession::AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t ty
     windowDragHotAreaMap_[displayId].insert_or_assign(type, area);
 }
 
-WSError SceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModalType)
+WSError SceneSession::NotifySubModalTypeChange(SubWindowModalType subWindowModalType)
 {
     const char* const where = __func__;
-    PostTask([weakThis = wptr(this), subWindowModalType, where]() {
+    PostTask([weakThis = wptr(this), subWindowModalType, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -736,14 +736,14 @@ WSError SceneSession::OnSessionModalTypeChange(SubWindowModalType subWindowModal
         }
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s subWindowModalType: %{public}u",
             where, static_cast<uint32_t>(subWindowModalType));
-        if (session->onSessionModalTypeChange_) {
-            session->onSessionModalTypeChange_(subWindowModalType);
+        if (session->onSubModalTypeChange_) {
+            session->onSubModalTypeChange_(subWindowModalType);
         }
     }, __func__);
     return WSError::WS_OK;
 }
 
-void SceneSession::SetSessionModalTypeChangeCallback(NotifySessionModalTypeChangeFunc&& func)
+void SceneSession::RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func)
 {
     const char* const where = __func__;
     PostTask([weakThis = wptr(this), func = std::move(func), where] {
@@ -752,13 +752,13 @@ void SceneSession::SetSessionModalTypeChangeCallback(NotifySessionModalTypeChang
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session or SessionModalTypeChangeFunc is null", where);
             return;
         }
-        session->onSessionModalTypeChange_ = std::move(func);
+        session->onSubModalTypeChange_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s id: %{public}d",
             where, session->GetPersistentId());
     }, __func__);
 }
 
-void SceneSession::SetMainSessionModalTypeChangeCallback(NotifyMainSessionModalTypeChangeFunc&& func)
+void SceneSession::RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func)
 {
     const char* const where = __func__;
     PostTask([weakThis = wptr(this), func = std::move(func), where] {
@@ -767,19 +767,14 @@ void SceneSession::SetMainSessionModalTypeChangeCallback(NotifyMainSessionModalT
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session or func is null", where);
             return;
         }
-        session->onMainSessionModalTypeChange_ = std::move(func);
+        session->onMainModalTypeChange_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where, session->GetPersistentId());
     }, __func__);
 }
 
 bool SceneSession::IsDialogWindow() const
 {
-    bool isDialogWindow = false;
-    auto property = GetSessionProperty();
-    if (property != nullptr) {
-        isDialogWindow = WindowHelper::IsDialogWindow(property->GetWindowType());
-    }
-    return isDialogWindow;
+    return WindowHelper::IsDialogWindow(GetSessionProperty()->GetWindowType());
 }
 
 SubWindowModalType SceneSession::GetSubWindowModalType() const
@@ -1838,8 +1833,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
-    if (Session::CheckIfNeedKeyboardAvoidAreaEmpty()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "Keyboard avoid area need to empty when in floating mode");
+    if (Session::CheckEmptyKeyboardAvoidAreaIfNeeded()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "Keyboard avoid area needs to be empty when in floating mode");
         return;
     }
     auto sessionProperty = GetSessionProperty();
@@ -2770,7 +2765,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     }
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
     if (!ret) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "no throw slip");
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
         return false;
     }
 
@@ -3004,7 +2999,6 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     }
     auto surfaceNode = GetSurfaceNode();
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    auto property = GetSessionProperty();
     if (surfaceNode && leashWinSurfaceNode) {
         leashWinSurfaceNode->SetGlobalPositionEnabled(isGlobal);
         leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -3026,9 +3020,8 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-    } else if (WindowHelper::IsSystemWindow(GetWindowType()) &&
-        property && property->GetDragEnabled() && surfaceNode) {
-        TLOGD(WmsLogTag::WMS_SYSTEM, "drag enabled systemwindow setSurfaceBounds");
+    } else if (WindowHelper::IsSystemWindow(GetWindowType()) && surfaceNode) {
+        TLOGD(WmsLogTag::WMS_SYSTEM, "system window setSurfaceBounds");
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
@@ -4494,7 +4487,7 @@ WMError SceneSession::HandleActionUpdateTopmost(const sptr<WindowSessionProperty
     WSPropertyChangeAction action)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateTopmostProperty permission denied!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "UpdateTopmostProperty permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 
@@ -5346,6 +5339,7 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
             return;
         }
         sessionProperty->SetDragEnabled(enableDrag);
+        session->NotifySessionInfoChange();
     }, "SetSystemWindowEnableDrag");
     return WMError::WM_OK;
 }
@@ -5484,7 +5478,7 @@ int32_t SceneSession::GetDockHeight()
     int32_t height = 0;
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
         GetSessionProperty() == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "specificCallback_ or session property is null");
+        TLOGE(WmsLogTag::WMS_DECOR, "specificCallback_ or session property is null");
         return height;
     }
     std::vector<sptr<SceneSession>> dockVector = specificCallback_->onGetSceneSessionVectorByType_(
@@ -5913,5 +5907,34 @@ bool SceneSession::IsSystemKeyboard() const
 void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+}
+
+void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enabled: %{public}d", GetPersistentId(), enabled);
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "fail to get surfaceNode");
+        return;
+    }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "begin rsTransaction");
+        rsTransaction->Begin();
+    }
+
+    if (behindWindowFilterEnabledModifier_ == nullptr) {
+        behindWindowFilterEnabledProperty_ = std::make_shared<RSProperty<bool>>(enabled);
+        behindWindowFilterEnabledModifier_ = std::make_shared<RSBehindWindowFilterEnabledModifier>(
+            behindWindowFilterEnabledProperty_);
+        surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
+    } else {
+        behindWindowFilterEnabledProperty_->Set(enabled);
+    }
+
+    if (rsTransaction != nullptr) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "commit rsTransaction");
+        rsTransaction->Commit();
+    }
 }
 } // namespace OHOS::Rosen

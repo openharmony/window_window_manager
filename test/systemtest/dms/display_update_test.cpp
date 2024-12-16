@@ -71,7 +71,8 @@ HWTEST_F(DisplayUpdateTest, RegisterDisplayUpdateListener, Function | MediumTest
 {
     auto& dm = DisplayManager::GetInstance();
     sptr<DisplayUpdateListener> listener_ = new DisplayUpdateListener();
-    dm.RegisterDisplayUpdateListener(listener_);
+    auto ret = dm.RegisterDisplayUpdateListener(listener_);
+    ASSERT_EQ(DMError::DM_OK, ret);
     sptr<WindowOption> option = new WindowOption();
     auto window = Window::Create("private", option);
     if (window == nullptr) {
@@ -79,7 +80,8 @@ HWTEST_F(DisplayUpdateTest, RegisterDisplayUpdateListener, Function | MediumTest
         return;
     }
     window->Show();
-    dm.UnregisterDisplayUpdateListener(listener_);
+    auto ret1 = dm.UnregisterDisplayUpdateListener(listener_);
+    ASSERT_EQ(DMError::DM_OK, ret1);
     window->Destroy();
 }
 } // namespace

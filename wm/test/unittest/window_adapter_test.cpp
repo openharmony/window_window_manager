@@ -466,31 +466,6 @@ HWTEST_F(WindowAdapterTest, ReregisterWindowManagerAgent, Function | SmallTest |
 }
 
 /**
- * @tc.name: RecoverAndConnectSpecificSession
- * @tc.desc: WindowAdapter/RecoverAndConnectSpecificSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, RecoverAndConnectSpecificSession, Function | SmallTest | Level2)
-{
-    WindowAdapter windowAdapter;
-    sptr<ISessionStage> iSessionStage;
-    sptr<IWindowEventChannel> eventChannel;
-    sptr<ISession> session = nullptr;
-    sptr<IRemoteObject> token = nullptr;
-    windowAdapter.RecoverAndConnectSpecificSession(
-        iSessionStage, eventChannel, nullptr, nullptr, session, token);
-
-    windowAdapter.isProxyValid_ = true;
-    windowAdapter.RecoverAndConnectSpecificSession(
-        iSessionStage, eventChannel, nullptr, nullptr, session, token);
-    
-    sptr<IRemoteObject> remotObject = nullptr;
-    windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
-    windowAdapter.RecoverAndConnectSpecificSession(
-        iSessionStage, eventChannel, nullptr, nullptr, session, token);
-}
-
-/**
  * @tc.name: RecoverAndReconnectSceneSession
  * @tc.desc: WindowAdapter/RecoverAndReconnectSceneSession
  * @tc.type: FUNC

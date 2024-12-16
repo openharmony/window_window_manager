@@ -388,15 +388,17 @@ enum class WindowLayoutMode : uint32_t {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
 
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
+constexpr uint32_t INVALID_WINDOW_ID = 0;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
+
+constexpr float UNDEFINED_DENSITY = -1.0f;
 }
 
 /**
@@ -711,8 +713,8 @@ enum class WindowUpdateType : int32_t {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = UINT32_MAX;
-    uint32_t maxHeight_ = UINT32_MAX;
+    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX);
+    uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
     uint32_t minWidth_ = 1;
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
