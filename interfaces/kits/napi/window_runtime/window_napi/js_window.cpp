@@ -330,14 +330,14 @@ napi_value JsWindow::SetUIContent(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetLayoutFullScreen(env, info) : nullptr;
 }
@@ -351,28 +351,28 @@ napi_value JsWindow::SetTitleAndDockHoverShown(napi_env env, napi_callback_info 
 
 napi_value JsWindow::SetWindowLayoutFullScreen(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowLayoutFullScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSystemBarEnable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowSystemBarEnable(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarEnable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSpecificSystemBarEnabled(env, info) : nullptr;
 }
@@ -393,21 +393,21 @@ napi_value JsWindow::DisableLandscapeMultiWindow(napi_env env, napi_callback_inf
 
 napi_value JsWindow::SetSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSystemBarProperties(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowSystemBarPropertiesSync(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowSystemBarProperties(env, info) : nullptr;
 }
@@ -421,7 +421,7 @@ napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidAreaSync(env, info) : nullptr;
 }
@@ -953,14 +953,14 @@ napi_value JsWindow::SetWindowGrayScale(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetImmersiveModeEnabledState(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetImmersiveModeEnabledState(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetImmersiveModeEnabledState(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetImmersiveModeEnabledState(env, info) : nullptr;
 }
@@ -1002,14 +1002,14 @@ napi_value JsWindow::CreateSubWindowWithOptions(napi_env env, napi_callback_info
 
 napi_value JsWindow::SetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetGestureBackEnabled(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "start");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetGestureBackEnabled(env, info) : nullptr;
 }
