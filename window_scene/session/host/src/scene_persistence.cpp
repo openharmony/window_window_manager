@@ -81,7 +81,6 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
 ScenePersistence::~ScenePersistence()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "destroyed, persistentId: %{public}d", persistentId_);
-    std::lock_guard<std::mutex> lock(savingSnapshotMutex_);
     remove(snapshotPath_.c_str());
 }
 
