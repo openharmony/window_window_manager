@@ -1062,17 +1062,9 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
         TLOGE(WmsLogTag::WMS_IMMS, "write type error");
         return avoidArea;
     }
-    if (!data.WriteInt32(rect.posX_)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "write posX_ error");
-    }
-    if (!data.WriteInt32(rect.posY_)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "write posY_ error");
-    }
-    if (!data.WriteInt32(rect.width_)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "write width_ error");
-    }
-    if (!data.WriteInt32(rect.height_)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "write height_ error");
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) || !data.WriteInt32(rect.width_) ||
+        !data.WriteInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {

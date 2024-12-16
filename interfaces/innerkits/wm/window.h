@@ -896,23 +896,20 @@ public:
      * @param rect
      * @return WMError
      */
-    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0})
-    {
-        return WMError::WM_OK;
-    }
+    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
+        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
      *
-     * @param avoidAreaOption Flags of whether the system or app sub window can obtain area
+     * @param avoidAreaOption from low to high, the first bit means system window, the second bit means app sub window
      */
-    virtual WMError SetAvoidAreaOption(uint32_t AvoidAreaOption) { return WMError::WM_OK; }
+    virtual WMError SetAvoidAreaOption(uint32_t avoidAreaOption) { return WMError::WM_OK; }
 
     /**
      * @brief Get the Avoid Area of system or app sub window Enabled object
      *
-     * @param
-     * @return 01 means system window can obtain avoid area, 10 means app sub window can obtain avoid area
+     * @return from low to high, the first bit represents system window, the second bit represents app sub window
      */
     virtual uint32_t GetAvoidAreaOption() { return 0; }
 

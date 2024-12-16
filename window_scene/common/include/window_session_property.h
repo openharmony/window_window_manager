@@ -101,7 +101,13 @@ public:
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
+    
+    /**
+     * WindowImmersive
+     */
     void SetAvoidAreaOption(uint32_t avoidAreaOption);
+    uint32_t GetAvoidAreaOption() const;
+    uint32_t avoidAreaOption_ = 0;
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -162,7 +168,6 @@ public:
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
     bool GetCompatibleModeEnableInPad() const;
-    uint32_t GetAvoidAreaOption() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -386,7 +391,6 @@ private:
     bool isUIExtFirstSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtAnySubWindow_ = false;
-    uint32_t avoidAreaOption_ = 0;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
     /**

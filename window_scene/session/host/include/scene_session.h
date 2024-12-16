@@ -304,7 +304,6 @@ public:
      * Window Immersive
      */
     WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0});
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
@@ -703,6 +702,7 @@ private:
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0});
 
     /**
      * Window Lifecycle
