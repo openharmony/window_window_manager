@@ -382,6 +382,11 @@ void ScreenSessionManager::ConfigureScreenScene()
         TLOGD(WmsLogTag::DMS, "rotationPolicy = %{public}s.", rotationPolicy.c_str());
         deviceScreenConfig_.rotationPolicy_ = rotationPolicy;
     }
+    if (stringConfig.count("defaultRotationPolicy") != 0) {
+        std::string defaultRotationPolicy = stringConfig["defaultRotationPolicy"];
+        TLOGD(WmsLogTag::DMS, "defaultRotationPolicy = %{public}s.", defaultRotationPolicy.c_str());
+        deviceScreenConfig_.defaultRotationPolicy_ = defaultRotationPolicy;
+    }
     if (enableConfig.count("isRightPowerButton") != 0) {
         bool isRightPowerButton = static_cast<bool>(enableConfig["isRightPowerButton"]);
         TLOGD(WmsLogTag::DMS, "isRightPowerButton = %d", isRightPowerButton);
@@ -5428,5 +5433,40 @@ DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenI
     oss << "]" << ", ret: " << ret;
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     return ret == 0 ? DMError::DM_OK : DMError::DM_ERROR_UNKNOWN;
+}
+
+DMError ScreenSessionManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+    uint32_t& actualRefreshRate)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    TLOGI(WmsLogTag::DMS, "ID:%{public}" PRIu64", refreshRate:%{public}u, actualRefreshRate:%{public}u",
+        id, refreshRate, actualRefreshRate);
+    if (id == GetDefaultScreenId()) {
+        TLOGE(WmsLogTag::DMS,
+        "cannot set refresh rate of main screen, main screen id: %{public}" PRIu64".", GetDefaultScreenId());
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto screenSession = GetScreenSession(id);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    ScreenId rsScreenId;
+    if (!screenIdManager_.ConvertToRsScreenId(id, rsScreenId)) {
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    int32_t res = rsInterface_.SetVirtualScreenRefreshRate(rsScreenId, refreshRate, actualRefreshRate);
+    TLOGI(WmsLogTag::DMS, "refreshRate:%{public}u, actualRefreshRate:%{public}u", refreshRate, actualRefreshRate);
+    if (res != StatusCode::SUCCESS) {
+        TLOGE(WmsLogTag::DMS, "rsInterface error: %{public}d", res);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    screenSession->UpdateRefreshRate(actualRefreshRate);
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen

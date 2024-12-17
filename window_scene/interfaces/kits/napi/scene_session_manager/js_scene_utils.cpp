@@ -71,6 +71,17 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
+WSError GetIntValueFromString(const std::string& str, uint32_t& value)
+{
+    char* end;
+    value = strtoul(str.c_str(), &end, 10); // 10 number convert base
+    if (*end == '\0' && value != 0) {
+        return WSError::WS_OK;
+    }
+    TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
 bool IsJsBundleNameUndefind(napi_env env, napi_value jsBundleName, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsBundleName) != napi_undefined) {
@@ -960,6 +971,22 @@ void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_v
         auto executeParams = params.GetWantParams("ohos.insightIntent.executeParam.param");
         napi_set_named_property(env, objValue, "extraFormIdentity",
             CreateJsValue(env, executeParams.GetStringParam("ohos.extra.param.key.form_identity")));
+        if (params.HasParam("expectWindowMode")) {
+            napi_set_named_property(env, objValue, "expectWindowMode",
+                CreateJsValue(env, params.GetIntParam("expectWindowMode", INVALID_VAL)));
+        }
+        if (params.HasParam("isStartFromAppDock")) {
+            napi_set_named_property(env, objValue, "isStartFromAppDock",
+                CreateJsValue(env, params.GetIntParam("isStartFromAppDock", INVALID_VAL)));
+        }
+        if (params.HasParam("dockAppDirection")) {
+            napi_set_named_property(env, objValue, "dockAppDirection",
+                CreateJsValue(env, params.GetIntParam("dockAppDirection", INVALID_VAL)));
+        }
+        if (params.HasParam("isAppFromRecentAppsOrDockApps")) {
+            napi_set_named_property(env, objValue, "isAppFromRecentAppsOrDockApps",
+                CreateJsValue(env, params.GetIntParam("isAppFromRecentAppsOrDockApps", INVALID_VAL)));
+        }
     }
 }
 

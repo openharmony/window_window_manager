@@ -54,6 +54,7 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetRequestedOrientation(Orientation orientation);
+    void SetDefaultRequestedOrientation(Orientation orientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetSnapshotSkip(bool isSkip);
@@ -94,6 +95,7 @@ public:
     void SetCompatibleModeInPc(bool compatibleModeInPc);
     void SetCompatibleWindowSizeInPc(int32_t portraitWidth, int32_t portraitHeight,
         int32_t landscapeWidth, int32_t landscapeHeight);
+    void SetIsAppSupportPhoneInPc(bool isSupportPhone);
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
@@ -116,6 +118,7 @@ public:
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
     Orientation GetRequestedOrientation() const;
+    Orientation GetDefaultRequestedOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
     bool GetSnapshotSkip() const;
@@ -151,6 +154,7 @@ public:
     int32_t GetCompatibleInPcPortraitHeight() const;
     int32_t GetCompatibleInPcLandscapeWidth() const;
     int32_t GetCompatibleInPcLandscapeHeight() const;
+    bool GetIsAppSupportPhoneInPc() const;
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
     bool GetCompatibleModeEnableInPad() const;
@@ -261,6 +265,7 @@ private:
     void ReadActionUpdateModeSupportInfo(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
+    mutable std::mutex requestRectMutex_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     mutable std::mutex windowRectMutex_;
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
@@ -277,6 +282,7 @@ private:
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
+    Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
@@ -332,6 +338,7 @@ private:
     int32_t compatibleInPcPortraitHeight_ = 0;
     int32_t compatibleInPcLandscapeWidth_ = 0;
     int32_t compatibleInPcLandscapeHeight_ = 0;
+    bool isAppSupportPhoneInPc_ = false;
     bool isSupportDragInPcCompatibleMode_ = false;
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;

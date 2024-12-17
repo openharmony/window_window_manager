@@ -167,6 +167,7 @@ void WindowSessionProperty::SetWindowRect(const struct Rect& rect)
 
 void WindowSessionProperty::SetRequestRect(const Rect& requestRect)
 {
+    std::lock_guard<std::mutex> lock(requestRectMutex_);
     requestRect_ = requestRect;
 }
 
@@ -213,6 +214,11 @@ void WindowSessionProperty::SetRaiseEnabled(bool raiseEnabled)
 void WindowSessionProperty::SetRequestedOrientation(Orientation orientation)
 {
     requestedOrientation_ = orientation;
+}
+
+void WindowSessionProperty::SetDefaultRequestedOrientation(Orientation orientation)
+{
+    defaultRequestedOrientation_ = orientation;
 }
 
 void WindowSessionProperty::SetPrivacyMode(bool isPrivate)
@@ -273,6 +279,7 @@ Rect WindowSessionProperty::GetWindowRect() const
 
 Rect WindowSessionProperty::GetRequestRect() const
 {
+    std::lock_guard<std::mutex> lock(requestRectMutex_);
     return requestRect_;
 }
 
@@ -319,6 +326,11 @@ bool WindowSessionProperty::GetRaiseEnabled() const
 Orientation WindowSessionProperty::GetRequestedOrientation() const
 {
     return requestedOrientation_;
+}
+
+Orientation WindowSessionProperty::GetDefaultRequestedOrientation() const
+{
+    return defaultRequestedOrientation_;
 }
 
 bool WindowSessionProperty::GetPrivacyMode() const
@@ -954,6 +966,16 @@ int32_t WindowSessionProperty::GetCompatibleInPcLandscapeHeight() const
     return compatibleInPcLandscapeHeight_;
 }
 
+void WindowSessionProperty::SetIsAppSupportPhoneInPc(bool isSupportPhone)
+{
+    isAppSupportPhoneInPc_ = isSupportPhone;
+}
+
+bool WindowSessionProperty::GetIsAppSupportPhoneInPc() const
+{
+    return isAppSupportPhoneInPc_;
+}
+
 void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
 {
     isPcAppInPad_ = isPcAppInPad;
@@ -1037,6 +1059,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(compatibleModeInPc_) &&
         parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
+        parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_);
 }
@@ -1109,6 +1132,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCompatibleModeInPc(parcel.ReadBool());
     property->SetCompatibleWindowSizeInPc(parcel.ReadInt32(), parcel.ReadInt32(),
                                           parcel.ReadInt32(), parcel.ReadInt32());
+    property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
@@ -1135,6 +1159,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     requestedOrientation_ = property->requestedOrientation_;
+    defaultRequestedOrientation_ = property->defaultRequestedOrientation_;
     isPrivacyMode_ = property->isPrivacyMode_;
     isSystemPrivacyMode_ = property->isSystemPrivacyMode_;
     isSnapshotSkip_ = property->isSnapshotSkip_;
