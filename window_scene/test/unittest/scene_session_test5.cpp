@@ -1756,6 +1756,30 @@ HWTEST_F(SceneSessionTest5, SetBehindWindowFilterEnabled, Function | SmallTest |
     session->SetBehindWindowFilterEnabled(false);
     session->SetBehindWindowFilterEnabled(true);
 }
+
+/**
+ * @tc.name: MarkSystemSceneUIFirst
+ * @tc.desc: MarkSystemSceneUIFirst function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "MarkSystemSceneUIFirst";
+    info.bundleName_ = "MarkSystemSceneUIFirst";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->MarkSystemSceneUIFirst(true, true);
+ 
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->leashWinSurfaceNode_ = nullptr;
+    session->MarkSystemSceneUIFirst(true, true);
+    session->leashWinSurfaceNode_ = surfaceNode;
+    session->MarkSystemSceneUIFirst(true, true);
+    EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
+}
 }
 }
 }
