@@ -957,7 +957,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
         clientProxy_->OnScreenConnectionChanged(screenId, screenEvent,
             screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
     }
-    if (g_isPcDevice) {
+    if (clientProxy_ && g_isPcDevice) {
         RecoverMultiScreenInfoFromData(screenSession);
     }
     if (phyMirrorEnable) {
@@ -5828,7 +5828,32 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
     SetClientInner();
     SwitchScbNodeHandle(userId, newScbPid, true);
+    RecoverMultiScreenMode();
     AddScbClientDeathRecipient(client, newScbPid);
+}
+
+void ScreenSessionManager::RecoverMultiScreenMode()
+{
+    if (!g_isPcDevice) {
+        TLOGW(WmsLogTag::DMS, "not PC device");
+        return;
+    }
+    if (!clientProxy_) {
+        TLOGE(WmsLogTag::DMS, "clientProxy is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (const auto& iter : screenSessionMap_) {
+        if (!iter.second) {
+            continue;
+        }
+        if (iter.second->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
+            !iter.second->GetIsInternal() && iter.second->GetIsCurrentInUse()) {
+            TLOGW(WmsLogTag::DMS, "found external screen, screenId: %{public}" PRIu64, iter.first);
+            RecoverMultiScreenInfoFromData(iter.second);
+            break;
+        }
+    }
 }
 
 void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScbPid, bool coldBoot)
