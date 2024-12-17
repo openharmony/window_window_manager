@@ -1310,7 +1310,6 @@ HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | L
     property->SetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(2, property->GetAvoidAreaOption());
 }
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -917,8 +917,9 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    uint32_t res = window->GetAvoidAreaOption();
-    ASSERT_EQ(res, 0);
+    uint32_t avoidAreaOption = 0;
+    WMError res = window->GetAvoidAreaOption(avoidAreaOption);
+    ASSERT_EQ(res, WMError::WM_OK);
 }
 }
 } // namespace Rosen

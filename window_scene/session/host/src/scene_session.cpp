@@ -1944,8 +1944,8 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     if (WindowHelper::IsSubWindow(winType)) {
         if (GetSessionProperty()->GetAvoidAreaOption() &
             static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
-            TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] option true",
-                GetPersistentId(), GetWindowName().c_str());
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d option %{public}d",
+                GetPersistentId(), GetSessionProperty()->GetAvoidAreaOption());
             return true;
         }
         auto parentSession = GetParentSession();
@@ -1968,10 +1968,9 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
          static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) {
         return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u "
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u "
         "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
-        GetPersistentId(), GetWindowName().c_str(), static_cast<uint32_t>(winType),
-        static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
+        GetPersistentId(), static_cast<uint32_t>(winType), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
     return false;
 }
 
