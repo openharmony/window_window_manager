@@ -7928,10 +7928,10 @@ WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,
 
 void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type)
 {
-    WLOGFD("NotifyWindowInfoChange, persistentId=%{public}d, updateType=%{public}d", persistentId, type);
+    WLOGFD("persistentId=%{public}d, updateType=%{public}d", persistentId, type);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("NotifyWindowInfoChange sceneSession nullptr!");
+        WLOGFE("sceneSession nullptr!");
         return;
     }
     wptr<SceneSession> weakSceneSession(sceneSession);
@@ -8015,10 +8015,10 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
 
 std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId)
 {
-    WLOGFI("GetSessionSnapshotFilePath persistentId %{public}d", persistentId);
+    WLOGFI("persistentId %{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        WLOGFE("GetSessionSnapshotFilePath sceneSession nullptr!");
+        WLOGFE("sceneSession nullptr!");
         return "";
     }
     wptr<SceneSession> weakSceneSession(sceneSession);
@@ -9083,7 +9083,7 @@ WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persi
 {
     const auto& callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, haveListener, callingPid]() -> WSError {
-        WLOGFI("UpdateSessionWindowVisibilityListener persistentId: %{public}d haveListener:%{public}d",
+        WLOGFI("persistentId: %{public}d haveListener:%{public}d",
             persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
@@ -9177,7 +9177,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
     if (displayInfo == nullptr) {
-        WLOGFE("SceneSessionManager::ProcessUpdateRotationChange displayInfo is nullptr.");
+        WLOGFE("displayInfo is nullptr.");
         return;
     }
     auto task = [this, displayInfo]() {
@@ -9185,7 +9185,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
         for (const auto &item : sceneSessionMap_) {
             auto sceneSession = item.second;
             if (sceneSession == nullptr) {
-                WLOGFE("SceneSessionManager::ProcessUpdateRotationChange null scene session");
+                WLOGFE("null scene session");
                 continue;
             }
             if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
@@ -11276,7 +11276,7 @@ WMError SceneSessionManager::GetCallingWindowRect(int32_t persistentId, Rect& re
 WMError SceneSessionManager::GetWindowModeType(WindowModeType& windowModeType)
 {
     if (!SessionPermission::IsSACalling()) {
-        WLOGFE("GetWindowModeType permission denied!");
+        WLOGFE("permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     windowModeType = CheckWindowModeType();
