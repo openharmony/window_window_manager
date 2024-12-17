@@ -168,7 +168,7 @@ public:
     WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
-    WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;.
+    WMError UnregisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
     WMError RegisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
