@@ -1986,7 +1986,6 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
         TLOGE(WmsLogTag::WMS_IMMS, "window is not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-
     auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     if (!(isPC || IsFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
