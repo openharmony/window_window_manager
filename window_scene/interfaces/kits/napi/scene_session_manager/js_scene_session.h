@@ -75,10 +75,7 @@ enum class ListenerFuncType : uint32_t {
     LAYOUT_FULL_SCREEN_CB,
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
-<<<<<<< HEAD
     SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB,
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
     UPDATE_APP_USE_CONTROL_CB,
     RESTORE_MAIN_WINDOW_CB,
 };
@@ -221,10 +218,7 @@ private:
     void ProcessSessionFocusableChangeRegister();
     void ProcessSessionTouchableChangeRegister();
     void ProcessSessionTopmostChangeRegister();
-<<<<<<< HEAD
     void ProcessMainWindowTopmostChangeRegister();
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
     void ProcessSubModalTypeChangeRegister();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
@@ -278,10 +272,7 @@ private:
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
     void OnSessionTopmostChange(bool topmost);
-<<<<<<< HEAD
     void OnMainWindowTopmostChange(bool isTopmost);
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
     void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnClick();
     void TerminateSession(const SessionInfo& info);

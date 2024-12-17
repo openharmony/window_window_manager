@@ -1113,7 +1113,6 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
-<<<<<<< HEAD
 void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
 {
     auto task = [weakThis = wptr(this), func] {
@@ -1127,8 +1126,6 @@ void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopm
     PostTask(task, __func__);
 }
 
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
 void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
 {
     const char* const funcName = __func__;
