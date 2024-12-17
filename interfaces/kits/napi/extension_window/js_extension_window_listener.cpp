@@ -81,19 +81,19 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::OnSizeChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(eng, &scope);
         if (scope == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "open handle scope failed");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "open handle scope failed");
             return;
         }
         napi_value objValue = nullptr;
         napi_create_object(eng, &objValue);
         if (objValue == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert rect to jsObject");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to convert rect to jsObject");
             napi_close_handle_scope(eng, scope);
             return;
         }
@@ -171,7 +171,7 @@ void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, Av
         [self = weakRef_, avoidArea, type, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
+                TLOGNE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
                 return;
             }
             napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
@@ -185,7 +185,7 @@ void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, Av
                 napi_value objValue = nullptr;
                 napi_create_object(env, &objValue);
                 if (objValue == nullptr) {
-                    TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get object");
+                    TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to get object");
                     return;
                 }
                 napi_set_named_property(env, objValue, "type",
@@ -215,7 +215,7 @@ void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>&
         [self = weakRef_, info, eng = env_] (napi_env env, NapiAsyncTask& task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
+                TLOGNE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
                 return;
             }
             napi_value argv[] = {CreateJsValue(eng, info->rect_.height_)};
@@ -237,7 +237,7 @@ static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWind
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::LifeCycleCallBack");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
             return;
         }
         napi_handle_scope scope = nullptr;

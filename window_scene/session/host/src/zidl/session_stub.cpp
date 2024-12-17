@@ -208,16 +208,16 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
-            return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
+            return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
-            return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
+            return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
@@ -1242,6 +1242,15 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_DIALOG, "called");
+    bool isEnabled = data.ReadBool();
+    WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply)
 {
     int32_t height = GetStatusBarHeight();
@@ -1250,12 +1259,13 @@ int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_DIALOG, "called");
-    bool isEnabled = data.ReadBool();
-    WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    uint32_t notifyEvent = 0;
+    if (!data.ReadUint32(notifyEvent)) {
+        return ERR_TRANSACTION_FAILED;
+    }
+    NotifyExtensionEventAsync(notifyEvent);
     return ERR_NONE;
 }
 
@@ -1276,16 +1286,6 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
     }
     WSError ret = RequestFocus(isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
-{
-    uint32_t notifyEvent = 0;
-    if (!data.ReadUint32(notifyEvent)) {
-        return ERR_TRANSACTION_FAILED;
-    }
-    NotifyExtensionEventAsync(notifyEvent);
     return ERR_NONE;
 }
 

@@ -116,6 +116,8 @@ public:
      */
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    void SetTargetAPIVersion(uint32_t targetAPIVersion);
+    uint32_t GetTargetAPIVersion() const;
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
@@ -628,6 +630,11 @@ private:
      * Multi Window
      */
     bool isSplitButtonVisible_ = true;
+
+    /*
+     * PC Window
+     */
+    uint32_t targetAPIVersion_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
