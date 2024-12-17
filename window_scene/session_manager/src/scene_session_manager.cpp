@@ -8903,7 +8903,7 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
         auto avoidArea = sceneSession->GetAvoidAreaByType(type);
         if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
             isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d  AIbar check false, visible %{public}d "
+            TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d AI bar check false, visible %{public}d "
                 "avoidarea %{public}s rect %{public}s", persistentId, isAINavigationBarVisible_,
                 avoidArea.ToString().c_str(), sceneSession->GetSessionRect().ToString().c_str());
             return;
