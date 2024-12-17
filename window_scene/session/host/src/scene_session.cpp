@@ -3580,14 +3580,14 @@ WSError SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
             session->GetPersistentId(), static_cast<uint32_t>(orientation));
         auto property = session->GetSessionProperty();
         if (property == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "get session property failed");
+            TLOGNE(WmsLogTag::DEFAULT, "get session property failed");
             return WSError::WS_ERROR_NULLPTR;
         }
         property->SetRequestedOrientation(orientation);
         property->SetDefaultRequestedOrientation(orientation);
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, "SetDefaultRequestedOrientation");
+    return PostSyncTask(task, __func__);
 }
 
 void SceneSession::NotifyForceHideChange(bool hide)
