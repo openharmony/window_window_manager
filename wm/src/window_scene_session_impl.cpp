@@ -2142,9 +2142,8 @@ WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType
         current.settingFlag_ = static_cast<SystemBarSettingFlag>(
             static_cast<uint32_t>(propertyIter->second.settingFlag_) |
             static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
-        TLOGI(WmsLogTag::WMS_IMMS,
-            "win [%{public}u %{public}s] set status bar foreground %{public}u",
-            GetWindowId(), GetWindowName().c_str(), current.contentColor_);
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u set status bar foreground %{public}u",
+            GetWindowId(), current.contentColor_);
         return SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
     }
     return WMError::WM_OK;
@@ -2184,7 +2183,7 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion win %{public}u errCode %{public}d",
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, win %{public}u errCode %{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
 
