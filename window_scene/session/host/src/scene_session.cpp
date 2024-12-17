@@ -390,6 +390,22 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
     return WSError::WS_OK;
 }
 
+void SceneSession::CheckAndMoveDisplayIdRecursively(uint64_t displayId)
+{
+    if (GetSessionProperty()->GetDisplayId() == displayId || !shouldFollowParentWhenShow_) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "session id: %{public}d, Move display to %{public}llu", GetPersistentId(), displayId);
+    SetScreenId(displayId); // notify client to update display id
+    GetSessionProperty()->SetDisplayId(displayId); // set session property
+    NotifySessionDisplayIdChange(displayId);
+    for (auto session : subSession_) {
+        if (session) {
+            session->CheckAndMoveDisplayIdRecursively(displayId);
+        }
+    }
+}
+
 WSError SceneSession::Background(bool isFromClient, const std::string& identityToken)
 {
     if (!CheckPermissionWithPropertyAnimation(GetSessionProperty())) {
@@ -1277,6 +1293,18 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
         }
         return WSError::WS_OK;
     }, "SetSessionRectChangeCallback");
+}
+
+void SceneSession::SetSessionDisplayIdChangeCallback(const NotifySessionDisplayIdChangeFunc& func)
+{
+    PostTask([weakThis = wptr(this), func]() {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session or display id is null");
+            return;
+        }
+        session->sessionDisplayIdChangeFunc_ = func;
+    }, "SetSessionDisplayIdChangeCallback");
 }
 
 void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
@@ -2488,6 +2516,30 @@ void SceneSession::NotifySessionRectChange(const WSRect& rect,
     }, "NotifySessionRectChange" + GetRectInfo(rect));
 }
 
+/** @note @window.layout */
+void SceneSession::NotifySessionDisplayIdChange(uint64_t displayId)
+{
+    PostTask([weakThis = wptr(this), displayId] {
+        auto session = weakThis.promote();
+        if (!session) {
+            WLOGFE("session is null");
+            return;
+        }
+        if (session->sessionDisplayIdChangeFunc_) {
+            session->sessionDisplayIdChangeFunc_(displayId);
+        }
+    }, "NotifySessionDisplayIdChange");
+}
+
+void SceneSession::CheckSubSessionShouldFollowParent(uint64_t displayId)
+{
+    for (auto session : subSession_) {
+        if (session && session->IsSessionForeground() && session->GetSessionProperty()->GetDisplayId() != displayId) {
+            session->SetShouldFollowParentWhenShow(false);
+        }
+    }
+}
+
 bool SceneSession::IsDecorEnable() const
 {
     auto property = GetSessionProperty();
@@ -2751,6 +2803,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
             NotifySessionRectChange(rect, reason);
         } else {
             NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
+            CheckSubSessionShouldFollowParent(moveDragController_->GetMoveDragEndDisplayId());
         }
     }
     moveDragController_->ResetCrossMoveDragProperty();
