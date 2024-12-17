@@ -584,12 +584,12 @@ bool MultiScreenManager::AreScreensTouching(sptr<ScreenSession> mainScreenSessio
     MultiScreenPositionOptions secondScreenOption)
 {
     ScreenProperty mainProperty = mainScreenSession->GetScreenProperty();
-    int32_t mainScreenWidth = mainProperty.GetBounds().rect_.GetWidth();
-    int32_t mainScreenHeight = mainProperty.GetBounds().rect_.GetHeight();
+    uint32_t mainScreenWidth = static_cast<uint32_t>(mainProperty.GetBounds().rect_.GetWidth());
+    uint32_t mainScreenHeight = static_cast<uint32_t>(mainProperty.GetBounds().rect_.GetHeight());
 
     ScreenProperty secondProperty = secondScreenSession->GetScreenProperty();
-    int32_t secondScreenWidth = secondProperty.GetBounds().rect_.GetWidth();
-    int32_t secondScreenHeight = secondProperty.GetBounds().rect_.GetHeight();
+    uint32_t secondScreenWidth = static_cast<uint32_t>(secondProperty.GetBounds().rect_.GetWidth());
+    uint32_t secondScreenHeight = static_cast<uint32_t>(secondProperty.GetBounds().rect_.GetHeight());
 
     bool horizontalTouchingAB = (mainScreenOptions.startX_ + mainScreenWidth == secondScreenOption.startX_);
     bool horizontalTouchingBA = (secondScreenOption.startX_ + secondScreenWidth == mainScreenOptions.startX_);
