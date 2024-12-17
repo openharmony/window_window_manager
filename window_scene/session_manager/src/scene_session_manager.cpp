@@ -10501,7 +10501,7 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             auto parentTransX = parentSession->GetSessionGlobalRect().posX_ - parentSession->GetSessionRect().posX_;
             auto parentTransY = parentSession->GetSessionGlobalRect().posY_ - parentSession->GetSessionRect().posY_;
             Rect globalRect = { rect.posX_ + parentTransX, rect.posY_ + parentTransY, rect.width_, rect.height_ };
-            ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect };
+            ExtensionWindowEventInfo extensionInfo { persistentId, pid, globalRect, rect, true };
             TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: pid: %{public}d, persistentId: %{public}d, "
                 "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
                 where, pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
