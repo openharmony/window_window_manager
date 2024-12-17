@@ -1869,7 +1869,8 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
     }
     availableAreaListeners_.erase(iter);
     DMError ret = DMError::DM_OK;
-    if (availableAreaListeners_.empty() && availableAreaListenerAgent_ != nullptr) {
+    if (availableAreaListeners_.empty() && availableAreaListenersMap_.empty() &&
+        availableAreaListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             availableAreaListenerAgent_,
             DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
@@ -1891,20 +1892,23 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
     DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = std::find(availableAreaListeners_.begin(), availableAreaListeners_.end(), listener);
-    if (iter == availableAreaListeners_.end()) {
+    if (availableAreaListenersMap_.find(displayId) == availableAreaListenersMap_.end()) {
         WLOGFE("could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
-    if (availableAreaListenersMap_.find(displayId) != availableAreaListenersMap_.end()) {
-        availableAreaListenersMap_[displayId].erase(listener);
-        if (availableAreaListenersMap_[displayId].empty()) {
-            availableAreaListenersMap_.erase(displayId);
-        }
+    auto iter = std::find(availableAreaListenersMap_[displayId].begin(), availableAreaListenersMap_[displayId].end(),
+        listener);
+    if (iter == availableAreaListenersMap_[displayId].end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
     }
-    availableAreaListeners_.erase(iter);
+    availableAreaListenersMap_[displayId].erase(iter);
+    if (availableAreaListenersMap_[displayId].empty()) {
+        availableAreaListenersMap_.erase(displayId);
+    }
     DMError ret = DMError::DM_OK;
-    if (availableAreaListeners_.empty() && availableAreaListenerAgent_ != nullptr) {
+    if (availableAreaListeners_.empty() && availableAreaListenersMap_.empty() &&
+        availableAreaListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             availableAreaListenerAgent_,
             DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
