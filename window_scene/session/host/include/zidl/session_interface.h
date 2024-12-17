@@ -251,7 +251,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError GetStartMoveFlag(bool& isMoving) { return WSError::WS_OK; }
+    virtual bool IsStartMoving() { return false; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool isShow) { return WSError::WS_OK; }
 
@@ -271,9 +271,9 @@ public:
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
-    virtual int32_t GetStatusBarHeight() { return 0; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual void NotifyExtensionDetachToDisplay() {}
+    virtual int32_t GetStatusBarHeight() { return 0; }
     /**
      * @brief Request to get focus or lose focus.
      *

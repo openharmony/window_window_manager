@@ -99,6 +99,7 @@ group("unittest") {
     ":ws_window_event_channel_test",
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
+    "window_pattern:window_pattern_snapshot_test",
   ]
 
   if (window_manager_use_sceneboard) {
@@ -1643,7 +1644,10 @@ config("ws_unittest_common_public_config") {
 }
 
 ohos_static_library("ws_unittest_common") {
-  visibility = [ ":*" ]
+  visibility = [
+    ":*",
+    "window_pattern:*",
+  ]
   testonly = true
 
   public_configs = [
