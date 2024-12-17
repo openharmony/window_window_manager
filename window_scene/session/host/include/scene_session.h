@@ -91,8 +91,8 @@ using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
-using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
+using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
 class SceneSession : public Session {
 public:
