@@ -1529,11 +1529,6 @@ void WindowSessionProperty::ReadActionUpdateTopmost(Parcel& parcel)
     SetTopmost(parcel.ReadBool());
 }
 
-void WindowSessionProperty::ReadActionUpdateAvoidAreaOption(Parcel& parcel)
-{
-    SetAvoidAreaOption(parcel.ReadUint32());
-}
-
 void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
 {
     UnmarshallingMainWindowTopmost(parcel, this);
@@ -1542,6 +1537,11 @@ void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel)
 {
     SetWindowModeSupportType(parcel.ReadUint32());
+}
+
+void WindowSessionProperty::ReadActionUpdateAvoidAreaOption(Parcel& parcel)
+{
+    SetAvoidAreaOption(parcel.ReadUint32());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)

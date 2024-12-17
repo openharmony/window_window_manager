@@ -107,7 +107,6 @@ public:
      */
     void SetAvoidAreaOption(uint32_t avoidAreaOption);
     uint32_t GetAvoidAreaOption() const;
-    uint32_t avoidAreaOption_ = 0;
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -406,6 +405,11 @@ private:
 
     // system keyboard
     bool isSystemKeyboard_ = false;
+
+    /*
+     * Window Immersive
+     */
+    uint32_t avoidAreaOption_ = 0;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
