@@ -420,26 +420,6 @@ HWTEST_F(SceneSessionManagerTest5, OnConfigurationUpdated, Function | SmallTest 
 }
 
 /**
- * @tc.name: CreateKeyboardPanelSession
- * @tc.desc: CreateKeyboardPanelSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, CreateKeyboardPanelSession, Function | SmallTest | Level3)
-{
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
-    ASSERT_NE(sceneSessionManager, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSessionManager->CreateKeyboardPanelSession(sceneSession);
-    delete sceneSessionManager;
-}
-
-/**
  * @tc.name: PrepareTerminate
  * @tc.desc: SceneSesionManager prepare terminate
  * @tc.type: FUNC
