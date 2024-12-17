@@ -268,12 +268,9 @@ public:
      */
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
-<<<<<<< HEAD
     virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
     void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
 
     /**
      * PC Window

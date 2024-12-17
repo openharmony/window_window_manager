@@ -70,12 +70,9 @@ const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
-<<<<<<< HEAD
 const std::string SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
-=======
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
 const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -131,10 +128,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
-<<<<<<< HEAD
     {SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB, ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB},
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
     {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
 };
@@ -1245,7 +1239,6 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
     TLOGD(WmsLogTag::WMS_LAYOUT, "ProcessSessionTopmostChangeRegister success");
 }
 
-<<<<<<< HEAD
 /** @note @window.hierarchy */
 void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
 {
@@ -1266,8 +1259,6 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
     TLOGD(WmsLogTag::WMS_LAYOUT, "register success");
 }
 
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
 void JsSceneSession::ProcessSubModalTypeChangeRegister()
 {
     auto session = weakSession_.promote();
@@ -2087,12 +2078,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB):
             ProcessSessionTopmostChangeRegister();
             break;
-<<<<<<< HEAD
         case static_cast<uint32_t>(ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB):
             ProcessMainWindowTopmostChangeRegister();
             break;
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
         case static_cast<uint32_t>(ListenerFuncType::SUB_MODAL_TYPE_CHANGE_CB):
             ProcessSubModalTypeChangeRegister();
             break;
@@ -2857,7 +2845,6 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
     taskScheduler_->PostMainThreadTask(task, "OnSessionTopmostChange: state " + std::to_string(topmost));
 }
 
-<<<<<<< HEAD
 /** @note @window.hierarchy */
 void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
 {
@@ -2881,8 +2868,6 @@ void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
         "OnMainWindowTopmostChange: " + std::to_string(isTopmost));
 }
 
-=======
->>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
 void JsSceneSession::OnSubModalTypeChange(SubWindowModalType subWindowModalType)
 {
     const char* const where = __func__;
