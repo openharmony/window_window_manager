@@ -227,11 +227,11 @@ static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sp
 {
     auto abilityInfo = session->GetSessionInfo().abilityInfo;
     if (!abilityInfo) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "abilityInfo is nullptr");
         return;
     }
     uint32_t value = 0;
-    auto metadata = abilityInfo->metadata;
-    for (auto item : metadata) {
+    for (const auto& item : abilityInfo->metadata) {
         if (item.name == "ohos.ability.window.width") {
             if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
                 TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.width = %{public}d", value);
