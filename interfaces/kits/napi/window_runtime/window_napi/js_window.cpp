@@ -2968,7 +2968,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     bool systemBarEnable = false;
     bool systemBarEnableAnimation = false;
-    if (argc < INDEX_ONE || !GetSpecificBarStatus(env, info, systemBarEnable, systemBarEnableAnimation)) {
+    if (argc < 1 || !GetSpecificBarStatus(env, info, systemBarEnable, systemBarEnableAnimation)) {
         TLOGE(WmsLogTag::WMS_IMMS, "invalid param or argc:%{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -3009,7 +3009,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value lastParam = (argc <= INDEX_ONE) ? nullptr :
+    napi_value lastParam = (argc <= 1) ? nullptr :
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
