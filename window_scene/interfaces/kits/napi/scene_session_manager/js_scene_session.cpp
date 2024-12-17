@@ -125,6 +125,8 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
     {SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB, ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB},
+    {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
+    {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -1177,6 +1179,25 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
     TLOGD(WmsLogTag::WMS_LAYOUT, "register success");
 }
 
+void JsSceneSession::ProcessSubModalTypeChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, persistentId:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->RegisterSubModalTypeChangeCallback([weakThis = wptr(this), where](SubWindowModalType subWindowModalType) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSubModalTypeChange(subWindowModalType);
+    });
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "register success, persistentId:%{public}d", persistentId_);
+}
+
 void JsSceneSession::ProcessSessionFocusableChangeRegister()
 {
     NotifySessionFocusableChangeFunc func = [weakThis = wptr(this)](bool isFocusable) {
@@ -1964,6 +1985,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB):
             ProcessMainWindowTopmostChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::SUB_MODAL_TYPE_CHANGE_CB):
+            ProcessSubModalTypeChangeRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::CLICK_CB):
             ProcessClickRegister();
             break;
@@ -2743,6 +2767,29 @@ void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
     };
     taskScheduler_->PostMainThreadTask(task,
         "OnMainWindowTopmostChange: " + std::to_string(isTopmost));
+}
+
+void JsSceneSession::OnSubModalTypeChange(SubWindowModalType subWindowModalType)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, subWindowModalType, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SUB_MODAL_TYPE_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsSessionModalTypeObj = CreateJsValue(env, subWindowModalType);
+        napi_value argv[] = {jsSessionModalTypeObj};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task,
+        "OnSubModalTypeChange: " + std::to_string(static_cast<uint32_t>(subWindowModalType)));
 }
 
 void JsSceneSession::OnClick()

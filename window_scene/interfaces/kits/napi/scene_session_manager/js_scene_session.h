@@ -75,6 +75,8 @@ enum class ListenerFuncType : uint32_t {
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
     SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB,
+    UPDATE_APP_USE_CONTROL_CB,
+    RESTORE_MAIN_WINDOW_CB,
 };
 
 class SceneSession;
@@ -212,6 +214,7 @@ private:
     void ProcessSessionTouchableChangeRegister();
     void ProcessSessionTopmostChangeRegister();
     void ProcessMainWindowTopmostChangeRegister();
+    void ProcessSubModalTypeChangeRegister();
     void ProcessClickRegister();
     void ProcessTerminateSessionRegister();
     void ProcessTerminateSessionRegisterNew();
@@ -263,6 +266,7 @@ private:
     void OnSessionTouchableChange(bool touchable);
     void OnSessionTopmostChange(bool topmost);
     void OnMainWindowTopmostChange(bool isTopmost);
+    void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnClick();
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
