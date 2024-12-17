@@ -1768,6 +1768,18 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     ASSERT_EQ(ssm_->GetDisplayIdByWindowId(windowIds, windowDisplayIdMap), WMError::WM_OK);
 }
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level3)
+{
+    bool isPcOrPadFreeMultiWindowMode = false;
+    auto result = ssm_->IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

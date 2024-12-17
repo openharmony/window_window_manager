@@ -40,6 +40,7 @@ private:
     int HandleShow(MessageParcel& data, MessageParcel& reply);
     int HandleHide(MessageParcel& data, MessageParcel& reply);
     int HandleDrawingCompleted(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& reply);
 
     // scene session
     int HandleSessionEvent(MessageParcel& data, MessageParcel& reply);
@@ -64,6 +65,7 @@ private:
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
     int HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply);
     int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
+    int HandleIsStartMoving(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
@@ -72,12 +74,14 @@ private:
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
     int HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

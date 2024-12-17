@@ -32,6 +32,7 @@
 namespace OHOS {
 namespace Rosen {
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window);
+napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window>>& windows);
 std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName);
 void BindFunctions(napi_env env, napi_value object, const char* moduleName);
 napi_value NapiGetUndefined(napi_env env);
@@ -51,6 +52,7 @@ public:
     static napi_value Hide(napi_env env, napi_callback_info info);
     static napi_value HideWithAnimation(napi_env env, napi_callback_info info);
     static napi_value Recover(napi_env env, napi_callback_info info);
+    static napi_value Restore(napi_env env, napi_callback_info info);
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowToAsync(napi_env env, napi_callback_info info);
@@ -193,6 +195,7 @@ private:
     napi_value OnHide(napi_env env, napi_callback_info info);
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
     napi_value OnRecover(napi_env env, napi_callback_info info);
+    napi_value OnRestore(napi_env env, napi_callback_info info);
     napi_value OnMoveTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowToAsync(napi_env env, napi_callback_info info);

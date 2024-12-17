@@ -23,7 +23,10 @@ namespace Rosen {
 namespace PermissionConstants {
 constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIONS";
 constexpr const char* PERMISSION_KILL_APP_PROCESS = "ohos.permission.KILL_APP_PROCESSES";
+<<<<<<< HEAD
 constexpr const char* PERMISSION_MAIN_WINDOW_TOPMOST = "ohos.permission.WINDOW_TOPMOST";
+=======
+>>>>>>> 98184b10c55b793ecccf9ad83de35dcbbbd629d8
 constexpr const char* PERMISSION_WRITE_APP_LOCK = "ohos.permission.WRITE_APP_LOCK";
 }
 class SessionPermission {

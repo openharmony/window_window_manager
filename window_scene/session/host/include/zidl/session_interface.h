@@ -44,6 +44,7 @@ public:
     virtual WSError Show(sptr<WindowSessionProperty> property) = 0;
     virtual WSError Hide() = 0;
     virtual WSError DrawingCompleted() = 0;
+    virtual WSError RemoveStartingWindow() = 0;
 
     // scene session
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
@@ -56,6 +57,13 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for processing restore main window.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
 
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(
@@ -153,6 +161,7 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual bool IsStartMoving() { return false; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool visible) { return WSError::WS_OK; }
     virtual WSError UpdateRectChangeListenerRegistered(bool isRegister)
@@ -174,6 +183,14 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError RequestFocus(bool isFocused) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for session modal type changes.
+     *
+     * @param subWindowModalType Indicates the {@link SubWindowModalType}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
 
     /*
      *  Gesture Back
