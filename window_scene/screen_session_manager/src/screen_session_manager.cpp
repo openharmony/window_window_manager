@@ -983,6 +983,8 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
             sptr<ScreenSession> internalSession = GetScreenSession(internalScreenId);
             MultiScreenManager::GetInstance().ExternalScreenDisconnectChange(internalSession, screenSession);
         }
+        MultiScreenPositionOptions defaultOptions = { GetDefaultScreenId(), 0, 0 };
+        SetRelativePositionForDisconnect(defaultOptions);
         FreeDisplayMirrorNodeInner(screenSession);
     }
     if (clientProxy_) {
@@ -6409,6 +6411,8 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
     }
     if (screenMode == MultiScreenMode::SCREEN_MIRROR) {
         MultiScreenModeChange(mainScreenId, secondaryScreenId, "mirror");
+        MultiScreenPositionOptions defaultOptions = { GetDefaultScreenId(), 0, 0 };
+        SetRelativePositionForDisconnect(defaultOptions);
     } else if (screenMode == MultiScreenMode::SCREEN_EXTEND) {
         MultiScreenModeChange(mainScreenId, secondaryScreenId, "extend");
     } else {
@@ -6461,6 +6465,32 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         transactionProxy->FlushImplicitTransaction();
     }
     return DMError::DM_OK;
+}
+
+void ScreenSessionManager::SetRelativePositionForDisconnect(MultiScreenPositionOptions defaultScreenOptions)
+{
+    TLOGI(WmsLogTag::DMS,
+        "mID:%{public}" PRIu64", X:%{public}u, Y:%{public}u",
+        defaultScreenOptions.screenId_, defaultScreenOptions.startX_, defaultScreenOptions.startY_);
+    sptr<ScreenSession> defaultScreenSession = GetScreenSession(defaultScreenOptions.screenId_);
+    if (!defaultScreenSession) {
+        TLOGE(WmsLogTag::DMS, "ScreenSession is null");
+        return;
+    }
+    defaultScreenSession->SetStartPosition(defaultScreenOptions.startX_, defaultScreenOptions.startY_);
+    defaultScreenSession->PropertyChange(defaultScreenSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+    std::shared_ptr<RSDisplayNode> defaultDisplayNode = defaultScreenSession->GetDisplayNode();
+    if (defaultDisplayNode) {
+        defaultDisplayNode->SetDisplayOffset(defaultScreenOptions.startX_, defaultScreenOptions.startY_);
+    } else {
+        TLOGW(WmsLogTag::DMS, "DisplayNode is null");
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        TLOGI(WmsLogTag::DMS, "free displayNode");
+        transactionProxy->FlushImplicitTransaction();
+    }
 }
 
 void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId,
