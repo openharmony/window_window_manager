@@ -142,14 +142,14 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
 
     std::lock_guard<std::mutex> lock(mutex_);
     if (windowManagerAgentMap_.find(type) == windowManagerAgentMap_.end()) {
-        WLOGFW("WindowManagerAgentType = %{public}d not found", type);
+        WLOGFW("WindowManagerAgentType=%{public}d not found", type);
         return ret;
     }
 
     auto& agentSet = windowManagerAgentMap_[type];
     auto agent = std::find(agentSet.begin(), agentSet.end(), windowManagerAgent);
     if (agent == agentSet.end()) {
-        WLOGFW("Cannot find agent,  type = %{public}d", type);
+        WLOGFW("Cannot find agent,  type=%{public}d", type);
         return ret;
     }
     agentSet.erase(agent);
@@ -317,7 +317,7 @@ bool WindowAdapter::InitWMSProxy()
 void WindowAdapter::RegisterSessionRecoverCallbackFunc(
     int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "persistentId = %{public}d", persistentId);
+    TLOGI(WmsLogTag::WMS_RECOVER, "persistentId=%{public}d", persistentId);
     std::lock_guard<std::mutex> lock(mutex_);
     sessionRecoverCallbackFuncMap_[persistentId] = callbackFunc;
 }
@@ -362,10 +362,10 @@ void WindowAdapter::WindowManagerAndSessionRecover()
         sessionRecoverCallbackFuncMap = sessionRecoverCallbackFuncMap_;
     }
     for (const auto& it : sessionRecoverCallbackFuncMap) {
-        TLOGD(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId = %{public}" PRId32, it.first);
+        TLOGD(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId=%{public}" PRId32, it.first);
         auto ret = it.second();
         if (ret != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId = %{public}" PRId32 " is error",
+            TLOGE(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId=%{public}" PRId32 " is error",
                 it.first);
             return;
         }
@@ -380,7 +380,7 @@ void WindowAdapter::ReregisterWindowManagerAgent()
         return;
     }
     for (const auto& it : windowManagerAgentMap_) {
-        TLOGI(WmsLogTag::WMS_RECOVER, "Window manager agent type = %{public}" PRIu32 ", size = %{public}" PRIu64,
+        TLOGI(WmsLogTag::WMS_RECOVER, "Window manager agent type=%{public}" PRIu32 ", size=%{public}" PRIu64,
             it.first, static_cast<uint64_t>(it.second.size()));
         for (auto& agent : it.second) {
             if (windowManagerServiceProxy_->RegisterWindowManagerAgent(it.first, agent) != WMError::WM_OK) {
@@ -802,7 +802,7 @@ WMError WindowAdapter::RecoverAndReconnectSceneSession(const sptr<ISessionStage>
     auto ret = wmsProxy->RecoverAndReconnectSceneSession(
         sessionStage, eventChannel, surfaceNode, session, property, token);
     if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "failed, ret = %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_RECOVER, "failed, ret=%{public}d", ret);
         return WMError::WM_DO_NOTHING;
     }
     return WMError::WM_OK;

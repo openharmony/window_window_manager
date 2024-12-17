@@ -832,7 +832,7 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
         pixelMap = SingletonContainer::Get<WindowAdapter>().GetSnapshot(property_->GetWindowId());
     }
     if (pixelMap != nullptr) {
-        WLOGFD("WMS-Client Save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        WLOGFD("WMS-Client Save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
         WLOGFE("Failed to get pixelmap, return nullptr!");
     }
@@ -4173,7 +4173,7 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
     }
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
-    TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId = %{private}u", accessTokenId);
+    TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId=%{private}u", accessTokenId);
     return false;
 }
 
