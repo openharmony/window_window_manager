@@ -64,6 +64,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
+constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
@@ -1797,8 +1798,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         (systemConfig_.IsPhoneWindow() ||
          (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
-        float miniScale = 0.316f; // Pressed mini floating Scale with 0.001 precision
-        if (Session::GetFloatingScale() <= miniScale) {
+        // mini floating scene no need avoid
+        if (LessOrEqual(Session::GetFloatingScale(), MINI_FLOAT_SCALE)) {
             return;
         }
         float vpr = 3.5f; // 3.5f: default pixel ratio
@@ -1986,6 +1987,8 @@ void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extens
             return;
         }
         iter->windowRect = extensionInfo.windowRect;
+        iter->uiExtRect = extensionInfo.uiExtRect;
+        iter->hasUpdatedRect = extensionInfo.hasUpdatedRect;
     }
     NotifySessionInfoChange();
 }
@@ -5621,6 +5624,9 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         return false;
     }
     auto globalRect = GetSessionGlobalRect();
+    if (globalRect != uiParam.rect_) {
+        UpdateAllModalUIExtensions(uiParam.rect_);
+    }
     SetSessionGlobalRect(uiParam.rect_);
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
@@ -5953,5 +5959,34 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
         TLOGD(WmsLogTag::WMS_LAYOUT, "commit rsTransaction");
         rsTransaction->Commit();
     }
+}
+
+void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, globalRect] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
+            return;
+        }
+        auto parentTransX = globalRect.posX_ - session->GetSessionRect().posX_;
+        auto parentTransY = globalRect.posY_ - session->GetSessionRect().posY_;
+        {
+            std::unique_lock<std::shared_mutex> lock(session->modalUIExtensionInfoListMutex_);
+            for (auto& extensionInfo : session->modalUIExtensionInfoList_) {
+                if (!extensionInfo.hasUpdatedRect) {
+                    continue;
+                }
+                extensionInfo.windowRect = extensionInfo.uiExtRect;
+                extensionInfo.windowRect.posX_ += parentTransX;
+                extensionInfo.windowRect.posX_ += parentTransY;
+            }
+        }
+        session->NotifySessionInfoChange();
+        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: id: %{public}d, globalRect: %{public}s, parentTransX: %{public}d, "
+            "parentTransY: %{public}d", where, session->GetPersistentId(), globalRect.ToString().c_str(),
+            parentTransX, parentTransY);
+    }, __func__);
 }
 } // namespace OHOS::Rosen

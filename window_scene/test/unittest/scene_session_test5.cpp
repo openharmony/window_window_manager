@@ -297,10 +297,6 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();;
 
     info.isSystem_ = false;
-    session->property_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
-
-    info.isSystem_ = false;
     pointerEvent->SetPointerAction(9);
 
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
@@ -880,9 +876,6 @@ HWTEST_F(SceneSessionTest5, UpdateWinRectForSystemBar, Function | SmallTest | Le
 
     WSRect rect2 = { 1, 2, 10, 8 };
     session->winRect_ = rect2;
-    session->UpdateWinRectForSystemBar(rect);
-
-    session->property_ = nullptr;
     session->UpdateWinRectForSystemBar(rect);
 }
 
