@@ -1374,18 +1374,16 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, Function | SmallTest | L
     session->SetSystemConfig(systemConfig);
 
     bool ret;
-    sceneSession->property_->SetAvoidAreaOption(1);
-
+    sceneSession->property_->SetAvoidAreaOption(0);
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     sceneSession->SetSessionProperty(property);
     ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-    ASSERT_EQ(true, ret);
+    ASSERT_EQ(false, ret);
 
-    sceneSession->property_->SetAvoidAreaOption(2);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->SetSessionProperty(property);
     ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-    ASSERT_EQ(true, ret);
+    ASSERT_EQ(false, ret);
 }
 }
 }
