@@ -925,7 +925,7 @@ public:
      *
      * @return from low to high, the first bit represents system window, the second bit represents app sub window
      */
-    virtual uint32_t GetAvoidAreaOption() { return 0; }
+    virtual WMError GetAvoidAreaOption(uint32_t &AvoidAreaOption) { return WMError::WM_OK; }
 
     /**
      * @brief Set this window layout full screen, with hide status bar and nav bar above on this window
