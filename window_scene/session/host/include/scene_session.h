@@ -269,7 +269,13 @@ public:
     virtual bool IsMainWindowTopmost() const { return false; }
     void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
 
+    /**
+     * PC Window
+     */
     virtual bool IsModal() const { return false; }
+    WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
+    void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
 
     /**
      * Window Immersive
