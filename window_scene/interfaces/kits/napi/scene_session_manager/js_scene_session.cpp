@@ -80,6 +80,7 @@ const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 const std::string SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
 const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
+const std::string SESSION_DISPLAY_ID_CHANGE_CB = "sessionDisplayIdChange";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -144,6 +145,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB, ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB},
     {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
+    {SESSION_DISPLAY_ID_CHANGE_CB,          ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -1025,6 +1027,24 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
     }
     session->SetSessionRectChangeCallback(func);
     WLOGFD("success");
+}
+
+void JsSceneSession::ProcessSessionDisplayIdChangeRegister()
+{
+    NotifySessionDisplayIdChangeFunc func = [weakThis = wptr(this)](uint64_t displayId) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "ProcessSessionDisplayIdChangeRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSessionDisplayIdChange(displayId);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetSessionDisplayIdChangeCallback(func);
 }
 
 void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
@@ -2241,6 +2261,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_RECT_CHANGE_CB):
             ProcessSessionRectChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB):
+            ProcessSessionDisplayIdChangeRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB):
             ProcessSessionPiPControlStatusChangeRegister();
             break;
@@ -2932,6 +2955,27 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason re
     std::string rectInfo = "OnSessionRectChange [" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_)
         + "], [" + std::to_string(rect.width_) + ", " + std::to_string(rect.height_);
     taskScheduler_->PostMainThreadTask(task, rectInfo);
+}
+
+void JsSceneSession::OnSessionDisplayIdChange(uint64_t displayId)
+{
+    auto task = [weakThis = wptr(this), displayId, persistentId = persistentId_, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "OnSessionDisplayIdChange jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_DISPLAY_ID_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionDisplayIdObj = CreateJsValue(env, static_cast<int32_t>(displayId));
+        napi_value argv[] = { jsSessionDisplayIdObj };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status)
