@@ -6983,8 +6983,7 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret %{public}d", ret);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] set end",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u set end", windowToken_->GetWindowId());
     return NapiGetUndefined(env);
 }
 
@@ -7001,7 +7000,7 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
     }
 
     bool isEnabled = windowToken_->GetImmersiveModeEnabledState();
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] isEnabled %{public}u set end",
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isEnabled %{public}u set end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isEnabled);
     return CreateJsValue(env, isEnabled);
 }
