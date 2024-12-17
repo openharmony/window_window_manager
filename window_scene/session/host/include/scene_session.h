@@ -331,6 +331,7 @@ public:
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    void SetSessionDisplayIdChangeCallback(const NotifySessionDisplayIdChangeFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
@@ -672,6 +673,15 @@ protected:
         const RectAnimationConfig& rectAnimationConfig = {});
     virtual void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
         const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig = {});
+    void NotifySessionDisplayIdChange(uint64_t displayId);
+    void CheckAndMoveDisplayIdRecursively(uint64_t displayId);
+    void SetShouldFollowParentWhenShow(bool flag)
+    {
+        shouldFollowParentWhenShow_ = flag;
+    }
+    void CheckSubSessionShouldFollowParent(uint64_t displayId);
+    std::atomic<bool> shouldFollowParentWhenShow_ = true;
+
 
     /*
      * Window Lifecycle
