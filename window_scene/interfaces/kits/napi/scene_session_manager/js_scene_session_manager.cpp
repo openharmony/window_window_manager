@@ -257,12 +257,12 @@ void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& scen
         }
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Specific session is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "Specific session is nullptr");
             return;
         }
         napi_value jsSceneSessionObj = JsSceneSession::Create(env, specificSession);
         if (jsSceneSessionObj == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSessionObj is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSessionObj is nullptr");
             return;
         }
         napi_value argv[] = {jsSceneSessionObj};
@@ -357,10 +357,10 @@ void JsSceneSessionManager::OnRootSceneBackEvent()
 {
     auto task = [rootScene = RootScene::staticRootScene_]() {
         if (rootScene == nullptr ||  rootScene->GetUIContent() == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "rootScene or UIContent is null");
+            TLOGNE(WmsLogTag::WMS_EVENT, "rootScene or UIContent is null");
             return;
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "rootScene ProcessBackPressed");
+        TLOGND(WmsLogTag::WMS_EVENT, "rootScene ProcessBackPressed");
         rootScene->GetUIContent()->ProcessBackPressed();
     };
     taskScheduler_->PostMainThreadTask(task, "OnRootSceneBackEvent");
@@ -495,7 +495,7 @@ void JsSceneSessionManager::OnStartPiPFailed()
 void JsSceneSessionManager::ProcessCreateSystemSessionRegister()
 {
     NotifyCreateSystemSessionFunc func = [this](const sptr<SceneSession>& session) {
-        TLOGI(WmsLogTag::WMS_SYSTEM, "NotifyCreateSystemSessionFunc");
+        TLOGNI(WmsLogTag::WMS_SYSTEM, "NotifyCreateSystemSessionFunc");
         this->OnCreateSystemSession(session);
     };
     SceneSessionManager::GetInstance().SetCreateSystemSessionListener(func);
@@ -522,7 +522,7 @@ void JsSceneSessionManager::ProcessStartUIAbilityErrorRegister()
 void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
 {
     NotifyRecoverSceneSessionFunc func = [this](const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {
-        TLOGD(WmsLogTag::WMS_RECOVER, "RecoverSceneSession");
+        TLOGND(WmsLogTag::WMS_RECOVER, "RecoverSceneSession");
         this->OnRecoverSceneSession(session, sessionInfo);
     };
     SceneSessionManager::GetInstance().SetRecoverSceneSessionListener(func);
@@ -557,11 +557,11 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
 void JsSceneSessionManager::ProcessShiftFocus()
 {
     ProcessShiftFocusFunc func = [this](int32_t persistentId) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "ProcessShiftFocus called");
+        TLOGND(WmsLogTag::WMS_FOCUS, "ProcessShiftFocus called");
         this->OnShiftFocus(persistentId);
     };
     NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
-        TLOGD(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
         const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
         if (uiContent == nullptr) {
             WLOGFE("[WMSComm]uiContent is nullptr");
@@ -570,7 +570,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
         uiContent->Focus();
     };
     NotifySCBAfterUpdateFocusFunc unfocusedCallback = [this]() {
-        TLOGD(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus");
+        TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus");
         const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
         if (uiContent == nullptr) {
             WLOGFE("[WMSComm]uiContent is nullptr");

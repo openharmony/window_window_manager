@@ -27,6 +27,7 @@
 #include "parameters.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
 #include "fold_screen_controller/super_fold_sensor_manager.h"
+#include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_state_internel.h"
 
 namespace OHOS {
@@ -50,9 +51,10 @@ const std::string ARG_SET_ROTATION_LOCK = "-rotationlock";
 const std::string ARG_PUBLISH_CAST_EVENT = "-publishcastevent";
 const std::string ARG_FOLD_DISPLAY_FULL = "-f";
 const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
+const std::string ARG_FOLD_DISPLAY_GLOBALL_FULL = "-g";
 const std::string ARG_FOLD_DISPLAY_SUB = "-sub";
 const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
-const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor"};
+const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor", "-g"};
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const std::string ARG_SET_ON_TENT_MODE = "-ontent";
@@ -61,6 +63,11 @@ const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
 const std::string ARG_SET_SUPER_FOLD_STATUS = "-supertrans";
 const std::string ARG_SET_POSTURE_HALL = "-posture";
 const std::string ARG_SET_POSTURE_HALL_STATUS = "-registerhall"; // 关闭开合sensor报值
+const std::string ARG_SET_SECONDARY_FOLD_STATUS = "-secondary";
+const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
+constexpr size_t SECONDARY_FOLD_STATUS_INDEX_M = 0;
+constexpr size_t SECONDARY_FOLD_STATUS_INDEX_F = 1;
+constexpr size_t SECONDARY_FOLD_STATUS_INDEX_G = 2;
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -206,6 +213,8 @@ void ScreenSessionDumper::ExcuteInjectCmd2()
         SetHallAndPostureValue(params_[0]);
     } else if (params_[0].find(ARG_SET_POSTURE_HALL_STATUS) != std::string::npos) {
         SetHallAndPostureStatus(params_[0]);
+    } else if (params_[0].find(ARG_SET_SECONDARY_FOLD_STATUS) != std::string::npos) {
+        SetSecondaryFoldStatusChange(params_[0]);
     }
 }
 
@@ -766,13 +775,16 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
     }
     int hallVal = stoi(tokens[DUMPER_PARAM_INDEX_ONE]);
     int postureVal = stoi(tokens[DUMPER_PARAM_INDEX_TWO]);
-    ExtHallData hallData = {(1 << 1), hallVal};
+    FoldScreenSensorManager::ExtHallData hallData = {
+        .flag = (1 << 1),
+        .hall = hallVal,
+    };
     PostureData postureData = {
         .angle = postureVal,
     };
     SensorEvent hallEvent = {
         .data = reinterpret_cast<uint8_t *>(&hallData),
-        .dataLen = sizeof(ExtHallData),
+        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
     };
     SensorEvent postureEvent = {
         .data = reinterpret_cast<uint8_t *>(&postureData),
@@ -843,5 +855,38 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
     }
 }
 
+void ScreenSessionDumper::SetSecondaryFoldStatusChange(const std::string &input)
+{
+    TLOGI(WmsLogTag::DMS, "secondary input: %{public}s", input.c_str());
+    size_t commaPos = input.find(',');
+    if (!((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_SECONDARY_FOLD_STATUS))) {
+        return;
+    }
+    std::string valueStr = input.substr(commaPos + 1, 1);
+    if (valueStr.empty()) {
+        return;
+    }
+    char ch = valueStr[0];
+    TLOGI(WmsLogTag::DMS, "value: %{public}c", ch);
+    const char *end = SECONDARY_DUMPER_VALUE_BOUNDARY + sizeof(SECONDARY_DUMPER_VALUE_BOUNDARY); // mfg
+    const char *result = std::find(SECONDARY_DUMPER_VALUE_BOUNDARY, end, ch);
+    if (result == end) {
+        TLOGE(WmsLogTag::DMS, "format error");
+        return;
+    }
+
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    if (ch == SECONDARY_DUMPER_VALUE_BOUNDARY[SECONDARY_FOLD_STATUS_INDEX_M]) {
+        displayMode = FoldDisplayMode::FULL;
+    } else if (ch == SECONDARY_DUMPER_VALUE_BOUNDARY[SECONDARY_FOLD_STATUS_INDEX_F]) {
+        displayMode = FoldDisplayMode::MAIN;
+    } else if (ch == SECONDARY_DUMPER_VALUE_BOUNDARY[SECONDARY_FOLD_STATUS_INDEX_G]) {
+        displayMode = FoldDisplayMode::GLOBAL_FULL;
+    } else {
+        TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode is not supported.");
+        return;
+    }
+    ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
+}
 } // Rosen
 } // OHOS

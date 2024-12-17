@@ -162,8 +162,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleProcessPointDownSession(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG):
             return HandleSendPointerEvenForMoveDrag(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_START_MOVE_FLAG):
-            return HandleGetStartMoveFlag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_START_MOVING):
+            return HandleIsStartMoving(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE):
             return HandleSetSystemEnableDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
@@ -208,16 +208,16 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
-            return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
+            return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
-            return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
+            return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
@@ -1141,12 +1141,13 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleIsStartMoving(MessageParcel& data, MessageParcel& reply)
 {
-    bool isMoving = false;
-    WSError errCode = GetStartMoveFlag(isMoving);
-    reply.WriteBool(isMoving);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    bool isMoving = IsStartMoving();
+    if (!reply.WriteBool(isMoving)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write isMoving failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1234,6 +1235,15 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_DIALOG, "called");
+    bool isEnabled = data.ReadBool();
+    WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply)
 {
     int32_t height = GetStatusBarHeight();
@@ -1242,12 +1252,13 @@ int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_DIALOG, "called");
-    bool isEnabled = data.ReadBool();
-    WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    uint32_t notifyEvent = 0;
+    if (!data.ReadUint32(notifyEvent)) {
+        return ERR_TRANSACTION_FAILED;
+    }
+    NotifyExtensionEventAsync(notifyEvent);
     return ERR_NONE;
 }
 
@@ -1268,16 +1279,6 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
     }
     WSError ret = RequestFocus(isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
-{
-    uint32_t notifyEvent = 0;
-    if (!data.ReadUint32(notifyEvent)) {
-        return ERR_TRANSACTION_FAILED;
-    }
-    NotifyExtensionEventAsync(notifyEvent);
     return ERR_NONE;
 }
 
