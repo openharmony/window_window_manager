@@ -240,7 +240,7 @@ void SceneSessionDirtyManager::UpdateHotAreas(const sptr<SceneSession>& sceneSes
         pointerHotAreas.emplace_back(rect);
         if (touchHotAreas.size() == static_cast<uint32_t>(MMI::WindowInfo::MAX_HOTAREA_COUNT)) {
             auto sessionId = sceneSession->GetWindowId();
-            TLOGE(WmsLogTag::WMS_EVENT, "id = %{public}d hotAreas size > %{public}d",
+            TLOGE(WmsLogTag::WMS_EVENT, "id=%{public}d hotAreas size > %{public}d",
                 sessionId, static_cast<int>(hotAreas.size()));
             break;
         }

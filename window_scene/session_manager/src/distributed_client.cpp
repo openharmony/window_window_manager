@@ -143,7 +143,7 @@ bool DistributedClient::ReadMissionInfosFromParcel(Parcel& parcel,
         }
         size_t size = static_cast<size_t>(len);
         if ((size > parcel.GetReadableBytes()) || (missionInfos.max_size() < size)) {
-            TLOGE(WmsLogTag::DEFAULT, "Failed to read MissionInfo vector, size = %{public}zu", size);
+            TLOGE(WmsLogTag::DEFAULT, "Failed to read MissionInfo vector, size=%{public}zu", size);
             return false;
         }
         missionInfos.clear();

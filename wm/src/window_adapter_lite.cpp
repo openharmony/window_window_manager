@@ -81,7 +81,7 @@ WMError WindowAdapterLite::UnregisterWindowManagerAgent(WindowManagerAgentType t
 
     std::lock_guard<std::mutex> lock(windowManagerLiteAgentMapMutex_);
     if (windowManagerLiteAgentMap_.find(type) == windowManagerLiteAgentMap_.end()) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "WindowManagerAgentType = %{public}d not found", type);
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "WindowManagerAgentType=%{public}d not found", type);
         return ret;
     }
     auto& agentSet = windowManagerLiteAgentMap_[type];
