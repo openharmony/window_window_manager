@@ -872,7 +872,7 @@ bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_,
         propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
     properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
-        GetColorFromJs(env, jsObject, "statusBarColor",
+        GetColorFromJs(env, jsObject, "navigationBarColor",
         properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_,
         propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
 

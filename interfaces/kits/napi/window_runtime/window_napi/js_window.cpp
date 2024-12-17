@@ -2963,8 +2963,8 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         TLOGE(WmsLogTag::WMS_IMMS, "invalid systemBar name.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    auto systemBarType = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
-        ((name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
+    auto systemBarType = name.compare("status") == 0 ? WindowType::WINDOW_TYPE_STATUS_BAR :
+        (name.compare("navigation") == 0 ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
         WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
     bool systemBarEnable = false;
     bool systemBarEnableAnimation = false;
