@@ -317,7 +317,7 @@ public:
     WSError SetIsStatusBarVisibleInner(bool isVisible);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
-    bool CheckGetAvoidAreaAvailable(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
+    bool CheckGetAvoidAreaAvailable(AvoidAreaType type) override;
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);

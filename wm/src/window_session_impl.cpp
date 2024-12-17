@@ -1743,10 +1743,7 @@ WMError WindowSessionImpl::SetAvoidAreaOption(uint32_t avoidAreaOption)
 /** @note @window.immersive */
 uint32_t WindowSessionImpl::GetAvoidAreaOption()
 {
-    if (IsWindowSessionInvalid()) {
-        return false;
-    }
-    return property_->GetAvoidAreaOption();
+    return IsWindowSessionInvalid() ? false : property_->GetAvoidAreaOption();
 }
 
 WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
