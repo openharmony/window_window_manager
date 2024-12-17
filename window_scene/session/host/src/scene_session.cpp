@@ -4524,7 +4524,7 @@ WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessi
 
 WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
-{   
+{
     auto sessionProperty = GetSessionProperty();
     if (!SessionHelper::IsSubWindow(sessionProperty->GetWindowType()) &&
         !SessionHelper::IsSystemWindow(sessionProperty->GetWindowType())) {
