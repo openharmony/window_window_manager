@@ -808,7 +808,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
         }
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_RECOVER, "Session is nullptr, persistentId = %{public}d", persistentId);
+            TLOGE(WmsLogTag::WMS_RECOVER, "Session is nullptr, persistentId=%{public}d", persistentId);
             continue;
         }
         if (sceneSession->IsRecovered()) {
@@ -826,7 +826,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
 
 void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "persistentIds recovered = %{public}zu. CurrentUserId = %{public}d",
+    TLOGI(WmsLogTag::WMS_RECOVER, "persistentIds recovered=%{public}zu. CurrentUserId=%{public}d",
         recoveredPersistentIds.size(), currentUserId_.load());
 
     auto task = [this, recoveredPersistentIds]() {
@@ -834,40 +834,40 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
         std::list<AAFwk::SessionInfo> abilitySessionInfos;
         for (const auto& persistentId : recoveredPersistentIds) {
             if (failRecoveredPersistentIdSet_.count(persistentId)) {
-                TLOGNI(WmsLogTag::WMS_RECOVER, "failRecoveredPersistentId = %{public}d, continue", persistentId);
+                TLOGNI(WmsLogTag::WMS_RECOVER, "failRecoveredPersistentId=%{public}d, continue", persistentId);
                 continue;
             }
             auto sceneSession = GetSceneSession(persistentId);
             if (sceneSession == nullptr) {
-                TLOGNE(WmsLogTag::WMS_RECOVER, "Session is nullptr, persistentId = %{public}d", persistentId);
+                TLOGNE(WmsLogTag::WMS_RECOVER, "Session is nullptr, persistentId=%{public}d", persistentId);
                 continue;
             }
             const auto& abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
             if (!abilitySessionInfo) {
-                TLOGNW(WmsLogTag::WMS_RECOVER, "abilitySessionInfo is null, persistentId = %{public}d", persistentId);
+                TLOGNW(WmsLogTag::WMS_RECOVER, "abilitySessionInfo is null, persistentId=%{public}d", persistentId);
                 continue;
             }
-            TLOGND(WmsLogTag::WMS_RECOVER, "recovered persistentId = %{public}d", persistentId);
+            TLOGND(WmsLogTag::WMS_RECOVER, "recovered persistentId=%{public}d", persistentId);
             abilitySessionInfos.emplace_back(*abilitySessionInfo);
         }
         std::vector<int32_t> unrecoverableSessionIds;
         AAFwk::AbilityManagerClient::GetInstance()->UpdateSessionInfoBySCB(
             abilitySessionInfos, currentUserId_, unrecoverableSessionIds);
-        TLOGNI(WmsLogTag::WMS_RECOVER, "Number of unrecoverableSessionIds = %{public}zu",
+        TLOGNI(WmsLogTag::WMS_RECOVER, "Number of unrecoverableSessionIds=%{public}zu",
             unrecoverableSessionIds.size());
         for (const auto& sessionId : unrecoverableSessionIds) {
             auto sceneSession = GetSceneSession(sessionId);
             if (sceneSession == nullptr) {
-                TLOGNW(WmsLogTag::WMS_RECOVER, "There is no session corresponding to persistentId = %{public}d ",
+                TLOGNW(WmsLogTag::WMS_RECOVER, "There is no session corresponding to persistentId=%{public}d ",
                     sessionId);
                 continue;
             }
             const auto& sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
             if (!sceneSessionInfo) {
-                TLOGNW(WmsLogTag::WMS_RECOVER, "sceneSessionInfo is null, persistentId = %{public}d", sessionId);
+                TLOGNW(WmsLogTag::WMS_RECOVER, "sceneSessionInfo is null, persistentId=%{public}d", sessionId);
                 continue;
             }
-            TLOGNI(WmsLogTag::WMS_RECOVER, "unrecoverable persistentId = %{public}d", sessionId);
+            TLOGNI(WmsLogTag::WMS_RECOVER, "unrecoverable persistentId=%{public}d", sessionId);
             sceneSession->NotifySessionExceptionInner(sceneSessionInfo, false);
         }
         RemoveFailRecoveredSession();
@@ -3049,7 +3049,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         }
         // recover specific session
         SessionInfo info = RecoverSessionInfo(property);
-        TLOGNI(WmsLogTag::WMS_RECOVER, "callingWindowId = %{public}" PRIu32, property->GetCallingSessionId());
+        TLOGNI(WmsLogTag::WMS_RECOVER, "callingWindowId=%{public}" PRIu32, property->GetCallingSessionId());
         ClosePipWindowIfExist(property->GetWindowType());
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
@@ -3102,8 +3102,8 @@ void SceneSessionManager::CacheSpecificSessionForRecovering(
 
     auto windowType = property->GetWindowType();
     auto parentId = property->GetParentPersistentId();
-    TLOGI(WmsLogTag::WMS_RECOVER, "Cache specific session persistentId = %{public}d, parent persistentId = "
-        "%{public}d, window type = %{public}d", sceneSession->GetPersistentId(), parentId, windowType);
+    TLOGI(WmsLogTag::WMS_RECOVER, "Cache specific session persistentId=%{public}d, parent persistentId = "
+        "%{public}d, window type=%{public}d", sceneSession->GetPersistentId(), parentId, windowType);
 
     if (WindowHelper::IsSubWindow(windowType)) {
         recoverSubSessionCacheMap_[parentId].emplace_back(sceneSession);
@@ -4653,7 +4653,7 @@ void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& sce
 
 void SceneSessionManager::NotifyWindowInfoChangeFromSession(int32_t persistentId)
 {
-    WLOGFD("persistentId = %{public}d", persistentId);
+    WLOGFD("persistentId=%{public}d", persistentId);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession nullptr");
@@ -6043,13 +6043,13 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "update privacy state failed, scene is nullptr, wid = %{public}u.", persistentId);
+        TLOGE(WmsLogTag::WMS_MAIN, "update privacy state failed, scene is nullptr, wid=%{public}u.", persistentId);
         return;
     }
 
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "get session property failed, wid = %{public}u.", persistentId);
+        TLOGE(WmsLogTag::WMS_MAIN, "get session property failed, wid=%{public}u.", persistentId);
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
@@ -6067,7 +6067,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
         TLOGI(WmsLogTag::WMS_MAIN, "first privacy window bundle name: %{public}s.", bundleListForNotify[0].c_str());
     }
     for (const auto& bundle : bundleListForNotify) {
-        TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display = %{public}" PRIu64 ", bundle = %{public}s.",
+        TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display=%{public}" PRIu64 ", bundle=%{public}s.",
               displayId, bundle.c_str());
     }
 }
@@ -6092,12 +6092,12 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
     for (const auto& item : sceneSessionMap_) {
         sptr<SceneSession> sceneSession = item.second;
         if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_MAIN, "scene session is nullptr, wid = %{public}d.", item.first);
+            TLOGE(WmsLogTag::WMS_MAIN, "scene session is nullptr, wid=%{public}d.", item.first);
             continue;
         }
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty == nullptr) {
-            TLOGE(WmsLogTag::WMS_MAIN, "scene session property is nullptr, wid = %{public}d.", item.first);
+            TLOGE(WmsLogTag::WMS_MAIN, "scene session property is nullptr, wid=%{public}d.", item.first);
             continue;
         }
         auto currentDisplayId = sessionProperty->GetDisplayId();
@@ -6118,7 +6118,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
             if (!sceneSession->GetSessionInfo().bundleName_.empty()) {
                 privacyBundles.insert(sceneSession->GetSessionInfo().bundleName_);
             } else {
-                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "bundle name is empty, wid = %{public}d.", item.first);
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "bundle name is empty, wid=%{public}d.", item.first);
                 privacyBundles.insert(sceneSession->GetWindowName());
             }
         }
@@ -6945,7 +6945,7 @@ int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int3
     TLOGI(WmsLogTag::DEFAULT, "begin");
     int result = DistributedClient::GetInstance().GetMissionInfos(deviceId, numMax, sessionInfos);
     if (result != ERR_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::DEFAULT, "failed, result=%{public}d", result);
         return result;
     }
     return ERR_OK;
@@ -7072,7 +7072,7 @@ bool SceneSessionManager::CheckIsRemote(const std::string& deviceId)
         WLOGFI("deviceId is local.");
         return false;
     }
-    WLOGFD("Checked deviceId = %{public}s", AnonymizeDeviceId(deviceId).c_str());
+    WLOGFD("Checked deviceId=%{public}s", AnonymizeDeviceId(deviceId).c_str());
     return true;
 }
 
@@ -7081,12 +7081,12 @@ bool SceneSessionManager::GetLocalDeviceId(std::string& localDeviceId)
     auto localNode = std::make_unique<NodeBasicInfo>();
     int32_t errCode = GetLocalNodeDeviceInfo(DM_PKG_NAME.c_str(), localNode.get());
     if (errCode != ERR_OK) {
-        WLOGFE("GetLocalNodeDeviceInfo errCode = %{public}d", errCode);
+        WLOGFE("GetLocalNodeDeviceInfo errCode=%{public}d", errCode);
         return false;
     }
     if (localNode != nullptr) {
         localDeviceId = localNode->networkId;
-        WLOGFD("get local deviceId, deviceId = %{public}s", AnonymizeDeviceId(localDeviceId).c_str());
+        WLOGFD("get local deviceId, deviceId=%{public}s", AnonymizeDeviceId(localDeviceId).c_str());
         return true;
     }
     WLOGFE("localDeviceId null");
@@ -7449,7 +7449,7 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
                 oriSnapshot->scale(sceneSession->GetFloatingScale(), sceneSession->GetFloatingScale());
             }
             snapshot.snapshot = oriSnapshot;
-            TLOGNI(WmsLogTag::WMS_SYSTEM, "snapshot WxH = %{public}dx%{public}d",
+            TLOGNI(WmsLogTag::WMS_SYSTEM, "snapshot WxH=%{public}dx%{public}d",
                 oriSnapshot->GetWidth(), oriSnapshot->GetHeight());
             return WMError::WM_OK;
         }
@@ -7480,7 +7480,7 @@ int SceneSessionManager::GetRemoteSessionSnapshotInfo(const std::string& deviceI
     int result = DistributedClient::GetInstance().GetRemoteMissionSnapshotInfo(deviceId,
         sessionId, sessionSnapshot);
     if (result != ERR_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::DEFAULT, "failed, result=%{public}d", result);
         return result;
     }
     return ERR_OK;
@@ -7858,7 +7858,7 @@ static bool CheckUnreliableWindowType(WindowType windowType)
         windowType == WindowType::WINDOW_TYPE_TOAST) {
         return true;
     }
-    TLOGD(WmsLogTag::DEFAULT, "false, WindowType = %{public}d", windowType);
+    TLOGD(WmsLogTag::DEFAULT, "false, WindowType=%{public}d", windowType);
     return false;
 }
 
@@ -7884,7 +7884,7 @@ static void FillUnreliableWindowInfo(const sptr<SceneSession>& sceneSession,
     info->scaleX_ = sceneSession->GetScaleX();
     info->scaleY_ = sceneSession->GetScaleY();
     infos.emplace_back(info);
-    TLOGD(WmsLogTag::WMS_MAIN, "wid = %{public}d", info->windowId_);
+    TLOGD(WmsLogTag::WMS_MAIN, "wid=%{public}d", info->windowId_);
 }
 
 WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,
@@ -7911,13 +7911,13 @@ WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,
                 TLOGND(WmsLogTag::DEFAULT, "persistentId: %{public}d is not visible", sessionId);
                 continue;
             }
-            TLOGND(WmsLogTag::DEFAULT, "name = %{public}s, isSystem = %{public}d, "
-                "persistentId = %{public}d, winType = %{public}d, state = %{public}d, visible = %{public}d",
+            TLOGND(WmsLogTag::DEFAULT, "name=%{public}s, isSystem=%{public}d, "
+                "persistentId=%{public}d, winType=%{public}d, state=%{public}d, visible=%{public}d",
                 sceneSession->GetWindowName().c_str(), sceneSession->GetSessionInfo().isSystem_, sessionId,
                 sceneSession->GetWindowType(), sceneSession->GetSessionState(), sceneSession->GetRSVisible());
             if (CheckUnreliableWindowType(sceneSession->GetWindowType())) {
-                TLOGI(WmsLogTag::DEFAULT, "persistentId = %{public}d, "
-                    "WindowType = %{public}d", sessionId, sceneSession->GetWindowType());
+                TLOGI(WmsLogTag::DEFAULT, "persistentId=%{public}d, "
+                    "WindowType=%{public}d", sessionId, sceneSession->GetWindowType());
                 FillUnreliableWindowInfo(sceneSession, infos);
             }
         }
@@ -7928,7 +7928,7 @@ WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,
 
 void SceneSessionManager::NotifyWindowInfoChange(int32_t persistentId, WindowUpdateType type)
 {
-    WLOGFD("NotifyWindowInfoChange, persistentId = %{public}d, updateType = %{public}d", persistentId, type);
+    WLOGFD("NotifyWindowInfoChange, persistentId=%{public}d, updateType=%{public}d", persistentId, type);
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFE("NotifyWindowInfoChange sceneSession nullptr!");
@@ -8008,7 +8008,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->isDecorEnable_ = property->IsDecorEnable();
     }
     infos.emplace_back(info);
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid = %{public}d, inWid = %{public}d, uiNId = %{public}d, bundleName = %{public}s",
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid=%{public}d, inWid=%{public}d, uiNId=%{public}d, bundleName=%{public}s",
         info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str());
     return true;
 }
@@ -10989,19 +10989,19 @@ void SceneSessionManager::RemoveFailRecoveredSession()
     for (const auto& persistentId : failRecoveredPersistentIdSet_) {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_RECOVER, "Session is nullptr, persistentId = %{public}d", persistentId);
+            TLOGE(WmsLogTag::WMS_RECOVER, "Session is nullptr, persistentId=%{public}d", persistentId);
             continue;
         }
         if (!sceneSession->IsRecovered()) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "not recovered session persistentId = %{public}d", persistentId);
+            TLOGW(WmsLogTag::WMS_RECOVER, "not recovered session persistentId=%{public}d", persistentId);
             continue;
         }
         const auto& sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
         if (!sceneSessionInfo) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "sceneSessionInfo is nullptr, persistentId = %{public}d", persistentId);
+            TLOGW(WmsLogTag::WMS_RECOVER, "sceneSessionInfo is nullptr, persistentId=%{public}d", persistentId);
             continue;
         }
-        TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId = %{public}d", persistentId);
+        TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId=%{public}d", persistentId);
         sceneSession->NotifySessionExceptionInner(sceneSessionInfo, true);
     }
     failRecoveredPersistentIdSet_.clear();
@@ -11033,7 +11033,7 @@ std::shared_ptr<SkRegion> SceneSessionManager::GetDisplayRegion(DisplayId displa
     SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
     auto region = std::make_shared<SkRegion>(rect);
     displayRegionMap_[displayId] = region;
-    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w = %{public}d, h = %{public}d", displayWidth, displayHeight);
+    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w=%{public}d, h=%{public}d", displayWidth, displayHeight);
     return std::make_shared<SkRegion>(rect);
 }
 
@@ -11053,7 +11053,7 @@ void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayIn
     SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
     auto region = std::make_shared<SkRegion>(rect);
     displayRegionMap_[displayId] = region;
-    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w = %{public}d, h = %{public}d", displayWidth, displayHeight);
+    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w=%{public}d, h=%{public}d", displayWidth, displayHeight);
 }
 
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
@@ -11161,8 +11161,8 @@ void SceneSessionManager::NotifyAllAccessibilityInfo()
     FillAccessibilityInfo(sceneSessionList, accessibilityInfo);
 
     for (const auto& item : accessibilityInfo) {
-        TLOGD(WmsLogTag::WMS_MAIN, "notify accessibilityWindow wid = %{public}d, inWid = %{public}d, "
-            "bundle=%{public}s,bounds=(x = %{public}d, y = %{public}d, w = %{public}d, h = %{public}d)",
+        TLOGD(WmsLogTag::WMS_MAIN, "notify accessibilityWindow wid=%{public}d, inWid=%{public}d, "
+            "bundle=%{public}s,bounds=(x=%{public}d, y=%{public}d, w=%{public}d, h=%{public}d)",
             item->wid_, item->innerWid_, item->bundleName_.c_str(),
             item->windowRect_.posX_, item->windowRect_.posY_, item->windowRect_.width_, item->windowRect_.height_);
         for (const auto& rect : item->touchHotAreas_) {
@@ -11813,7 +11813,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<
             }
             auto sceneSession = GetSceneSession(persistentId);
             if (sceneSession == nullptr) {
-                TLOGNE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr persistentId = %{public}d", persistentId);
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "sceneSession is nullptr persistentId=%{public}d", persistentId);
                 continue;
             }
             if (i > UINT32_MAX - startZOrder) {

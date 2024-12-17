@@ -234,22 +234,22 @@ static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sp
     for (auto item : metadata) {
         if (item.name == "ohos.ability.window.width") {
             if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.width = %{public}d", value);
+                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.width=%{public}d", value);
                 napi_set_named_property(env, objValue, "windowWidth", CreateJsValue(env, value));
             }
         } else if (item.name == "ohos.ability.window.height") {
             if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.height = %{public}d", value);
+                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.height=%{public}d", value);
                 napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
             }
         } else if (item.name == "ohos.ability.window.left") {
             if (item.value.size() > 0) {
-                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.left = %{public}s", item.value.c_str());
+                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.left=%{public}s", item.value.c_str());
                 napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, item.value));
             }
         } else if (item.name == "ohos.ability.window.top") {
             if (item.value.size() > 0) {
-                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.top = %{public}s", item.value.c_str());
+                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.top=%{public}s", item.value.c_str());
                 napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, item.value));
             }
         }
@@ -2189,12 +2189,12 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     }
     auto iterFunctionType = ListenerFuncMap.find(cbType);
     if (iterFunctionType == ListenerFuncMap.end()) {
-        WLOGFE("callback type is not supported, type = %{public}s", cbType.c_str());
+        WLOGFE("callback type is not supported, type=%{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
     ListenerFuncType listenerFuncType = iterFunctionType->second;
     if (IsCallbackRegistered(env, cbType, value)) {
-        WLOGFE("callback is registered, type = %{public}s", cbType.c_str());
+        WLOGFE("callback is registered, type=%{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
@@ -2213,7 +2213,7 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
         jsCbMap_[cbType] = callbackRef;
     }
     ProcessRegisterCallback(listenerFuncType);
-    WLOGFD("end, type = %{public}s", cbType.c_str());
+    WLOGFD("end, type=%{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
@@ -3514,7 +3514,7 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
 
 void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName = %{public}s, abilityName = %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
     bool needRemoveSession = false;
     if (!needStartCaller && !isFromBroker) {
@@ -3550,7 +3550,7 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
 
 void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName = %{public}s, abilityName = %{public}s, terminateType = %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s, terminateType=%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), static_cast<int32_t>(terminateType));
 
     auto task = [weakThis = wptr(this), persistentId = persistentId_, terminateType, env = env_] {
@@ -3670,7 +3670,7 @@ void JsSceneSession::UpdateSessionIcon(const std::string& iconPath)
 
 void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemoveSession, bool startFail)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName = %{public}s, abilityName = %{public}s, startFail = %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s, startFail=%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), startFail);
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
@@ -3706,7 +3706,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
 
 void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName = %{public}s, abilityName = %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
@@ -3740,7 +3740,7 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
 void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE,
-        "bundleName = %{public}s, abilityName = %{public}s, shouldBackToCaller = %{public}d",
+        "bundleName=%{public}s, abilityName=%{public}s, shouldBackToCaller=%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), shouldBackToCaller);
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
