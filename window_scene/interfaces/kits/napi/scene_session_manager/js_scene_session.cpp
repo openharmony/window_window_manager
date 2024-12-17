@@ -210,7 +210,7 @@ static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sp
 {
     auto abilityInfo = session->GetSessionInfo().abilityInfo;
     if (!abilityInfo) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "abilityInfo is nullptr");
+        TLOGW(WmsLogTag::WMS_LAYOUT, "abilityInfo is nullptr");
         return;
     }
     uint32_t value = 0;
