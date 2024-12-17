@@ -1023,7 +1023,7 @@ WMError WindowManager::UnregisterWindowPidVisibilityChangedListener(
 WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId,
     float density, DisplayOrientation orientation)
 {
-    TLOGD(WmsLogTag::DMS, "notify display info change, displayid=%{public}" PRIu64", density=%{public}f," \
+    TLOGD(WmsLogTag::DMS, "notify display info change, displayid=%{public}" PRIu64 ", density=%{public}f, "
         "orientation=%{public}d", displayId, density, orientation);
     if (token == nullptr) {
         TLOGE(WmsLogTag::DMS, "notify display info change failed, token is nullptr");
