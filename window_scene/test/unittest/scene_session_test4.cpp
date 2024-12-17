@@ -1418,3 +1418,4 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, Function | SmallTest | L
 }
 }
 }
+}

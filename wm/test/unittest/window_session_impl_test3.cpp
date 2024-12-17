@@ -893,7 +893,7 @@ HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Leve
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    WMError res = window->SetAvoidAreaOption(3); 
+    WMError res = window->SetAvoidAreaOption(3);
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
