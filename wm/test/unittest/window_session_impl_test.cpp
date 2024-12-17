@@ -1254,7 +1254,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
-
 }
 
 /**
