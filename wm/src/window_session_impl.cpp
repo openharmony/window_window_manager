@@ -2895,7 +2895,7 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         }
         // whether keep the keyboard created by other windows, support system window and app subwindow.
         bool keepKeyboardFlag = window->property_->GetKeepKeyboardFlag();
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
             window->GetPersistentId(), isNeedKeyboard, keepKeyboardFlag);
         RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag);
     };
@@ -2951,7 +2951,7 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
             std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
             if (uiContent_ != nullptr) {
                 uiContent_ = nullptr;
-                TLOGD(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
+                TLOGND(WmsLogTag::WMS_LIFE, "NotifyBeforeDestroy: uiContent destroy success, persistentId:%{public}d",
                     GetPersistentId());
             }
         }
@@ -4062,7 +4062,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     auto task = [weak = wptr(this), info, rsTransaction]() {
         auto window = weak.promote();
         if (!window) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed");
             return;
         }
         if (rsTransaction) {
@@ -4170,7 +4170,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
         windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        if (IsPcOrPadFreeMultiWindowMode()) {
+        if (IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14) { // 14: isolated version
             windowStatus = GetImmersiveModeEnabledState() ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
                 WindowStatus::WINDOW_STATUS_MAXIMIZE;
         } else {
@@ -4500,6 +4500,16 @@ WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
     TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
     property_->SetDragEnabled(enableDrag);
     return WSError::WS_OK;
+}
+
+void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
+{
+    targetAPIVersion_ = targetAPIVersion;
+}
+
+uint32_t WindowSessionImpl::GetTargetAPIVersion() const
+{
+    return targetAPIVersion_;
 }
 } // namespace Rosen
 } // namespace OHOS

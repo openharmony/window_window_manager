@@ -555,7 +555,7 @@ void JsSceneSession::ProcessSessionInfoLockedStateChangeRegister()
     NotifySessionInfoLockedStateChangeFunc func = [weakThis = wptr(this)](bool lockedState) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionInfoLockedStateChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessSessionInfoLockedStateChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSessionInfoLockedStateChange(lockedState);
@@ -618,7 +618,7 @@ void JsSceneSession::ProcessAdjustKeyboardLayoutRegister()
     NotifyKeyboardLayoutAdjustFunc func = [weakThis = wptr(this)](const KeyboardLayoutParams& params) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessAdjustKeyboardLayoutRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessAdjustKeyboardLayoutRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnAdjustKeyboardLayout(params);
@@ -880,7 +880,7 @@ void JsSceneSession::ProcessSessionDefaultAnimationFlagChangeRegister()
     session->RegisterDefaultAnimationFlagChangeCallback([weakThis = wptr(this)](bool isNeedDefaultAnimationFlag) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionDefaultAnimationFlagChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessSessionDefaultAnimationFlagChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnDefaultAnimationFlagChange(isNeedDefaultAnimationFlag);
@@ -916,7 +916,7 @@ void JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister()
     NotifyChangeSessionVisibilityWithStatusBarFunc func = [weakThis = wptr(this)](SessionInfo& info, bool visible) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessChangeSessionVisibilityWithStatusBarRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessChangeSessionVisibilityWithStatusBarRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->ChangeSessionVisibilityWithStatusBar(info, visible);
@@ -935,7 +935,7 @@ void JsSceneSession::ProcessSessionStateChangeRegister()
     NotifySessionStateChangeFunc func = [weakThis = wptr(this)](const SessionState& state) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionStateChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessSessionStateChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSessionStateChange(state);
@@ -954,7 +954,7 @@ void JsSceneSession::ProcessBufferAvailableChangeRegister()
     NotifyBufferAvailableChangeFunc func = [weakThis = wptr(this)](const bool isAvailable) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessBufferAvailableChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessBufferAvailableChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnBufferAvailableChange(isAvailable);
@@ -973,7 +973,7 @@ void JsSceneSession::ProcessCreateSubSessionRegister()
     NotifyCreateSubSessionFunc func = [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessCreateSubSessionRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessCreateSubSessionRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnCreateSubSession(sceneSession);
@@ -1091,7 +1091,7 @@ void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
     NotifyRaiseToTopForPointDownFunc func = [weakThis = wptr(this)]() {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessRaiseToTopForPointDownRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessRaiseToTopForPointDownRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnRaiseToTopForPointDown();
@@ -1385,7 +1385,7 @@ void JsSceneSession::ProcessSessionFocusableChangeRegister()
     NotifySessionFocusableChangeFunc func = [weakThis = wptr(this)](bool isFocusable) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionFocusableChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessSessionFocusableChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSessionFocusableChange(isFocusable);
@@ -1404,7 +1404,7 @@ void JsSceneSession::ProcessSessionTouchableChangeRegister()
     NotifySessionTouchableChangeFunc func = [weakThis = wptr(this)](bool touchable) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessSessionTouchableChangeRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessSessionTouchableChangeRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSessionTouchableChange(touchable);
@@ -1423,7 +1423,7 @@ void JsSceneSession::ProcessClickRegister()
     NotifyClickFunc func = [weakThis = wptr(this)](bool requestFocus, bool isClick) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessClickRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessClickRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnClick(requestFocus, isClick);
@@ -1442,7 +1442,7 @@ void JsSceneSession::ProcessContextTransparentRegister()
     NotifyContextTransparentFunc func = [weakThis = wptr(this)]() {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessContextTransparentRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessContextTransparentRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnContextTransparent();
@@ -1672,7 +1672,7 @@ void JsSceneSession::ProcessFrameLayoutFinishRegister()
     NotifyFrameLayoutFinishFunc func = [weakThis = wptr(this)]() {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessFrameLayoutFinishRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessFrameLayoutFinishRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->NotifyFrameLayoutFinish();
@@ -1730,7 +1730,7 @@ void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
     auto task = [this, isPrivacyMode, env = env_]() {
         auto jsCallback = this->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
         if (!jsCallback) {
-            TLOGE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
+            TLOGNE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
             return;
         }
         napi_value jsSessionPrivacyMode = CreateJsValue(env, isPrivacyMode);
@@ -3288,7 +3288,7 @@ void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, boo
     auto task = [weakThis = wptr(this), sessionInfo, visible]() {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ChangeSessionVisibilityWithStatusBar jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ChangeSessionVisibilityWithStatusBar jsSceneSession is null");
             return;
         }
         jsSceneSession->ChangeSessionVisibilityWithStatusBarInner(sessionInfo, visible);
@@ -3608,7 +3608,7 @@ void JsSceneSession::ProcessUpdateSessionLabelRegister()
     NofitySessionLabelUpdatedFunc func = [weakThis = wptr(this)](const std::string& label) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessUpdateSessionLabelRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessUpdateSessionLabelRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->UpdateSessionLabel(label);
@@ -3628,7 +3628,7 @@ void JsSceneSession::ProcessUpdateSessionIconRegister()
     NofitySessionIconUpdatedFunc func = [weakThis = wptr(this)](const std::string& iconPath) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_LIFE, "ProcessUpdateSessionIconRegister jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessUpdateSessionIconRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->UpdateSessionIcon(iconPath);
@@ -4161,14 +4161,14 @@ napi_value JsSceneSession::OnSetSystemActive(napi_env env, napi_callback_info in
     if (argc < 1) {
         WLOGFE("argc is invalid : %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-        "Input parameter is missing or invalid"));
+            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool scbSystemActive = false;
     if (!ConvertFromJsValue(env, argv[0], scbSystemActive)){
         WLOGFE("Failed to convert parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-        "Input parameter is missing or invalid"));
+            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
@@ -4196,7 +4196,7 @@ napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
     if (!ConvertFromJsValue(env, argv[0], touchable)) {
         WLOGFE("Failed to  convert parameter to touchable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-        "Input parameter is missing or invalid"));
+            "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
