@@ -378,6 +378,7 @@ private:
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
+    void RecoverMultiScreenMode();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
