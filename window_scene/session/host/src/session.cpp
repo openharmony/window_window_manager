@@ -1056,12 +1056,12 @@ WSError Session::UpdateOrientation()
 {
     TLOGD(WmsLogTag::DMS, "update orientation: id: %{public}d.", GetPersistentId());
     if (!IsSessionValid()) {
-        TLOGE(WmsLogTag::DMS, "update orientation failed because of session is invalid, id = %{public}d.",
+        TLOGE(WmsLogTag::DMS, "update orientation failed because of session is invalid, id=%{public}d.",
             GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "update orientation failed because of sessionStage_ is nullptr, id = %{public}d.",
+        TLOGE(WmsLogTag::DMS, "update orientation failed because of sessionStage_ is nullptr, id=%{public}d.",
             GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -2250,7 +2250,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
     auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH = %{public}dx%{public}d, id: %{public}d",
+        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH=%{public}dx%{public}d, id: %{public}d",
             pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
         if (notifySessionSnapshotFunc_) {
             notifySessionSnapshotFunc_(persistentId_);

@@ -468,7 +468,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     }
     RecoverSessionListener();
     TLOGI(WmsLogTag::WMS_RECOVER,
-        "over, windowName = %{public}s, persistentId = %{public}d",
+        "over, windowName=%{public}s, persistentId=%{public}d",
         GetWindowName().c_str(), GetPersistentId());
     return WMError::WM_OK;
 }
@@ -586,7 +586,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
         TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
-        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type = %{public}d", GetType());
+        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}d", GetType());
         isSpecificSession = true;
         const auto& type = GetType();
         if (WindowHelper::IsSystemWindow(type)) {
@@ -677,7 +677,7 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
 {
-    TLOGD(WmsLogTag::WMS_RECOVER, "Id = %{public}d, isSpecificSession = %{public}s",
+    TLOGD(WmsLogTag::WMS_RECOVER, "Id=%{public}d, isSpecificSession=%{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");
 
     if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -705,7 +705,7 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
         auto ret = isSpecificSession ? promoteThis->RecoverAndConnectSpecificSession() :
 			promoteThis->RecoverAndReconnectSceneSession();
 
-        TLOGD(WmsLogTag::WMS_RECOVER, "Recover session over, ret = %{public}d", ret);
+        TLOGD(WmsLogTag::WMS_RECOVER, "Recover session over, ret=%{public}d", ret);
         return ret;
     };
     SingletonContainer::Get<WindowAdapter>().RegisterSessionRecoverCallbackFunc(GetPersistentId(), callbackFunc);
@@ -3290,7 +3290,7 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
     }
     std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap != nullptr) {
-        WLOGFD("Snapshot succeed, save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
         WLOGFE("Failed to get pixelmap, return nullptr!");
     }
@@ -4309,7 +4309,7 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 
 bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enableImmersiveMode = %{public}u",
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enableImmersiveMode=%{public}u",
         GetWindowId(), enableImmersiveMode_);
     if (IsWindowSessionInvalid()) {
         return false;
