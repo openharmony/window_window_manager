@@ -1282,6 +1282,37 @@ HWTEST_F(SceneSessionTest4, SetFrameGravity, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetIsLayoutFullScreen
+ * @tc.desc: SetIsLayoutFullScreen Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetIsLayoutFullScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsLayoutFullScreen";
+    info.bundleName_ = "SetIsLayoutFullScreen";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->SetIsLayoutFullScreen(true);
+    EXPECT_EQ(session->IsLayoutFullScreen(), true);
+}
+
+/**
+ * @tc.name: IsLayoutFullScreen
+ * @tc.desc: IsLayoutFullScreen Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsLayoutFullScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsLayoutFullScreen";
+    info.bundleName_ = "IsLayoutFullScreen";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    EXPECT_EQ(session->IsLayoutFullScreen(), false);
+}
+
+/**
  * @tc.name: HandleActionUpdateAvoidAreaOption
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1384,7 +1415,6 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, Function | SmallTest | L
     sceneSession->SetSessionProperty(property);
     ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(false, ret);
-}
 }
 }
 }

@@ -5190,6 +5190,16 @@ WSError SceneSession::UpdateRectChangeListenerRegistered(bool isRegister)
     return WSError::WS_OK;
 }
 
+void SceneSession::SetIsLayoutFullScreen(bool isLayoutFullScreen)
+{
+    isLayoutFullScreen_ = isLayoutFullScreen;
+}
+
+bool SceneSession::IsLayoutFullScreen() const
+{
+    return isLayoutFullScreen_;
+}
+
 WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
 {
     PostTask([weakThis = wptr(this), isLayoutFullScreen]() {
@@ -5200,6 +5210,7 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
         if (session->onLayoutFullScreenChangeFunc_) {
+            session->SetIsLayoutFullScreen(isLayoutFullScreen);
             session->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
         }
         return WSError::WS_OK;
@@ -5953,12 +5964,18 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
     }
 
     if (behindWindowFilterEnabledModifier_ == nullptr) {
-        behindWindowFilterEnabledProperty_ = std::make_shared<RSProperty<bool>>(enabled);
+        auto behindWindowFilterEnabledProperty = std::make_shared<RSProperty<bool>>(enabled);
         behindWindowFilterEnabledModifier_ = std::make_shared<RSBehindWindowFilterEnabledModifier>(
-            behindWindowFilterEnabledProperty_);
+            behindWindowFilterEnabledProperty);
         surfaceNode->AddModifier(behindWindowFilterEnabledModifier_);
     } else {
-        behindWindowFilterEnabledProperty_->Set(enabled);
+        auto behindWindowFilterEnabledProperty = std::static_pointer_cast<RSProperty<bool>>(
+            behindWindowFilterEnabledModifier_->GetProperty());
+        if (!behindWindowFilterEnabledProperty) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "fail to get property");
+            return;
+        }
+        behindWindowFilterEnabledProperty->Set(enabled);
     }
 
     if (rsTransaction != nullptr) {

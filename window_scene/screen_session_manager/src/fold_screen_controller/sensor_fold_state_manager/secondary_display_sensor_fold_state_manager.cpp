@@ -29,6 +29,7 @@
 
 namespace OHOS::Rosen {
 namespace {
+constexpr uint8_t HALF_FOLD_VALUE = 3;
 constexpr uint8_t HALLS_AXIS_SIZE = 2;
 constexpr uint8_t ANGLES_AXIS_SIZE = 2;
 constexpr float ANGLE_MIN_VAL = 0.0F;
@@ -144,7 +145,12 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState (FoldStatu
     if (mSecondaryFoldState == FoldStatus::UNKNOWN || mSecondaryFoldState == defaultState) {
         return mPrimaryFoldState;
     }
-    int globalFoldState = (int)mPrimaryFoldState + (int)mSecondaryFoldState * 10;
+    int mPrimaryFoldStatus = (int)mPrimaryFoldState;
+    int mSecondaryFoldStatus = (int)mSecondaryFoldState;
+    if (mSecondaryFoldStatus == HALF_FOLD_VALUE) {
+        mSecondaryFoldStatus --;
+    }
+    int globalFoldState = mPrimaryFoldStatus + mSecondaryFoldStatus * 10;
     FoldStatus globalFoldStatus = static_cast<FoldStatus>(globalFoldState);
     return globalFoldStatus;
 }
