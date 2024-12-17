@@ -5627,10 +5627,10 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         return false;
     }
     auto globalRect = GetSessionGlobalRect();
-    SetSessionGlobalRect(uiParam.rect_);
     if (globalRect != uiParam.rect_) {
         UpdateAllModalUIExtensions(uiParam.rect_);
     }
+    SetSessionGlobalRect(uiParam.rect_);
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
             "rectAfter:%{public}s preRect:%{public}s preGlobalRect:%{public}s", GetPersistentId(), uiParam.needSync_,
@@ -5960,7 +5960,8 @@ void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
 
 void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
 {
-    PostTask([weakThis = wptr(this), &globalRect]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, globalRect] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
@@ -5980,9 +5981,9 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
             }
         }
         session->NotifySessionInfoChange();
-        TLOGNI(WmsLogTag::WMS_UIEXT, "id: %{public}d, globalRect: %{public}s, parentTransX: %{public}d, "
-            "parentTransY: %{public}d", session->GetPersistentId(), globalRect.ToString().c_str(),
+        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: id: %{public}d, globalRect: %{public}s, parentTransX: %{public}d, "
+            "parentTransY: %{public}d", where, session->GetPersistentId(), globalRect.ToString().c_str(),
             parentTransX, parentTransY);
-    }, "UpdateAllModalUIExtensions");
+    }, __func__);
 }
 } // namespace OHOS::Rosen
