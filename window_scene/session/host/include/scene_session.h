@@ -301,6 +301,12 @@ public:
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
 
     /*
+     * PC Window Layout
+     */
+    void SetIsLayoutFullScreen(bool isLayoutFullScreen);
+    bool IsLayoutFullScreen() const;
+
+    /*
      * Window Immersive
      */
     WSError OnNeedAvoid(bool status) override;
@@ -944,6 +950,11 @@ private:
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
+
+    /*
+     * PC Window Layout
+     */
+    bool isLayoutFullScreen_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
