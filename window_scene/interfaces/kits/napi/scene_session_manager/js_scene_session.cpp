@@ -4194,7 +4194,7 @@ napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
 
     bool touchable = false;
     if (!ConvertFromJsValue(env, argv[0], touchable)) {
-        WLOGFE("Failed to  convert parameter to touchable");
+        WLOGFE("Failed to convert parameter to touchable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
