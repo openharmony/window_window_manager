@@ -431,7 +431,6 @@ HWTEST_F(SceneSessionManagerTest5, PrepareTerminate, Function | SmallTest | Leve
     SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(sceneSessionManager, nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate));
-    delete sceneSessionManager;
 }
 
 /**
@@ -452,7 +451,6 @@ HWTEST_F(SceneSessionManagerTest5, IsKeyboardForeground, Function | SmallTest | 
     sceneSessionManager->IsKeyboardForeground();
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
     sceneSessionManager->IsKeyboardForeground();
-    delete sceneSessionManager;
 }
 
 /**
@@ -467,7 +465,6 @@ HWTEST_F(SceneSessionManagerTest5, RequestInputMethodCloseKeyboard02, Function |
     SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(sceneSessionManager, nullptr);
     sceneSessionManager->PrepareTerminate(persistentId, isPrepareTerminate);
-    delete sceneSessionManager;
 }
 
 /**
@@ -1680,7 +1677,6 @@ HWTEST_F(SceneSessionManagerTest5, ConfigDecor02, Function | SmallTest | Level3)
     WindowSceneConfig::ConfigItem* item = new WindowSceneConfig::ConfigItem;
     ASSERT_NE(item, nullptr);
     ssm_->ConfigDecor(*item, false);
-    delete item;
 }
 
 /**
@@ -1717,8 +1713,6 @@ HWTEST_F(SceneSessionManagerTest5, CreateKeyboardPanelSession02, Function | Smal
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    sptr<SceneSession> sceneSession = nullptr;
-    ssm_->CreateKeyboardPanelSession(sceneSession);
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->CreateKeyboardPanelSession(sceneSession);
 }
