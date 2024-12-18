@@ -145,12 +145,12 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState (FoldStatu
     if (mSecondaryFoldState == FoldStatus::UNKNOWN || mSecondaryFoldState == defaultState) {
         return mPrimaryFoldState;
     }
-    int mPrimaryFoldStatus = (int)mPrimaryFoldState;
-    int mSecondaryFoldStatus = (int)mSecondaryFoldState;
+    int32_t mPrimaryFoldStatus = static_cast<int32_t>(mPrimaryFoldState);
+    int32_t mSecondaryFoldStatus = static_cast<int32_t>(mSecondaryFoldState);
     if (mSecondaryFoldStatus == HALF_FOLD_VALUE) {
         mSecondaryFoldStatus --;
     }
-    int globalFoldState = mPrimaryFoldStatus + mSecondaryFoldStatus * 10;
+    int32_t globalFoldState = mPrimaryFoldStatus + mSecondaryFoldStatus * 10;
     FoldStatus globalFoldStatus = static_cast<FoldStatus>(globalFoldState);
     return globalFoldStatus;
 }
