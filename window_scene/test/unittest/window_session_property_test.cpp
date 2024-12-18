@@ -558,7 +558,6 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
     property->SetPiPTemplateInfo(pipTemplateInfo);
     property->MarshallingPiPTemplateInfo(parcel);
     property->UnmarshallingPiPTemplateInfo(parcel, property);
-    delete property;
 }
 
 /**
