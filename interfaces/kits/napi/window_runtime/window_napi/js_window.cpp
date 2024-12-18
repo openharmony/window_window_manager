@@ -2687,7 +2687,7 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "SetFullScreen failed, ret = %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window SetFullScreen failed."));
             }
         };
@@ -2737,7 +2737,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen failed, ret = %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env,
                     ret, "Window OnSetLayoutFullScreen failed."));
             }
@@ -3043,7 +3043,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         if (err == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "SetSpecificSystemBarEnabled failed, ret %{public}d", err);
+            TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", err);
             task.Reject(env, JsErrUtils::CreateJsError(env, err, "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
     };
@@ -3299,7 +3299,7 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
             AvoidArea avoidArea;
             WMError ret = weakWindow->GetAvoidAreaByType(avoidAreaType, avoidArea);
             if (ret != WMError::WM_OK) {
-                TLOGNE(WmsLogTag::WMS_IMMS, "GetAvoidArea failed, ret = %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
                 avoidArea.topRect_ = g_emptyRect;
                 avoidArea.leftRect_ = g_emptyRect;
                 avoidArea.rightRect_ = g_emptyRect;
