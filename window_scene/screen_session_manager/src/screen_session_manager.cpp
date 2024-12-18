@@ -2389,12 +2389,12 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
         }
         case ScreenPowerState::POWER_DOZE: {
             status = ScreenPowerStatus::POWER_STATUS_DOZE;
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_SUSPEND");
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_DOZE");
             break;
         }
         case ScreenPowerState::POWER_DOZE_SUSPEND: {
             status = ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND;
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_SUSPEND");
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_DOZE_SUSPEND");
             break;
         }
         default: {

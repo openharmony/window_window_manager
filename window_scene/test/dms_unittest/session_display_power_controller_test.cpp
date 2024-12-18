@@ -137,7 +137,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, HandleSetDisplayStateOff, Function |
     controller.canceledSuspend_ = true;
     result = controller.HandleSetDisplayStateOff(state);
     EXPECT_TRUE(result);
-    controller.hasSuspendBegin_ = true;
+    controller.isSuspendBegin_ = true;
     controller.canceledSuspend_ = false;
     result = controller.HandleSetDisplayStateOff(state);
     EXPECT_FALSE(result);

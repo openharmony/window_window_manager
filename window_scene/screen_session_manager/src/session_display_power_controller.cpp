@@ -45,8 +45,7 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
             std::lock_guard<std::mutex> notifyLock(notifyMutex_);
             canCancelSuspendNotify_ = false;
             if (needCancelNotify_) {
-                TLOGI(WmsLogTag::DMS, "[UL_POWER]"
-                    "SetDisplayState to OFF is canceled successfully before notify");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully before notify");
                 needCancelNotify_ = false;
                 displayState_ = lastState;
                 ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
@@ -58,11 +57,11 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
             ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(displayPowerEvent,
                 EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
         }
-        if (hasSuspendBegin_)
+        if (isSuspendBegin_)
         {
             WaitScreenOffNotify(state);
         }
-        hasSuspendBegin_ = false;
+        isSuspendBegin_ = false;
         if (canceledSuspend_) {
             TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully after notify");
             canceledSuspend_ = false;
