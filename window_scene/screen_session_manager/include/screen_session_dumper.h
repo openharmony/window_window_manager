@@ -76,7 +76,12 @@ private:
     int SetFoldStatusLocked();
     void SetHallAndPostureValue(std::string input);
     void SetHallAndPostureStatus(std::string input);
-    void SetSecondaryFoldStatusChange(const std::string &input);
+    void SetSecondaryStatusChange(const std::string &input);
+    bool IsAllCharDigit(const std::string &firstPostureStr);
+    bool GetPostureAndHall(std::vector<std::string> strVec,
+        std::vector<float> &postures, std::vector<uint16_t> &halls);
+    void TriggerSecondarySensor(const std::string &valueStr);
+    void TriggerSecondaryFoldStatus(const std::string &valueStr);
 private:
     int fd_;
     std::vector<std::string> params_;
