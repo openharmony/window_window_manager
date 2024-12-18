@@ -2436,7 +2436,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         ExitCoordination("Press PowerKey");
     }
     DisplayPowerEvent notifyEvent = DisplayPowerEvent::DISPLAY_OFF;
-    auto iter = SCREEN_STATUS_POWER_EVENT_MAP.at(status);
+    auto iter = SCREEN_STATUS_POWER_EVENT_MAP.find(status);
     if (iter != SCREEN_STATUS_POWER_EVENT_MAP.end()) {
         notifyEvent = iter->second;
     }
