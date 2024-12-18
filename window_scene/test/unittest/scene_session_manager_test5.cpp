@@ -1713,7 +1713,7 @@ HWTEST_F(SceneSessionManagerTest5, CreateKeyboardPanelSession02, Function | Smal
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->CreateKeyboardPanelSession(sceneSession);
 }
 
