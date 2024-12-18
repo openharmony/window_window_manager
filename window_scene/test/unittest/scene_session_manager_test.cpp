@@ -2340,10 +2340,9 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
 HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest | Level3)
 {
     std::string key = "com.example.recposentryEntryAbility";
-    bool enabled = false;
+    bool enabled = true;
     ssm_->SetIsWindowRectAutoSave(key, enabled);
-    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(ssm_->isWindowRectAutoSaveMap_.at(key), true);
 }
 
 /**
