@@ -633,10 +633,10 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     std::map<WindowType, SystemBarProperty>& systemBarProperties,
     std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
-    uint32_t size = INDEX_ZERO;
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    uint32_t size = INDEX_ZERO;
     napi_value nativeArray = nullptr;
     if (argc > 0 && GetType(env, argv[INDEX_ZERO]) != napi_function) {
         nativeArray = argv[INDEX_ZERO];
@@ -669,6 +669,7 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableFlag = true;
     return true;
 }
+
 bool ParseAndCheckRect(napi_env env, napi_value jsObject,
     const Rect& windowRect, Rect& touchableRect)
 {
@@ -869,12 +870,12 @@ bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
 {
     properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
         GetColorFromJs(env, jsObject, "statusBarColor",
-        properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
     properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
         GetColorFromJs(env, jsObject, "navigationBarColor",
-        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
 
     if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||
         !SetWindowNavigationBarContentColor(env, jsObject, properties, propertyFlags)) {
