@@ -101,6 +101,7 @@ private:
     int HandleGetProcessSurfaceNodeIdByPersistentId(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply);
+    int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleGetDisplayIdByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
 
