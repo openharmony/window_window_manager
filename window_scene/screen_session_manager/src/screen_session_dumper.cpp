@@ -29,6 +29,8 @@
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_state_internel.h"
+#include "window_helper.h"
+#include "fold_screen_controller/secondary_fold_sensor_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -68,6 +70,8 @@ const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
 constexpr size_t SECONDARY_FOLD_STATUS_INDEX_M = 0;
 constexpr size_t SECONDARY_FOLD_STATUS_INDEX_F = 1;
 constexpr size_t SECONDARY_FOLD_STATUS_INDEX_G = 2;
+constexpr size_t SECONDARY_FOLD_STATUS_COMMAND_NUM = 2;
+constexpr uint16_t HALL_EXT_DATA_FLAG = 26;
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -214,7 +218,7 @@ void ScreenSessionDumper::ExcuteInjectCmd2()
     } else if (params_[0].find(ARG_SET_POSTURE_HALL_STATUS) != std::string::npos) {
         SetHallAndPostureStatus(params_[0]);
     } else if (params_[0].find(ARG_SET_SECONDARY_FOLD_STATUS) != std::string::npos) {
-        SetSecondaryFoldStatusChange(params_[0]);
+        SetSecondaryStatusChange(params_[0]);
     }
 }
 
@@ -855,7 +859,7 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
     }
 }
 
-void ScreenSessionDumper::SetSecondaryFoldStatusChange(const std::string &input)
+void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
 {
     TLOGI(WmsLogTag::DMS, "secondary input: %{public}s", input.c_str());
     size_t commaPos = input.find(',');
@@ -871,7 +875,13 @@ void ScreenSessionDumper::SetSecondaryFoldStatusChange(const std::string &input)
     const char *end = SECONDARY_DUMPER_VALUE_BOUNDARY + sizeof(SECONDARY_DUMPER_VALUE_BOUNDARY); // mfg
     const char *result = std::find(SECONDARY_DUMPER_VALUE_BOUNDARY, end, ch);
     if (result == end) {
-        TLOGE(WmsLogTag::DMS, "format error");
+        if (ch == 'p') { // sensor
+            TriggerSecondarySensor(input.substr(commaPos + 1, input.size() - commaPos - 1));
+        } else if (ch == 'z') { // foldstatus
+            TriggerSecondaryFoldStatus(input.substr(commaPos + 1, input.size() - commaPos - 1));
+        } else {
+            TLOGE(WmsLogTag::DMS, "command not supported.");
+        }
         return;
     }
 
@@ -887,6 +897,138 @@ void ScreenSessionDumper::SetSecondaryFoldStatusChange(const std::string &input)
         return;
     }
     ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
+}
+
+bool ScreenSessionDumper::IsAllCharDigit(const std::string &firstPostureStr)
+{
+    for (size_t i = 0; i < firstPostureStr.size(); i++) {
+        if (!std::isdigit(firstPostureStr[i])) {
+            TLOGW(WmsLogTag::DMS, "%{public}s is not number", firstPostureStr.c_str());
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ScreenSessionDumper::GetPostureAndHall(std::vector<std::string> strVec,
+    std::vector<float> &postures, std::vector<uint16_t> &halls)
+{
+    for (std::string str : strVec) {
+        size_t index = str.find(":");
+        if (index == std::string::npos) {
+            return false;
+        }
+        std::string key = str.substr(0, index);
+        std::string value = str.substr(index + 1, str.size() - index - 1);
+        index = value.find(",");
+        if (index == std::string::npos) {
+            return false;
+        }
+        std::vector<std::string> posturesStrList = WindowHelper::Split(value, ",");
+        std::string firstPostureStr;
+        std::string secondPostureStr;
+        std::string thirdPostureStr;
+        if (posturesStrList.size() == DUMPER_PARAM_INDEX_THREE) {
+            firstPostureStr = posturesStrList[0];
+            secondPostureStr = posturesStrList[1];
+            thirdPostureStr = posturesStrList[DUMPER_PARAM_INDEX_TWO];
+            if (!WindowHelper::IsFloatingNumber(firstPostureStr) ||
+                !WindowHelper::IsFloatingNumber(secondPostureStr)) {
+                TLOGW(WmsLogTag::DMS, "posture should be a float number");
+                return false;
+            }
+            if (thirdPostureStr != "0" && thirdPostureStr != "1") {
+                TLOGW(WmsLogTag::DMS, "third posture is not 0 or 1");
+                return false;
+            }
+            postures.emplace_back(std::stof(firstPostureStr));
+            postures.emplace_back(std::stof(secondPostureStr));
+            postures.emplace_back(std::stof(thirdPostureStr));
+        } else if (posturesStrList.size() == DUMPER_PARAM_INDEX_TWO) {
+            firstPostureStr = posturesStrList[0];
+            secondPostureStr = posturesStrList[1];
+            if (!IsAllCharDigit(firstPostureStr) || !IsAllCharDigit(secondPostureStr)) {
+                return false;
+            }
+            halls.emplace_back(std::stoi(firstPostureStr));
+            halls.emplace_back(std::stoi(secondPostureStr));
+        } else {
+            TLOGW(WmsLogTag::DMS, "sensor command error");
+            return false;
+        }
+    }
+    return true;
+}
+
+void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
+{
+    TLOGI(WmsLogTag::DMS, "%{public}s", valueStr.c_str());
+    std::vector<std::string> strVec = WindowHelper::Split(valueStr, "/");
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+    if (!GetPostureAndHall(strVec, postures, halls)) {
+        TLOGW(WmsLogTag::DMS, "GetPostureAndHall failed");
+        return;
+    }
+    FoldScreenSensorManager::ExtHallData hallData = {
+        .flag = HALL_EXT_DATA_FLAG,
+        .hall = halls[0],
+        .hallAb = halls[1],
+    };
+    FoldScreenSensorManager::PostureDataSecondary postureData = {
+        .postureBc = postures[0],
+        .postureAb = postures[1],
+        .postureAbAnti = postures[DUMPER_PARAM_INDEX_TWO],
+    };
+    SensorEvent hallEvent = {
+        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
+        .data = reinterpret_cast<uint8_t *>(&hallData),
+    };
+    SensorEvent postureEvent = {
+        .dataLen = sizeof(FoldScreenSensorManager::PostureDataSecondary),
+        .data = reinterpret_cast<uint8_t *>(&postureData),
+    };
+    TLOGI(WmsLogTag::DMS, "mock secondary sensor: %{public}s, %{public}s",
+        FoldScreenStateInternel::TransVec2Str(postures, "angle").c_str(),
+        FoldScreenStateInternel::TransVec2Str(halls, "hall").c_str());
+    SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(&hallEvent);
+    SecondaryFoldSensorManager::GetInstance().HandlePostureData(&postureEvent);
+}
+ 
+void ScreenSessionDumper::TriggerSecondaryFoldStatus(const std::string &valueStr)
+{
+    std::vector<std::string> strVec = WindowHelper::Split(valueStr, "=");
+    if (strVec.size() != SECONDARY_FOLD_STATUS_COMMAND_NUM) {
+        TLOGW(WmsLogTag::DMS, "secondary foldstatus command miss '=' or has extra '='.");
+        return;
+    }
+    const std::string &foldStatusStr = strVec[1];
+    for (size_t i = 0; i < foldStatusStr.size(); i++) {
+        if (!std::isdigit(foldStatusStr[i])) {
+            TLOGW(WmsLogTag::DMS, "secondary foldstatus command contains characters that are not numbers.");
+            return;
+        }
+    }
+    uint32_t foldStatus = std::stoi(foldStatusStr);
+    switch (foldStatus) {
+        case static_cast<uint32_t>(FoldStatus::EXPAND) :
+        case static_cast<uint32_t>(FoldStatus::FOLDED) :
+        case static_cast<uint32_t>(FoldStatus::HALF_FOLD) :
+        case static_cast<uint32_t>(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND) :
+        case static_cast<uint32_t>(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED) :
+        case static_cast<uint32_t>(FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND) :
+        case static_cast<uint32_t>(FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED) :
+        case static_cast<uint32_t>(FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND) :
+        case static_cast<uint32_t>(FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED) : {
+            break;
+        }
+        default: {
+            TLOGW(WmsLogTag::DMS, "secondary foldstatus is out of range.");
+            return;
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "change fold status, %{public}s", foldStatusStr.c_str());
+    ScreenSessionManager::GetInstance().TriggerFoldStatusChange(static_cast<FoldStatus>(foldStatus));
 }
 } // Rosen
 } // OHOS

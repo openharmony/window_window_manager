@@ -165,6 +165,16 @@ public:
     {
         availableArea_ = area;
     }
+
+    RRect GetPhysicalTouchBounds();
+
+    void SetPhysicalTouchBounds(bool isSecondaryDevice);
+
+    int32_t GetInputOffsetX();
+
+    int32_t GetInputOffsetY();
+
+    void SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode foldDisplayMode);
 private:
     static inline bool IsVertical(Rotation rotation)
     {
@@ -225,6 +235,10 @@ private:
     void UpdateYDpi();
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
     DMRect availableArea_;
+
+    RRect physicalTouchBounds_;
+    int32_t inputOffsetX_;
+    int32_t inputOffsetY_;
 };
 } // namespace OHOS::Rosen
 
