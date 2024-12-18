@@ -3431,6 +3431,6 @@ void JsSceneSessionManager::OnNotifyAppUseControlList(
         napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
         napi_value argv[] = { typeValue, userIdValue, controlListValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        }, __func__);
+    }, __func__);
 }
 } // namespace OHOS::Rosen

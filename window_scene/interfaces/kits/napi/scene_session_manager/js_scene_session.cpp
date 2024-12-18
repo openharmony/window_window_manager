@@ -69,6 +69,7 @@ const std::string KEYBOARD_GRAVITY_CHANGE_CB = "keyboardGravityChange";
 const std::string ADJUST_KEYBOARD_LAYOUT_CB = "adjustKeyboardLayout";
 const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
+const std::string TITLE_DOCK_HOVER_SHOW_CB = "titleAndDockHoverShowChange";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
@@ -127,6 +128,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {ADJUST_KEYBOARD_LAYOUT_CB,             ListenerFuncType::ADJUST_KEYBOARD_LAYOUT_CB},
     {LAYOUT_FULL_SCREEN_CB,                 ListenerFuncType::LAYOUT_FULL_SCREEN_CB},
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
+    {TITLE_DOCK_HOVER_SHOW_CB,              ListenerFuncType::TITLE_DOCK_HOVER_SHOW_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
     {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
@@ -210,6 +212,39 @@ static napi_value CreatePipTemplateInfo(napi_env env, const sptr<SceneSession>& 
     return pipTemplateInfoValue;
 }
 
+static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
+{
+    auto abilityInfo = session->GetSessionInfo().abilityInfo;
+    if (!abilityInfo) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "abilityInfo is nullptr");
+        return;
+    }
+    uint32_t value = 0;
+    for (const auto& item : abilityInfo->metadata) {
+        if (item.name == "ohos.ability.window.width") {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.width = %{public}d", value);
+                napi_set_named_property(env, objValue, "windowWidth", CreateJsValue(env, value));
+            }
+        } else if (item.name == "ohos.ability.window.height") {
+            if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.height = %{public}d", value);
+                napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
+            }
+        } else if (item.name == "ohos.ability.window.left") {
+            if (item.value.size() > 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.left = %{public}s", item.value.c_str());
+                napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, item.value));
+            }
+        } else if (item.name == "ohos.ability.window.top") {
+            if (item.value.size() > 0) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "ohos.ability.window.top = %{public}s", item.value.c_str());
+                napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, item.value));
+            }
+        }
+    }
+}
+
 napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& session)
 {
     napi_value objValue = nullptr;
@@ -236,7 +271,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsTopmost())));
     napi_set_named_property(env, objValue, "subWindowModalType",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
-
+    SetWindowSizeAndPosition(env, objValue, session);
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
     BindNativeMethodForKeyboard(env, objValue, moduleName);
@@ -266,6 +301,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::SetSystemSceneOcclusionAlpha);
     BindNativeFunction(env, objValue, "setSystemSceneForceUIFirst",
         moduleName, JsSceneSession::SetSystemSceneForceUIFirst);
+    BindNativeFunction(env, objValue, "markSystemSceneUIFirst",
+        moduleName, JsSceneSession::MarkSystemSceneUIFirst);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setIsMidScene", moduleName, JsSceneSession::SetIsMidScene);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
@@ -295,6 +332,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetBufferAvailableCallbackEnable);
     BindNativeFunction(env, objValue, "isDeviceWakeupByApplication", moduleName,
         JsSceneSession::IsDeviceWakeupByApplication);
+    BindNativeFunction(env, objValue, "syncDefaultRequestedOrientation", moduleName,
+        JsSceneSession::SyncDefaultRequestedOrientation);
     BindNativeFunction(env, objValue, "setIsPcAppInPad", moduleName,
         JsSceneSession::SetIsPcAppInPad);
     BindNativeFunction(env, objValue, "setCompatibleModeEnableInPad", moduleName,
@@ -630,6 +669,50 @@ void JsSceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnLayoutFullScreenChange");
+}
+
+void JsSceneSession::ProcessTitleAndDockHoverShowChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const funcName = __func__;
+    session->SetTitleAndDockHoverShowChangeCallback([weakThis = wptr(this), funcName](
+        bool isTitleHoverShown, bool isDockHoverShown) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsSceneSession is null", funcName);
+            return;
+        }
+        jsSceneSession->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
+    });
+    TLOGI(WmsLogTag::WMS_IMMS, "Register success, persistent id %{public}d", persistentId_);
+}
+
+void JsSceneSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTitleHoverShown, isDockHoverShown,
+        env = env_, funcName] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                funcName, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(TITLE_DOCK_HOVER_SHOW_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsCallBack is nullptr", funcName);
+            return;
+        }
+        napi_value jsObjTitle = CreateJsValue(env, isTitleHoverShown);
+        napi_value jsObjDock = CreateJsValue(env, isDockHoverShown);
+        napi_value argv[] = {jsObjTitle, jsObjDock};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, funcName);
 }
 
 void JsSceneSession::ProcessDefaultDensityEnabledRegister()
@@ -1609,6 +1692,13 @@ napi_value JsSceneSession::SetSystemSceneForceUIFirst(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnSetSystemSceneForceUIFirst(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::MarkSystemSceneUIFirst(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnMarkSystemSceneUIFirst(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::SetFocusable(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]SetFocusable");
@@ -1820,6 +1910,13 @@ napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_c
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]SetBufferAvailableCallbackEnable");
     JsSceneSession *me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetBufferAvailableCallbackEnable(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSyncDefaultRequestedOrientation(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetIsPcAppInPad(napi_env env, napi_callback_info info)
@@ -2098,6 +2195,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB):
             ProcessDefaultDensityEnabledRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::TITLE_DOCK_HOVER_SHOW_CB):
+            ProcessTitleAndDockHoverShowChangeRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB):
             ProcessFrameLayoutFinishRegister();
             break;
@@ -2218,6 +2318,40 @@ napi_value JsSceneSession::OnSetSystemSceneForceUIFirst(napi_env env, napi_callb
     }
     session->SetSystemSceneForceUIFirst(forceUIFirst);
     TLOGD(WmsLogTag::DEFAULT, "[NAPI] end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnMarkSystemSceneUIFirst(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isForced = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isForced)) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isForced");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isUIFirstEnabled = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isUIFirstEnabled)) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Failed to convert parameter to isUIFirstEnabled");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->MarkSystemSceneUIFirst(isForced, isUIFirstEnabled);
     return NapiGetUndefined(env);
 }
 
@@ -4414,6 +4548,39 @@ napi_value JsSceneSession::OnIsDeviceWakeupByApplication(napi_env env, napi_call
     napi_value jsResult;
     napi_get_boolean(env, result, &jsResult);
     return jsResult;
+}
+
+napi_value JsSceneSession::OnSyncDefaultRequestedOrientation(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    uint32_t defaultRequestedOrientation = 0;
+    if (!ConvertFromJsValue(env, argv[0], defaultRequestedOrientation)) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Failed to convert parameter to defaultRequestedOrientation");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    auto windowOrientation = static_cast<Orientation>(defaultRequestedOrientation);
+    if (windowOrientation < Orientation::BEGIN || windowOrientation > Orientation::END) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Orientation %{public}u invalid, id:%{public}d",
+            defaultRequestedOrientation, persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetDefaultRequestedOrientation(windowOrientation);
+    return NapiGetUndefined(env);
 }
 
 napi_value JsSceneSession::OnSetIsPcAppInPad(napi_env env, napi_callback_info info)
