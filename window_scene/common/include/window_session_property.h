@@ -364,8 +364,8 @@ private:
     bool fullScreenStart_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
-    static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
+    static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
+    static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;

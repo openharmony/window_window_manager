@@ -1206,18 +1206,18 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
 
 int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t actionValue = 0;
+    uint64_t actionValue = 0;
     if (!data.ReadUint32(actionValue)) {
         TLOGE(WmsLogTag::DEFAULT, "read action error");
         return ERR_INVALID_DATA;
     }
-    if (actionValue < static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RECT) ||
-        actionValue > static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST)) {
+    if (actionValue < static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_RECT) ||
+        actionValue > static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION)) {
         TLOGE(WmsLogTag::DEFAULT, "invalid action");
         return ERR_INVALID_DATA;
     }
     auto action = static_cast<WSPropertyChangeAction>(actionValue);
-    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
+    TLOGD(WmsLogTag::DEFAULT, "action: %{public}" PRIu64, action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
         property = sptr<WindowSessionProperty>::MakeSptr();
