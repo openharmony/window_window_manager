@@ -45,11 +45,13 @@ public:
     bool canceledSuspend_ { false };
     bool canCancelSuspendNotify_ { false };
     bool skipScreenOffBlock_ { false };
+    bool hasSuspendBegin_ { false };
     std::mutex notifyMutex_;
 
 private:
     void WaitScreenOffNotify(DisplayState& state);
     void SetDisplayStateToOn(DisplayState& state);
+    bool HandleSetDisplayStateOff(DisplayState& state);
     std::atomic<DisplayState> displayState_ { DisplayState::UNKNOWN };
     SessionDisplayStateChangeListener displayStateChangeListener_;
 };

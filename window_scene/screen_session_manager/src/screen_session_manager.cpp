@@ -119,6 +119,12 @@ static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
 const std::string SCREEN_UNKNOWN = "unknown";
+static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
+    {ScreenPowerStatus::POWER_STATUS_ON : DisplayPowerEvent::DISPLAY_ON},
+    {ScreenPowerStatus::POWER_STATUS_OFF ? DisplayPowerEvent::DISPLAY_OFF},
+    {ScreenPowerStatus::POWER_STATUS_DOZE ? DisplayPowerEvent::DISPLAY_DOZE},
+    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND ? DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
+};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -354,7 +360,7 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
             }
             TLOGI(WmsLogTag::DMS, "Recover Posture sensor finished");
         }
-        
+
         if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
             SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
         } else {
@@ -1931,6 +1937,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     // 多屏协作灭屏不通知锁屏
     gotScreenOffNotify_  = false;
     sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
+    sessionDisplayPowerController_->hasSuspendBegin_ = true;
     sessionDisplayPowerController_->SuspendBegin(reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
@@ -2369,6 +2376,16 @@ bool ScreenSessionManager::GetPowerStatus(ScreenPowerState state, PowerStateChan
             rsInterface_.MarkPowerOffNeedProcessOneFrame();
             break;
         }
+        case ScreenPowerState::POWER_DOZE: {
+            status = ScreenPowerStatus::POWER_STATUS_DOZE;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_SUSPEND");
+            break;
+        }
+        case ScreenPowerState::POWER_DOZE_SUSPEND: {
+            status = ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND;
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_SUSPEND");
+            break;
+        }
         default: {
             TLOGW(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerStatus state not support");
             return false;
@@ -2395,7 +2412,8 @@ void ScreenSessionManager::TryToRecoverFoldDisplayMode(ScreenPowerStatus status)
         return;
     }
     if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED ||
-        status == ScreenPowerStatus::POWER_STATUS_OFF_FAKE || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
+        status == ScreenPowerStatus::POWER_STATUS_OFF_FAKE || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
+        status == ScreenPowerStatus::POWER_STATUS_DOZE) {
         foldScreenController_->RecoverDisplayMode();
     }
 }
@@ -2409,17 +2427,22 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         return false;
     }
 
-    if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
+    if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
+        status == ScreenPowerStatus::POWER_STATUS_DOZE) {
         ExitCoordination("Press PowerKey");
     }
-
-    if (((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+    DisplayPowerEvent notifyEvent = DisplayPowerEvent::DISPLAY_OFF;
+    auto iter = SCREEN_STATUS_POWER_EVENT_MAP.find(status);
+    if (iter != SCREEN_STATUS_POWER_EVENT_MAP.end()) {
+        notifyEvent = iter->second;
+    }
+    if (((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
+        status == ScreenPowerStatus::POWER_STATUS_DOZE) &&
         gotScreenlockFingerprint_ == true) &&
         prePowerStateChangeReason_ != PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN) {
         gotScreenlockFingerprint_ = false;
         TLOGI(WmsLogTag::DMS, "[UL_POWER] screenlockFingerprint or shutdown");
-        return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
-            DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
+        return NotifyDisplayPowerEvent(notifyEvent, EventStatus::END, reason);
     }
 
     if (foldScreenController_ != nullptr) {
@@ -2435,13 +2458,13 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
     }
-    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) &&
+    if ((status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
+        status == ScreenPowerStatus::POWER_STATUS_DOZE) &&
         gotScreenlockFingerprint_ == true) {
         gotScreenlockFingerprint_ = false;
     }
 
-    return NotifyDisplayPowerEvent(status == ScreenPowerStatus::POWER_STATUS_ON ? DisplayPowerEvent::DISPLAY_ON :
-        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
+    return NotifyDisplayPowerEvent(notifyEvent, EventStatus::END, reason);
 }
 
 void ScreenSessionManager::CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds,
@@ -2524,7 +2547,8 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
             TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed register posture.");
         }
 #endif
-    } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
+    } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
+        status == ScreenPowerStatus::POWER_STATUS_DOZE || status == ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND) {
         TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
         if (isMultiScreenCollaboration_) {
             TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
@@ -2706,6 +2730,14 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock fingerprint");
         gotScreenOffNotify_ = true;
         gotScreenlockFingerprint_ = true;
+        if (needScreenOffNotify_) {
+            ScreenOffCVNotify();
+        }
+    }
+
+    if (event == DisplayEvent::SCREEN_LOCK_DOZE_FINISH) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock doze finish");
+        gotScreenOffNotify_ = true;
         if (needScreenOffNotify_) {
             ScreenOffCVNotify();
         }
