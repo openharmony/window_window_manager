@@ -3009,7 +3009,6 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-
     std::map<WindowType, SystemBarProperty> systemBarProperties;
     std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (argc < 1 || argc > 2 || argv[INDEX_ZERO] == nullptr ||
