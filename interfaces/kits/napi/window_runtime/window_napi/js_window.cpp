@@ -7000,8 +7000,7 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
     }
 
     bool isEnabled = windowToken_->GetImmersiveModeEnabledState();
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isEnabled %{public}u set end",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isEnabled);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isEnabled %{public}u set end", windowToken_->GetWwindowId(), isEnabled);
     return CreateJsValue(env, isEnabled);
 }
 
