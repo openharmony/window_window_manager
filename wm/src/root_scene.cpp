@@ -79,6 +79,7 @@ RootScene::RootScene()
 
 RootScene::~RootScene()
 {
+    TLOGI(WmsLogTag::WMS_MAIN, "destroyed");
     uiContent_ = nullptr;
 }
 
