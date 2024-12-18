@@ -1132,6 +1132,10 @@ WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string
         return WSError::WS_ERROR_NULLPTR;
     }
     uiContentSharedPtr->DumpInfo(params, info);
+    if (!SessionPermission::IsBetaVersion()) {
+        TLOGW(WmsLogTag::WMS_UIEXT, "is not beta version, persistentId: %{public}d", GetPersistentId());
+        info.clear();
+    }
     return WSError::WS_OK;
 }
 

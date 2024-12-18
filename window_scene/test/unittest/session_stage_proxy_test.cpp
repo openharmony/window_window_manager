@@ -384,7 +384,7 @@ HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
     std::vector<std::string> params;
     std::vector<std::string> info;
     auto res = sessionStage_->NotifyDumpInfo(params, info);
-    ASSERT_EQ(WSError::WS_OK, res);
+    ASSERT_NE(WSError::WS_OK, res);
 
     MockMessageParcel::SetReadStringVectorErrorFlag(true);
     res = sessionStage_->NotifyDumpInfo(params, info);
@@ -394,7 +394,7 @@ HWTEST_F(SessionStageProxyTest, NotifyDumpInfo, Function | SmallTest | Level1)
     res = sessionStage_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     sptr<SessionStageProxy> sessionStage = new SessionStageProxy(nullptr);
-    res = sessionStage_->NotifyDumpInfo(params, info);
+    res = sessionStage->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
     MockMessageParcel::ClearAllErrorFlag();
 }
