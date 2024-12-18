@@ -2776,7 +2776,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | Small
         ssm_->foldScreenController_ = new FoldScreenController(
             ssm_->displayInfoMutex_, ssm_->screenPowerTaskScheduler_);
     }
-    
+
     ASSERT_NE(ssm_->foldScreenController_, nullptr);
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
     ASSERT_FALSE(isReset);
@@ -3407,6 +3407,76 @@ HWTEST_F(ScreenSessionManagerTest, FreeDisplayMirrorNodeInner, Function | SmallT
     virtualOption.name_ = "createVirtualOption";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     ASSERT_EQ(ssm_->GetScreenSession(screenId)->GetDisplayNode(), nullptr);
+}
+
+/**
+ * @tc.name: GetPowerStatus
+ * @tc.desc: GetPowerStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPowerStatus01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status;
+    ssm_->GetPowerStatus(ScreenPowerState::POWER_ON, PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT, status);
+    ASSERT_EQ(status, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm_->GetPowerStatus(ScreenPowerState::POWER_ON, PowerStateChangeReason::POWER_BUTTON, status);
+    ASSERT_EQ(status, ScreenPowerStatus::POWER_STATUS_ON);
+}
+
+/**
+ * @tc.name: GetPowerStatus
+ * @tc.desc: GetPowerStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPowerStatus02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status;
+    ssm_->GetPowerStatus(ScreenPowerState::POWER_OFF,
+        PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF, status);
+    ASSERT_EQ(status, ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED);
+    ssm_->GetPowerStatus(ScreenPowerState::POWER_OFF, PowerStateChangeReason::POWER_BUTTON, status);
+    ASSERT_EQ(status, ScreenPowerStatus::POWER_STATUS_OFF);
+}
+
+/**
+ * @tc.name: GetPowerStatus
+ * @tc.desc: GetPowerStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPowerStatus03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status;
+    ssm_->GetPowerStatus(ScreenPowerState::POWER_SUSPEND, PowerStateChangeReason::POWER_BUTTON, status);
+    ASSERT_EQ(status, ScreenPowerStatus::POWER_STATUS_SUSPEND);
+}
+
+/**
+ * @tc.name: GetPowerStatus
+ * @tc.desc: GetPowerStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPowerStatus04, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status;
+    ssm_->GetPowerStatus(ScreenPowerState::POWER_DOZE, PowerStateChangeReason::POWER_BUTTON, status);
+    ASSERT_EQ(status, ScreenPowerStatus::POWER_STATUS_DOZE);
+}
+
+/**
+ * @tc.name: GetPowerStatus
+ * @tc.desc: GetPowerStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPowerStatus05, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status;
+    ssm_->GetPowerStatus(ScreenPowerState::POWER_DOZE_SUSPEND, PowerStateChangeReason::POWER_BUTTON, status);
+    ASSERT_EQ(status, ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND);
 }
 }
 } // namespace Rosen

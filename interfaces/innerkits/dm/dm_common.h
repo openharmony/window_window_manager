@@ -104,6 +104,8 @@ enum class ScreenPowerState : uint32_t {
     POWER_OFF,
     POWER_BUTT,
     INVALID_STATE,
+    POWER_DOZE,
+    POWER_DOZE_SUSPEND,
 };
 
 enum class ScreenPropertyChangeType : uint32_t {
@@ -146,6 +148,7 @@ enum class DisplayEvent : uint32_t {
     SCREEN_LOCK_SUSPEND,
     SCREEN_LOCK_OFF,
     SCREEN_LOCK_FINGERPRINT,
+    SCREEN_LOCK_DOZE_FINISH,
 };
 
 /**
@@ -219,8 +222,8 @@ enum class DisplayPowerEvent : uint32_t {
     DISPLAY_ON,
     DISPLAY_OFF,
     DESKTOP_READY,
-    DOZE,
-    DOZE_SUSPEND,
+    DISPLAY_DOZE,
+    DISPLAY_DOZE_SUSPEND,
     DISPLAY_OFF_CANCELED,
 };
 
