@@ -2902,6 +2902,10 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
                 continue;
             }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+                TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
+                continue;
+            }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
             screenSession->GetDisplayNode()->AddCrossParentChild(movedSurfaceNode, -1);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
@@ -2917,6 +2921,10 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
             if (screenSession == nullptr) {
                 TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+                TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to remove cross parent child");
                 continue;
             }
             screenSession->GetDisplayNode()->RemoveCrossParentChild(
