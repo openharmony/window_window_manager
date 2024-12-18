@@ -37,7 +37,8 @@ void SessionDisplayPowerController::SetDisplayStateToOn(DisplayState& state)
     }
 }
 
-bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state){
+bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state)
+{
     DisplayState lastState = displayState_;
     displayState_ = state;
     if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
