@@ -185,7 +185,7 @@ WSError MainSession::SetMainWindowTopmost(bool isTopmost)
     auto property = GetSessionProperty();
     if (property) {
         property->SetMainWindowTopmost(isTopmost);
-        TLOGD(WmsLogTag::WMS_LAYOUT,
+        TLOGND(WmsLogTag::WMS_HIERARCHY,
             "Notify session topmost change, id: %{public}d, isTopmost: %{public}u",
             GetPersistentId(), isTopmost);
         if (mainWindowTopmostChangeFunc_) {
@@ -233,6 +233,25 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
+WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
+{
+    const char* const funcName = __func__;
+    auto task = [weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", funcName);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d", funcName,
+            isTitleHoverShown, isDockHoverShown);
+        if (session->onTitleAndDockHoverShowChangeFunc_) {
+            session->onTitleAndDockHoverShowChangeFunc_(isTitleHoverShown, isDockHoverShown);
+        }
+    };
+    PostTask(task, funcName);
+    return WSError::WS_OK;
+}
+
 WSError MainSession::OnRestoreMainWindow()
 {
     auto task = [weakThis = wptr(this)] {
@@ -243,6 +262,22 @@ WSError MainSession::OnRestoreMainWindow()
         }
         if (session->onRestoreMainWindowFunc_) {
             session->onRestoreMainWindowFunc_();
+        }
+    };
+    PostTask(task, __func__);
+    return WSError::WS_OK;
+}
+
+WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
+{
+    auto task = [weakThis = wptr(this), enabled] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        if (session->onSetWindowRectAutoSaveFunc_) {
+            session->onSetWindowRectAutoSaveFunc_(enabled);
         }
     };
     PostTask(task, __func__);

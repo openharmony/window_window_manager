@@ -1118,12 +1118,27 @@ void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopm
     auto task = [weakThis = wptr(this), func] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "session or func is null");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session or func is null");
             return;
         }
         session->mainWindowTopmostChangeFunc_ = func;
     };
     PostTask(task, __func__);
+}
+
+void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func)
+{
+    const char* const funcName = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), funcName] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session or TitleAndDockHoverShowChangeFunc is null");
+            return;
+        }
+        session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d",
+            funcName, session->GetPersistentId());
+    }, funcName);
 }
 
 void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
@@ -2868,6 +2883,25 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
     }
 }
 
+void SceneSession::MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::MarkSystemSceneUIFirst");
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
+        return;
+    }
+    if (leashWinSurfaceNode != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForced=%{public}d. isUIFirstEnabled=%{public}d",
+            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), isForced, isUIFirstEnabled);
+        leashWinSurfaceNode->MarkUifirstNode(isForced, isUIFirstEnabled);
+    } else {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForced=%{public}d. isUIFirstEnabled=%{public}d",
+            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), isForced, isUIFirstEnabled);
+        surfaceNode_->MarkUifirstNode(isForced, isUIFirstEnabled);
+    }
+}
+
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     auto task = [weakThis = wptr(this), needDefaultAnimationFlag] {
@@ -3475,7 +3509,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         uint32_t accessTokenId = property->GetAccessTokenId();
         if (!SessionPermission::VerifyPermissionByCallerToken(accessTokenId,
             PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "The caller has no permission granted.");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "The caller has no permission granted.");
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
@@ -5100,6 +5134,22 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
             "SetNeedSyncSessionRect: change isNeedSync from %{public}d to %{public}d, id:%{public}d",
             session->isNeedSyncSessionRect_, needSync, session->GetPersistentId());
         session->isNeedSyncSessionRect_ = needSync;
+    };
+    PostTask(task, __func__);
+}
+
+void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func)
+{
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session or onSetWindowRectAutoSaveFunc is null");
+            return;
+        }
+        session->onSetWindowRectAutoSaveFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where,
+            session->GetPersistentId());
     };
     PostTask(task, __func__);
 }
