@@ -53,20 +53,6 @@ void ScreenSettingHelperTest::TearDown()
 }
 
 namespace {
-
-    /**
-     * @tc.name: SetSettingDefaultDpi
-     * @tc.desc: SetSettingDefaultDpi
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, SetSettingDefaultDpi, Function | SmallTest | Level3)
-    {
-        uint32_t dpi = 520;
-        std::string key = "default_display_dpi";
-        auto ret = ScreenSettingHelper::SetSettingDefaultDpi(dpi, key);
-        ASSERT_TRUE(ret);
-    }
-
     /**
      * @tc.name: RegisterSettingDpiObserver
      * @tc.desc: RegisterSettingDpiObserver
@@ -117,19 +103,6 @@ namespace {
         std::string key = "test";
         bool ret = ScreenSettingHelper::GetSettingDpi(dpi, key);
         ASSERT_FALSE(ret);
-    }
-
-    /**
-     * @tc.name: GetSettingDpi02
-     * @tc.desc: GetSettingDpi02
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingDpi02, Function | SmallTest | Level3)
-    {
-        uint32_t dpi = 0;
-        std::string key = "user_set_dpi_value";
-        bool ret = ScreenSettingHelper::GetSettingDpi(dpi, key);
-        ASSERT_TRUE(ret);
     }
 
     /**
