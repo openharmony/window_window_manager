@@ -70,8 +70,8 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction01, Function | Sma
     MessageParcel reply;
     MessageOption option{MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
-    data.WriteUint32(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
-    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY);
+    data.WriteUint64(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
+    uint64_t code = static_cast<uint64_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY);
 
     int ret = session_->OnRemoteRequest(code, data, reply, option);
     ASSERT_EQ(ERR_NONE, ret);
