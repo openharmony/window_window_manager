@@ -414,7 +414,7 @@ napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_in
 
 napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "GetAvoidArea");
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetAvoidArea(env, info) : nullptr;
 }
@@ -2687,7 +2687,7 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "SetFullScreen failed, ret = %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window SetFullScreen failed."));
             }
         };
@@ -2737,7 +2737,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreen failed, ret = %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env,
                     ret, "Window OnSetLayoutFullScreen failed."));
             }
@@ -2843,7 +2843,7 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window OnSetLayoutFullScreen failed."));
             }
         };
@@ -2869,7 +2869,7 @@ static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPrope
         if (flag.enableFlag || flag.backgroundColorFlag || flag.contentColorFlag || flag.enableAnimationFlag) {
             err = windowToken->SetSystemBarProperty(type, systemBarProperties.at(type));
             if (err != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty failed, ret %{public}d", err);
+                TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", err);
                 ret = err;
             }
         }
@@ -2901,7 +2901,7 @@ void SetSystemBarEnableTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsyncTa
             WindowType::WINDOW_TYPE_NAVIGATION_BAR, systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR));
         *errCodePtr = spWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR,
             systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR));
-        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] system bar enabled, ret %{public}d",
+        TLOGNI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] system bar enabled, ret %{public}d",
             spWindow->GetWindowId(), spWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -3023,7 +3023,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
-            TLOGE(WmsLogTag::WMS_IMMS, "window is nullptr");
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
             task.Reject(env, JsErrUtils::CreateJsError(env, err));
             return;
         }
@@ -3043,7 +3043,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         if (err == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGE(WmsLogTag::WMS_IMMS, "SetSpecificSystemBarEnabled failed, ret %{public}d", err);
+            TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", err);
             task.Reject(env, JsErrUtils::CreateJsError(env, err, "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
     };
@@ -3299,7 +3299,7 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
             AvoidArea avoidArea;
             WMError ret = weakWindow->GetAvoidAreaByType(avoidAreaType, avoidArea);
             if (ret != WMError::WM_OK) {
-                TLOGNE(WmsLogTag::WMS_IMMS, "GetAvoidArea failed, ret = %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
                 avoidArea.topRect_ = g_emptyRect;
                 avoidArea.leftRect_ = g_emptyRect;
                 avoidArea.rightRect_ = g_emptyRect;
@@ -6980,11 +6980,10 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
     TLOGI(WmsLogTag::WMS_IMMS, "enable %{public}d", static_cast<int32_t>(enable));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetImmersiveModeEnabledState(enable));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Window immersive mode set enabled failed, ret %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret %{public}d", ret);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "finished, win [%{public}u, %{public}s]",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u set end", windowToken_->GetWindowId());
     return NapiGetUndefined(env);
 }
 
@@ -7001,8 +7000,7 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
     }
 
     bool isEnabled = windowToken_->GetImmersiveModeEnabledState();
-    TLOGI(WmsLogTag::WMS_IMMS, "finished, win [%{public}u, %{public}s] isEnabled %{public}u",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isEnabled);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isEnabled %{public}u set end", windowToken_->GetWindowId(), isEnabled);
     return CreateJsValue(env, isEnabled);
 }
 
