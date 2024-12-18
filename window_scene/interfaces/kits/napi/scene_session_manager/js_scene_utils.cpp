@@ -71,6 +71,17 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
+WSError GetIntValueFromString(const std::string& str, uint32_t& value)
+{
+    char* end;
+    value = strtoul(str.c_str(), &end, 10); // 10 number convert base
+    if (*end == '\0' && value != 0) {
+        return WSError::WS_OK;
+    }
+    TLOGE(WmsLogTag::DEFAULT, "param %{public}s convert int failed", str.c_str());
+    return WSError::WS_ERROR_INVALID_PARAM;
+}
+
 bool IsJsBundleNameUndefind(napi_env env, napi_value jsBundleName, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsBundleName) != napi_undefined) {

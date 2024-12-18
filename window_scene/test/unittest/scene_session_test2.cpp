@@ -2083,6 +2083,23 @@ HWTEST_F(SceneSessionTest2, SetWindowAnimationFlag, Function | SmallTest | Level
     ASSERT_EQ(true, sceneSession->needDefaultAnimationFlag_);
 }
 
+/**
+ * @tc.name: SetTitleAndDockHoverShowChangeCallback
+ * @tc.desc: SetTitleAndDockHoverShowChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetTitleAndDockHoverShowChangeCallback";
+    info.bundleName_ = "SetTitleAndDockHoverShowChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetTitleAndDockHoverShowChangeCallback([](bool isTitleHoverShown, bool isDockHoverShown) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
+}
+
 }
 
 /**

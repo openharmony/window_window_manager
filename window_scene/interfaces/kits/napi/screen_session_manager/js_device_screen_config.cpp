@@ -22,7 +22,8 @@ using namespace AbilityRuntime;
 
 napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const DeviceScreenConfig& config)
 {
-    TLOGI(WmsLogTag::DMS, "DeviceScreenConfig rotationPolicy:%{public}s.", config.rotationPolicy_.c_str());
+    TLOGI(WmsLogTag::DMS, "DeviceScreenConfig rotationPolicy:%{public}s, defaultRotationPolicy:%{public}s.",
+        config.rotationPolicy_.c_str(), config.defaultRotationPolicy_.c_str());
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -30,6 +31,7 @@ napi_value JsDeviceScreenConfig::CreateDeviceScreenConfig(napi_env env, const De
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "rotationPolicy", CreateJsValue(env, config.rotationPolicy_));
+    napi_set_named_property(env, objValue, "defaultRotationPolicy", CreateJsValue(env, config.defaultRotationPolicy_));
     napi_set_named_property(env, objValue, "isRightPowerButton", CreateJsValue(env, config.isRightPowerButton_));
     return objValue;
 }

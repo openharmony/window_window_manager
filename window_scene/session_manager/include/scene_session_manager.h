@@ -634,6 +634,7 @@ private:
     void EraseSceneSessionAndMarkDirtyLocked(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
+    void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     void ClosePipWindowIfExist(WindowType type);
@@ -744,7 +745,8 @@ private:
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
     // Multi User
-    int32_t currentUserId_;
+    static constexpr int32_t DEFAULT_USERID = -1;
+    std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
     bool isUserBackground_ = false; // Only accessed on SSM thread
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,

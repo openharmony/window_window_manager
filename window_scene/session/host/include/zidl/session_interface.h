@@ -59,6 +59,16 @@ public:
     virtual WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for processing title and dock hover show changes.
+     *
+     * @param isTitleHoverShown Indicates the {@link bool}
+     * @param isDockHoverShown Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) { return WSError::WS_OK; }
+
+    /**
      * @brief Callback for processing restore main window.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.

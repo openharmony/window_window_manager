@@ -89,7 +89,6 @@ constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_
 constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
-constexpr int32_t DEFAULT_USERID = -1;
 constexpr int32_t SCALE_DIMENSION = 2;
 constexpr int32_t TRANSLATE_DIMENSION = 2;
 constexpr int32_t ROTAION_DIMENSION = 4;
@@ -119,6 +118,24 @@ const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
+
+const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
+    {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
+    {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
+    {"portrait",                            OHOS::AppExecFwk::DisplayOrientation::PORTRAIT},
+    {"follow_recent",                       OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT},
+    {"landscape_inverted",                  OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED},
+    {"portrait_inverted",                   OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED},
+    {"auto_rotation",                       OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION},
+    {"auto_rotation_landscape",             OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE},
+    {"auto_rotation_portrait",              OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT},
+    {"auto_rotation_restricted",            OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED},
+    {"auto_rotation_landscape_restricted",  OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {"auto_rotation_portrait_restricted",   OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {"locked",                              OHOS::AppExecFwk::DisplayOrientation::LOCKED},
+    {"auto_rotation_unspecified",           OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED},
+    {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
+};
 
 static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
@@ -757,7 +774,7 @@ void SceneSessionManager::ClearUnrecoveredSessions(const std::vector<int32_t>& r
 void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "Number of persistentIds recovered = %{public}zu. CurrentUserId = %{public}d",
-        recoveredPersistentIds.size(), currentUserId_);
+        recoveredPersistentIds.size(), currentUserId_.load());
 
     auto task = [this, recoveredPersistentIds]() {
         ClearUnrecoveredSessions(recoveredPersistentIds);
@@ -2611,7 +2628,7 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
 void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "Number of persistentIds need to be recovered = %{public}zu. CurrentUserId = "
-           "%{public}d", alivePersistentIds.size(), currentUserId_);
+           "%{public}d", alivePersistentIds.size(), currentUserId_.load());
     alivePersistentIds_ = alivePersistentIds;
 }
 
@@ -3249,7 +3266,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
 {
     auto task = [this, isUserActive]() {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Notify switching user. IsUserActive=%{public}u, currentUserId=%{public}d",
-            isUserActive, currentUserId_);
+            isUserActive, currentUserId_.load());
         isUserBackground_ = !isUserActive;
         SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
         if (isUserActive) { // switch to current user
@@ -6588,6 +6605,7 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
                 scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
+                GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 return WSError::WS_OK;
             }
         }
@@ -6619,6 +6637,7 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<App
                 scbAbilityInfo.abilityInfo_ = iter->abilityInfos[0];
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
                 scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
+                GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
                 continue;
             }
@@ -6629,11 +6648,46 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<App
                 SCBAbilityInfo scbAbilityInfo;
                 scbAbilityInfo.abilityInfo_ = abilityInfo;
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
+                GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
             }
         }
     }
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo)
+{
+    if (abilityInfo.orientationId == 0) {
+        return;
+    }
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "resConfig is nullptr.");
+        return;
+    }
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager(
+        abilityInfo.bundleName, abilityInfo.moduleName, "", {}, *resConfig));
+    if (resourceMgr == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
+        return;
+    }
+    std::string loadPath = abilityInfo.hapPath.empty() ? abilityInfo.resourcePath : abilityInfo.hapPath;
+    if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_STRING)) {
+        TLOGE(WmsLogTag::DEFAULT, "Add resource %{private}s failed.", loadPath.c_str());
+    }
+    std::string orientation;
+    auto ret = resourceMgr->GetStringById(abilityInfo.orientationId, orientation);
+    if (ret != Global::Resource::RState::SUCCESS) {
+        TLOGE(WmsLogTag::DEFAULT, "GetStringById failed errcode:%{public}d, labelId:%{public}d",
+            static_cast<int32_t>(ret), abilityInfo.orientationId);
+        return;
+    }
+    if (STRING_TO_DISPLAY_ORIENTATION_MAP.find(orientation) == STRING_TO_DISPLAY_ORIENTATION_MAP.end()) {
+        TLOGE(WmsLogTag::DEFAULT, "Do not support this orientation:%{public}s", orientation.c_str());
+        return;
+    }
+    abilityInfo.orientation = STRING_TO_DISPLAY_ORIENTATION_MAP.at(orientation);
 }
 
 WSError SceneSessionManager::TerminateSessionNew(
@@ -7642,9 +7696,23 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         TLOGW(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    if (currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) {
-        TLOGW(WmsLogTag::WMS_LIFE, "currentUserId_:%{public}d userId:%{public}d", currentUserId_, userId);
-        return WSError::WS_ERROR_INVALID_OPERATION;
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WRITE_APP_LOCK)) {
+        TLOGW(WmsLogTag::WMS_LIFE, "write app lock permission denied");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (currentUserId_ != userId) {
+        if (currentUserId_ != DEFAULT_USERID) {
+            TLOGW(WmsLogTag::WMS_LIFE, "invalid userId, currentUserId_:%{public}d userId:%{public}d",
+                currentUserId_.load(), userId);
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        int32_t userIdByUid = GetUserIdByUid(getuid());
+        if (userId != userIdByUid) {
+            TLOGW(WmsLogTag::WMS_LIFE,
+                "invalid userId, currentUserId_:%{public}d userId:%{public}d GetUserIdByUid:%{public}d",
+                currentUserId_.load(), userId, userIdByUid);
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
     }
     taskScheduler_->PostAsyncTask([this, type, userId, controlList] {
         if (notifyAppUseControlListFunc_ != nullptr) {
@@ -10778,7 +10846,8 @@ WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
 void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid)
 {
     if (currentUserId_ != static_cast<int32_t>(userid)) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64"", currentUserId_, userid);
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64,
+            currentUserId_.load(), userid);
         return;
     }
     auto secSurfaceInfoMap = secExtensionData->GetSecData();
