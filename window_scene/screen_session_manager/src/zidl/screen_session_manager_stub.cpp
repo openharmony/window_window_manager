@@ -271,7 +271,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_WITH_REGION: {
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
-            ScreenId mirrorScreenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<ScreenId> mirrorScreenId;
+            if (!data.ReadUInt64Vector(&mirrorScreenId)) {
+                WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+                break;
+            }
             int32_t posX = data.ReadInt32();
             int32_t posY = data.ReadInt32();
             uint32_t width = data.ReadUint32();
