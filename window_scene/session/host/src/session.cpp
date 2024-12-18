@@ -2762,7 +2762,7 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
     uint32_t minHeight, uint32_t maxFloatingWindowSize)
 {
-    constexptr uint32_t marginOfError = 2; // The max vp bias for preventing giant logs.
+    constexpr uint32_t marginOfError = 2; // The max vp bias for preventing giant logs.
     if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError ||
         curHeight + marginOfError < minHeight || curHeight > maxFloatingWindowSize + marginOfError) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
