@@ -1863,7 +1863,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (Session::CheckEmptyKeyboardAvoidAreaIfNeeded()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "Keyboard avoid area need to empty when in floating mode");
+        TLOGD(WmsLogTag::WMS_IMMS, "Keyboard avoid area needs to be empty in floating mode");
         return;
     }
     auto sessionProperty = GetSessionProperty();
