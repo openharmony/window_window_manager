@@ -31,7 +31,7 @@ class IBundleMgr;
 
 namespace OHOS::Rosen {
 class AbilityInfoManager {
-WM_DECLARE_SINGLE_INSTANCE(AbilityInfoManager);    
+WM_DECLARE_SINGLE_INSTANCE(AbilityInfoManager);
 public:
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
     void SetCurrentUserId(int32_t userId);

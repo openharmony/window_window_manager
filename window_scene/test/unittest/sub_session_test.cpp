@@ -358,35 +358,6 @@ HWTEST_F(SubSessionTest, IsApplicationModal, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CheckDisplayAndMove
- * @tc.desc: CheckDisplayAndMove function01
- * @tc.type: FUNC
- */
-HWTEST_F(SubSessionTest, CheckDisplayAndMove01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    sptr<Session> mainSession = sptr<Session>::MakeSptr(info);
-    sptr<SubSession::SpecificSessionCallback> specificCallback = sptr<SubSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SubSessionMocker> subSession = sptr<SubSessionMocker>::MakeSptr(info, specificCallback);
-    // if main window not exist
-    EXPECT_CALL(*subSession, SetScreenId(_)).Times(0);
-    subSession->CheckParentDisplayIdAndMove();
-    // if main window and sub window has same display id
-    subSession->parentSession_ = mainSession;
-    DisplayId mainDisplayId = 123;
-    mainSession->GetSessionProperty()->SetDisplayId(mainDisplayId);
-    subSession->GetSessionProperty()->SetDisplayId(mainDisplayId);
-    EXPECT_CALL(*subSession, SetScreenId(_)).Times(0);
-    subSession->CheckParentDisplayIdAndMove();
-    // if main window and sub window has different display id
-    DisplayId subDisplayId = 234;
-    subSession->GetSessionProperty()->SetDisplayId(subDisplayId);
-    EXPECT_CALL(*subSession, SetScreenId(mainDisplayId)).Times(1);
-    subSession->CheckParentDisplayIdAndMove();
-    ASSERT_EQ(subSession->property_->displayId_, mainDisplayId);
-}
-
-/**
  * @tc.name: NotifySessionRectChange
  * @tc.desc: NotifySessionRectChange function01
  * @tc.type: FUNC

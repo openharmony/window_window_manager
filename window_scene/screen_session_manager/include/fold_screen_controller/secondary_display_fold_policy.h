@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SECONDARY_DISPLAY_DEVICE_POLICY_H
-#define OHOS_ROSEN_WINDOW_SCENE_SECONDARY_DISPLAY_DEVICE_POLICY_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SECONDARY_DISPLAY_FOLD_POLICY_H
+#define OHOS_ROSEN_WINDOW_SCENE_SECONDARY_DISPLAY_FOLD_POLICY_H
 
 #include <refbase.h>
 
@@ -32,19 +32,23 @@ public:
     void ChangeScreenDisplayMode(FoldDisplayMode displayMode,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT) override;
     void SendSensorResult(FoldStatus foldStatus) override;
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     FoldDisplayMode GetModeMatchStatus() override;
 private:
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
         FoldDisplayMode displayMode);
     void RecoverWhenBootAnimationExit();
+    void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
-    void SetStatusFullActiveRectAndTpFeature(ScreenProperty &screenProperty_);
-    void SetStatusMainActiveRectAndTpFeature(ScreenProperty &screenProperty_);
-    void SetStatusGlobalFullActiveRectAndTpFeature(ScreenProperty &screenProperty_);
+    void SetStatusFullActiveRectAndTpFeature(ScreenProperty &screenProperty);
+    void SetStatusMainActiveRectAndTpFeature(ScreenProperty &screenProperty);
+    void SetStatusGlobalFullActiveRectAndTpFeature(ScreenProperty &screenProperty);
+    void InitScreenParams();
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
+    std::vector<uint32_t> screenParams_;
 };
 } // namespace OHOS::Rosen
-#endif //OHOS_ROSEN_WINDOW_SCENE_SECONDARY_DISPLAY_DEVICE_POLICY_H
+#endif //OHOS_ROSEN_WINDOW_SCENE_SECONDARY_DISPLAY_FOLD_POLICY_H

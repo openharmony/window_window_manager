@@ -893,7 +893,7 @@ HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation01, Function | SmallTest | 
     info.bundleName_ = "IsPcOrPadEnableActivation01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
 }
@@ -1274,6 +1274,67 @@ HWTEST_F(SceneSessionTest4, SetFrameGravity, Function | SmallTest | Level2)
     ASSERT_EQ(true, session->SetFrameGravity(Gravity::RESIZE));
     session->surfaceNode_ = nullptr;
     ASSERT_EQ(false, session->SetFrameGravity(Gravity::TOP_LEFT));
+}
+
+/**
+ * @tc.name: SetIsLayoutFullScreen
+ * @tc.desc: SetIsLayoutFullScreen Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetIsLayoutFullScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsLayoutFullScreen";
+    info.bundleName_ = "SetIsLayoutFullScreen";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->SetIsLayoutFullScreen(true);
+    EXPECT_EQ(session->IsLayoutFullScreen(), true);
+}
+
+/**
+ * @tc.name: IsLayoutFullScreen
+ * @tc.desc: IsLayoutFullScreen Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsLayoutFullScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsLayoutFullScreen";
+    info.bundleName_ = "IsLayoutFullScreen";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    EXPECT_EQ(session->IsLayoutFullScreen(), false);
+}
+
+/**
+ * @tc.name: UpdateAllModalUIExtensions
+ * @tc.desc: UpdateAllModalUIExtensions Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateAllModalUIExtensions";
+    info.bundleName_ = "UpdateAllModalUIExtensions";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    WSRect globalRect = { 100, 100, 100, 100 };
+    session->SetSessionGlobalRect(globalRect);
+
+    Rect windowRect = { 100, 100, 100, 100 };
+    Rect uiExtRect = { 0, 0, 100, 100 };
+    ExtensionWindowEventInfo extensionInfo { 1, 1, windowRect, uiExtRect, false };
+    ExtensionWindowEventInfo extensionInfo2 { 2, 2, windowRect, uiExtRect, true };
+    session->modalUIExtensionInfoList_.push_back(extensionInfo);
+    session->modalUIExtensionInfoList_.push_back(extensionInfo2);
+
+    WSRect newGlobalRect = { 150, 150, 100, 100 };
+    session->UpdateAllModalUIExtensions(newGlobalRect);
 }
 }
 }

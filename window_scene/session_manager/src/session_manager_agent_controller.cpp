@@ -152,7 +152,7 @@ void SessionManagerAgentController::UpdateVisibleWindowNum(
     const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo)
 {
     for (const auto& num : visibleWindowNumInfo) {
-        TLOGI(WmsLogTag::WMS_MAIN, "displayId = %{public}d, visibleWindowNum = %{public}d",
+        TLOGI(WmsLogTag::WMS_MAIN, "displayId=%{public}d, visibleWindowNum=%{public}d",
             num.displayId, num.visibleWindowNum);
     }
     for (auto& agent : smAgentContainer_.GetAgentsByType(

@@ -849,7 +849,7 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
                                                               const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY = %{public}f, KeyBoardHeight = %{public}d",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY=%{public}f, KeyBoardHeight=%{public}d",
         info->textFieldPositionY_, info->rect_.height_);
     if (occupiedAreaChangeListener_) {
         occupiedAreaChangeListener_->OnSizeChange(info, rsTransaction);
@@ -1217,7 +1217,7 @@ bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
 {
     bool enable = false;
     SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(enable);
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable = %{public}u", enable);
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable=%{public}u", enable);
     return enable;
 }
 
