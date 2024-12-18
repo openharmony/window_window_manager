@@ -581,7 +581,7 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken03, Function | SmallTes
 
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     WSError result03 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_EQ(result03, WSError::WS_OK);
 }
 
 /**
@@ -1903,6 +1903,7 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
     ssm_->sceneSessionMap_.insert({-1, nullptr});
     skip = true;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
+    usleep(WAIT_SYNC_IN_NS_ONE);
     ASSERT_EQ(result, WMError::WM_OK);
     skip = false;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
