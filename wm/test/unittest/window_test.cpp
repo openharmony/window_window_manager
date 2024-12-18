@@ -461,6 +461,20 @@ HWTEST_F(WindowTest, SetLayoutFullScreen, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetTitleAndDockHoverShown
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetTitleAndDockHoverShown, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(nullptr, window);
+    auto ret = window->SetTitleAndDockHoverShown(true, true);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: SetFullScreen
  * @tc.desc: get
  * @tc.type: FUNC
@@ -2556,7 +2570,7 @@ HWTEST_F(WindowTest, Test01, Function | SmallTest | Level2)
     SystemBarProperty prop;
     ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, prop));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDecorVisible(true));
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleButtonVisible(true, true, true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleButtonVisible(true, true, true, true));
     auto var = 5;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDecorHeight(var));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorHeight(var));
@@ -2651,21 +2665,21 @@ HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
 {
     sptr<Window> window = new (std::nothrow) Window();
     ASSERT_NE(window, nullptr);
-    WMError res = window->SetTitleButtonVisible(true, true, true);
+    WMError res = window->SetTitleButtonVisible(true, true, true, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(false, true, true);
+    res = window->SetTitleButtonVisible(false, true, true, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(true, false, true);
+    res = window->SetTitleButtonVisible(true, false, true, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(true, true, false);
+    res = window->SetTitleButtonVisible(true, true, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(false, false, true);
+    res = window->SetTitleButtonVisible(false, false, true, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(false, true, false);
+    res = window->SetTitleButtonVisible(false, true, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(true, false, false);
+    res = window->SetTitleButtonVisible(true, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    res = window->SetTitleButtonVisible(false, false, false);
+    res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 

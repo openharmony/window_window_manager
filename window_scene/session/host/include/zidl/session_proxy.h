@@ -48,6 +48,8 @@ public:
     WSError OnSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
+    WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
     WSError OnSetWindowRectAutoSave(bool enabled) override;
     WSError RaiseToAppTop() override;
