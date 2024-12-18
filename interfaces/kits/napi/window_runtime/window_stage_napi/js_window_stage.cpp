@@ -293,7 +293,7 @@ napi_value JsWindowStage::OnEvent(napi_env env, napi_callback_info info)
     }
     auto ret = g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "register event %{public}s failed, ret = %{public}d", eventString.c_str(), ret);
+        TLOGE(WmsLogTag::DEFAULT, "register event %{public}s failed, ret=%{public}d", eventString.c_str(), ret);
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
         return NapiGetUndefined(env);
     }
@@ -341,7 +341,7 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
         }
     }
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "unregister event %{public}s failed, ret = %{public}d", eventString.c_str(), ret);
+        TLOGE(WmsLogTag::DEFAULT, "unregister event %{public}s failed, ret=%{public}d", eventString.c_str(), ret);
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
         return NapiGetUndefined(env);
     }
@@ -367,7 +367,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
         task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
             "Window load content failed"));
     }
-    WLOGI("Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+    WLOGI("Window [%{public}u, %{public}s] load content end, ret=%{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return;
 }
@@ -651,7 +651,7 @@ napi_value JsWindowStage::OnSetShowOnLockScreen(napi_env env, napi_callback_info
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
             window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
-    WLOGI("Window [%{public}u, %{public}s] SetShowOnLockScreen %{public}u, ret = %{public}u",
+    WLOGFI("Window [%{public}u, %{public}s] %{public}u, ret=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), showOnLockScreen, ret);
 
     return CreateJsValue(env, static_cast<int32_t>(ret));

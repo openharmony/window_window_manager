@@ -112,7 +112,7 @@ int32_t CJWindowImpl::Hide()
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(result.nativeWindow->Hide(0, false, false));
     TLOGI(WmsLogTag::WMS_DIALOG,
-        "Window [%{public}u] hide end, ret = %{public}d", result.nativeWindow->GetWindowId(), ret);
+        "Window [%{public}u] hide end, ret=%{public}d", result.nativeWindow->GetWindowId(), ret);
     return static_cast<int32_t>(ret);
 }
 
@@ -132,7 +132,7 @@ int32_t CJWindowImpl::HideWithAnimation()
         return static_cast<int32_t>(errCode);
     }
     errCode = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Hide(0, true, false));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] HideWithAnimation end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, ret=%{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), errCode);
     return static_cast<int32_t>(errCode);
 }
@@ -149,7 +149,7 @@ int32_t CJWindowImpl::ShowWindow()
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     WMError ret = weakWindow->Show(0, false);
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] show with ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] show with ret=%{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret));
 }
@@ -170,7 +170,7 @@ int32_t CJWindowImpl::ShowWithAnimation()
         return static_cast<int32_t>(errCode);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Show(0, true));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] ShowWithAnimation end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, ret=%{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(ret);
 }
@@ -183,7 +183,7 @@ int32_t CJWindowImpl::DestroyWindow()
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WMError ret = weakWindow->Destroy();
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] destroy end, ret=%{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     windowToken_ = nullptr;
     return static_cast<int32_t>(ret);
@@ -197,7 +197,7 @@ int32_t CJWindowImpl::MoveWindowTo(int32_t x, int32_t y)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveTo(x, y));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] move end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] move end, ret=%{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(ret);
 }
@@ -214,7 +214,7 @@ int32_t CJWindowImpl::Resize(uint32_t width, uint32_t height)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Resize(width, height));
-    TLOGD(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] resize end, ret = %{public}d",
+    TLOGD(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] resize end, ret=%{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(ret);
 }
@@ -231,7 +231,7 @@ int32_t CJWindowImpl::SetWindowMode(uint32_t mode)
     }
     WindowMode winMode = CJ_TO_NATIVE_WINDOW_MODE_MAP.at(static_cast<ApiWindowMode>(mode));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowMode(winMode));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set type end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set type end, ret=%{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(ret);
 }
@@ -288,7 +288,7 @@ int32_t CJWindowImpl::SetWindowLayoutFullScreen(bool isLayoutFullScreen)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetLayoutFullScreen(isLayoutFullScreen));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, ret=%{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(ret);
 }
@@ -301,7 +301,7 @@ int32_t CJWindowImpl::SetWindowBackgroundColor(const char* color)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackgroundColor(color));
     if (ret == WmErrorCode::WM_OK) {
-        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set background color end",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     }
     return static_cast<int32_t>(ret);
@@ -315,7 +315,7 @@ int32_t CJWindowImpl::SetWindowBrightness(float brightness)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetBrightness(brightness));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set brightness end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -327,20 +327,20 @@ int32_t CJWindowImpl::SetBackdropBlurStyle(uint32_t blurStyle)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetBackdropBlurStyle is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "Not allowed since window is not system window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (blurStyle > static_cast<uint32_t>(WindowBlurStyle::WINDOW_BLUR_THICK)) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetBackdropBlurStyle Invalid window blur style");
+        TLOGE(WmsLogTag::WMS_DIALOG, "Invalid window blur style");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret =
         WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(blurStyle)));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetBackdropBlurStyle failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     } else {
         TLOGI(WmsLogTag::WMS_DIALOG,
-            "Window [%{public}u, %{public}s] SetBackdropBlurStyle end, blurStyle = %{public}u",
+            "Window [%{public}u, %{public}s] end, blurStyle=%{public}u",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), blurStyle);
     }
     return static_cast<int32_t>(ret);
@@ -360,7 +360,7 @@ int32_t CJWindowImpl::SetPreferredOrientation(uint32_t orientation)
 
     windowToken_->SetRequestedOrientation(winOrientation);
     TLOGI(WmsLogTag::WMS_DIALOG,
-        "Window [%{public}u, %{public}s] OnSetPreferredOrientation end, orientation = %{public}u",
+        "Window [%{public}u, %{public}s] end, orientation=%{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
         static_cast<uint32_t>(winOrientation));
     return static_cast<int32_t>(WmErrorCode::WM_OK);
@@ -374,7 +374,7 @@ int32_t CJWindowImpl::SetWindowFocusable(bool focusable)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetFocusable(focusable));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set focusable end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -387,7 +387,7 @@ int32_t CJWindowImpl::SetWindowKeepScreenOn(bool keepScreenOn)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetKeepScreenOn(keepScreenOn));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set keep screen on end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -431,7 +431,7 @@ int32_t CJWindowImpl::SetWindowPrivacyMode(bool isPrivacyMode)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetPrivacyMode(isPrivacyMode));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, mode=%{public}u",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
     return static_cast<int32_t>(ret);
 }
@@ -444,7 +444,7 @@ int32_t CJWindowImpl::SetWindowTouchable(bool touchable)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetTouchable(touchable));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set touchable end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -476,7 +476,7 @@ bool CJWindowImpl::IsWindowSupportWideGamut(int32_t* errCode)
     }
     bool flag = windowToken_->IsSupportWideGamut();
     *errCode = 0;
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] OnIsWindowSupportWideGamut end, ret = %{public}u",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, ret=%{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), flag);
     return flag;
 }
@@ -490,7 +490,7 @@ bool CJWindowImpl::IsWindowShowing(int32_t* errCode)
     }
     bool state = (windowToken_->GetWindowState() == WindowState::STATE_SHOWN);
     *errCode = 0;
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] get show state end, state = %{public}u",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] get show state end, state=%{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), state);
     return state;
 }
@@ -508,9 +508,9 @@ int32_t CJWindowImpl::SetWaterMarkFlag(bool enable)
         ret = windowToken_->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
     }
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetWaterMarkFlag failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     } else {
-        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set waterMark flag end, ret = %{public}d",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, ret=%{public}d",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     }
     return static_cast<int32_t>(ret);
@@ -526,12 +526,12 @@ int32_t CJWindowImpl::SetShadowRadius(double radius)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetShadowRadius invalid radius");
+        TLOGE(WmsLogTag::WMS_DIALOG, "invalid radius");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetShadowRadius failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     }
     return static_cast<int32_t>(ret);
 }
@@ -547,7 +547,7 @@ int32_t CJWindowImpl::SetShadowColor(std::string color)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetShadowColor failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     }
     return static_cast<int32_t>(ret);
 }
@@ -563,7 +563,7 @@ int32_t CJWindowImpl::SetShadowOffsetX(double offsetX)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(offsetX));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetShadowOffsetX failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     }
     return static_cast<int32_t>(ret);
 }
@@ -579,7 +579,7 @@ int32_t CJWindowImpl::SetShadowOffsetY(double offsetY)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(offsetY));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetShadowOffsetY failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     }
     return static_cast<int32_t>(ret);
 }
@@ -591,18 +591,18 @@ int32_t CJWindowImpl::SetBackdropBlur(double radius)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetBackdropBlur is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not system window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetBackdropBlur invalid radius");
+        TLOGE(WmsLogTag::WMS_DIALOG, "invalid radius");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackdropBlur(radius));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetBackdropBlur failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     } else {
-        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] SetBackdropBlur end, radius = %{public}f",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, radius=%{public}f",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     }
     return static_cast<int32_t>(ret);
@@ -615,18 +615,18 @@ int32_t CJWindowImpl::SetBlur(double radius)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetBlur is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not system window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetBlur invalid radius");
+        TLOGE(WmsLogTag::WMS_DIALOG, "invalid radius");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBlur(radius));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetBlur failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     } else {
-        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] SetBlur end, radius = %{public}f",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, radius=%{public}f",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     }
     return static_cast<int32_t>(ret);
@@ -639,7 +639,7 @@ int32_t CJWindowImpl::SetAspectRatio(double ratio)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetAspectRatio is not allowed since window is not main window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not main window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (ratio <= 0.0) {
@@ -647,9 +647,9 @@ int32_t CJWindowImpl::SetAspectRatio(double ratio)
     }
     WMError ret = windowToken_->SetAspectRatio(ratio);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window SetAspectRatio failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     } else {
-        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set aspect ratio end, ret = %{public}d",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, ret=%{public}d",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     }
     return static_cast<int32_t>(ret);
@@ -662,14 +662,14 @@ int32_t CJWindowImpl::ResetAspectRatio()
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "ResetAspectRatio is not allowed since window is not main window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not main window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     WMError ret = windowToken_->ResetAspectRatio();
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Window ResetAspectRatio failed");
+        TLOGE(WmsLogTag::WMS_DIALOG, "failed");
     } else {
-        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] reset aspect ratio end, ret = %{public}d",
+        TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] reset aspect ratio end, ret=%{public}d",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     }
     return static_cast<int32_t>(ret);
@@ -683,7 +683,7 @@ int32_t CJWindowImpl::SetWindowColorSpace(uint32_t colorSpace)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     weakWindow->SetColorSpace(ColorSpace(colorSpace));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] OnSetWindowColorSpace end, colorSpace = %{public}u",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, colorSpace=%{public}u",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
     return 0;
 }
@@ -699,7 +699,7 @@ int32_t CJWindowImpl::Minimize()
         return Hide();
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Minimize());
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] minimize end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, ret=%{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
     return static_cast<int32_t>(ret);
 }
@@ -715,15 +715,15 @@ int32_t CJWindowImpl::SetCornerRadius(float radius)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetCornerRadius is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not system window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (MathHelper::LessNotEqual(radius, 0.0)) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "SetCornerRadius invalid radius");
+        TLOGE(WmsLogTag::WMS_DIALOG, "invalid radius");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetCornerRadius(radius));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] SetCornerRadius end, radius = %{public}f",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, radius=%{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return static_cast<int32_t>(ret);
 }
@@ -736,7 +736,7 @@ int32_t CJWindowImpl::SetResizeByDragEnabled(bool enable)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetResizeByDragEnabled(enable));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set dragEnabled end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -763,7 +763,7 @@ int32_t CJWindowImpl::SetSnapshotSkip(bool isSkip)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetSnapshotSkip(isSkip));
-    TLOGI(WmsLogTag::WMS_DIALOG, "[%{public}u, %{public}s] set snapshotSkip end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "[%{public}u, %{public}s] end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -775,11 +775,11 @@ int32_t CJWindowImpl::SetWakeUpScreen(bool wakeUp)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "set wake up screen permission denied!");
+        TLOGE(WmsLogTag::WMS_DIALOG, "permission denied!");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     windowToken_->SetTurnScreenOn(wakeUp);
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] set wake up screen %{public}d end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] screen %{public}d end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), wakeUp);
     return 0;
 }
@@ -792,7 +792,7 @@ uint32_t CJWindowImpl::GetWindowColorSpace(int32_t* errCode)
         return 0;
     }
     ColorSpace colorSpace = windowToken_->GetColorSpace();
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] OnGetColorSpace end, colorSpace = %{public}u",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, colorSpace=%{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
     *errCode = 0;
     return static_cast<uint32_t>(colorSpace);
@@ -807,7 +807,7 @@ int32_t CJWindowImpl::SetRaiseByClickEnabled(bool enable)
     }
     sptr<Window> weakWindow = result.nativeWindow;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetRaiseByClickEnabled(enable));
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set raiseEnabled end",
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] end",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -831,7 +831,7 @@ int32_t CJWindowImpl::Translate(double x, double y, double z)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Translate is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not system window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     auto trans = windowToken_->GetTransform();
@@ -839,8 +839,8 @@ int32_t CJWindowImpl::Translate(double x, double y, double z)
     trans.translateY_ = y;
     trans.translateZ_ = z;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] Translate end," \
-        "translateX = %{public}f, translateY = %{public}f, translateZ = %{public}f",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end," \
+        "translateX=%{public}f, translateY=%{public}f, translateZ=%{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
         trans.translateX_, trans.translateY_, trans.translateZ_);
     return static_cast<int32_t>(ret);
@@ -861,7 +861,7 @@ int32_t CJWindowImpl::Rotate(double x, double y, double z, double pivotX, double
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Translate is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not system window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (!IsPivotValid(pivotX) || !IsPivotValid(pivotY)) {
@@ -875,7 +875,7 @@ int32_t CJWindowImpl::Rotate(double x, double y, double z, double pivotX, double
     trans.pivotX_ = pivotX;
     trans.pivotY_ = pivotY;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] Rotate end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -895,7 +895,7 @@ int32_t CJWindowImpl::Scale(double x, double y, double pivotX, double pivotY)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Translate is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not system window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (!IsPivotValid(pivotX) || !IsPivotValid(pivotY) || !IsScaleValid(x) || !IsScaleValid(y)) {
@@ -908,7 +908,7 @@ int32_t CJWindowImpl::Scale(double x, double y, double pivotX, double pivotY)
     trans.scaleX_ = x;
     trans.scaleY_ = y;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] Scale end",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return static_cast<int32_t>(ret);
 }
@@ -920,7 +920,7 @@ int32_t CJWindowImpl::Opacity(double opacity)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "Translate is not allowed since window is not system window");
+        TLOGE(WmsLogTag::WMS_DIALOG, "not allowed since window is not system window");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     if (!IsPivotValid(opacity)) {
@@ -928,7 +928,7 @@ int32_t CJWindowImpl::Opacity(double opacity)
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetAlpha(opacity));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] Opacity end, alpha = %{public}f",
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] Opacity end, alpha=%{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), opacity);
     return static_cast<int32_t>(ret);
 }
@@ -942,7 +942,7 @@ std::shared_ptr<Media::PixelMap> CJWindowImpl::Snapshot(int32_t* errCode)
     }
     std::shared_ptr<Media::PixelMap> pixelMap = windowToken_->Snapshot();
     if (pixelMap == nullptr) {
-        TLOGE(WmsLogTag::WMS_DIALOG, "window snapshot get pixelmap is null");
+        TLOGE(WmsLogTag::WMS_DIALOG, "get pixelmap is null");
         *errCode = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return nullptr;
     }
