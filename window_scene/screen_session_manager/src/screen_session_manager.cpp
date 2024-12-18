@@ -1948,7 +1948,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     // 多屏协作灭屏不通知锁屏
     gotScreenOffNotify_  = false;
     sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
-    sessionDisplayPowerController_->hasSuspendBegin_ = true;
+    sessionDisplayPowerController_->isSuspendBegin_ = true;
     sessionDisplayPowerController_->SuspendBegin(reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
