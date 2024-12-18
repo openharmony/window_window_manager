@@ -77,6 +77,7 @@ enum class ListenerFuncType : uint32_t {
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
     TITLE_DOCK_HOVER_SHOW_CB,
+    SET_WINDOW_RECT_AUTO_SAVE_CB,
     UPDATE_APP_USE_CONTROL_CB,
     RESTORE_MAIN_WINDOW_CB,
 };
@@ -254,6 +255,7 @@ private:
     void ProcessRestoreMainWindowRegister();
     void ProcessFrameLayoutFinishRegister();
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
+    void ProcessSetWindowRectAutoSaveRegister();
     void RegisterUpdateAppUseControlCallback();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
@@ -307,8 +309,9 @@ private:
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
     void RestoreMainWindow();
     void NotifyFrameLayoutFinish();
+    void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
-    
+
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
     napi_env env_;

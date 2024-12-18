@@ -1794,6 +1794,31 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
     window->property_->SetRequestRect(request);
     window->PreLayoutOnShow(window->property_->GetWindowType());
 }
+
+/**
+ * @tc.name: SetWindowRectAutoSave
+ * @tc.desc: SetWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowRectAutoSave");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    auto ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PHONE;
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
