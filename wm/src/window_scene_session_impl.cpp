@@ -1997,7 +1997,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         property_->SetIsLayoutFullScreen(preStatus);
-        TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion win %{public}u errCode %{public}d",
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, win %{public}u errCode %{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     enableImmersiveMode_ = status;
@@ -2096,7 +2096,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         TLOGI(WmsLogTag::WMS_IMMS, "only main window support");
         return WMError::WM_OK;
     }
-    if (!(state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM)) {
+    if (!(state_ > WindowState::STATE_INITIAL && state_ < WindowState::STATE_BOTTOM)) {
         TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property &&
