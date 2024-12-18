@@ -1113,9 +1113,9 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
-void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
+void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc&& func)
 {
-    auto task = [weakThis = wptr(this), func] {
+    auto task = [weakThis = wptr(this), func = std::move(func)] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "session or func is null");
