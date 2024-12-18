@@ -297,10 +297,6 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();;
 
     info.isSystem_ = false;
-    session->property_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
-
-    info.isSystem_ = false;
     pointerEvent->SetPointerAction(9);
 
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
@@ -423,7 +419,7 @@ HWTEST_F(SceneSessionTest5, RegisterLayoutFullScreenChangeCallback, Function | S
     SessionInfo info;
     info.abilityName_ = "RegisterLayoutFullScreenChangeCallback";
     info.bundleName_ = "RegisterLayoutFullScreenChangeCallback";
-    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->onLayoutFullScreenChangeFunc_ = nullptr;
     NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
 
@@ -521,7 +517,7 @@ HWTEST_F(SceneSessionTest5, SetSessionRectChangeCallback02, Function | SmallTest
     };
     session->SetSessionRectChangeCallback(nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session->SetSessionProperty(property);
@@ -656,7 +652,7 @@ HWTEST_F(SceneSessionTest5, CheckAspectRatioValid, Function | SmallTest | Level2
     windowLimits.minHeight_ = -10000;
     EXPECT_EQ(WSError::WS_OK, session->SetAspectRatio(0.0f));
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     WindowLimits limits = {8, 1, 6, 1, 1, 1.0f, 1.0f};
     property->SetWindowLimits(limits);
@@ -832,7 +828,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
 
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     session->SetSessionProperty(property);
     property->compatibleModeInPc_ = true;
@@ -880,9 +876,6 @@ HWTEST_F(SceneSessionTest5, UpdateWinRectForSystemBar, Function | SmallTest | Le
 
     WSRect rect2 = { 1, 2, 10, 8 };
     session->winRect_ = rect2;
-    session->UpdateWinRectForSystemBar(rect);
-
-    session->property_ = nullptr;
     session->UpdateWinRectForSystemBar(rect);
 }
 
@@ -936,7 +929,7 @@ HWTEST_F(SceneSessionTest5, SetPrivacyMode, Function | SmallTest | Level2)
     session->leashWinSurfaceNode_ = surfaceNode;
     session->SetPrivacyMode(true);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetPrivacyMode(true);
     session->SetSessionProperty(property);
@@ -1276,7 +1269,7 @@ HWTEST_F(SceneSessionTest5, SetUniqueDensityDpi, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, session->SetUniqueDensityDpi(true, 79));
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, session->SetUniqueDensityDpi(false, 79));
 
-    session->sessionStage_ = new SessionStageMocker();
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, session->sessionStage_);
 }
 
@@ -1697,7 +1690,7 @@ HWTEST_F(SceneSessionTest5, SetAndIsSystemKeyboard, Function | SmallTest | Level
     SessionInfo info;
     info.abilityName_ = "SetAndIsSystemKeyboard";
     info.bundleName_ = "SetAndIsSystemKeyboard";
-    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, session);
 
     ASSERT_EQ(false, session->IsSystemKeyboard());
@@ -1762,6 +1755,30 @@ HWTEST_F(SceneSessionTest5, SetBehindWindowFilterEnabled, Function | SmallTest |
 
     session->SetBehindWindowFilterEnabled(false);
     session->SetBehindWindowFilterEnabled(true);
+}
+
+/**
+ * @tc.name: MarkSystemSceneUIFirst
+ * @tc.desc: MarkSystemSceneUIFirst function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "MarkSystemSceneUIFirst";
+    info.bundleName_ = "MarkSystemSceneUIFirst";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->MarkSystemSceneUIFirst(true, true);
+ 
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->leashWinSurfaceNode_ = nullptr;
+    session->MarkSystemSceneUIFirst(true, true);
+    session->leashWinSurfaceNode_ = surfaceNode;
+    session->MarkSystemSceneUIFirst(true, true);
+    EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
 }
 }
 }

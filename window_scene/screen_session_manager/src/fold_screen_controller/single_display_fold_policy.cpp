@@ -107,7 +107,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     }
     SetdisplayModeChangeStatus(true);
     ReportFoldDisplayModeChange(displayMode);
-    ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
     switch (displayMode) {
         case FoldDisplayMode::MAIN: {
             ChangeScreenDisplayModeToMain(screenSession, reason);
@@ -132,6 +131,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         lastDisplayMode_ = displayMode;
     }
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
 }
 
 void SingleDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)

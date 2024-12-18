@@ -36,12 +36,12 @@ public:
     void SetDefaultProperty();
     WMError Minimize() override;
     void StartMove() override;
-    bool GetStartMoveFlag() override;
+    bool IsStartMoving() override;
     WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
 
-    /**
+    /*
      * Window Layout
      */
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
@@ -278,12 +278,12 @@ private:
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
-    /**
+    /*
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
 
-    /**
+    /*
      * Window Immersive
      */
     void UpdateDefaultStatusBarColor();
@@ -299,15 +299,16 @@ private:
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
 
-    /**
+    /*
      * Gesture Back
      */
     bool gestureBackEnabled_ = true;
 
-    /**
+    /*
      * Window Property.
      */
     void InitSystemSessionDragEnable();
+    bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
 
     /*
      * Sub Window

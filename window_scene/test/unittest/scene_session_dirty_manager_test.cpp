@@ -99,8 +99,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, Function | SmallT
  */
 HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTest | Level2)
 {
-    std::vector<MMI::WindowInfo> lastWindowInfoList;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList(lastWindowInfoList);
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
@@ -129,7 +128,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, Function | SmallTe
         propertyModal1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
         ssm_->sceneSessionMap_.insert({sceneSessionModal1->GetPersistentId(), sceneSessionModal1});
     }
-    auto [windowInfoList1, pixelMapList1] = manager_->GetFullWindowInfoList(lastWindowInfoList);
+    auto [windowInfoList1, pixelMapList1] = manager_->GetFullWindowInfoList();
     ASSERT_EQ(windowInfoList.size() + 3, windowInfoList1.size());
 }
 
@@ -244,40 +243,38 @@ HWTEST_F(SceneSessionDirtyManagerTest, IsFilterSession02, Function | SmallTest |
  */
 HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, Function | SmallTest | Level2)
 {
-    std::vector<MMI::WindowInfo> lastWindowInfoList;
-    manager_->GetWindowInfo(nullptr, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(nullptr, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     SessionInfo info;
     info.abilityName_ = "111";
     info.bundleName_ = "111";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
-    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     sptr<WindowSessionProperty> windowSessionProperty = session->GetSessionProperty();
     session->SetSessionProperty(windowSessionProperty);
-    manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     windowSessionProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> ret;
-    ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.id, session->GetWindowId());
     windowSessionProperty->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.windowType, static_cast<int32_t>(windowSessionProperty->GetWindowType()));
     windowSessionProperty->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
-    ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.id, session->GetWindowId());
     info.isSetPointerAreas_ = true;
-    ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.id, session->GetWindowId());
     windowSessionProperty->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING));
-    ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.flags, static_cast<int32_t>(MMI::WindowInfo::FLAG_BIT_HANDWRITING));
     windowSessionProperty->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
-    ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.flags, 0);
-    session->SetRectChangeBySystem(true);
-    ret = manager_->GetWindowInfo(session, lastWindowInfoList, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.id, session->GetWindowId());
 }
 

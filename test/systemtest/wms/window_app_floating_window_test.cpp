@@ -46,8 +46,8 @@ class WindowAppFloatingWindowTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 
     static inline float virtualPixelRatio_ = 1.0;
     static inline Rect displayRect_ {0, 0, 0, 0};
@@ -129,28 +129,12 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow01, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
-
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
-
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
-
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
@@ -166,32 +150,14 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
-
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
-
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+    ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
-
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
@@ -207,32 +173,15 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
-
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
-    }
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoBackground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-    }
-
+    ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
+    ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
@@ -248,24 +197,11 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
-
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(nullptr, scene->GetMainWindow());
-        ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
-    }
-
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
+    ASSERT_EQ(nullptr, scene->GetMainWindow());
+    ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 }
 
@@ -283,26 +219,12 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
-
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoBackground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
@@ -319,31 +241,15 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoBackground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-    }
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(false, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
+    ASSERT_EQ(false, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
@@ -360,31 +266,16 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
     ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
-    }
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoBackground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-    }
+    ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
+    ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
@@ -401,24 +292,13 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(nullptr, scene->GetMainWindow());
-        ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
-    }
+    ASSERT_EQ(nullptr, scene->GetMainWindow());
+    ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 }
 
@@ -436,12 +316,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest
     Rect fltWindRect = GetRectWithVpr(10, 20, 10, 10);
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
-
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     Rect exceptRect = {10, 20, 0, 0};
@@ -461,18 +336,10 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest
         }
     }
     exceptRect.height_ = static_cast<uint32_t>(exceptRect.width_ * hwRatio);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_FALSE(WindowTestUtils::RectEqualTo(fltWin, exceptRect));
-    } else {
-        ASSERT_TRUE(WindowTestUtils::RectEqualTo(fltWin, exceptRect));
-    }
+    ASSERT_TRUE(WindowTestUtils::RectEqualTo(fltWin, exceptRect));
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
@@ -498,11 +365,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow10, Function | MediumTest
     ASSERT_NE(nullptr, fltWin3);
 
     ASSERT_EQ(WMError::WM_OK, fltWin3->Destroy());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 /**
@@ -522,11 +385,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow11, Function | MediumTest
     sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
     ASSERT_NE(nullptr, fltWin);
 
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoForeground());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     usleep(500000); // 500000us = 0.5s
@@ -540,11 +399,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow11, Function | MediumTest
     ASSERT_EQ(false, testCameraFloatWindowChangedListener_->isShowing_);
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->GoDestroy());
-    } else {
-        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
-    }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 
     WindowManager::GetInstance().UnregisterCameraFloatWindowChangedListener(testCameraFloatWindowChangedListener_);
 }

@@ -196,13 +196,13 @@ public:
     void SetFullScreenStart(bool fullScreenStart);
     bool GetFullScreenStart() const;
 
-    /**
+    /*
      * Sub Window
      */
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
 
-    /**
+    /*
      * UIExtension
      */
     void SetRealParentId(int32_t realParentId);
@@ -218,19 +218,19 @@ public:
     void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
     bool GetIsUIExtAnySubWindow() const;
 
-    /**
+    /*
      * Multi Instance
      */
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
 
-    /**
+    /*
      * PC Window
      */
     void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
     void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
 
-    /**
+    /*
      * system keyboard
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
@@ -308,7 +308,7 @@ private:
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
-    Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED;
+    Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
@@ -369,12 +369,12 @@ private:
     mutable std::mutex compatibleModeMutex_;
     bool compatibleModeEnableInPad_ = false;
 
-    /**
+    /*
      * Sub Window
      */
     uint32_t subWindowLevel_ = 0;
 
-    /**
+    /*
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -384,12 +384,12 @@ private:
     bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 
-    /**
+    /*
      * Multi Instance
      */
     std::string appInstanceKey_;
 
-    /**
+    /*
      * PC Window
      */
     mutable std::mutex supportWindowModesMutex_;

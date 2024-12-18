@@ -378,6 +378,7 @@ private:
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
+    void RecoverMultiScreenMode();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -395,6 +396,7 @@ private:
     DMError CheckDisplayMangerAgentTypeAndPermission(
         const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type);
     void SetMultiScreenDefaultRelativePosition();
+    void SetRelativePositionForDisconnect(MultiScreenPositionOptions defaultScreenOptions);
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession);
     DisplayId GetFakeDisplayId(sptr<ScreenSession> screenSession);

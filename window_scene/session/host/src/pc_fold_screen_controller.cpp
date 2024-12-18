@@ -126,13 +126,13 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     WSRectF velocity = CalculateMovingVelocity();
     if (!manager.NeedDoThrowSlip(startSide, velocity)) {
         manager.ResetArrangeRule(startSide);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "no throw rect: %{public}s", rect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_PC, "no throw rect: %{public}s", rect.ToString().c_str());
         return false;
     }
 
     manager.ThrowSlipToOppositeSide(startSide, rect, topAvoidHeight, botAvoidHeight, GetTitleHeight());
     manager.ResetArrangeRule(startSide);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "throw to rect: %{public}s", rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_PC, "throw to rect: %{public}s", rect.ToString().c_str());
     return true;
 }
 
@@ -169,13 +169,13 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
 {
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id: %{public}d", GetPersistentId());
         return;
     }
     sceneSession->PostTask([weakThis = wptr(this), isWaterfallMode] {
         auto controller = weakThis.promote();
         if (controller == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "controller is nullptr");
+            TLOGNE(WmsLogTag::WMS_PC, "controller is nullptr");
             return;
         }
         if (controller->isFullScreenWaterfallMode_ == isWaterfallMode) {

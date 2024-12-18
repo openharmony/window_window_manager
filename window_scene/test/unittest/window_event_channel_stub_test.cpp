@@ -47,8 +47,8 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-    sptr<ISessionStage> sessionStage = new SessionStageMocker();
-    sptr<WindowEventChannelStub> windowEventChannelStub_ = new WindowEventChannelMocker(sessionStage);
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<WindowEventChannelStub> windowEventChannelStub_ = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
 };
 
 void WindowEventChannelStubTest::SetUpTestCase()
@@ -82,7 +82,7 @@ HWTEST_F(WindowEventChannelStubTest, OnRemoteRequest, Function | SmallTest | Lev
     data.WriteInterfaceToken(WindowEventChannelStub::GetDescriptor());
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     data.WriteUint32(static_cast<uint32_t>(type));
-    sptr<IWindowManagerAgent> windowManagerAgent = new WindowManagerAgent();
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
 
     uint32_t code = static_cast<uint32_t>(

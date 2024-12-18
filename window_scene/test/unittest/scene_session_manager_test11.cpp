@@ -153,7 +153,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainWindowStatesByPid03, Function | Small
     int32_t callingPid = 1001;
     SessionInfo sessionInfo;
     int32_t persistentId = 1005;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetSessionState(sessionState);
     sceneSession->SetRSVisible(isVisible);
@@ -238,12 +238,12 @@ HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, Function | SmallTe
     info.bundleName_ = "test2";
     info.moduleName_ = "test3";
     info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->UpdateOccupiedAreaIfNeed(persistentId);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     sceneSession->SetSessionProperty(property);
@@ -267,7 +267,7 @@ HWTEST_F(SceneSessionManagerTest11, GetAllSessionDumpDetailInfo, Function | Smal
     info1.abilityName_ = "GetAllSessionDumpDetailInfo1";
     info1.bundleName_ = "GetAllSessionDumpDetailInfo1";
     info1.persistentId_ = 1;
-    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
     sceneSession1->UpdateNativeVisibility(true);
 
@@ -275,7 +275,7 @@ HWTEST_F(SceneSessionManagerTest11, GetAllSessionDumpDetailInfo, Function | Smal
     info2.abilityName_ = "GetAllSessionDumpDetailInfo2";
     info2.bundleName_ = "GetAllSessionDumpDetailInfo2";
     info2.persistentId_ = 2;
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
     sceneSession2->UpdateNativeVisibility(false);
 
