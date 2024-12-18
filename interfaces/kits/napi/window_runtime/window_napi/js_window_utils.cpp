@@ -289,6 +289,8 @@ napi_value MaximizePresentationInit(napi_env env)
         static_cast<int32_t>(MaximizePresentation::EXIT_IMMERSIVE)));
     napi_set_named_property(env, objValue, "ENTER_IMMERSIVE", CreateJsValue(env,
         static_cast<int32_t>(MaximizePresentation::ENTER_IMMERSIVE)));
+    napi_set_named_property(env, objValue, "ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER", CreateJsValue(env,
+        static_cast<int32_t>(MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER)));
     return objValue;
 }
 
@@ -1041,6 +1043,27 @@ std::unique_ptr<NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastPara
     }
 }
 
+std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,
+    napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred,
+            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef,
+            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    }
+}
+
 napi_value ModalityTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
@@ -1112,27 +1135,6 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     return ParseModalityParam(env, jsObject, windowOption);
-}
-
-std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,
-    napi_value lastParam, napi_value* result)
-{
-    napi_valuetype type = napi_undefined;
-    napi_typeof(env, lastParam, &type);
-    if (lastParam == nullptr || type != napi_function) {
-        napi_deferred nativeDeferred = nullptr;
-        napi_create_promise(env, &nativeDeferred, result);
-        return std::make_unique<NapiAsyncTask>(nativeDeferred,
-            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
-            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
-    } else {
-        napi_get_undefined(env, result);
-        napi_ref callbackRef = nullptr;
-        napi_create_reference(env, lastParam, 1, &callbackRef);
-        return std::make_unique<NapiAsyncTask>(callbackRef,
-            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
-            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
-    }
 }
 } // namespace Rosen
 } // namespace OHOS

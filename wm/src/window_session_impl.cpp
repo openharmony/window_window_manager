@@ -844,10 +844,11 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
     }
 }
 
-void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButton, bool& hideMinimizeButton,
-    bool& hideSplitButton)
+void WindowSessionImpl::GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton,
+    bool& hideSplitButton, bool& hideCloseButton)
 {
-    if (!isPC) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
         return;
     }
     if (hideMaximizeButton > !windowTitleVisibleFlags_.isMaximizeVisible) {
@@ -862,6 +863,10 @@ void WindowSessionImpl::GetTitleButtonVisible(bool isPC, bool& hideMaximizeButto
         TLOGW(WmsLogTag::WMS_LAYOUT, "isSplitVisible param INVALID");
     }
     hideSplitButton = hideSplitButton || (!windowTitleVisibleFlags_.isSplitVisible);
+    if (hideCloseButton > !windowTitleVisibleFlags_.isCloseVisible) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "isCloseVisible param INVALID");
+    }
+    hideCloseButton = hideCloseButton || (!windowTitleVisibleFlags_.isCloseVisible);
 }
 
 void WindowSessionImpl::UpdateDensity()
@@ -1152,13 +1157,12 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
         WLOGFD("hide other buttons except close");
-        uiContent->HideWindowTitleButton(true, true, true);
+        uiContent->HideWindowTitleButton(true, true, true, false);
         return;
     }
     auto modeSupportInfo = property_->GetModeSupportInfo();
@@ -1169,17 +1173,19 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
         GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     bool hideMinimizeButton = false;
-    GetTitleButtonVisible(isPC, hideMaximizeButton, hideMinimizeButton, hideSplitButton);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton]: [%{public}d, %{public}d, %{public}d]",
-        hideSplitButton, hideMaximizeButton, hideMinimizeButton);
+    bool hideCloseButton = false;
+    GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[hideSplit, hideMaximize, hideMinimizeButton, hideCloseButton]:"
+        "[%{public}d, %{public}d, %{public}d, %{public}d]",
+        hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     if (property_->GetCompatibleModeInPc()) {
         if (IsFreeMultiWindowMode()) {
-            uiContent->HideWindowTitleButton(true, hideMaximizeButton, hideMinimizeButton);
+            uiContent->HideWindowTitleButton(true, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
         } else {
-            uiContent->HideWindowTitleButton(hideSplitButton, true, hideMinimizeButton);
+            uiContent->HideWindowTitleButton(hideSplitButton, true, hideMinimizeButton, hideCloseButton);
         }
     } else {
-        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton);
+        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
 }
 
@@ -1400,8 +1406,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
             WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-                decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                        (property_->GetIsPcAppInPad() && isSubWindow));
+                decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
+                    (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
             }
             uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
             return;
@@ -1430,8 +1436,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                     (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
                 if (windowSystemConfig_.freeMultiWindowSupport_) {
                     auto isSubWindow = WindowHelper::IsSubWindow(GetType());
-                    decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                            (property_->GetIsPcAppInPad() && isSubWindow));
+                    decorVisible = decorVisible && ((property_->GetIsPcAppInPad() && isSubWindow) ||
+                        (windowSystemConfig_.freeMultiWindowEnable_ && mode != WindowMode::WINDOW_MODE_FULLSCREEN));
                 }
                 WLOGFD("[WSLayout]Notify uiContent window mode change end,decorVisible:%{public}d", decorVisible);
                 uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
@@ -1552,20 +1558,16 @@ bool WindowSessionImpl::IsTopmost() const
 
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
+    TLOGD(WmsLogTag::DEFAULT, "%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
-    WLOGFD("set dragEnabled");
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) ||
+        (WindowHelper::IsSubWindow(GetType()) && windowOption_->GetSubWindowDecorEnable())) {
         property_->SetDragEnabled(dragEnabled);
     } else {
-        WLOGFE("This is not main window.");
+        TLOGE(WmsLogTag::DEFAULT, "This is not main window or decor enabled sub window.");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
@@ -2528,7 +2530,8 @@ void WindowSessionImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventC
     inputEventConsumer_ = inputEventConsumer;
 }
 
-WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+    bool isCloseVisible)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -2536,13 +2539,13 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     if (!IsPcOrPadCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible };
+    if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible };
     UpdateTitleButtonVisibility();
     return WMError::WM_OK;
 }

@@ -84,6 +84,8 @@ using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<Sce
 using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 using NotifyDefaultDensityEnabledFunc = std::function<void(bool isDefaultDensityEnabled)>;
+using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHoverShown,
+    bool isDockHoverShown)>;
 using NotifyRestoreMainWindowFunc = std::function<void()>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
@@ -256,7 +258,9 @@ public:
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
+    void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
+    WSError SetDefaultRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
@@ -482,6 +486,11 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
+    /*
+     * PC Window
+     */
+    void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -560,6 +569,11 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, bool> appUseControlMap_;
+
+    /*
+     * PC Window
+     */
+    NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();

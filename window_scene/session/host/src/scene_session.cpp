@@ -1132,6 +1132,21 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
+void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func)
+{
+    const char* const funcName = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), funcName] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session or TitleAndDockHoverShowChangeFunc is null");
+            return;
+        }
+        session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d",
+            funcName, session->GetPersistentId());
+    }, funcName);
+}
+
 void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
 {
     const char* const funcName = __func__;
@@ -2874,6 +2889,25 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
     }
 }
 
+void SceneSession::MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::MarkSystemSceneUIFirst");
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode == nullptr && surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
+        return;
+    }
+    if (leashWinSurfaceNode != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForced=%{public}d. isUIFirstEnabled=%{public}d",
+            leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), isForced, isUIFirstEnabled);
+        leashWinSurfaceNode->MarkUifirstNode(isForced, isUIFirstEnabled);
+    } else {
+        TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " isForced=%{public}d. isUIFirstEnabled=%{public}d",
+            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), isForced, isUIFirstEnabled);
+        surfaceNode_->MarkUifirstNode(isForced, isUIFirstEnabled);
+    }
+}
+
 WSError SceneSession::UpdateWindowAnimationFlag(bool needDefaultAnimationFlag)
 {
     auto task = [weakThis = wptr(this), needDefaultAnimationFlag] {
@@ -3048,6 +3082,28 @@ void SceneSession::SetRequestedOrientation(Orientation orientation)
     if (onRequestedOrientationChange_) {
         onRequestedOrientationChange_(static_cast<uint32_t>(orientation));
     }
+}
+
+WSError SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
+{
+    auto task = [weakThis = wptr(this), orientation]() -> WSError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::DEFAULT, "session is null");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        TLOGNI(WmsLogTag::DEFAULT, "id: %{public}d defaultRequestedOrientation: %{public}u",
+            session->GetPersistentId(), static_cast<uint32_t>(orientation));
+        auto property = session->GetSessionProperty();
+        if (property == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "get session property failed");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        property->SetRequestedOrientation(orientation);
+        property->SetDefaultRequestedOrientation(orientation);
+        return WSError::WS_OK;
+    };
+    return PostSyncTask(task, __func__);
 }
 
 void SceneSession::NotifyForceHideChange(bool hide)
@@ -3419,7 +3475,6 @@ static bool IsNeedSystemPermissionByAction(WSPropertyChangeAction action,
         case WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS:
         case WSPropertyChangeAction::ACTION_UPDATE_TOPMOST:
         case WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE:
-        case WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED:
         case WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
             return true;
@@ -3812,11 +3867,6 @@ WMError SceneSession::HandleActionUpdateWindowLimits(const sptr<WindowSessionPro
 WMError SceneSession::HandleActionUpdateDragenabled(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    if (!property->GetSystemCalling()) {
-        TLOGE(WmsLogTag::DEFAULT, "Update property dragEnabled permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
-
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty != nullptr) {
         sessionProperty->SetDragEnabled(property->GetDragEnabled());
