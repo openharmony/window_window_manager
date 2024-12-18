@@ -149,7 +149,7 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     auto& agentSet = windowManagerAgentMap_[type];
     auto agent = std::find(agentSet.begin(), agentSet.end(), windowManagerAgent);
     if (agent == agentSet.end()) {
-        WLOGFW("Cannot find agent,  type=%{public}d", type);
+        WLOGFW("Cannot find agent, type=%{public}d", type);
         return ret;
     }
     agentSet.erase(agent);

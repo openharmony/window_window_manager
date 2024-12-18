@@ -3103,7 +3103,7 @@ void SceneSessionManager::CacheSpecificSessionForRecovering(
 
     auto windowType = property->GetWindowType();
     auto parentId = property->GetParentPersistentId();
-    TLOGI(WmsLogTag::WMS_RECOVER, "Cache specific session persistentId=%{public}d, parent persistentId = "
+    TLOGI(WmsLogTag::WMS_RECOVER, "Cache specific session persistentId=%{public}d, parent persistentId="
         "%{public}d, window type=%{public}d", sceneSession->GetPersistentId(), parentId, windowType);
 
     if (WindowHelper::IsSubWindow(windowType)) {
@@ -7505,7 +7505,8 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
 
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
 {
-    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession)] {
+    const char* const where = __func__;
+    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), where] {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -7519,12 +7520,12 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         auto sessionInfo = sceneSession->GetSessionInfo();
         auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
         if (!abilitySessionInfo) {
-            TLOGE(WmsLogTag::WMS_MAIN,
-                "abilitySessionInfo is null, id:%{public}d", persistentId);
+            TLOGNE(WmsLogTag::WMS_MAIN,
+                "%{public}s abilitySessionInfo is null, id:%{public}d", where, persistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        TLOGI(WmsLogTag::WMS_MAIN, "state:%{public}d, id:%{public}d",
-            sessionInfo.callState_, persistentId);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: state:%{public}d, id:%{public}d",
+            where, sessionInfo.callState_, persistentId);
         bool isColdStart = false;
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
         if (isColdStart) {
@@ -8661,12 +8662,13 @@ void SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags()
 
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token)
 {
+    const char* const where = __func__;
     if (!SessionPermission::IsSACalling()) {
         WLOGFE("permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &token]() {
-        WLOGFD("with focusedSessionId: %{public}d", focusedSessionId_);
+    auto task = [this, &token, where]() {
+        WLOGD("%{public}s with focusedSessionId: %{public}d", where, focusedSessionId_);
         auto sceneSession = GetSceneSession(focusedSessionId_);
         if (sceneSession) {
             token = sceneSession->GetAbilityToken();
@@ -8690,8 +8692,9 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
         WLOGFE("permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &element]() {
-        WLOGFD("with focusedSessionId: %{public}d", focusedSessionId_);
+    const char* const where = __func__;
+    auto task = [this, &element, where]() {
+        WLOGD("%{public}s with focusedSessionId: %{public}d", where, focusedSessionId_);
         auto sceneSession = GetSceneSession(focusedSessionId_);
         if (sceneSession) {
             auto sessionInfo = sceneSession->GetSessionInfo();
@@ -9138,7 +9141,8 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
         WLOGFE("displayInfo is nullptr.");
         return;
     }
-    auto task = [this, displayInfo]() {
+    const char* const where = __func__;
+    auto task = [this, displayInfo, where]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         if (processVirtualPixelRatioChangeFunc_ != nullptr &&
             displayInfo->GetVirtualPixelRatio() == displayInfo->GetDensityInCurResolution()) {
@@ -9150,7 +9154,7 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
         for (const auto &item : sceneSessionMap_) {
             auto sceneSession = item.second;
             if (sceneSession == nullptr) {
-                WLOGFE("null scene session");
+                WLOGE("%{public}s null scene session", where);
                 continue;
             }
             if (sceneSession->GetSessionProperty() != nullptr &&
@@ -9182,12 +9186,13 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
         WLOGFE("displayInfo is nullptr.");
         return;
     }
-    auto task = [this, displayInfo]() {
+    const char* const where = __func__;
+    auto task = [this, displayInfo, where]() {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto &item : sceneSessionMap_) {
             auto sceneSession = item.second;
             if (sceneSession == nullptr) {
-                WLOGFE("null scene session");
+                WLOGE("%{public}s null scene session", where);
                 continue;
             }
             if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
@@ -9359,10 +9364,11 @@ WSError SceneSessionManager::LockSession(int32_t sessionId)
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, sessionId]() {
+    const char* const where = __func__;
+    auto task = [this, sessionId, where]() {
         auto sceneSession = GetSceneSession(sessionId);
         if (sceneSession == nullptr) {
-            WLOGFE("cannot find session, id: %{public}d", sessionId);
+            WLOGE("%{public}s cannot find session, id: %{public}d", where, sessionId);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         sceneSession->SetSessionInfoLockedState(true);
@@ -9382,10 +9388,11 @@ WSError SceneSessionManager::UnlockSession(int32_t sessionId)
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, sessionId]() {
+    const char* const where = __func__;
+    auto task = [this, sessionId, where]() {
         auto sceneSession = GetSceneSession(sessionId);
         if (sceneSession == nullptr) {
-            WLOGFE("cannot find session, id: %{public}d", sessionId);
+            WLOGE("%{public}s cannot find session, id: %{public}d", where, sessionId);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         sceneSession->SetSessionInfoLockedState(false);
@@ -10572,7 +10579,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         int32_t parentId = static_cast<int32_t>(info.hostWindowId);
         UIExtensionUsage usage = static_cast<UIExtensionUsage>(info.uiExtensionUsage);
         TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: persistentId=%{public}d, parentId=%{public}d, "
-            "usage=%{public}u, surfaceNodeId=%{public}" PRIu64", pid=%{public}d",
+            "usage=%{public}u, surfaceNodeId=%{public}" PRIu64 ", pid=%{public}d",
             where, persistentId, parentId, usage, surfaceNodeId, pid);
 
         remoteExtSessionMap_.insert(std::make_pair(remoteExtSession, token));
@@ -11834,7 +11841,7 @@ void SceneSessionManager::RefreshPcZOrderList(uint32_t startZOrder, std::vector<
             sceneSession->UpdatePCZOrderAndMarkDirty(i + startZOrder);
         }
         oss << "]";
-        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s:%{public}s", where, oss.str().c_str());
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: %{public}s", where, oss.str().c_str());
         return WSError::WS_OK;
     };
     taskScheduler_->PostTask(task, __func__);
