@@ -40,6 +40,13 @@
 namespace OHOS::Rosen {
 class RSInterfaces;
 
+static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
+    {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
+    {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
+    {ScreenPowerStatus::POWER_STATUS_DOZE, DisplayPowerEvent::DISPLAY_DOZE},
+    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
+};
+
 class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {
 DECLARE_SYSTEM_ABILITY(ScreenSessionManager)
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
@@ -420,6 +427,12 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     void SetScreenCorrection();
+
+    /**
+     * On/Off screen
+     */
+    void SetGotOffAndWakeUpBlockCV();
+
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:

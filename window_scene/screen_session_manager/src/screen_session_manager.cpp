@@ -116,13 +116,6 @@ constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
 static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 
-static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
-    {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
-    {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
-    {ScreenPowerStatus::POWER_STATUS_DOZE, DisplayPowerEvent::DISPLAY_DOZE},
-    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
-};
-
 const std::string SCREEN_EXTEND = "extend";
 const std::string SCREEN_MIRROR = "mirror";
 const std::string SCREEN_UNKNOWN = "unknown";
@@ -2443,7 +2436,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         ExitCoordination("Press PowerKey");
     }
     DisplayPowerEvent notifyEvent = DisplayPowerEvent::DISPLAY_OFF;
-    auto iter = SCREEN_STATUS_POWER_EVENT_MAP.find(status);
+    auto iter = SCREEN_STATUS_POWER_EVENT_MAP.at(status);
     if (iter != SCREEN_STATUS_POWER_EVENT_MAP.end()) {
         notifyEvent = iter->second;
     }
@@ -2715,43 +2708,39 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
 
     if (event == DisplayEvent::SCREEN_LOCK_SUSPEND) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock suspend");
-        gotScreenOffNotify_ = true;
         if (isPhyScreenConnected_) {
             isScreenLockSuspend_ = false;
             TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend__  is false");
         } else {
             isScreenLockSuspend_ = true;
         }
-        if (needScreenOffNotify_) {
-            ScreenOffCVNotify();
-        }
+        SetGotOffAndWakeUpBlockCV();
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_OFF) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock off");
-        gotScreenOffNotify_ = true;
         isScreenLockSuspend_ = false;
         TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend__  is false");
-        if (needScreenOffNotify_) {
-            ScreenOffCVNotify();
-        }
+        SetGotOffAndWakeUpBlockCV();
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_FINGERPRINT) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock fingerprint");
-        gotScreenOffNotify_ = true;
         gotScreenlockFingerprint_ = true;
-        if (needScreenOffNotify_) {
-            ScreenOffCVNotify();
-        }
+        SetGotOffAndWakeUpBlockCV();
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_DOZE_FINISH) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock doze finish");
-        gotScreenOffNotify_ = true;
-        if (needScreenOffNotify_) {
-            ScreenOffCVNotify();
-        }
+        SetGotOffAndWakeUpBlockCV();
+    }
+}
+
+void ScreenSessionManager::SetGotOffAndWakeUpBlockCV()
+{
+    gotScreenOffNotify_ = true;
+    if (needScreenOffNotify_) {
+        ScreenOffCVNotify();
     }
 }
 
