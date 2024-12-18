@@ -75,7 +75,7 @@ void WindowEventChannelListener::OnTransferKeyEventForConsumed(int32_t keyEventI
     isConsumedPromise_ = nullptr;
 }
 
-int32_t WindowEventChannelListener::OnRemoteRequest(uint64_t code, MessageParcel& data, MessageParcel& reply,
+int32_t WindowEventChannelListener::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {

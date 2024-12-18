@@ -317,7 +317,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest13, Function | SmallTest | Level2
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerStub::GetDescriptor());
-    data.WriteUint32(static_cast<uint32_t>(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG));
+    data.WriteUint64(static_cast<uint64_t>(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG));
     sptr<WindowProperty> windowProperty = new WindowProperty();
     windowProperty->Write(data, PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
 

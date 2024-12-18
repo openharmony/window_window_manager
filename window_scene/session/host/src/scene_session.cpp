@@ -4068,7 +4068,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             TLOGNE(WmsLogTag::DEFAULT, "the session is nullptr");
             return WMError::WM_DO_NOTHING;
         }
-        TLOGND(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}" PRIu64, 
+        TLOGND(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}" PRIu64,
             sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
         return sceneSession->HandleUpdatePropertyByAction(property, action);
