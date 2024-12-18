@@ -178,6 +178,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetDisplayIdByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
             return HandleIsPcOrPadFreeMultiWindowMode(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE):
+            return HandleIsWindowRectAutoSave(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1173,6 +1175,26 @@ int SceneSessionManagerStub::HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& d
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_SUB, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply)
+{
+    std::string key;
+    if (!data.ReadString(key)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read key failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool enabled = false;
+    WMError errCode = IsWindowRectAutoSave(key, enabled);
+    if (!reply.WriteBool(enabled)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write enabled failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

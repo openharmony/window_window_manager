@@ -324,6 +324,24 @@ HWTEST_F(MainSessionTest, IsExitSplitOnBackground02, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: OnTitleAndDockHoverShowChange
+ * @tc.desc: OnTitleAndDockHoverShowChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnTitleAndDockHoverShowChange";
+    info.bundleName_ = "OnTitleAndDockHoverShowChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetTitleAndDockHoverShowChangeCallback([](bool isTitleHoverShown, bool isDockHoverShown) {
+        return;
+    });
+    EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
+    EXPECT_EQ(sceneSession->OnTitleAndDockHoverShowChange(true, true), WSError::WS_OK);
+}
+
+/**
  * @tc.name: OnRestoreMainWindow
  * @tc.desc: OnRestoreMainWindow function01
  * @tc.type: FUNC
@@ -345,6 +363,30 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, Function | SmallTest | Level2)
     };
     session->onRestoreMainWindowFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
+}
+
+/**
+ * @tc.name: OnSetWindowRectAutoSave
+ * @tc.desc: OnSetWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnSetWindowRectAutoSave";
+    info.bundleName_ = "OnSetWindowRectAutoSave";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+
+    session->onSetWindowRectAutoSaveFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+
+    NotifySetWindowRectAutoSaveFunc func = [](bool enabled) {
+        return;
+    };
+    session->onSetWindowRectAutoSaveFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
 }
 }
 }
