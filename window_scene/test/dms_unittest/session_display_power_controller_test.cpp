@@ -128,7 +128,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, HandleSetDisplayStateOff, Function |
         EXPECT_TRUE(true);
     });
     state = DisplayState::OFF;
-    result = controller.HandleSetDisplayStateOff(state);
+    bool result = controller.HandleSetDisplayStateOff(state);
     EXPECT_TRUE(result);
     controller.needCancelNotify_ = true;
     result = controller.HandleSetDisplayStateOff(state);
