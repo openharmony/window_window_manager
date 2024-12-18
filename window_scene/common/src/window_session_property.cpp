@@ -1410,7 +1410,7 @@ void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
         TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
         return;
     }
-    SetPersistentId(parcel.ReadUint64());
+    SetPersistentId(parcel.ReadUint32());
     (this->*(funcIter->second))(parcel);
 }
 
