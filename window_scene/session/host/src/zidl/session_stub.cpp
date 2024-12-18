@@ -879,8 +879,8 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
         return ERR_INVALID_DATA;
     }
     WSRect rect {};
-    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) || !data.ReadInt32(rect.width_) ||
-        !data.ReadInt32(rect.height_)) {
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+        !data.ReadInt32(rect.width_) || !data.ReadInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
         return ERR_INVALID_DATA;
     }

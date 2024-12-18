@@ -882,15 +882,12 @@ HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, Function | SmallTest |
 HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("SetAvoidAreaOption");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
-
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     WMError res = window->SetAvoidAreaOption(3);
@@ -904,21 +901,19 @@ HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
 
     option->SetWindowName("GetAvoidAreaOption");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    uint32_t avoidAreaOption = 0;
-    WMError res = window->GetAvoidAreaOption(avoidAreaOption);
+    uint32_t avoidAreaOptions = 0;
+    WMError res = window->GetAvoidAreaOption(avoidAreaOptions);
     ASSERT_EQ(res, WMError::WM_OK);
 }
 }

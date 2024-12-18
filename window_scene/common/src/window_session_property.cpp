@@ -404,9 +404,9 @@ bool WindowSessionProperty::IsTopmost() const
     return topmost_;
 }
 
-void WindowSessionProperty::SetAvoidAreaOption(uint32_t avoidAreaOption)
+void WindowSessionProperty::SetAvoidAreaOption(uint32_t avoidAreaOptions)
 {
-    avoidAreaOption_ = avoidAreaOption;
+    avoidAreaOption_ = avoidAreaOptions;
 }
 
 uint32_t WindowSessionProperty::GetAvoidAreaOption() const
