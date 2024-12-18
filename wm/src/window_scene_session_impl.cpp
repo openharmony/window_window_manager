@@ -1960,6 +1960,31 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     return ret;
 }
 
+WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
+    bool isTitleHoverShown, bool isDockHoverShown)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "winId:%{public}u %{public}s isTitleHoverShown:%{public}d, "
+        "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(), isTitleHoverShown, isDockHoverShown);
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is not main window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!(isPC || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    titleHoverShowEnabled_ = isTitleHoverShown;
+    dockHoverShowEnabled_ = isDockHoverShown;
+    if (auto hostSession = GetHostSession()) {
+        hostSession->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
+    }
+    return WMError::WM_OK;
+}
+
 bool WindowSceneSessionImpl::IsLayoutFullScreen() const
 {
     if (IsWindowSessionInvalid()) {
@@ -2219,12 +2244,19 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    titleHoverShowEnabled_ = true;
+    dockHoverShowEnabled_ = true;
     switch (presentation) {
         case MaximizePresentation::ENTER_IMMERSIVE:
             enableImmersiveMode_ = true;
             break;
         case MaximizePresentation::EXIT_IMMERSIVE:
             enableImmersiveMode_ = false;
+            break;
+        case MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER:
+            enableImmersiveMode_ = true;
+            titleHoverShowEnabled_ = false;
+            dockHoverShowEnabled_ = false;
             break;
         case MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING:
             break;
@@ -2233,6 +2265,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+    hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
     SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_);
