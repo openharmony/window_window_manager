@@ -283,6 +283,8 @@ public:
      * PC Window
      */
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
+    void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -747,7 +749,8 @@ private:
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
     // Multi User
-    int32_t currentUserId_;
+    static constexpr int32_t DEFAULT_USERID = -1;
+    std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
     bool isUserBackground_ = false; // Only accessed on SSM thread
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,
@@ -906,6 +909,12 @@ private:
     bool isAINavigationBarVisible_ = false;
     std::shared_mutex currAINavigationBarAreaMapMutex_;
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
+
+    /**
+     * PC Window
+     */
+    std::mutex isWindowRectAutoSaveMapMutex_;
+    std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
 
     /**
      * Window Lifecycle
