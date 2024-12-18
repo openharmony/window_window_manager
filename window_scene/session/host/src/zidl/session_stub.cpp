@@ -1207,12 +1207,12 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
 int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
 {
     uint64_t actionValue = 0;
-    if (!data.ReadUint32(actionValue)) {
+    if (!data.ReadUint64(actionValue)) {
         TLOGE(WmsLogTag::DEFAULT, "read action error");
         return ERR_INVALID_DATA;
     }
     if (actionValue < static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_RECT) ||
-        actionValue > static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION)) {
+        actionValue > static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_END)) {
         TLOGE(WmsLogTag::DEFAULT, "invalid action");
         return ERR_INVALID_DATA;
     }
