@@ -1310,14 +1310,13 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, Function | SmallTe
             "</systemUIStatusBar>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     sceneSessionManager->ConfigWindowSceneXml();
     ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_, 1);
     ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str(),
         "#4c000000");
     ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.
         immersiveStatusBarContentColor_.c_str(), "#ffffee");
-    delete sceneSessionManager;
 }
 
 /**
@@ -1995,10 +1994,9 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, Function | SmallTe
             "</systemUIStatusBar>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(sceneSessionManager, nullptr);
     sceneSessionManager->ConfigWindowSceneXml();
-    delete sceneSessionManager;
 }
 
 /**
