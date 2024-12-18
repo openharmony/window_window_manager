@@ -1292,20 +1292,20 @@ void JsSceneSession::ProcessSessionTopmostChangeRegister()
 /** @note @window.hierarchy */
 void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
 {
-    NotifyMainWindowTopmostChangeFunc func = [weakThis = wptr(this)](bool isTopmost) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnMainWindowTopmostChange(isTopmost);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGNE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetMainWindowTopmostChangeCallback(func);
+    const char* const where = __func__;
+    session->SetMainWindowTopmostChangeCallback([weakThis = wptr(this), where](bool isTopmost) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnMainWindowTopmostChange(isTopmost);
+    });
     TLOGND(WmsLogTag::WMS_HIERARCHY, "register success");
 }
 
@@ -2945,11 +2945,13 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
 /** @note @window.hierarchy */
 void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
 {
+    const char* const where = __func__;
     TLOGND(WmsLogTag::WMS_HIERARCHY, "[NAPI]isTopmost: %{public}u", isTopmost);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB);
