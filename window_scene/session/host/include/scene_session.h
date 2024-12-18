@@ -95,6 +95,7 @@ using PiPStateChangeCallback = std::function<void(const std::string& bundleName,
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
+using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
 class SceneSession : public Session {
 public:
@@ -272,6 +273,7 @@ public:
      * PC Window
      */
     void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
+    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
     virtual bool IsModal() const { return false; }
     virtual bool IsApplicationModal() const { return false; }
     bool IsDialogWindow() const;
@@ -548,6 +550,7 @@ protected:
      * PC Window
      */
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
+    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
 

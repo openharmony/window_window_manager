@@ -144,6 +144,7 @@ public:
      * PC Window
      */
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
+    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
