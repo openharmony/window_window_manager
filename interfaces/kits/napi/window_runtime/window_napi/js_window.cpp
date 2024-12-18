@@ -2843,7 +2843,7 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "SetWindowLayoutFullScreen failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window OnSetLayoutFullScreen failed."));
             }
         };
@@ -2869,7 +2869,7 @@ static WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPrope
         if (flag.enableFlag || flag.backgroundColorFlag || flag.contentColorFlag || flag.enableAnimationFlag) {
             err = windowToken->SetSystemBarProperty(type, systemBarProperties.at(type));
             if (err != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_IMMS, "SetSystemBarProperty failed, ret %{public}d", err);
+                TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", err);
                 ret = err;
             }
         }
