@@ -1400,14 +1400,20 @@ HWTEST_F(SceneSessionTest4, GetSystemAvoidArea, Function | SmallTest | Level2)
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     sceneSession->SetSessionProperty(property);
 
-    WSRect rect1({1, 1, 1, 1});
+    WSRect rect1({0, 0, 10, 10});
     AvoidArea avoidArea;
     sceneSession->GetSystemAvoidArea(rect1, avoidArea);
     
-    WSRect rect2({1, 1, 1, 1});
+    WSRect rect2({0, 0, 10, 10});
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionProperty(property);
     sceneSession->GetSystemAvoidArea(rect2, avoidArea);
+    ASSERT_EQ(avoidArea.topRect_.posX_, 0);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(avoidArea.topRect_.posX_, 0);
 }
 
 /**
