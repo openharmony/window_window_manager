@@ -2071,31 +2071,27 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
 
 WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate)
 {
-    auto task = [this, persistentId, &isPrepareTerminate]() {
-        if (!isPrepareTerminateEnable_) { // not support prepareTerminate
-            isPrepareTerminate = false;
-            WLOGE("not support prepareTerminate, Id:%{public}d", persistentId);
-            return WSError::WS_OK;
-        }
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            WLOGFE("sceneSession is null, Id:%{public}d", persistentId);
-            isPrepareTerminate = false;
-            return WSError::WS_ERROR_NULLPTR;
-        }
-        auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
-        if (sceneSessionInfo == nullptr) {
-            WLOGFE("sceneSessionInfo is null, Id:%{public}d", persistentId);
-            isPrepareTerminate = false;
-            return WSError::WS_ERROR_NULLPTR;
-        }
-        auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->
-            PrepareTerminateAbilityBySCB(sceneSessionInfo, isPrepareTerminate);
-        TLOGNI(WmsLogTag::WMS_MAIN, "PrepareTerminateAbilityBySCB Id:%{public}d isPrepareTerminate:%{public}d "
-            "errorCode:%{public}d", persistentId, isPrepareTerminate, errorCode);
+    if (!isPrepareTerminateEnable_) { // not support prepareTerminate
+        isPrepareTerminate = false;
+        TLOGE(WmsLogTag::WMS_MAIN, "not support prepareTerminate, Id:%{public}d", persistentId);
         return WSError::WS_OK;
-    };
-    taskScheduler_->PostSyncTask(task, "PrepareTerminate:PID:" + std::to_string(persistentId));
+    }
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sceneSession is null, Id:%{public}d", persistentId);
+        isPrepareTerminate = false;
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
+    if (sceneSessionInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sceneSessionInfo is null, Id:%{public}d", persistentId);
+        isPrepareTerminate = false;
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->
+        PrepareTerminateAbilityBySCB(sceneSessionInfo, isPrepareTerminate);
+    TLOGI(WmsLogTag::WMS_MAIN, "Id:%{public}d isPrepareTerminate:%{public}d "
+        "errorCode:%{public}d", persistentId, isPrepareTerminate, errorCode);
     return WSError::WS_OK;
 }
 
