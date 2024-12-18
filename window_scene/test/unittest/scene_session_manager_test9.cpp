@@ -640,7 +640,7 @@ HWTEST_F(SceneSessionManagerTest9, SetSessionLabel02, Function | SmallTest | Lev
     sessionInfo.abilityName_ = "SetSessionLabel02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<IRemoteObject> token = new (std::nothrow) MockIRemoteObject();
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
     ASSERT_NE(nullptr, token);
     sceneSession->SetAbilityToken(token);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
@@ -789,14 +789,14 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen, Funct
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
 
-    sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> focusedSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(focusedSession, nullptr);
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     bool ret = ssm_->CheckClickFocusIsDownThroughFullScreen(focusedSession, sceneSession, FocusChangeReason::DEFAULT);
     ASSERT_EQ(ret, false);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     focusedSession->SetSessionProperty(property);
@@ -822,9 +822,9 @@ HWTEST_F(SceneSessionManagerTest9, ShiftFocus, Function | SmallTest | Level3)
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<SceneSession> focusedSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> focusedSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(focusedSession, nullptr);
-    sptr<SceneSession> nextSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> nextSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nextSession, nullptr);
     focusedSession->persistentId_ = 1;
     nextSession->persistentId_ = 4;
@@ -854,8 +854,8 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation, Function | SmallTes
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
-    sptr<SceneSession> sceneSession = new SceneSession(info, callback);
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
     windowId = 0;
 
@@ -883,8 +883,8 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallT
     AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
 
     SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
-    sptr<SceneSession> sceneSession = new SceneSession(info, callback);
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
     Session session(info);
     session.getStateFromManagerFunc_ = getStateTrue;
@@ -909,8 +909,8 @@ HWTEST_F(SceneSessionManagerTest9, GetLockScreenZorder, Function | SmallTest | L
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
-    sptr<SceneSession> sceneSession = new SceneSession(info, callback);
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
 
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
     auto ret = ssm_->GetLockScreenZorder();
@@ -955,8 +955,8 @@ HWTEST_F(SceneSessionManagerTest9, IsLastPiPWindowVisible01, Function | SmallTes
     WindowVisibilityState lastVisibilityState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
 
     SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> callback = new SceneSession::SpecificSessionCallback();
-    sptr<SceneSession> sceneSession = new SceneSession(info, callback);
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, nullptr));
 
     struct RSSurfaceNodeConfig config;

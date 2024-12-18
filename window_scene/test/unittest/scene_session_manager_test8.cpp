@@ -277,8 +277,8 @@ HWTEST_F(SceneSessionManagerTest8, NotifyUpdateRectAfterLayout, Function | Small
 HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest | Level3)
 {
     ssm_->remoteExtSessionMap_.clear();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    sptr<IRemoteObject> token = new IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(nullptr, iRemoteObjectMocker);
     ssm_->DestroyExtensionSession(iRemoteObjectMocker);
     ssm_->remoteExtSessionMap_.emplace(iRemoteObjectMocker, token);

@@ -32,7 +32,7 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
 
-    /**
+    /*
      * Window Hierarchy
      */
     WSError SetTopmost(bool topmost) override;
@@ -43,7 +43,7 @@ public:
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
 
-    /**
+    /*
      * PC Window
      */
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,

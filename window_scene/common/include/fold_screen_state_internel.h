@@ -100,6 +100,17 @@ public:
         return GetFoldType() == SECONDARY_FOLD_DISPLAY;
     }
 
+    static bool IsOuterScreen(FoldDisplayMode foldDisplayMode)
+    {
+        if (IsDualDisplayFoldDevice()) {
+            return foldDisplayMode == FoldDisplayMode::SUB;
+        }
+        if (IsSingleDisplayFoldDevice() || IsSingleDisplayPocketFoldDevice()) {
+            return foldDisplayMode == FoldDisplayMode::MAIN;
+        }
+        return false;
+    }
+
     static std::vector<std::string> StringSplit(const std::string& str, char delim)
     {
         std::size_t previous = 0;
@@ -165,6 +176,8 @@ public:
                 strs << "_bc";
             } else if (i == 1) {
                 strs << "_ab";
+            } else if (i == 1) {
+                strs << "_ab_anti";
             }
             strs << ": ";
             strs << std::to_string(str) << " ";

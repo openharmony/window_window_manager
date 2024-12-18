@@ -44,7 +44,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<SessionStageStub> sessionStageStub_ = new SessionStageMocker();
+    sptr<SessionStageStub> sessionStageStub_ = sptr<SessionStageMocker>::MakeSptr();
 };
 
 void SessionStageStubLifecycleTest::SetUpTestCase()

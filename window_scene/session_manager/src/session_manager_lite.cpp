@@ -223,12 +223,12 @@ void SessionManagerLite::ReregisterSessionListener()
     }
 
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
-    TLOGI(WmsLogTag::WMS_RECOVER, "listener count = %{public}" PRIu64,
+    TLOGI(WmsLogTag::WMS_RECOVER, "listener count=%{public}" PRIu64,
         static_cast<int64_t>(sessionListeners_.size()));
     for (const auto& listener : sessionListeners_) {
         auto ret = sceneSessionManagerLiteProxy->RegisterSessionListener(listener, true);
         if (ret != WSError::WS_OK) {
-            TLOGW(WmsLogTag::WMS_RECOVER, "failed, ret = %{public}" PRId32, ret);
+            TLOGW(WmsLogTag::WMS_RECOVER, "failed, ret=%{public}" PRId32, ret);
         }
     }
 }

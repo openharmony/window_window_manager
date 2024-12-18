@@ -215,7 +215,7 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource04, Function | Sma
  */
 HWTEST_F(SceneSessionManagerTest12, RequestKeyboardPanelSession, Function | SmallTest | Level2)
 {
-    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(nullptr, ssm);
     std::string panelName = "SystemKeyboardPanel";
     ASSERT_NE(nullptr, ssm->RequestKeyboardPanelSession(panelName, 0)); // 0 is screenId
@@ -233,11 +233,11 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | Sma
     SessionInfo keyboardInfo;
     keyboardInfo.abilityName_ = "CreateKeyboardPanelSession03";
     keyboardInfo.bundleName_ = "CreateKeyboardPanelSession03";
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(keyboardInfo, nullptr, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardInfo, nullptr, nullptr);
     ASSERT_NE(nullptr, keyboardSession);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
-    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(nullptr, ssm);
 
     // the keyboard panel enabled flag of ssm is false
@@ -250,7 +250,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | Sma
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
     // the keyboard session is system keyboard
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(property));
     ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
@@ -270,11 +270,11 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession04, Function | Sma
     SessionInfo keyboardInfo;
     keyboardInfo.abilityName_ = "CreateKeyboardPanelSession04";
     keyboardInfo.bundleName_ = "CreateKeyboardPanelSession04";
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(keyboardInfo, nullptr, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardInfo, nullptr, nullptr);
     ASSERT_NE(nullptr, keyboardSession);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
-    sptr<SceneSessionManager> ssm = new (std::nothrow) SceneSessionManager();
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(nullptr, ssm);
 
     // the keyboard panel enabled flag of ssm is true
@@ -297,7 +297,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession04, Function | Sma
 HWTEST_F(SceneSessionManagerTest12, CheckSystemWindowPermission02, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, ssm_);
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);

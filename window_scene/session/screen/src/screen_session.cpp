@@ -478,8 +478,8 @@ void ScreenSession::UpdatePropertyByActiveMode()
 ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
-    property_.SetBounds(updatedProperty.GetBounds());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
+    property_.SetBounds(updatedProperty.GetBounds());
     return property_;
 }
 
@@ -728,16 +728,16 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     }
 }
 
-void ScreenSession::SetPhysicalRotation(int rotation, FoldStatus foldStatus)
+void ScreenSession::SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode)
 {
     int32_t realRotation = static_cast<int32_t>(rotation);
     std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
+    bool isOuterScreen = FoldScreenStateInternel::IsOuterScreen(foldDisplayMode);
     int32_t offsetRotation = 0;
-    if (phyOffsets.size() == 1 || foldStatus == FoldStatus::FOLDED) {
+    if (phyOffsets.size() == 1 || isOuterScreen) {
         offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[0]));
     }
-    if ((foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) &&
-        phyOffsets.size() == 2) { // 2 is arg number
+    if (!isOuterScreen && phyOffsets.size() == 2) { // 2 is arg number
         offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[1]));
     }
     realRotation = (rotation + offsetRotation) % 360; // 360 is 360 degree

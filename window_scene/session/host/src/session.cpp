@@ -701,19 +701,6 @@ bool Session::GetSystemTouchable() const
     return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
-bool Session::GetRectChangeBySystem() const
-{
-    return rectChangeBySystem_.load();
-}
-
-void Session::SetRectChangeBySystem(bool rectChangeBySystem)
-{
-    if (rectChangeBySystem_.load() != rectChangeBySystem) {
-        rectChangeBySystem_.store(rectChangeBySystem);
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), rectChangeBySystem);
-    }
-}
-
 bool Session::IsSystemActive() const
 {
     return isSystemActive_;
@@ -1069,12 +1056,12 @@ WSError Session::UpdateOrientation()
 {
     TLOGD(WmsLogTag::DMS, "update orientation: id: %{public}d.", GetPersistentId());
     if (!IsSessionValid()) {
-        TLOGE(WmsLogTag::DMS, "update orientation failed because of session is invalid, id = %{public}d.",
+        TLOGE(WmsLogTag::DMS, "update orientation failed because of session is invalid, id=%{public}d.",
             GetPersistentId());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "update orientation failed because of sessionStage_ is nullptr, id = %{public}d.",
+        TLOGE(WmsLogTag::DMS, "update orientation failed because of sessionStage_ is nullptr, id=%{public}d.",
             GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -1137,7 +1124,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
-    TLOGI(WmsLogTag::WMS_MAIN, "windId: %{public}d, requestedOrientation: %{public}u,"
+    TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
         " defaultRequestedOrientation: %{public}u", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()));
@@ -1505,13 +1492,13 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
     PostTask([weakThis = wptr(this), isAttach]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGD(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        TLOGD(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
+        TLOGND(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
             session->GetPersistentId());
         if (!isAttach && session->detachCallback_ != nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_LIFE, "Session detach, persistentId:%{public}d", session->GetPersistentId());
             session->detachCallback_->OnPatternDetach(session->GetPersistentId());
             session->detachCallback_ = nullptr;
         }
@@ -1667,7 +1654,7 @@ WSError Session::TerminateSessionNew(
     auto task = [weakThis = wptr(this), abilitySessionInfo, needStartCaller, isFromBroker]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "session is null.");
+            TLOGNI(WmsLogTag::WMS_LIFE, "session is null.");
             return;
         }
         session->isTerminating_ = true;
@@ -1684,7 +1671,7 @@ WSError Session::TerminateSessionNew(
         if (session->terminateSessionFuncNew_) {
             session->terminateSessionFuncNew_(info, needStartCaller, isFromBroker);
         }
-        TLOGI(WmsLogTag::WMS_LIFE,
+        TLOGNI(WmsLogTag::WMS_LIFE,
             "TerminateSessionNew, id: %{public}d, needStartCaller: %{public}d, isFromBroker: %{public}d",
             session->GetPersistentId(), needStartCaller, isFromBroker);
     };
@@ -2263,7 +2250,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
     auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH = %{public}dx%{public}d, id: %{public}d",
+        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH=%{public}dx%{public}d, id: %{public}d",
             pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_);
         if (notifySessionSnapshotFunc_) {
             notifySessionSnapshotFunc_(persistentId_);
@@ -2282,7 +2269,7 @@ void Session::SaveSnapshot(bool useFfrt)
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
@@ -2296,7 +2283,7 @@ void Session::SaveSnapshot(bool useFfrt)
         }
         std::function<void()> func = [weakThis]() {
             if (auto session = weakThis.promote()) {
-                TLOGI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
                 std::lock_guard<std::mutex> lock(session->snapshotMutex_);
                 session->snapshot_ = nullptr;
             }
@@ -2331,7 +2318,7 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
             return;
         }
         session->NotifySessionStateChange(changedState);
-        TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, state_: %{public}d, changedState: %{public}d",
+        TLOGNI(WmsLogTag::WMS_LIFE, "id: %{public}d, state_: %{public}d, changedState: %{public}d",
             session->GetPersistentId(), session->GetSessionState(), changedState);
     }, "SetSessionStateChangeListenser");
 }
@@ -3274,7 +3261,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         auto session = weakThis.promote();
         if (session == nullptr) {
             if (isAttach) {
-                TLOGE(WmsLogTag::WMS_LIFE, "Window attach state and session"
+                TLOGNE(WmsLogTag::WMS_LIFE, "Window attach state and session"
                     "state mismatch, session is nullptr, attach:%{public}d", isAttach);
             }
             return;
@@ -3282,7 +3269,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
         // Skip state detect when screen locked.
         if (session->isScreenLockedCallback_ && !session->isScreenLockedCallback_()) {
             if (!session->IsStateMatch(isAttach)) {
-                TLOGE(WmsLogTag::WMS_LIFE, "Window attach state and session state mismatch, "
+                TLOGNE(WmsLogTag::WMS_LIFE, "Window attach state and session state mismatch, "
                     "attach:%{public}d, sessioniState:%{public}d, persistenId:%{public}d, bundleName:%{public}s",
                     isAttach, static_cast<uint32_t>(session->GetSessionState()),
                     session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());

@@ -41,8 +41,8 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-    sptr<ISessionStage> sessionStage = new SessionStageMocker();
-    sptr<WindowEventChannelStub> windowEventChannelStub_ = new WindowEventChannelMocker(sessionStage);
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<WindowEventChannelStub> windowEventChannelStub_ = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
 };
 
 void WindowEventChannelMockStubTest::SetUpTestCase()

@@ -81,6 +81,7 @@ enum class ListenerFuncType : uint32_t {
     TITLE_DOCK_HOVER_SHOW_CB,
     SET_WINDOW_RECT_AUTO_SAVE_CB,
     UPDATE_APP_USE_CONTROL_CB,
+    SESSION_DISPLAY_ID_CHANGE_CB,
 };
 
 class SceneSession;
@@ -125,7 +126,6 @@ private:
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
     static napi_value SetZOrder(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
-    static napi_value SetRectChangeBySystem(napi_env env, napi_callback_info info);
     static napi_value SetSystemActive(napi_env env, napi_callback_info info);
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
@@ -192,7 +192,6 @@ private:
     napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
     napi_value OnSetZOrder(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
-    napi_value OnSetRectChangeBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetSystemActive(napi_env env, napi_callback_info info);
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
@@ -256,6 +255,7 @@ private:
     void ProcessCreateSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
+    void ProcessSessionDisplayIdChangeRegister();
     void ProcessSessionPiPControlStatusChangeRegister();
     void ProcessAutoStartPiPStatusChangeRegister();
     void ProcessRaiseToTopRegister();
@@ -304,6 +304,7 @@ private:
     void OnSessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
+    void OnSessionDisplayIdChange(uint64_t displayId);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority);
     void OnRaiseToTop();

@@ -191,8 +191,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground05, Function | SmallTest | Level2)
     info.bundleName_ = "Foreground05";
 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     session->Session::SetSessionState(SessionState::STATE_CONNECT);
     session->Session::isActive_ = true;
     session->SetLeashWinSurfaceNode(nullptr);
@@ -796,7 +795,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
 
     auto result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1, "session2");
-    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1, "session1");

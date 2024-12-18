@@ -1031,7 +1031,7 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
     session_->RectCheckProcess();
 
     session_->property_->displayId_ = 0;
-    sptr<ScreenSession> screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(0, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     ASSERT_NE(&screenProperty, nullptr);
