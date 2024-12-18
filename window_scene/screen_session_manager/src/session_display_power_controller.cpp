@@ -57,8 +57,7 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
             ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(displayPowerEvent,
                 EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
         }
-        if (isSuspendBegin_)
-        {
+        if (isSuspendBegin_) {
             WaitScreenOffNotify(state);
         }
         isSuspendBegin_ = false;
