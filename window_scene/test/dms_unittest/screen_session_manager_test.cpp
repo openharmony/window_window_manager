@@ -1230,6 +1230,11 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayEvent, Function | SmallTest | Le
     event = DisplayEvent::SCREEN_LOCK_FINGERPRINT;
     ssm_->NotifyDisplayEvent(event);
     ASSERT_EQ(ssm_->gotScreenlockFingerprint_, true);
+
+    ssm_->gotScreenOffNotify_ = false;
+    event = DisplayEvent::SCREEN_LOCK_DOZE_FINISH;
+    ssm_->NotifyDisplayEvent(event);
+    ASSERT_EQ(ssm_->gotScreenOffNotify_, true);
 }
 
 /**

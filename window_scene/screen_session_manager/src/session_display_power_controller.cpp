@@ -85,7 +85,9 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
         }
         case DisplayState::DOZE:
         case DisplayState::OFF: {
-            HandleSetDisplayStateOff(state);
+            if (HandleSetDisplayStateOff(state)) {
+                return false;
+            }
             break;
         }
         case DisplayState::DOZE_SUSPEND: {

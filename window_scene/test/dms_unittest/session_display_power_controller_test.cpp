@@ -107,6 +107,40 @@ HWTEST_F(SessionDisplayPowerControllerTest, SetDisplayState, Function | SmallTes
     state = DisplayState::OFF;
     result = controller.SetDisplayState(state);
     EXPECT_TRUE(result);
+    state = DisplayState::DOZE;
+    result = controller.SetDisplayState(state);
+    EXPECT_TRUE(result);
+    state = DisplayState::DOZE_SUSPEND;
+    result = controller.SetDisplayState(state);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleSetDisplayStateOff
+ * @tc.desc: HandleSetDisplayStateOff func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionDisplayPowerControllerTest, HandleSetDisplayStateOff, Function | SmallTest | Level1)
+{
+    DisplayState state = DisplayState::UNKNOWN;
+    SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
+        sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
+        EXPECT_TRUE(true);
+    });
+    state = DisplayState::OFF;
+    result = controller.HandleSetDisplayStateOff(state);
+    EXPECT_TRUE(result);
+    controller.needCancelNotify_ = true;
+    result = controller.HandleSetDisplayStateOff(state);
+    EXPECT_TRUE(result);
+    controller.needCancelNotify_ = false;
+    controller.canceledSuspend_ = true;
+    result = controller.HandleSetDisplayStateOff(state);
+    EXPECT_TRUE(result);
+    controller.hasSuspendBegin_ = true;
+    controller.canceledSuspend_ = false;
+    result = controller.HandleSetDisplayStateOff(state);
+    EXPECT_FALSE(result);
 }
 
 /**
