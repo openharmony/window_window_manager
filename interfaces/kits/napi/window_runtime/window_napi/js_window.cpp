@@ -54,7 +54,6 @@ constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_ONE = 1;
 constexpr size_t ARG_COUNT_TWO = 2;
-constexpr size_t ARG_COUNT_THREE = 3;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
 constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
