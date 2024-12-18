@@ -80,6 +80,7 @@ const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 const std::string SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
 const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
+const std::string SESSION_DISPLAY_ID_CHANGE_CB = "sessionDisplayIdChange";
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -144,6 +145,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB, ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB},
     {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
+    {SESSION_DISPLAY_ID_CHANGE_CB,          ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -227,29 +229,29 @@ static void SetWindowSizeAndPosition(napi_env env, napi_value objValue, const sp
 {
     auto abilityInfo = session->GetSessionInfo().abilityInfo;
     if (!abilityInfo) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "abilityInfo is nullptr");
         return;
     }
     uint32_t value = 0;
-    auto metadata = abilityInfo->metadata;
-    for (auto item : metadata) {
+    for (const auto& item : abilityInfo->metadata) {
         if (item.name == "ohos.ability.window.width") {
             if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.width = %{public}d", value);
+                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.width=%{public}d", value);
                 napi_set_named_property(env, objValue, "windowWidth", CreateJsValue(env, value));
             }
         } else if (item.name == "ohos.ability.window.height") {
             if (GetIntValueFromString(item.value, value) == WSError::WS_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.height = %{public}d", value);
+                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.height=%{public}d", value);
                 napi_set_named_property(env, objValue, "windowHeight", CreateJsValue(env, value));
             }
         } else if (item.name == "ohos.ability.window.left") {
             if (item.value.size() > 0) {
-                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.left = %{public}s", item.value.c_str());
+                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.left=%{public}s", item.value.c_str());
                 napi_set_named_property(env, objValue, "windowLeft", CreateJsValue(env, item.value));
             }
         } else if (item.name == "ohos.ability.window.top") {
             if (item.value.size() > 0) {
-                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.top = %{public}s", item.value.c_str());
+                TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ohos.ability.window.top=%{public}s", item.value.c_str());
                 napi_set_named_property(env, objValue, "windowTop", CreateJsValue(env, item.value));
             }
         }
@@ -1025,6 +1027,24 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
     }
     session->SetSessionRectChangeCallback(func);
     WLOGFD("success");
+}
+
+void JsSceneSession::ProcessSessionDisplayIdChangeRegister()
+{
+    NotifySessionDisplayIdChangeFunc func = [weakThis = wptr(this)](uint64_t displayId) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "ProcessSessionDisplayIdChangeRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSessionDisplayIdChange(displayId);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetSessionDisplayIdChangeCallback(func);
 }
 
 void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
@@ -2025,7 +2045,7 @@ napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_c
 
 napi_value JsSceneSession::SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSyncDefaultRequestedOrientation(env, info) : nullptr;
 }
@@ -2189,12 +2209,12 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
     }
     auto iterFunctionType = ListenerFuncMap.find(cbType);
     if (iterFunctionType == ListenerFuncMap.end()) {
-        WLOGFE("callback type is not supported, type = %{public}s", cbType.c_str());
+        WLOGFE("callback type is not supported, type=%{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
     ListenerFuncType listenerFuncType = iterFunctionType->second;
     if (IsCallbackRegistered(env, cbType, value)) {
-        WLOGFE("callback is registered, type = %{public}s", cbType.c_str());
+        WLOGFE("callback is registered, type=%{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
@@ -2213,7 +2233,7 @@ napi_value JsSceneSession::OnRegisterCallback(napi_env env, napi_callback_info i
         jsCbMap_[cbType] = callbackRef;
     }
     ProcessRegisterCallback(listenerFuncType);
-    WLOGFD("end, type = %{public}s", cbType.c_str());
+    WLOGFD("end, type=%{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
@@ -2240,6 +2260,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_RECT_CHANGE_CB):
             ProcessSessionRectChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB):
+            ProcessSessionDisplayIdChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB):
             ProcessSessionPiPControlStatusChangeRegister();
@@ -2934,6 +2957,27 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason re
     taskScheduler_->PostMainThreadTask(task, rectInfo);
 }
 
+void JsSceneSession::OnSessionDisplayIdChange(uint64_t displayId)
+{
+    auto task = [weakThis = wptr(this), displayId, persistentId = persistentId_, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "OnSessionDisplayIdChange jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_DISPLAY_ID_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsSessionDisplayIdObj = CreateJsValue(env, static_cast<int32_t>(displayId));
+        napi_value argv[] = { jsSessionDisplayIdObj };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
 void JsSceneSession::OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, status:%{public}d", controlType, status);
@@ -3514,7 +3558,7 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
 
 void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName = %{public}s, abilityName = %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
     bool needRemoveSession = false;
     if (!needStartCaller && !isFromBroker) {
@@ -3550,7 +3594,7 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
 
 void JsSceneSession::TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName = %{public}s, abilityName = %{public}s, terminateType = %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s, terminateType=%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), static_cast<int32_t>(terminateType));
 
     auto task = [weakThis = wptr(this), persistentId = persistentId_, terminateType, env = env_] {
@@ -3670,7 +3714,7 @@ void JsSceneSession::UpdateSessionIcon(const std::string& iconPath)
 
 void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemoveSession, bool startFail)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName = %{public}s, abilityName = %{public}s, startFail = %{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s, startFail=%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), startFail);
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
@@ -3706,7 +3750,7 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
 
 void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName = %{public}s, abilityName = %{public}s",
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s",
         info.bundleName_.c_str(), info.abilityName_.c_str());
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
@@ -3740,7 +3784,7 @@ void JsSceneSession::PendingSessionToForeground(const SessionInfo& info)
 void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE,
-        "bundleName = %{public}s, abilityName = %{public}s, shouldBackToCaller = %{public}d",
+        "bundleName=%{public}s, abilityName=%{public}s, shouldBackToCaller=%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), shouldBackToCaller);
 
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
@@ -4194,7 +4238,7 @@ napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
 
     bool touchable = false;
     if (!ConvertFromJsValue(env, argv[0], touchable)) {
-        WLOGFE("Failed to  convert parameter to touchable");
+        WLOGFE("Failed to convert parameter to touchable");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -4919,7 +4963,13 @@ napi_value JsSceneSession::OnSyncDefaultRequestedOrientation(napi_env env, napi_
         TLOGE(WmsLogTag::WMS_SCB, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SetDefaultRequestedOrientation(static_cast<Orientation>(defaultRequestedOrientation));
+    auto windowOrientation = static_cast<Orientation>(defaultRequestedOrientation);
+    if (windowOrientation < Orientation::BEGIN || windowOrientation > Orientation::END) {
+        TLOGE(WmsLogTag::WMS_SCB, "[NAPI]Orientation %{public}u invalid, id:%{public}d",
+            defaultRequestedOrientation, persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetDefaultRequestedOrientation(windowOrientation);
     return NapiGetUndefined(env);
 }
 
@@ -5366,7 +5416,6 @@ napi_value JsSceneSession::OnSetBehindWindowFilterEnabled(napi_env env, napi_cal
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
     bool enabled = true;
     if (!ConvertFromJsValue(env, argv[0], enabled)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to enabled");

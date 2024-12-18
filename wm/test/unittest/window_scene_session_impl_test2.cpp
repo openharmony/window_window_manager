@@ -1663,7 +1663,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible01, Function | SmallT
     window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { false, false, false, false};
+    window->windowTitleVisibleFlags_ = { false, false, false, false };
     bool hideMaximizeButton = false;
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
@@ -1692,7 +1692,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible02, Function | SmallT
     window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { true, true, true, true};
+    window->windowTitleVisibleFlags_ = { true, true, true, true };
     bool hideMaximizeButton = false;
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
@@ -1721,7 +1721,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTitleButtonVisible03, Function | SmallT
     window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
-    window->windowTitleVisibleFlags_ = { false, false, false, false};
+    window->windowTitleVisibleFlags_ = { false, false, false, false };
     bool hideMaximizeButton = true;
     bool hideMinimizeButton = true;
     bool hideSplitButton = true;

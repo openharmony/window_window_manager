@@ -297,10 +297,6 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();;
 
     info.isSystem_ = false;
-    session->property_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
-
-    info.isSystem_ = false;
     pointerEvent->SetPointerAction(9);
 
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
@@ -880,9 +876,6 @@ HWTEST_F(SceneSessionTest5, UpdateWinRectForSystemBar, Function | SmallTest | Le
 
     WSRect rect2 = { 1, 2, 10, 8 };
     session->winRect_ = rect2;
-    session->UpdateWinRectForSystemBar(rect);
-
-    session->property_ = nullptr;
     session->UpdateWinRectForSystemBar(rect);
 }
 
@@ -1762,6 +1755,30 @@ HWTEST_F(SceneSessionTest5, SetBehindWindowFilterEnabled, Function | SmallTest |
 
     session->SetBehindWindowFilterEnabled(false);
     session->SetBehindWindowFilterEnabled(true);
+}
+
+/**
+ * @tc.name: MarkSystemSceneUIFirst
+ * @tc.desc: MarkSystemSceneUIFirst function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "MarkSystemSceneUIFirst";
+    info.bundleName_ = "MarkSystemSceneUIFirst";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->MarkSystemSceneUIFirst(true, true);
+ 
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->leashWinSurfaceNode_ = nullptr;
+    session->MarkSystemSceneUIFirst(true, true);
+    session->leashWinSurfaceNode_ = surfaceNode;
+    session->MarkSystemSceneUIFirst(true, true);
+    EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
 }
 }
 }

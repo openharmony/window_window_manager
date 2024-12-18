@@ -24,6 +24,7 @@ group("systemtest") {
     ":wms_window_gesture_navigation_enabled_test",
     ":wms_window_input_method_test",
     ":wms_window_input_test",
+    ":wms_window_layout_integration_test",
     ":wms_window_mode_support_info_test",
     ":wms_window_nointeraction_listener_test",
     ":wms_window_occupied_area_change_test",
@@ -49,7 +50,6 @@ group("systemtest") {
       ":wms_window_focus_test",
       ":wms_window_gamut_test",
       ":wms_window_immersive_test",
-      ":wms_window_layout_integration_test",
       ":wms_window_layout_test",
       ":wms_window_move_drag_test",
       ":wms_window_multi_ability_st_test",
@@ -472,7 +472,11 @@ ohos_systemtest("wms_window_mode_support_info_test") {
 ohos_systemtest("wms_window_app_floating_window_test") {
   module_out_path = module_out_path
 
-  sources = [ "window_app_floating_window_test.cpp" ]
+  if (!window_manager_use_sceneboard) {
+    sources = [ "window_app_floating_window_test.cpp" ]
+  } else {
+    sources = [ "window_app_floating_window_scb_test.cpp" ]
+  }
 
   sanitize = {
     cfi = true

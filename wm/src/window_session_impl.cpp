@@ -274,7 +274,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
             rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
             break;
         case WindowType::WINDOW_TYPE_UI_EXTENSION:
-            TLOGI(WmsLogTag::WMS_UIEXT, "uiExtensionUsage = %{public}u", property_->GetUIExtensionUsage());
+            TLOGI(WmsLogTag::WMS_UIEXT, "uiExtensionUsage=%{public}u", property_->GetUIExtensionUsage());
             if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
                 rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_SECURE_NODE;
             } else {
@@ -427,7 +427,7 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
         }
         uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
         property_->SetAccessTokenId(accessTokenId);
-        TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId = %{private}u", accessTokenId);
+        TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId=%{private}u", accessTokenId);
     }
     return WMError::WM_OK;
 }
@@ -1089,7 +1089,7 @@ bool WindowSessionImpl::IsFocused() const
         return false;
     }
 
-    TLOGD(WmsLogTag::WMS_FOCUS, "window id = %{public}d, isFocused = %{public}d", GetPersistentId(), isFocused_.load());
+    TLOGD(WmsLogTag::WMS_FOCUS, "window id=%{public}d, isFocused=%{public}d", GetPersistentId(), isFocused_.load());
     return isFocused_;
 }
 
@@ -1616,7 +1616,7 @@ WMError WindowSessionImpl::SetFocusable(bool isFocusable)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "set focusable: windowId = %{public}d, isFocusable = %{public}d",
+    TLOGI(WmsLogTag::WMS_FOCUS, "set focusable: windowId=%{public}d, isFocusable=%{public}d",
         property_->GetPersistentId(), isFocusable);
     property_->SetFocusable(isFocusable);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
@@ -1625,7 +1625,7 @@ WMError WindowSessionImpl::SetFocusable(bool isFocusable)
 bool WindowSessionImpl::GetFocusable() const
 {
     bool isFocusable = property_->GetFocusable();
-    TLOGD(WmsLogTag::WMS_FOCUS, "get focusable: windowId = %{public}d, isFocusable = %{public}d",
+    TLOGD(WmsLogTag::WMS_FOCUS, "get focusable: windowId=%{public}d, isFocusable=%{public}d",
         property_->GetPersistentId(), isFocusable);
     return isFocusable;
 }
@@ -1669,7 +1669,7 @@ WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
     property_->SetMainWindowTopmost(isTopmost);
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
-    TLOGD(WmsLogTag::WMS_HIERARCHY, "tokenId = %{private}u, isTopmost = %{public}d", accessTokenId, isTopmost);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "tokenId=%{private}u, isTopmost=%{public}d", accessTokenId, isTopmost);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
 }
 
@@ -2749,7 +2749,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (GetUIContentSharedPtr() == nullptr || !IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible};
+    windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible };
     UpdateTitleButtonVisibility();
     return WMError::WM_OK;
 }
@@ -2810,7 +2810,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     }
 
     if (vsyncStation_ != nullptr) {
-        TLOGD(WmsLogTag::WMS_MAIN, "enable FrameRateLinker, linkerId = %{public}" PRIu64,
+        TLOGD(WmsLogTag::WMS_MAIN, "enable FrameRateLinker, linkerId=%{public}" PRIu64,
             vsyncStation_->GetFrameRateLinkerId());
         vsyncStation_->SetFrameRateLinkerEnable(true);
         if (WindowHelper::IsMainWindow(GetType())) {
@@ -2834,7 +2834,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     }
 
     if (vsyncStation_ != nullptr) {
-        TLOGD(WmsLogTag::WMS_MAIN, "disable FrameRateLinker, linkerId = %{public}" PRIu64,
+        TLOGD(WmsLogTag::WMS_MAIN, "disable FrameRateLinker, linkerId=%{public}" PRIu64,
             vsyncStation_->GetFrameRateLinkerId());
         vsyncStation_->SetFrameRateLinkerEnable(false);
         if (WindowHelper::IsMainWindow(GetType())) {
@@ -4152,7 +4152,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
         windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        if (IsPcOrPadFreeMultiWindowMode()) {
+        if (IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14) { // 14: isolated version
             windowStatus = GetImmersiveModeEnabledState() ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
                 WindowStatus::WINDOW_STATUS_MAXIMIZE;
         } else {
@@ -4195,7 +4195,7 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
             "BUNDLE_NAME", property_->GetSessionInfo().bundleName_,
             "WINDOW_MODE", static_cast<int32_t>(mode));
         if (ret) {
-            TLOGW(WmsLogTag::WMS_FOCUS, "write event fail, WINDOW_STATUS_CHANGE, ret = %{public}d", ret);
+            TLOGW(WmsLogTag::WMS_FOCUS, "write event fail, WINDOW_STATUS_CHANGE, ret=%{public}d", ret);
         }
     }
 }
@@ -4482,6 +4482,16 @@ WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
     TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
     property_->SetDragEnabled(enableDrag);
     return WSError::WS_OK;
+}
+
+void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
+{
+    targetAPIVersion_ = targetAPIVersion;
+}
+
+uint32_t WindowSessionImpl::GetTargetAPIVersion() const
+{
+    return targetAPIVersion_;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -230,7 +230,7 @@ void WindowManagerLite::Impl::NotifyAccessibilityWindowInfo(const std::vector<sp
 
 void WindowManagerLite::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Camera window, accessTokenId = %{public}u, isShowing = %{public}u",
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Camera window, accessTokenId=%{public}u, isShowing=%{public}u",
         accessTokenId, isShowing);
     std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangeListeners;
     {

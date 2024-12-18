@@ -354,6 +354,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+        SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
@@ -467,7 +468,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     }
     RecoverSessionListener();
     TLOGI(WmsLogTag::WMS_RECOVER,
-        "over, windowName = %{public}s, persistentId = %{public}d",
+        "over, windowName=%{public}s, persistentId=%{public}d",
         GetWindowName().c_str(), GetPersistentId());
     return WMError::WM_OK;
 }
@@ -582,8 +583,10 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (GetHostSession()) { // main window
         SetDefaultDisplayIdIfNeed();
         ret = Connect();
+        SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
+        TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
-        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type = %{public}d", GetType());
+        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}d", GetType());
         isSpecificSession = true;
         const auto& type = GetType();
         if (WindowHelper::IsSystemWindow(type)) {
@@ -674,7 +677,7 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
 
 void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSession)
 {
-    TLOGD(WmsLogTag::WMS_RECOVER, "Id = %{public}d, isSpecificSession = %{public}s",
+    TLOGD(WmsLogTag::WMS_RECOVER, "Id=%{public}d, isSpecificSession=%{public}s",
         GetPersistentId(), isSpecificSession ? "true" : "false");
 
     if (GetType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -702,7 +705,7 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
         auto ret = isSpecificSession ? promoteThis->RecoverAndConnectSpecificSession() :
 			promoteThis->RecoverAndReconnectSceneSession();
 
-        TLOGD(WmsLogTag::WMS_RECOVER, "Recover session over, ret = %{public}d", ret);
+        TLOGD(WmsLogTag::WMS_RECOVER, "Recover session over, ret=%{public}d", ret);
         return ret;
     };
     SingletonContainer::Get<WindowAdapter>().RegisterSessionRecoverCallbackFunc(GetPersistentId(), callbackFunc);
@@ -1994,7 +1997,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
         property_->SetIsLayoutFullScreen(preStatus);
-        TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion win %{public}u errCode%{public}d",
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, win %{public}u errCode %{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
     enableImmersiveMode_ = status;
@@ -2093,7 +2096,7 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
         TLOGI(WmsLogTag::WMS_IMMS, "only main window support");
         return WMError::WM_OK;
     }
-    if (!((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM))) {
+    if (!(state_ > WindowState::STATE_INITIAL && state_ < WindowState::STATE_BOTTOM)) {
         TLOGE(WmsLogTag::WMS_IMMS, "win %{public}u invalid state", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     } else if (GetSystemBarPropertyByType(type) == property &&
@@ -2139,9 +2142,8 @@ WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType
         current.settingFlag_ = static_cast<SystemBarSettingFlag>(
             static_cast<uint32_t>(propertyIter->second.settingFlag_) |
             static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
-        TLOGI(WmsLogTag::WMS_IMMS,
-            "win [%{public}u %{public}s] set status bar fg %{public}u",
-            GetWindowId(), GetWindowName().c_str(), current.contentColor_);
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u set status bar content color %{public}u",
+            GetWindowId(), current.contentColor_);
         return SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
     }
     return WMError::WM_OK;
@@ -2181,7 +2183,7 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
 
     WMError ret = SetLayoutFullScreenByApiVersion(status);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetLayoutFullScreenByApiVersion win %{public}u errCode %{public}d",
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, win %{public}u errCode %{public}d",
             GetWindowId(), static_cast<int32_t>(ret));
     }
 
@@ -3287,7 +3289,7 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
     }
     std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap != nullptr) {
-        WLOGFD("Snapshot succeed, save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
         WLOGFE("Failed to get pixelmap, return nullptr!");
     }
@@ -4306,7 +4308,7 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 
 bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enableImmersiveMode = %{public}u",
+    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enableImmersiveMode=%{public}u",
         GetWindowId(), enableImmersiveMode_);
     if (IsWindowSessionInvalid()) {
         return false;

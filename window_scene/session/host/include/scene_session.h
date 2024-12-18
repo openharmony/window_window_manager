@@ -301,6 +301,12 @@ public:
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
 
     /*
+     * PC Window Layout
+     */
+    void SetIsLayoutFullScreen(bool isLayoutFullScreen);
+    bool IsLayoutFullScreen() const;
+
+    /*
      * Window Immersive
      */
     WSError OnNeedAvoid(bool status) override;
@@ -325,6 +331,7 @@ public:
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
     void SetSessionEventParam(SessionEventParam param);
     void SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func);
+    void SetSessionDisplayIdChangeCallback(const NotifySessionDisplayIdChangeFunc& func);
     void SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func);
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
@@ -666,6 +673,15 @@ protected:
         const RectAnimationConfig& rectAnimationConfig = {});
     virtual void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
         const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig = {});
+    void NotifySessionDisplayIdChange(uint64_t displayId);
+    void CheckAndMoveDisplayIdRecursively(uint64_t displayId);
+    void SetShouldFollowParentWhenShow(bool flag)
+    {
+        shouldFollowParentWhenShow_ = flag;
+    }
+    void CheckSubSessionShouldFollowParent(uint64_t displayId);
+    std::atomic<bool> shouldFollowParentWhenShow_ = true;
+
 
     /*
      * Window Lifecycle
@@ -734,6 +750,11 @@ private:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
+
+    /*
+     * UIExtension
+     */
+    void UpdateAllModalUIExtensions(const WSRect& globalRect);
 
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
@@ -934,7 +955,6 @@ private:
         bool isGlobal = false, bool needFlush = true);
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
-    std::shared_ptr<RSProperty<bool>> behindWindowFilterEnabledProperty_; // Only accessed on main thread
     std::shared_ptr<RSBehindWindowFilterEnabledModifier>
         behindWindowFilterEnabledModifier_; // Only accessed on main thread
 
@@ -944,6 +964,11 @@ private:
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
+
+    /*
+     * PC Window Layout
+     */
+    bool isLayoutFullScreen_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
