@@ -111,7 +111,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             return;
         }
 
-        TLOGND(WmsLogTag::WMS_PATTERN, "Save snapshot begin");
+        TLOGNI(WmsLogTag::WMS_PATTERN, "Save snapshot begin");
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SaveSnapshot %s", scenePersistence->snapshotPath_.c_str());
         OHOS::Media::ImagePacker imagePacker;
         OHOS::Media::PackOption option;
@@ -143,7 +143,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             resetSnapshotCallback();
             scenePersistence->isSavingSnapshot_.store(false);
         }
-        TLOGND(WmsLogTag::WMS_PATTERN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
+        TLOGNI(WmsLogTag::WMS_PATTERN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
     snapshotFfrtHelper_->SubmitTask(std::move(task), "SaveSnapshot" + snapshotPath_);
 }
@@ -244,7 +244,7 @@ bool ScenePersistence::IsSnapshotExisted() const
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IsSnapshotExisted");
     struct stat buf;
     if (stat(snapshotPath_.c_str(), &buf)) {
-        TLOGD(WmsLogTag::PATTERN, "Snapshot file %{public}s does not exist", snapshotPath_.c_str());
+        TLOGD(WmsLogTag::WMS_PATTERN, "Snapshot file %{public}s does not exist", snapshotPath_.c_str());
         return false;
     }
     return S_ISREG(buf.st_mode);
@@ -254,7 +254,7 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
     const float newScale) const
 {
     if (!IsSnapshotExisted()) {
-        TLOGE(WmsLogTag::PATTERN, "local snapshot pic is not existed");
+        TLOGE(WmsLogTag::WMS_PATTERN, "local snapshot pic is not existed");
         return nullptr;
     }
 
@@ -264,7 +264,7 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
     std::lock_guard lock(savingSnapshotMutex_);
     auto imageSource = Media::ImageSource::CreateImageSource(snapshotPath_, sourceOpts, errorCode);
     if (!imageSource) {
-        TLOGE(WmsLogTag::PATTERN, "create image source fail, errCode : %{public}d", errorCode);
+        TLOGE(WmsLogTag::WMS_PATTERN, "create image source fail, errCode : %{public}u", errorCode);
         return nullptr;
     }
 
