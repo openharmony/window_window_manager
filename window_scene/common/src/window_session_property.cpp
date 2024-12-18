@@ -1272,7 +1272,7 @@ bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
         TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
         return false;
     }
-    bool ret = parcel.WriteUint64(static_cast<uint64_t>(persistentId_));
+    bool ret = parcel.WriteUint32(static_cast<uint32_t>(persistentId_));
     return ret && (this->*(funcIter->second))(parcel);
 }
 
