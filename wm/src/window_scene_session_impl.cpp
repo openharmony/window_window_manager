@@ -2142,7 +2142,7 @@ WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType
         current.settingFlag_ = static_cast<SystemBarSettingFlag>(
             static_cast<uint32_t>(propertyIter->second.settingFlag_) |
             static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u set status bar foreground %{public}u",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u set status bar content color %{public}u",
             GetWindowId(), current.contentColor_);
         return SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
     }
