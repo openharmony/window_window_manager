@@ -671,7 +671,6 @@ HWTEST_F(SessionStageStubTest, HandleNotifyKeyboardPanelInfoChange, Function | S
     data.WriteParcelable(keyboardPanelInfo);
     ASSERT_NE(sessionStageStub_, nullptr);
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-    delete keyboardPanelInfo;
 }
 
 /**
