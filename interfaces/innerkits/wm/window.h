@@ -822,6 +822,20 @@ public:
      * @param status if true, hide status bar and nav bar; Otherwise, show status bar and nav bar
      * @return WMError
      */
+
+    /**
+     * @brief Set whether the title bar and dock bar will show, when the mouse hovers over hot area.
+     *
+     * @param isTitleHoverShown
+     * @param isDockHoverShown
+     * @return WMError
+     */
+    virtual WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
+        bool isDockHoverShown = true)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     virtual WMError SetFullScreen(bool status) { return WMError::WM_OK; }
     /**
      * @brief destroy window
@@ -1932,9 +1946,11 @@ public:
      * @param isMaximizeVisible Display maximize button if true, or hide maximize button if false.
      * @param isMinimizeVisible Display minimize button if true, or hide minimize button if false.
      * @param isSplitVisible Display split button if true, or hide split button if false.
+     * @param isCloseVisible Display close button if true, or hide close button if false.
      * @return Errorcode of window.
      */
-    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible)
+    virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+        bool isCloseVisible)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2063,6 +2079,22 @@ public:
      * @return WMError
      */
     virtual WMError Recover(uint32_t reason) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set to automatically save the window rect.
+     *
+     * @param enabled Enable the window rect auto-save if true, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether the auto-save the window rect is enabled or not.
+     *
+     * @param enabled True means the window rect auto-save is enabled, otherwise means the opposite.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get the rect of host window.

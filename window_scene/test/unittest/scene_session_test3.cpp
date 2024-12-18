@@ -305,6 +305,7 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
     sceneSession->isKeyboardPanelEnabled_ = true;
+    sceneSession->isScbCoreEnabled_ = false;
     ASSERT_EQ(WSError::WS_OK,
         sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
 
@@ -501,6 +502,27 @@ HWTEST_F(SceneSessionTest3, UpdateScaleInner, Function | SmallTest | Level2)
     EXPECT_EQ(true, res);
     res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
     EXPECT_EQ(false, res);
+}
+
+/**
+ * @tc.name: SetWindowRectAutoSaveCallback
+ * @tc.desc: SetWindowRectAutoSaveCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetWindowRectAutoSaveCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowRectAutoSaveCallback";
+    info.bundleName_ = "SetWindowRectAutoSaveCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    NotifySetWindowRectAutoSaveFunc func1 = [](bool enabled) {
+        return;
+    };
+    sceneSession->SetWindowRectAutoSaveCallback(std::move(func1));
+    ASSERT_NE(nullptr, sceneSession->onSetWindowRectAutoSaveFunc_);
 }
 }
 }
