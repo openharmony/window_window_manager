@@ -2714,29 +2714,29 @@ void ScreenSessionManager::NotifyDisplayEvent(DisplayEvent event)
         } else {
             isScreenLockSuspend_ = true;
         }
-        SetGotOffAndWakeUpBlockCV();
+        SetGotScreenOffAndWakeUpBlock();
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_OFF) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock off");
         isScreenLockSuspend_ = false;
         TLOGI(WmsLogTag::DMS, "[UL_POWER]isScreenLockSuspend__  is false");
-        SetGotOffAndWakeUpBlockCV();
+        SetGotScreenOffAndWakeUpBlock();
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_FINGERPRINT) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock fingerprint");
         gotScreenlockFingerprint_ = true;
-        SetGotOffAndWakeUpBlockCV();
+        SetGotScreenOffAndWakeUpBlock();
     }
 
     if (event == DisplayEvent::SCREEN_LOCK_DOZE_FINISH) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screen lock doze finish");
-        SetGotOffAndWakeUpBlockCV();
+        SetGotScreenOffAndWakeUpBlock();
     }
 }
 
-void ScreenSessionManager::SetGotOffAndWakeUpBlockCV()
+void ScreenSessionManager::SetGotScreenOffAndWakeUpBlock()
 {
     gotScreenOffNotify_ = true;
     if (needScreenOffNotify_) {

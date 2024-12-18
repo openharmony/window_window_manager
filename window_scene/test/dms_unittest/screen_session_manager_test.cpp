@@ -3483,6 +3483,21 @@ HWTEST_F(ScreenSessionManagerTest, GetPowerStatus05, Function | SmallTest | Leve
     ssm_->GetPowerStatus(ScreenPowerState::POWER_DOZE_SUSPEND, PowerStateChangeReason::POWER_BUTTON, status);
     ASSERT_EQ(status, ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND);
 }
+
+/**
+ * @tc.name: SetGotScreenOffAndWakeUpBlock
+ * @tc.desc: SetGotScreenOffAndWakeUpBlock test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetGotScreenOffAndWakeUpBlock, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetGotScreenOffAndWakeUpBlock();
+    ASSERT_TRUE(ssm_->gotScreenOffNotify_);
+    ssm_->needScreenOffNotify_ = true;
+    ssm_->SetGotScreenOffAndWakeUpBlock();
+    ASSERT_FALSE(ssm_->needScreenOffNotify_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -431,7 +431,7 @@ private:
     /**
      * On/Off screen
      */
-    void SetGotOffAndWakeUpBlockCV();
+    void SetGotScreenOffAndWakeUpBlock();
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
