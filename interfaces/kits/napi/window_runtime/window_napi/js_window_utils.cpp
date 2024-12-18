@@ -32,6 +32,9 @@ constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
 constexpr size_t FOUR_PARAMS_SIZE = 4;
+constexpr size_t ARG_COUNT_ZERO = 0;
+constexpr size_t ARG_COUNT_TWO = 2;
+constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 }
 
@@ -638,7 +641,7 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     uint32_t size = INDEX_ZERO;
     napi_value nativeArray = nullptr;
-    if (argc > 0 && GetType(env, argv[INDEX_ZERO]) != napi_function) {
+    if (argc > ARG_COUNT_ZERO && GetType(env, argv[INDEX_ZERO]) != napi_function) {
         nativeArray = argv[INDEX_ZERO];
         if (nativeArray == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to SystemBarArray");
@@ -765,11 +768,11 @@ bool GetSpecificBarStatus(napi_env env, napi_callback_info info, bool& systemBar
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 2 || !ConvertFromJsValue(env, argv[INDEX_ONE], systemBarEnable)) {
+    if (argc < ARG_COUNT_TWO || !ConvertFromJsValue(env, argv[INDEX_ONE], systemBarEnable)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu or Failed to convert enable parameter to bool", argc);
         return false;
     }
-    if (argc >= 3 && !ConvertFromJsValue(env, argv[INDEX_TWO], systemBarEnableAnimation)) {
+    if (argc >= ARG_COUNT_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], systemBarEnableAnimation)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert enableAnimation parameter to bool");
         return false;
     }
