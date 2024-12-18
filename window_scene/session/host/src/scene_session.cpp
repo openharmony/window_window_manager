@@ -1113,6 +1113,21 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask(task, "SetSessionRectChangeCallback");
 }
 
+void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func)
+{
+    const char* const funcName = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), funcName] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "session or TitleAndDockHoverShowChangeFunc is null");
+            return;
+        }
+        session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d",
+            funcName, session->GetPersistentId());
+    }, funcName);
+}
+
 void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
 {
     const char* const funcName = __func__;
