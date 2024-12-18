@@ -9850,7 +9850,7 @@ void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionS
             return;
         }
         auto iter = remoteExtSessionMap_.find(remoteExtSession);
-        if (iter->second != token) {
+        if (iter == remoteExtSessionMap_.end() || iter->second != token) {
             TLOGE(WmsLogTag::WMS_UIEXT, "token not match");
             return;
         }
