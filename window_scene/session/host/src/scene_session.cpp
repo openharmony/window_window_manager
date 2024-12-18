@@ -1951,8 +1951,10 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
         auto parentSession = GetParentSession();
         if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
             return parentSession->CheckGetAvoidAreaAvailable(type);
+        } else if (parentSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "parentSession is nullptr");
         }
-        TLOGE(WmsLogTag::WMS_IMMS, "parentSession is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "session rect not equal to parent session rect");
     }
     if (WindowHelper::IsMainWindow(winType)) {
         if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {

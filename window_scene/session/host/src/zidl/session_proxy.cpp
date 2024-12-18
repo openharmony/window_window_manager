@@ -1058,12 +1058,12 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
         TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
         return avoidArea;
     }
-    if (!(data.WriteUint32(static_cast<uint32_t>(type)))) {
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         TLOGE(WmsLogTag::WMS_IMMS, "write type error");
         return avoidArea;
     }
-    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) || !data.WriteInt32(rect.width_) ||
-        !data.WriteInt32(rect.height_)) {
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
     }
     sptr<IRemoteObject> remote = Remote();

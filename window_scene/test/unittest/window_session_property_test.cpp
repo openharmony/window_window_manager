@@ -1288,13 +1288,12 @@ HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest
 HWTEST_F(WindowSessionPropertyTest, SetAvoidAreaOption, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    uint32_t avoidAreaOption = 0;
-    property->SetAvoidAreaOption(avoidAreaOption);
-    ASSERT_EQ(avoidAreaOption, property->GetAvoidAreaOption());
-    avoidAreaOption = 2;
-    property->SetAvoidAreaOption(avoidAreaOption);
-    ASSERT_EQ(avoidAreaOption, property->GetAvoidAreaOption());
+    uint32_t avoidAreaOptions = 0;
+    property->SetAvoidAreaOption(avoidAreaOptions);
+    ASSERT_EQ(avoidAreaOptions, property->GetAvoidAreaOption());
+    avoidAreaOptions = 2;
+    property->SetAvoidAreaOption(avoidAreaOptions);
+    ASSERT_EQ(avoidAreaOptions, property->GetAvoidAreaOption());
 }
 
 /**
@@ -1305,9 +1304,8 @@ HWTEST_F(WindowSessionPropertyTest, SetAvoidAreaOption, Function | SmallTest | L
 HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    uint32_t avoidAreaOption = 2;
-    property->SetAvoidAreaOption(avoidAreaOption);
+    uint32_t avoidAreaOptions = 2;
+    property->SetAvoidAreaOption(avoidAreaOptions);
     ASSERT_EQ(2, property->GetAvoidAreaOption());
 }
 } // namespace
