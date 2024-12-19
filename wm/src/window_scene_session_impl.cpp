@@ -2557,7 +2557,7 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    auto isPC = windowSystemConfig_.IsPcWindow();
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
     if (!(isPC || IsFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
