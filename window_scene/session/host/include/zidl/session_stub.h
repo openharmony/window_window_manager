@@ -74,6 +74,7 @@ private:
     int HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply);
     int HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply);
     int HandleDefaultDensityEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply);
     int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
@@ -98,6 +99,9 @@ private:
     int HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
+
+    // PC Window
+    int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

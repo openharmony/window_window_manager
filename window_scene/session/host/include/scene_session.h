@@ -83,6 +83,8 @@ using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<Sce
 using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
 using NotifyDefaultDensityEnabledFunc = std::function<void(bool isDefaultDensityEnabled)>;
+using NotifyTitleAndDockHoverShowChangeFunc = std::function<void(bool isTitleHoverShown,
+    bool isDockHoverShown)>;
 using NotifyRestoreMainWindowFunc = std::function<void()>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
@@ -92,6 +94,7 @@ using PiPStateChangeCallback = std::function<void(const std::string& bundleName,
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
+using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
 class SceneSession : public Session {
 public:
@@ -255,6 +258,7 @@ public:
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
+    void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
     WSError SetDefaultRequestedOrientation(Orientation orientation);
     void SetWindowAnimationFlag(bool needDefaultAnimationFlag);
@@ -267,6 +271,7 @@ public:
     /**
      * PC Window
      */
+    void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
     virtual bool IsModal() const { return false; }
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
@@ -479,6 +484,11 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
+    /*
+     * PC Window
+     */
+    void SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -535,6 +545,7 @@ protected:
     /**
      * PC Window
      */
+    NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
 
@@ -556,6 +567,11 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, bool> appUseControlMap_;
+
+    /*
+     * PC Window
+     */
+    NotifyTitleAndDockHoverShowChangeFunc onTitleAndDockHoverShowChangeFunc_;
 
 private:
     void NotifyAccessibilityVisibilityChange();

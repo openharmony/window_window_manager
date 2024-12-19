@@ -36,7 +36,6 @@ group("unittest") {
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
     ":ws_scene_board_judgement_test",
-    ":ws_scene_input_manager_test",
     ":ws_scene_persistence_test",
     ":ws_scene_persistent_storage_test",
     ":ws_scene_session_converter_test",
@@ -57,8 +56,6 @@ group("unittest") {
     ":ws_scene_session_manager_test5",
     ":ws_scene_session_manager_test6",
     ":ws_scene_session_manager_test8",
-    ":ws_scene_session_manager_test9",
-    ":ws_scene_session_test",
     ":ws_session_lifecycle_test",
     ":ws_session_listener_controller_test",
     ":ws_session_manager_agent_controller_test",
@@ -92,10 +89,13 @@ group("unittest") {
   ]
   if (window_manager_use_sceneboard) {
     deps += [
+      ":ws_scene_input_manager_test",
       ":ws_scene_session_manager_stub_lifecycle_test",
       ":ws_scene_session_manager_stub_test",
       ":ws_scene_session_manager_test4",
       ":ws_scene_session_manager_test7",
+      ":ws_scene_session_manager_test9",
+      ":ws_scene_session_test",
       ":ws_session_test",
     ]
   }
