@@ -267,6 +267,7 @@ public:
     /*
      * Window Layout
      */
+    WMError EnableDrag(bool enableDrag) override;
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
 protected:

@@ -396,6 +396,31 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetSurfaceBounds01
+ * @tc.desc: SetSurfaceBounds function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSurfaceBounds01";
+    info.bundleName_ = "SetSurfaceBounds01";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = nullptr;
+    WSRect preRect = { 20, 20, 800, 800 };
+    WSRect rect = { 30, 30, 900, 900 };
+    session->SetSessionRect(preRect);
+    session->SetSurfaceBounds(rect);
+
+    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceBounds(rect);
+    EXPECT_EQ(preRect, session->GetSessionRect());
+}
+
+/**
  * @tc.name: OnLayoutFullScreenChange
  * @tc.desc: OnLayoutFullScreenChange function
  * @tc.type: FUNC
@@ -1053,6 +1078,22 @@ HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction, Function | SmallTest |
     action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
     res = session->HandleUpdatePropertyByAction(property, session, action);
     EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: SetSystemWindowEnableDrag
+ * @tc.desc: SetSystemWindowEnableDrag function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSystemWindowEnableDrag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSystemWindowEnableDrag";
+    info.bundleName_ = "SetSystemWindowEnableDrag";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DESKTOP);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = session->SetSystemWindowEnableDrag(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
