@@ -4595,7 +4595,7 @@ float WindowSceneSessionImpl::GetCustomDensity()
         return isCustomDensityEnabled_.load();
     }
     auto mainWindow = FindMainWindowWithContext();
-    return mainWindow ? mainWindow->customDEnsity_ : UNDEFINED_DENSITY;
+    return mainWindow ? mainWindow->customDensity_ : UNDEFINED_DENSITY;
 }
 
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)
