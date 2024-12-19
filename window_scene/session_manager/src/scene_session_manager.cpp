@@ -4679,8 +4679,8 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
                 session->GetPersistentId());
             return false;
         }
-        const auto mainOrFloatSessionState = mainOrFloatSession->GetSessionState();
         if (session->IsVisible() || (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
+            const auto mainOrFloatSessionState = mainOrFloatSession->GetSessionState();
             if (mainOrFloatSessionState == SessionState::STATE_INACTIVE ||
                 mainOrFloatSessionState == SessionState::STATE_BACKGROUND) {
                 TLOGD(WmsLogTag::WMS_SUB, "Parent of this sub window is at background, id: %{public}d",
