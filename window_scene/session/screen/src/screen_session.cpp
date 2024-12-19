@@ -334,8 +334,8 @@ void ScreenSession::UpdatePropertyByActiveMode()
 void ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
-    property_.SetBounds(updatedProperty.GetBounds());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
+    property_.SetBounds(updatedProperty.GetBounds());
 }
 
 void ScreenSession::UpdateDisplayState(DisplayState displayState)
