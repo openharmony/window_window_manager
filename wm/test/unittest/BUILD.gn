@@ -702,6 +702,7 @@ ohos_static_library("wm_unittest_common") {
 
   public_deps = [
     # need delete it for abilitycontext
+    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
@@ -712,6 +713,8 @@ ohos_static_library("wm_unittest_common") {
     "${window_base_path}/wm:libwm",
     "${window_base_path}/wm:libwm_lite",
     "${window_base_path}/wmserver:libwms",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
+    "//foundation/arkui/napi:ace_napi",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
