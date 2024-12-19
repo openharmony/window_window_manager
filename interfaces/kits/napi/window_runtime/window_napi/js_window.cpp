@@ -4989,7 +4989,8 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
             weakWindow->SetColorSpace(colorSpace);
             task.Resolve(env, NapiGetUndefined(env));
             WLOGI("%{public}s end, window [%{public}u, %{public}s] colorSpace=%{public}u",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
+                static_cast<uint32_t>(colorSpace));
         };
 
     napi_value lastParam = (argc <= 1) ? nullptr :
@@ -5028,7 +5029,8 @@ napi_value JsWindow::OnGetColorSpace(napi_env env, napi_callback_info info)
             ColorSpace colorSpace = weakWindow->GetColorSpace();
             task.Resolve(env, CreateJsValue(env, static_cast<uint32_t>(colorSpace)));
             WLOGI("%{public}s end, window [%{public}u, %{public}s] colorSpace=%{public}u",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
+                static_cast<uint32_t>(colorSpace));
         };
 
     napi_value lastParam = (argc == 0) ? nullptr :
