@@ -105,7 +105,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         auto scenePersistence = weakThis.promote();
         if (scenePersistence == nullptr || pixelMap == nullptr ||
             scenePersistence->snapshotPath_.find('/') == std::string::npos) {
-            TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence is%{public}s nullptr, pixelMap is%{public}s nullptr",
+            TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence %{public}s nullptr, pixelMap %{public}s nullptr",
                 scenePersistence == nullptr ? "" : " not", pixelMap == nullptr ? "" : " not");
             resetSnapshotCallback();
             return;
