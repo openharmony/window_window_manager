@@ -1796,6 +1796,29 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: InitSystemSessionDragEnable
+ * @tc.desc: InitSystemSessionDragEnable Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("InitSystemSessionDragEnable");
+    sptr<WindowSceneSessionImpl> window = new WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    window->hostSession_ = session;
+    window->InitSystemSessionDragEnable();
+}
+
+/**
  * @tc.name: SetWindowRectAutoSave
  * @tc.desc: SetWindowRectAutoSave
  * @tc.type: FUNC
