@@ -522,7 +522,7 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentName, env, storage, token, ability);
+    return SetUIContentInner(contentInfo, env, storage, token, ability);
 }
 
 WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env,
