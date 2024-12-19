@@ -832,28 +832,6 @@ HWTEST_F(WindowSceneSessionImplTest, NotifyDrawingCompleted, Function | SmallTes
 }
 
 /**
- * @tc.name: NotifyRemoveStartingWindow
- * @tc.desc: NotifyRemoveStartingWindow session
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, NotifyRemoveStartingWindow, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("NotifyRemoveStartingWindow");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
-    window->property_->SetPersistentId(1);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-
-    window->hostSession_ = session;
-    window->NotifyRemoveStartingWindow();
-}
-
-/**
  * @tc.name: SetBackgroundColor01
  * @tc.desc: test SetBackgroundColor withow uiContent
  * @tc.type: FUNC
@@ -878,7 +856,29 @@ HWTEST_F(WindowSceneSessionImplTest, SetBackgroundColor01, Function | SmallTest 
     window->Destroy(true);
 }
 
-/*
+/**
+ * @tc.name: NotifyRemoveStartingWindow
+ * @tc.desc: NotifyRemoveStartingWindow session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, NotifyRemoveStartingWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifyRemoveStartingWindow");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+
+    window->hostSession_ = session;
+    window->NotifyRemoveStartingWindow();
+}
+
+/**
  * @tc.name: SetTransparent
  * @tc.desc: SetTransparent test
  * @tc.type: FUNC
@@ -1471,6 +1471,54 @@ HWTEST_F(WindowSceneSessionImplTest, SetKeepScreenOn, Function | SmallTest | Lev
     window->hostSession_ = session;
     window->SetKeepScreenOn(false);
     ASSERT_FALSE(window->IsKeepScreenOn());
+}
+
+/*
+ * @tc.name: DestoryInner01
+ * @tc.desc: DestoryInner01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, DestoryInner01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("DestoryInner01");
+    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"DestoryInnerBundle", "DestoryInnerModule", "DestoryInnerAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->property_->SetPersistentId(123);
+    window->property_->SetExtensionFlag(true);
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+    window->property_->SetExtensionFlag(false);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+}
+
+/*
+ * @tc.name: DestoryInner02
+ * @tc.desc: DestoryInner02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, DestoryInner02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("DestoryInner02");
+    option->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    SessionInfo sessionInfo = {"DestoryInnerBundle", "DestoryInnerModule", "DestoryInnerAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    window->property_->SetPersistentId(134);
+    window->property_->SetExtensionFlag(true);
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
+    window->property_->SetExtensionFlag(false);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->DestroyInner(true));
 }
 
 /*
