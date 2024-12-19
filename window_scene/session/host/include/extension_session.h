@@ -20,6 +20,7 @@
 #include "key_event.h"
 #include "want.h"
 
+#include "extension_data_handler.h"
 #include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
@@ -78,6 +79,7 @@ public:
     explicit ExtensionSession(const SessionInfo& info);
     virtual ~ExtensionSession();
 
+    std::shared_ptr<IDataHandler> GetExtensionDataHandler() const;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
@@ -122,6 +124,7 @@ private:
     bool isFirstTriggerBindModal_ = true;
     sptr<ChannelDeathRecipient> channelDeath_ = nullptr;
     sptr<WindowEventChannelListener> channelListener_ = nullptr;
+    std::shared_ptr<IDataHandler> dataHandler_;
 };
 } // namespace OHOS::Rosen
 
