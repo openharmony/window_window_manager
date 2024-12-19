@@ -127,7 +127,7 @@ public:
      * @param userId User ID
      * @param controlList Control Application Information List
      * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
-     * @permission application requires SA permission
+     * @permission application requires SA permission and ohos.permission.WRITE_APP_LOCK permission
      */
     virtual WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList) = 0;
