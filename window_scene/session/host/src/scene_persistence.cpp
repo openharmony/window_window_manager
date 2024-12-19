@@ -264,7 +264,7 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
     std::lock_guard lock(savingSnapshotMutex_);
     auto imageSource = Media::ImageSource::CreateImageSource(snapshotPath_, sourceOpts, errorCode);
     if (!imageSource) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "create image source fail, errCode : %{public}u", errorCode);
+        TLOGE(WmsLogTag::WMS_PATTERN, "create image source fail, errCode: %{public}u", errorCode);
         return nullptr;
     }
 
