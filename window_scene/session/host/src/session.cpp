@@ -1924,6 +1924,18 @@ sptr<Session> Session::GetMainSession() const
     }
 }
 
+sptr<Session> Session::GetMainOrFloatSession() const
+{
+    auto windowType = GetWindowType();
+    if (SessionHelper::IsMainWindow(windowType) || windowType == WindowType::WINDOW_TYPE_FLOAT) {
+        return const_cast<Session*>(this);
+    } else if (parentSession_) {
+        return parentSession_->GetMainOrFloatSession();
+    } else {
+        return nullptr;
+    }
+}
+
 void Session::BindDialogToParentSession(const sptr<Session>& session)
 {
     std::unique_lock<std::shared_mutex> lock(dialogVecMutex_);

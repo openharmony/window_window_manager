@@ -7193,11 +7193,11 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
                 "window is nullptr"));
             return;
         }
-        if (!WindowHelper::IsSubWindow(window->GetType()) &&
+        if (!WindowHelper::IsFloatOrSubWindow(window->GetType()) &&
             !WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s this is not subWindow or mainWindow.", where);
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s invalid window type: %{public}d", where, window->GetType());
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-                "This is not subWindow or mainWindow"));
+                "invalid window type"));
             return;
         }
         windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
