@@ -1821,7 +1821,7 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("SetRaiseByClickEnabled01");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
 
     WMError retCode = window->SetRaiseByClickEnabled(true);
@@ -1838,7 +1838,7 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
 
     option->SetWindowName("SetRaiseByClickForSubWindow");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sptr<WindowSessionImpl> subWindow = new(std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> subWindow = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, subWindow);
 
     subWindow->property_->SetParentPersistentId(1);
