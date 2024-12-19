@@ -40,7 +40,6 @@ bool CalculateDumpInfoSize(const std::vector<std::string>& infos)
 
         dataSize += info.length();
     }
-
     return dataSize + RESERVED_SPACE <= CAPACITY_THRESHOLD;
 }
 
