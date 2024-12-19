@@ -128,7 +128,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
 
 void JsExtensionWindow::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     std::unique_ptr<JsExtensionWindow>(static_cast<JsExtensionWindow*>(data));
 }
 

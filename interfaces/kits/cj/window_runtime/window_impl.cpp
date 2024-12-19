@@ -839,7 +839,7 @@ int32_t CJWindowImpl::Translate(double x, double y, double z)
     trans.translateY_ = y;
     trans.translateZ_ = z;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTransform(trans));
-    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end," \
+    TLOGI(WmsLogTag::WMS_DIALOG, "Window [%{public}u, %{public}s] end, "
         "translateX=%{public}f, translateY=%{public}f, translateZ=%{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
         trans.translateX_, trans.translateY_, trans.translateZ_);

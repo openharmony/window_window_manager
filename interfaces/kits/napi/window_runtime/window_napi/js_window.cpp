@@ -1174,8 +1174,9 @@ napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
         }
     }
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCode != WmErrorCode::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
                 return;
@@ -1192,8 +1193,8 @@ napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window show failed"));
             }
-            WLOGFI("Window [%{public}u, %{public}s] end, ret=%{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+            WLOGI("%{public}s Window [%{public}u, %{public}s] end, ret=%{public}d",
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     napi_value result = nullptr;
     size_t argc = 4;
@@ -1217,8 +1218,9 @@ napi_value JsWindow::OnDestroy(napi_env env, napi_callback_info info)
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [this, weakToken, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [this, weakToken, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr");
@@ -1238,8 +1240,8 @@ napi_value JsWindow::OnDestroy(napi_env env, napi_callback_info info)
                 return;
             }
             WMError ret = weakWindow->Destroy();
-            WLOGFI("Window [%{public}u, %{public}s] end, ret=%{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+            WLOGI("%{public}s Window [%{public}u, %{public}s] end, ret=%{public}d",
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret != WMError::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window destroy failed"));
                 return;
@@ -1258,8 +1260,9 @@ napi_value JsWindow::OnDestroy(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
 {
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [this, weakToken](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [this, weakToken, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr or get invalid param");
@@ -1275,8 +1278,8 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Destroy());
-            WLOGFI("end, window [%{public}u, %{public}s] ret=%{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+            WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret != WmErrorCode::WM_OK) {
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, ret, "Window destroy failed"));
@@ -1306,8 +1309,9 @@ napi_value JsWindow::OnHide(napi_env env, napi_callback_info info)
 napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, WmErrorCode errCode)
 {
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCode != WmErrorCode::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
                 return;
@@ -1332,7 +1336,7 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, W
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window hide failed"));
             }
-            WLOGFI("end, window [%{public}u] ret=%{public}d", weakWindow->GetWindowId(), ret);
+            WLOGI("%{public}s end, window [%{public}u] ret=%{public}d", where, weakWindow->GetWindowId(), ret);
         };
 
     size_t argc = 4;
@@ -1363,8 +1367,9 @@ napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
         }
     }
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCode != WmErrorCode::WM_OK) {
                 task.Reject(env,
                     JsErrUtils::CreateJsError(env, errCode));
@@ -1383,8 +1388,8 @@ napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window show failed"));
             }
-            WLOGFI("end, window [%{public}u, %{public}s] ret=%{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+            WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -1873,7 +1878,8 @@ static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
     wptr<Window> weakToken, int32_t width, int32_t height)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    execute = [weakToken, errCodePtr, width, height] {
+    const char* const where = __func__;
+    execute = [weakToken, errCodePtr, width, height, where] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -1888,8 +1894,8 @@ static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
             weakWindow->ResizeAsync(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
-        TLOGI(WmsLogTag::WMS_LAYOUT, "end, window [%{public}u, %{public}s] err=%{public}d",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
@@ -2054,8 +2060,9 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
     }
 
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, winType, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, winType, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr");
@@ -2073,8 +2080,8 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set type failed"));
             }
-            WLOGFI("end, window [%{public}u, %{public}s] ret=%{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+            WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     napi_value lastParam = (argc <= 1) ? nullptr :
@@ -2268,7 +2275,7 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    WLOGI("Register end, window [%{public}u, %{public}s], type=%{public}s",
+    WLOGFI("Register end, window [%{public}u, %{public}s], type=%{public}s",
         windowToken->GetWindowId(), windowToken->GetWindowName().c_str(), cbType.c_str());
     return NapiGetUndefined(env);
 }
@@ -2308,7 +2315,7 @@ napi_value JsWindow::OnUnregisterWindowCallback(napi_env env, napi_callback_info
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    WLOGI("Unregister end, window [%{public}u, %{public}s], type=%{public}s",
+    WLOGFI("Unregister end, window [%{public}u, %{public}s], type=%{public}s",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str());
     return NapiGetUndefined(env);
 }
@@ -3510,7 +3517,7 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
         requestedOrientation <= Orientation::END) {
         apiOrientation = NATIVE_TO_JS_ORIENTATION_MAP.at(requestedOrientation);
     } else {
-        WLOGE("Orientation %{public}u invalid!", static_cast<uint32_t>(requestedOrientation));
+        WLOGFE("Orientation %{public}u invalid!", static_cast<uint32_t>(requestedOrientation));
     }
     WLOGFI("end, window [%{public}u, %{public}s] orientation=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), static_cast<uint32_t>(apiOrientation));
@@ -5445,8 +5452,7 @@ napi_value JsWindow::OnRotate(napi_env env, napi_callback_info info)
     }
     WLOGI("Window [%{public}u, %{public}s] Rotate end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
-    WLOGI("rotateX=%{public}f, rotateY=%{public}f," \
-        "rotateZ=%{public}f pivotX=%{public}f pivotY=%{public}f",
+    WLOGI("rotateX=%{public}f, rotateY=%{public}f, rotateZ=%{public}f pivotX=%{public}f pivotY=%{public}f",
         trans.rotationX_, trans.rotationY_, trans.rotationZ_, trans.pivotX_, trans.pivotY_);
     return NapiGetUndefined(env);
 }
@@ -5502,7 +5508,7 @@ napi_value JsWindow::OnTranslate(napi_env env, napi_callback_info info)
         WLOGFE("Window Translate failed");
         return NapiThrowError(env, ret);
     }
-    WLOGI("Window [%{public}u, %{public}s] Translate end," \
+    WLOGI("Window [%{public}u, %{public}s] Translate end, "
         "translateX=%{public}f, translateY=%{public}f, translateZ=%{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
         trans.translateX_, trans.translateY_, trans.translateZ_);

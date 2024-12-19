@@ -241,7 +241,7 @@ static bool GetWindowTypeAndParentId(napi_env env, uint32_t& parentId, WindowTyp
 static void CreateNewSystemWindowTask(void* contextPtr, sptr<WindowOption> windowOption,
     napi_env env, NapiAsyncTask& task)
 {
-    WLOGFI("called");
+    WLOGFI("[NAPI]");
     if (windowOption == nullptr) {
         task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
             "New window option failed"));
@@ -280,7 +280,7 @@ static void CreateNewSystemWindowTask(void* contextPtr, sptr<WindowOption> windo
 static void CreateSystemWindowTask(void* contextPtr, std::string windowName, WindowType winType,
     napi_env env, NapiAsyncTask& task)
 {
-    WLOGFD("called");
+    WLOGFD("[NAPI]");
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (contextPtr == nullptr || context == nullptr) {
         task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "Context is nullptr"));
@@ -735,7 +735,7 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
 
-    WLOGI("Display id=%{public}" PRIu64", err=%{public}d", static_cast<uint64_t>(displayId), errCode);
+    WLOGI("Display id=%{public}" PRIu64 ", err=%{public}d", static_cast<uint64_t>(displayId), errCode);
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WM:MinimizeAll: " PRIu64"",
@@ -760,13 +760,14 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
 napi_value JsWindowManager::OnToggleShownStateForAllAppWindows(napi_env env, napi_callback_info info)
 {
     WLOGFI("[NAPI]");
+    const char* cosnt where = __func__;
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
                 SingletonContainer::Get<WindowManager>().ToggleShownStateForAllAppWindows());
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
-                WLOGFD("success");
+                WLOGI("%{public}s success", where);
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnToggleShownStateForAllAppWindows failed"));
             }
@@ -1020,13 +1021,14 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
     }
 
     WLOGI("LayoutMode=%{public}u, err=%{public}d", winLayoutMode, errCode);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
                 SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode));
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
-                WLOGFD("success");
+                WLOGD("%{public}s success", where);
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "SetWindowLayoutMode failed"));
             }

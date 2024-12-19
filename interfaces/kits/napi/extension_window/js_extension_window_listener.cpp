@@ -232,7 +232,7 @@ void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>&
 static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWindowListener> weakRef,
     napi_env env, std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "envent type: %{public}u", eventType);
+    TLOGI(WmsLogTag::WMS_UIEXT, "event type: %{public}u", eventType);
     auto task = [self = weakRef, eventType, eng = env] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::LifeCycleCallBack");
         auto thisListener = self.promote();
