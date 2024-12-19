@@ -2163,7 +2163,9 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
                 return WSError::WS_OK;
             }
         }
-        if ((IsDecorEnable() || isMovableSystemWindow) &&
+        if ((WindowHelper::IsMainWindow(windowType) ||
+             WindowHelper::IsSubWindow(windowType) ||
+             WindowHelper::IsSystemWindow(windowType)) &&
             moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
