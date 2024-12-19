@@ -1110,11 +1110,12 @@ void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdj
         KeyboardLayoutParams params = property->GetKeyboardLayoutParams();
         session->adjustKeyboardLayoutFunc_(params);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify adjust keyboard layout when register, keyboardId: %{public}d, "
-            "gravity: %{public}u, LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
+            "gravity: %{public}u, landscapeAvoidHeight: %{public}d, PortraitAvoidHeight: %{public}d, "
+            "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
             "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s", session->GetPersistentId(),
-            static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
-            params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
-            params.PortraitPanelRect_.ToString().c_str());
+            static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
+            params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
+            params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
         return WSError::WS_OK;
     };
     PostTask(task, "SetAdjustKeyboardLayoutCallback");
@@ -1573,6 +1574,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             WSRect keyboardRect = {0, 0, 0, 0};
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
+                inputMethod->RecalculatePanelRectForAvoidArea(keyboardRect);
             }
             TLOGI(WmsLogTag::WMS_IMMS, "window %{public}s keyboard %{public}s",
                   rect.ToString().c_str(), keyboardRect.ToString().c_str());
@@ -3420,7 +3422,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
+        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}" PRIu64, action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     property->SetSystemCalling(isSystemCalling);
@@ -3431,7 +3433,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             TLOGE(WmsLogTag::DEFAULT, "the session is nullptr");
             return WMError::WM_DO_NOTHING;
         }
-        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
+        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}" PRIu64, sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
         return sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
     };
@@ -3498,60 +3500,62 @@ WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionPrope
 WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    switch (static_cast<uint32_t>(action)) {
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON):
+    switch (static_cast<uint64_t>(action)) {
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON):
             return HandleActionUpdateTurnScreenOn(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
             return HandleActionUpdateKeepScreenOn(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
             return HandleActionUpdateFocusable(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
             return HandleActionUpdateTouchable(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS):
             return HandleActionUpdateSetBrightness(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION):
             return HandleActionUpdateOrientation(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE):
             return HandleActionUpdatePrivacyMode(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE):
             return HandleActionUpdatePrivacyMode(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP):
             return HandleActionUpdateSnapshotSkip(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE):
             return HandleActionUpdateMaximizeState(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS):
             return HandleActionUpdateOtherProps(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS):
             return HandleActionUpdateStatusProps(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS):
             return HandleActionUpdateNavigationProps(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS):
             return HandleActionUpdateNavigationIndicatorProps(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS):
             return HandleActionUpdateFlags(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE):
             return HandleActionUpdateMode(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG):
             return HandleActionUpdateAnimationFlag(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA):
             return HandleActionUpdateTouchHotArea(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEYBOARD_TOUCH_HOT_AREA):
+            return HandleActionUpdateKeyboardTouchHotArea(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE):
             return HandleActionUpdateDecorEnable(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS):
             return HandleActionUpdateWindowLimits(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED):
             return HandleActionUpdateDragenabled(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED):
             return HandleActionUpdateRaiseenabled(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS):
             return HandleActionUpdateHideNonSystemFloatingWindows(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO):
             return HandleActionUpdateTextfieldAvoidInfo(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK):
             return HandleActionUpdateWindowMask(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST):
             return HandleActionUpdateTopmost(property, sceneSession, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
             return HandleActionUpdateModeSupportInfo(property, sceneSession, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
@@ -3742,6 +3746,16 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
     return WMError::WM_OK;
 }
 
+WMError SceneSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
+    return WMError::WM_OK;
+}
+
 WMError SceneSession::HandleActionUpdateDecorEnable(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
@@ -3899,7 +3913,7 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
 void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
-    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}" PRIu64,
         GetPersistentId(), action);
     if (sessionChangeByActionNotifyManagerFunc_ == nullptr) {
         TLOGW(WmsLogTag::DEFAULT, "func is null");
