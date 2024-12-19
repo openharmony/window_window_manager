@@ -454,6 +454,36 @@ HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner02, F
 }
 
 /**
+ * @tc.name: DestroyAndDisconnectSpecificSessionInner03
+ * @tc.desc: DestroyAndDisconnectSpecificSessionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner03, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "DestroyAndDisconnectSpecificSessionInner03";
+    sptr<SceneSession> floatSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, floatSession);
+    floatSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    floatSession->persistentId_ = 1;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, subSession);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession->persistentId_ = 2;
+    subSession->SetParentSession(floatSession);
+    floatSession->subSession_.push_back(subSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, floatSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ssm_->sceneSessionMap_.find(2), ssm_->sceneSessionMap_.end());
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(2);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: CheckPiPPriority
  * @tc.desc: CheckPiPPriority
  * @tc.type: FUNC

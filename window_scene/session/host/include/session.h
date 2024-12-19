@@ -300,7 +300,6 @@ public:
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
     sptr<Session> GetParentSession() const;
-    sptr<Session> GetMainSession() const;
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
     std::vector<sptr<Session>> GetDialogVector() const;
@@ -564,6 +563,12 @@ public:
      * Free Multi Window
      */
     std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
+
+    /*
+     * PC Window
+     */
+    sptr<Session> GetMainSession() const;
+    sptr<Session> GetMainOrFloatSession() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
