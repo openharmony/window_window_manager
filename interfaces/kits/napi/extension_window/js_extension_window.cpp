@@ -310,7 +310,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     if (isLoadedByName) {
         ret = windowImpl->SetUIContentByName(contextUrl, env, nativeStorage);
     } else {
-        ret = windowImpl->NapiSetUIContent(contextUrl, env, nativeStorage, false, parentToken);
+        ret = windowImpl->NapiSetUIContent(contextUrl, env, nativeStorage, BackupAndRestoreType::NONE, parentToken);
     }
     if (ret == WMError::WM_OK) {
         task.Resolve(env, NapiGetUndefined(env));
