@@ -325,7 +325,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     AdjustPropertySessionInfo(context_, property_->EditSessionInfo());
-    
+
     const WindowType type = GetType();
     bool hasToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
     if (WindowHelper::IsSubWindow(type) && (property_->GetIsUIExtFirstSubWindow() ||
@@ -2923,27 +2923,27 @@ sptr<Window> WindowSceneSessionImpl::GetTopWindowWithContext(const std::shared_p
     {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
         if (windowSessionMap_.empty()) {
-            TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Please create mainWindow First!");
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "Please create mainWindow First!");
             return nullptr;
         }
         for (const auto& winPair : windowSessionMap_) {
             auto win = winPair.second.second;
             if (win && WindowHelper::IsMainWindow(win->GetType()) && context.get() == win->GetContext().get()) {
                 mainWinId = win->GetWindowId();
-                TLOGD(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Find MainWinId:%{public}u.", mainWinId);
+                TLOGD(WmsLogTag::WMS_HIERARCHY, "Find MainWinId:%{public}u.", mainWinId);
                 break;
             }
         }
     }
     TLOGI(WmsLogTag::WMS_HIERARCHY, "mainId:%{public}u!", mainWinId);
     if (mainWinId == INVALID_WINDOW_ID) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] Cannot find topWindow!");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Cannot find topWindow!");
         return nullptr;
     }
     uint32_t topWinId = INVALID_WINDOW_ID;
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "[GetTopWin] failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
     return FindWindowById(topWinId);
