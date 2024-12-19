@@ -68,6 +68,8 @@ public:
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
 
+    const std::shared_ptr<AbilityRuntime::Context> GetContext() const override { return context_.lock(); }
+
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
@@ -117,6 +119,7 @@ private:
     static std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> configurationUpdatedCallback_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    std::weak_ptr<AbilityRuntime::Context> context_;
 
     /*
      * Window Immersive
