@@ -1576,7 +1576,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 /** @note @window.hierarchy */
 WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
-    WLOGFD("set raiseEnabled");
+    WLOGFD("%{public}d", raiseEnabled);
     auto parentId = GetParentId();
     if (parentId == INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "Window id: %{public}d Parent id is invalid!",
