@@ -917,11 +917,13 @@ public:
      * @brief Set whether the system or app sub window can obtain area
      *
      * @param avoidAreaOption from low to high, the first bit means system window, the second bit means app sub window
+     * @return WMError
      */
     virtual WMError SetAvoidAreaOption(uint32_t avoidAreaOption) { return WMError::WM_OK; }
 
     /**
      * @brief Get the Avoid Area of system or app sub window Enabled object
+     * 
      * @param avoidAreaOption from low to high, the first bit means system window, the second bit means app sub window
      * @return WMError
      */
