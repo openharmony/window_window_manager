@@ -1881,14 +1881,15 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    avoidArea = hostSession->GetAvoidAreaByType(type);
+    WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+    avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect);
     getAvoidAreaCnt_++;
     TLOGI(WmsLogTag::WMS_IMMS, "Win [%{public}u %{public}s] type %{public}d times %{public}u area %{public}s",
           GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_.load(), avoidArea.ToString().c_str());

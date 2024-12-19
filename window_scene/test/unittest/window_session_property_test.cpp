@@ -900,6 +900,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
 
@@ -1277,6 +1278,35 @@ HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest
     ASSERT_EQ(false, property->IsSystemKeyboard());
     property->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, property->IsSystemKeyboard());
+}
+
+/**
+ * @tc.name: SetAvoidAreaOption
+ * @tc.desc: SetAvoidAreaOption Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint32_t avoidAreaOptions = 0;
+    property->SetAvoidAreaOption(avoidAreaOptions);
+    ASSERT_EQ(avoidAreaOptions, property->GetAvoidAreaOption());
+    avoidAreaOptions = 2;
+    property->SetAvoidAreaOption(avoidAreaOptions);
+    ASSERT_EQ(avoidAreaOptions, property->GetAvoidAreaOption());
+}
+
+/**
+ * @tc.name: GetAvoidAreaOption
+ * @tc.desc: GetAvoidAreaOption Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint32_t avoidAreaOptions = 2;
+    property->SetAvoidAreaOption(avoidAreaOptions);
+    ASSERT_EQ(2, property->GetAvoidAreaOption());
 }
 } // namespace
 } // namespace Rosen

@@ -101,6 +101,12 @@ public:
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
+    
+    /*
+     * Window Immersive
+     */
+    void SetAvoidAreaOption(uint32_t avoidAreaOptions);
+    uint32_t GetAvoidAreaOption() const;
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -263,6 +269,7 @@ private:
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
+    bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -287,6 +294,7 @@ private:
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
+    void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -356,8 +364,8 @@ private:
     bool fullScreenStart_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
-    static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
+    static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
+    static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;
@@ -397,6 +405,11 @@ private:
 
     // system keyboard
     bool isSystemKeyboard_ = false;
+
+    /*
+     * Window Immersive
+     */
+    uint32_t avoidAreaOption_ = 0;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

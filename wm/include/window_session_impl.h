@@ -219,8 +219,6 @@ public:
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
         AAFwk::WantParams& reWantParams) override;
-    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
-    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyScreenshot() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
@@ -317,6 +315,10 @@ public:
      */
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError SetAvoidAreaOption(uint32_t avoidAreaOptions) override;
+    WMError GetAvoidAreaOption(uint32_t& avoidAreaOptions) override;
+    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
 
     /*
      * Window Property

@@ -1813,8 +1813,10 @@ void SceneSession::CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoi
 void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr ||
-        (sessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID))) {
+    bool isNeedAvoid = sessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    if (isNeedAvoid && WindowHelper::IsAppWindow(GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u flag %{public}d",
+            GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
     DisplayId displayId = sessionProperty->GetDisplayId();
@@ -1842,10 +1844,6 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         avoidArea.topRect_.width_ = static_cast<uint32_t>(display->GetWidth());
         return;
     }
-    if (!isStatusBarVisible_) {
-        TLOGI(WmsLogTag::WMS_IMMS, "status bar not visible");
-        return;
-    }
     std::vector<sptr<SceneSession>> statusBarVector;
     if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByType_) {
         statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
@@ -1853,6 +1851,12 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     for (auto& statusBar : statusBarVector) {
         WSRect statusBarRect = statusBar->GetSessionRect();
+        bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
+            isStatusBarVisible_ : statusBar->isVisible_;
+        if (!isStatusBarVisible) {
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
+            continue;
+        }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
@@ -1966,6 +1970,21 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     }
     WindowMode mode = GetWindowMode();
     WindowType winType = GetWindowType();
+    if (WindowHelper::IsSubWindow(winType)) {
+        if (GetSessionProperty()->GetAvoidAreaOption() &
+            static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d option %{public}d",
+                GetPersistentId(), GetSessionProperty()->GetAvoidAreaOption());
+            return true;
+        }
+        auto parentSession = GetParentSession();
+        if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
+            return parentSession->CheckGetAvoidAreaAvailable(type);
+        } else if (parentSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "parentSession is nullptr");
+        }
+        TLOGE(WmsLogTag::WMS_IMMS, "session rect not equal to parent session rect");
+    }
     if (WindowHelper::IsMainWindow(winType)) {
         if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
             return false;
@@ -1975,16 +1994,14 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
             return true;
         }
     }
-    if (WindowHelper::IsSubWindow(winType)) {
-        auto parentSession = GetParentSession();
-        if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
-            return parentSession->CheckGetAvoidAreaAvailable(type);
-        }
+    if (WindowHelper::IsSystemWindow(winType) &&
+        (GetSessionProperty()->GetAvoidAreaOption() &
+         static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) {
+        return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] type %{public}u "
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u "
         "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
-        GetPersistentId(), GetWindowName().c_str(), static_cast<uint32_t>(winType),
-        static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
+        GetPersistentId(), static_cast<uint32_t>(winType), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
     return false;
 }
 
@@ -2097,32 +2114,32 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
-AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type)
+AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect)
 {
     if (!CheckGetAvoidAreaAvailable(type)) {
         return {};
     }
 
     AvoidArea avoidArea;
-    WSRect rect = GetSessionRect();
+    WSRect sessionRect = rect.IsEmpty() ? GetSessionRect() : rect;
     switch (type) {
         case AvoidAreaType::TYPE_SYSTEM: {
-            GetSystemAvoidArea(rect, avoidArea);
+            GetSystemAvoidArea(sessionRect, avoidArea);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_CUTOUT: {
-            GetCutoutAvoidArea(rect, avoidArea);
+            GetCutoutAvoidArea(sessionRect, avoidArea);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
             return avoidArea;
         }
         case AvoidAreaType::TYPE_KEYBOARD: {
-            GetKeyboardAvoidArea(rect, avoidArea);
+            GetKeyboardAvoidArea(sessionRect, avoidArea);
             return avoidArea;
         }
         case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-            GetAINavigationBarArea(rect, avoidArea);
+            GetAINavigationBarArea(sessionRect, avoidArea);
             return avoidArea;
         }
         default: {
@@ -2133,15 +2150,15 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type)
     }
 }
 
-AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type)
+AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
 {
-    auto task = [weakThis = wptr(this), type]() -> AvoidArea {
+    auto task = [weakThis = wptr(this), type, rect]() -> AvoidArea {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
             return {};
         }
-        return session->GetAvoidAreaByTypeInner(type);
+        return session->GetAvoidAreaByTypeInner(type, rect);
     };
     return PostSyncTask(task, "GetAvoidAreaByType");
 }
@@ -4094,7 +4111,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
+        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}" PRIu64, action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     property->SetSystemCalling(isSystemCalling);
@@ -4105,7 +4122,8 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             TLOGNE(WmsLogTag::DEFAULT, "the session is nullptr");
             return WMError::WM_DO_NOTHING;
         }
-        TLOGND(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
+        TLOGND(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}" PRIu64,
+            sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
         return sceneSession->HandleUpdatePropertyByAction(property, action);
     };
@@ -4205,63 +4223,65 @@ WMError SceneSession::HandleUpdatePropertyByAction(const sptr<WindowSessionPrope
 WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    switch (static_cast<uint32_t>(action)) {
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON):
+    switch (static_cast<uint64_t>(action)) {
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON):
             return HandleActionUpdateTurnScreenOn(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON):
             return HandleActionUpdateKeepScreenOn(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE):
             return HandleActionUpdateFocusable(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCHABLE):
             return HandleActionUpdateTouchable(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS):
             return HandleActionUpdateSetBrightness(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION):
             return HandleActionUpdateOrientation(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE):
             return HandleActionUpdatePrivacyMode(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE):
             return HandleActionUpdatePrivacyMode(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP):
             return HandleActionUpdateSnapshotSkip(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE):
             return HandleActionUpdateMaximizeState(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_OTHER_PROPS):
             return HandleActionUpdateOtherProps(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS):
             return HandleActionUpdateStatusProps(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS):
             return HandleActionUpdateNavigationProps(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS):
             return HandleActionUpdateNavigationIndicatorProps(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_FLAGS):
             return HandleActionUpdateFlags(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE):
             return HandleActionUpdateMode(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG):
             return HandleActionUpdateAnimationFlag(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA):
             return HandleActionUpdateTouchHotArea(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE):
             return HandleActionUpdateDecorEnable(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS):
             return HandleActionUpdateWindowLimits(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED):
             return HandleActionUpdateDragenabled(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED):
             return HandleActionUpdateRaiseenabled(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_HIDE_NON_SYSTEM_FLOATING_WINDOWS):
             return HandleActionUpdateHideNonSystemFloatingWindows(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO):
             return HandleActionUpdateTextfieldAvoidInfo(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK):
             return HandleActionUpdateWindowMask(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOPMOST):
             return HandleActionUpdateTopmost(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST):
             return HandleActionUpdateMainWindowTopmost(property, action);
-        case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
             return HandleActionUpdateWindowModeSupportType(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION):
+            return HandleActionUpdateAvoidAreaOption(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -4558,6 +4578,18 @@ WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessi
     return WMError::WM_OK;
 }
 
+WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (!SessionHelper::IsSubWindow(sessionProperty->GetWindowType()) &&
+        !SessionHelper::IsSystemWindow(sessionProperty->GetWindowType())) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    sessionProperty->SetAvoidAreaOption(property->GetAvoidAreaOption());
+    return WMError::WM_OK;
+}
+
 void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property)
 {
     auto systemBarProperties = property->GetSystemBarProperty();
@@ -4593,8 +4625,7 @@ void SceneSession::SetWindowFlags(const sptr<WindowSessionProperty>& property)
 void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}d",
-        GetPersistentId(), action);
+    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}" PRIu64, GetPersistentId(), action);
     if (sessionChangeByActionNotifyManagerFunc_ == nullptr) {
         TLOGW(WmsLogTag::DEFAULT, "func is null");
         return;
