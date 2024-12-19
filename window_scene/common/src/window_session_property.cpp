@@ -551,6 +551,8 @@ void WindowSessionProperty::SetWindowState(WindowState state)
 void WindowSessionProperty::SetKeyboardLayoutParams(const KeyboardLayoutParams& params)
 {
     keyboardLayoutParams_.gravity_ = params.gravity_;
+    keyboardLayoutParams_.landscapeAvoidHeight_ = params.landscapeAvoidHeight_;
+    keyboardLayoutParams_.portraitAvoidHeight_ = params.portraitAvoidHeight_;
     keyboardLayoutParams_.LandscapeKeyboardRect_ = params.LandscapeKeyboardRect_;
     keyboardLayoutParams_.PortraitKeyboardRect_ = params.PortraitKeyboardRect_;
     keyboardLayoutParams_.LandscapePanelRect_ = params.LandscapePanelRect_;

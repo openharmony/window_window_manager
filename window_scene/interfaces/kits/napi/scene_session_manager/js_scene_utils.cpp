@@ -1487,6 +1487,10 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
 
     napi_set_named_property(env, objValue, "gravity",
         CreateJsValue(env, params.gravity_));
+    napi_set_named_property(env, objValue, "landscapeAvoidHeight",
+        CreateJsValue(env, params.landscapeAvoidHeight_));
+    napi_set_named_property(env, objValue, "portraitAvoidHeight",
+        CreateJsValue(env, params.portraitAvoidHeight_));
     napi_set_named_property(env, objValue, "landscapeKeyboardRect",
         CreateJsSessionRect(env, params.LandscapeKeyboardRect_));
     napi_set_named_property(env, objValue, "portraitKeyboardRect",

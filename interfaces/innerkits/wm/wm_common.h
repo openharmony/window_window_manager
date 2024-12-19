@@ -1359,6 +1359,8 @@ struct SptrHash {
 class KeyboardLayoutParams : public Parcelable {
 public:
     WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    int32_t landscapeAvoidHeight_ = -1;
+    int32_t portraitAvoidHeight_ = -1;
     Rect LandscapeKeyboardRect_ { 0, 0, 0, 0 };
     Rect PortraitKeyboardRect_ { 0, 0, 0, 0 };
     Rect LandscapePanelRect_ { 0, 0, 0, 0 };
@@ -1366,7 +1368,10 @@ public:
 
     bool operator==(const KeyboardLayoutParams& params) const
     {
-        return (gravity_ == params.gravity_ && LandscapeKeyboardRect_ == params.LandscapeKeyboardRect_ &&
+        return (gravity_ == params.gravity_ &&
+            landscapeAvoidHeight_ == params.landscapeAvoidHeight_ &&
+            portraitAvoidHeight_ == params.portraitAvoidHeight_ &&
+            LandscapeKeyboardRect_ == params.LandscapeKeyboardRect_ &&
             PortraitKeyboardRect_ == params.PortraitKeyboardRect_ &&
             LandscapePanelRect_ == params.LandscapePanelRect_ &&
             PortraitPanelRect_ == params.PortraitPanelRect_);
@@ -1398,6 +1403,8 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return (parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
+            parcel.WriteInt32(landscapeAvoidHeight_) &&
+            parcel.WriteInt32(portraitAvoidHeight_) &&
             WriteParcel(parcel, LandscapeKeyboardRect_) &&
             WriteParcel(parcel, PortraitKeyboardRect_) &&
             WriteParcel(parcel, LandscapePanelRect_) &&
@@ -1411,6 +1418,8 @@ public:
             return nullptr;
         }
         params->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
+        params->landscapeAvoidHeight_ = parcel.ReadInt32();
+        params->portraitAvoidHeight_ = parcel.ReadInt32();
         if (ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
             ReadParcel(parcel, params->PortraitKeyboardRect_) &&
             ReadParcel(parcel, params->LandscapePanelRect_) &&

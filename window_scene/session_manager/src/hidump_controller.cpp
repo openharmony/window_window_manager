@@ -315,6 +315,8 @@ void HidumpController::DumpKeyboardParam(
         << std::setprecision(precision) << property->GetTextFieldHeight() << "|"
         << std::endl
         << "{" << static_cast<uint32_t>(keyboardLayoutParams.gravity_) << "|"
+        << keyboardLayoutParams.landscapeAvoidHeight_ << "|"
+        << keyboardLayoutParams.portraitAvoidHeight_ << "|"
         << "[" << LandscapeKeyboardRect.posX_ << " "
         << LandscapeKeyboardRect.posY_ << " "
         << LandscapeKeyboardRect.width_ << " "
