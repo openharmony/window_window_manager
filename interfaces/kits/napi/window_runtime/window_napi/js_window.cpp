@@ -1017,6 +1017,13 @@ napi_value JsWindow::GetGestureBackEnabled(napi_env env, napi_callback_info info
     return (me != nullptr) ? me->OnGetGestureBackEnabled(env, info) : nullptr;
 }
 
+napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "GetWindowDensityInfo");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowDensityInfo(env, info) : nullptr;
+}
+
 static WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, const sptr<Window>& window)
 {
