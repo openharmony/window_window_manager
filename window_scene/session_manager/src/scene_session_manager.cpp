@@ -8802,7 +8802,6 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         UpdateRootSceneSessionAvoidArea(persistentId, needUpdate);
         return;
     }
-    if (session == nullptr)
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
         if (session != nullptr) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isVisible %{public}u sessionState %{public}u",
