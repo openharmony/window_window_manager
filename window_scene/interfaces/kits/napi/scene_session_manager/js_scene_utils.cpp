@@ -19,6 +19,7 @@
 
 #include <event_handler.h>
 #include <js_runtime_utils.h>
+#include <napi_common_want.h>
 
 #include "root_scene.h"
 #include "window_manager_hilog.h"
@@ -909,6 +910,9 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.errorReason));
     napi_set_named_property(env, objValue, "isFromIcon", CreateJsValue(env, sessionInfo.isFromIcon_));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
+    if (sessionInfo.want != nullptr) {
+        napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
+    }
     return objValue;
 }
 
