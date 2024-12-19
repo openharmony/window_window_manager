@@ -110,6 +110,25 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, Function | SmallTest
 }
 
 /**
+ * @tc.name: HandleActionUpdateKeyboardTouchHotArea
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
+    sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    OHOS::Rosen::Session session(info);
+    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+}
+
+/**
  * @tc.name: HandleActionUpdateDecorEnable
  * @tc.desc: normal function
  * @tc.type: FUNC

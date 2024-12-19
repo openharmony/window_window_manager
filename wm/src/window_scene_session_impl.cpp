@@ -3546,7 +3546,7 @@ WMError WindowSceneSessionImpl::SetKeyboardTouchHotAreas(const KeyboardTouchHotA
     WMError result = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEYBOARD_TOUCH_HOT_AREA);
     if (result != WMError::WM_OK) {
         property_->SetKeyboardTouchHotAreas(lastKeyboardTouchHotAreas);
-        TLOGE(WmsLogTag::WMS_EVENT,"errCode:%{public}d", static_cast<int32_t>(result));
+        TLOGE(WmsLogTag::WMS_EVENT, "errCode:%{public}d", static_cast<int32_t>(result));
     }
     return result;
 }
