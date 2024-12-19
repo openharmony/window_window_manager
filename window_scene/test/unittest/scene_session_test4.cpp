@@ -25,6 +25,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "window_helper.h"
 #include "wm_common.h"
 #include "ui/rs_surface_node.h"
@@ -600,6 +601,10 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
 
     EXPECT_EQ(WMError::WM_DO_NOTHING, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RECT));
+    
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION));
 }
 
 /**
@@ -1335,6 +1340,111 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | L
 
     WSRect newGlobalRect = { 150, 150, 100, 100 };
     session->UpdateAllModalUIExtensions(newGlobalRect);
+}
+
+/**
+ * @tc.name: HandleActionUpdateAvoidAreaOption
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleActionUpdateAvoidAreaOption, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateAvoidAreaOption";
+    info.bundleName_ = "HandleActionUpdateAvoidAreaOption";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
+    ASSERT_NE(sessionProperty, nullptr);
+
+    sessionProperty->SetAvoidAreaOption(1);
+    sessionProperty->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    WMError ret = session->HandleActionUpdateAvoidAreaOption(sessionProperty, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    sessionProperty->SetAvoidAreaOption(2);
+    sessionProperty->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = session->HandleActionUpdateAvoidAreaOption(sessionProperty, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    sessionProperty->SetAvoidAreaOption(3);
+    sessionProperty->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ret = session->HandleActionUpdateAvoidAreaOption(sessionProperty, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
+ * @tc.name: GetSystemAvoidArea
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, GetSystemAvoidArea, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSystemAvoidArea";
+    info.bundleName_ = "GetSystemAvoidArea";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+
+    sceneSession->isActive_ = true;
+    SystemSessionConfig systemConfig;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sceneSession->SetSystemConfig(systemConfig);
+    
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    sceneSession->GetSessionProperty()->SetDisplayId(2024);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(2024, screenSession));
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    sceneSession->SetSessionProperty(property);
+
+    WSRect rect1({0, 0, 10, 10});
+    AvoidArea avoidArea;
+    sceneSession->GetSystemAvoidArea(rect1, avoidArea);
+    
+    WSRect rect2({0, 0, 10, 10});
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->GetSystemAvoidArea(rect2, avoidArea);
+    ASSERT_EQ(avoidArea.topRect_.posX_, 0);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    sceneSession->SetSessionProperty(property);
+    ASSERT_EQ(avoidArea.topRect_.posX_, 0);
+}
+
+/**
+ * @tc.name: CheckGetAvoidAreaAvailable
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateAvoidAreaOption";
+    info.bundleName_ = "HandleActionUpdateAvoidAreaOption";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = session->GetSessionProperty();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    SystemSessionConfig systemConfig;
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session->SetSystemConfig(systemConfig);
+
+    bool ret;
+    property->SetAvoidAreaOption(0);
+    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+    ASSERT_EQ(false, ret);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+    ASSERT_EQ(false, ret);
 }
 }
 }

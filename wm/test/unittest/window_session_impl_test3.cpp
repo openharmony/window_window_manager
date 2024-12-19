@@ -873,6 +873,49 @@ HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, Function | SmallTest |
     ASSERT_NE(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor end";
 }
+
+/**
+ * @tc.name: SetAvoidAreaOption
+ * @tc.desc: SetAvoidAreaOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetAvoidAreaOption");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    WMError res = window->SetAvoidAreaOption(3);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetAvoidAreaOption
+ * @tc.desc: GetAvoidAreaOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+
+    option->SetWindowName("GetAvoidAreaOption");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    uint32_t avoidAreaOptions = 0;
+    WMError res = window->GetAvoidAreaOption(avoidAreaOptions);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
