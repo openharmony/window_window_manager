@@ -23,8 +23,8 @@
 #include <optional>
 
 #include <event_handler.h>
+#include <message_parcel.h>
 #include <want.h>
-#include "message_parcel.h"
 
 namespace OHOS::Rosen::Extension {
 
@@ -33,17 +33,17 @@ struct DataTransferConfig : public Parcelable {
     static DataTransferConfig* Unmarshalling(Parcel& parcel);
     std::string ToString() const;
 
-    bool needSyncSend_ { false };
-    bool needReply_ { false };
-    SubSystemId subSystemId_ { SubSystemId::INVALID };
-    uint32_t customId_ { 0 };
+    bool needSyncSend { false };
+    bool needReply { false };
+    SubSystemId subSystemId { SubSystemId::INVALID };
+    uint32_t customId { 0 };
 };
 
 using Task = std::function<void()>;
 
 class DataHandler : public IDataHandler {
 public:
-    DataHandler(std::shared_ptr<AppExecFwk::EventHandler>& eventHandler) : eventHandler_(eventHandler) {};
+    explicit DataHandler(const std::shared_ptr<AppExecFwk::EventHandler>& eventHandler) : eventHandler_(eventHandler) {}
     virtual ~DataHandler() = default;
 
     DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data,

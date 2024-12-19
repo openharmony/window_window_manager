@@ -20,8 +20,8 @@
 #include "key_event.h"
 #include "want.h"
 
-#include "session/host/include/session.h"
 #include "extension_data_handler.h"
+#include "session/host/include/session.h"
 
 namespace OHOS::Rosen {
 class WindowEventChannelListener : public IRemoteStub<IWindowEventChannelListener> {
