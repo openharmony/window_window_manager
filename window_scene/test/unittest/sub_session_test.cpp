@@ -397,7 +397,6 @@ HWTEST_F(SubSessionTest, UpdateSessionRectInner01, Function | SmallTest | Level2
  */
 HWTEST_F(SubSessionTest, IsVisibleForeground, Function | SmallTest | Level2)
 {
-    ASSERT_NE(subSession_, nullptr);
     systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     subSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(subSession_->IsVisibleForeground(), false);
@@ -411,7 +410,6 @@ HWTEST_F(SubSessionTest, IsVisibleForeground, Function | SmallTest | Level2)
     info.moduleName_ = "IsVisibleForeground";
     info.bundleName_ = "IsVisibleForeground";
     sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(nullptr, parentSession);
     parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     subSession_->SetParentSession(parentSession);
     EXPECT_EQ(subSession_->IsVisibleForeground(), false);
