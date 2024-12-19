@@ -1829,7 +1829,7 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
 
     option->SetWindowName("SetRaiseByClickForFloatWindow");
     option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    sptr<WindowSessionImpl> floatWindow = new(std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> floatWindow = new (std::nothrow) WindowSessionImpl(option);
     floatWindow->property_->SetParentPersistentId(1);
     ASSERT_NE(nullptr, floatWindow);
 
