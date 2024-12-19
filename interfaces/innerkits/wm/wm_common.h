@@ -1293,8 +1293,8 @@ enum class CaseType {
 
 enum class MaximizePresentation {
     FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set immersiveStateEnable
-    EXIT_IMMERSIVE = 1,       // immersiveStateEnable will be set as false
-    ENTER_IMMERSIVE = 2,       // immersiveStateEnable will be set as true
+    EXIT_IMMERSIVE = 1,                // immersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,               // immersiveStateEnable will be set as true
     // immersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
