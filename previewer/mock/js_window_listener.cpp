@@ -42,7 +42,7 @@ void JsWindowListener::SetMainEventHandler()
 
 void JsWindowListener::CallJsMethod(const char* methodName, napi_value const* argv, size_t argc)
 {
-    WLOGFD("methodName = %{public}s", methodName);
+    WLOGFD("methodName=%{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
         WLOGFE("env_ nullptr or jsCallBack_ is nullptr");
         return;
@@ -59,7 +59,7 @@ void JsWindowListener::CallJsMethod(const char* methodName, napi_value const* ar
 
 void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    WLOGFD("type = %{public}d", type);
+    WLOGFD("type=%{public}d", type);
     // js callback should run in js thread
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
         [self = weakRef_, avoidArea, type, eng = env_] (napi_env env,
