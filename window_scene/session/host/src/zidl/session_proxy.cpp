@@ -774,8 +774,7 @@ WSError SessionProxy::OnRestoreMainWindow()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 /** @note @window.layout */
@@ -2184,7 +2183,6 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    uint32_t ret = reply.ReadUint32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
