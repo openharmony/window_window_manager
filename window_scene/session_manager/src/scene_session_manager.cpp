@@ -1579,7 +1579,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
             TLOGI(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
-    
+
         if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
             TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
                 "abilityName: %{public}s, appIndex: %{public}d",
@@ -6802,9 +6802,15 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
         snapshot.topAbility.SetBundleName(sessionInfo.bundleName_.c_str());
         snapshot.topAbility.SetModuleName(sessionInfo.moduleName_.c_str());
         snapshot.topAbility.SetAbilityName(sessionInfo.abilityName_.c_str());
-        auto oriSnapshot = sceneSession->Snapshot();
+        float snapShotScale = sceneSession->GetFloatingScale() > 1.0f ? 1.0f : sceneSession->GetFloatingScale();
+        auto oriSnapshot = sceneSession->Snapshot(false, snapShotScale);
         if (oriSnapshot != nullptr) {
+            if (sceneSession->GetFloatingScale() > 1.0f) {
+                oriSnapshot->scale(sceneSession->GetFloatingScale(), sceneSession->GetFloatingScale());
+            }
             snapshot.snapshot = oriSnapshot;
+            TLOGI(WmsLogTag::WMS_SYSTEM, "snapshot WxH = %{public}dx%{public}d",
+                oriSnapshot->GetWidth(), oriSnapshot->GetHeight());
             return WMError::WM_OK;
         }
         return WMError::WM_ERROR_NULLPTR;
