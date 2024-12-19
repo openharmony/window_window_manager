@@ -24,6 +24,7 @@
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
+#include "data_handler_interface.h"
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -2711,6 +2712,11 @@ public:
      * @param errorCode error code when UIExtension timeout
      */
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+
+    /**
+     * @brief Get Data Handler of UIExtension
+     */
+    virtual std::shared_ptr<IDataHandler> GetExtensionDataHandler() const { return nullptr; }
 
     /**
      * @brief Get the real parent id of UIExtension
