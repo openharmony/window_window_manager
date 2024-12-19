@@ -4592,7 +4592,7 @@ bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
 float WindowSceneSessionImpl::GetCustomDensity()
 {
     if (WindowHelper::IsMainWindow(GetType())) {
-        return isCustomDensityEnabled_.load();
+        return customDensity_;
     }
     auto mainWindow = FindMainWindowWithContext();
     return mainWindow ? mainWindow->customDensity_ : UNDEFINED_DENSITY;
