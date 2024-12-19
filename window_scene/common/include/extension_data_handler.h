@@ -13,27 +13,26 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef OHOS_ROSEN_EXTENSION_DATA_HANDLER_H
+#define OHOS_ROSEN_EXTENSION_DATA_HANDLER_H
 
 #include "data_handler_interface.h"
 
-#include <optional>
 #include <cstdint>
-#include <shared_mutex>
+#include <mutex>
+#include <optional>
 
-#include <want.h>
 #include <event_handler.h>
+#include <want.h>
 #include "message_parcel.h"
 
 namespace OHOS::Rosen::Extension {
 
-class TransferConfig : public Parcelable {
-public:
+struct DataTransferConfig : public Parcelable {
     bool Marshalling(Parcel& parcel) const override;
-    static TransferConfig* Unmarshalling(Parcel& parcel);
+    static DataTransferConfig* Unmarshalling(Parcel& parcel);
     std::string ToString() const;
 
-public:
     bool needSyncSend_ { false };
     bool needReply_ { false };
     SubSystemId subSystemId_ { SubSystemId::INVALID };
@@ -54,18 +53,20 @@ public:
     DataHandlerErr RegisterDataConsumer(SubSystemId dataId, DataConsumeCallback&& callback) override;
     void UnregisterDataConsumer(SubSystemId dataId) override;
     DataHandlerErr NotifyDataConsumer(AAFwk::Want&& data, std::optional<AAFwk::Want> reply,
-        const TransferConfig& config);
+        const DataTransferConfig& config);
 
 protected:
-    virtual DataHandlerErr SendData(AAFwk::Want& data, AAFwk::Want& reply, const TransferConfig& config) = 0;
-    DataHandlerErr PrepareData(MessageParcel& data, AAFwk::Want& toSend, const TransferConfig& config);
-    DataHandlerErr ParseReply(MessageParcel& data, AAFwk::Want& reply, const TransferConfig& config);
+    virtual DataHandlerErr SendData(AAFwk::Want& data, AAFwk::Want& reply, const DataTransferConfig& config) = 0;
+    DataHandlerErr PrepareData(MessageParcel& data, AAFwk::Want& toSend, const DataTransferConfig& config);
+    DataHandlerErr ParseReply(MessageParcel& data, AAFwk::Want& reply, const DataTransferConfig& config);
     void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime);
 
 protected:
-    mutable std::shared_mutex mutex_;
+    mutable std::mutex mutex_;
     std::unordered_map<SubSystemId, DataConsumeCallback> consumers_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
 };
 
 }  // namespace OHOS::Rosen::Extension
+
+#endif  // OHOS_ROSEN_EXTENSION_DATA_HANDLER_H
