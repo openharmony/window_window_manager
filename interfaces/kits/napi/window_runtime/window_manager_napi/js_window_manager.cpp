@@ -760,7 +760,7 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
 napi_value JsWindowManager::OnToggleShownStateForAllAppWindows(napi_env env, napi_callback_info info)
 {
     WLOGFI("[NAPI]");
-    const char* cosnt where = __func__;
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
