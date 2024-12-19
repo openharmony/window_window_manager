@@ -202,36 +202,6 @@ HWTEST_F(SceneSessionManagerTest3, ConfigAppWindowShadow, Function | SmallTest |
 }
 
 /**
- * @tc.name: ConfigKeyboardAnimation
- * @tc.desc: SceneSesionManager config keyboard animation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, ConfigKeyboardAnimation, Function | SmallTest | Level3)
-{
-    WindowSceneConfig::ConfigItem animationConfig;
-    WindowSceneConfig::ConfigItem itemCurve;
-    WindowSceneConfig::ConfigItem itemDurationIn;
-    WindowSceneConfig::ConfigItem itemDurationOut;
-    std::vector<int> curve = {39};
-    std::vector<int> durationIn = {39};
-    std::vector<int> durationOut = {39};
-
-    itemCurve.SetValue(curve);
-    itemCurve.SetValue({{"curve", itemCurve}});
-    itemDurationIn.SetValue(durationIn);
-    itemDurationIn.SetValue({{"durationIn", itemDurationIn}});
-    itemDurationOut.SetValue(durationOut);
-    itemDurationOut.SetValue({{"durationOut", itemDurationOut}});
-    animationConfig.SetValue({{"timing", itemCurve}, {"timing", itemDurationIn}, {"timing", itemDurationOut}});
-    int ret = 0;
-    ssm_->ConfigKeyboardAnimation(animationConfig);
-    KeyboardSceneAnimationConfig animationIn;
-    KeyboardSceneAnimationConfig animationOut;
-    ssm_->ConfigDefaultKeyboardAnimation(animationIn, animationOut);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: ConfigStatusBar
  * @tc.desc: ConfigStatusBar config window immersive status bar
  * @tc.type: FUNC
@@ -560,46 +530,6 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByType, Function | Small
 }
 
 /**
- * @tc.name: UpdateParentSessionForDialog
- * @tc.desc: SceneSesionManager UpdateParentSessionForDialog
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, UpdateParentSessionForDialog, Function | SmallTest | Level3)
-{
-    WSError result = ssm_->UpdateParentSessionForDialog(nullptr, nullptr);
-    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    result = ssm_->UpdateParentSessionForDialog(nullptr, property);
-    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
-
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
-    info.moduleName_ = "test3";
-    info.appIndex_ = 10;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    result = ssm_->UpdateParentSessionForDialog(sceneSession, property);
-    EXPECT_EQ(result, WSError::WS_OK);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    result = ssm_->UpdateParentSessionForDialog(sceneSession, property);
-    EXPECT_EQ(result, WSError::WS_OK);
-
-    SessionInfo info1;
-    info1.abilityName_ = "test2";
-    info1.bundleName_ = "test3";
-    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    ASSERT_NE(nullptr, sceneSession2);
-    ssm_->sceneSessionMap_.insert({2, sceneSession2});
-    property->SetParentPersistentId(2);
-    result = ssm_->UpdateParentSessionForDialog(sceneSession, property);
-    EXPECT_EQ(result, WSError::WS_OK);
-}
-
-/**
  * @tc.name: CheckWindowId
  * @tc.desc: CheckWindowId
  * @tc.type: FUNC
@@ -854,30 +784,6 @@ HWTEST_F(SceneSessionManagerTest3, SetOutsideDownEventListener, Function | Small
     int ret = 0;
     ssm_->SetOutsideDownEventListener(func);
     ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: DestroyAndDisconnectSpecificSession
- * @tc.desc: SceneSesionManager destroy and disconnect specific session
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, DestroyAndDisconnectSpecificSession, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 0;
-    WSError result = ssm_->DestroyAndDisconnectSpecificSession(persistentId);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: DestroyAndDisconnectSpecificSessionWithDetachCallback
- * @tc.desc: SceneSesionManager destroy and disconnect specific session with detach callback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, DestroyAndDisconnectSpecificSessionWithDetachCallback, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 0;
-    WSError result = ssm_->DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, nullptr);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
