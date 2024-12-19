@@ -2031,11 +2031,11 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     WSRect rect2 = {2, 2, 2, 1};
     sceneSession->winRect_ = rect2;
     sceneSession->moveDragController_->moveDragProperty_.originalRect_ = rect;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
+    sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::HIDE);
     WSRect rect3 = {1, 1, 2, 1};
     ASSERT_EQ(rect2, rect3);
 
-    sceneSession->HandleCompatileNoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
+    sceneSession->HandleCompatileModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
     ASSERT_EQ(rect2, rect3);
 }
 
