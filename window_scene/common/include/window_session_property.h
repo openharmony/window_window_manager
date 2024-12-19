@@ -105,7 +105,7 @@ public:
     /*
      * Window Immersive
      */
-    void SetAvoidAreaOption(uint32_t avoidAreaOptions);
+    void SetAvoidAreaOption(uint32_t avoidAreaOption);
     uint32_t GetAvoidAreaOption() const;
 
     bool GetIsNeedUpdateWindowMode() const;
