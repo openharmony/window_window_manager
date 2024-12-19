@@ -464,11 +464,9 @@ HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner03, F
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
     sessionInfo.abilityName_ = "DestroyAndDisconnectSpecificSessionInner03";
     sptr<SceneSession> floatSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, floatSession);
     floatSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     floatSession->persistentId_ = 1;
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, subSession);
     subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     subSession->persistentId_ = 2;
     subSession->SetParentSession(floatSession);
