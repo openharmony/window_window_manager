@@ -389,6 +389,37 @@ HWTEST_F(SubSessionTest, UpdateSessionRectInner01, Function | SmallTest | Level2
     subSession_->UpdateSessionRectInner(rect, SizeChangeReason::DRAG_END, config);
     ASSERT_EQ(subSession_->shouldFollowParentWhenShow_, false);
 }
+
+/**
+ * @tc.name: IsVisibleForeground
+ * @tc.desc: IsVisibleForeground Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsVisibleForeground, Function | SmallTest | Level2)
+{
+    ASSERT_NE(subSession_, nullptr);
+    systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    subSession_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(subSession_->IsVisibleForeground(), false);
+    subSession_->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(subSession_->IsVisibleForeground(), false);
+    subSession_->isVisible_ = true;
+    EXPECT_EQ(subSession_->IsVisibleForeground(), true);
+
+    SessionInfo info;
+    info.abilityName_ = "IsVisibleForeground";
+    info.moduleName_ = "IsVisibleForeground";
+    info.bundleName_ = "IsVisibleForeground";
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(nullptr, parentSession);
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    subSession_->SetParentSession(parentSession);
+    EXPECT_EQ(subSession_->IsVisibleForeground(), false);
+    parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(subSession_->IsVisibleForeground(), false);
+    parentSession->isVisible_ = true;
+    EXPECT_EQ(subSession_->IsVisibleForeground(), true);
+}
 }
 }
 }

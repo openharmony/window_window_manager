@@ -2295,6 +2295,36 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetMainOrFloatSession
+ * @tc.desc: GetMainOrFloatSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, GetMainOrFloatSession, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "GetMainOrFloatSession";
+    info.moduleName_ = "GetMainOrFloatSession";
+    info.bundleName_ = "GetMainOrFloatSession";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(session, session->GetMainOrFloatSession());
+
+    sptr<Session> floatSession = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(floatSession, nullptr);
+    floatSession->SetParentSession(session);
+    floatSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    EXPECT_EQ(floatSession, floatSession->GetMainOrFloatSession());
+
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(subSession, nullptr);
+    subSession->SetParentSession(floatSession);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(floatSession, subSession->GetMainOrFloatSession());
+}
+
+/**
  * @tc.name: IsSupportDetectWindow
  * @tc.desc: IsSupportDetectWindow Test
  * @tc.type: FUNC
