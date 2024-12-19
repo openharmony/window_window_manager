@@ -118,6 +118,7 @@ const std::unordered_set<WindowType> INVALID_SCB_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_LAUNCHER_DOCK
 };
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
+constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -3999,29 +4000,18 @@ bool WindowSceneSessionImpl::GetDefaultDensityEnabled()
 
 float WindowSceneSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
 {
-    float vpr = 1.0f;
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is nullptr");
-        return vpr;
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
+        return INVALID_DEFAULT_DENSITY;
     }
-    bool isDefaultDensityEnabled = false;
-    if (WindowHelper::IsMainWindow(GetType())) {
-        isDefaultDensityEnabled = GetDefaultDensityEnabled();
-    } else {
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow) {
-            isDefaultDensityEnabled = mainWindow->GetDefaultDensityEnabled();
-            CopyUniqueDensityParameter(mainWindow);
-        }
+    if (IsDefaultDensityEnabled()) {
+        return displayInfo->GetDefaultVirtualPixelRatio();
     }
-    if (isDefaultDensityEnabled) {
-        vpr = displayInfo->GetDefaultVirtualPixelRatio();
-    } else if (useUniqueDensity_) {
-        vpr = virtualPixelRatio_;
-    } else {
-        vpr = displayInfo->GetVirtualPixelRatio();
+    if (useUniqueDensity_) {
+        return virtualPixelRatio_;
     }
-    return vpr;
+    auto vpr = GetCustomDensity();
+    return vpr >= MINIMUM_CUSTOM_DENSITY && vpr <= MAXIMUM_CUSTOM_DENSITY ? vpr : displayInfo->GetVirtualPixelRatio();
 }
 
 WMError WindowSceneSessionImpl::HideNonSecureWindows(bool shouldHide)
@@ -4584,6 +4574,89 @@ bool WindowSceneSessionImpl::IsSystemDensityChanged(const sptr<DisplayInfo>& dis
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}d, lastDensity: %{public}f, currDensity: %{public}f",
         GetPersistentId(), lastSystemDensity_, displayInfo->GetVirtualPixelRatio());
     return true;
+}
+
+bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
+{
+    if (WindowHelper::IsMainWindow(GetType())) {
+        return GetDefaultDensityEnabled();
+    }
+    auto mainWindow = FindMainWindowWithContext();
+    if (mainWindow) {
+        CopyUniqueDensityParameter(mainWindow);
+        return mainWindow->GetDefaultDensityEnabled();
+    }
+    return false;
+}
+
+float WindowSceneSessionImpl::GetCustomDensity()
+{
+    if (WindowHelper::IsMainWindow(GetType())) {
+        return isCustomDensityEnabled_.load();
+    }
+    auto mainWindow = FindMainWindowWithContext();
+    return mainWindow ? mainWindow->customDEnsity_ : UNDEFINED_DENSITY;
+}
+
+WMError WindowSceneSessionImpl::SetCustomDensity(float density)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId=%{public}u set custom density=%{public}f",
+        GetWindowId(), density);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if ((density < MINIMUM_CUSTOM_DENSITY && !MathHelper::NearZero(density - UNDEFINED_DENSITY)) ||
+        density > MAXIMUM_CUSTOM_DENSITY) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid custom density value: %{public}f", density);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "must be app main window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (MathHelper::NearZero(customDensity_ - density)) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "custom density not change");
+        return WMError::WM_OK;
+    }
+    isDefaultDensityEnabled_ = false;
+    customDensity_ = density;
+    UpdateDensity();
+
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityInfo)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "display is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    densityInfo.systemDensity_ = displayInfo->GetVirtualPixelRatio();
+    densityInfo.defaultDensity_ = displayInfo->GetDefaultVirtualPixelRatio();
+    auto customDensity = UNDEFINED_DENSITY;
+    if (IsDefaultDensityEnabled()) {
+        customDensity = displayInfo->GetDefaultVirtualPixelRatio();
+    } else {
+        customDensity = GetCustomDensity();
+        customDensity = MathHelper::NearZero(customDensity - UNDEFINED_DENSITY) ? displayInfo->GetVirtualPixelRatio() 
+                                                                                : customDensity;
+    }
+    densityInfo.customDensity_ = customDensity;
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

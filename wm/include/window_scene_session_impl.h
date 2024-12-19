@@ -309,6 +309,10 @@ private:
      */
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
+    bool IsDefaultDensityEnabled();
+    float GetCustomDensity();
+    WMError SetCustomDensity(float density) override;
+    WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
 
     /*
      * Sub Window
