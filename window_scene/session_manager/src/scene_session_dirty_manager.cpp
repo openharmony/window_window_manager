@@ -590,7 +590,7 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
 }
 
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
-    const sptr<SceneSession>& sceneSession, const SceneSessionDirtyManager::WindowAction& action) const
+    const sptr<SceneSession>& sceneSession, const WindowAction& action) const
 {
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession is nullptr");
