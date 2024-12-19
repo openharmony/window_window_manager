@@ -2358,6 +2358,14 @@ public:
     virtual bool GetDefaultDensityEnabled() { return false; }
 
     /**
+     * @brief Set custom density of window.
+     *
+     * @param density the custom density of window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get virtual pixel ratio.
      *
      * @return Value of PixelRatio obtained from displayInfo.
@@ -2768,6 +2776,14 @@ public:
      * @return The string corresponding to the window.
      */
     virtual std::string GetClassType() const { return "Window"; }
+
+    /**
+     * @brief Get the window density of current window.
+     *
+     * @param densityInfo the struct representing system density, default density and custom density.
+     * @return WMError.
+     */
+    virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) { return WMError::WM_OK; }
 };
 }
 }

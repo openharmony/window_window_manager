@@ -322,6 +322,7 @@ public:
      * Window Property
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
+    float customDensity_ = UNDEFINED_DENSITY;
 
 protected:
     WMError Connect();
