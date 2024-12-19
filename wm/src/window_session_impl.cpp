@@ -1732,26 +1732,26 @@ WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 }
 
 /** @note @window.immersive */
-WMError WindowSessionImpl::SetAvoidAreaOption(uint32_t avoidAreaOptions)
+WMError WindowSessionImpl::SetAvoidAreaOption(uint32_t avoidAreaOption)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_IMMS, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    property_->SetAvoidAreaOption(avoidAreaOptions);
+    property_->SetAvoidAreaOption(avoidAreaOption);
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d, set option %{public}d",
-        GetPersistentId(), avoidAreaOptions);
+        GetPersistentId(), avoidAreaOption);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION);
 }
 
 /** @note @window.immersive */
-WMError WindowSessionImpl::GetAvoidAreaOption(uint32_t& avoidAreaOptions)
+WMError WindowSessionImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_IMMS, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    avoidAreaOptions = property_->GetAvoidAreaOption();
+    avoidAreaOption = property_->GetAvoidAreaOption();
     return WMError::WM_OK;
 }
 
