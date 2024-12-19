@@ -1882,6 +1882,9 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
 
     sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
+
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE, false);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::DRAG_MOVE);
 }
 
 /**

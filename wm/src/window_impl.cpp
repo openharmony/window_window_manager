@@ -3898,7 +3898,7 @@ bool WindowImpl::IsStretchableReason(WindowSizeChangeReason reason)
 {
     return reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END ||
            reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
-           reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::UNDEFINED;
+           IsMoveToOrDragMove(reason) || reason == WindowSizeChangeReason::UNDEFINED;
 }
 
 void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason,
