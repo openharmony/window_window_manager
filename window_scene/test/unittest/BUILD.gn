@@ -831,10 +831,19 @@ ohos_unittest("ws_scene_session_manager_test11") {
 
 ohos_unittest("ws_scene_session_manager_test12") {
   module_out_path = module_out_path
-
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   sources = [ "scene_session_manager_test12.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "ability_base:configuration",
