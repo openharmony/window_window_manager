@@ -4652,7 +4652,7 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
         customDensity = displayInfo->GetDefaultVirtualPixelRatio();
     } else {
         customDensity = GetCustomDensity();
-        customDensity = MathHelper::NearZero(customDensity - UNDEFINED_DENSITY) ? displayInfo->GetVirtualPixelRatio() 
+        customDensity = MathHelper::NearZero(customDensity - UNDEFINED_DENSITY) ? displayInfo->GetVirtualPixelRatio()
                                                                                 : customDensity;
     }
     densityInfo.customDensity_ = customDensity;
