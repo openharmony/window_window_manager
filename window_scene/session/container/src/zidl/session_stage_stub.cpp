@@ -551,6 +551,18 @@ int SessionStageStub::HandleNotifyCompatibleModeEnableInPad(MessageParcel& data,
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool enableDrag = true;
+    if (!data.ReadBool(enableDrag)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read enableDrag failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetEnableDragBySystem(enableDrag);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "entry");
@@ -579,18 +591,6 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
         return ERR_TRANSACTION_FAILED;
     }
 
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    bool enableDrag = true;
-    if (!data.ReadBool(enableDrag)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Read enableDrag failed.");
-        return ERR_INVALID_DATA;
-    }
-    SetEnableDragBySystem(enableDrag);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -150,7 +150,6 @@ public:
     {
         return WSError::WS_OK;
     }
-
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
 };
 } // namespace OHOS::Rosen
