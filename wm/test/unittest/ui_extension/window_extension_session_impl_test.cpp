@@ -969,6 +969,35 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest 
 }
 
 /**
+ * @tc.name: NapiSetUIContentByName
+ * @tc.desc: NapiSetUIContentByName Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContentByName, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    std::string contentInfo = "NapiSetUIContentByName test";
+    napi_env env = napi_env();
+    napi_value storage = napi_value();
+    sptr<IRemoteObject> token;
+    window_->uiContent_ = nullptr;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    window_->focusState_ = std::nullopt;
+    window_->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+
+    auto uiContent = std::make_shared<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, uiContent);
+    window_->uiContent_ = uiContent;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    window_->focusState_ = true;
+    window_->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+}
+
+/**
  * @tc.name: UpdateRect01
  * @tc.desc: UpdateRect Test
  * @tc.type: FUNC
