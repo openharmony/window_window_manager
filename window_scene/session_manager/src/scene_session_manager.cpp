@@ -4978,18 +4978,17 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
                         });
         return GetSCBDebugDumpInfo(std::move(cmd), dumpInfo);
     }
-    if (params.size() >= 2 && params[0] == ARG_DUMP_PIPLINE && IsValidDigitString(params[1])) { // 2: params num
-        return GetTotalUITreeInfo(params[1], dumpInfo);
+    if (params.size() >= 1 && params[0] == ARG_DUMP_PIPLINE) { // 1: params num
+        return GetTotalUITreeInfo(dumpInfo);
     }
     return WSError::WS_ERROR_INVALID_OPERATION;
 }
 
-WSError SceneSessionManager::GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo)
+WSError SceneSessionManager::GetTotalUITreeInfo(std::string& dumpInfo)
 {
     TLOGI(WmsLogTag::WMS_PIPELINE, "begin");
-    uint64_t screenId = std::stoull(strId);
     if (dumpUITreeFunc_) {
-        dumpUITreeFunc_(screenId, dumpInfo);
+        dumpUITreeFunc_(dumpInfo);
     } else {
         TLOGE(WmsLogTag::WMS_PIPELINE, "dumpUITreeFunc is null");
     }
