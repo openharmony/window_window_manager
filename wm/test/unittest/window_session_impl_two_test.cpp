@@ -1080,21 +1080,22 @@ HWTEST_F(WindowSessionImplTwoTest, InitUIContent, Function | SmallTest | Level2)
     WindowSetUIContentType type = WindowSetUIContentType::DEFAULT;
     AppExecFwk::Ability *ability = nullptr;
     OHOS::Ace::UIContentErrorCode aceRet;
+    BackupAndRestoreType restoreType = BackupAndRestoreType::NONE;
 
     window->uiContent_ = nullptr;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
 
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
 
-    type = WindowSetUIContentType::DISTRIBUTE;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
+    type = WindowSetUIContentType::RESTORE;
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
 
     type = WindowSetUIContentType::BY_NAME;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
 
     type = WindowSetUIContentType::BY_ABC;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, ability, aceRet), WMError::WM_OK);
+    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTwoTest: InitUIContent end";
 }
 

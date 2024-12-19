@@ -437,9 +437,19 @@ enum class WindowGravity : uint32_t {
  */
 enum class WindowSetUIContentType: uint32_t {
     DEFAULT,
-    DISTRIBUTE,
+    RESTORE,
     BY_NAME,
     BY_ABC,
+};
+
+/**
+ * @brief Enumerates restore type.
+ */
+enum class BackupAndRestoreType : int32_t {
+    NONE = 0,                       // no backup and restore
+    CONTINUATION = 1,               // distribute
+    APP_RECOVERY = 2,               // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
 
 /**
