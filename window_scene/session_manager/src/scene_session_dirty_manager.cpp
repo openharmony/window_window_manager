@@ -220,7 +220,7 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
 static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, std::vector<Rect>& hotAreas)
 {
     sptr<SceneSession> session = (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) ?
-        sceneSession->GetKeybaordSession() : sceneSession;
+        sceneSession->GetKeyboardSession() : sceneSession;
     auto sessionProperty = session->GetSessionProperty();
 
     KeyboardTouchHotAreas keyboardTouchHotAreas = sessionProperty->GetKeyboardTouchHotAreas();
