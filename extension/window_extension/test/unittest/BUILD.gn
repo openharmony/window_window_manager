@@ -101,14 +101,9 @@ config("window_extension_unittest_common_public_config") {
     "//third_party/googletest/googlemock/include",
 
     # for abilityContext
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "//third_party/node/deps/icu-small/source/common",
-    "${ability_runtime_inner_api_path}/ability_manager/include",
-    "//foundation/ability/ability_base/interfaces/kits/native/configuration/include/",
 
     # abilityContext end
-    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 
@@ -156,6 +151,9 @@ ohos_static_library("window_extension_unittest_common") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
+    "ability_runtime:runtime",
     "accessibility:accessibility_common",
     "c_utils:utils",
     "hilog:libhilog",

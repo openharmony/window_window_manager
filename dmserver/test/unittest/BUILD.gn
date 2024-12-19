@@ -45,6 +45,7 @@ ohos_unittest("dmserver_abstract_screen_controller_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -76,6 +77,7 @@ ohos_unittest("dmserver_abstract_display_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -89,6 +91,7 @@ ohos_unittest("dmserver_display_manager_service_inner_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -102,6 +105,7 @@ ohos_unittest("dmserver_display_manager_service_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -134,6 +138,7 @@ ohos_unittest("dmserver_screen_rotation_controller_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 
@@ -153,6 +158,7 @@ ohos_unittest("dmserver_display_dumper_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -166,6 +172,7 @@ ohos_unittest("dmserver_display_cutout_controller_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -179,6 +186,7 @@ ohos_unittest("dmserver_display_power_controller_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -192,6 +200,7 @@ ohos_unittest("dmserver_abstract_screen_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 
@@ -242,7 +251,6 @@ config("dmserver_unittest_common_public_config") {
     "../../../test/common/mock",
     "../../../test/common/utils/include",
     "../../../utils/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",  # RSSurface
   ]
 }
 
@@ -266,7 +274,6 @@ ohos_static_library("dmserver_unittest_common") {
     "../../../snapshot:snapshot_display",
     "../../../test/common/utils:libtestutil",
     "//commonlibrary/c_utils/base:utils",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//third_party/googletest:gmock",
@@ -278,6 +285,7 @@ ohos_static_library("dmserver_unittest_common") {
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "ipc:ipc_single",
   ]
