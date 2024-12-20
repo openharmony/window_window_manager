@@ -2366,6 +2366,13 @@ public:
     virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Get custom density of window.
+     *
+     * @return custom density.
+     */
+    virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
+
+    /**
      * @brief Get virtual pixel ratio.
      *
      * @return Value of PixelRatio obtained from displayInfo.

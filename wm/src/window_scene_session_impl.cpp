@@ -3998,7 +3998,7 @@ bool WindowSceneSessionImpl::GetDefaultDensityEnabled()
     return isDefaultDensityEnabled_.load();
 }
 
-float WindowSceneSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+float WindowSceneSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo)
 {
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
@@ -4010,7 +4010,7 @@ float WindowSceneSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo
     if (useUniqueDensity_) {
         return virtualPixelRatio_;
     }
-    auto vpr = GetCustomDensity();
+    auto vpr = GetMainWindowCustomDensity();
     return vpr >= MINIMUM_CUSTOM_DENSITY && vpr <= MAXIMUM_CUSTOM_DENSITY ? vpr : displayInfo->GetVirtualPixelRatio();
 }
 
@@ -4589,13 +4589,18 @@ bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
     return false;
 }
 
-float WindowSceneSessionImpl::GetCustomDensity()
+float WindowSceneSessionImpl::GetMainWindowCustomDensity()
 {
     if (WindowHelper::IsMainWindow(GetType())) {
-        return customDensity_;
+        return GetCustomDensity();
     }
     auto mainWindow = FindMainWindowWithContext();
-    return mainWindow ? mainWindow->customDensity_ : UNDEFINED_DENSITY;
+    return mainWindow ? mainWindow->GetCustomDensity() : UNDEFINED_DENSITY;
+}
+
+float WindowSceneSessionImpl::GetCustomDensity() const
+{
+    return customDensity_;
 }
 
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)
@@ -4645,8 +4650,8 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    densityInfo.systemDensity_ = displayInfo->GetVirtualPixelRatio();
-    densityInfo.defaultDensity_ = displayInfo->GetDefaultVirtualPixelRatio();
+    densityInfo.systemDensity = displayInfo->GetVirtualPixelRatio();
+    densityInfo.defaultDensity = displayInfo->GetDefaultVirtualPixelRatio();
     auto customDensity = UNDEFINED_DENSITY;
     if (IsDefaultDensityEnabled()) {
         customDensity = displayInfo->GetDefaultVirtualPixelRatio();
@@ -4655,7 +4660,7 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
         customDensity = MathHelper::NearZero(customDensity - UNDEFINED_DENSITY) ? displayInfo->GetVirtualPixelRatio()
                                                                                 : customDensity;
     }
-    densityInfo.customDensity_ = customDensity;
+    densityInfo.customDensity = customDensity;
     return WMError::WM_OK;
 }
 } // namespace Rosen
