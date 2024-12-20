@@ -861,10 +861,7 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
 
 bool WindowSessionProperty::MarshallingMainWindowTopmost(Parcel& parcel) const
 {
-    if (!parcel.WriteBool(mainWindowTopmost_)) {
-        return false;
-    }
-    if (!parcel.WriteUint32(accessTokenId_)) {
+    if (!parcel.WriteBool(mainWindowTopmost_) || !parcel.WriteUint32(accessTokenId_)) {
         return false;
     }
     return true;

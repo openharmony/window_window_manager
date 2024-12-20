@@ -498,7 +498,7 @@ napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGND(WmsLogTag::WMS_HIERARCHY, "in");
+    TLOGND(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
 }
@@ -3778,11 +3778,11 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGNE(WmsLogTag::WMS_HIERARCHY, "[NAPI]device not support");
+        TLOGNE(WmsLogTag::WMS_HIERARCHY, "device not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGNE(WmsLogTag::WMS_HIERARCHY, "[NAPI]not allowed since window is not main window");
+        TLOGNE(WmsLogTag::WMS_HIERARCHY, "not allowed since window is not main window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
@@ -3794,8 +3794,12 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             "Argc is invalid: %{public}zu. Failed to convert parameter to topmost", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+
     bool isMainWindowTopmost = false;
-    napi_get_value_bool(env, argv[0], &isMainWindowTopmost);
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isMainWindowTopmost)) {
+        TLOGNE(WmsLogTag::WMS_HIERARCHY, "Failed to convert parameter to isMainWindowTopmost");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
 
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     NapiAsyncTask::ExecuteCallback execute = [weakToken = wptr(windowToken_), isMainWindowTopmost, errCodePtr] {

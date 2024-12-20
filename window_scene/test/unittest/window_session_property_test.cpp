@@ -674,6 +674,7 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
     if (property != nullptr) {
         Parcel parcel = Parcel();
         property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE);
+        property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
         ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
         delete property;
     }
@@ -692,12 +693,16 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
         int32_t persistentId = 2;
         oldProperty->SetPersistentId(persistentId);
         oldProperty->SetFocusable(true);
+        oldProperty->SetMainWindowTopmost(true);
         Parcel parcel = Parcel();
         oldProperty->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+        oldProperty->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
 
         newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+        newProperty->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
         ASSERT_EQ(newProperty->GetPersistentId(), persistentId);
         ASSERT_EQ(newProperty->GetFocusable(), true);
+        ASSERT_EQ(newProperty->IsMainWindowTopmost(), true);
         delete oldProperty;
         delete newProperty;
     }
