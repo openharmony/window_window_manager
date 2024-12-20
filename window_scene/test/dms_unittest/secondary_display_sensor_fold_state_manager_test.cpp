@@ -116,7 +116,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Fun
 {
     float angel = -0.1;
     uint16_t hall = 0;
-    uint16_t allowUserSensorForLargeFoldDevice = 0;
+    int32_t allowUserSensorForLargeFoldDevice = 0;
     SecondaryDisplaySensorFoldStateManager manager;
     FoldStatus state = FoldStatus::UNKNOWN;
     auto result1 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
@@ -161,7 +161,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Fun
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Function | SmallTest | Level1)
 {
     SecondaryDisplaySensorFoldStateManager manager;
-    uint16_t allowUserSensorForLargeFoldDevice = 1;
+    int32_t allowUserSensorForLargeFoldDevice = 1;
     FoldStatus state = FoldStatus::UNKNOWN;
     float angel = 25.0F;
     uint16_t hall = 1;
