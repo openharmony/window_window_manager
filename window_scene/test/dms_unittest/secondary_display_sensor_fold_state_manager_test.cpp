@@ -66,23 +66,45 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange, Fu
 }
 
 /**
- * @tc.name: UpdateSwitchScreenBoundaryForLargeFoldDevice
- * @tc.desc: test function : UpdateSwitchScreenBoundaryForLargeFoldDevice
+ * @tc.name: UpdateSwitchScreenBoundaryForLargeFoldDeviceAB
+ * @tc.desc: test function : UpdateSwitchScreenBoundaryForLargeFoldDeviceAB
  * @tc.type: FUNC
  */
-HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDevice,
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDeviceAB,
         Function | SmallTest | Level1)
 {
     float angel = 0;
-    int hall = 0;
+    uint16_t hall = 0;
     SecondaryDisplaySensorFoldStateManager manager;
-    manager.UpdateSwitchScreenBoundaryForLargeFoldDevice(angel, hall);
-    EXPECT_TRUE(true);
+    FoldStatus state = FoldStatus::UNKNOWN;
+    manager.UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(angel, hall, state);
+    EXPECT_EQ(manager.allowUserSensorForLargeFoldDeviceAB, 0);
 
     angel = 91.0F;
     hall = 1;
-    manager.UpdateSwitchScreenBoundaryForLargeFoldDevice(angel, hall);
-    EXPECT_TRUE(true);
+    manager.UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(angel, hall, state);
+    EXPECT_EQ(manager.allowUserSensorForLargeFoldDeviceAB, 1);
+}
+
+/**
+ * @tc.name: UpdateSwitchScreenBoundaryForLargeFoldDeviceBC
+ * @tc.desc: test function : UpdateSwitchScreenBoundaryForLargeFoldDeviceBC
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDeviceBC,
+        Function | SmallTest | Level1)
+{
+    float angel = 0;
+    uint16_t hall = 0;
+    SecondaryDisplaySensorFoldStateManager manager;
+    FoldStatus state = FoldStatus::UNKNOWN;
+    manager.UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(angel, hall, state);
+    EXPECT_EQ(manager.allowUserSensorForLargeFoldDeviceBC, 0);
+
+    angel = 91.0F;
+    hall = 1;
+    manager.UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(angel, hall, state);
+    EXPECT_EQ(manager.allowUserSensorForLargeFoldDeviceBC, 1);
 }
 
 /**
@@ -93,41 +115,41 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryF
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Function | SmallTest | Level1)
 {
     float angel = -0.1;
-    int hall = 0;
+    uint16_t hall = 0;
+    int32_t allowUserSensorForLargeFoldDevice = 0;
     SecondaryDisplaySensorFoldStateManager manager;
     FoldStatus state = FoldStatus::UNKNOWN;
-    auto result1 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result1 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result1), 0);
 
-    manager.allowUserSensorForLargeFoldDevice = 0;
     angel = 90.0F;
     hall = 1;
-    auto result2 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result2 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result2), 3);
 
     angel = 130.0F - 0.1;
     hall = 1;
-    auto result3 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result3 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result3), 3);
     
     angel = 130.0F - 0.1;
     hall = 0;
-    auto result4 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result4 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result4), 3);
 
     angel = 130.0F + 0.1;
     hall = 0;
-    auto result5 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result5 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result5), 3);
 
     angel = 140.0F + 0.1;
     hall = 0;
-    auto result6 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result6 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result6), 3);
 
     angel = 140.0F + 0.1;
     hall = 1;
-    auto result7 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result7 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result7), 1);
 }
 
@@ -139,40 +161,40 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Fun
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Function | SmallTest | Level1)
 {
     SecondaryDisplaySensorFoldStateManager manager;
-    manager.allowUserSensorForLargeFoldDevice = 1;
+    int32_t allowUserSensorForLargeFoldDevice = 1;
     FoldStatus state = FoldStatus::UNKNOWN;
     float angel = 25.0F;
-    int hall = 1;
-    auto result1 = manager.GetNextFoldStateHalf(angel, hall, state);
+    uint16_t hall = 1;
+    auto result1 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result1), 0);
 
     angel = 70.0F - 0.1;
-    auto result2 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result2 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result2), 2);
 
     angel = 70.0F + 0.1;
-    auto result3 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result3 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result3), 3);
     
     angel = 130.0F - 0.1;
-    auto result4 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result4 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result4), 3);
 
     angel = 130.0F + 0.1;
-    auto result5 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result5 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result5), 3);
 
     angel = 80.0F - 0.1;
-    auto result6 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result6 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result6), 3);
 
     angel = 70.0F + 0.1;
     hall = 0;
-    auto result7 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result7 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result7), 3);
 
     angel = 130.0F + 0.1;
-    auto result8 = manager.GetNextFoldStateHalf(angel, hall, state);
+    auto result8 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result8), 3);
 }
 
