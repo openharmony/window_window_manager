@@ -176,6 +176,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetGestureBackEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
             return HandleNotifySubModalTypeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_MODAL_TYPE_CHANGE):
+            return HandleNotifyMainModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE):
             return HandleSetWindowRectAutoSave(data, reply);
         default:
@@ -1019,6 +1021,17 @@ int SessionStub::HandleNotifySubModalTypeChange(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     NotifySubModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isModal = false;
+    if (!data.ReadBool(isModal)) {
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "isModal: %{public}d", isModal);
+    NotifyMainModalTypeChange(isModal);
     return ERR_NONE;
 }
 
