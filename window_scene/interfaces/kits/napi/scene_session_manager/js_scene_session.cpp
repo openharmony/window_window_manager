@@ -71,7 +71,7 @@ const std::string LAYOUT_FULL_SCREEN_CB = "layoutFullScreenChange";
 const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string TITLE_DOCK_HOVER_SHOW_CB = "titleAndDockHoverShowChange";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
-const std::string SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
+const std::string MAIN_WINDOW_TOP_MOST_CHANGE_CB = "sessionMainWindowTopmostChange";
 const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
 const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
@@ -131,7 +131,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {DEFAULT_DENSITY_ENABLED_CB,            ListenerFuncType::DEFAULT_DENSITY_ENABLED_CB},
     {TITLE_DOCK_HOVER_SHOW_CB,              ListenerFuncType::TITLE_DOCK_HOVER_SHOW_CB},
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
-    {SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB, ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB},
+    {MAIN_WINDOW_TOP_MOST_CHANGE_CB,        ListenerFuncType::MAIN_WINDOW_TOP_MOST_CHANGE_CB},
     {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
     {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
@@ -2135,7 +2135,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_TOP_MOST_CHANGE_CB):
             ProcessSessionTopmostChangeRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB):
+        case static_cast<uint32_t>(ListenerFuncType::MAIN_WINDOW_TOP_MOST_CHANGE_CB):
             ProcessMainWindowTopmostChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::SUB_MODAL_TYPE_CHANGE_CB):
@@ -2945,8 +2945,8 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
 /** @note @window.hierarchy */
 void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
 {
+    TLOGND(WmsLogTag::WMS_HIERARCHY, "isTopmost: %{public}u", isTopmost);
     const char* const where = __func__;
-    TLOGND(WmsLogTag::WMS_HIERARCHY, "[NAPI]isTopmost: %{public}u", isTopmost);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -2954,9 +2954,9 @@ void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
                 where, persistentId);
             return;
         }
-        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_MAIN_WINDOW_TOP_MOST_CHANGE_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(MAIN_WINDOW_TOP_MOST_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "[NAPI]jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "jsCallBack is nullptr");
             return;
         }
         napi_value jsMainWindowTopmostObj = CreateJsValue(env, isTopmost);
