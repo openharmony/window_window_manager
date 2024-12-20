@@ -817,7 +817,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize01, Function | SmallTest | Level2)
     subWindow->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 100));
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
-                                                                    std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 100));
     ASSERT_EQ(WMError::WM_OK, subWindow->Resize(100, 200));
