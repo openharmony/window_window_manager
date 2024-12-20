@@ -533,7 +533,7 @@ WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& co
 }
 
 WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName)
+    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName)
 {
     WLOGFD("%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (auto uiContent = GetUIContentSharedPtr()) {
@@ -555,8 +555,7 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         }
 
-        if (initByName)
-        {
+        if (initByName) {
             uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
         } else {
             uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
