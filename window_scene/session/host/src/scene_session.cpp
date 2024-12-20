@@ -1366,11 +1366,12 @@ void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdj
         KeyboardLayoutParams params = property->GetKeyboardLayoutParams();
         session->adjustKeyboardLayoutFunc_(params);
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "Notify adjust keyboard layout when register, keyboardId: %{public}d, "
-            "gravity: %{public}u, LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
+            "gravity: %{public}u, landscapeAvoidHeight: %{public}d, PortraitAvoidHeight: %{public}d, "
+            "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
             "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s", session->GetPersistentId(),
-            static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
-            params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
-            params.PortraitPanelRect_.ToString().c_str());
+            static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
+            params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
+            params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
         return WSError::WS_OK;
     }, "SetAdjustKeyboardLayoutCallback");
 }
@@ -1898,6 +1899,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             WSRect keyboardRect = {0, 0, 0, 0};
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
+                inputMethod->RecalculatePanelRectForAvoidArea(keyboardRect);
             }
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s keyboard %{public}s",
                   rect.ToString().c_str(), keyboardRect.ToString().c_str());
@@ -4273,6 +4275,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateAnimationFlag(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA):
             return HandleActionUpdateTouchHotArea(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_KEYBOARD_TOUCH_HOT_AREA):
+            return HandleActionUpdateKeyboardTouchHotArea(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_DECOR_ENABLE):
             return HandleActionUpdateDecorEnable(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS):
@@ -4480,6 +4484,19 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
         std::vector<Rect> touchHotAreas;
         property->GetTouchHotAreas(touchHotAreas);
         sessionProperty->SetTouchHotAreas(touchHotAreas);
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    if (GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty != nullptr) {
+        sessionProperty->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
     }
     return WMError::WM_OK;
 }

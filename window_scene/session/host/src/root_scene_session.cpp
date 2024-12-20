@@ -78,6 +78,7 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
             WSRect keyboardRect;
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
+                inputMethod->RecalculatePanelRectForAvoidArea(keyboardRect);
             }
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
             TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s keyboard %{public}s area %{public}s",
