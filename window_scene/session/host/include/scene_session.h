@@ -587,6 +587,7 @@ public:
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
     bool IsSystemKeyboard() const;
+    void ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid);
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -703,6 +704,13 @@ protected:
      * Multi Window
      */
     NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
+
+    /**
+     * keyboard Window
+     */
+    virtual void EnableCallingSessionAvoidArea() {};
+    virtual void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {};
+    bool keyboardAvoidAreaActive_ = true;
 
 private:
     void NotifyAccessibilityVisibilityChange();
