@@ -1351,15 +1351,19 @@ struct SptrHash {
  * @brief Currently available density
  */
 struct WindowDensityInfo {
-    float systemDensity_ = UNDEFINED_DENSITY;
-    float defaultDensity_ = UNDEFINED_DENSITY;
-    float customDensity_ = UNDEFINED_DENSITY;
-
-    inline std::string ToString() const
+    float systemDensity = UNDEFINED_DENSITY;
+    float defaultDensity = UNDEFINED_DENSITY;
+    float customDensity = UNDEFINED_DENSITY;
+    std::string ToString() const
     {
-        std::ostringstream oss;
-        oss << "[" << systemDensity_ << " " << defaultDensity_ << " " << customDensity_ << "]";
-        return oss.str();
+        std::string str;
+        constexpr int BUFFER_SIZE = 64;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[%s, %s, %s]", systemDensity, defaultDensity, customDensity) > 0) {
+            str.append(buffer);
+        }
+        return str;
     }
 };
 

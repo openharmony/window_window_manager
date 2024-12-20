@@ -305,6 +305,7 @@ public:
     virtual WMError SetDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetDefaultDensityEnabled() { return false; }
     virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
     virtual float GetVirtualPixelRatio() { return 1.0f; }
     virtual void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;

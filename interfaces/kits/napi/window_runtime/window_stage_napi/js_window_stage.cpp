@@ -153,7 +153,7 @@ napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_i
 
 napi_value JsWindowStage::SetCustomDensity(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "SetCustomDensity");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetCustomDensity(env, info) : nullptr;
 }
@@ -731,33 +731,30 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowScene is null");
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "weakScene is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
     }
 
     auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
     double density = UNDEFINED_DENSITY;
     if (!ConvertFromJsValue(env, argv[0], density)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to double");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] SetCustomDensity,"
-        " density=%{public}f, result=%{public}u", window->GetWindowId(),
-        window->GetWindowName().c_str(), density, ret);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, result=%{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
     return CreateJsValue(env, static_cast<int32_t>(ret));
 }
 

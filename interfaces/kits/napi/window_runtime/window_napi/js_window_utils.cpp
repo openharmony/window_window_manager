@@ -950,11 +950,11 @@ napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityIn
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
     napi_set_named_property(
-        env, objValue, "systemDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.systemDensity_)));
+        env, objValue, "systemDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.systemDensity)));
     napi_set_named_property(
-        env, objValue, "defaultDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.defaultDensity_)));
+        env, objValue, "defaultDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.defaultDensity)));
     napi_set_named_property(
-        env, objValue, "customDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.customDensity_)));
+        env, objValue, "customDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.customDensity)));
     return objValue;
 }
 
