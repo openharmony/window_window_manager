@@ -31,12 +31,12 @@ public:
 private:
     FoldStatus GetNextFoldState(const std::vector<float> &angles, const std::vector<uint16_t> &halls);
     FoldStatus GetNextFoldStateHalf(float angle, uint16_t hall, FoldStatus myNextStatus,
-        uint16_t allowUserSensorForLargeFoldDevice);
+        uint32_t allowUserSensorForLargeFoldDevice);
     FoldStatus GetGlobalFoldState(FoldStatus PrimaryFoldState, FoldStatus SecondaryFoldState);
     FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle, uint16_t hall, FoldStatus state);
     FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle, uint16_t hall, FoldStatus state);
-    uint16_t allowUserSensorForLargeFoldDeviceAB = 0;
-    uint16_t allowUserSensorForLargeFoldDeviceBC = 0;
+    uint32_t allowUserSensorForLargeFoldDeviceAB = 0;
+    uint32_t allowUserSensorForLargeFoldDeviceBC = 0;
     FoldStatus mNextStateAB = FoldStatus::UNKNOWN;
     FoldStatus mNextStateBC = FoldStatus::UNKNOWN;
 };
