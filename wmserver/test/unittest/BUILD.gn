@@ -52,6 +52,8 @@ test_external_deps = [
   "config_policy:configpolicy_util",
   "display_manager:displaymgr",
   "eventhandler:libeventhandler",
+  "googletest:gmock",
+  "googletest:gtest_main",
   "graphic_2d:librender_service_client",
   "graphic_2d:window_animation",
   "hicollie:libhicollie",
@@ -63,11 +65,6 @@ test_external_deps = [
   "napi:ace_napi",
   "power_manager:powermgr_client",
   "safwk:system_ability_fwk",
-]
-
-test_public_deps = [
-  "//third_party/googletest:gmock",
-  "//third_party/googletest:gtest_main",
 ]
 
 test_inner_deps = [
@@ -111,7 +108,6 @@ ohos_unittest("wmserver_window_manager_service_test") {
   configs = test_public_config
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -121,7 +117,6 @@ ohos_unittest("wmserver_input_window_monitor_test") {
   sources = [ "input_window_monitor_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -131,7 +126,6 @@ ohos_unittest("wmserver_avoid_area_controller_test") {
   sources = [ "avoid_area_controller_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -141,7 +135,6 @@ ohos_unittest("wmserver_window_controller_test") {
   sources = [ "window_controller_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -151,7 +144,6 @@ ohos_unittest("wmserver_minimize_app_test") {
   sources = [ "minimize_app_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -161,7 +153,6 @@ ohos_unittest("wmserver_window_layout_policy_test") {
   sources = [ "window_layout_policy_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -170,7 +161,6 @@ ohos_unittest("wmserver_window_manager_config_test") {
   configs = test_public_config
   sources = [ "window_manager_config_test.cpp" ]
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 
   deps += [ "//third_party/libxml2:libxml2" ]
@@ -182,7 +172,6 @@ ohos_unittest("wmserver_window_snapshot_test") {
   sources = [ "window_snapshot_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 
   external_deps += [ "image_framework:image_native" ]
@@ -194,7 +183,6 @@ ohos_unittest("wmserver_window_zorder_policy_test") {
   sources = [ "window_zorder_policy_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -204,7 +192,6 @@ ohos_unittest("wmserver_window_node_container_test") {
   sources = [ "window_node_container_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -214,7 +201,6 @@ ohos_unittest("wmserver_window_node_test") {
   sources = [ "window_node_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -225,7 +211,6 @@ ohos_unittest("wmserver_window_pair_test") {
   sources = [ "window_pair_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -235,7 +220,6 @@ ohos_unittest("wmserver_window_manager_stub_test") {
   sources = [ "window_manager_stub_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -245,7 +229,6 @@ ohos_unittest("wmserver_starting_window_test") {
   sources = [ "starting_window_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -255,7 +238,6 @@ ohos_unittest("wmserver_window_manager_proxy_test") {
   sources = [ "window_manager_proxy_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -265,7 +247,6 @@ ohos_unittest("wmserver_window_dumper_test") {
   sources = [ "window_dumper_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -275,7 +256,6 @@ ohos_unittest("wmserver_display_group_controller_test") {
   sources = [ "display_group_controller_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -285,7 +265,6 @@ ohos_unittest("wmserver_window_display_zoom_controller_test") {
   sources = [ "window_display_zoom_controller_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -295,7 +274,6 @@ ohos_unittest("wmserver_display_group_info_test") {
   sources = [ "display_group_info_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -305,7 +283,6 @@ ohos_unittest("wmserver_accessibility_connection_test") {
   sources = [ "accessibility_connection_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -315,7 +292,6 @@ ohos_unittest("wmserver_window_freeze_controller_test") {
   sources = [ "window_freeze_controller_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -325,7 +301,6 @@ ohos_unittest("wmserver_window_inner_window_test") {
   sources = [ "window_inner_window_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -335,7 +310,6 @@ ohos_unittest("wmserver_remote_animation_test") {
   sources = [ "remote_animation_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -345,7 +319,6 @@ ohos_unittest("wmserver_drag_controller_test") {
   sources = [ "drag_controller_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -355,7 +328,6 @@ ohos_unittest("wmserver_window_inner_manager_test") {
   sources = [ "window_inner_manager_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -365,7 +337,6 @@ ohos_unittest("wmserver_window_root_test") {
   sources = [ "window_root_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -375,7 +346,6 @@ ohos_unittest("wmserver_window_system_effect_test") {
   sources = [ "window_system_effect_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -385,7 +355,6 @@ ohos_unittest("wmserver_window_manager_service_utils_test") {
   sources = [ "window_manager_service_utils_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
   if (is_standard_system) {
     external_deps += [ "init:libbegetutil" ]
@@ -400,7 +369,6 @@ ohos_unittest("wmserver_window_group_mgr_test") {
   sources = [ "window_group_mgr_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -410,7 +378,6 @@ ohos_unittest("wmserver_mock_session_manager_service_test") {
   sources = [ "mock_session_manager_service_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
 
@@ -420,6 +387,5 @@ ohos_unittest("wmserver_window_common_event_test") {
   sources = [ "window_common_event_test.cpp" ]
 
   deps = test_inner_deps
-  public_deps = test_public_deps
   external_deps = test_external_deps
 }
