@@ -75,6 +75,9 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, show keyboard failed");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        if (session->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+            session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
+        }
         session->UseFocusIdIfCallingSessionIdInvalid();
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard session, id: %{public}d, calling session id: %{public}d",
             session->GetPersistentId(), session->GetCallingSessionId());
@@ -109,7 +112,8 @@ WSError KeyboardSession::Hide()
         if (session->systemConfig_.IsPcWindow() || session->GetSessionScreenName() == "HiCar" ||
             session->GetSessionScreenName() == "SuperLauncher") {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "pc or virtual screen, restore calling session");
-            session->RestoreCallingSession();
+            !session->IsSystemKeyboard() ? session->RestoreCallingSession() :
+                session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE);
             auto sessionProperty = session->GetSessionProperty();
             if (sessionProperty) {
                 sessionProperty->SetCallingSessionId(INVALID_WINDOW_ID);
@@ -133,7 +137,8 @@ WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identi
         session->SceneSession::Disconnect(isFromClient);
         WSRect rect = {0, 0, 0, 0};
         session->NotifyKeyboardPanelInfoChange(rect, false);
-        session->RestoreCallingSession();
+        !session->IsSystemKeyboard() ? session->RestoreCallingSession() :
+                session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT);
         auto sessionProperty = session->GetSessionProperty();
         if (sessionProperty) {
             sessionProperty->SetCallingSessionId(INVALID_WINDOW_ID);
@@ -161,6 +166,11 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 
 void KeyboardSession::UpdateKeyboardAvoidArea()
 {
+    if (!keyboardAvoidAreaActive_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemkeyboard: %{public}d, state: %{public}d, "
+            "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
+        return;
+    }
     if (!IsSessionForeground() || !IsVisibleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
         return;
@@ -275,11 +285,15 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
         // handle keyboard gravity change
         if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
+            session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
             session->SetWindowAnimationFlag(false);
             if (session->IsSessionForeground()) {
                 session->RestoreCallingSession();
             }
         } else {
+            if (session->IsSessionForeground()) {
+                session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM);
+            }
             session->SetWindowAnimationFlag(true);
         }
         // notify keyboard layout param
@@ -384,6 +398,11 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
 void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (!keyboardAvoidAreaActive_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemkeyboard: %{public}d, state: %{public}d, "
+            "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
+        return;
+    }
     if (!IsSessionForeground() || (needCheckVisible && !IsVisibleForeground())) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground.");
         return;
@@ -439,6 +458,11 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
 
 void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (!keyboardAvoidAreaActive_) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemkeyboard: %{public}d, state: %{public}d, "
+            "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
+        return;
+    }
     sptr<SceneSession> callingSession = GetSceneSession(GetCallingSessionId());
     if (callingSession == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
@@ -489,6 +513,31 @@ void KeyboardSession::UpdateCallingSessionIdAndPosition(uint32_t newCallingSessi
     WSRect panelRect = { 0, 0, 0, 0 };
     panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
     RaiseCallingSession(panelRect, true);
+}
+
+void KeyboardSession::EnableCallingSessionAvoidArea()
+{
+    WSRect panelRect = { 0, 0, 0, 0 };
+    panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
+    RaiseCallingSession(panelRect, true);
+}
+
+void KeyboardSession::NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason)
+{
+    if (!(systemConfig_.IsPcWindow())) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "this device is not pc.");
+        return;
+    }
+    if (!IsSystemKeyboard()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "this is not system keyboard, id: %{public}d.", GetPersistentId());
+        return;
+    }
+    if (keyboardCallback_ == nullptr || keyboardCallback_->onSystemKeyboardAvoidChange_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "SystemKeyboardAvoidChange callback is nullptr, id: %{public}d.",
+            GetPersistentId());
+        return;
+    }
+    keyboardCallback_->onSystemKeyboardAvoidChange_(GetScreenId(), reason);
 }
 
 void KeyboardSession::OpenKeyboardSyncTransaction()
