@@ -325,6 +325,7 @@ public:
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
+    virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) { return; }
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
@@ -810,6 +811,8 @@ private:
     WMError HandleActionUpdateAnimationFlag(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateTouchHotArea(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
+    WMError HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateDecorEnable(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);

@@ -3536,6 +3536,21 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
     return result;
 }
 
+WMError WindowSceneSessionImpl::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas)
+{
+    if (GetType() != WindowType::WINDOW_TYPE_DIALOG) {
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    KeyboardTouchHotAreas lastKeyboardTouchHotAreas = property_->GetKeyboardTouchHotAreas();
+    property_->SetKeyboardTouchHotAreas(hotAreas);
+    WMError result = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEYBOARD_TOUCH_HOT_AREA);
+    if (result != WMError::WM_OK) {
+        property_->SetKeyboardTouchHotAreas(lastKeyboardTouchHotAreas);
+        TLOGE(WmsLogTag::WMS_EVENT, "errCode:%{public}d", static_cast<int32_t>(result));
+    }
+    return result;
+}
+
 WmErrorCode WindowSceneSessionImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
     property_->KeepKeyboardOnFocus(keepKeyboardFlag);
@@ -4264,11 +4279,13 @@ WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams
 
 WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}u, LandscapeKeyboardRect: %{public}s, "
-        "PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s",
-        static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
-        params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
-        params.PortraitPanelRect_.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}u, "
+        "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "
+        "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
+        "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s",
+        static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
+        params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
+        params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
     property_->SetKeyboardLayoutParams(params);
     auto ret = MoveAndResizeKeyboard(params);
     if (ret != WMError::WM_OK) {

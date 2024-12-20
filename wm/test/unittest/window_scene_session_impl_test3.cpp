@@ -642,6 +642,29 @@ HWTEST_F(WindowSceneSessionImplTest3, SetTouchHotAreas, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: SetKeyboardTouchHotAreas
+ * @tc.desc: SetKeyboardTouchHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, SetKeyboardTouchHotAreas, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetKeyboardTouchHotAreas");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    KeyboardTouchHotAreas hotAreas;
+    Rect rect = {800, 800, 1200, 1200};
+    hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
+    hotAreas.landscapePanelHotAreas_.push_back(rect);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
+    hotAreas.portraitPanelHotAreas_.push_back(rect);
+    auto ret = windowSceneSessionImpl->SetKeyboardTouchHotAreas(hotAreas);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
  * @tc.name: GetWindowLimits01
  * @tc.desc: GetWindowLimits
  * @tc.type: FUNC
