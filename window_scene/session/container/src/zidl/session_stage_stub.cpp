@@ -623,37 +623,6 @@ int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
-    std::vector<std::string> params;
-    if (!data.ReadStringVector(&params)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to read string vector");
-        return ERR_INVALID_VALUE;
-    }
-    std::vector<std::string> infos;
-    WSError errCode = NotifyDumpInfo(params, infos);
-    bool isLittleSize = CalculateDumpInfoSize(infos);
-    if (!reply.WriteBool(isLittleSize)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write isLittleSize failed");
-        return ERR_TRANSACTION_FAILED;
-    }
-
-    bool writeResult = isLittleSize ? WriteLittleStringVector(infos, reply) :
-        WriteLargeStringVector(infos, reply);
-    if (!writeResult) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "write data failed");
-        return ERR_TRANSACTION_FAILED;
-    }
-
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "write errCode failed");
-        return ERR_TRANSACTION_FAILED;
-    }
-
-    return ERR_NONE;
-}
-
 int SessionStageStub::HandleSetSplitButtonVisible(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -687,6 +656,37 @@ int SessionStageStub::HandleSetFullScreenWaterfallMode(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     SetFullScreenWaterfallMode(isWaterfallMode);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
+    std::vector<std::string> params;
+    if (!data.ReadStringVector(&params)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to read string vector");
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<std::string> infos;
+    WSError errCode = NotifyDumpInfo(params, infos);
+    bool isLittleSize = CalculateDumpInfoSize(infos);
+    if (!reply.WriteBool(isLittleSize)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write isLittleSize failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    bool writeResult = isLittleSize ? WriteLittleStringVector(infos, reply) :
+        WriteLargeStringVector(infos, reply);
+    if (!writeResult) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write data failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write errCode failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
