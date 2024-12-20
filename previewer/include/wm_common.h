@@ -610,7 +610,7 @@ struct WindowDensityInfo {
         constexpr int BUFFER_SIZE = 64;
         char buffer[BUFFER_SIZE] = { 0 };
         if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
-            "[%s, %s, %s]", systemDensity, defaultDensity, customDensity) > 0) {
+            "[%f, %f, %f]", systemDensity, defaultDensity, customDensity) > 0) {
             str.append(buffer);
         }
         return str;
