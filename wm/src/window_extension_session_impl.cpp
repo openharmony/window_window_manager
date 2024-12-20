@@ -954,7 +954,7 @@ WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, f
     return WSError::WS_OK;
 }
 
-float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+float WindowExtensionSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo)
 {
     if (isDensityFollowHost_ && hostDensityValue_ != std::nullopt) {
         return hostDensityValue_->load();
