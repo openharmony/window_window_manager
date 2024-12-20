@@ -603,6 +603,25 @@ void SceneSession::RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFu
     }, __func__);
 }
 
+void SceneSession::RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session or func is null", where);
+            return;
+        }
+        session->onMainModalTypeChange_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
+}
+
+bool SceneSession::IsDialogWindow() const
+{
+    return WindowHelper::IsDialogWindow(GetSessionProperty()->GetWindowType());
+}
+
 SubWindowModalType SceneSession::GetSubWindowModalType() const
 {
     SubWindowModalType modalType = SubWindowModalType::TYPE_UNDEFINED;
