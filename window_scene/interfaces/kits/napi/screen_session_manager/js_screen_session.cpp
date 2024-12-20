@@ -421,7 +421,7 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         WLOGI("The js callback has been executed: %{public}s.", callbackType.c_str());
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
         if (ret != napi_status::napi_ok) {
             WLOGFE("CallJsCallback: Failed to SendEvent.");
         }
