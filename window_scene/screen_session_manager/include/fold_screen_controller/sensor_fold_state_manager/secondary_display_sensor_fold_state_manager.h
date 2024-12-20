@@ -33,8 +33,8 @@ private:
     FoldStatus GetNextFoldStateHalf(float angle, uint16_t hall, FoldStatus myNextStatus,
         uint16_t allowUserSensorForLargeFoldDevice);
     FoldStatus GetGlobalFoldState(FoldStatus PrimaryFoldState, FoldStatus SecondaryFoldState);
-    void UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle, uint16_t hall, FoldStatus state);
-    void UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle, uint16_t hall, FoldStatus state);
+    FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle, uint16_t hall, FoldStatus state);
+    FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle, uint16_t hall, FoldStatus state);
     uint16_t allowUserSensorForLargeFoldDeviceAB = 0;
     uint16_t allowUserSensorForLargeFoldDeviceBC = 0;
     FoldStatus mNextStateAB = FoldStatus::UNKNOWN;

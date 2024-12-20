@@ -85,7 +85,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::v
     return state;
 }
 
-void SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle,
+FoldStatus SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle,
     uint16_t hall, FoldStatus state)
 {
     if (hall == HALL_FOLDED_THRESHOLD) {
@@ -93,10 +93,10 @@ void SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeF
     } else if (angle >= LARGER_BOUNDARY_FOR_GRL_THRESHOLD) {
         allowUserSensorForLargeFoldDeviceAB = LARGER_BOUNDARY_FLAG;
     }
-    GetNextFoldStateHalf(angle, hall, state, allowUserSensorForLargeFoldDeviceAB);
+    return GetNextFoldStateHalf(angle, hall, state, allowUserSensorForLargeFoldDeviceAB);
 }
 
-void SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle,
+FoldStatus SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle,
     uint16_t hall, FoldStatus state)
 {
     if (hall == HALL_FOLDED_THRESHOLD) {
@@ -104,11 +104,11 @@ void SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeF
     } else if (angle >= LARGER_BOUNDARY_FOR_GRL_THRESHOLD) {
         allowUserSensorForLargeFoldDeviceBC = LARGER_BOUNDARY_FLAG;
     }
-    GetNextFoldStateHalf(angle, hall, state, allowUserSensorForLargeFoldDeviceBC);
+    return GetNextFoldStateHalf(angle, hall, state, allowUserSensorForLargeFoldDeviceBC);
 }
 
 FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float angle,
-    int hall, FoldStatus CurrentState, uint16_t allowUserSensorForLargeFoldDevice)
+    uint16_t hall, FoldStatus CurrentState, uint16_t allowUserSensorForLargeFoldDevice)
 {
     if (std::isless(angle, ANGLE_MIN_VAL)) {
         return CurrentState;
