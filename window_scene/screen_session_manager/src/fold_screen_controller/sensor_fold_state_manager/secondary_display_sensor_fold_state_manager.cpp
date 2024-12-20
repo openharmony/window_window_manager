@@ -108,7 +108,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryFor
 }
 
 FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float angle,
-    uint16_t hall, FoldStatus CurrentState, uint16_t allowUserSensorForLargeFoldDevice)
+    uint16_t hall, FoldStatus CurrentState, int32_t allowUserSensorForLargeFoldDevice)
 {
     if (std::isless(angle, ANGLE_MIN_VAL)) {
         return CurrentState;
