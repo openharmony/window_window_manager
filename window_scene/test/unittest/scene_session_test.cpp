@@ -1462,11 +1462,11 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     auto result = sceneSession->SyncSessionEvent(event);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     property->isSystemCalling_ = false;
     result = sceneSession->SyncSessionEvent(event);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
