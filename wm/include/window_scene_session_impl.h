@@ -313,7 +313,7 @@ private:
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
-    float GetMainWindowCustomDensity() const;
+    float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
 
     /*
