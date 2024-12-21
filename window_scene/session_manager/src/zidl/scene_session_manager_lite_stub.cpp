@@ -129,6 +129,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetAccessibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST):
             return HandleNotifyAppUseControlList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MINIMIZE_MAIN_SESSION):
+            return HandleMinimizeMainSession(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -882,6 +884,31 @@ int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& da
     }
 
     WSError ret = NotifyAppUseControlList(type, userId, controlList);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleMinimizeMainSession(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+
+    int32_t appIndex = 0;
+    if (!data.ReadInt32(appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
+        return ERR_INVALID_DATA;
+    }
+
+    int32_t userId = 0;
+    if (!data.ReadInt32(userId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read userId");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = MinimizeMainSession(bundleName, appIndex, userId);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
