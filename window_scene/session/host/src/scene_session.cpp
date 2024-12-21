@@ -131,7 +131,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         session->NotifyPropertyWhenConnect();
         return ret;
     };
-    return PostSyncTask(task, "ConnectInner");
+    return PostSyncTask(task, __func__);
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -386,7 +386,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE, "foreground specific callback does not take effect, callback function null");
         }
         return WSError::WS_OK;
-    }, "Foreground");
+    }, __func__);
     return WSError::WS_OK;
 }
 
@@ -472,7 +472,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             session->UpdateGestureBackEnabled();
         }
         return WSError::WS_OK;
-    }, "Background");
+    }, __func__);
     return WSError::WS_OK;
 }
 
@@ -578,8 +578,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->isEnableGestureBackHadSet_ = false;
         }
         return WSError::WS_OK;
-    },
-        "Disconnect");
+    }, __func__);
     return WSError::WS_OK;
 }
 
@@ -4007,7 +4006,7 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
             session->pendingSessionActivationFunc_(info);
         }
         return WSError::WS_OK;
-    }, "PendingSessionActivation");
+    }, __func__);
     return WSError::WS_OK;
 }
 
