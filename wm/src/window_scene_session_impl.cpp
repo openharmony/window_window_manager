@@ -3778,35 +3778,35 @@ WSError WindowSceneSessionImpl::NotifyCompatibleModeEnableInPad(bool enable)
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
-    if (handler_) {
-        handler_->PostTask([weakThis = wptr(this), reason, withAnimation] {
-            auto window = weakThis.promote();
-            if (!window) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
-                return;
-            }
-            window->Show(reason, withAnimation);
-        }, __func__);
+    if (!handler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
         return;
     }
-    Show(reason, withAnimation);
+    handler_->PostTask([weakThis = wptr(this), reason, withAnimation] {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+            return;
+        }
+        window->Show(reason, withAnimation);
+    }, __func__);
 }
 
 void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
-    if (handler_) {
-        handler_->PostTask([weakThis = wptr(this), reason, withAnimation, isFromInnerkits] {
-            auto window = weakThis.promote();
-            if (!window) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
-                return;
-            }
-            window->Hide(reason, withAnimation, isFromInnerkits);
-        }, __func__);
+    if (!handler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
         return;
     }
-    Hide(reason, withAnimation, isFromInnerkits);
+    handler_->PostTask([weakThis = wptr(this), reason, withAnimation, isFromInnerkits] {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+            return;
+        }
+        window->Hide(reason, withAnimation, isFromInnerkits);
+    }, __func__);
 }
 
 WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
