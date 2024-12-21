@@ -755,7 +755,7 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
                 TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to rectChangeReasons");
                 return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
             }
-            if (reasons != static_cast<uint32_t>::HOST_WINDOW_RECT_CHANGE) {
+            if (reasons != static_cast<uint32_t>(ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE)) {
                 TLOGE(WmsLogTag::WMS_UIEXT, "Unsupported rect change reasons");
                 return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
             }
@@ -821,8 +821,8 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
     if (argc == 1) {
         ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, cbValue);
     } else {
-        value = argv[1];
-        if (value == nullptr || !NapiIsCallable(env, cbValue)) {
+        cbValue = argv[1];
+        if (cbValue == nullptr || !NapiIsCallable(env, cbValue)) {
             ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
                 env, nullptr);
         } else {
