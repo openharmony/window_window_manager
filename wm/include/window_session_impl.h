@@ -352,7 +352,7 @@ protected:
     uint32_t GetBackgroundColor() const;
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     float GetVirtualPixelRatio() override;
-    virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
+    virtual float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const sptr<DisplayInfo>& info = nullptr,

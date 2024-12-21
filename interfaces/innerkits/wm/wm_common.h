@@ -612,6 +612,8 @@ constexpr int32_t DEFAULT_SCREEN_ID = 0;
 constexpr int32_t FULL_CIRCLE_DEGREE = 360;
 constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
 constexpr float UNDEFINED_DENSITY = -1.0f;
+constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
+constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -1348,6 +1350,29 @@ struct SptrHash {
     std::size_t operator()(const sptr<T>& ptr) const
     {
         return std::hash<T*>{}(ptr.GetRefPtr());
+    }
+};
+
+/**
+ * @struct WindowDensityInfo
+ *
+ * @brief Currently available density
+ */
+struct WindowDensityInfo {
+    float systemDensity = UNDEFINED_DENSITY;
+    float defaultDensity = UNDEFINED_DENSITY;
+    float customDensity = UNDEFINED_DENSITY;
+
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 64;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[%f, %f, %f]", systemDensity, defaultDensity, customDensity) > 0) {
+            str.append(buffer);
+        }
+        return str;
     }
 };
 
