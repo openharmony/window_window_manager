@@ -33,6 +33,10 @@ class ExtensionWindow {
     return this.__extension_window__.on(type, callback);
   }
 
+  on(type, reasons, callback) {
+    return this.__extension_window__.on(type, callback);
+  }
+
   off(type, callback) {
     return this.__extension_window__.off(type, callback);
   }
