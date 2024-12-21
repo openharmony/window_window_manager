@@ -2013,20 +2013,14 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId:%{public}u %{public}s isTitleHoverShown:%{public}d, "
         "isDockHoverShown:%{public}d", GetWindowId(), GetWindowName().c_str(), isTitleHoverShown, isDockHoverShown);
-    if (WindowHelper::IsSystemWindow(GetType())) {
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "system window is not supported");
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window is not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-
     auto isPC = windowSystemConfig_.IsPcWindow();
     if (!(isPC || IsFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    WindowType winType = property_->GetWindowType();
-    if (!WindowHelper::IsMainWindow(winType)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window is not main window");
-        return WMError::WM_ERROR_INVALID_CALLING;
     }
     titleHoverShowEnabled_ = isTitleHoverShown;
     dockHoverShowEnabled_ = isDockHoverShown;
