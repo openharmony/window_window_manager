@@ -4581,8 +4581,7 @@ bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
     if (WindowHelper::IsMainWindow(GetType())) {
         return GetDefaultDensityEnabled();
     }
-    auto mainWindow = FindMainWindowWithContext();
-    if (mainWindow) {
+    if (auto mainWindow = FindMainWindowWithContext()) {
         CopyUniqueDensityParameter(mainWindow);
         return mainWindow->GetDefaultDensityEnabled();
     }

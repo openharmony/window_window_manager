@@ -308,7 +308,7 @@ private:
     bool gestureBackEnabled_ = true;
 
     /*
-     * Window Property.
+     * Window Property
      */
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
