@@ -604,6 +604,7 @@ struct WindowDensityInfo {
     float systemDensity = UNDEFINED_DENSITY;
     float defaultDensity = UNDEFINED_DENSITY;
     float customDensity = UNDEFINED_DENSITY;
+
     std::string ToString() const
     {
         std::string str;

@@ -734,22 +734,21 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    auto weakScene = windowScene_.lock();
-    if (weakScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "weakScene is null");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
-    }
-
-    auto window = weakScene->GetMainWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-
     double density = UNDEFINED_DENSITY;
     if (!ConvertFromJsValue(env, argv[0], density)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to double");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowScene is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density));

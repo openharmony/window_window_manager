@@ -306,6 +306,8 @@ public:
     virtual bool GetDefaultDensityEnabled() { return false; }
     virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
+    virtual WMError GetWindowDensityInfo(
+        WindowDensityInfo& densityInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual float GetVirtualPixelRatio() { return 1.0f; }
     virtual void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     virtual void CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback) = 0;
@@ -448,17 +450,6 @@ public:
      * @return WMError
      */
     virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    
-    /**
-     * @brief Get the window density of current window.
-     *
-     * @param densityInfo the struct representing system density, default density and custom density.
-     * @return WMError.
-     */
-    virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo)
-    {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
 };
 }
 }
