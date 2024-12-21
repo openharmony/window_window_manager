@@ -4615,6 +4615,16 @@ WSError SceneSession::UpdateRectChangeListenerRegistered(bool isRegister)
     return WSError::WS_OK;
 }
 
+void SceneSession::SetIsLayoutFullScreen(bool isLayoutFullScreen)
+{
+    isLayoutFullScreen_ = isLayoutFullScreen;
+}
+
+bool SceneSession::IsLayoutFullScreen() const
+{
+    return isLayoutFullScreen_;
+}
+
 WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
 {
     auto task = [weakThis = wptr(this), isLayoutFullScreen]() {
@@ -4626,6 +4636,7 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         TLOGI(WmsLogTag::WMS_LAYOUT, "OnLayoutFullScreenChange, isLayoutFullScreen: %{public}d",
             isLayoutFullScreen);
         if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_) {
+            session->SetIsLayoutFullScreen(isLayoutFullScreen);
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
         }
         return WSError::WS_OK;
