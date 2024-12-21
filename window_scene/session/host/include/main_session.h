@@ -44,6 +44,11 @@ public:
     bool IsExitSplitOnBackground() const override;
 
     /*
+     * Window Focus
+     */
+    WSError UpdateFocus(bool isFocused) override;
+
+    /*
      * PC Window
      */
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,

@@ -1765,10 +1765,29 @@ HWTEST_F(WindowSceneSessionImplTest4, SetFullScreenWaterfallMode, Function | Sma
     option->SetWindowName("SetFullScreenWaterfallMode");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
-    ASSERT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(true));
-    ASSERT_TRUE(window->isFullScreenWaterfallMode_.load());
-    ASSERT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(false));
-    ASSERT_FALSE(window->isFullScreenWaterfallMode_.load());
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    EXPECT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(true));
+    EXPECT_EQ(WSError::WS_DO_NOTHING, window->SetFullScreenWaterfallMode(true));
+    EXPECT_TRUE(window->isFullScreenWaterfallMode_.load());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->lastWindowModeBeforeWaterfall_.load());
+    EXPECT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(false));
+    EXPECT_FALSE(window->isFullScreenWaterfallMode_.load());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->lastWindowModeBeforeWaterfall_.load());
+}
+
+/**
+ * @tc.name: SetSupportEnterWaterfallMode
+ * @tc.desc: test SetSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetSupportEnterWaterfallMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetSupportEnterWaterfallMode");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_EQ(WSError::WS_OK, window->SetSupportEnterWaterfallMode(true));
 }
 
 /**

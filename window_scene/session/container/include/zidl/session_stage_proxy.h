@@ -77,6 +77,7 @@ public:
     WSError SetSplitButtonVisible(bool isVisible) override;
     WSError SetEnableDragBySystem(bool dragEnable) override;
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
+    WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

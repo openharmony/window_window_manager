@@ -198,6 +198,7 @@ public:
      * PC Screen Manager
      */
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
+    WSError SetSupportEnterWaterfallMode(bool isWaterfallMode) override;
     WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
 
     /*
@@ -331,6 +332,7 @@ private:
      * PC Fold Screen
      */
     std::atomic_bool isFullScreenWaterfallMode_ { false };
+    std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 };
 } // namespace Rosen
 } // namespace OHOS
