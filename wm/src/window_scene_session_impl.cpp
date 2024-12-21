@@ -4605,24 +4605,20 @@ float WindowSceneSessionImpl::GetCustomDensity() const
 
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId=%{public}u set custom density=%{public}f",
-        GetWindowId(), density);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId=%{public}u, density=%{public}f", GetWindowId(), density);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
     if ((density < MINIMUM_CUSTOM_DENSITY && !MathHelper::NearZero(density - UNDEFINED_DENSITY)) ||
         density > MAXIMUM_CUSTOM_DENSITY) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid custom density value: %{public}f", density);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid custom density=%{public}f", density);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "must be app main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-
     if (MathHelper::NearZero(customDensity_ - density)) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "custom density not change");
         return WMError::WM_OK;
