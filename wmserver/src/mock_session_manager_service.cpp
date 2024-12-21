@@ -830,13 +830,13 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t
         TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied!");
         return ERR_UNKNOWN_TRANSACTION;
     }
-    sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
-    if (!remoteObject) {
-        return ERR_NULL_OBJECT;
-    }
     {
         std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
         userIdBundleNamesMap_[userId] = bundleNameList;
+    }
+    sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
+    if (!remoteObject) {
+        return ERR_NONE;
     }
     return NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
 }
