@@ -49,6 +49,7 @@ public:
     static napi_value SetShowOnLockScreen(napi_env env, napi_callback_info info);
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
     static napi_value SetDefaultDensityEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetCustomDensity(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -80,6 +81,7 @@ private:
     napi_value OnSetShowOnLockScreen(napi_env env, napi_callback_info info);
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
     napi_value OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetCustomDensity(napi_env env, napi_callback_info info);
 
     /*
      * PC Window

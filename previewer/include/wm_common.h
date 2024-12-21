@@ -407,6 +407,8 @@ constexpr int32_t INVALID_PID = -1;
 constexpr int32_t INVALID_UID = -1;
 
 constexpr float UNDEFINED_DENSITY = -1.0f;
+constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
+constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
 }
 
 /**
@@ -598,6 +600,29 @@ struct SystemBarProperty {
     {
         return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_ &&
             enableAnimation_ == a.enableAnimation_);
+    }
+};
+
+/**
+ * @struct WindowDensityInfo
+ *
+ * @brief Currently available density
+ */
+struct WindowDensityInfo {
+    float systemDensity = UNDEFINED_DENSITY;
+    float defaultDensity = UNDEFINED_DENSITY;
+    float customDensity = UNDEFINED_DENSITY;
+
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 64;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[%f, %f, %f]", systemDensity, defaultDensity, customDensity) > 0) {
+            str.append(buffer);
+        }
+        return str;
     }
 };
 

@@ -151,6 +151,13 @@ napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
 }
 
+napi_value JsWindowStage::SetCustomDensity(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnSetCustomDensity(env, info) : nullptr;
+}
+
 napi_value JsWindowStage::RemoveStartingWindow(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "[NAPI]");
@@ -717,6 +724,39 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
     return CreateJsValue(env, static_cast<int32_t>(ret));
 }
 
+napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    double density = UNDEFINED_DENSITY;
+    if (!ConvertFromJsValue(env, argv[0], density)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to double");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowScene is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, result=%{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
+    return CreateJsValue(env, static_cast<int32_t>(ret));
+}
+
 napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
     auto windowScene = windowScene_.lock();
@@ -946,6 +986,8 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "disableWindowDecor", moduleName, JsWindowStage::DisableWindowDecor);
     BindNativeFunction(env,
         objValue, "setDefaultDensityEnabled", moduleName, JsWindowStage::SetDefaultDensityEnabled);
+    BindNativeFunction(env,
+        objValue, "setCustomDensity", moduleName, JsWindowStage::SetCustomDensity);
     BindNativeFunction(env,
         objValue, "removeStartingWindow", moduleName, JsWindowStage::RemoveStartingWindow);
     BindNativeFunction(env,
