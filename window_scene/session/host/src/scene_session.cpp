@@ -129,6 +129,9 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return ret;
         }
         session->NotifyPropertyWhenConnect();
+        if (session->pcFoldScreenController_) {
+            session->pcFoldScreenController_->OnConnect();
+        }
         return ret;
     };
     return PostSyncTask(task, __func__);
@@ -4215,6 +4218,20 @@ void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<v
         }
         session->pcFoldScreenController_->RegisterFullScreenWaterfallModeChangeCallback(std::move(func));
     }, __func__);
+}
+
+bool SceneSession::IsMissionHighlighted()
+{
+    if(!SessionHelper::IsMainWindow(GetWindowType())) {
+        return false;
+    }
+    if (IsFocused()) {
+        return true;
+    }
+    return std::any_of(subSession_.begin(), subSession_.end(),
+        [](sptr<SceneSession> sceneSession) {
+            return sceneSession != nullptr && sceneSession->IsMissionHighlighted();
+        });
 }
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)

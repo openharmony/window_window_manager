@@ -1780,6 +1780,33 @@ HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level
     session->MarkSystemSceneUIFirst(true, true);
     EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
 }
+
+/**
+ * @tc.name: IsMissionHighlighted
+ * @tc.desc: IsMissionHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsMissionHighlighted, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMissionHighlighted";
+    info.bundleName_ = "IsMissionHighlighted";
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(mainSession, nullptr);
+    mainSession->isFocused_ = true;
+    EXPECT_TRUE(mainSession->IsMissionHighlighted());
+    mainSession->isFocused_ = false;
+
+    SessionInfo subInfo;
+    subInfo.abilityName_ = "IsMissionHighlightedSub";
+    subInfo.bundleName_ = "IsMissionHighlightedSub";
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subInfo, nullptr);
+    mainSession->subSession_.push_back(subSession);
+    subSession->isFocused_ = true;
+    EXPECT_TRUE(mainSession->IsMissionHighlighted());
+    subSession->isFocused_ = false;
+    EXPECT_FALSE(mainSession->IsMissionHighlighted());
+}
 }
 }
 }

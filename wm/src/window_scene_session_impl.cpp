@@ -23,6 +23,7 @@
 
 #include <application_context.h>
 #include "color_parser.h"
+#include "common/include/fold_screen_state_internel.h"
 #include "singleton_container.h"
 #include "display_manager.h"
 #include "display_manager_adapter.h"
@@ -2370,6 +2371,16 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
 WMError WindowSceneSessionImpl::Recover()
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && isFullScreenWaterfallMode_.load() &&
+        lastWindowModeBeforeWaterfall_.load() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        SetFullScreenWaterfallMode(false);
+        WMError ret = Maximize();
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "recover to fullscreen failed");
+            SetFullScreenWaterfallMode(true);
+        }
+        return ret;
+    }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -4573,7 +4584,42 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "prev: %{public}d, curr: %{public}d",
         isFullScreenWaterfallMode_.load(), isWaterfallMode);
+    if (isFullScreenWaterfallMode_.load() == isWaterfallMode) {
+        return WSError::WS_DO_NOTHING;
+    }
     isFullScreenWaterfallMode_.store(isWaterfallMode);
+    if (isWaterfallMode) {
+        lastWindowModeBeforeWaterfall_.store(property_->GetWindowMode());
+    } else {
+        lastWindowModeBeforeWaterfall_.store(WindowMode::WINDOW_MODE_UNDEFINED);
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::SetSupportEnterWaterfallMode(bool isSupportEnter)
+{
+    const char* const where = __func__;
+    handler_->PostTask([weakThis = wptr(this), isSupportEnter, where] {
+        auto window = weakThis.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is null", where);
+            return;
+        }
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s start", where);
+        if (window->supportEnterWaterfallMode_ == isSupportEnter) {
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s prev: %{public}d, curr: %{public}d",
+            where, window->supportEnterWaterfallMode_, isSupportEnter);
+        window->supportEnterWaterfallMode_ = isSupportEnter;
+        std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
+        if (uiContent == nullptr || !window->IsDecorEnable()) {
+            TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s uiContent not avaliable", where);
+            return;
+        }
+        uiContent->OnContainerModalEvent("scb_waterfall_visibility",
+            isSupportEnter ? "true" : "false");
+    }, __func__);
     return WSError::WS_OK;
 }
 
@@ -4582,11 +4628,12 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, DBTB event: %{public}s, value: %{public}s",
         GetPersistentId(), eventName.c_str(), value.c_str());
     if (eventName == WATERFALL_WINDOW_EVENT) {
-        isFullScreenWaterfallMode_.store(true);
+        bool lastFullScreenWaterfallMode = isFullScreenWaterfallMode_.load();
+        SetFullScreenWaterfallMode(true);
         auto ret = Maximize();
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "maximize failed");
-            isFullScreenWaterfallMode_.store(false);
+            SetFullScreenWaterfallMode(lastFullScreenWaterfallMode);
         }
         return ret;
     }

@@ -17,6 +17,7 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include "mock/mock_session_stage.h"
 #include "session/host/include/pc_fold_screen_controller.h"
 #include "session/host/include/main_session.h"
 #include "wm_math.h"
@@ -63,10 +64,10 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112; // dp
 // velocity test
 constexpr int32_t MOVING_RECORDS_SIZE_LIMIT = 5;
 constexpr int32_t MOVING_RECORDS_TIME_LIMIT_IN_NS = 100000;
-const WSRectF B_VELOCITY = { 0.0f, 1.0f, 0.0f, 0.0f };
+const WSRectF B_VELOCITY = { 0.0f, 5.0f, 0.0f, 0.0f };
 const WSRectF B_VELOCITY_SLOW = { 0.0f, 0.1f, 0.0f, 0.0f };
 const WSRectF B_VELOCITY_SKEW = { 0.5f, 0.5f, 0.0f, 0.0f };
-const WSRectF C_VELOCITY = { 0.0f, -1.0f, 0.0f, 0.0f };
+const WSRectF C_VELOCITY = { 0.0f, -5.0f, 0.0f, 0.0f };
 const WSRectF C_VELOCITY_SLOW = { 0.0f, -0.1f, 0.0f, 0.0f };
 const WSRectF C_VELOCITY_SKEW = { 0.5f, -0.5f, 0.0f, 0.0f };
 } // namespace
@@ -551,6 +552,22 @@ HWTEST_F(PcFoldScreenManagerTest, GetVpr, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: OnConnect
+ * @tc.desc: test function : OnConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, OnConnect, Function | SmallTest | Level2)
+{
+    mainSession_->sessionInfo_.screenId_ = DEFAULT_SCREEN_ID;
+    SetHalfFolded();
+    controller_->OnConnect();
+    EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
+    SetExpanded();
+    controller_->OnConnect();
+    EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
+}
+
+/**
  * @tc.name: RecordStartMoveRect
  * @tc.desc: test function : RecordStartMoveRect, IsStartFullScreen
  * @tc.type: FUNC
@@ -711,6 +728,24 @@ HWTEST_F(PcFoldScreenControllerTest, RegisterFullScreenWaterfallModeChangeCallba
 }
 
 /**
+ * @tc.name: UpdateSupportEnterWaterfallMode
+ * @tc.desc: test function : UpdateSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, Function | SmallTest | Level3)
+{
+    controller_->lastSupportEnterWaterfallMode_ = false;
+    controller_->supportEnterWaterfallMode_ = true;
+    controller_->UpdateSupportEnterWaterfallMode();
+    EXPECT_NE(controller_->lastSupportEnterWaterfallMode_, controller_->supportEnterWaterfallMode_);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    mainSession_->sessionStage_ = mockSessionStage;
+    controller_->UpdateSupportEnterWaterfallMode();
+    EXPECT_EQ(controller_->lastSupportEnterWaterfallMode_, controller_->supportEnterWaterfallMode_);
+}
+
+/**
  * @tc.name: GetPersistentId
  * @tc.desc: test function : GetPersistentId
  * @tc.type: FUNC
@@ -719,6 +754,19 @@ HWTEST_F(PcFoldScreenControllerTest, GetPersistentId, Function | SmallTest | Lev
 {
     controller_->persistentId_ = 100;
     EXPECT_EQ(mainSession_->pcFoldScreenController_->GetPersistentId(), 100);
+}
+
+/**
+ * @tc.name: GetScreenId
+ * @tc.desc: test function : GetScreenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, GetScreenId, Function | SmallTest | Level3)
+{
+    mainSession_->sessionInfo_.screenId_ = 100;
+    EXPECT_EQ(100, controller_->GetScreenId());
+    mainSession_ = nullptr;
+    EXPECT_EQ(SCREEN_ID_INVALID, controller_->GetScreenId());
 }
 
 /**

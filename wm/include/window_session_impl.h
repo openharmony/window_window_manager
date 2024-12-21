@@ -462,6 +462,12 @@ protected:
      */
     uint32_t GetStatusBarHeight() override;
 
+    /**
+     * PC Fold Screen
+     */
+    std::mutex supportEnterWaterfallModeMutex_;
+    bool supportEnterWaterfallMode_ { false };
+
     /*
      * Window Property
      */

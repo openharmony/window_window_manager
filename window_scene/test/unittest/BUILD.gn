@@ -34,6 +34,7 @@ group("unittest") {
     ":ws_main_session_test",
     ":ws_move_drag_controller_test",
     ":ws_multi_instance_manager_test",
+    ":ws_pc_fold_screen_controller_test",
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
     ":ws_scene_board_judgement_test",
@@ -1152,7 +1153,7 @@ ohos_unittest("ws_multi_instance_manager_test") {
 ohos_unittest("ws_pc_fold_screen_controller_test") {
   module_out_path = module_out_path
 
-  sources = [ "pc_fold_screen_controller.cpp" ]
+  sources = [ "pc_fold_screen_controller_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
