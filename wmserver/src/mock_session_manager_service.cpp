@@ -836,6 +836,7 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t
     }
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
     if (!remoteObject) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "user:%{public}d isn't active.", userId);
         return ERR_NONE;
     }
     return NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
