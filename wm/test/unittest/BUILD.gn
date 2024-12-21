@@ -411,7 +411,10 @@ ohos_unittest("wm_window_scene_session_impl_test") {
 
   sources = [ "window_scene_session_impl_test.cpp" ]
 
-  deps = [ ":wm_unittest_common" ]
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = [
     "c_utils:utils",
