@@ -58,8 +58,7 @@ bool CopyBufferFromRawData(void*& buffer, size_t size, const void* data)
     return true;
 }
 
-bool ReadLittleStringVectorFromParcel(
-    MessageParcel& reply, std::vector<std::string>& infos)
+bool ReadLittleStringVectorFromParcel(MessageParcel& reply, std::vector<std::string>& infos)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "entry");
     if (!reply.ReadStringVector(&infos)) {
@@ -69,8 +68,7 @@ bool ReadLittleStringVectorFromParcel(
     return true;
 }
 
-bool ReadLargeStringVectorFromParcel(
-    MessageParcel& reply, std::vector<std::string>& infos)
+bool ReadLargeStringVectorFromParcel(MessageParcel& reply, std::vector<std::string>& infos)
 {
     int32_t dataSizeInt = 0;
     if (!reply.ReadInt32(dataSizeInt) || dataSizeInt == 0) {
@@ -1277,8 +1275,7 @@ void SessionStageProxy::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
     }
 }
 
-WSError SessionStageProxy::NotifyDumpInfo(
-    const std::vector<std::string>& params, std::vector<std::string>& info)
+WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
