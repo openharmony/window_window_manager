@@ -65,6 +65,9 @@ public:
     MOCK_CONST_METHOD0(GetBaseDir, std::string());
     MOCK_CONST_METHOD0(GetDeviceType, Global::Resource::DeviceType());
     MOCK_METHOD1(CreateAreaModeContext, std::shared_ptr<Context>(int areaMode));
+#ifdef SUPPORT_GRAPHICS
+    MOCK_METHOD1(CreateDisplayContext, std::shared_ptr<Context>(uint64_t displayId));
+#endif
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
