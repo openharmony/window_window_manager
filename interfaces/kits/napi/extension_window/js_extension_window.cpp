@@ -827,7 +827,7 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
                 env, nullptr);
         } else {
             ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env,
-                  cbValue);
+                cbValue);
         }
     }
 
