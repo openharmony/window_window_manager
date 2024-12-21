@@ -2035,7 +2035,7 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     WSRect rect3 = {1, 1, 2, 1};
     ASSERT_EQ(rect2, rect3);
 
-    sceneSession->HandleCompatileModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
+    sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
     ASSERT_EQ(rect2, rect3);
 }
 
