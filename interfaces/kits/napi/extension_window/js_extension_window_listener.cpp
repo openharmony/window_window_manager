@@ -114,7 +114,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
     ComponentRectChangeReason componentRectChangeReason = ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE;
-    if (currRect_ == rect && currentRectChangeReason_ == rectChangeReason) {
+    if (currRect_ == rect && currentRectChangeReason_ == componentRectChangeReason) {
         TLOGD(WmsLogTag::WMS_UIEXT, "Skip redundant rect update");
         return;
     }
