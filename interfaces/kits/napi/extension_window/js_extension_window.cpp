@@ -21,6 +21,7 @@
 #include "js_window.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "window_session_impl.h"
 #include "extension_window.h"
 #include "ui_content.h"
 #include "permission.h"
@@ -720,8 +721,12 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
         TLOGE(WmsLogTag::WMS_UIEXT, "WindowImpl is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    UIExtensionUsage uiExtensionUsage = UIExtensionUsage::UIEXTENSION_USAGE_END;
-    if (uiExtensionUsage != UIExtensionUsage::EMBEDDED) {
+    if (!windowImpl->IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    }
+    WindowSessionImpl* windowSessionImpl = static_cast<WindowSessionImpl*>(windowImpl.GetRefPtr());
+    if (windowSessionImpl->GetProperty()->GetUIExtensionUsage() != UIExtensionUsage::EMBEDDED) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtension usage is not embedded");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
@@ -796,15 +801,19 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
         TLOGE(WmsLogTag::WMS_UIEXT, "windowImpl is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    UIExtensionUsage uiExtensionUsage = UIExtensionUsage::UIEXTENSION_USAGE_END;
-    if (uiExtensionUsage != UIExtensionUsage::EMBEDDED) {
+    if (!windowImpl->IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    }
+    WindowSessionImpl* windowSessionImpl = static_cast<WindowSessionImpl*>(windowImpl.GetRefPtr());
+    if (windowSessionImpl->GetProperty()->GetUIExtensionUsage() != UIExtensionUsage::EMBEDDED) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtension usage is not embedded");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
-    constexpr size_t argcMin = 2;
-    constexpr size_t argcMax = 3;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    constexpr size_t argcMin = 1;
+    constexpr size_t argcMax = 2;
+    size_t argc = 3;
+    napi_value argv[3] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < argcMin || argc > argcMax) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);

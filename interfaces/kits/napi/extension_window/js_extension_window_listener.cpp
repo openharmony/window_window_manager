@@ -113,15 +113,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 
 void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
-    RectChangeReason rectChangeReason = RectChangeReason::UNDEFINED;
     ComponentRectChangeReason componentRectChangeReason = ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE;
-    if (JS_SIZE_CHANGE_REASON.count(reason) != 0 &&
-        !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
-        rectChangeReason = JS_SIZE_CHANGE_REASON.at(reason);
-    }
-    if (currentRectChangeReason_ != RectChangeReason::DRAG && rectChangeReason == RectChangeReason::DRAG_END) {
-        rectChangeReason = RectChangeReason::MOVE;
-    }
     if (currRect_ == rect && currentRectChangeReason_ == rectChangeReason) {
         TLOGD(WmsLogTag::WMS_UIEXT, "Skip redundant rect update");
         return;
@@ -156,7 +148,7 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
     currRect_ = rect;
-    currentRectChangeReason_ = rectChangeReason;
+    currentRectChangeReason_ = componentRectChangeReason;
 }
 
 void JsExtensionWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
