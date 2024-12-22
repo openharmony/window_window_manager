@@ -902,18 +902,16 @@ HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Leve
 HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-
     option->SetWindowName("GetAvoidAreaOption");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    uint32_t avoidAreaOptions = 0;
-    WMError res = window->GetAvoidAreaOption(avoidAreaOptions);
+    uint32_t avoidAreaOption = 0;
+    WMError res = window->GetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(res, WMError::WM_OK);
 }
 }
