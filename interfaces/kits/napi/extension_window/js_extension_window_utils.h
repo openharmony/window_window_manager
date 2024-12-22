@@ -32,6 +32,7 @@
 
 namespace OHOS {
 namespace Rosen {
+    napi_value ComponentRectChangeReasonInit(napi_env env);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
     napi_value CreateJsExtensionWindowPropertiesObject(napi_env env, sptr<Window>& window);

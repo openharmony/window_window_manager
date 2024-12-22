@@ -23,6 +23,20 @@ namespace OHOS {
 namespace Rosen {
 using namespace  AbilityRuntime;
 
+napi_value ComponentRectChangeReasonInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "ComponentRectChangeReasonInit called");
+
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "HOST_WINDOW_RECT_CHANGE",
+        CreateJsValue(env, static_cast<uint32_t>(ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE)));
+    return objValue;
+}
+
 napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect)
 {
     napi_value objValue = nullptr;
