@@ -2431,6 +2431,15 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
     }
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP && moveDragController_ &&
+        NeedNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        pointerItem.SetWindowX(moveDragController_->GetStartMoveX());
+        pointerItem.SetWindowY(moveDragController_->GetStartMoveY());
+        pointerEvent->AddPointerItem(pointerItem);
+        WLOGD("resetMovePosition windowX:%{private}d windowY:%{private}d",
+            moveDragController_->GetStartMoveX(), moveDragController_->GetStartMoveY())
+    }
     return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
 }
 
