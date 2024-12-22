@@ -923,7 +923,7 @@ public:
 
     /**
      * @brief Get the Avoid Area of system or app sub window Enabled object
-     * 
+     *
      * @param avoidAreaOption from low to high, the first bit means system window, the second bit means app sub window
      * @return WMError
      */
