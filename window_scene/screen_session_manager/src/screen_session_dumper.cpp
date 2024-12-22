@@ -130,7 +130,7 @@ void ScreenSessionDumper::OutputDumpInfo()
 }
 
 
-void ScreenSessionDumper::ExcuteDumpCmd()
+void ScreenSessionDumper::ExecuteDumpCmd()
 {
     if (!(SessionPermission::IsSACalling() || SessionPermission::IsStartByHdcd())) {
         TLOGE(WmsLogTag::DMS, "dump permission denied!");
@@ -154,11 +154,11 @@ void ScreenSessionDumper::ExcuteDumpCmd()
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
     }
-    ExcuteInjectCmd();
+    ExecuteInjectCmd();
     OutputDumpInfo();
 }
 
-void ScreenSessionDumper::ExcuteInjectCmd()
+void ScreenSessionDumper::ExecuteInjectCmd()
 {
     bool isDeveloperMode = system::GetBoolParameter("const.security.developermode.state", false);
     if (isDeveloperMode) {
@@ -181,10 +181,10 @@ void ScreenSessionDumper::ExcuteInjectCmd()
         ShowNotifyFoldStatusChangedInfo();
         return;
     } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
-        SetMotionSensorvalue(params_[0]);
+        SetMotionSensorValue(params_[0]);
         return;
     } else if (params_[0].find(ARG_SET_ROTATION_LOCK) != std::string::npos) {
-        SetRotationLockedvalue(params_[0]);
+        SetRotationLockedValue(params_[0]);
         return;
     } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
         MockSendCastPublishEvent(params_[0]);
@@ -197,10 +197,10 @@ void ScreenSessionDumper::ExcuteInjectCmd()
         }
         return;
     }
-    ExcuteInjectCmd2();
+    ExecuteInjectCmd2();
 }
 
-void ScreenSessionDumper::ExcuteInjectCmd2()
+void ScreenSessionDumper::ExecuteInjectCmd2()
 {
     if (params_[0].find(ARG_SET_ON_TENT_MODE) != std::string::npos ||
         params_[0].find(ARG_SET_OFF_TENT_MODE) != std::string::npos) {
@@ -466,7 +466,7 @@ void ScreenSessionDumper::DumpRsInfoById01(sptr<ScreenSession> screenSession)
 }
 
 void ScreenSessionDumper::DumpCutoutInfoPrint(std::ostringstream& oss,
-    const OHOS::Rosen::DMRect& areaRect, const std::string& label)
+    const DMRect& areaRect, const std::string& label)
 {
     oss << std::left << std::setw(LINE_WIDTH) << label
         << areaRect.posX_ << ", "
@@ -604,7 +604,7 @@ void ScreenSessionDumper::ShowIllegalArgsInfo()
     dumpInfo_.append("The arguments are illegal and you can enter '-h' for help.");
 }
 
-void ScreenSessionDumper::SetMotionSensorvalue(std::string input)
+void ScreenSessionDumper::SetMotionSensorValue(std::string input)
 {
     size_t commaPos = input.find_last_of(',');
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_ROTATION_SENSOR)) {
@@ -626,7 +626,7 @@ void ScreenSessionDumper::SetMotionSensorvalue(std::string input)
     }
 }
 
-void ScreenSessionDumper::SetRotationLockedvalue(std::string input)
+void ScreenSessionDumper::SetRotationLockedValue(std::string input)
 {
     size_t commaPos = input.find_last_of(',');
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_ROTATION_LOCK)) {
@@ -790,8 +790,8 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
         .data = reinterpret_cast<uint8_t *>(&postureData),
         .dataLen = sizeof(PostureData),
     };
-    OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
-    OHOS::Rosen::FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
+    FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
+    FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
     TLOGI(WmsLogTag::DMS, "mock posture: %{public}d, hall: %{public}d ", postureVal, hallVal);
 }
 
@@ -806,21 +806,21 @@ void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
         int32_t value = std::stoi(valueStr);
         if (value) {
             if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-                OHOS::Rosen::SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
-                OHOS::Rosen::SuperFoldSensorManager::GetInstance().RegisterHallCallback();
+                SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
+                SuperFoldSensorManager::GetInstance().RegisterHallCallback();
             } else {
-                OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterHallCallback();
-                OHOS::Rosen::FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-                OHOS::Rosen::ScreenSensorConnector::SubscribeRotationSensor();
+                FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+                FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+                ScreenSensorConnector::SubscribeRotationSensor();
             }
         } else {
             if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-                OHOS::Rosen::SuperFoldSensorManager::GetInstance().UnregisterPostureCallback();
-                OHOS::Rosen::SuperFoldSensorManager::GetInstance().UnregisterHallCallback();
+                SuperFoldSensorManager::GetInstance().UnregisterPostureCallback();
+                SuperFoldSensorManager::GetInstance().UnregisterHallCallback();
             } else {
-                OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterHallCallback();
-                OHOS::Rosen::FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
-                OHOS::Rosen::ScreenSensorConnector::UnsubscribeRotationSensor();
+                FoldScreenSensorManager::GetInstance().UnRegisterHallCallback();
+                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+                ScreenSensorConnector::UnsubscribeRotationSensor();
             }
         }
         TLOGI(WmsLogTag::DMS, "hall and posture register status: %{public}d", value);
