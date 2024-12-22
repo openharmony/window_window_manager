@@ -2432,6 +2432,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         RaiseToAppTopForPointDown();
     }
     MMI::PointerEvent::PointerItem pointerItem;
+    // modify the window coordinates when move end
     if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP && moveDragController_ &&
         needNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
         int32_t windowX = pointerItem.GetDisplayX() - winRect_.posX_;
