@@ -314,10 +314,6 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
             WLOGFD("Move event hasPointDown");
             hasPointDown_ = true;
-            startMoveX_ = pointerItem.GetWindowX();
-            startMoveY_ = pointerItem.GetWindowY();
-            WLOGD("startMovePosition windowX:%{private}d windowY:%{private}d",
-                startMoveX_, startMoveY_)
         } else if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
@@ -1094,16 +1090,6 @@ void MoveDragController::OnLostFocus()
 void MoveDragController::SetIsPcWindow(bool isPcWindow)
 {
     isPcWindow_ = isPcWindow;
-}
-
-int32_t MoveDragController::GetStartMoveX()
-{
-    return startMoveX_;
-}
-
-int32_t MoveDragController::GetStartMoveY()
-{
-    return startMoveY_;
 }
 
 std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()

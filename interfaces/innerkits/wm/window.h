@@ -917,16 +917,18 @@ public:
     /**
      * @brief Set whether the system or app sub window can obtain area
      *
-     * @param avoidAreaOptions from low to high, the first bit means system window, the second bit means app sub window
+     * @param avoidAreaOption from low to high, the first bit means system window, the second bit means app sub window
+     * @return WMError
      */
-    virtual WMError SetAvoidAreaOption(uint32_t avoidAreaOptions) { return WMError::WM_OK; }
+    virtual WMError SetAvoidAreaOption(uint32_t avoidAreaOption) { return WMError::WM_OK; }
 
     /**
      * @brief Get the Avoid Area of system or app sub window Enabled object
      *
-     * @return from low to high, the first bit represents system window, the second bit represents app sub window
+     * @param avoidAreaOption from low to high, the first bit means system window, the second bit means app sub window
+     * @return WMError
      */
-    virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOptions) { return WMError::WM_OK; }
+    virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
 
     /**
      * @brief Set this window layout full screen, with hide status bar and nav bar above on this window

@@ -1064,6 +1064,7 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
     if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
         !data.WriteInt32(rect.width_) || !data.WriteInt32(rect.height_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
+        return avoidArea;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {

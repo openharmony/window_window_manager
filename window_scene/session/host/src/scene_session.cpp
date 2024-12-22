@@ -2005,7 +2005,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
          static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) {
         return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}u "
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u "
         "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
         GetPersistentId(), static_cast<uint32_t>(winType), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
     return false;
@@ -2433,12 +2433,13 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
     }
     MMI::PointerEvent::PointerItem pointerItem;
     if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP && moveDragController_ &&
-        NeedNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        pointerItem.SetWindowX(moveDragController_->GetStartMoveX());
-        pointerItem.SetWindowY(moveDragController_->GetStartMoveY());
+        needNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        int32_t windowX = pointerItem.GetDisplayX() - winRect_.posX_;
+        int32_t windowY = pointerItem.GetDisplayY() - winRect_.posY_;
+        WLOGD("move end position: windowX:%{private}d windowY:%{private}d", windowX, windowY);
+        pointerItem.SetWindowX(windowX);
+        pointerItem.SetWindowY(windowY);
         pointerEvent->AddPointerItem(pointerItem);
-        WLOGD("resetMovePosition windowX:%{private}d windowY:%{private}d",
-            moveDragController_->GetStartMoveX(), moveDragController_->GetStartMoveY())
     }
     return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
 }
