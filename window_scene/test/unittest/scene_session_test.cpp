@@ -2184,7 +2184,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     EXPECT_NE(property, nullptr);
-    property->SetDisplayId(-99);
+    property->SetDisplayId(-1);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetDefaultDisplayIdIfNeed();
     EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);
