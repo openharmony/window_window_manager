@@ -4405,31 +4405,34 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
 
 napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2: maximum params num
         WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool shouldHide = false;
-    if (errCode == WMError::WM_OK) {
+    if (errCode == WmErrorCode::WM_OK) {
         napi_value nativeVal = argv[0];
         if (nativeVal == nullptr) {
             WLOGFE("Failed to convert parameter to shouldHide");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
-            napi_get_value_bool(env, nativeVal, &shouldHide);
+            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                napi_get_value_bool(env, nativeVal, &shouldHide));
         }
     }
     wptr<Window> weakToken(windowToken_);
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, shouldHide, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
+            WmErrorCode wmErrorCode;
             if (weakWindow == nullptr) {
                 WLOGFE("window is nullptr");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "window is nullptr."));
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "window is nullptr."));
                 return;
             }
             if (weakWindow->IsFloatingWindowAppType()) {
@@ -4438,7 +4441,7 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
                     "HideNonSystemFloatingWindows is not allowed since window is app window"));
                 return;
             }
-            if (errCode != WMError::WM_OK) {
+            if (errCode != WmErrorCode::WM_OK) {
                 WLOGFE("Invalidate params");
                 task.Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
                 return;
@@ -4447,7 +4450,8 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Hide non-system floating windows failed"));
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Hide non-system floating windows failed"));
             }
             WLOGI("Window [%{public}u, %{public}s] hide non-system floating windows end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
