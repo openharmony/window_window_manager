@@ -83,8 +83,6 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
     void SetIsPcWindow(bool isPcWindow);
-    int32_t GetStartMoveX();
-    int32_t GetStartMoveY();
 
     /*
      * Cross Display Move Drag
@@ -191,8 +189,6 @@ private:
     int32_t persistentId_;
     WindowType winType_;
     bool isPcWindow_ = false;
-    int32_t startMoveX_ = 0;
-    int32_t startMoveY_ = 0;
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,
