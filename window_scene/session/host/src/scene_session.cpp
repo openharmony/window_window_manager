@@ -704,20 +704,20 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
         TLOGE(WmsLogTag::WMS_SYSTEM, "This is not start move event, eventId=%{public}d", event);
         return WSError::WS_ERROR_NULLPTR;
     }
-    auto task = [weakThis = wptr(this), event]() {
+    const char* const funcName = __func__;
+    return PostSyncTask([weakThis = wptr(this), event, funcName] {
         auto session = weakThis.promote();
         if (!session || !session->moveDragController_) {
-            TLOGNW(WmsLogTag::WMS_SYSTEM, "IPC communicate failed since hostSession is nullptr");
+            TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s: session or moveDragController is null", funcName);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->moveDragController_->GetStartMoveFlag()) {
-            TLOGNW(WmsLogTag::WMS_SYSTEM, "Repeat operation,system window is moving");
+            TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s: Repeat operation, system window is moving", funcName);
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         session->OnSessionEvent(event);
         return WSError::WS_OK;
-    };
-    return PostSyncTask(task, "SyncSessionEvent");
+    }, funcName);
 }
 
 uint32_t SceneSession::GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY)
@@ -2392,8 +2392,8 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
     bool isMovableSystemWindow = WindowHelper::IsSystemWindow(windowType) && !isDialog;
     TLOGD(WmsLogTag::WMS_EVENT, "%{public}s: %{public}d && %{public}d", property->GetWindowName().c_str(),
         WindowHelper::IsSystemWindow(windowType), property->GetDragEnabled());
-    if (isMovableWindowType && (isMainWindow || isSubWindow || isDialog || isDragEnabledSystemWindow ||
-            isMovableSystemWindow) && !isMaxModeAvoidSysBar) {
+    if (isMovableWindowType && !isMaxModeAvoidSysBar &&
+        (isMainWindow || isSubWindow || isDialog || isDragEnabledSystemWindow || isMovableSystemWindow)) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
             pointerEvent->MarkProcessed();
@@ -5440,34 +5440,33 @@ WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
 
 WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag : %{public}d", enableDrag);
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d, permission denied!", GetPersistentId());
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
 
     if (!WindowHelper::IsSystemWindow(GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allow since this is not system window");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d, this is not system window", GetPersistentId());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    PostTask([weakThis = wptr(this), enableDrag]() {
+    const char* const funcName = __func__;
+    PostTask([weakThis = wptr(this), enableDrag, funcName] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
             return;
         }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, enableDrag:%{public}d",
+            funcName, session->GetPersistentId(), enableDrag);
         auto sessionProperty = session->GetSessionProperty();
-
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "task id: %{public}d, enableDrag: %{public}d",
-            session->GetPersistentId(), enableDrag);
         if (!sessionProperty) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "sessionProperty is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: sessionProperty is null", funcName);
             return;
         }
         sessionProperty->SetDragEnabled(enableDrag);
         session->NotifySessionInfoChange();
-    }, "SetSystemWindowEnableDrag");
+    }, funcName);
     return WMError::WM_OK;
 }
 

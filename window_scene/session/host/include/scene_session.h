@@ -253,11 +253,11 @@ public:
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
-    WMError SetSystemWindowEnableDrag(bool enableDrag) override;
 
     /*
      * Window Layout
      */
+    WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WMError SetWindowEnableDragBySystem(bool enableDrag);
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
     void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);

@@ -730,7 +730,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     AreaType dragType = AreaType::UNDEFINED;
     WindowType windowType = property_->GetWindowType();
     bool isSystemDragEnabledType = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
-    if (property_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING || isSystemDragEnabledType) {
+    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDragEnabledType) {
         dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     }
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
@@ -748,8 +748,8 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
             hostSession->SendPointEventForMoveDrag(pointerEvent);
             needNotifyEvent = false;
         } else if (WindowHelper::IsMainWindow(windowType) ||
-            WindowHelper::IsSubWindow(windowType) ||
-            WindowHelper::IsSystemWindow(windowType)) {
+                   WindowHelper::IsSubWindow(windowType) ||
+                   WindowHelper::IsSystemWindow(windowType)) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
         } else {
             hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
@@ -2574,7 +2574,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
     }
     if (auto hostSession = GetHostSession()) {
         WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
-        TLOGD(WmsLogTag::WMS_SYSTEM, "id: %{public}d , errorCode: %{public}d",
+        TLOGD(WmsLogTag::WMS_SYSTEM, "id:%{public}d, errorCode:%{public}d",
             GetPersistentId(), static_cast<int>(errorCode));
         switch (errorCode) {
             case WSError::WS_ERROR_REPEAT_OPERATION: {
@@ -3891,10 +3891,8 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
 
     WindowType windowType = GetType();
     bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
-    if (!WindowHelper::IsMainWindow(windowType) &&
-        !WindowHelper::IsSubWindow(windowType) &&
-        windowType != WindowType::WINDOW_TYPE_DIALOG &&
-        !isDragEnabledSystemWin) {
+    if (!WindowHelper::IsMainWindow(windowType) && !WindowHelper::IsSubWindow(windowType) &&
+        windowType != WindowType::WINDOW_TYPE_DIALOG && !isDragEnabledSystemWin) {
         WLOGFE("type not support. Id:%{public}u, type:%{public}u",
             GetWindowId(), static_cast<uint32_t>(windowType));
         return WMError::WM_ERROR_INVALID_CALLING;
