@@ -598,6 +598,14 @@ public:
      * @param configuration configuration for app
      */
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+	/**
+     * @brief Update configuration synchronously for all windows.
+	 *
+     * @param configuration configuration for app.
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
     /**
      * @brief Get surface node from RS
      *
@@ -1182,6 +1190,14 @@ public:
      * @param configuration Window configuration.
      */
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
+	/**
+     * @brief Update configuration synchronously.
+	 *
+     * @param configuration Window configuration.
+     */
+    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
     /**
      * @brief Register window lifecycle listener.
      *
