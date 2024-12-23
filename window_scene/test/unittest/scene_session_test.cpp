@@ -19,7 +19,6 @@
 
 #include <gtest/gtest.h>
 #include "key_event.h"
-#define private public
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
@@ -29,7 +28,6 @@
 #include "input_event.h"
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
-#undef private
 
 using namespace testing;
 using namespace testing::ext;
