@@ -896,13 +896,11 @@ int SceneSessionManagerLiteStub::HandleMinimizeMainSession(MessageParcel& data, 
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
         return ERR_INVALID_DATA;
     }
-
     int32_t appIndex = 0;
     if (!data.ReadInt32(appIndex)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
         return ERR_INVALID_DATA;
     }
-
     int32_t userId = 0;
     if (!data.ReadInt32(userId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read userId");

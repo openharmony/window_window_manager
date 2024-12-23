@@ -1431,7 +1431,6 @@ WSError SceneSessionManagerLiteProxy::NotifyAppUseControlList(
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-
 WMError SceneSessionManagerLiteProxy::MinimizeMainSession(
     const std::string& bundleName, int32_t appIndex, int32_t userId)
 {
@@ -1455,7 +1454,6 @@ WMError SceneSessionManagerLiteProxy::MinimizeMainSession(
         TLOGE(WmsLogTag::WMS_LIFE, "write userId failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
@@ -1466,8 +1464,8 @@ WMError SceneSessionManagerLiteProxy::MinimizeMainSession(
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    uint32_t ret = 0;
-    if (!reply.ReadUint32(ret)) {
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
