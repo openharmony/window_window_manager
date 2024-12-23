@@ -472,7 +472,7 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
 
 void JsWindowListener::OnSystemDensityChanged(float density)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     auto jsCallback = [self = weakRef_, density, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
