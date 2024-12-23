@@ -4686,9 +4686,9 @@ bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 
 void SceneSession::RetrieveStatusBarDefaultVisibility()
 {
-    auto property = GetSessionProperty();
-    if (property && specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
-        isStatusBarVisible_ = specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(property->GetDisplayId());
+    if (specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
+        isStatusBarVisible_ = specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(
+            GetSessionProperty()->GetDisplayId());
     }
 }
 

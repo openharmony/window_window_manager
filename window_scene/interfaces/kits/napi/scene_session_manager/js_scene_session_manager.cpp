@@ -2732,25 +2732,25 @@ napi_value JsSceneSessionManager::OnSetStatusBarDefaultVisibilityPerDisplay(napi
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     int64_t displayId = -1;
     if (!ConvertFromJsValue(env, argv[0], displayId)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Failed to convert parameter to displayId");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to displayId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     if (displayId < 0) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Failed to convert parameter to displayId");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to displayId");
         return NapiGetUndefined(env);
     }
     bool visible = false;
     if (!ConvertFromJsValue(env, argv[1], visible)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Failed to convert parameter to visible");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to visible");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
