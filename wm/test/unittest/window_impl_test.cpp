@@ -1323,7 +1323,6 @@ HWTEST_F(WindowImplTest, SetBrightness03, Function | SmallTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
-
 /**
  * @tc.name: SetRestoredRouterStack_0100
  * @tc.desc: basic function test of set or get restored router stack.
