@@ -1905,6 +1905,20 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
     window_->property_->SetRealParentId(12345);
     EXPECT_EQ(window_->GetRealParentId(), 12345);
 }
+
+/**
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
+{
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, window_);
+    window_->windowExtensionSessionSet_.insert(window_);
+    window_->UpdateConfigurationSyncForAll(configuration);
+    window_->windowExtensionSessionSet_.erase(window_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
