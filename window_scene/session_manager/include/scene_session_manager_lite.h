@@ -79,6 +79,7 @@ public:
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
         const std::vector<AppUseControlInfo>& controlList) override;
+    WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) override;
 };
 } // namespace OHOS::Rosen
 
