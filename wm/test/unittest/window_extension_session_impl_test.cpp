@@ -1907,7 +1907,6 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
 }
 
 /**
-<<<<<<< HEAD
  * @tc.name: NotifyExtensionEventAsync
  * @tc.desc: NotifyExtensionEventAsync Test
  * @tc.type: FUNC
@@ -1941,7 +1940,9 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | 
     window_->uiContent_ = nullptr;
     ret = window_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
-=======
+}
+
+/**
  * @tc.name: UpdateConfigurationSyncForAll
  * @tc.desc: UpdateConfigurationSyncForAll Test
  * @tc.type: FUNC
@@ -1953,7 +1954,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, Function
     window_->windowExtensionSessionSet_.insert(window_);
     window_->UpdateConfigurationSyncForAll(configuration);
     window_->windowExtensionSessionSet_.erase(window_);
->>>>>>> upgrade/OpenHarmony-5.0.2-Release
 }
 }
 } // namespace Rosen
