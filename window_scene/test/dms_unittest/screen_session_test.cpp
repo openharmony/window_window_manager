@@ -379,6 +379,47 @@ HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetPhysicalRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetPhysicalRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetPhysicalRotation start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    int rotation = 0;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN;
+    screenSession->SetPhysicalRotation(rotation, foldDisplayMode);
+    GTEST_LOG_(INFO) << "SetPhysicalRotation end";
+}
+
+/**
+ * @tc.name: SetScreenComponentRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenComponentRotation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetScreenComponentRotation start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    int rotation = 0;
+    screenSession->SetScreenComponentRotation(rotation);
+    GTEST_LOG_(INFO) << "SetScreenComponentRotation end";
+}
+
+/**
  * @tc.name: UpdateToInputManager
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -395,13 +436,14 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, screenSession);
     RRect bounds;
     int rotation = 90;
+    int deviceRotation = 90;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::FULL;
-    screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     rotation = 0;
     foldDisplayMode = FoldDisplayMode::MAIN;
-    screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     GTEST_LOG_(INFO) << "UpdateToInputManager end";
 }
 
