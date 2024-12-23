@@ -1829,8 +1829,9 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief start move system window. It is called by application.
+     * @brief Start move window. It is called by application.
      *
+     * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
