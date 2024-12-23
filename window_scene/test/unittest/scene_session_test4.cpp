@@ -415,7 +415,6 @@ HWTEST_F(SceneSessionTest4, SetRequestedOrientation, Function | SmallTest | Leve
     info.bundleName_ = "SetRequestedOrientation";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     Orientation orientation { Orientation::BEGIN };
-    session->sessionChangeCallback_ = nullptr;
     session->SetRequestedOrientation(orientation);
     session->onRequestedOrientationChange_ = nullptr;
     session->SetRequestedOrientation(orientation);
@@ -896,8 +895,6 @@ HWTEST_F(SceneSessionTest4, UnregisterSessionChangeListeners01, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->UnregisterSessionChangeListeners();
 
-    sceneSession->sessionChangeCallback_ = sptr<MainSession::SessionChangeCallback>::MakeSptr();
-    ASSERT_NE(sceneSession->sessionChangeCallback_, nullptr);
     sceneSession->UnregisterSessionChangeListeners();
     NotifyPendingSessionToBackgroundForDelegatorFunc func =[sceneSession](const SessionInfo& info,
         bool shouldBackToCaller) { return; };
@@ -954,7 +951,6 @@ HWTEST_F(SceneSessionTest4, OnTitleAndDockHoverShowChange01, Function | SmallTes
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     auto result = sceneSession->OnTitleAndDockHoverShowChange(true, true);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1112,11 +1108,8 @@ HWTEST_F(SceneSessionTest4, SetMovable01, Function | SmallTest | Level2)
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
     sceneSession->SetMovable(true);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     sceneSession->OnSessionEvent(event);
     sceneSession->moveDragController_->isStartDrag_ = true;
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    ASSERT_NE(sceneSession->sessionChangeCallback_, nullptr);
     auto result = sceneSession->OnSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_OK);
 }

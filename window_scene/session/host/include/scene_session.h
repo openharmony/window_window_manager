@@ -135,9 +135,6 @@ public:
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
     };
 
-    // callback for notify SceneBoard
-    struct SessionChangeCallback : public RefBase {};
-
     // func for change window scene pattern property
     struct SetWindowScenePatternFunc : public RefBase {
         SetWindowPatternOpacityFunc setOpacityFunc_;
@@ -401,7 +398,6 @@ public:
     bool RemoveToastSession(int32_t persistentId);
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
-    void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
 
     /*
@@ -632,7 +628,6 @@ protected:
     void UpdateGestureBackEnabled() override;
 
     sptr<SpecificSessionCallback> specificCallback_ = nullptr;
-    sptr<SessionChangeCallback> sessionChangeCallback_ = nullptr;
 
     /*
      * Dialog window

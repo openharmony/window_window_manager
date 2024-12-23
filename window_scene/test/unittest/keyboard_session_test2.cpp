@@ -136,16 +136,11 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout01, Function | SmallTest | Le
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     keyboardSession->SetSessionProperty(property);
-    keyboardSession->RegisterSessionChangeCallback(nullptr);
 
     KeyboardLayoutParams params;
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sessionChangeCallback, nullptr);
     keyboardSession->adjustKeyboardLayoutFunc_ = nullptr;
-    keyboardSession->RegisterSessionChangeCallback(sessionChangeCallback);
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 
     keyboardSession->adjustKeyboardLayoutFunc_ = [](const KeyboardLayoutParams& params){};
