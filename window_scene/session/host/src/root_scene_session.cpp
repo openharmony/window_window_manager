@@ -33,15 +33,10 @@ void RootSceneSession::LoadContent(
 
 void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "failed to get session property");
-        return;
-    }
     std::vector<sptr<SceneSession>> statusBarVector;
     if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByType_) {
         statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
-            WindowType::WINDOW_TYPE_STATUS_BAR, sessionProperty->GetDisplayId());
+            WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     }
     for (auto& statusBar : statusBarVector) {
         if (!statusBar->IsVisible()) {
@@ -56,18 +51,13 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
 
 void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "failed to get session property");
-        return;
-    }
     std::vector<sptr<SceneSession>> inputMethodVector;
     if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByType_) {
         inputMethodVector = specificCallback_->onGetSceneSessionVectorByType_(
-            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, sessionProperty->GetDisplayId());
+            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, GetSessionProperty()->GetDisplayId());
     }
     for (auto& inputMethod : inputMethodVector) {
-        if (inputMethod->IsVisible()) {
+        if (!inputMethod->IsVisible()) {
             continue;
         }
         SessionGravity gravity = inputMethod->GetKeyboardGravity();
@@ -93,12 +83,7 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
 
 void RootSceneSession::GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "failed to get session property");
-        return;
-    }
-    auto display = DisplayManager::GetInstance().GetDisplayById(sessionProperty->GetDisplayId());
+    auto display = DisplayManager::GetInstance().GetDisplayById(GetSessionProperty()->GetDisplayId());
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to get display");
         return;
@@ -126,14 +111,9 @@ void RootSceneSession::GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
 
 void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "failed to get session property");
-        return;
-    }
     WSRect barArea;
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
-        barArea = specificCallback_->onGetAINavigationBarArea_(sessionProperty->GetDisplayId());
+        barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
     }
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
     TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s AI bar %{public}s area %{public}s",
