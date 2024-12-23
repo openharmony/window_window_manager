@@ -954,7 +954,8 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest 
     window_->focusState_ = std::nullopt;
     window_->state_ = WindowState::STATE_HIDDEN;
     ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, 0, token, nullptr));
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::CONTINUATION,
+        token, nullptr));
 
     auto uiContent = std::make_shared<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, uiContent);
@@ -963,7 +964,8 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest 
     window_->focusState_ = true;
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK,
-        window_->NapiSetUIContent(contentInfo, env, storage, 0, token, nullptr));
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::CONTINUATION,
+        token, nullptr));
 }
 
 /**
@@ -1521,7 +1523,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows01, Function | Smal
 {
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows02
  * @tc.desc: HideNonSecureWindows Test
@@ -1543,7 +1545,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows02, Function | Smal
 
     ASSERT_EQ(WMError::WM_OK, window_->HideNonSecureWindows(false));
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows03
  * @tc.desc: HideNonSecureWindows Test
@@ -1554,7 +1556,7 @@ HWTEST_F(WindowExtensionSessionImplTest, HideNonSecureWindows03, Function | Smal
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window_->HideNonSecureWindows(true));
 }
- 
+
 /**
  * @tc.name: HideNonSecureWindows04
  * @tc.desc: HideNonSecureWindows Test
@@ -1592,7 +1594,7 @@ HWTEST_F(WindowExtensionSessionImplTest, SetWaterMarkFlag01, Function | SmallTes
 {
     ASSERT_EQ(WMError::WM_OK, window_->SetWaterMarkFlag(false));
 }
- 
+
 /**
  * @tc.name: SetWaterMarkFlag02
  * @tc.desc: SetWaterMarkFlag Test
@@ -1905,6 +1907,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetRealParentId, Function | SmallTest |
 }
 
 /**
+<<<<<<< HEAD
  * @tc.name: NotifyExtensionEventAsync
  * @tc.desc: NotifyExtensionEventAsync Test
  * @tc.type: FUNC
@@ -1938,6 +1941,19 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | 
     window_->uiContent_ = nullptr;
     ret = window_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+=======
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, Function | SmallTest | Level3)
+{
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, window_);
+    window_->windowExtensionSessionSet_.insert(window_);
+    window_->UpdateConfigurationSyncForAll(configuration);
+    window_->windowExtensionSessionSet_.erase(window_);
+>>>>>>> upgrade/OpenHarmony-5.0.2-Release
 }
 }
 } // namespace Rosen

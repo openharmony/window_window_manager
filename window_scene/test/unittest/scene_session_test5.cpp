@@ -133,6 +133,8 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
+    session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RESIZE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RECOVER);
@@ -153,6 +155,9 @@ HWTEST_F(SceneSessionTest5, NotifyClientToUpdateRectTask, Function | SmallTest |
     EXPECT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
+    session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionTest5", nullptr));
 }
@@ -393,6 +398,31 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     systemConfig.uiType_ = "pc";
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->TransferPointerEvent(pointerEvent, false));
     session->ClearDialogVector();
+}
+
+/**
+ * @tc.name: SetSurfaceBounds01
+ * @tc.desc: SetSurfaceBounds function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSurfaceBounds01";
+    info.bundleName_ = "SetSurfaceBounds01";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = nullptr;
+    WSRect preRect = { 20, 20, 800, 800 };
+    WSRect rect = { 30, 30, 900, 900 };
+    session->SetSessionRect(preRect);
+    session->SetSurfaceBounds(rect);
+
+    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceBounds(rect);
+    EXPECT_EQ(preRect, session->GetSessionRect());
 }
 
 /**
@@ -732,7 +762,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
     reason = SizeChangeReason::DRAG_END;
     session->OnMoveDragCallback(reason);
 
-    reason = SizeChangeReason::MOVE;
+    reason = SizeChangeReason::DRAG_MOVE;
     session->OnMoveDragCallback(reason);
 
     reason = SizeChangeReason::DRAG_START;
@@ -1053,6 +1083,22 @@ HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction, Function | SmallTest |
     action = WSPropertyChangeAction::ACTION_UPDATE_FLAGS;
     res = session->HandleUpdatePropertyByAction(property, session, action);
     EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: SetSystemWindowEnableDrag
+ * @tc.desc: SetSystemWindowEnableDrag function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSystemWindowEnableDrag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSystemWindowEnableDrag";
+    info.bundleName_ = "SetSystemWindowEnableDrag";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DESKTOP);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = session->SetSystemWindowEnableDrag(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
