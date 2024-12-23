@@ -4423,7 +4423,7 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
             SetDisplayBrightness(brightness);
         }
         if (!setBrightnessRet) {
-            WLOGFE("Report post listener callback task failed. the task name is SetBrightness");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "post task failed. task is SetBrightness");
         }
     }
 #else
