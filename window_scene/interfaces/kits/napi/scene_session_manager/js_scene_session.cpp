@@ -1306,7 +1306,7 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
         }
         jsSceneSession->OnMainWindowTopmostChange(isTopmost);
     });
-    TLOGND(WmsLogTag::WMS_HIERARCHY, "register success");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "register success");
 }
 
 void JsSceneSession::ProcessSubModalTypeChangeRegister()
@@ -2945,7 +2945,7 @@ void JsSceneSession::OnSessionTopmostChange(bool topmost)
 /** @note @window.hierarchy */
 void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
 {
-    TLOGND(WmsLogTag::WMS_HIERARCHY, "isTopmost: %{public}u", isTopmost);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "isTopmost: %{public}u", isTopmost);
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
