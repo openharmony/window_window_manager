@@ -325,7 +325,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->SetTokenState(true);
     }
     AdjustPropertySessionInfo(context_, property_->EditSessionInfo());
-    
+
     const WindowType type = GetType();
     bool hasToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
     if (WindowHelper::IsSubWindow(type) && (property_->GetIsUIExtFirstSubWindow() ||
@@ -930,8 +930,8 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null");
         return;
     }
-    uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
-    uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     if (displayWidth == 0 || displayHeight == 0) {
         return;
     }
