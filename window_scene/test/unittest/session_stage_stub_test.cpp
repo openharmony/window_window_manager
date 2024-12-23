@@ -452,6 +452,25 @@ HWTEST_F(SessionStageStubTest, HandleNotifyCompatibleModeEnableInPad, Function |
 }
 
 /**
+ * @tc.name: HandleNotifyDumpInfo
+ * @tc.desc: test function : HandleNotifyDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyDumpInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO);
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteStringVector(params);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleSetEnableDragBySystem
  * @tc.desc: test function : HandleSetEnableDragBySystem
  * @tc.type: FUNC

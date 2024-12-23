@@ -1130,6 +1130,35 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
         oss.str());
 }
 
+void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "notifyEvent:%{public}d", notifyEvent);
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window session invalid.");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyExtensionEventAsync(notifyEvent);
+}
+
+WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
+    auto uiContentSharedPtr = GetUIContentSharedPtr();
+    if (uiContentSharedPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uiContentSharedPtr->DumpInfo(params, info);
+    if (!SessionPermission::IsBetaVersion()) {
+        TLOGW(WmsLogTag::WMS_UIEXT, "is not beta version, persistentId: %{public}d", GetPersistentId());
+        info.clear();
+    }
+    return WSError::WS_OK;
+}
+
 bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 {
     bool isPcOrPadFreeMultiWindowMode = false;
