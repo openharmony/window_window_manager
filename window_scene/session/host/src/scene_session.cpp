@@ -824,13 +824,6 @@ void SceneSession::SetSessionEventParam(SessionEventParam param)
     sessionEventParam_ = param;
 }
 
-void SceneSession::RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>&
-    sessionChangeCallback)
-{
-    std::lock_guard<std::mutex> guard(sessionChangeCbMutex_);
-    sessionChangeCallback_ = sessionChangeCallback;
-}
-
 void SceneSession::RegisterSessionEventCallback(NotifySessionEventFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback)] {
