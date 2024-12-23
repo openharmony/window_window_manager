@@ -83,6 +83,7 @@ public:
         TRANS_ID_GET_ROOT_MAIN_WINDOW_ID,
         TRANS_ID_UI_EXTENSION_CREATION_CHECK,
         TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST,
+        TRANS_ID_MINIMIZE_MAIN_SESSION,
     };
 
     /*
@@ -147,6 +148,20 @@ public:
      * @param windowStates Window state list
      */
     virtual WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) = 0;
+
+    /**
+     * @brief Minimize All Main Sessions of An Application.
+     *
+     * This function is used to minimize the main sessions of the application with the same bundleName and appIndex.
+     * The invoker must be an SA or SystemApp and have the related permission.
+     *
+     * @param bundleName bundle name of the application that need to be minimized.
+     * @param appIndex appIndex of the target application
+     * @param userId User ID
+     * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
+     * @permission application requires SA permission or SystemApp permission
+     */
+    virtual WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

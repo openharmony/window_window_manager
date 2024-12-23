@@ -519,6 +519,7 @@ public:
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
+    WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
