@@ -1326,6 +1326,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateAvoidAreaByType_ = [this](int32_t persistentId, AvoidAreaType type) {
         this->UpdateAvoidAreaByType(persistentId, type);
     };
+    specificCb->onGetStatusBarDefaultVisibilityByDisplayId_ = [this](DisplayId displayId) {
+        return this->GetStatusBarDefaultVisibilityByDisplayId(displayId);
+    };
     specificCb->onUpdateOccupiedAreaIfNeed_ = [this](const int32_t& persistentId) {
         this->UpdateOccupiedAreaIfNeed(persistentId);
     };
@@ -4366,6 +4369,21 @@ void SceneSessionManager::SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func)
 void SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func)
 {
     isRootSceneLastFrameLayoutFinishedFunc_ = std::move(func);
+}
+
+void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible)
+{
+    taskScheduler_->PostAsyncTask([this, displayId, visible] {
+        statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
+        TLOGNI(WmsLogTag::WMS_IMMS,
+            "set default visibility on display: %{public}" PRIu64 " visible: %{public}d", displayId, visible);
+    }, __func__);
+}
+
+bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId)
+{
+    return statusBarDefaultVisibilityPerDisplay_.count(displayId) != 0 ?
+           statusBarDefaultVisibilityPerDisplay_[displayId] : true;
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
