@@ -5530,10 +5530,8 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     if (screenSession != nullptr) {
         if (foldStatus == FoldStatus::FOLDED) {
             screenSession->SetDefaultDeviceRotationOffset(0);
-            rsInterface_.SetDefaultDeviceRotationOffset(0);
         } else {
             screenSession->SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
-            rsInterface_.SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
         }
     }
     if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
