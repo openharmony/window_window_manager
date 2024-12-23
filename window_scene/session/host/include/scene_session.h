@@ -850,7 +850,6 @@ private:
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    mutable std::mutex sessionChangeCbMutex_;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
     std::vector<sptr<SceneSession>> toastSession_;
