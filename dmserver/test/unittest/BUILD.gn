@@ -45,7 +45,6 @@ ohos_unittest("dmserver_abstract_screen_controller_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -77,7 +76,6 @@ ohos_unittest("dmserver_abstract_display_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -91,7 +89,6 @@ ohos_unittest("dmserver_display_manager_service_inner_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -105,7 +102,6 @@ ohos_unittest("dmserver_display_manager_service_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -138,7 +134,6 @@ ohos_unittest("dmserver_screen_rotation_controller_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 
@@ -158,7 +153,6 @@ ohos_unittest("dmserver_display_dumper_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -172,7 +166,6 @@ ohos_unittest("dmserver_display_cutout_controller_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -186,7 +179,6 @@ ohos_unittest("dmserver_display_power_controller_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }
@@ -200,7 +192,6 @@ ohos_unittest("dmserver_abstract_screen_test") {
 
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 
@@ -273,12 +264,16 @@ ohos_static_library("dmserver_unittest_common") {
     "../..:libdms",
     "../../../snapshot:snapshot_display",
     "../../../test/common/utils:libtestutil",
-    "//commonlibrary/c_utils/base:utils",
-    "//foundation/multimedia/image_framework/interfaces/innerkits:image_native",  # PixelMap
-    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libjpeg-turbo:turbojpeg_static",  # jpeg
+  ]
+
+  public_external_deps = [
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "libjpeg-turbo:turbojpeg_static",
   ]
 
   external_deps = [
