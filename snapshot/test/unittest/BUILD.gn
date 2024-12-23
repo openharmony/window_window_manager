@@ -78,11 +78,16 @@ ohos_static_library("utils_unittest_common") {
     "../../../test/common/utils:libtestutil",
     "../../../utils:libwmutil",
     "../../../utils:libwmutil_base",
-    "//commonlibrary/c_utils/base:utils",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
+  ]
+
+  public_external_deps = [
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "image_framework:image_native",
   ]
 
   external_deps = [
