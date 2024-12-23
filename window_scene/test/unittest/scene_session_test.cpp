@@ -1226,36 +1226,6 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest
 }
 
 /**
- * @tc.name: TransferPointerEventSystemDialog
- * @tc.desc: TransferPointerEventSystemDialog
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, TransferPointerEventSystemDialog, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "TransferPointerEventSystemDialog";
-    info.bundleName_ = "TransferPointerEventSystemDialogbundle";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession =
-        sptr<SceneSession>::MakeSptr(info, specificCallback_);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
-    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    property->SetDecorEnable(true);
-    property->SetDragEnabled(true);
-    property->SetPersistentId(13);
-    sceneSession->property_ = property;
-    EXPECT_NE(sceneSession, nullptr);
-}
-
-/**
  * @tc.name: CalculateAvoidAreaRect
  * @tc.desc: CalculateAvoidAreaRect
  * @tc.type: FUNC
@@ -1507,11 +1477,9 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SyncSessionEvent";
     info.bundleName_ = "SyncSessionEvent";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);

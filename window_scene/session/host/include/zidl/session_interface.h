@@ -67,6 +67,15 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SyncSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+
+    /**
+     * @brief Enables or disables system window dragging.
+     *
+     * This function provides the ability for system application to make system window dragable.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
     virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
 
     /**
