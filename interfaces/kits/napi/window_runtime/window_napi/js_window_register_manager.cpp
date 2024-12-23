@@ -248,10 +248,9 @@ WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<J
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     IDisplayIdChangeListenerSptr thisListener(listener);
-    WmErrorCode ret = isRegister ?
+    return isRegister ?
         WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener)) :
         WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
-    return ret;
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener,
