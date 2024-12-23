@@ -1354,6 +1354,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateAvoidAreaByType_ = [this](int32_t persistentId, AvoidAreaType type) {
         this->UpdateAvoidAreaByType(persistentId, type);
     };
+    specificCb->onGetStatusBarDefaultVisibilityByDisplayId_ = [this](DisplayId displayId) {
+        return this->GetStatusBarDefaultVisibilityByDisplayId(displayId);
+    };
     specificCb->onUpdateOccupiedAreaIfNeed_ = [this](const int32_t& persistentId) {
         this->UpdateOccupiedAreaIfNeed(persistentId);
     };
@@ -1579,7 +1582,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
             TLOGI(WmsLogTag::WMS_LIFE, "get exist session persistentId: %{public}d", sessionInfo.persistentId_);
             return session;
         }
-    
+
         if (WindowHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
             TLOGD(WmsLogTag::WMS_LIFE, "mainWindow bundleName: %{public}s, moduleName: %{public}s, "
                 "abilityName: %{public}s, appIndex: %{public}d",
@@ -1815,33 +1818,27 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
 
 WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate)
 {
-    auto task = [this, persistentId, &isPrepareTerminate]() {
-        if (!isPrepareTerminateEnable_) { // not support prepareTerminate
-            isPrepareTerminate = false;
-            WLOGE("not support prepareTerminate, Id:%{public}d", persistentId);
-            return WSError::WS_OK;
-        }
-        auto scnSession = GetSceneSession(persistentId);
-        if (scnSession == nullptr) {
-            WLOGFE("PrepareTerminate scnSession is nullptr, Id:%{public}d", persistentId);
-            isPrepareTerminate = false;
-            return WSError::WS_ERROR_NULLPTR;
-        }
-        auto scnSessionInfo = SetAbilitySessionInfo(scnSession);
-        if (scnSessionInfo == nullptr) {
-            WLOGFE("PrepareTerminate scnSessionInfo is nullptr, Id:%{public}d", persistentId);
-            isPrepareTerminate = false;
-            return WSError::WS_ERROR_NULLPTR;
-        }
-        TLOGI(WmsLogTag::WMS_MAIN, "PrepareTerminateAbilityBySCB Id:%{public}d", persistentId);
-        auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->
-            PrepareTerminateAbilityBySCB(scnSessionInfo, isPrepareTerminate);
-        TLOGI(WmsLogTag::WMS_MAIN, "PrepareTerminateAbilityBySCB isPrepareTerminate:%{public}d errorCode:%{public}d",
-            isPrepareTerminate, errorCode);
+    if (!isPrepareTerminateEnable_) { // not support prepareTerminate
+        isPrepareTerminate = false;
+        TLOGE(WmsLogTag::WMS_MAIN, "not support prepareTerminate, Id:%{public}d", persistentId);
         return WSError::WS_OK;
-    };
-
-    taskScheduler_->PostSyncTask(task, "PrepareTerminate:PID:" + std::to_string(persistentId));
+    }
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sceneSession is null, Id:%{public}d", persistentId);
+        isPrepareTerminate = false;
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
+    if (sceneSessionInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sceneSessionInfo is null, Id:%{public}d", persistentId);
+        isPrepareTerminate = false;
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->
+        PrepareTerminateAbilityBySCB(sceneSessionInfo, isPrepareTerminate);
+    TLOGI(WmsLogTag::WMS_MAIN, "Id:%{public}d isPrepareTerminate:%{public}d "
+        "errorCode:%{public}d", persistentId, isPrepareTerminate, errorCode);
     return WSError::WS_OK;
 }
 
@@ -2456,6 +2453,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGE(WmsLogTag::WMS_LIFE, "[WMSSub][WMSSystem] session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
         newSession->SetIsSystemSpecificSession(isSystemCalling);
@@ -4402,6 +4400,21 @@ void SceneSessionManager::SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func)
 void SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func)
 {
     isRootSceneLastFrameLayoutFinishedFunc_ = std::move(func);
+}
+
+void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible)
+{
+    taskScheduler_->PostAsyncTask([this, displayId, visible] {
+        statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
+        TLOGNI(WmsLogTag::WMS_IMMS,
+            "set default visibility on display: %{public}" PRIu64 " visible: %{public}d", displayId, visible);
+    }, __func__);
+}
+
+bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId)
+{
+    return statusBarDefaultVisibilityPerDisplay_.count(displayId) != 0 ?
+           statusBarDefaultVisibilityPerDisplay_[displayId] : true;
 }
 
 void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
@@ -6801,9 +6814,15 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
         snapshot.topAbility.SetBundleName(sessionInfo.bundleName_.c_str());
         snapshot.topAbility.SetModuleName(sessionInfo.moduleName_.c_str());
         snapshot.topAbility.SetAbilityName(sessionInfo.abilityName_.c_str());
-        auto oriSnapshot = sceneSession->Snapshot();
+        float snapShotScale = sceneSession->GetFloatingScale() > 1.0f ? 1.0f : sceneSession->GetFloatingScale();
+        auto oriSnapshot = sceneSession->Snapshot(false, snapShotScale);
         if (oriSnapshot != nullptr) {
+            if (sceneSession->GetFloatingScale() > 1.0f) {
+                oriSnapshot->scale(sceneSession->GetFloatingScale(), sceneSession->GetFloatingScale());
+            }
             snapshot.snapshot = oriSnapshot;
+            TLOGI(WmsLogTag::WMS_SYSTEM, "snapshot WxH = %{public}dx%{public}d",
+                oriSnapshot->GetWidth(), oriSnapshot->GetHeight());
             return WMError::WM_OK;
         }
         return WMError::WM_ERROR_NULLPTR;
@@ -9100,12 +9119,13 @@ void DisplayChangeListener::OnImmersiveStateChange(bool& immersive)
 
 bool SceneSessionManager::GetImmersiveState()
 {
-    auto task = [this] {
+    return taskScheduler_->PostSyncTask([this, where = __func__] {
+        bool isPcOrPadFreeMultiWindowMode = false;
+        IsPcOrPadFreeMultiWindowMode(isPcOrPadFreeMultiWindowMode);
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (auto item = sceneSessionMap_.begin(); item != sceneSessionMap_.end(); ++item) {
-            auto sceneSession = item->second;
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
-                WLOGFE("Session is nullptr");
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is nullptr", where);
                 continue;
             }
             if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
@@ -9118,24 +9138,26 @@ bool SceneSessionManager::GetImmersiveState()
             if (sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
                 continue;
             }
-            auto property = sceneSession->GetSessionProperty();
-            if (property == nullptr) {
-                WLOGFE("Property is nullptr");
+            if (isPcOrPadFreeMultiWindowMode) {
+                if (sceneSession->IsLayoutFullScreen()) {
+                    return true;
+                }
                 continue;
             }
-            auto sysBarProperty = property->GetSystemBarProperty();
+            auto sysBarProperty = sceneSession->GetSessionProperty()->GetSystemBarProperty();
             if (sysBarProperty[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ == false) {
-                WLOGI("GetImmersiveState, window is immersive. id:%{public}d", sceneSession->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s window is immersive. id: %{public}d", where,
+                    sceneSession->GetPersistentId());
                 return true;
             } else {
-                WLOGI("GetImmersiveState, statusBar is enabled. id:%{public}d", sceneSession->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s statusBar is enabled. id: %{public}d", where,
+                    sceneSession->GetPersistentId());
                 break;
             }
         }
-        WLOGI("GetImmersiveState, not immersive");
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s not immersive", where);
         return false;
-    };
-    return taskScheduler_->PostSyncTask(task, "GetImmersiveState");
+    }, __func__);
 }
 
 void SceneSessionManager::NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason,
@@ -9640,7 +9662,8 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                                                 session->GetSessionProperty());
             infos.emplace_back(sptr<WindowVisibilityInfo>::MakeSptr(session->GetWindowId(), session->GetCallingPid(),
                 session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType(), windowStatus, rect,
-                session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_));
+                session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_,
+                session->IsFocused()));
         }
         return WMError::WM_OK;
     };

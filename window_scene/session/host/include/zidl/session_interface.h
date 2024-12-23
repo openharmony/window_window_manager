@@ -48,6 +48,27 @@ public:
 
     // scene session
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+
+    /**
+     * @brief Receive session event from application.
+     *
+     * This function provides the ability for applications to move window.
+     * This interface will take effect after touch down event.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+
+    /**
+     * @brief Enables or disables system window dragging.
+     *
+     * This function provides the ability for system applications to make system window dragable.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
+    virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
+
     virtual WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) { return WSError::WS_OK; }
 
     /**
@@ -133,8 +154,8 @@ public:
      * @brief Update the required params to system.
      *
      * Update the required rect and reason to determine the final size of pip window. Called when start pip,
-     * show pip window, update pip size and pip restore.\n
-     * Make sure the caller's process is same with the process which created pip window.\n
+     * show pip window, update pip size and pip restore.
+     * Make sure the caller's process is same with the process which created pip window.
      *
      * @param rect Indicates the {@link Rect} structure containing required size and position.
      * @param reason Indicates the {@link SizeChangeReason} reason.
@@ -145,8 +166,8 @@ public:
     /**
      * @brief Update the pip control status to pip control panel.
      *
-     * Called when the specified component's status needs to be updated.\n
-     * Make sure the caller's process is same with the process which created pip window.\n
+     * Called when the specified component's status needs to be updated.
+     * Make sure the caller's process is same with the process which created pip window.
      *
      * @param controlType Indicates the {@link WsPiPControlType} component in pip control panel.
      * @param status Indicates the {@link WsPiPControlStatus} status of specified component.
@@ -201,6 +222,14 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for main session modal type changes.
+     *
+     * @param isModal Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifyMainModalTypeChange(bool isModal) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to automatically save the window rect.

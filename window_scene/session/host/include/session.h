@@ -498,6 +498,8 @@ public:
      */
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
+    void SetClientDragEnable(bool dragEnable);
+    std::optional<bool> GetClientDragEnable() const;
 
     /*
      * Starting Window
@@ -509,6 +511,11 @@ public:
     bool GetAppBufferReady() const;
     void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
     bool UseStartingWindowAboveLocked() const;
+
+    /**
+     * Free Multi Window
+     */
+    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -690,7 +697,6 @@ private:
     void HandleDialogBackground();
     WSError HandleSubWindowClick(int32_t action);
     void NotifyPointerEventToRs(int32_t pointAction);
-    void SetWindowSessionProperty(const sptr<WindowSessionProperty>& property);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
@@ -702,6 +708,12 @@ private:
     bool ShouldCreateDetectTaskInRecent(bool newShowRecent, bool oldShowRecent, bool isAttach) const;
     void CreateDetectStateTask(bool isAttach, WindowMode windowMode);
     int32_t GetRotateAnimationDuration();
+
+    /*
+     * Window Property
+     */
+    void InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& property);
+    void InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property);
 
     /*
      * Window Layout
@@ -782,6 +794,11 @@ private:
     bool enableRemoveStartingWindow_ { false };
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
+
+    /*
+     * Window Layout
+     */
+    std::optional<bool> clientDragEnable_;
 };
 } // namespace OHOS::Rosen
 
