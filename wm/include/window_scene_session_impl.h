@@ -45,6 +45,7 @@ public:
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
     bool IsStartMoving() override;
+    WmErrorCode StartMoveSystemWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
@@ -172,6 +173,12 @@ public:
     WMError SetGestureBackEnabled(bool enable) override;
     WMError GetGestureBackEnabled(bool& enable) override;
 
+	/*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -254,6 +261,11 @@ private:
      * Gesture Back
      */
     bool gestureBackEnabled_ = true;
+
+    /*
+     * Window Property
+     */
+    void InitSystemSessionDragEnable();
 
     /**
      * Sub Window
