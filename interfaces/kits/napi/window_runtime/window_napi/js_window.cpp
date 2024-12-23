@@ -3785,7 +3785,6 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
         TLOGNE(WmsLogTag::WMS_HIERARCHY, "not allowed since window is not main window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3794,7 +3793,6 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             "Argc is invalid: %{public}zu. Failed to convert parameter to topmost", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     bool isMainWindowTopmost = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isMainWindowTopmost)) {
         TLOGNE(WmsLogTag::WMS_HIERARCHY, "Failed to convert parameter to isMainWindowTopmost");
