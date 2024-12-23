@@ -345,6 +345,9 @@ public:
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void UnregisterCreateSubSessionListener(int32_t persistentId);
 
+    /*
+     * Window Immersive
+     */
     WSError GetIsLayoutFullScreen(bool& isLayoutFullScreen);
     WSError UpdateSessionAvoidAreaListener(int32_t& persistentId, bool haveListener) override;
     void ClearDisplayStatusBarTemporarilyFlags();
