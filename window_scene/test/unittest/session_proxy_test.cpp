@@ -816,6 +816,29 @@ HWTEST_F(SessionProxyTest, DrawingCompleted, Function | SmallTest | Level2)
     ASSERT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
     GTEST_LOG_(INFO) << "SessionProxyTest: DrawingCompleted end";
 }
+
+/**
+ * @tc.name: OnSetSupportWindowModes
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnSetSupportWindowModes, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnSetSupportWindowModes start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes = {
+        AppExecFwk::SupportWindowMode::FULLSCREEN,
+        AppExecFwk::SupportWindowMode::SPLIT,
+        AppExecFwk::SupportWindowMode::FLOATING
+    };
+    WSError res = sProxy->OnSetSupportWindowModes(supportWindowModes);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnSetSupportWindowModes end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
