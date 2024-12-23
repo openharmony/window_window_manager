@@ -716,7 +716,6 @@ HWTEST_F(WindowSessionTest3, Snapshot, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallTest | Level2)
 {
-    ASSERT_NE(session_, nullptr);
     session_->SetSessionState(SessionState::STATE_CONNECT);
     session_->SetSessionStateChangeNotifyManagerListener(nullptr);
 
@@ -725,10 +724,10 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallT
 
     int resultValue = 0;
     NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetBufferAvailableChangeListener(func);
-    EXPECT_EQ(resultValue, 1);
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -1328,25 +1327,6 @@ HWTEST_F(WindowSessionTest3, GetScreenId, Function | SmallTest | Level2)
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionTest3, SetFreezeImmediately, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    struct RSSurfaceNodeConfig config;
-    session_->surfaceNode_ = RSSurfaceNode::Create(config);
-    ASSERT_NE(session_->surfaceNode_, nullptr);
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
-    session_->surfaceNode_->bufferAvailable_ = true;
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, true));
-    session_->surfaceNode_ = nullptr;
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
-}
-
-/**
- * @tc.name: SetFreezeImmediately02
- * @tc.desc: SetFreezeImmediately Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, SetFreezeImmediately02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     struct RSSurfaceNodeConfig config;
