@@ -1457,12 +1457,9 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     sceneSession->moveDragController_->isStartDrag_ = true;
     sceneSession->moveDragController_->hasPointDown_ = true;
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE), WSError::WS_OK);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_END_MOVE), WSError::WS_OK);
 }
