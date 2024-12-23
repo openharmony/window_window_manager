@@ -128,6 +128,7 @@ public:
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value IsFocused(napi_env env, napi_callback_info info);
     static napi_value RequestFocus(napi_env env, napi_callback_info info);
+    static napi_value StartMoving(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -156,6 +157,7 @@ public:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
+    static napi_value SetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSubWindowModal(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
@@ -166,6 +168,7 @@ public:
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value EnableDrag(napi_env env, napi_callback_info info);
 
     /**
      * Sub Window
@@ -242,6 +245,7 @@ private:
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorVisible(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetSubWindowModal(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
@@ -253,6 +257,7 @@ private:
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
+    napi_value OnEnableDrag(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -310,6 +315,7 @@ private:
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
     napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
+    napi_value OnStartMoving(napi_env env, napi_callback_info info);
 
     /**
      * Sub Window

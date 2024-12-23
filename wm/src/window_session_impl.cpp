@@ -80,6 +80,27 @@ Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orienta
     config.SetTransformHint(transformHint);
     return config;
 }
+
+Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
+{
+    auto contentInfoType = Ace::ContentInfoType::NONE;
+    switch (type) {
+        case BackupAndRestoreType::CONTINUATION:
+            contentInfoType = Ace::ContentInfoType::CONTINUATION;
+            break;
+        case BackupAndRestoreType::APP_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::APP_RECOVERY;
+            break;
+        case BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY:
+            contentInfoType = Ace::ContentInfoType::RESOURCESCHEDULE_RECOVERY;
+            break;
+        case BackupAndRestoreType::NONE:
+            [[fallthrough]];
+        default:
+            break;
+    }
+    return contentInfoType;
+}
 }
 
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
@@ -1190,51 +1211,67 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
 }
 
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     return SetUIContentInner(contentInfo, env, storage,
-        isdistributed ? WindowSetUIContentType::DISTRIBUTE : WindowSetUIContentType::DEFAULT, ability);
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentByName(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_NAME,
+        BackupAndRestoreType::NONE, ability);
 }
 
 WMError WindowSessionImpl::SetUIContentByAbc(
     const std::string& contentInfo, napi_env env, napi_value storage, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC, ability);
+    return SetUIContentInner(contentInfo, env, storage, WindowSetUIContentType::BY_ABC,
+        BackupAndRestoreType::NONE, ability);
+}
+
+void WindowSessionImpl::DestroyExistUIContent()
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent) {
+        uiContent->Destroy();
+    }
 }
 
 WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType type, AppExecFwk::Ability* ability, OHOS::Ace::UIContentErrorCode& aceRet)
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+    OHOS::Ace::UIContentErrorCode& aceRet)
 {
-    {
-        std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-        if (uiContent) {
-            uiContent->Destroy();
-        }
-    }
+    DestroyExistUIContent();
     std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
         Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "fail to NapiSetUIContent id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    switch (type) {
+    switch (setUIContentType) {
         default:
-        case WindowSetUIContentType::DEFAULT:
+        case WindowSetUIContentType::DEFAULT: {
             if (isUIExtensionAbilityProcess_ && property_->GetExtensionFlag() == true) {
                 // subWindow created by UIExtensionAbility
                 uiContent->SetUIExtensionSubWindow(true);
                 uiContent->SetUIExtensionAbilityProcess(true);
+            } else {
+                auto routerStack = GetRestoredRouterStack();
+                auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
+                if (!routerStack.empty() &&
+                    uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
+                    TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
+                    break;
+                }
             }
             aceRet = uiContent->Initialize(this, contentInfo, storage);
             break;
-        case WindowSetUIContentType::DISTRIBUTE:
-            aceRet = uiContent->Restore(this, contentInfo, storage);
+        }
+        case WindowSetUIContentType::RESTORE:
+            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -1285,7 +1322,7 @@ void WindowSessionImpl::RegisterFrameLayoutCallback()
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType type, AppExecFwk::Ability* ability)
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "NapiSetUIContent: %{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (IsWindowSessionInvalid()) {
@@ -1294,7 +1331,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
     }
     NotifySetUIContentComplete();
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, type, ability, aceRet);
+    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet);
     if (initUIContentRet != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
@@ -1576,7 +1613,23 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 /** @note @window.hierarchy */
 WMError WindowSessionImpl::SetRaiseByClickEnabled(bool raiseEnabled)
 {
-    WLOGFD("set raiseEnabled");
+    WLOGFD("%{public}d", raiseEnabled);
+    auto parentId = GetParentId();
+    if (parentId == INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window id: %{public}d Parent id is invalid!",
+              GetPersistentId());
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window id: %{public}d Must be app sub window!",
+              GetPersistentId());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Window id: %{public}d The sub window must be shown!",
+              GetPersistentId());
+        return WMError::WM_DO_NOTHING;
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1706,15 +1759,31 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
     return property_->GetRequestedOrientation();
 }
 
-std::string WindowSessionImpl::GetContentInfo()
+std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
 {
     WLOGFD("GetContentInfo");
+    if (type == BackupAndRestoreType::NONE) {
+        return "";
+    }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}d", GetPersistentId());
         return "";
     }
-    return uiContent->GetContentInfo();
+    return uiContent->GetContentInfo(GetAceContentInfoType(type));
+}
+
+WMError WindowSessionImpl::SetRestoredRouterStack(const std::string& routerStack)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "Set restored router stack.");
+    restoredRouterStack_ = routerStack;
+    return WMError::WM_OK;
+}
+
+std::string WindowSessionImpl::GetRestoredRouterStack()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "Get restored router stack.");
+    return std::move(restoredRouterStack_);
 }
 
 Ace::UIContent* WindowSessionImpl::GetUIContent() const
@@ -1798,6 +1867,25 @@ WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListen
     return UnregisterListener(displayMoveListeners_[GetPersistentId()], listener);
 }
 
+/**
+ * Currently only supports system windows.
+ */
+WMError WindowSessionImpl::EnableDrag(bool enableDrag)
+{
+    bool isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!isPC && !IsFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    property_->SetDragEnabled(enableDrag);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WMError errorCode = hostSession->SetSystemWindowEnableDrag(enableDrag);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, enableDrag:%{public}d, errcode:%{public}d",
+        GetPersistentId(), enableDrag, static_cast<int>(errorCode));
+    return static_cast<WMError>(errorCode);
+}
+
 WMError WindowSessionImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
     WLOGFD("Start register");
@@ -1862,6 +1950,29 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::SetWindowTitleMoveEnabled(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType()) && !WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "called by invalid window type, type:%{public}d", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uicontent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uiContent->EnableContainerModalGesture(enable);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "enable:%{public}d end", enable);
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modalityType)
 {
     if (IsWindowSessionInvalid()) {
@@ -1894,6 +2005,31 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
             SubWindowModalType::TYPE_APPLICATION_MODALITY;
     }
     hostSession->NotifySubModalTypeChange(subWindowModalType);
+    return modalRet;
+}
+
+WMError WindowSessionImpl::SetWindowModal(bool isModal)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "called by invalid window type, type:%{public}d", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    WMError modalRet = isModal ?
+        AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL) :
+        RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    if (modalRet != WMError::WM_OK) {
+        return modalRet;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->NotifyMainModalTypeChange(isModal);
     return modalRet;
 }
 

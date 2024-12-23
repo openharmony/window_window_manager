@@ -329,9 +329,9 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
-    WINDOW_FLAG_HANDWRITING = 1 << 7,
-    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
     WINDOW_FLAG_END = 1 << 9,
 };
 
@@ -383,8 +383,14 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
+    DRAG_MOVE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(WindowSizeChangeReason reason)
+{
+    return reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE;
+}
 
 /**
  * @brief Enumerates layout mode of window.
@@ -437,9 +443,19 @@ enum class WindowGravity : uint32_t {
  */
 enum class WindowSetUIContentType: uint32_t {
     DEFAULT,
-    DISTRIBUTE,
+    RESTORE,
     BY_NAME,
     BY_ABC,
+};
+
+/**
+ * @brief Enumerates restore type.
+ */
+enum class BackupAndRestoreType : int32_t {
+    NONE = 0,                       // no backup and restore
+    CONTINUATION = 1,               // distribute
+    APP_RECOVERY = 2,               // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
 
 /**
@@ -1076,10 +1092,10 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = UINT32_MAX;
-    uint32_t maxHeight_ = UINT32_MAX;
-    uint32_t minWidth_ = 0;
-    uint32_t minHeight_ = 0;
+    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX); // The width and height are no larger than INT32_MAX.
+    uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
+    uint32_t minWidth_ = 1; // The width and height of the window cannot be less than or equal to 0.
+    uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
     float vpRatio_ = 1.0f;

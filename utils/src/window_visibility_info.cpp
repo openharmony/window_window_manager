@@ -28,7 +28,7 @@ bool WindowVisibilityInfo::Marshalling(Parcel& parcel) const
            parcel.WriteUint32(static_cast<uint32_t>(windowType_)) &&
            parcel.WriteUint32(static_cast<uint32_t>(windowStatus_)) && parcel.WriteInt32(rect_.posX_) &&
            parcel.WriteInt32(rect_.posY_) && parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
-           parcel.WriteString(bundleName_) && parcel.WriteString(abilityName_);
+           parcel.WriteString(bundleName_) && parcel.WriteString(abilityName_) && parcel.WriteBool(isFocused_);
 }
 
 WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel& parcel)
@@ -52,6 +52,7 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel& parcel)
     windowVisibilityInfo->rect_ = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     windowVisibilityInfo->bundleName_ = parcel.ReadString();
     windowVisibilityInfo->abilityName_ = parcel.ReadString();
+    windowVisibilityInfo->isFocused_ = parcel.ReadBool();
     return windowVisibilityInfo;
 }
 } // namespace OHOS::Rosen
