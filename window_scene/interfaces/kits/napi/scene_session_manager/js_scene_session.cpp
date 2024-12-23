@@ -1294,7 +1294,7 @@ void JsSceneSession::ProcessMainWindowTopmostChangeRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGNE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
     const char* const where = __func__;
