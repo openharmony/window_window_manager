@@ -1111,7 +1111,7 @@ int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& r
 {
     bool enableDrag = false;
     if (!data.ReadBool(enableDrag)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read enableDrag failed");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);

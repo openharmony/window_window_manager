@@ -6170,14 +6170,14 @@ static NapiAsyncTask::CompleteCallback GetEnableDragCompleteCallback(
     NapiAsyncTask::CompleteCallback complete = [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
             task.Reject(env,
-                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Set Enable Drag failed."));
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Set enable drag failed."));
             return;
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "OnEnableDrag: ret: %{public}u", *errCodePtr);
         if (*errCodePtr == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Set Enable Drag failed."));
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Set enable drag failed."));
         }
     };
     return complete;
@@ -6186,7 +6186,7 @@ static NapiAsyncTask::CompleteCallback GetEnableDragCompleteCallback(
 napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argv[INDEX_ZERO] == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
@@ -7047,26 +7047,26 @@ napi_value JsWindow::OnRequestFocus(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken is nullptr.");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const funcName = __func__;
     NapiAsyncTask::ExecuteCallback execute = [this, weakToken = wptr<Window>(windowToken_), err, funcName] {
         if (err == nullptr) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: wm error code is null.", funcName);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: wm error code is null.", funcName);
             return;
         }
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: This window is nullptr.", funcName);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: This window is nullptr.", funcName);
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
             !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
             !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s: This is not valid window.", funcName);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: This is not valid window.", funcName);
             *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }

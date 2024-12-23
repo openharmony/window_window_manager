@@ -71,7 +71,7 @@ public:
     /**
      * @brief Enables or disables system window dragging.
      *
-     * This function provides the ability for system appilication to make system window dragable.
+     * This function provides the ability for system application to make system window dragable.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      * @permission Make sure the caller has system permission.

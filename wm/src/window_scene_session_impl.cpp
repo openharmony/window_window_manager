@@ -2569,12 +2569,12 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
     auto isPC = windowSystemConfig_.IsPcWindow();
     if (!(isPC || IsFreeMultiWindowMode())) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "The device is not supported");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (auto hostSession = GetHostSession()) {
         WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
-        TLOGD(WmsLogTag::WMS_SYSTEM, "id:%{public}d, errorCode:%{public}d",
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errorCode:%{public}d",
             GetPersistentId(), static_cast<int>(errorCode));
         switch (errorCode) {
             case WSError::WS_ERROR_REPEAT_OPERATION: {
@@ -2588,7 +2588,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
             }
         }
     } else {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "hostSession is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is nullptr");
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
 }

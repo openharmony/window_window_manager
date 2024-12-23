@@ -1479,7 +1479,7 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
     info.bundleName_ = "SyncSessionEvent";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
