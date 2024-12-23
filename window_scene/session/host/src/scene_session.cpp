@@ -3509,7 +3509,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         uint32_t accessTokenId = property->GetAccessTokenId();
         if (!SessionPermission::VerifyPermissionByCallerToken(accessTokenId,
             PermissionConstants::PERMISSION_MAIN_WINDOW_TOPMOST)) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "The caller has no permission granted.");
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "The caller has no permission granted.");
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
