@@ -16,6 +16,7 @@
 #include "js_scene_utils.h"
 #include "js_scene_session.h"
 
+#include "pixel_map_napi.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
@@ -350,6 +351,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetIsActivatedAfterScreenLocked);
     BindNativeFunction(env, objValue, "setUseStartingWindowAboveLocked", moduleName,
         JsSceneSession::SetUseStartingWindowAboveLocked);
+    BindNativeFunction(env, objValue, "setFreezeImmediately", moduleName,
+        JsSceneSession::SetFreezeImmediately);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2008,6 +2011,13 @@ napi_value JsSceneSession::SetUseStartingWindowAboveLocked(napi_env env, napi_ca
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetUseStartingWindowAboveLocked(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetFreezeImmediately(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetFreezeImmediately(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -4956,5 +4966,57 @@ void JsSceneSession::OnUpdateAppUseControl(ControlAppType type, bool isNeedContr
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
+napi_value JsSceneSession::OnSetFreezeImmediately(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    double scaleValue;
+    if (!ConvertFromJsValue(env, argv[0], scaleValue)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to scaleValue");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
+        static_cast<float>(scaleValue) : 0.0f;
+    bool isFreeze = false;
+    if (!ConvertFromJsValue(env, argv[1], isFreeze)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to isFreeze");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    std::shared_ptr<Media::PixelMap> pixelPtr = session->SetFreezeImmediately(scaleParam, isFreeze);
+    if (isFreeze) {
+        if (pixelPtr == nullptr) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to create pixelPtr");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                "System is abnormal"));
+            return NapiGetUndefined(env);
+        }
+        napi_value pixelMapObj = Media::PixelMapNapi::CreatePixelMap(env, pixelPtr);
+        if (pixelMapObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to create pixel map object");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                "System is abnormal"));
+            return NapiGetUndefined(env);
+        }
+        return pixelMapObj;
+    }
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
