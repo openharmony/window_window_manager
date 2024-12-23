@@ -602,7 +602,9 @@ public:
                decorButtonStyle.closeButtonRightMargin >= MIN_CLOSE_BUTTON_RIGHT_MARGIN &&
                decorButtonStyle.closeButtonRightMargin <= MAX_CLOSE_BUTTON_RIGHT_MARGIN &&
                decorButtonStyle.spacingBetweenButtons >= MIN_SPACING_BETWEEN_BUTTONS &&
-               decorButtonStyle.spacingBetweenButtons <= MAX_SPACING_BETWEEN_BUTTONS;
+               decorButtonStyle.spacingBetweenButtons <= MAX_SPACING_BETWEEN_BUTTONS &&
+               decorButtonStyle.colorMode >= MIN_COLOR_MODE &&
+               decorButtonStyle.colorMode <= MAX_COLOR_MODE;
     }
 
 private:

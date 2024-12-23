@@ -580,22 +580,27 @@ napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButto
 bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
 {
     int32_t colorMode;
+    bool emptyParam = true;
     if (ParseJsValue(jsObject, env, "colorMode", colorMode)) {
         style.colorMode = colorMode;
+        emptyParam = false;
     }
     uint32_t buttonBackgroundSize;
     if (ParseJsValue(jsObject, env, "buttonBackgroundSize", buttonBackgroundSize)) {
         style.buttonBackgroundSize = buttonBackgroundSize;
+        emptyParam = false;
     }
     uint32_t spacingBetweenButtons;
     if (ParseJsValue(jsObject, env, "spacingBetweenButtons", spacingBetweenButtons)) {
         style.spacingBetweenButtons = spacingBetweenButtons;
+        emptyParam = false;
     }
     uint32_t closeButtonRightMargin;
     if (ParseJsValue(jsObject, env, "closeButtonRightMargin", closeButtonRightMargin)) {
         style.closeButtonRightMargin = closeButtonRightMargin;
+        emptyParam = false;
     }
-    return true;
+    return !emptyParam;
 }
 
 napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
