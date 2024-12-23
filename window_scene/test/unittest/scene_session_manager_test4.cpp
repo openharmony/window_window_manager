@@ -550,6 +550,31 @@ HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest 
 }
 
 /**
+ * @tc.name: GetImmersiveState01
+ * @tc.desc: GetImmersiveState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetImmersiveState01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    SessionInfo info;
+    info.abilityName_ = "GetImmersiveState01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+
+    sceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;
+    sceneSession->state_ = SessionState::STATE_ACTIVE;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(false, ssm_->GetImmersiveState());
+    sceneSession->SetIsLayoutFullScreen(true);
+    EXPECT_EQ(true, ssm_->GetImmersiveState());
+}
+
+/**
  * @tc.name: GetImmersiveState02
  * @tc.desc: GetImmersiveState
  * @tc.type: FUNC
@@ -559,7 +584,7 @@ HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | L
     ASSERT_NE(nullptr, ssm_);
 
     SessionInfo info;
-    info.abilityName_ = "SetBrightness";
+    info.abilityName_ = "GetImmersiveState02";
     sptr<SceneSession> sceneSession01;
     sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_EQ(sceneSession01, nullptr);
@@ -567,10 +592,7 @@ HWTEST_F(SceneSessionManagerTest4, GetImmersiveState02, Function | SmallTest | L
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
 
-    sceneSession02->property_ = nullptr;
     EXPECT_EQ(false, ssm_->GetImmersiveState());
-    sceneSession02->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(sceneSession02->property_, nullptr);
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
     EXPECT_EQ(false, ssm_->GetImmersiveState());
     sceneSession02->property_->type_ = WindowType::APP_MAIN_WINDOW_BASE;

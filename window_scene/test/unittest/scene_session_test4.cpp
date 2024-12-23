@@ -705,6 +705,37 @@ HWTEST_F(SceneSessionTest4, SetGestureBackEnabled, Function | SmallTest | Level2
     EXPECT_EQ(WMError::WM_OK, sceneSession->SetGestureBackEnabled(true));
     EXPECT_EQ(true, sceneSession->GetGestureBackEnabled());
 }
+
+/**
+ * @tc.name: SetIsLayoutFullScreen
+ * @tc.desc: SetIsLayoutFullScreen Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetIsLayoutFullScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetIsLayoutFullScreen";
+    info.bundleName_ = "SetIsLayoutFullScreen";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->SetIsLayoutFullScreen(true);
+    EXPECT_EQ(session->IsLayoutFullScreen(), true);
+}
+
+/**
+ * @tc.name: IsLayoutFullScreen
+ * @tc.desc: IsLayoutFullScreen Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsLayoutFullScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsLayoutFullScreen";
+    info.bundleName_ = "IsLayoutFullScreen";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    EXPECT_EQ(session->IsLayoutFullScreen(), false);
+}
 }
 }
 }
