@@ -37,6 +37,26 @@ float ScreenProperty::GetRotation() const
     return rotation_;
 }
 
+void ScreenProperty::SetPhysicalRotation(float rotation)
+{
+    physicalRotation_ = rotation;
+}
+
+float ScreenProperty::GetPhysicalRotation() const
+{
+    return physicalRotation_;
+}
+
+void ScreenProperty::SetScreenComponentRotation(float rotation)
+{
+    screenComponentRotation_ = rotation;
+}
+
+float ScreenProperty::GetScreenComponentRotation() const
+{
+    return screenComponentRotation_;
+}
+
 void ScreenProperty::SetBounds(const RRect& bounds)
 {
     bounds_ = bounds;
@@ -260,6 +280,16 @@ Rotation ScreenProperty::GetScreenRotation() const
     return screenRotation_;
 }
 
+void ScreenProperty::UpdateDeviceRotation(Rotation rotation)
+{
+    deviceRotation_ = rotation;
+}
+
+Rotation ScreenProperty::GetDeviceRotation() const
+{
+    return deviceRotation_;
+}
+
 void ScreenProperty::SetOrientation(Orientation orientation)
 {
     orientation_ = orientation;
@@ -288,6 +318,16 @@ void ScreenProperty::SetDisplayOrientation(DisplayOrientation displayOrientation
 DisplayOrientation ScreenProperty::GetDisplayOrientation() const
 {
     return displayOrientation_;
+}
+
+void ScreenProperty::SetDeviceOrientation(DisplayOrientation displayOrientation)
+{
+    deviceOrientation_ = displayOrientation;
+}
+
+DisplayOrientation ScreenProperty::GetDeviceOrientation() const
+{
+    return deviceOrientation_;
 }
 
 void ScreenProperty::UpdateXDpi()
@@ -325,8 +365,10 @@ void ScreenProperty::CalcDefaultDisplayOrientation()
 {
     if (bounds_.rect_.width_ > bounds_.rect_.height_) {
         displayOrientation_ = DisplayOrientation::LANDSCAPE;
+        deviceOrientation_ = DisplayOrientation::LANDSCAPE;
     } else {
         displayOrientation_ = DisplayOrientation::PORTRAIT;
+        deviceOrientation_ = DisplayOrientation::PORTRAIT;
     }
 }
 

@@ -426,11 +426,14 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
         TLOGE(WmsLogTag::DMS, "[NAPI]Failed to get bounds from js object");
         return NapiGetUndefined(env);
     }
-    int rotation;
-    if (!ConvertFromJsValue(env, argv[2], rotation)) { // 2: the 3rd argv
-        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to rotation");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
+    ScreenDirectionInfo directionInfo;
+    napi_value nativeObject = argv[2];
+    if (nativeObject == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to ScreenDirectionInfo,the param is null");
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertScreenDirectionInfoFromJs(env, nativeObject, directionInfo)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to ScreenDirectionInfo");
         return NapiGetUndefined(env);
     }
     ScreenPropertyChangeType type = ScreenPropertyChangeType::UNSPECIFIED;
@@ -443,8 +446,7 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
             return NapiGetUndefined(env);
         }
     }
-    ScreenSessionManagerClient::GetInstance().UpdateScreenRotationProperty(screenId, bounds, rotation,
-        type);
+    ScreenSessionManagerClient::GetInstance().UpdateScreenRotationProperty(screenId, bounds, directionInfo, type);
     return NapiGetUndefined(env);
 }
 
