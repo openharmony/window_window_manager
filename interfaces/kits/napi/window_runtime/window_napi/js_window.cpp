@@ -991,7 +991,7 @@ napi_value JsWindow::RequestFocus(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::StartMoving(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnStartMoving(env, info) : nullptr;
 }
@@ -6145,13 +6145,51 @@ bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits
     return true;
 }
 
+static NapiAsyncTask::ExecuteCallback GetEnableDragExecuteCallback(bool enableDrag,
+    const wptr<Window>& weakToken, const std::shared_ptr<WmErrorCode>& errCodePtr)
+{
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, enableDrag, errCodePtr] {
+        if (errCodePtr == nullptr) {
+            return;
+        }
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->EnableDrag(enableDrag));
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] set enable drag end",
+            window->GetWindowId(), window->GetWindowName().c_str());
+    };
+    return execute;
+}
+
+static NapiAsyncTask::CompleteCallback GetEnableDragCompleteCallback(
+    const std::shared_ptr<WmErrorCode>& errCodePtr)
+{
+    NapiAsyncTask::CompleteCallback complete = [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (errCodePtr == nullptr) {
+            task.Reject(env,
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Set enable drag failed."));
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "OnEnableDrag: ret: %{public}u", *errCodePtr);
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Set enable drag failed."));
+        }
+    };
+    return complete;
+}
+
 napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+    if (argc < 1 || argv[INDEX_ZERO] == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
@@ -6167,16 +6205,14 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
-    napi_value nativeVal = argv[0];
-    if (nativeVal == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed, nativeVal is null");
+    bool enableDrag = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enableDrag)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter from jsValue");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool enableDrag = false;
-    napi_get_value_bool(env, nativeVal, &enableDrag);
-    wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = GetEnableDragExecuteCallback(enableDrag, weakToken, errCodePtr);
+    NapiAsyncTask::ExecuteCallback execute =
+        GetEnableDragExecuteCallback(enableDrag, wptr<Window>(windowToken_), errCodePtr);
     NapiAsyncTask::CompleteCallback complete = GetEnableDragCompleteCallback(errCodePtr);
 
     napi_value result = nullptr;
@@ -6185,58 +6221,18 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     return result;
 }
 
-NapiAsyncTask::ExecuteCallback JsWindow::GetEnableDragExecuteCallback(bool enableDrag, const wptr<Window>& weakToken,
-    std::shared_ptr<WmErrorCode>& errCodePtr) const
-{
-    NapiAsyncTask::ExecuteCallback execute =
-        [weakToken, enableDrag, errCodePtr] {
-            if (errCodePtr == nullptr) {
-                return;
-            }
-            auto window = weakToken.promote();
-            if (window == nullptr) {
-                *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-                return;
-            }
-            *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->EnableDrag(enableDrag));
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] set enable drag end",
-                window->GetWindowId(), window->GetWindowName().c_str());
-        };
-    return execute;
-}
-
-NapiAsyncTask::CompleteCallback JsWindow::GetEnableDragCompleteCallback(
-    const std::shared_ptr<WmErrorCode>& errCodePtr) const
-{
-    NapiAsyncTask::CompleteCallback complete =
-        [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (errCodePtr == nullptr) {
-                task.Reject(env,
-                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Set Enable Drag failed."));
-                return;
-            }
-            TLOGNI(WmsLogTag::WMS_LAYOUT, "call enabledrag ret: %{public}u", *errCodePtr);
-            if (*errCodePtr == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Set Enable Drag failed."));
-            }
-        };
-    return complete;
-}
-
 /** @note @window.layout */
 napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1 || argv[0] == nullptr) {
+    if (argc < 1 || argv[INDEX_ZERO] == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WindowLimits windowLimits;
-    if (!ParseWindowLimits(env, argv[0], windowLimits)) {
+    if (!ParseWindowLimits(env, argv[INDEX_ZERO], windowLimits)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to windowLimits");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -7051,26 +7047,26 @@ napi_value JsWindow::OnRequestFocus(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "windowToken_ is nullptr.");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [this, weakToken, err] {
+    const char* const funcName = __func__;
+    NapiAsyncTask::ExecuteCallback execute = [this, weakToken = wptr<Window>(windowToken_), err, funcName] {
         if (err == nullptr) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "wm error code is null.");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: wm error code is null.", funcName);
             return;
         }
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "This window is nullptr.");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: This window is nullptr.", funcName);
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
             !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
             !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "This is not valid window.");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: This is not valid window.", funcName);
             *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }
