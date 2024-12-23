@@ -205,10 +205,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     }
     WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
         const std::vector<AppUseControlInfo>& controlList) override { return WSError::WS_OK; }
-    WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) override
-    {
-        return WMError::WM_OK;
-    }
+    WMError MinimizeMainSession(const std::string& bundleName,
+        int32_t appIndex, int32_t userId) override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
