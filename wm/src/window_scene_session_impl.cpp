@@ -251,9 +251,8 @@ bool WindowSceneSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     if (!windowSystemConfig_.IsPadWindow()) {
         return windowSystemConfig_.IsPcWindow();
     }
-    bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetIsUIExtFirstSubWindow();
-    if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
-        return IsFreeMultiWindowMode();
+    if (IsFreeMultiWindowMode()) {
+        return true;
     }
     sptr<WindowSessionImpl> parentWindow = nullptr;
     {
