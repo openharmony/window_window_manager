@@ -275,7 +275,7 @@ public:
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual void StartMove() = 0;
-    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_OK; }
+    virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }
     virtual WMError Close() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
     virtual bool IsSupportWideGamut() = 0;
@@ -327,6 +327,7 @@ public:
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) = 0;
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
         bool isCloseVisible)
     {

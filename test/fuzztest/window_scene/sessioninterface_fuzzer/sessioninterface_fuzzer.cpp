@@ -112,7 +112,7 @@ void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYSTEM_SESSION_EVENT),
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYNC_SESSION_EVENT),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT),
         sendData, reply, option);
