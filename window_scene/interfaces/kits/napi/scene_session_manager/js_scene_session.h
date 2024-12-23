@@ -82,6 +82,7 @@ enum class ListenerFuncType : uint32_t {
     SET_WINDOW_RECT_AUTO_SAVE_CB,
     UPDATE_APP_USE_CONTROL_CB,
     SESSION_DISPLAY_ID_CHANGE_CB,
+    SET_SUPPORT_WINDOW_MODES_CB,
 };
 
 class SceneSession;
@@ -295,6 +296,11 @@ private:
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
     void RegisterUpdateAppUseControlCallback();
+
+    /*
+     * PC Window Layout
+     */
+    void ProcessSetSupportWindowModesRegister();
     
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -345,6 +351,11 @@ private:
     void NotifyPrivacyModeChange(bool isPrivacyMode);
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+
+    /*
+     * PC Window Layout
+     */
+    void OnSetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

@@ -307,6 +307,17 @@ public:
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
+
+    /**
+     * @brief Callback for setting the window support modes.
+     *
+     * @param supportWindowModes Indicates the {@link AppExecFwk::SupportWindowMode}.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 
