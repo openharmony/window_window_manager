@@ -3498,4 +3498,34 @@ std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
 {
     return handler_;
 }
+
+std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam, bool isFreeze) const
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "GetSnapshotWithFreeze[%d][%s]",
+        persistentId_, sessionInfo_.bundleName_.c_str());
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+        return nullptr;
+    }
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    auto scaleValue = (scaleParam < 0.0f || scaleParam < std::numeric_limits<float>::min()) ?
+        snapshotScale_ : scaleParam;
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleValue,
+        .scaleY = scaleValue,
+        .useDma = true,
+        .useCurWindow = true,
+    };
+    bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config);
+    if (!ret) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed");
+        return nullptr;
+    }
+    if (isFreeze) {
+        auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+        TLOGI(WmsLogTag::WMS_PATTERN, "get result: %{public}d, id: %{public}d", pixelMap != nullptr, persistentId_);
+        return pixelMap;
+    }
+    return nullptr;
+}
 } // namespace OHOS::Rosen
