@@ -520,6 +520,7 @@ private:
     KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
+    std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 
     /*
      * Window Layout
@@ -527,7 +528,6 @@ private:
     std::atomic_bool windowSizeChanged_ = true;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
-    std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
 };
