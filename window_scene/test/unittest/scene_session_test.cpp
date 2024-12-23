@@ -2040,48 +2040,15 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
 
     WSRect rect = {1, 1, 1, 1};
-    WSRect rect2 = {1, 1, 2, 1};
+    WSRect rect2 = {2, 2, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+    sceneSession->moveDragController_->moveDragProperty_.originalRect_ = rect;
+    sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::HIDE);
+    WSRect rect3 = {1, 1, 2, 1};
+    ASSERT_EQ(rect2, rect3);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect = {1, 1, 2000, 1};
-    rect2 = {1, 1, 2, 1};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect = {1, 1, 2000, 1};
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect = {1, 1, 500, 1};
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect = {1, 1, 500, 1};
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
-
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::DRAG_MOVE);
+    sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
+    ASSERT_EQ(rect2, rect3);
 }
 
 /**
