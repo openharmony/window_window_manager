@@ -30,6 +30,7 @@ public:
     static void SetReadUint32ErrorFlag(bool flag);
     static void SetReadInt32ErrorFlag(bool flag);
     static void SetReadInt64ErrorFlag(bool flag);
+    static void SetReadStringVectorErrorFlag(bool flag);
 };
 }
 }

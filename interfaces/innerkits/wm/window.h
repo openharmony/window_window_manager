@@ -2408,6 +2408,14 @@ public:
     virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
 
     /**
+     * @brief Notify extension asynchronously
+     *
+     * @param notifyEvent event type
+     * @return void
+     */
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
+
+    /**
      * @brief Get IsUIExtensionFlag of window.
      *
      * @return true - is UIExtension window, flase - is not UIEXtension window.
