@@ -269,7 +269,7 @@ public:
      */
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
-    /**
+    /*
      * Window Property
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
