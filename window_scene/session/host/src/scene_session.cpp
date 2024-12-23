@@ -120,13 +120,13 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
         }
+        session->RetrieveStatusBarDefaultVisibility();
         auto ret = session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
             return ret;
         }
         session->NotifyPropertyWhenConnect();
-        session->isStatusBarVisible_ = true;
         return ret;
     };
     return PostSyncTask(task, "ConnectInner");
@@ -4682,6 +4682,14 @@ void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
 bool SceneSession::GetIsDisplayStatusBarTemporarily() const
 {
     return isDisplayStatusBarTemporarily_.load();
+}
+
+void SceneSession::RetrieveStatusBarDefaultVisibility()
+{
+    if (specificCallback_ && specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_) {
+        isStatusBarVisible_ = specificCallback_->onGetStatusBarDefaultVisibilityByDisplayId_(
+            GetSessionProperty()->GetDisplayId());
+    }
 }
 
 bool SceneSession::IsDeviceWakeupByApplication() const
