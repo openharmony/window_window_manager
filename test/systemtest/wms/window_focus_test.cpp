@@ -584,12 +584,12 @@ HWTEST_F(WindowFocusTest, WindowShowWithoutFocusTest, Function | MediumTest | Le
     ASSERT_EQ(WMError::WM_OK, window2->Show(0, false, false));
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(window2->GetWindowId(), testFocusChangedListener_->focusedWindow_);
+    ASSERT_EQ(window1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Show(0, false, false));
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(subWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
+    ASSERT_EQ(window1->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     window1->Destroy();
     window2->Destroy();
