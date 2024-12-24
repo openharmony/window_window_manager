@@ -1567,6 +1567,10 @@ WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     property_->SetMainWindowTopmost(isTopmost);
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
