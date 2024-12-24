@@ -196,6 +196,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     if (displayMode == FoldDisplayMode::FULL) {
         SetStatusFullActiveRectAndTpFeature(screenProperty_);
     } else if (displayMode == FoldDisplayMode::MAIN) {
+        reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
         SetStatusMainActiveRectAndTpFeature(screenProperty_);
     } else if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
         SetStatusGlobalFullActiveRectAndTpFeature(screenProperty_);
