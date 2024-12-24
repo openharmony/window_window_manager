@@ -102,6 +102,7 @@ group("unittest") {
     ":ws_window_scene_config_test",
     ":ws_window_session_property_test",
     "window_pattern:window_pattern_snapshot_test",
+    "ui_extension:unittest"
   ]
 
   if (window_manager_use_sceneboard) {
@@ -1669,6 +1670,7 @@ ohos_static_library("ws_unittest_common") {
   visibility = [
     ":*",
     "window_pattern:*",
+    "ui_extension:*",
   ]
   testonly = true
 

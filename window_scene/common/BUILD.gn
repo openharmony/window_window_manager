@@ -23,6 +23,7 @@ config("window_scene_common_public_config") {
     "${window_base_path}/utils/include",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/interfaces/innerkits/dm",
+    "${window_base_path}/interfaces/innerkits/extension",
   ]
 }
 
@@ -39,6 +40,7 @@ ohos_shared_library("window_scene_common") {
     "src/session_permission.cpp",
     "src/task_scheduler.cpp",
     "src/window_session_property.cpp",
+    "src/extension_data_handler.cpp",
   ]
 
   public_configs = [ ":window_scene_common_public_config" ]

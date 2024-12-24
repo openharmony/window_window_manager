@@ -47,7 +47,7 @@ enum class DataHandlerErr : uint32_t {
 };
 
 using DataConsumeCallback =
-    std::function<int32_t(SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want> reply)>;
+    std::function<int32_t(SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>;
 
 /**
  * @class IDataHandler
