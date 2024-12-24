@@ -43,21 +43,25 @@ using Task = std::function<void()>;
 
 class DataHandler : public IDataHandler {
 public:
-    explicit DataHandler(const std::shared_ptr<AppExecFwk::EventHandler>& eventHandler) : eventHandler_(eventHandler) {}
+    DataHandler() = default;
     virtual ~DataHandler() = default;
 
     DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data,
-        AAFwk::Want& reply) override;
+                                AAFwk::Want& reply) override;
     DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data) override;
     DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data) override;
     DataHandlerErr RegisterDataConsumer(SubSystemId dataId, DataConsumeCallback&& callback) override;
     void UnregisterDataConsumer(SubSystemId dataId) override;
-    DataHandlerErr NotifyDataConsumer(AAFwk::Want&& data, std::optional<AAFwk::Want> reply,
-        const DataTransferConfig& config);
+    void NotifyDataConsumer(MessageParcel& data, MessageParcel& reply);
+    void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& eventHandler);
+    void SetRemoteProxyObject(const sptr<IRemoteObject>& remoteObject);
 
 protected:
+    DataHandlerErr NotifyDataConsumer(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply,
+                                      const DataTransferConfig& config);
     virtual DataHandlerErr SendData(AAFwk::Want& data, AAFwk::Want& reply, const DataTransferConfig& config) = 0;
     DataHandlerErr PrepareData(MessageParcel& data, AAFwk::Want& toSend, const DataTransferConfig& config);
+    virtual bool WriteInterfaceToken(MessageParcel& data) = 0;
     DataHandlerErr ParseReply(MessageParcel& data, AAFwk::Want& reply, const DataTransferConfig& config);
     void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime);
 
@@ -65,6 +69,7 @@ protected:
     mutable std::mutex mutex_;
     std::unordered_map<SubSystemId, DataConsumeCallback> consumers_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
+    sptr<IRemoteObject> remoteProxy_;
 };
 
 }  // namespace OHOS::Rosen::Extension
