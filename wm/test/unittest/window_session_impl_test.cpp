@@ -1350,9 +1350,9 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     ISystemDensityChangeListenerSptr listener13 = nullptr;
-    res = window->RegisterSystemDensityChangeListener(listener11);
+    res = window->RegisterSystemDensityChangeListener(listener13);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterSystemDensityChangeListener(listener11);
+    res = window->UnregisterSystemDensityChangeListener(listener13);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
