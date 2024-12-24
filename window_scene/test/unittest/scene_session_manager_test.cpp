@@ -804,9 +804,9 @@ HWTEST_F(SceneSessionManagerTest, UpdateTopmostProperty, Function | SmallTest | 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetTopmost(true);
     property->SetSystemCalling(true);
-    sptr<SceneSession> scenesession = sptr<MainSession>::MakeSptr(info, nullptr);
-    scenesession->SetSessionProperty(property);
-    WMError result = ssm_->UpdateTopmostProperty(property, scenesession);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(property);
+    WMError result = ssm_->UpdateTopmostProperty(property, sceneSession);
     ASSERT_EQ(WMError::WM_OK, result);
 }
 
