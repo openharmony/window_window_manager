@@ -2049,10 +2049,10 @@ HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = true;
-    sptr<IOccupiedAreaChangeListener> listener = new IOccupiedAreaChangeListener();
+    sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
     Rect rect = {0, 0, 0, 0};
     window->RegisterOccupiedAreaChangeListener(listener);
-    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect, 80);
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect, 80);
     listener->OnSizeChange(info, nullptr);
     window->UnregisterOccupiedAreaChangeListener(listener);
     ASSERT_EQ(true, ret);
