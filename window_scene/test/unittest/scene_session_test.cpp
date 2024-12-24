@@ -1446,8 +1446,6 @@ HWTEST_F(SceneSessionTest, SetMainWindowTopmost, Function | SmallTest | Level2)
     info.bundleName_ = "SetMainWindowTopmost";
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    sceneSession->SetSessionProperty(property);
     auto result = sceneSession->SetMainWindowTopmost(false);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(sceneSession->IsMainWindowTopmost());
