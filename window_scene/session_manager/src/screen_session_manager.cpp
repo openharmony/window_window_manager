@@ -72,6 +72,7 @@ const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
 const std::string SETTING_LOCKED_KEY = "settings.general.accelerometer_rotation_status";
+const ScreenId SCREEN_ID_DEFAULT = 0;
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
 const ScreenId SCREEN_ID_PC = 4;
@@ -138,8 +139,35 @@ ScreenSessionManager::ScreenSessionManager()
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
     if (g_foldScreenFlag) {
         HandleFoldScreenPowerInit();
+    } else {
+        std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
+        int32_t phyOffset = static_cast<int32_t>(std::stoi(phyOffsets[0]));
+        ScreenRotation correctRotation = ConvertOffsetToCorrectRotation(phyOffset);
+        rsInterface_.SetScreenCorrection(SCREEN_ID_DEFAULT, correctRotation);
+        TLOGI(WmsLogTag::DMS, "SetScreenCorrection, phyOffset: %{public}u, correctRotation: %{public}u",
+            phyOffset, correctRotation);
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
+}
+
+ScreenRotation ScreenSessionManager::ConvertOffsetToCorrectRotation(int32_t phyOffset)
+{
+    ScreenRotation offsetRotation = ScreenRotation::ROTATION_0;
+    switch (phyOffset) {
+        case 90: // Rotation 90 degree
+            offsetRotation = ScreenRotation::ROTATION_270;
+            break;
+        case 180: // Rotation 180 degree
+            offsetRotation = ScreenRotation::ROTATION_180;
+            break;
+        case 270: // Rotation 270 degree
+            offsetRotation = ScreenRotation::ROTATION_90;
+            break;
+        default:
+            offsetRotation = ScreenRotation::ROTATION_0;
+            break;
+    }
+    return offsetRotation;
 }
 
 void ScreenSessionManager::HandleFoldScreenPowerInit()
@@ -2096,6 +2124,20 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     ScreenSessionPublish::GetInstance().PublishDisplayRotationEvent(
         displayInfo->GetScreenId(), displayInfo->GetRotation());
     IPCSkeleton::SetCallingIdentity(identity);
+}
+
+void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"", screenId);
+        return;
+    }
+    screenSession->SetPhysicalRotation(rotation, GetFoldDisplayMode());
+    screenSession->SetScreenComponentRotation(screenComponentRotation);
+    screenSession->UpdateRotationOrientation(rotation);
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", rotation: %{public}f, screenComponentRotation: %{public}f",
+        screenId, rotation, screenComponentRotation);
 }
 
 void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,

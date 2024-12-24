@@ -744,8 +744,6 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     } else {
         titleBarHeight = static_cast<int32_t>(titleBarHeight * vpr);
     }
-    bool isMoveArea = (0 <= winX && winX <= static_cast<int32_t>(rect.width_)) &&
-        (0 <= winY && winY <= titleBarHeight);
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
         static_cast<int>(HOTZONE_TOUCH * vpr);
     AreaType dragType = AreaType::UNDEFINED;
@@ -763,17 +761,14 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
         isFixedSystemWin, isFixedSubWin, isDecorDialog);
     if ((isFixedSystemWin || isFixedSubWin) && !isDecorDialog) {
-        if (!isFixedSubWin && windowType != WindowType::WINDOW_TYPE_DIALOG) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent);
-        } else {
-            hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-        }
+        hostSession->SendPointEventForMoveDrag(pointerEvent);
     } else {
         if (dragType != AreaType::UNDEFINED) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
             needNotifyEvent = false;
-        } else if (isMoveArea || (WindowHelper::IsSystemWindow(windowType) &&
-                                  windowType != WindowType::WINDOW_TYPE_DIALOG)) {
+        } else if (WindowHelper::IsMainWindow(windowType) ||
+            WindowHelper::IsSubWindow(windowType) ||
+            WindowHelper::IsSystemWindow(windowType)) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
         } else {
             hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
@@ -2560,18 +2555,20 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
     return WMError::WM_OK;
 }
 
-WmErrorCode WindowSceneSessionImpl::StartMoveSystemWindow()
+WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!(isPC || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (auto hostSession = GetHostSession()) {
-        WSError errorCode = hostSession->OnSystemSessionEvent(SessionEvent::EVENT_START_MOVE);
+        WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
         TLOGD(WmsLogTag::WMS_SYSTEM, "id:%{public}d, errorCode:%{public}d",
             GetPersistentId(), static_cast<int>(errorCode));
         switch (errorCode) {
             case WSError::WS_ERROR_REPEAT_OPERATION: {
                 return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
-            }
-            case WSError::WS_ERROR_NOT_SYSTEM_APP: {
-                return WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
             }
             case WSError::WS_ERROR_NULLPTR: {
                 return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -2844,6 +2841,32 @@ void WindowSceneSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<App
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
         window->UpdateConfiguration(configuration);
+    }
+}
+
+void WindowSceneSessionImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+        uiContent->UpdateConfigurationSyncForAll(configuration);
+    }
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        TLOGI(WmsLogTag::WMS_IMMS, "no subSession, winId: %{public}d", GetWindowId());
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+        subWindowSession->UpdateConfigurationSync(configuration);
+    }
+}
+
+void WindowSceneSessionImpl::UpdateConfigurationSyncForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
     }
 }
 
@@ -3662,13 +3685,35 @@ WSError WindowSceneSessionImpl::NotifyCompatibleModeEnableInPad(bool enable)
 
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("NotifySessionForeground");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (handler_) {
+        handler_->PostTask([weakThis = wptr(this), reason, withAnimation] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+                return;
+            }
+            window->Show(reason, withAnimation);
+        }, __func__);
+        return;
+    }
     Show(reason, withAnimation);
 }
 
 void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
-    WLOGFI("NotifySessionBackground");
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (handler_) {
+        handler_->PostTask([weakThis = wptr(this), reason, withAnimation, isFromInnerkits] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
+                return;
+            }
+            window->Hide(reason, withAnimation, isFromInnerkits);
+        }, __func__);
+        return;
+    }
     Hide(reason, withAnimation, isFromInnerkits);
 }
 

@@ -540,6 +540,31 @@ HWTEST_F(SessionProxyTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: NotifyExtensionEventAsync
+ * @tc.desc: NotifyExtensionEventAsync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyExtensionEventAsync, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    sProxy->NotifyExtensionEventAsync(0);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyExtensionEventAsync(0);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: OnSetWindowRectAutoSave
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -554,6 +579,22 @@ HWTEST_F(SessionProxyTest, OnSetWindowRectAutoSave, Function | SmallTest | Level
     WSError res = sProxy->OnSetWindowRectAutoSave(true);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnSetWindowRectAutoSave end";
+}
+
+/**
+ * @tc.name: NotifyMainModalTypeChange
+ * @tc.desc: NotifyMainModalTypeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyMainModalTypeChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyMainModalTypeChange start";
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(sProxy->NotifyMainModalTypeChange(true), WSError::WS_ERROR_IPC_FAILED);
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_EQ(sProxy->NotifyMainModalTypeChange(true), WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyMainModalTypeChange end";
 }
 } // namespace
 } // namespace Rosen

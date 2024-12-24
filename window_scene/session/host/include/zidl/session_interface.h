@@ -50,15 +50,14 @@ public:
     virtual WSError OnSessionEvent(SessionEvent event) { return WSError::WS_OK; }
 
     /**
-     * @brief Receive session event from system application.
+     * @brief Receive session event from application.
      *
-     * This function provides the ability for system applications to move system window.
+     * This function provides the ability for applications to move window.
      * This interface will take effect after touch down event.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
-     * @permission Make sure the caller has system permission.
      */
-    virtual WSError OnSystemSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+    virtual WSError SyncSessionEvent(SessionEvent event) { return WSError::WS_OK; }
 
     /**
      * @brief Enables or disables system window dragging.
@@ -143,6 +142,7 @@ public:
     virtual void NotifyAsyncOn() {}
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
      * @brief Close pip window while stopPip is called.
@@ -223,6 +223,14 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for main session modal type changes.
+     *
+     * @param isModal Indicates the {@link bool}
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifyMainModalTypeChange(bool isModal) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to automatically save the window rect.

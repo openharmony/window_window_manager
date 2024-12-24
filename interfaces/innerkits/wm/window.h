@@ -598,6 +598,14 @@ public:
      * @param configuration configuration for app
      */
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+	/**
+     * @brief Update configuration synchronously for all windows.
+	 *
+     * @param configuration configuration for app.
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
     /**
      * @brief Get surface node from RS
      *
@@ -1182,6 +1190,14 @@ public:
      * @param configuration Window configuration.
      */
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
+	/**
+     * @brief Update configuration synchronously.
+	 *
+     * @param configuration Window configuration.
+     */
+    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
     /**
      * @brief Register window lifecycle listener.
      *
@@ -1388,8 +1404,8 @@ public:
      * @param ability
      * @return WMError
      */
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {
         return WMError::WM_OK;
@@ -1428,7 +1444,19 @@ public:
      *
      * @return UI content info.
      */
-    virtual std::string GetContentInfo() { return std::string(); }
+    virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION)
+    {
+        return {};
+    }
+    /**
+     * @brief Set uiability restored router stack.
+     *
+     * @return WMError.
+     */
+    virtual WMError SetRestoredRouterStack(const std::string& routerStack)
+    {
+        return WMError::WM_OK;
+    }
     /**
      * @brief Get ui content object.
      *
@@ -1581,11 +1609,11 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief Start move system window. It is called by application.
+     * @brief Start move window. It is called by application.
      *
      * @return Errorcode of window.
      */
-    virtual WmErrorCode StartMoveSystemWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set flag that need remove window input channel.
@@ -1949,6 +1977,14 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Enable or disable move window by title bar.
+     *
+     * @param enable The value true means to enable window moving, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Enable drag window.
      *
      * @param enableDrag The value true means to enable window dragging, and false means the opposite.
@@ -2077,7 +2113,15 @@ public:
     }
 
     /**
-     * @brief Set the modality of window.
+     * @brief Set the application modality of main window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetWindowModal(bool isModal) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set the modality of sub window.
      *
      * @param isModal bool.
      * @param modalityType ModalityType.
@@ -2333,7 +2377,7 @@ public:
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
     virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
-
+    
     /**
      * @brief Get the window status of current window.
      *
@@ -2362,6 +2406,14 @@ public:
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
      */
     virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
+
+    /**
+     * @brief Notify extension asynchronously
+     *
+     * @param notifyEvent event type
+     * @return void
+     */
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
      * @brief Get IsUIExtensionFlag of window.

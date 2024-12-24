@@ -267,6 +267,9 @@ HWTEST_F(WindowSceneSessionImplTest4, HandlePointDownEvent, Function | SmallTest
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
 
+    windowSceneSessionImpl->property_->SetDragEnabled(false);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     auto ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     EXPECT_EQ(true, ret);
 
@@ -279,16 +282,24 @@ HWTEST_F(WindowSceneSessionImplTest4, HandlePointDownEvent, Function | SmallTest
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetDecorEnable(true);
+
     ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     EXPECT_EQ(true, ret);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetDecorEnable(false);
+
     pointerItem.SetWindowX(100);
     pointerItem.SetWindowY(100);
     ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     EXPECT_EQ(true, ret);
     pointerItem.SetWindowX(1);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    EXPECT_EQ(true, ret);
+
+    windowSceneSessionImpl->property_->SetDragEnabled(true);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    EXPECT_EQ(false, ret);
+
+    pointerItem.SetWindowX(100);
     ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
     EXPECT_EQ(true, ret);
 }
@@ -617,6 +628,8 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
     subWindow->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveToAsync(10, 10));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -689,6 +702,8 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
     subWindow->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK, subWindow->ResizeAsync(500, 500));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
 /**
@@ -978,6 +993,196 @@ HWTEST_F(WindowSceneSessionImplTest4, GetParentSessionAndVerify, Function | Smal
     EXPECT_EQ(WMError::WM_OK, res);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
+ * @tc.name: MoveTo03
+ * @tc.desc: MoveTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveTo03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("MoveTo01SubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1001);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(2, 2));
+
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("MoveTo02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(3, 3));
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(4, 3));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(4, 4));
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(5, 4));
+    ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(5, 4));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+}
+
+/**
+ * @tc.name: SetWindowMode01
+ * @tc.desc: SetWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("SetWindowMode01");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1007);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    subWindow->property_->SetModeSupportInfo(0);
+    auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, ret);
+}
+
+/**
+ * @tc.name: UpdateNewSize01
+ * @tc.desc: UpdateNewSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("UpdateNewSize01SubWindow");
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1003);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+    subWindow->UpdateNewSize();
+    Rect windowRect = { 0, 0, 0, 0 };
+    WindowLimits windowLimits = { 0, 0, 0, 0, 0.0, 0, 0 };
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->property_->SetWindowRect(windowRect);
+    subWindow->property_->SetWindowLimits(windowLimits);
+    subWindow->UpdateNewSize();
+    windowRect.width_ = 10;
+    windowRect.height_ = 10;
+    subWindow->UpdateNewSize();
+    windowRect.width_ = 0;
+    windowRect.height_ = 0;
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    subWindow->UpdateNewSize();
+    Rect windowRect1 = { 10, 10, 10, 10 };
+    WindowLimits windowLimits1 = { 100, 100, 100, 100, 0.0, 0, 0 };
+    subWindow->property_->SetRequestRect(windowRect1);
+    subWindow->property_->SetWindowLimits(windowLimits1);
+    subWindow->UpdateNewSize();
+    Rect windowRect2 = { 200, 200, 200, 200 };
+    subWindow->property_->SetRequestRect(windowRect2);
+    subWindow->UpdateNewSize();
+}
+
+/**
+ * @tc.name: UpdateSubWindowStateAndNotify01
+ * @tc.desc: UpdateSubWindowStateAndNotify
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateSubWindowStateAndNotify01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, subOption);
+    subOption->SetWindowName("UpdateSubWindowStateAndNotify01");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = new (std::nothrow) WindowSceneSessionImpl(subOption);
+    ASSERT_NE(nullptr, subWindow);
+    ASSERT_NE(nullptr, subWindow->property_);
+    subWindow->property_->SetPersistentId(1005);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = new (std::nothrow) SessionMocker(subSessionInfo);
+    ASSERT_NE(nullptr, subSession);
+    subWindow->hostSession_ = subSession;
+
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("UpdateSubWindowStateAndNotify02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1006);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    std::vector<sptr<WindowSessionImpl>> vec;
+    WindowSceneSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+            std::vector<sptr<WindowSessionImpl>>>(1006, vec));
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_HIDDEN);
+    WindowSceneSessionImpl::subWindowSessionMap_[1006].push_back(subWindow);
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_HIDDEN);
+    subWindow->state_ = WindowState::STATE_HIDDEN;
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_HIDDEN);
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_SHOWN);
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    subWindow->UpdateSubWindowStateAndNotify(1006, WindowState::STATE_SHOWN);
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
+}
+
+/**
+ * @tc.name: UpdateConfigurationSyncForAll
+ * @tc.desc: UpdateConfigurationSyncForAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationSyncForAll, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("UpdateConfigurationSyncForAll");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, configuration);
+    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSession);
+    SessionInfo sessionInfo = {"CreateTestBundle1", "CreateTestModule1", "CreateTestAbility1"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSession->hostSession_ = session;
+    windowSession->property_->SetPersistentId(1);
+    windowSession->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK, windowSession->Create(abilityContext_, session));
+    windowSceneSessionImpl->UpdateConfigurationSyncForAll(configuration);
+    ASSERT_EQ(WMError::WM_OK, windowSession->Destroy(true));
 }
 }
 } // namespace Rosen

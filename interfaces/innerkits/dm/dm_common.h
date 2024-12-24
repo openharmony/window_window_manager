@@ -411,6 +411,15 @@ struct DisplayPhysicalResolution {
 };
 
 /**
+ * @brief screen direction info
+ */
+struct ScreenDirectionInfo {
+    int32_t notifyRotation_;
+    int32_t screenRotation_;
+    int32_t rotation_;
+};
+
+/**
  * @brief displayRect
  */
 struct DMRect {

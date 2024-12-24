@@ -1441,26 +1441,31 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: OnSystemSessionEvent
+ * @tc.name: SyncSessionEvent
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, OnSystemSessionEvent, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnSystemSessionEvent";
-    info.bundleName_ = "OnSystemSessionEvent";
+    info.abilityName_ = "SyncSessionEvent";
+    info.bundleName_ = "SyncSessionEvent";
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
     sptr<WindowSessionProperty> property = new WindowSessionProperty();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
     sceneSession->isActive_ = false;
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId());
 
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
-    auto result = sceneSession->OnSystemSessionEvent(event);
+    auto result = sceneSession->SyncSessionEvent(event);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    property->isSystemCalling_ = false;
+    result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1882,6 +1887,9 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
 
     sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE, false);
     ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
+
+    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE, false);
+    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::DRAG_MOVE);
 }
 
 /**
