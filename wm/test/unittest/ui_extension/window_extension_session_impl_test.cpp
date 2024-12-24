@@ -988,7 +988,6 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContentByName, Function | Smal
         window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
 
     auto uiContent = std::make_shared<Ace::UIContentMocker>();
-    ASSERT_NE(nullptr, uiContent);
     window_->uiContent_ = uiContent;
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
     window_->focusState_ = true;
