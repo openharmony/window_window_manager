@@ -434,8 +434,6 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
     : env_(env), weakSession_(session), persistentId_(session->GetPersistentId()),
       taskScheduler_(std::make_shared<MainThreadScheduler>(env))
 {
-    auto sessionchangeCallback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->RegisterSessionChangeCallback(sessionchangeCallback);
     session->RegisterClearCallbackMapCallback([weakThis = wptr(this)](bool needRemove) {
         if (!needRemove) {
             TLOGND(WmsLogTag::WMS_LIFE, "clearCallbackFunc needRemove is false");
@@ -448,7 +446,6 @@ JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
         }
         jsSceneSession->ClearCbMap();
     });
-    sessionchangeCallback_ = sessionchangeCallback;
 
     TLOGI(WmsLogTag::WMS_LIFE, "created, id:%{public}d", persistentId_);
 }

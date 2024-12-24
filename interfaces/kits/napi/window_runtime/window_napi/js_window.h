@@ -31,7 +31,6 @@
 
 namespace OHOS {
 namespace Rosen {
-using namespace AbilityRuntime;
 napi_value CreateJsWindowObject(napi_env env, sptr<Window>& window);
 napi_value CreateJsWindowArrayObject(napi_env env, const std::vector<sptr<Window>>& windows);
 std::shared_ptr<NativeReference> FindJsWindowObject(const std::string& windowName);
@@ -126,6 +125,7 @@ public:
     static napi_value IsFocused(napi_env env, napi_callback_info info);
     static napi_value RequestFocus(napi_env env, napi_callback_info info);
     static napi_value StartMoving(napi_env env, napi_callback_info info);
+    static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -264,6 +264,7 @@ private:
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -368,10 +369,6 @@ private:
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
-
-    NapiAsyncTask::ExecuteCallback GetEnableDragExecuteCallback(bool enableDrag, const wptr<Window>& weakToken,
-        std::shared_ptr<WmErrorCode>& errCodePtr) const;
-    NapiAsyncTask::CompleteCallback GetEnableDragCompleteCallback(const std::shared_ptr<WmErrorCode>& errCodePtr) const;
 };
 }  // namespace Rosen
 }  // namespace OHOS

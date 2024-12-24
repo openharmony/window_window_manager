@@ -1255,7 +1255,7 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
     }
     auto iterFuncType = ListenerFunctionTypeMap.find(cbType);
     if (iterFuncType == ListenerFunctionTypeMap.end()) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Failed to find function handler! type = %{public}s", cbType.c_str());
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to find function handler! type=%{public}s", cbType.c_str());
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -1271,7 +1271,7 @@ napi_value JsSceneSessionManager::OnRegisterCallback(napi_env env, napi_callback
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
-    WLOGFD("End, type = %{public}s", cbType.c_str());
+    WLOGFD("End, type=%{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
@@ -2147,7 +2147,7 @@ napi_value JsSceneSessionManager::OnStartAbilityBySpecified(napi_env env, napi_c
         sessionInfo.want = std::make_shared<AAFwk::Want>(want);
     }
 
-    WLOGFI("[%{public}s, %{public}s, %{public}s], errCode = %{public}d",
+    WLOGFI("[%{public}s, %{public}s, %{public}s], errCode=%{public}d",
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(), errCode);
     SceneSessionManager::GetInstance().StartAbilityBySpecified(sessionInfo);
     return NapiGetUndefined(env);
@@ -3182,8 +3182,7 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
                 nativeData = Media::PixelMapNapi::CreatePixelMap(env, *pixelPtr);
             }
             if (nativeData) {
-                WLOGD("pixelmap W x H = %{public}d x %{public}d", (*pixelPtr)->GetWidth(),
-                    (*pixelPtr)->GetHeight());
+                WLOGD("pixelmap W x H=%{public}d x %{public}d", (*pixelPtr)->GetWidth(), (*pixelPtr)->GetHeight());
                 task.Resolve(env, nativeData);
             } else {
                 WLOGE("Create native pixelmap fail");

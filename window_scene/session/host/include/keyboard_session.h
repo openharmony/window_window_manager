@@ -20,9 +20,22 @@
 #include "transaction/rs_sync_transaction_controller.h"
 
 namespace OHOS::Rosen {
+enum class SystemKeyboardAvoidChangeReason {
+    KEYBOARD_BEGIN = 0,
+    KEYBOARD_CREATED = 1,
+    KEYBOARD_SHOW = 2,
+    KEYBOARD_HIDE = 3,
+    KEYBOARD_DISCONNECT = 4,
+    KEYBOARD_GRAVITY_BOTTOM = 5,
+    KEYBOARD_GRAVITY_FLOAT = 6,
+    KEYBOARD_END = 7,
+};
+
 using OnGetSceneSessionCallback = std::function<sptr<SceneSession>(uint32_t callingSessionId)>;
 using OnGetFocusedSessionIdCallback = std::function<int32_t()>;
 using OnCallingSessionIdChangeCallback = std::function<void(uint32_t callingSessionId)>;
+using OnSystemKeyboardAvoidChangeCallback = std::function<void(DisplayId displayId,
+    SystemKeyboardAvoidChangeReason reason)>;
 
 class KeyboardSession : public SystemSession {
 public:
@@ -31,6 +44,7 @@ public:
         OnGetSceneSessionCallback onGetSceneSession_;
         OnGetFocusedSessionIdCallback onGetFocusedSessionId_;
         OnCallingSessionIdChangeCallback onCallingSessionIdChange_;
+        OnSystemKeyboardAvoidChangeCallback onSystemKeyboardAvoidChange_;
     };
     KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
         const sptr<KeyboardSessionCallback>& keyboardCallback);
@@ -51,6 +65,11 @@ public:
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
     bool IsVisibleForeground() const override;
     uint32_t GetCallingSessionId() override;
+    void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
+
+protected:
+    void EnableCallingSessionAvoidArea() override;
+    void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
@@ -62,7 +81,6 @@ private:
         const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-    void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateKeyboardAvoidArea();
     void UseFocusIdIfCallingSessionIdInvalid();
     void UpdateCallingSessionIdAndPosition(uint32_t newCallingSessionId);
@@ -73,6 +91,7 @@ private:
     std::string GetSessionScreenName();
     void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty,
         bool isShow);
+    void NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason);
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

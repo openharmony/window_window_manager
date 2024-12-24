@@ -70,15 +70,14 @@ namespace {
  */
 HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, Function | SmallTest | Level3)
 {
-    std::string strId = "1234";
     std::string dumpInfo = "dumpInfo";
     ssm_->SetDumpUITreeFunc(nullptr);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(strId, dumpInfo));
-    DumpUITreeFunc func = [](uint64_t, std::string& dumpInfo) {
+    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
+    DumpUITreeFunc func = [](std::string& dumpInfo) {
         return;
     };
     ssm_->SetDumpUITreeFunc(func);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(strId, dumpInfo));
+    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
 }
 
 /**

@@ -633,29 +633,31 @@ HWTEST_F(WindowSceneSessionImplTest, StartMove01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: StartMoveWindow01
- * @tc.desc: StartMoveWindow
+ * @tc.name: StartMoveWindow_IsDeviceSupportOrNot
+ * @tc.desc: StartMoveWindow Test, is device support or not
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_IsDeviceSupportOrNot, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    option->SetWindowName("StartMoveWindow01");
-    sptr<WindowSceneSessionImpl> windowSceneSession = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    windowSceneSession->property_->SetPersistentId(1);
-    // show with null session
-
-    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_IsDeviceSupportOrNot");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    windowSceneSession->hostSession_ = session;
-    windowSceneSession->StartMoveWindow();
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
 
-    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, windowSceneSession->StartMoveWindow());
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    ASSERT_NE(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 /**
@@ -1760,7 +1762,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, Function | Small
     window->hostSession_ = session;
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetTitleAndDockHoverShown(true, true));
 
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleAndDockHoverShown(true, true));
 

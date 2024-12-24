@@ -87,13 +87,18 @@ HWTEST_F(SessionStubImmersiveTest, HandleGetAvoidAreaByTypeWithSystemType, Funct
     AvoidArea mockArea;
     mockArea.topRect_.width_ = 1200;
     mockArea.topRect_.height_ = 127;
-    EXPECT_CALL(*session_, GetAvoidAreaByType(_)).WillOnce(Return(mockArea));
+    EXPECT_CALL(*session_, GetAvoidAreaByType(_, _)).WillOnce(Return(mockArea));
 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
     data.WriteUint32(static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM));
+    WSRect rect = {0, 0, 1200, 127};
+    data.WriteInt32(rect.posX_);
+    data.WriteInt32(rect.posY_);
+    data.WriteInt32(rect.width_);
+    data.WriteInt32(rect.height_);
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA);
     int ret = session_->OnRemoteRequest(code, data, reply, option);
 

@@ -217,6 +217,38 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     pointerHotAreas.emplace_back(pointerRect);
 }
 
+static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, std::vector<Rect>& hotAreas)
+{
+    sptr<SceneSession> session = (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) ?
+        sceneSession->GetKeyboardSession() : sceneSession;
+    auto sessionProperty = session->GetSessionProperty();
+
+    KeyboardTouchHotAreas keyboardTouchHotAreas = sessionProperty->GetKeyboardTouchHotAreas();
+
+    auto displayId = sessionProperty->GetDisplayId();
+    std::map<ScreenId, ScreenProperty> screensProperties =
+        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.find(displayId) == screensProperties.end()) {
+        return;
+    }
+    auto screenProperty = screensProperties[displayId];
+    bool isLandscape = screenProperty.GetBounds().rect_.GetWidth() > screenProperty.GetBounds().rect_.GetHeight();
+
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        if (keyboardTouchHotAreas.isKeyboardEmpty()) {
+            return;
+        }
+        hotAreas = isLandscape ? keyboardTouchHotAreas.landscapeKeyboardHotAreas_ :
+            keyboardTouchHotAreas.portraitKeyboardHotAreas_;
+    } else if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+        if (keyboardTouchHotAreas.isPanelEmpty()) {
+            return;
+        }
+        hotAreas = isLandscape ? keyboardTouchHotAreas.landscapePanelHotAreas_ :
+            keyboardTouchHotAreas.portraitPanelHotAreas_;
+    }
+}
+
 void SceneSessionDirtyManager::UpdateHotAreas(const sptr<SceneSession>& sceneSession,
     std::vector<MMI::Rect>& touchHotAreas, std::vector<MMI::Rect>& pointerHotAreas) const
 {
@@ -225,7 +257,11 @@ void SceneSessionDirtyManager::UpdateHotAreas(const sptr<SceneSession>& sceneSes
         return;
     }
     std::unordered_set<MMI::Rect, InputRectHash, InputRectEqual> hotAreaHashSet;
-    const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
+    std::vector<Rect> hotAreas = sceneSession->GetTouchHotAreas();
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+        UpdateKeyboardHotAreasInner(sceneSession, hotAreas);
+    }
     for (const auto& area : hotAreas) {
         MMI::Rect rect;
         rect.x = area.posX_;
@@ -592,7 +628,7 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
 }
 
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
-    const sptr<SceneSession>& sceneSession, const SceneSessionDirtyManager::WindowAction& action) const
+    const sptr<SceneSession>& sceneSession, const WindowAction& action) const
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
