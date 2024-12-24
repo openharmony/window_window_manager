@@ -100,6 +100,8 @@ using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayI
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
+using NotifySetSupportWindowModesFunc = std::function<void(
+    std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -297,6 +299,7 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
+    void RegisterSupportWindowModesCallback(NotifySetSupportWindowModesFunc&& func);
 
     /*
      * PC Window Layout
@@ -655,6 +658,7 @@ protected:
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
+    NotifySetSupportWindowModesFunc onSetSupportWindowModesFunc_;
 
     /*
      * PiP Window
