@@ -1937,9 +1937,9 @@ HWTEST_F(WindowTest, IOccupiedAreaChangeListener, Function | SmallTest | Level3)
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
     sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
-    Rect rect_ = {0, 0, 0, 0};
+    Rect rect = {0, 0, 0, 0};
     window->RegisterOccupiedAreaChangeListener(listener);
-    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect_, 80);
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect, 80);
     listener->OnSizeChange(info, nullptr);
     window->UnregisterOccupiedAreaChangeListener(listener);
     ASSERT_EQ(true, ret);
@@ -1957,9 +1957,9 @@ HWTEST_F(WindowTest, WindowChangeListener02, Function | SmallTest | Level3)
     auto ret = true;
     sptr<IWindowChangeListener> listener = sptr<IWindowChangeListener>::MakeSptr();
     window->RegisterWindowChangeListener(listener);
-    Rect rect_ = {0, 0, 0, 0};
+    Rect rect = {0, 0, 0, 0};
     std::shared_ptr<RSTransaction> rstransaction;
-    listener->OnSizeChange(rect_, WindowSizeChangeReason::UNDEFINED, rstransaction);
+    listener->OnSizeChange(rect, WindowSizeChangeReason::UNDEFINED, rstransaction);
     window->UnregisterWindowChangeListener(listener);
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -2012,8 +2012,8 @@ HWTEST_F(WindowTest, IDialogDeathRecipientListener, Function | SmallTest | Level
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = true;
     sptr<IDialogDeathRecipientListener> listener = sptr<IDialogDeathRecipientListener>::MakeSptr();
-    Rect rect_ = {0, 0, 0, 0};
-    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect_, 80);
+    Rect rect = {0, 0, 0, 0};
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect, 80);
     listener->OnDialogDeathRecipient();
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -2518,10 +2518,10 @@ HWTEST_F(WindowTest, Test02, Function | SmallTest | Level2)
     windowStatusChangeListener.OnWindowStatusChange(WindowStatus::WINDOW_STATUS_UNDEFINED);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDefaultDensityEnabled(true));
     ASSERT_EQ(false, window->GetDefaultDensityEnabled());
-    Rect rect_ = {0, 0, 0, 0};
-    window->UpdatePiPRect(rect_, WindowSizeChangeReason::UNDEFINED);
+    Rect rect = {0, 0, 0, 0};
+    window->UpdatePiPRect(rect, WindowSizeChangeReason::UNDEFINED);
     IWindowRectChangeListener windowRectChangeListener;
-    windowRectChangeListener.OnRectChange(rect_, WindowSizeChangeReason::UNDEFINED);
+    windowRectChangeListener.OnRectChange(rect, WindowSizeChangeReason::UNDEFINED);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
