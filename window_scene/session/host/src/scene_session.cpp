@@ -395,11 +395,12 @@ void SceneSession::CheckAndMoveDisplayIdRecursively(uint64_t displayId)
     if (GetSessionProperty()->GetDisplayId() == displayId || !shouldFollowParentWhenShow_) {
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "session id: %{public}d, Move display to %{public}llu", GetPersistentId(), displayId);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "session id: %{public}d, Move display to %{public}" PRIu64,
+        GetPersistentId(), displayId);
     SetScreenId(displayId); // notify client to update display id
     GetSessionProperty()->SetDisplayId(displayId); // set session property
     NotifySessionDisplayIdChange(displayId);
-    for (auto session : subSession_) {
+    for (const auto& session : subSession_) {
         if (session) {
             session->CheckAndMoveDisplayIdRecursively(displayId);
         }
@@ -1287,16 +1288,16 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     }, "SetSessionRectChangeCallback");
 }
 
-void SceneSession::SetSessionDisplayIdChangeCallback(const NotifySessionDisplayIdChangeFunc& func)
+void SceneSession::SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChangeFunc&& func)
 {
-    PostTask([weakThis = wptr(this), func]() {
+    PostTask([weakThis = wptr(this), func = std::move(func)]() {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "session or display id is null");
             return;
         }
-        session->sessionDisplayIdChangeFunc_ = func;
-    }, "SetSessionDisplayIdChangeCallback");
+        session->sessionDisplayIdChangeFunc_ = std::move(func);
+    }, __func__);
 }
 
 void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
@@ -2549,18 +2550,18 @@ void SceneSession::NotifySessionDisplayIdChange(uint64_t displayId)
     PostTask([weakThis = wptr(this), displayId] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return;
         }
         if (session->sessionDisplayIdChangeFunc_) {
             session->sessionDisplayIdChangeFunc_(displayId);
         }
-    }, "NotifySessionDisplayIdChange");
+    }, __func__);
 }
 
 void SceneSession::CheckSubSessionShouldFollowParent(uint64_t displayId)
 {
-    for (auto session : subSession_) {
+    for (const auto& session : subSession_) {
         if (session && session->IsSessionForeground() && session->GetSessionProperty()->GetDisplayId() != displayId) {
             session->SetShouldFollowParentWhenShow(false);
         }
