@@ -1791,7 +1791,6 @@ HWTEST_F(SceneSessionTest5, IsMissionHighlighted, Function | SmallTest | Level2)
     info.abilityName_ = "IsMissionHighlighted";
     info.bundleName_ = "IsMissionHighlighted";
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(mainSession, nullptr);
     mainSession->isFocused_ = true;
     EXPECT_TRUE(mainSession->IsMissionHighlighted());
     mainSession->isFocused_ = false;

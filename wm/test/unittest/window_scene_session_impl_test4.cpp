@@ -1764,7 +1764,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetFullScreenWaterfallMode, Function | Sma
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetFullScreenWaterfallMode");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     EXPECT_EQ(WSError::WS_OK, window->SetFullScreenWaterfallMode(true));
     EXPECT_EQ(WSError::WS_DO_NOTHING, window->SetFullScreenWaterfallMode(true));
@@ -1785,7 +1784,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSupportEnterWaterfallMode, Function | S
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetSupportEnterWaterfallMode");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     ASSERT_EQ(WSError::WS_OK, window->SetSupportEnterWaterfallMode(true));
 }
 
