@@ -708,6 +708,7 @@ protected:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
+    uint32_t dragDirtyFlags_ = 0;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     DisplayId lastUpdatedDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;

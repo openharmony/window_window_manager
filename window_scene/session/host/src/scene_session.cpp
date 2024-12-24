@@ -3018,7 +3018,7 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         sceneSession->winRect_ = rect;
-        sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+        sceneSession->dragDirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
         return WSError::WS_OK;
     }, funcName);
 }
@@ -5134,7 +5134,8 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
 
 void SceneSession::ResetSizeChangeReasonIfDirty()
 {
-    if (IsDirtyWindow() && GetSizeChangeReason() != SizeChangeReason::DRAG) {
+    if (IsDirtyWindow() && GetSizeChangeReason() != SizeChangeReason::DRAG &&
+        GetSizeChangeReason() != SizeChangeReason::DRAG_END) {
         UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     }
 }
@@ -5146,7 +5147,7 @@ bool SceneSession::IsDirtyWindow()
 
 bool SceneSession::IsDirtyDragWindow()
 {
-    return dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+    return dragDirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
 }
 
 void SceneSession::NotifyUILostFocus()
