@@ -2947,7 +2947,7 @@ void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
 {
     TLOGD(WmsLogTag::WMS_HIERARCHY, "isTopmost: %{public}u", isTopmost);
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_, where] {
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s jsSceneSession id:%{public}d has been destroyed",
@@ -2960,11 +2960,9 @@ void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
             return;
         }
         napi_value jsMainWindowTopmostObj = CreateJsValue(env, isTopmost);
-        napi_value argv[] = {jsMainWindowTopmostObj};
+        napi_value argv[] = { jsMainWindowTopmostObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task,
-        "OnMainWindowTopmostChange: " + std::to_string(isTopmost));
+    }, "OnMainWindowTopmostChange: " + std::to_string(isTopmost));
 }
 
 void JsSceneSession::OnSubModalTypeChange(SubWindowModalType subWindowModalType)
