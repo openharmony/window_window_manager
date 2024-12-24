@@ -218,11 +218,9 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionImplTest4, IsMainWindowTopmost, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsMainWindowTopmost");
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     bool res = window->IsMainWindowTopmost();
     ASSERT_FALSE(res);
 }
