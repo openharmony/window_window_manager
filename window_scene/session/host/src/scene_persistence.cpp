@@ -46,7 +46,7 @@ bool ScenePersistence::CreateSnapshotDir(const std::string& directory)
 {
     snapshotDirectory_ = directory + "/SceneSnapShot/";
     if (mkdir(snapshotDirectory_.c_str(), S_IRWXU)) {
-        WLOGFD("mkdir failed or the directory already exists");
+        TLOGD(WmsLogTag::WMS_PATTERN, "mkdir failed or the directory already exists");
         return false;
     }
     return true;
@@ -56,7 +56,7 @@ bool ScenePersistence::CreateUpdatedIconDir(const std::string& directory)
 {
     updatedIconDirectory_ = directory + "/UpdatedIcon/";
     if (mkdir(updatedIconDirectory_.c_str(), S_IRWXU)) {
-        WLOGFD("mkdir failed or the directory already exists");
+        TLOGD(WmsLogTag::DEFAULT, "mkdir failed or the directory already exists");
         return false;
     }
     return true;
@@ -80,7 +80,7 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
 
 ScenePersistence::~ScenePersistence()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "destroyed, persistentId: %{public}d", persistentId_);
+    TLOGI(WmsLogTag::WMS_PATTERN, "destroyed, persistentId: %{public}d", persistentId_);
     remove(snapshotPath_.c_str());
 }
 
@@ -105,13 +105,13 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         auto scenePersistence = weakThis.promote();
         if (scenePersistence == nullptr || pixelMap == nullptr ||
             scenePersistence->snapshotPath_.find('/') == std::string::npos) {
-            WLOGFE("scenePersistence is%{public}s nullptr, pixelMap is%{public}s nullptr",
-                scenePersistence == nullptr ? "" : " not", pixelMap == nullptr ? "" : " not");
+            TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence %{public}s nullptr, pixelMap %{public}s nullptr",
+                scenePersistence == nullptr ? "" : "not", pixelMap == nullptr ? "" : "not");
             resetSnapshotCallback();
             return;
         }
 
-        TLOGD(WmsLogTag::WMS_MAIN, "Save snapshot begin");
+        TLOGNI(WmsLogTag::WMS_PATTERN, "Save snapshot begin");
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SaveSnapshot %s", scenePersistence->snapshotPath_.c_str());
         OHOS::Media::ImagePacker imagePacker;
         OHOS::Media::PackOption option;
@@ -119,22 +119,22 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         option.quality = IsAstcEnabled() ? ASTC_IMAGE_QUALITY : IMAGE_QUALITY;
         option.numberHint = 1;
 
-        std::lock_guard<std::mutex> lock(scenePersistence->savingSnapshotMutex_);
+        std::lock_guard lock(scenePersistence->savingSnapshotMutex_);
         remove(scenePersistence->snapshotPath_.c_str());
         scenePersistence->snapshotSize_ = { pixelMap->GetWidth(), pixelMap->GetHeight() };
         if (imagePacker.StartPacking(scenePersistence->snapshotPath_, option)) {
-            TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, starting packing error");
+            TLOGNE(WmsLogTag::WMS_PATTERN, "Save snapshot failed, starting packing error");
             resetSnapshotCallback();
             return;
         }
         if (imagePacker.AddImage(*pixelMap)) {
-            TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, adding image error");
+            TLOGNE(WmsLogTag::WMS_PATTERN, "Save snapshot failed, adding image error");
             resetSnapshotCallback();
             return;
         }
         int64_t packedSize = 0;
         if (imagePacker.FinalizePacking(packedSize)) {
-            TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, finalizing packing error");
+            TLOGNE(WmsLogTag::WMS_PATTERN, "Save snapshot failed, finalizing packing error");
             resetSnapshotCallback();
             return;
         }
@@ -143,7 +143,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
             resetSnapshotCallback();
             scenePersistence->isSavingSnapshot_.store(false);
         }
-        TLOGD(WmsLogTag::WMS_MAIN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
+        TLOGNI(WmsLogTag::WMS_PATTERN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
     snapshotFfrtHelper_->SubmitTask(std::move(task), "SaveSnapshot" + snapshotPath_);
 }
@@ -158,7 +158,7 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersi
     auto task = [weakThis = wptr(this), oldPersistentId]() {
         auto scenePersistence = weakThis.promote();
         if (scenePersistence == nullptr) {
-            WLOGFE("scenePersistence is nullptr");
+            TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence is nullptr");
             return;
         }
         std::string oldSnapshotPath;
@@ -169,12 +169,13 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersi
             oldSnapshotPath = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
                 std::to_string(oldPersistentId) + IMAGE_SUFFIX;
         }
+        std::lock_guard lock(scenePersistence->savingSnapshotMutex_);
         int ret = std::rename(oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         if (ret == 0) {
-            WLOGFI("Rename snapshot from %{public}s to %{public}s.",
+            TLOGNI(WmsLogTag::WMS_PATTERN, "Rename snapshot from %{public}s to %{public}s.",
                 oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         } else {
-            WLOGFW("Failed to rename snapshot from %{public}s to %{public}s.",
+            TLOGNW(WmsLogTag::WMS_PATTERN, "Failed to rename snapshot from %{public}s to %{public}s.",
                 oldSnapshotPath.c_str(), scenePersistence->snapshotPath_.c_str());
         }
     };
@@ -200,22 +201,22 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
     option.numberHint = 1;
 
     if (remove(updatedIconPath_.c_str())) {
-        WLOGFD("Failed to delete old file");
+        TLOGD(WmsLogTag::DEFAULT, "Failed to delete old file");
     }
     if (imagePacker.StartPacking(GetUpdatedIconPath(), option)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Save updated icon failed, starting packing error");
+        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, starting packing error");
         return;
     }
     if (imagePacker.AddImage(*pixelMap)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Save updated icon failed, adding image error");
+        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, adding image error");
         return;
     }
     int64_t packedSize = 0;
     if (imagePacker.FinalizePacking(packedSize)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Save updated icon failed, finalizing packing error");
+        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, finalizing packing error");
         return;
     }
-    WLOGFD("SaveUpdatedIcon finished");
+    TLOGD(WmsLogTag::DEFAULT, "SaveUpdatedIcon finished");
 }
 
 std::string ScenePersistence::GetUpdatedIconPath() const
@@ -243,7 +244,7 @@ bool ScenePersistence::IsSnapshotExisted() const
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IsSnapshotExisted");
     struct stat buf;
     if (stat(snapshotPath_.c_str(), &buf)) {
-        WLOGFD("Snapshot file %{public}s does not exist", snapshotPath_.c_str());
+        TLOGD(WmsLogTag::WMS_PATTERN, "Snapshot file %{public}s does not exist", snapshotPath_.c_str());
         return false;
     }
     return S_ISREG(buf.st_mode);
@@ -253,16 +254,17 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
     const float newScale) const
 {
     if (!IsSnapshotExisted()) {
-        WLOGE("local snapshot pic is not existed");
+        TLOGE(WmsLogTag::WMS_PATTERN, "local snapshot pic is not existed");
         return nullptr;
     }
 
     uint32_t errorCode = 0;
     Media::SourceOptions sourceOpts;
     sourceOpts.formatHint = IsAstcEnabled() ? ASTC_IMAGE_FORMAT : IMAGE_FORMAT;
+    std::lock_guard lock(savingSnapshotMutex_);
     auto imageSource = Media::ImageSource::CreateImageSource(snapshotPath_, sourceOpts, errorCode);
     if (!imageSource) {
-        WLOGE("create image source fail, errCode : %{public}d", errorCode);
+        TLOGE(WmsLogTag::WMS_PATTERN, "create image source fail, errCode: %{public}u", errorCode);
         return nullptr;
     }
 

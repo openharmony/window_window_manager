@@ -83,16 +83,27 @@ public:
         TRANS_ID_GET_ROOT_MAIN_WINDOW_ID,
         TRANS_ID_UI_EXTENSION_CREATION_CHECK,
         TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST,
+        TRANS_ID_MINIMIZE_MAIN_SESSION,
     };
 
-    virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
-    virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
-    virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
+    /*
+     * Window Lifecycle
+     */
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) = 0;
-    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
-    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
+    virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
+    virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
+        std::vector<std::int32_t>& result) = 0;
+    virtual WSError TerminateSessionNew(
+        const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) = 0;
+    virtual WSError ClearSession(int32_t persistentId) = 0;
+    virtual WSError ClearAllSessions() = 0;
+    virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
+    virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
+    virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
+        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
+    virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) = 0;
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError GetSessionInfos(const std::string& deviceId,
@@ -101,21 +112,15 @@ public:
     virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
-    virtual WSError TerminateSessionNew(
-        const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) = 0;
+    
+    virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
+    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
+    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
     virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                        SessionSnapshot& snapshot, bool isLowResolution) = 0;
-    virtual WSError ClearSession(int32_t persistentId) = 0;
-    virtual WSError ClearAllSessions() = 0;
     virtual WSError LockSession(int32_t sessionId) = 0;
     virtual WSError UnlockSession(int32_t sessionId) = 0;
-    virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
-    virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
-        std::vector<std::int32_t>& result) = 0;
     virtual WSError RaiseWindowToTop(int32_t persistentId) = 0;
-    virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
-        const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
-    virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType) = 0;
 
     /**
@@ -143,6 +148,20 @@ public:
      * @param windowStates Window state list
      */
     virtual WSError GetMainWindowStatesByPid(int32_t pid, std::vector<MainWindowState>& windowStates) = 0;
+
+    /**
+     * @brief Minimize All Main Sessions of An Application.
+     *
+     * This function is used to minimize the main sessions of the application with the same bundleName and appIndex.
+     * The invoker must be an SA or SystemApp and have the related permission.
+     *
+     * @param bundleName bundle name of the application that need to be minimized.
+     * @param appIndex appIndex of the target application
+     * @param userId User ID
+     * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
+     * @permission application requires SA permission or SystemApp permission
+     */
+    virtual WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

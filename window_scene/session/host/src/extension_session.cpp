@@ -429,7 +429,7 @@ WSError ExtensionSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avoi
     return sessionStage_->UpdateAvoidArea(avoidArea, type);
 }
 
-AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type)
+AvoidArea ExtensionSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
 {
     Rosen::AvoidArea avoidArea;
     if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ != nullptr) {
@@ -467,7 +467,7 @@ void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
 
 WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Notify dump, persistenId=%{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }

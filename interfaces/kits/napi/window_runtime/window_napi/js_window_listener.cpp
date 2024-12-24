@@ -51,7 +51,7 @@ void JsWindowListener::SetMainEventHandler()
 
 napi_value JsWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
 {
-    WLOGFD("methodName = %{public}s", methodName);
+    WLOGFD("methodName=%{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
         WLOGFE("env_ nullptr or jsCallBack_ is nullptr");
         return nullptr;
@@ -78,7 +78,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         TLOGD(WmsLogTag::WMS_LAYOUT, "no need to change size");
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u], reason = %{public}u",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u], reason=%{public}u",
         rect.width_, rect.height_, reason);
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, rect, env = env_, funcName = __func__] {
@@ -464,6 +464,24 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
         HandleScope handleScope(env);
         napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
         thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
+    }
+}
+
+void JsWindowListener::OnSystemDensityChanged(float density)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    auto jsCallback = [self = weakRef_, density, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "This listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, density) };
+        thisListener->CallJsMethod(SYSTEM_DENSITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");

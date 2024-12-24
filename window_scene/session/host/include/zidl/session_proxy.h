@@ -60,7 +60,7 @@ public:
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
@@ -91,7 +91,7 @@ public:
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    WSError GetStartMoveFlag(bool& isMoving) override;
+    bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
@@ -99,14 +99,14 @@ public:
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
-    int32_t GetStatusBarHeight() override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+    int32_t GetStatusBarHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
-    WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionDetachToDisplay() override;
+    WSError RequestFocus(bool isFocused) override;
     
-    /**
+    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
@@ -114,9 +114,9 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 
-     /**
-      * Starting Window
-      */
+    /*
+     * Starting Window
+     */
     WSError RemoveStartingWindow() override;
 
 private:

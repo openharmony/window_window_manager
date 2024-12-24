@@ -28,6 +28,13 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
+constexpr size_t INDEX_ZERO = 0;
+constexpr size_t INDEX_ONE = 1;
+constexpr size_t INDEX_TWO = 2;
+constexpr size_t FOUR_PARAMS_SIZE = 4;
+constexpr size_t ARG_COUNT_ZERO = 0;
+constexpr size_t ARG_COUNT_TWO = 2;
+constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 }
 
@@ -573,22 +580,27 @@ napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButto
 bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
 {
     int32_t colorMode;
+    bool emptyParam = true;
     if (ParseJsValue(jsObject, env, "colorMode", colorMode)) {
         style.colorMode = colorMode;
+        emptyParam = false;
     }
     uint32_t buttonBackgroundSize;
     if (ParseJsValue(jsObject, env, "buttonBackgroundSize", buttonBackgroundSize)) {
         style.buttonBackgroundSize = buttonBackgroundSize;
+        emptyParam = false;
     }
     uint32_t spacingBetweenButtons;
     if (ParseJsValue(jsObject, env, "spacingBetweenButtons", spacingBetweenButtons)) {
         style.spacingBetweenButtons = spacingBetweenButtons;
+        emptyParam = false;
     }
     uint32_t closeButtonRightMargin;
     if (ParseJsValue(jsObject, env, "closeButtonRightMargin", closeButtonRightMargin)) {
         style.closeButtonRightMargin = closeButtonRightMargin;
+        emptyParam = false;
     }
-    return true;
+    return !emptyParam;
 }
 
 napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
@@ -625,35 +637,26 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
     return objValue;
 }
 
-bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-                        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
-                        napi_env env, napi_callback_info info, sptr<Window>& window)
+bool GetSystemBarStatus(napi_env env, napi_callback_info info,
+    std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
-    napi_value nativeArray = nullptr;
-    uint32_t size = 0;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > 0 && GetType(env, argv[0]) != napi_function) {
-        nativeArray = argv[0];
+    uint32_t size = INDEX_ZERO;
+    napi_value nativeArray = nullptr;
+    if (argc > ARG_COUNT_ZERO && GetType(env, argv[INDEX_ZERO]) != napi_function) {
+        nativeArray = argv[INDEX_ZERO];
         if (nativeArray == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to SystemBarArray");
             return false;
         }
         napi_get_array_length(env, nativeArray, &size);
     }
-    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-    statusProperty.enable_ = false;
-    navProperty.enable_ = false;
-    navIndicatorProperty.enable_ = false;
-    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
-    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
-    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarPropertyFlag();
+    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = false;
     for (uint32_t i = 0; i < size; i++) {
         std::string name;
         napi_value getElementValue = nullptr;
@@ -765,56 +768,18 @@ WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info,
     return errCode;
 }
 
-void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
-    std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties)
+bool GetSpecificBarStatus(napi_env env, napi_callback_info info, bool& systemBarEnable, bool& systemBarEnableAnimation)
 {
-    auto type = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
-                (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
-                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
-    auto property = window->GetSystemBarPropertyByType(type);
-    systemBarProperties[type] = property;
-    systemBarProperties[type].enable_ = newSystemBarProperties[type].enable_;
-    systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
-}
-
-bool GetSpecificBarStatus(napi_env env, napi_callback_info info,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    uint32_t paramNumber = 2;
-    if (argc < paramNumber) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+    if (argc < ARG_COUNT_TWO || !ConvertFromJsValue(env, argv[INDEX_ONE], systemBarEnable)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu or Failed to convert enable parameter to bool", argc);
         return false;
     }
-    std::string name;
-    if (!ConvertFromJsValue(env, argv[0], name)) {
-        WLOGFE("Failed to convert parameter to SystemBarName");
+    if (argc >= ARG_COUNT_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], systemBarEnableAnimation)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert enableAnimation parameter to bool");
         return false;
-    }
-    bool enable = false;
-    if (!ConvertFromJsValue(env, argv[1], enable)) {
-        WLOGFE("Failed to convert enable parameter to bool");
-        return NapiGetUndefined(env);
-    }
-    bool enableAnimation = false;
-    if (argc >= 3) {    // 3: min param num when using enableAnimation
-        if (!ConvertFromJsValue(env, argv[2], enableAnimation)) {   // 2: index of param enableAnimation
-            WLOGFE("Failed to convert enableAnimation parameter to bool");
-            return false;
-        }
-    }
-    if (name.compare("status") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableAnimation;
-    } else if (name.compare("navigation") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ = enableAnimation;
-    } else if (name.compare("navigationIndicator") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableAnimation_ = enableAnimation;
     }
     return true;
 }
@@ -907,47 +872,23 @@ bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
     return true;
 }
 
-void GetSystemBarPropertiesFromJs(sptr<Window>& window,
-    std::map<WindowType, SystemBarProperty>& newProperties,
-    std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags,
+bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
     std::map<WindowType, SystemBarProperty>& properties,
     std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
-    for (auto type : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {
-        auto property = window->GetSystemBarPropertyByType(type);
-        properties[type] = property;
-        propertyFlags[type] = SystemBarPropertyFlag();
-
-        properties[type].backgroundColor_ = newProperties[type].backgroundColor_;
-        properties[type].contentColor_ = newProperties[type].contentColor_;
-        properties[type].enableAnimation_ = newProperties[type].enableAnimation_;
-        propertyFlags[type].backgroundColorFlag = newPropertyFlags[type].backgroundColorFlag;
-        propertyFlags[type].contentColorFlag = newPropertyFlags[type].contentColorFlag;
-        propertyFlags[type].enableAnimationFlag = newPropertyFlags[type].enableAnimationFlag;
-    }
-}
-
-bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject, sptr<Window>& window,
-    std::map<WindowType, SystemBarProperty>& properties,
-    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
-{
-    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
-    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
-    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ = GetColorFromJs(env, jsObject, "statusBarColor",
-        statusProperty.backgroundColor_, propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ = GetColorFromJs(env,
-        jsObject, "navigationBarColor", navProperty.backgroundColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
+        GetColorFromJs(env, jsObject, "statusBarColor",
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
+        GetColorFromJs(env, jsObject, "navigationBarColor",
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
 
     if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||
         !SetWindowNavigationBarContentColor(env, jsObject, properties, propertyFlags)) {
         return false;
     }
-
     bool enableStatusBarAnimation = false;
     if (ParseJsValue(jsObject, env, "enableStatusBarAnimation", enableStatusBarAnimation)) {
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableStatusBarAnimation;
@@ -1005,6 +946,20 @@ napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& 
     napi_set_named_property(env, objValue, "top", CreateJsValue(env, titleButtonRect.posY_));
     napi_set_named_property(env, objValue, "width", CreateJsValue(env, titleButtonRect.width_));
     napi_set_named_property(env, objValue, "height", CreateJsValue(env, titleButtonRect.height_));
+    return objValue;
+}
+
+napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityInfo& windowDensityInfo)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(
+        env, objValue, "systemDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.systemDensity)));
+    napi_set_named_property(
+        env, objValue, "defaultDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.defaultDensity)));
+    napi_set_named_property(
+        env, objValue, "customDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.customDensity)));
     return objValue;
 }
 

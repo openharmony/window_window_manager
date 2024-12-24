@@ -685,6 +685,36 @@ HWTEST_F(WindowSessionImplTest3, SetRequestedOrientation, Function | SmallTest |
 }
 
 /**
+ * @tc.name: SetTargetAPIVersion
+ * @tc.desc: SetTargetAPIVersion
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetTargetAPIVersion, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTargetAPIVersion start";
+    window_ = GetTestWindowImpl("SetAPPWindowIcon");
+    ASSERT_NE(window_, nullptr);
+    uint32_t version = 14;
+    window_->SetTargetAPIVersion(version);
+    EXPECT_EQ(version, window_->GetTargetAPIVersion());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTargetAPIVersion end";
+}
+
+/**
+ * @tc.name: SetAPPWindowIcon
+ * @tc.desc: SetAPPWindowIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetTargetAPIVersion, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetTargetAPIVersion start";
+    window_ = GetTestWindowImpl("GetTargetAPIVersion");
+    ASSERT_NE(window_, nullptr);
+    EXPECT_EQ(0, window_->GetTargetAPIVersion());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetTargetAPIVersion end";
+}
+
+/**
  * @tc.name: SetAPPWindowIcon
  * @tc.desc: SetAPPWindowIcon
  * @tc.type: FUNC
@@ -700,6 +730,189 @@ HWTEST_F(WindowSessionImplTest3, SetAPPWindowIcon, Function | SmallTest | Level2
     auto ret = window_->SetAPPWindowIcon(icon);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetAPPWindowIcon end";
+}
+
+/**
+ * @tc.name: SetBackgroundColor
+ * @tc.desc: SetBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetBackgroundColor, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBackgroundColor start";
+    window_ = GetTestWindowImpl("SetBackgroundColor");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    std::string color = "";
+    auto ret = window_->SetBackgroundColor(color);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    color = "#FF0000";
+    ret = window_->SetBackgroundColor(color);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetBackgroundColor end";
+}
+
+/**
+ * @tc.name: Find
+ * @tc.desc: Find
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, Find, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: Find start";
+    window_ = GetTestWindowImpl("Find");
+    ASSERT_NE(window_, nullptr);
+    window_->windowSessionMap_.clear();
+    std::string name = "Find";
+    sptr<WindowSessionImpl> window1 = GetTestWindowImpl("Find1");
+    ASSERT_NE(window1, nullptr);
+    window_->windowSessionMap_.insert(std::make_pair(name, std::make_pair(1, window1)));
+    auto ret = window_->Find(name);
+    ASSERT_NE(ret, nullptr);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: Find end";
+}
+
+/**
+ * @tc.name: RegisterWindowTitleButtonRectChangeListener
+ * @tc.desc: RegisterWindowTitleButtonRectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RegisterWindowTitleButtonRectChangeListener, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterWindowTitleButtonRectChangeListener start";
+    window_ = GetTestWindowImpl("RegisterWindowTitleButtonRectChangeListener");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_SHOWN;
+    window_->interactive_ = true;
+    window_->hasFirstNotifyInteractive_ = true;
+    window_->NotifyForegroundInteractiveStatus(true);
+
+    sptr<IWindowTitleButtonRectChangedListener> listener = nullptr;
+    auto ret = window_->RegisterWindowTitleButtonRectChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterWindowTitleButtonRectChangeListener end";
+}
+
+/**
+ * @tc.name: GetUIContentWithId
+ * @tc.desc: GetUIContentWithId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetUIContentWithId, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentWithId start";
+    window_ = GetTestWindowImpl("GetUIContentWithId");
+    ASSERT_NE(window_, nullptr);
+    window_->windowSessionMap_.clear();
+    std::string name = "GetUIContentWithId";
+    sptr<WindowSessionImpl> window1 = GetTestWindowImpl("GetUIContentWithId1");
+    ASSERT_NE(window1, nullptr);
+    window_->windowSessionMap_.insert(std::make_pair(name, std::make_pair(1, window1)));
+    auto ret = window_->GetUIContentWithId(1);
+    ASSERT_EQ(ret, nullptr);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetUIContentWithId end";
+}
+
+/**
+ * @tc.name: UnregisterWindowRectChangeListener
+ * @tc.desc: UnregisterWindowRectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UnregisterWindowRectChangeListener, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterWindowRectChangeListener start";
+    window_ = GetTestWindowImpl("UnregisterWindowRectChangeListener");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_SHOWN;
+    window_->windowRectChangeListeners_.clear();
+    sptr<IWindowRectChangeListener> listener = nullptr;
+    auto ret = window_->UnregisterWindowRectChangeListener(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterWindowRectChangeListener end";
+}
+
+/**
+ * @tc.name: IsFloatingWindowAppType
+ * @tc.desc: IsFloatingWindowAppType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFloatingWindowAppType start";
+    window_ = GetTestWindowImpl("IsFloatingWindowAppType");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->property_->isFloatingWindowAppType_ = true;
+    window_->state_ = WindowState::STATE_CREATED;
+    auto ret = window_->IsFloatingWindowAppType();
+    ASSERT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsFloatingWindowAppType end";
+}
+
+/**
+ * @tc.name: SetWindowContainerColor
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor start";
+    window_ = GetTestWindowImpl("SetWindowContainerColor");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window_->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window_->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    std::string activeColor = "";
+    std::string inactiveColor = "";
+    auto ret = window_->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_NE(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor end";
+}
+
+/**
+ * @tc.name: SetAvoidAreaOption
+ * @tc.desc: SetAvoidAreaOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetAvoidAreaOption");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    WMError res = window->SetAvoidAreaOption(3);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetAvoidAreaOption
+ * @tc.desc: GetAvoidAreaOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetAvoidAreaOption");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    uint32_t avoidAreaOption = 0;
+    WMError res = window->GetAvoidAreaOption(avoidAreaOption);
+    ASSERT_EQ(res, WMError::WM_OK);
 }
 }
 } // namespace Rosen

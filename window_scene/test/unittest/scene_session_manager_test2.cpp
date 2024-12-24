@@ -765,134 +765,6 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml08, Function | SmallTest 
 }
 
 /**
- * @tc.name: ConfigKeyboardAnimation01
- * @tc.desc: call ConfigKeyboardAnimation default
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation01, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>abv</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>abv</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
-    ASSERT_EQ(ssm_->systemConfig_.animationOut_.duration_, static_cast<uint32_t>(300));
-}
-
-/**
- * @tc.name: ConfigKeyboardAnimation02
- * @tc.desc: call ConfigKeyboardAnimation default
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation02, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                        "<duration>600</duration>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.animationOut_.duration_, static_cast<uint32_t>(300));
-}
-
-/**
- * @tc.name: ConfigKeyboardAnimation03
- * @tc.desc: call ConfigKeyboardAnimation default
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation03, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                        "<duration>400</duration>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
-}
-
-/**
- * @tc.name: ConfigKeyboardAnimation04
- * @tc.desc: call ConfigKeyboardAnimation default
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation04, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                    "</timing>"
-                "</animationIn>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
-}
-
-/**
  * @tc.name: ConfigWindowAnimation01
  * @tc.desc: call ConfigWindowAnimation default
  * @tc.type: FUNC
@@ -1310,14 +1182,13 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, Function | SmallTe
             "</systemUIStatusBar>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     sceneSessionManager->ConfigWindowSceneXml();
     ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_, 1);
     ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str(),
         "#4c000000");
     ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.
         immersiveStatusBarContentColor_.c_str(), "#ffffee");
-    delete sceneSessionManager;
 }
 
 /**
@@ -1995,66 +1866,9 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, Function | SmallTe
             "</systemUIStatusBar>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(sceneSessionManager, nullptr);
     sceneSessionManager->ConfigWindowSceneXml();
-    delete sceneSessionManager;
-}
-
-/**
- * @tc.name: CreateAndConnectSpecificSession
- * @tc.desc: CreateAndConnectSpecificSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, CreateAndConnectSpecificSession02, Function | SmallTest | Level3)
-{
-    sptr<ISessionStage> sessionStage;
-    sptr<IWindowEventChannel> eventChannel;
-    std::shared_ptr<RSSurfaceNode> node = nullptr;
-    sptr<WindowSessionProperty> property;
-    sptr<ISession> session;
-    SystemSessionConfig systemConfig;
-    sptr<IRemoteObject> token;
-    int32_t id = 0;
-    ASSERT_NE(ssm_, nullptr);
-    // property is nullptr
-    WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
-
-    // property is not nullptr
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    property->SetTopmost(true);
-    uint32_t flags = property->GetWindowFlags() & (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL)));
-    property->SetWindowFlags(flags);
-    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    property->SetFloatingWindowAppType(true);
-    ssm_->shouldHideNonSecureFloatingWindows_.store(true);
-    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
-    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    ssm_->isScreenLocked_ = true;
-    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(WSError::WS_DO_NOTHING, res);
 }
 
 /**

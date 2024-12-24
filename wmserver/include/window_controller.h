@@ -49,7 +49,8 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError RequestFocus(uint32_t windowId);
     WMError SetAlpha(uint32_t windowId, float alpha);
-    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const;
+    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType,
+        const Rect& rect = {0, 0, 0, 0}) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);

@@ -35,6 +35,8 @@ constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
 constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
 constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
 constexpr int32_t DEFAULT_COLOR_MODE = -1;
+constexpr int32_t MIN_COLOR_MODE = -1;
+constexpr int32_t MAX_COLOR_MODE = 1;
 constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
 constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
@@ -300,6 +302,7 @@ enum class SystemBarSettingFlag : uint32_t {
 enum class ControlAppType : uint8_t {
     CONTROL_APP_TYPE_BEGIN = 0,
     APP_LOCK = 1,
+    PARENT_CONTROL,
     CONTROL_APP_TYPE_END,
 };
 
@@ -332,6 +335,14 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_IS_TOAST = 1 << 7,
     WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
     WINDOW_FLAG_END = 1 << 9,
+};
+
+/**
+ * @brief Enumerates system and app sub window avoid area options
+ */
+enum class AvoidAreaOption : uint32_t {
+    ENABLE_SYSTEM_WINDOW = 1,
+    ENABLE_APP_SUB_WINDOW = 1 << 1,
 };
 
 /**
@@ -583,20 +594,23 @@ struct MainWindowState : public Parcelable {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
-    constexpr int32_t INVALID_USER_ID = -1;
-    constexpr int32_t SYSTEM_USERID = 0;
-    constexpr int32_t BASE_USER_RANGE = 200000;
-    constexpr int32_t DEFAULT_SCREEN_ID = 0;
-    constexpr int32_t FULL_CIRCLE_DEGREE = 360;
-    constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+constexpr uint32_t INVALID_WINDOW_ID = 0;
+constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
+constexpr int32_t INVALID_USER_ID = -1;
+constexpr int32_t SYSTEM_USERID = 0;
+constexpr int32_t BASE_USER_RANGE = 200000;
+constexpr int32_t DEFAULT_SCREEN_ID = 0;
+constexpr int32_t FULL_CIRCLE_DEGREE = 360;
+constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+constexpr float UNDEFINED_DENSITY = -1.0f;
+constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
+constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -798,9 +812,11 @@ enum class UIExtensionUsage : uint32_t {
  * @brief UIExtension info for event
  */
 struct ExtensionWindowEventInfo {
-    int32_t persistentId  = 0;
+    int32_t persistentId = 0;
     int32_t pid = -1;
-    Rect windowRect {0, 0, 0, 0};
+    Rect windowRect { 0, 0, 0, 0 }; // Calculated from global rect and UIExtension windowRect
+    Rect uiExtRect { 0, 0, 0, 0 };  // Transferred from arkUI
+    bool hasUpdatedRect = false;
 };
 
 /**
@@ -1118,9 +1134,9 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX);
+    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX); // The width and height are no larger than INT32_MAX.
     uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
-    uint32_t minWidth_ = 1;
+    uint32_t minWidth_ = 1; // The width and height of the window cannot be less than or equal to 0.
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
@@ -1276,8 +1292,8 @@ enum class CaseType {
 
 enum class MaximizePresentation {
     FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set immersiveStateEnable
-    EXIT_IMMERSIVE = 1,       // immersiveStateEnable will be set as false
-    ENTER_IMMERSIVE = 2,       // immersiveStateEnable will be set as true
+    EXIT_IMMERSIVE = 1,                // immersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,               // immersiveStateEnable will be set as true
     // immersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
@@ -1335,6 +1351,29 @@ struct SptrHash {
 };
 
 /**
+ * @struct WindowDensityInfo
+ *
+ * @brief Currently available density
+ */
+struct WindowDensityInfo {
+    float systemDensity = UNDEFINED_DENSITY;
+    float defaultDensity = UNDEFINED_DENSITY;
+    float customDensity = UNDEFINED_DENSITY;
+
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 64;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[%f, %f, %f]", systemDensity, defaultDensity, customDensity) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
+};
+
+/**
  * @class KeyboardLayoutParams
  *
  * @brief Keyboard need adjust layout
@@ -1342,6 +1381,8 @@ struct SptrHash {
 class KeyboardLayoutParams : public Parcelable {
 public:
     WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    int32_t landscapeAvoidHeight_ = -1;
+    int32_t portraitAvoidHeight_ = -1;
     Rect LandscapeKeyboardRect_ { 0, 0, 0, 0 };
     Rect PortraitKeyboardRect_ { 0, 0, 0, 0 };
     Rect LandscapePanelRect_ { 0, 0, 0, 0 };
@@ -1349,7 +1390,10 @@ public:
 
     bool operator==(const KeyboardLayoutParams& params) const
     {
-        return (gravity_ == params.gravity_ && LandscapeKeyboardRect_ == params.LandscapeKeyboardRect_ &&
+        return (gravity_ == params.gravity_ &&
+            landscapeAvoidHeight_ == params.landscapeAvoidHeight_ &&
+            portraitAvoidHeight_ == params.portraitAvoidHeight_ &&
+            LandscapeKeyboardRect_ == params.LandscapeKeyboardRect_ &&
             PortraitKeyboardRect_ == params.PortraitKeyboardRect_ &&
             LandscapePanelRect_ == params.LandscapePanelRect_ &&
             PortraitPanelRect_ == params.PortraitPanelRect_);
@@ -1381,6 +1425,8 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return (parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
+            parcel.WriteInt32(landscapeAvoidHeight_) &&
+            parcel.WriteInt32(portraitAvoidHeight_) &&
             WriteParcel(parcel, LandscapeKeyboardRect_) &&
             WriteParcel(parcel, PortraitKeyboardRect_) &&
             WriteParcel(parcel, LandscapePanelRect_) &&
@@ -1394,6 +1440,8 @@ public:
             return nullptr;
         }
         params->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
+        params->landscapeAvoidHeight_ = parcel.ReadInt32();
+        params->portraitAvoidHeight_ = parcel.ReadInt32();
         if (ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
             ReadParcel(parcel, params->PortraitKeyboardRect_) &&
             ReadParcel(parcel, params->LandscapePanelRect_) &&
@@ -1402,6 +1450,29 @@ public:
         }
         delete params;
         return nullptr;
+    }
+};
+
+/**
+ * @struct KeyboardTouchHotAreas
+ *
+ * @brief keyboard need set hotArea
+ */
+struct KeyboardTouchHotAreas {
+public:
+    std::vector<Rect> landscapeKeyboardHotAreas_;
+    std::vector<Rect> portraitKeyboardHotAreas_;
+    std::vector<Rect> landscapePanelHotAreas_;
+    std::vector<Rect> portraitPanelHotAreas_;
+
+    bool isKeyboardEmpty() const
+    {
+        return (landscapeKeyboardHotAreas_.empty() || portraitKeyboardHotAreas_.empty());
+    }
+
+    bool isPanelEmpty() const
+    {
+        return (landscapePanelHotAreas_.empty() || portraitPanelHotAreas_.empty());
     }
 };
 }

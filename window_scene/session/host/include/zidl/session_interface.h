@@ -67,6 +67,15 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SyncSessionEvent(SessionEvent event) { return WSError::WS_OK; }
+
+    /**
+     * @brief Enables or disables system window dragging.
+     *
+     * This function provides the ability for system application to make system window dragable.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
     virtual WMError SetSystemWindowEnableDrag(bool enableDrag) { return WMError::WM_OK; }
 
     /**
@@ -93,10 +102,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
-        bool isDockHoverShown = true)
-    {
-        return WSError::WS_OK;
-    }
+        bool isDockHoverShown = true) { return WSError::WS_OK; }
 
     /**
      * @brief Callback for processing restore main window.
@@ -128,7 +134,7 @@ public:
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
-    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type) { return {}; }
+    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
@@ -251,7 +257,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    virtual WSError GetStartMoveFlag(bool& isMoving) { return WSError::WS_OK; }
+    virtual bool IsStartMoving() { return false; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool isShow) { return WSError::WS_OK; }
 
@@ -271,9 +277,9 @@ public:
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
-    virtual int32_t GetStatusBarHeight() { return 0; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual void NotifyExtensionDetachToDisplay() {}
+    virtual int32_t GetStatusBarHeight() { return 0; }
     /**
      * @brief Request to get focus or lose focus.
      *

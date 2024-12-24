@@ -237,9 +237,6 @@ std::pair<ScreenId, DMRect> ScreenSession::GetMirrorScreenRegion()
 void ScreenSession::EnableMirrorScreenRegion()
 {
     auto& rect = mirrorScreenRegion_.second;
-    if (rect == DMRect::NONE()) {
-        return;
-    }
     ScreenId screenId = INVALID_SCREEN_ID;
     if (isPhysicalMirrorSwitch_) {
         screenId = screenId_;
@@ -478,8 +475,8 @@ void ScreenSession::UpdatePropertyByActiveMode()
 ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
-    property_.SetBounds(updatedProperty.GetBounds());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
+    property_.SetBounds(updatedProperty.GetBounds());
     return property_;
 }
 
