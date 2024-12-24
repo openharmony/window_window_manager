@@ -1073,7 +1073,8 @@ HWTEST_F(WindowImplTest5, AdjustWindowAnimationFlag, Function | SmallTest | Leve
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
 
     window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    sptr<IAnimationTransitionController> animationTransitionController = sptr<IAnimationTransitionController>::MakeSptr();
+    sptr<IAnimationTransitionController> animationTransitionController =
+        sptr<IAnimationTransitionController>::MakeSptr();
     ASSERT_NE(animationTransitionController, nullptr);
     window->animationTransitionController_ = animationTransitionController;
 
@@ -1182,7 +1183,8 @@ HWTEST_F(WindowImplTest5, GetOriginalAbilityInfo, Function | SmallTest | Level1)
     option->SetWindowName("GetOriginalAbilityInfo");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
 
-    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    std::shared_ptr<AbilityRuntime::Context> context =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
     window->context_ = context;
     ASSERT_EQ(nullptr, window->GetOriginalAbilityInfo());
 }
