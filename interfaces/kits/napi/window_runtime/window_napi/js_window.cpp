@@ -3080,6 +3080,7 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
         }
         auto errCode = WM_JS_TO_ERROR_CODE_MAP.at(
             UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window));
