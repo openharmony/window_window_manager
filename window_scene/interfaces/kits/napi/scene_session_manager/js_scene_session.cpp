@@ -3811,7 +3811,8 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
 void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, propertyMap, env = env_] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, propertyMap, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnSystemBarPropertyChange jsSceneSession id:%{public}d has been destroyed",
@@ -3825,7 +3826,7 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
         }
         napi_value jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
         if (jsSessionStateObj == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "jsSessionStateObj is nullptr");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsSessionStateObj is nullptr", where);
             return;
         }
         napi_value argv[] = {jsSessionStateObj};
@@ -4574,7 +4575,7 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
     }
     session->SetIsDisplayStatusBarTemporarily(isTempDisplay);
 
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] isTempDisplay:%{public}u",
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] isTempDisplay %{public}u",
         session->GetPersistentId(), session->GetWindowName().c_str(), isTempDisplay);
     return NapiGetUndefined(env);
 }
