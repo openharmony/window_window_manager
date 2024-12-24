@@ -118,6 +118,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         config.property = screenSessionManager_->GetScreenProperty(screenId);
         config.displayNode = screenSessionManager_->GetDisplayNode(screenId);
         sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+        screenSession->SetScreenCombination(screenSessionManager_->GetScreenCombination(screenId));
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
