@@ -62,7 +62,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
 
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
     WSError NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) override;
     WSError NotifyAccessibilityChildTreeRegister(
@@ -94,7 +94,7 @@ public:
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
-    float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
+    float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;

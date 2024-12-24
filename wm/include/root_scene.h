@@ -59,7 +59,7 @@ public:
      */
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
@@ -67,6 +67,8 @@ public:
     void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
+
+    const std::shared_ptr<AbilityRuntime::Context> GetContext() const override { return context_.lock(); }
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
@@ -117,6 +119,7 @@ private:
     static std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> configurationUpdatedCallback_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    std::weak_ptr<AbilityRuntime::Context> context_;
 
     /*
      * Window Immersive

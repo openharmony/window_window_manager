@@ -130,7 +130,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
-    WLOGFD("End, type = %{public}s", cbType.c_str());
+    WLOGFD("End, type=%{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 

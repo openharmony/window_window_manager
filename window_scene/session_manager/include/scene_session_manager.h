@@ -119,7 +119,7 @@ using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
-using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
+using DumpUITreeFunc = std::function<void(std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
 using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
@@ -519,6 +519,7 @@ public:
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
+    WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
@@ -708,12 +709,11 @@ private:
     int GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
                               std::vector<SessionInfoBean>& sessionInfos);
     int GetRemoteSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
-    WSError GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo);
+    WSError GetTotalUITreeInfo(std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
-    void PostBrightnessTask(float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
@@ -988,8 +988,16 @@ private:
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
         sptr<WindowSessionProperty> property, const WindowType& type);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
+
+    /*
+     * keyboard Window
+     */
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     sptr<SceneSession> RequestKeyboardPanelSession(const std::string& panelName, uint64_t displayId);
+    sptr<SceneSession> GetKeyboardSession(DisplayId displayId, bool isSystemKeyboard);
+    void HandleKeyboardAvoidChange(sptr<SceneSession> sceneSession, DisplayId displayId,
+        SystemKeyboardAvoidChangeReason reason);
+    void UpdateKeyboardAvoidAreaActive(DisplayId displayId, bool sysKeyAvoidAreaActive);
 
     /*
      * Specific Window

@@ -88,6 +88,7 @@ public:
     void SetWindowModeSupportType(uint32_t windowModeSupportType);
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
+    void SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& keyboardTouchHotAreas);
     void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
@@ -101,6 +102,12 @@ public:
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
+    
+    /*
+     * Window Immersive
+     */
+    void SetAvoidAreaOption(uint32_t avoidAreaOption);
+    uint32_t GetAvoidAreaOption() const;
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -146,6 +153,7 @@ public:
     const Transform& GetTransform() const;
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
+    KeyboardTouchHotAreas GetKeyboardTouchHotAreas() const;
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
@@ -237,8 +245,13 @@ public:
     bool IsSystemKeyboard() const;
 
 private:
+    void setTouchHotAreasInner(std::vector<Rect>& touchHotAreas, const std::vector<Rect>& rects);
+    bool MarshallingTouchHotAreasInner(const std::vector<Rect>& touchHotAreas, Parcel& parcel) const;
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
+    bool MarshallingKeyboardTouchHotAreas(Parcel& parcel) const;
+    static void UnmarshallingTouchHotAreasInner(std::vector<Rect>& touchHotAreas, Parcel& parcel);
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
+    static void UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
@@ -253,6 +266,7 @@ private:
     bool WriteActionUpdateMode(Parcel& parcel);
     bool WriteActionUpdateAnimationFlag(Parcel& parcel);
     bool WriteActionUpdateTouchHotArea(Parcel& parcel);
+    bool WriteActionUpdateKeyboardTouchHotArea(Parcel& parcel);
     bool WriteActionUpdateDecorEnable(Parcel& parcel);
     bool WriteActionUpdateWindowLimits(Parcel& parcel);
     bool WriteActionUpdateDragenabled(Parcel& parcel);
@@ -263,6 +277,7 @@ private:
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
+    bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -277,6 +292,7 @@ private:
     void ReadActionUpdateMode(Parcel& parcel);
     void ReadActionUpdateAnimationFlag(Parcel& parcel);
     void ReadActionUpdateTouchHotArea(Parcel& parcel);
+    void ReadActionUpdateKeyboardTouchHotArea(Parcel& parcel);
     void ReadActionUpdateDecorEnable(Parcel& parcel);
     void ReadActionUpdateWindowLimits(Parcel& parcel);
     void ReadActionUpdateDragenabled(Parcel& parcel);
@@ -287,6 +303,7 @@ private:
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
+    void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -341,6 +358,7 @@ private:
     bool isFloatingWindowAppType_ = false;
     mutable std::mutex touchHotAreasMutex_;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
+    KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
     bool keepKeyboardFlag_ = false;
@@ -356,8 +374,8 @@ private:
     bool fullScreenStart_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
-    static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
+    static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
+    static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;
@@ -397,6 +415,11 @@ private:
 
     // system keyboard
     bool isSystemKeyboard_ = false;
+
+    /*
+     * Window Immersive
+     */
+    uint32_t avoidAreaOption_ = 0;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

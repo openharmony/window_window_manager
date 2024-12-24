@@ -1226,36 +1226,6 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest
 }
 
 /**
- * @tc.name: TransferPointerEventSystemDialog
- * @tc.desc: TransferPointerEventSystemDialog
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, TransferPointerEventSystemDialog, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "TransferPointerEventSystemDialog";
-    info.bundleName_ = "TransferPointerEventSystemDialogbundle";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession =
-        sptr<SceneSession>::MakeSptr(info, specificCallback_);
-    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ =  MMI::PointerEvent::Create();
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
-    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    property->SetDecorEnable(true);
-    property->SetDragEnabled(true);
-    property->SetPersistentId(13);
-    sceneSession->property_ = property;
-    EXPECT_NE(sceneSession, nullptr);
-}
-
-/**
  * @tc.name: CalculateAvoidAreaRect
  * @tc.desc: CalculateAvoidAreaRect
  * @tc.type: FUNC
@@ -1487,12 +1457,9 @@ HWTEST_F(SceneSessionTest, OnSessionEvent, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
     sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     sceneSession->moveDragController_->isStartDrag_ = true;
     sceneSession->moveDragController_->hasPointDown_ = true;
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE), WSError::WS_OK);
     ASSERT_EQ(sceneSession->OnSessionEvent(SessionEvent::EVENT_END_MOVE), WSError::WS_OK);
 }
@@ -1507,11 +1474,9 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SyncSessionEvent";
     info.bundleName_ = "SyncSessionEvent";
-    sptr<Rosen::ISession> session_;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
@@ -2040,48 +2005,15 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(12, WindowType::WINDOW_TYPE_FLOAT);
 
     WSRect rect = {1, 1, 1, 1};
-    WSRect rect2 = {1, 1, 2, 1};
+    WSRect rect2 = {2, 2, 2, 1};
     sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
+    sceneSession->moveDragController_->moveDragProperty_.originalRect_ = rect;
+    sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::HIDE);
+    WSRect rect3 = {1, 1, 2, 1};
+    ASSERT_EQ(rect2, rect3);
 
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect = {1, 1, 2000, 1};
-    rect2 = {1, 1, 2, 1};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect = {1, 1, 2000, 1};
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect = {1, 1, 500, 1};
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    rect = {1, 1, 500, 1};
-    rect2 = {1, 1, 1, 2};
-    sceneSession->winRect_ = rect2;
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::HIDE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::HIDE);
-
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::MOVE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::MOVE);
-
-    sceneSession->HandleCompatibleModeMoveDrag(rect, SizeChangeReason::DRAG_MOVE);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::DRAG_MOVE);
+    sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
+    ASSERT_EQ(rect2, rect3);
 }
 
 /**
@@ -2184,7 +2116,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
     EXPECT_NE(property, nullptr);
-    property->SetDisplayId(-99);
+    property->SetDisplayId(-1);
     sceneSession->SetSessionProperty(property);
     sceneSession->SetDefaultDisplayIdIfNeed();
     EXPECT_EQ(property->GetDisplayId(), SCREEN_ID_INVALID);

@@ -51,7 +51,7 @@ void JsWindowListener::SetMainEventHandler()
 
 napi_value JsWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
 {
-    WLOGFD("methodName = %{public}s", methodName);
+    WLOGFD("methodName=%{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
         WLOGFE("env_ nullptr or jsCallBack_ is nullptr");
         return nullptr;
@@ -78,7 +78,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         TLOGD(WmsLogTag::WMS_LAYOUT, "no need to change size");
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u], reason = %{public}u",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u], reason=%{public}u",
         rect.width_, rect.height_, reason);
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, rect, env = env_, funcName = __func__] {

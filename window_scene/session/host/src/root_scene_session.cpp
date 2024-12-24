@@ -78,6 +78,7 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
             WSRect keyboardRect;
             if (inputMethod && inputMethod->GetKeyboardPanelSession()) {
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
+                inputMethod->RecalculatePanelRectForAvoidArea(keyboardRect);
             }
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
             TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s keyboard %{public}s area %{public}s",
@@ -140,7 +141,7 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
           rect.ToString().c_str(), barArea.ToString().c_str(), avoidArea.ToString().c_str());
 }
 
-AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
+AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {
         auto session = weakThis.promote();
@@ -150,25 +151,25 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type)
         }
 
         AvoidArea avoidArea;
-        WSRect rect = session->GetSessionRect();
+        WSRect sessionRect = session->GetSessionRect();
         switch (type) {
             case AvoidAreaType::TYPE_SYSTEM: {
-                session->GetSystemAvoidAreaForRoot(rect, avoidArea);
+                session->GetSystemAvoidAreaForRoot(sessionRect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_CUTOUT: {
-                session->GetCutoutAvoidAreaForRoot(rect, avoidArea);
+                session->GetCutoutAvoidAreaForRoot(sessionRect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_SYSTEM_GESTURE: {
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_KEYBOARD: {
-                session->GetKeyboardAvoidAreaForRoot(rect, avoidArea);
+                session->GetKeyboardAvoidAreaForRoot(sessionRect, avoidArea);
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
-                session->GetAINavigationBarAreaForRoot(rect, avoidArea);
+                session->GetAINavigationBarAreaForRoot(sessionRect, avoidArea);
                 return avoidArea;
             }
             default: {

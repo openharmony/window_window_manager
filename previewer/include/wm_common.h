@@ -33,6 +33,8 @@ constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
 constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
 constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
 constexpr int32_t DEFAULT_COLOR_MODE = -1;
+constexpr int32_t MIN_COLOR_MODE = -1;
+constexpr int32_t MAX_COLOR_MODE = 1;
 constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
 constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
@@ -273,6 +275,14 @@ enum class WindowFlag : uint32_t {
 };
 
 /**
+ * @brief Enumerates system and app sub window avoid area options
+ */
+enum class AvoidAreaOption : uint32_t {
+    ENABLE_SYSTEM_WINDOW = 1,
+    ENABLE_APP_SUB_WINDOW = 1 << 1,
+};
+
+/**
  * @brief Enumerates flag of multiWindowUIType.
  */
 enum class WindowUIType : uint8_t {
@@ -399,6 +409,8 @@ constexpr int32_t INVALID_PID = -1;
 constexpr int32_t INVALID_UID = -1;
 
 constexpr float UNDEFINED_DENSITY = -1.0f;
+constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
+constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
 }
 
 /**
@@ -594,6 +606,29 @@ struct SystemBarProperty {
 };
 
 /**
+ * @struct WindowDensityInfo
+ *
+ * @brief Currently available density
+ */
+struct WindowDensityInfo {
+    float systemDensity = UNDEFINED_DENSITY;
+    float defaultDensity = UNDEFINED_DENSITY;
+    float customDensity = UNDEFINED_DENSITY;
+
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 64;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[%f, %f, %f]", systemDensity, defaultDensity, customDensity) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
+};
+
+/**
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
@@ -713,9 +748,9 @@ enum class WindowUpdateType : int32_t {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX);
+    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX); // The width and height are no larger than INT32_MAX.
     uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
-    uint32_t minWidth_ = 1;
+    uint32_t minWidth_ = 1; // The width and height of the window cannot be less than or equal to 0.
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
@@ -865,8 +900,8 @@ struct MoveConfiguration {
 
 enum class MaximizePresentation {
     FOLLOW_APP_IMMERSIVE_SETTING = 0,   // follow app set immersiveStateEnable
-    EXIT_IMMERSIVE = 1,        // immersiveStateEnable will be set as false
-    ENTER_IMMERSIVE = 2,        // immersiveStateEnable will be set as true
+    EXIT_IMMERSIVE = 1,                 // immersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,                // immersiveStateEnable will be set as true
     // immersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };

@@ -51,7 +51,7 @@ void JsExtensionWindowListener::SetMainEventHandler()
 
 void JsExtensionWindowListener::CallJsMethod(const char* methodName, napi_value const * argv, size_t argc)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "CallJsMethod methodName = %{public}s", methodName);
+    TLOGI(WmsLogTag::WMS_UIEXT, "methodName=%{public}s", methodName);
     if (env_ == nullptr || jsCallBack_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "env_ nullptr or jsCallBack_ is nullptr");
         return;
@@ -69,7 +69,7 @@ void JsExtensionWindowListener::CallJsMethod(const char* methodName, napi_value 
 void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "OnSizeChange, [%{public}u, %{public}u], reason=%{public}u",
+    TLOGI(WmsLogTag::WMS_UIEXT, "rect [%{public}u, %{public}u], reason=%{public}u",
         rect.width_, rect.height_, reason);
     if (currRect_.width_ == rect.width_ && currRect_.height_ == rect.height_ &&
         reason != WindowSizeChangeReason::DRAG_END) {
@@ -232,7 +232,7 @@ void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>&
 static void LifeCycleCallBack(LifeCycleEventType eventType, wptr<JsExtensionWindowListener> weakRef,
     napi_env env, std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "LifeCycleCallBack, envent type: %{public}u", eventType);
+    TLOGI(WmsLogTag::WMS_UIEXT, "event type: %{public}u", eventType);
     auto task = [self = weakRef, eventType, eng = env] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::LifeCycleCallBack");
         auto thisListener = self.promote();
