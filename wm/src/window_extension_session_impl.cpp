@@ -554,13 +554,11 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
         if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         }
-
         if (initByName) {
             uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
         } else {
             uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
         }
-        
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);

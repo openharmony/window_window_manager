@@ -1493,8 +1493,7 @@ HWTEST_F(WindowTest, NapiSetUIContent, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowTest, NapiSetUIContentByName, Function | SmallTest | Level2)
 {
-    sptr<Window> window = new Window();
-    ASSERT_NE(nullptr, window);
+    auto window = sptr<Window>::MakeSptr();
     napi_env env = nullptr;
     napi_value storage = nullptr;
     auto ret = window->NapiSetUIContentByName("info", env, storage);

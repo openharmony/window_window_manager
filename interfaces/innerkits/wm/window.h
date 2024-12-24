@@ -1589,19 +1589,16 @@ public:
      * @brief set window ui content
      *
      * @param contentName content info path
-     * @param env
-     * @param storage
-     * @param type
-     * @param token
-     * @param ability
+     * @param env Napi environment
+     * @param storage Napi storage
+     * @param type restore type.
+     * @param token parent token
+     * @param ability Ability instance
      * @return WMError
      */
     virtual WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
-        AppExecFwk::Ability* ability = nullptr)
-    {
-        return WMError::WM_OK;
-    }
+        AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
 
     /**
      * @brief set window ui content
