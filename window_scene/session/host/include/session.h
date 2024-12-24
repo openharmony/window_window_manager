@@ -546,7 +546,6 @@ public:
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
     void ResetDirtyFlags();
-    void ResetDragDirtyFlags();
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
@@ -708,7 +707,6 @@ protected:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
-    uint32_t dragDirtyFlags_ = 0;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     DisplayId lastUpdatedDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
