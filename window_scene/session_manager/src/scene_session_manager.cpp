@@ -12184,6 +12184,12 @@ WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
 #endif
 }
 
+WMError SceneSessionManager::IsPcWindow(bool& isPcWindow)
+{
+    isPcWindow = systemConfig_.IsPcWindow();
+    return WMError::WM_OK;
+}
+
 WMError SceneSessionManager::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     isPcOrPadFreeMultiWindowMode = (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());

@@ -21,7 +21,6 @@
 #include "js_window.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "window_session_impl.h"
 #include "extension_window.h"
 #include "ui_content.h"
 #include "permission.h"
@@ -71,7 +70,6 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
 
     const char *moduleName = "JsExtensionWindow";
     BindNativeFunction(env, objValue, "getWindowAvoidArea", moduleName, JsExtensionWindow::GetWindowAvoidArea);
-    napi_set_named_property(env, objValue, "RectChangeReason", ComponentRectChangeReasonInit(env));
     BindNativeFunction(env, objValue, "on", moduleName, JsExtensionWindow::RegisterExtensionWindowCallback);
     BindNativeFunction(env, objValue, "off", moduleName, JsExtensionWindow::UnRegisterExtensionWindowCallback);
     BindNativeFunction(env, objValue, "hideNonSecureWindows", moduleName, JsExtensionWindow::HideNonSecureWindows);
@@ -722,21 +720,10 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
         TLOGE(WmsLogTag::WMS_UIEXT, "WindowImpl is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!windowImpl->IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-    }
-    WindowSessionImpl* windowSessionImpl = static_cast<WindowSessionImpl*>(windowImpl.GetRefPtr());
-    if (windowSessionImpl->GetProperty()->GetUIExtensionUsage() != UIExtensionUsage::EMBEDDED) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtension usage is not embedded");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-    }
-    constexpr size_t argcMin = 2;
-    constexpr size_t argcMax = 3;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < argcMin || argc > argcMax) {
+    if (argc < 2) { // 2: params num
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -745,53 +732,49 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to callbackType");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    uint32_t reasons;
-    napi_value cbValue = nullptr;
-    switch (argc) {
-        case argcMin: {
-            napi_value cbValue = argv[1];
-            if (!NapiIsCallable(env, cbValue)) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
-                return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-            }
-            break;
+    if (cbType == "rectChange") {
+        if (!windowImpl->IsPcWindow()) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
-        case argcMax: {
-            if (!ConvertFromJsValue(env, argv[1], reasons)) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to rectChangeReasons");
-                return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-            }
-            if (reasons != static_cast<uint32_t>(ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE)) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Unsupported rect change reasons");
-                return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-            }
-            napi_value cbValue = argv[2];
-            if (!NapiIsCallable(env, cbValue)) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[2]) is not callable");
-                return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-            }
-            break;
+        uint32_t reasons;
+        if (!ConvertFromJsValue(env, argv[1], reasons)) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to rectChangeReasons");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
+        if (reason != static_cast<uint32_t>(ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE)) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Unsupported rect change reasons");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+        napi_value cbValue = argv[2];
+        if (!NapiIsCallable(env, value)) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[2]) is not callable");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+        WmErrorCode ret = extensionRegisterManager_->RegisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
+            env, value);
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[2]) is not callable");
+            TLOGI(WmsLogTag::WMS_UIEXT, "Register failed, window [%{public}u, %{public}s], type=%{public}s,\
+                reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str(),
+                reasons);
+            return NapiThrowError(env, ret);
+        }
+        return NapiGetUndefined(env);
+    }
+    napi_value value = argv[1];
+    if (!NapiIsCallable(env, value)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WmErrorCode ret = extensionRegisterManager_->RegisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
-        env, cbValue);
+        env, value);
     if (ret != WmErrorCode::WM_OK) {
-        if (argc == argcMin) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "Register failed, window [%{public}u, %{public}s], type=%{public}s",
-                  windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str());
-            TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
-        } else {
-            TLOGI(WmsLogTag::WMS_UIEXT, "Register failed, window [%{public}u, %{public}s], type=%{public}s,\
-                  reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str(),
-                  reasons);
-            TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[2]) is not callable");
-        }
+        TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
         return NapiThrowError(env, ret);
-    } else {
-        TLOGI(WmsLogTag::WMS_UIEXT, "Register success, window [%{public}u, %{public}s], type=%{public}s,\
-              reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str(),
-              reasons);
     }
+    TLOGI(WmsLogTag::WMS_UIEXT, "Register end, window [%{public}u, %{public}s], type=%{public}s",
+          windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str());
     return NapiGetUndefined(env);
 }
 
@@ -824,6 +807,12 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to callbackType");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (cbType == "rectChange") {
+        if (!windowImpl->IsPcWindow()) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        }
     }
 
     napi_value cbValue = nullptr;

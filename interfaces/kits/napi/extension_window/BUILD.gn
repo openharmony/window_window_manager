@@ -98,22 +98,18 @@ ohos_shared_library("extensionwindow_napi") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
-    "../../../../wm:libwm_static",
     "../window_runtime:window_native_kit",
   ]
 
   external_deps = [
     "ability_runtime:ability_manager",
-    "ability_runtime:app_context",
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
-    "input:libmmi-client",
     "napi:ace_napi",
   ]
 
