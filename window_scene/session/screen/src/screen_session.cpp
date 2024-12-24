@@ -39,6 +39,7 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
 const int32_t NO_EXIST_UID_VERSION = -1;
+constexpr uint32_t GLOBAL_FULL_ROTATION_OFFSET = 3;
 ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
@@ -472,11 +473,13 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
-ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
+ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
+    FoldDisplayMode foldDisplayMode)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
+    UpdateTouchBoundsAndOffset(foldDisplayMode);
     return property_;
 }
 
@@ -698,6 +701,12 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
     screenFlag_ = screenFlag;
 }
 
+void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
+{
+    property_.SetPhysicalTouchBounds(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
+    property_.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), foldDisplayMode);
+}
+
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
     FoldDisplayMode foldDisplayMode)
 {
@@ -712,6 +721,7 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    UpdateTouchBoundsAndOffset(foldDisplayMode);
     Rotation targetDeviceRotation = ConvertIntToRotation(deviceRotation);
     DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation);
     property_.UpdateDeviceRotation(targetDeviceRotation);
@@ -757,6 +767,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    UpdateTouchBoundsAndOffset(foldDisplayMode);
     {
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         if (!displayNode_) {
@@ -794,6 +805,7 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    UpdateTouchBoundsAndOffset(foldDisplayMode);
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
@@ -1019,6 +1031,9 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
+        rotation = static_cast<Rotation>(static_cast<uint32_t>(rotation) + GLOBAL_FULL_ROTATION_OFFSET);
+    }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN

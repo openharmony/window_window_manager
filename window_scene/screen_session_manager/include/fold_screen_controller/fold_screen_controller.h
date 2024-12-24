@@ -46,6 +46,7 @@ public:
     bool IsFoldable();
     FoldStatus GetFoldStatus();
     bool GetTentMode();
+    FoldDisplayMode GetModeMatchStatus();
     void SetFoldStatus(FoldStatus foldStatus);
     void OnTentModeChanged(bool isTentMode);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();

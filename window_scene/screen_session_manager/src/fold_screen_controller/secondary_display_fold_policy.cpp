@@ -202,7 +202,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     } else {
         TLOGW(WmsLogTag::DMS, "unKnown displayMode");
     }
-    screenSession->UpdatePropertyByFoldControl(screenProperty_);
+    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
