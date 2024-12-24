@@ -294,10 +294,10 @@ HWTEST_F(WindowImplTest5, SetDefaultOption02, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, UpdateActiveStatus, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("UpdateActiveStatus");
-    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
     bool isActive = true;
@@ -593,11 +593,11 @@ HWTEST_F(WindowImplTest5, RequestVsync02, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, ConsumePointerEvent02, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("ConsumePointerEvent02");
     option->SetWindowType(WindowType::WINDOW_TYPE_LAUNCHER_RECENT);
-    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
     Rect rect { 0, 0, 10u, 10u };
@@ -645,10 +645,10 @@ HWTEST_F(WindowImplTest5, ConsumePointerEvent02, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, PerfLauncherHotAreaIfNeed, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("PerfLauncherHotAreaIfNeed");
-    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MockMmiPointerEvent>();
@@ -678,7 +678,7 @@ HWTEST_F(WindowImplTest5, NotifyOccupiedAreaChange, Function | SmallTest | Level
     listener = sptr<MockOccupiedAreaChangeListener>::MakeSptr();
     window->occupiedAreaChangeListeners_[window->GetWindowId()].push_back(listener);
     EXPECT_CALL(*listener, OnSizeChange(_, _));
-    sptr<OccupiedAreaChangeInfo> info = new (std::nothrow) OccupiedAreaChangeInfo();
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_NE(info, nullptr);
     std::shared_ptr<RSTransaction> rsTransaction;
     window->NotifyOccupiedAreaChange(info, rsTransaction);
@@ -698,7 +698,7 @@ HWTEST_F(WindowImplTest5, NotifyDragEvent, Function | SmallTest | Level1)
 
     sptr<MockWindowDragListener> listener;
     window->windowDragListeners_.push_back(listener);
-    listener = new (std::nothrow) MockWindowDragListener();
+    listener = sptr<MockWindowDragListener>::MakeSptr();
     window->windowDragListeners_.push_back(listener);
     EXPECT_CALL(*listener, OnDrag(_, _, _));
     PointInfo point({10, 20});
@@ -713,10 +713,10 @@ HWTEST_F(WindowImplTest5, NotifyDragEvent, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, TransferPointerEvent02, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("TransferPointerEvent02");
-    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     window->TransferPointerEvent(nullptr);
 
@@ -842,10 +842,10 @@ HWTEST_F(WindowImplTest5, CalculateStartRectExceptHotZone, Function | SmallTest 
  */
 HWTEST_F(WindowImplTest5, PendingClose02, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("PendingClose02");
-    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -993,10 +993,10 @@ HWTEST_F(WindowImplTest5, MaximizeFloating02, Function | SmallTest | Level1)
  */
 HWTEST_F(WindowImplTest5, SetCallingWindow, Function | SmallTest | Level1)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("SetCallingWindow");
-    sptr<WindowImpl> window = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
     window->state_ = WindowState::STATE_INITIAL;
@@ -1073,8 +1073,7 @@ HWTEST_F(WindowImplTest5, AdjustWindowAnimationFlag, Function | SmallTest | Leve
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
 
     window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    sptr<IAnimationTransitionController> animationTransitionController = new (std::nothrow)
-        IAnimationTransitionController();
+    sptr<IAnimationTransitionController> animationTransitionController = sptr<IAnimationTransitionController>::MakeSptr();
     ASSERT_NE(animationTransitionController, nullptr);
     window->animationTransitionController_ = animationTransitionController;
 
@@ -1133,7 +1132,7 @@ HWTEST_F(WindowImplTest5, DestroyFloatingWindow, Function | SmallTest | Level1)
     window->DestroyFloatingWindow();
 
     std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap;
-    sptr<WindowImpl> windowImpl = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(windowImpl, nullptr);
     std::vector<sptr<WindowImpl>> v;
     std::vector<sptr<WindowImpl>> v2;
@@ -1161,7 +1160,7 @@ HWTEST_F(WindowImplTest5, DestroyDialogWindow, Function | SmallTest | Level1)
     window->DestroyFloatingWindow();
 
     std::map<uint32_t, std::vector<sptr<WindowImpl>>> appDialogWindowMap;
-    sptr<WindowImpl> windowImpl = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(windowImpl, nullptr);
     std::vector<sptr<WindowImpl>> v;
     std::vector<sptr<WindowImpl>> v2;
@@ -1206,20 +1205,20 @@ HWTEST_F(WindowImplTest5, WindowCreateCheck05, Function | SmallTest | Level1)
     EXPECT_EQ(window->WindowCreateCheck(INVALID_WINDOW_ID), WMError::WM_ERROR_INVALID_PARENT);
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
-    sptr<WindowImpl> windowImpl1 = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl1 = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(windowImpl1, nullptr);
     windowImpl1->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl1)));
     EXPECT_EQ(window->WindowCreateCheck(INVALID_WINDOW_ID), WMError::WM_ERROR_REPEAT_OPERATION);
 
     window->property_->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    sptr<WindowImpl> windowImpl2 = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl2 = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(windowImpl2, nullptr);
     windowImpl2->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(0, windowImpl2)));
     EXPECT_EQ(window->WindowCreateCheck(0), WMError::WM_ERROR_INVALID_PARENT);
 
-    sptr<WindowImpl> windowImpl3 = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl3 = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(windowImpl3, nullptr);
     windowImpl3->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl3)));
@@ -1244,19 +1243,19 @@ HWTEST_F(WindowImplTest5, IsAppMainOrSubOrFloatingWindow, Function | SmallTest |
     WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, nullptr)));
     EXPECT_EQ(window->IsAppMainOrSubOrFloatingWindow(), false);
 
-    sptr<WindowImpl> windowImpl1 = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl1 = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(windowImpl1, nullptr);
     windowImpl1->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl1)));
     EXPECT_EQ(window->IsAppMainOrSubOrFloatingWindow(), false);
 
-    sptr<WindowImpl> windowImpl2 = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl2 = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(windowImpl2, nullptr);
     windowImpl2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     WindowImpl::windowMap_.insert(std::make_pair("test", std::pair<uint32_t, sptr<Window>>(1, windowImpl2)));
     EXPECT_EQ(window->IsAppMainOrSubOrFloatingWindow(), false);
 
-    sptr<WindowImpl> windowImpl3 = new (std::nothrow) WindowImpl(option);
+    sptr<WindowImpl> windowImpl3 = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(windowImpl3, nullptr);
     windowImpl3->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
