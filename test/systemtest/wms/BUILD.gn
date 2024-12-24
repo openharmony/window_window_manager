@@ -26,7 +26,6 @@ group("systemtest") {
     ":wms_window_display_zoom_test",
     ":wms_window_drag_test",
     ":wms_window_effect_test",
-    ":wms_window_focus_test",
     ":wms_window_gamut_test",
     ":wms_window_gesture_navigation_enabled_test",
     ":wms_window_immersive_test",
@@ -51,7 +50,10 @@ group("systemtest") {
     deps += [ ":wms_window_move_drag_test" ]
   }
   if (window_manager_use_sceneboard) {
-    deps += [ ":wms_window_layout_test" ]
+    deps += [
+      ":wms_window_focus_test",
+      ":wms_window_layout_test",
+    ]
   }
 }
 
