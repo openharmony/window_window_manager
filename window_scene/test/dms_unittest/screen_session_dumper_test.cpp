@@ -25,6 +25,14 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SIZE_TWO = 2;
+constexpr uint32_t SIZE_THREE = 3;
+constexpr float POSTURE_FIRST = 93;
+constexpr float POSTURE_SECOND = 180;
+constexpr float POSTURE_THIRD = 0;
+constexpr uint16_t HALL_TEST = 1;
+const std::string TEST_SECONDARY_SRNSOR_POSTURE = "posture:93,180,0";
+const std::string TEST_SECONDARY_SRNSOR_HALL = "hall:1,1";
 }
 class ScreenSessionDumperTest : public testing::Test {
 public:
@@ -1090,6 +1098,146 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange06, Function | SmallTe
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->SetSuperFoldStatusChange("-supertrans,1");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSecondaryStatusChange01
+ * @tc.desc: test function : SetSecondaryStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange01, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange("-secondary,f");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSecondaryStatusChange02
+ * @tc.desc: test function : SetSecondaryStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange02, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSecondaryStatusChange("-secondary,m");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetSecondaryStatusChange03
+ * @tc.desc: test function : SetSecondaryStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSecondaryStatusChange03, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSecondaryStatusChange("-secondary,g");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: IsAllCharDigit01
+ * @tc.desc: test function : IsAllCharDigit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, IsAllCharDigit01, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    bool res = dumper->IsAllCharDigit("-secondary,g");
+    EXPECT_FALSE(res);
+    res = dumper->IsAllCharDigit("111");
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: GetPostureAndHall01
+ * @tc.desc: test function : GetPostureAndHall
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall01, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec { TEST_SECONDARY_SRNSOR_POSTURE, TEST_SECONDARY_SRNSOR_HALL };
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+    bool res = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_TRUE(res);
+    EXPECT_EQ(postures.size(), SIZE_THREE);
+    EXPECT_EQ(postures[0], POSTURE_FIRST);
+    EXPECT_EQ(postures[1], POSTURE_SECOND);
+    EXPECT_EQ(postures[SIZE_TWO], POSTURE_THIRD);
+    EXPECT_EQ(halls.size(), SIZE_TWO);
+    EXPECT_EQ(halls[0], HALL_TEST);
+    EXPECT_EQ(halls[1], HALL_TEST);
+}
+
+/**
+ * @tc.name: GetPostureAndHall02
+ * @tc.desc: test function : GetPostureAndHall
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall02, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+    std::vector<std::string> strVecFirst { "posture:93,180,2", "hall:1,1" };
+    bool res = dumper->GetPostureAndHall(strVecFirst, postures, halls);
+    EXPECT_FALSE(res);
+
+    postures.clear();
+    halls.clear();
+    std::vector<std::string> strVecSecond { "posture:181,180,0", "hall:1,1" };
+    res = dumper->GetPostureAndHall(strVecSecond, postures, halls);
+    EXPECT_TRUE(res);
+
+    postures.clear();
+    halls.clear();
+    std::vector<std::string> strVecFourth { "posture:90,170,0", "hall:a,1" };
+    res = dumper->GetPostureAndHall(strVecFourth, postures, halls);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: TriggerSecondarySensor01
+ * @tc.desc: test function : TriggerSecondarySensor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor01, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->TriggerSecondarySensor("posture:93,180,0/hall:1,1");
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: TriggerSecondaryFoldStatus01
+ * @tc.desc: test function : TriggerSecondaryFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, TriggerSecondaryFoldStatus01, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->TriggerSecondaryFoldStatus("z=23");
     ASSERT_EQ(dumper->fd_, 1);
 }
 }

@@ -170,6 +170,15 @@ void FoldScreenController::SetFoldStatus(FoldStatus foldStatus)
     foldScreenPolicy_->SetFoldStatus(foldStatus);
 }
 
+FoldDisplayMode FoldScreenController::GetModeMatchStatus()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy is null");
+        return FoldDisplayMode::UNKNOWN;
+    }
+    return foldScreenPolicy_->GetModeMatchStatus();
+}
+
 bool FoldScreenController::GetTentMode()
 {
     if (sensorFoldStateManager_ == nullptr) {

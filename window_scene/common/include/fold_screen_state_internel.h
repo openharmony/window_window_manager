@@ -32,6 +32,7 @@ static const std::string SINGLE_POCKET_DISPLAY = "4";
 static const std::string SUPER_FOLD_DISPLAY = "5";
 static const std::string SECONDARY_FOLD_DISPLAY = "6";
 static const std::string DEFAULT_OFFSET = "0";
+static const size_t THIRD_ANGLE = 2;
 }
 class FoldScreenStateInternel {
 public:
@@ -176,7 +177,7 @@ public:
                 strs << "_bc";
             } else if (i == 1) {
                 strs << "_ab";
-            } else if (i == 1) {
+            } else if (i == THIRD_ANGLE) {
                 strs << "_ab_anti";
             }
             strs << ": ";

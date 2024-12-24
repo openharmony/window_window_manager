@@ -178,12 +178,14 @@ public:
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
 
+    void UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode);
     void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdateRotationOrientation(int rotation);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
-    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
+    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
+        FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();

@@ -1707,6 +1707,8 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.SetPhyBounds(screenBounds);
     property.SetBounds(screenBounds);
     property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
+    property.SetPhysicalTouchBounds(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
+    property.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), GetFoldDisplayMode());
     if (isDensityDpiLoad_) {
         if (screenId == SCREEN_ID_MAIN) {
             TLOGW(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
@@ -6036,6 +6038,18 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
     dumper->ExecuteDumpCmd();
     TLOGI(WmsLogTag::DMS, "dump end");
     return 0;
+}
+
+void ScreenSessionManager::TriggerFoldStatusChange(FoldStatus foldStatus)
+{
+    TLOGI(WmsLogTag::DMS, "enter foldStatus = %{public}d.", foldStatus);
+    if (foldScreenController_ == nullptr) {
+        return;
+    }
+    foldScreenController_->SetFoldStatus(foldStatus);
+    FoldDisplayMode displayMode = foldScreenController_->GetModeMatchStatus();
+    SetFoldDisplayMode(displayMode);
+    NotifyFoldStatusChanged(foldStatus);
 }
 
 int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam)

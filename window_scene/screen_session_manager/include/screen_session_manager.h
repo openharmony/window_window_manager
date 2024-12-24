@@ -256,6 +256,7 @@ public:
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
+    void TriggerFoldStatusChange(FoldStatus foldStatus);
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
     void NotifyFoldAngleChanged(std::vector<float> foldAngles);
     int NotifyFoldStatusChanged(const std::string& statusParam);
