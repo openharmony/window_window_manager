@@ -98,17 +98,6 @@ config("window_extension_unittest_common_public_config") {
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/test/mock",
     "${window_base_path}/window_scene/session/host/include/zidl",
-    "//third_party/googletest/googlemock/include",
-
-    # for abilityContext
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
-    "//third_party/node/deps/icu-small/source/common",
-    "${ability_runtime_inner_api_path}/ability_manager/include",
-    "//foundation/ability/ability_base/interfaces/kits/native/configuration/include/",
-
-    # abilityContext end
-    "${accessibility_path}/interfaces/innerkits/common/include/",
   ]
 }
 
@@ -137,11 +126,6 @@ ohos_static_library("window_extension_unittest_common") {
     "${window_base_path}/wm:libwm",
     "${window_base_path}/wm:libwm_lite",
     "${window_base_path}/wmserver:libwms",
-    "//commonlibrary/c_utils/base:utils",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   deps = [
@@ -152,15 +136,27 @@ ohos_static_library("window_extension_unittest_common") {
     "../../../extension_connection:libwindow_extension_client",
   ]
 
+  public_external_deps = [
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "libjpeg-turbo:turbojpeg_static",
+  ]
+
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
+    "ability_runtime:runtime",
     "accessibility:accessibility_common",
-    "c_utils:utils",
     "hilog:libhilog",
-    "input:libmmi-client",
     "ipc:ipc_single",
+    "node:node_header_notice",
   ]
   subsystem_name = "window"
   part_name = "window_manager"

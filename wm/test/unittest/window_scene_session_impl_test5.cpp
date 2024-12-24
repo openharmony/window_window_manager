@@ -342,6 +342,61 @@ HWTEST_F(WindowSceneSessionImplTest5, MoveWindowToGlobal01, Function | SmallTest
     ret = window->MoveWindowToGlobal(1, 1, presentation);
     ASSERT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetCustomDensity01
+ * @tc.desc: SetCustomDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    float density = 0.4f;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCustomDensity(density));
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetCustomDensity01");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCustomDensity(density));
+
+    density = 1.5f;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetCustomDensity(density));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(WMError::WM_OK, window->SetCustomDensity(density));
+    ASSERT_EQ(density, window->customDensity_);
+    ASSERT_EQ(WMError::WM_OK, window->SetCustomDensity(density));
+}
+
+/**
+ * @tc.name: GetWindowDensityInfo01
+ * @tc.desc: GetWindowDensityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetWindowDensityInfo01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    WindowDensityInfo densityInfo;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetWindowDensityInfo(densityInfo));
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("GetWindowDensityInfo01");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetWindowDensityInfo(densityInfo));
+}
 }  // namespace
 }
 }

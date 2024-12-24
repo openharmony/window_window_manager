@@ -689,15 +689,14 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdDumpSessionWithId, Function | Small
  * @tc.desc: test TransIdTerminateSessionNew
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, TransId, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, TransIdTerminateSessionNew, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    ASSERT_NE(nullptr, abilitySessionInfo);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
     data.WriteParcelable(abilitySessionInfo);
     data.WriteBool(true);
     data.WriteBool(true);
@@ -706,7 +705,7 @@ HWTEST_F(SceneSessionManagerStubTest, TransId, Function | SmallTest | Level2)
         static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_TERMINATE_SESSION_NEW);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**

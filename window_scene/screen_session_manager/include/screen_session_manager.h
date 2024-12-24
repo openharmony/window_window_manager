@@ -40,6 +40,13 @@
 namespace OHOS::Rosen {
 class RSInterfaces;
 
+static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
+    {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
+    {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
+    {ScreenPowerStatus::POWER_STATUS_DOZE, DisplayPowerEvent::DISPLAY_DOZE},
+    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
+};
+
 class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {
 DECLARE_SYSTEM_ABILITY(ScreenSessionManager)
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
@@ -81,25 +88,14 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
-    bool WakeUpBegin(PowerStateChangeReason reason) override;
-    bool WakeUpEnd() override;
-    bool SuspendBegin(PowerStateChangeReason reason) override;
-    bool SuspendEnd() override;
     ScreenId GetInternalScreenId() override;
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
-    bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
     bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
     uint32_t GetScreenBrightness(uint64_t screenId) override;
     bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
-    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
-    ScreenPowerState GetScreenPower(ScreenId screenId) override;
-    void NotifyDisplayEvent(DisplayEvent event) override;
-    bool TryToCancelScreenOff() override;
     void ForceSkipScreenOffAnimation();
-
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
-    bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
     void NotifyScreenshot(DisplayId displayId);
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
@@ -111,7 +107,7 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
-    virtual DMError MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode) override;
@@ -204,12 +200,26 @@ public:
     DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
 
+    /**
+     * On/Off screen
+     */
+    bool WakeUpBegin(PowerStateChangeReason reason) override;
+    bool WakeUpEnd() override;
+    bool SuspendBegin(PowerStateChangeReason reason) override;
+    bool SuspendEnd() override;
     void BlockScreenOnByCV(void);
     void BlockScreenOffByCV(void);
     bool BlockSetDisplayState(void);
     bool IsScreenLockSuspend(void);
     bool IsPreBrightAuthFail(void);
     void ScreenOffCVNotify(void);
+    bool SetDisplayState(DisplayState state) override;
+    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
+    ScreenPowerState GetScreenPower(ScreenId screenId) override;
+    void NotifyDisplayEvent(DisplayEvent event) override;
+    bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
+    bool TryToCancelScreenOff() override;
+
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
     sptr<ScreenSession> GetOrCreateFakeScreenSession(sptr<ScreenSession> screenSession);
@@ -378,6 +388,7 @@ private:
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
+    void RecoverMultiScreenMode();
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -395,6 +406,7 @@ private:
     DMError CheckDisplayMangerAgentTypeAndPermission(
         const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type);
     void SetMultiScreenDefaultRelativePosition();
+    void SetRelativePositionForDisconnect(MultiScreenPositionOptions defaultScreenOptions);
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession);
     DisplayId GetFakeDisplayId(sptr<ScreenSession> screenSession);
@@ -415,6 +427,12 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     void SetScreenCorrection();
+
+    /**
+     * On/Off screen
+     */
+    void SetGotScreenOffAndWakeUpBlock();
+
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -500,18 +518,22 @@ private:
     uint32_t extendDefaultDpi_ {0};
     uint32_t defaultDeviceRotationOffset_ { 0 };
 
+    /**
+     * On/Off screen
+     */
     bool isMultiScreenCollaboration_ = false;
     bool screenPrivacyStates = false;
     bool keyguardDrawnDone_ = true;
     bool needScreenOnWhenKeyguardNotify_ = false;
     bool gotScreenOffNotify_ = false;
     bool needScreenOffNotify_ = false;
-
+    bool dozeNotifyFinish_ = false;
     std::mutex screenOnMutex_;
     std::condition_variable screenOnCV_;
     std::mutex screenOffMutex_;
     std::condition_variable screenOffCV_;
     int32_t screenOffDelay_ {0};
+
     std::vector<ScreenId> mirrorScreenIds_;
     std::mutex snapBypickerMutex_;
 

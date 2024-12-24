@@ -44,7 +44,7 @@ void CjWindowListener::SetMainEventHandler()
 
 void CjWindowListener::CallCjMethod(const char* methodName, void* argv, size_t argc)
 {
-    TLOGD(WmsLogTag::WMS_DIALOG, "[WindowListener]CallCjMethod methodName = %{public}s", methodName);
+    TLOGD(WmsLogTag::WMS_DIALOG, "[WindowListener]methodName=%{public}s", methodName);
     if (cjCallBack_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "[WindowListener]env_ nullptr or jsCallBack_ is nullptr");
         return;
@@ -144,6 +144,10 @@ void CjWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
 }
 
 void CjWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
+{
+}
+
+void CjWindowListener::OnSystemDensityChanged(float density)
 {
 }
 

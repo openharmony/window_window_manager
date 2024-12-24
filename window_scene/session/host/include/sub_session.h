@@ -38,7 +38,7 @@ protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
 
-    /**
+    /*
      * Window Layout
      */
     void NotifySessionRectChange(const WSRect& rect,
@@ -53,10 +53,6 @@ protected:
     bool IsTopmost() const override;
     bool IsModal() const override;
     bool IsApplicationModal() const override;
-
-private:
-    void CheckParentDisplayIdAndMove();
-    bool shouldFollowParentWhenShow_ = true;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H

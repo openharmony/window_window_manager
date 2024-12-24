@@ -69,7 +69,10 @@ ohos_shared_library("screen_session_manager") {
     "src/fold_screen_controller/fold_screen_policy.cpp",
     "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
     "src/fold_screen_controller/fold_screen_state_machine.cpp",
+    "src/fold_screen_controller/secondary_display_fold_policy.cpp",
+    "src/fold_screen_controller/secondary_fold_sensor_manager.cpp",
     "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
+    "src/fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.cpp",
     "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
     "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
     "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.cpp",
@@ -177,6 +180,12 @@ ohos_shared_library("screen_session_manager") {
   if (device_status_enable) {
     external_deps += [ "device_status:devicestatus_client" ]
     defines += [ "DEVICE_STATUS_ENABLE" ]
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_soc_perf)) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RES_SCHED_ENABLE" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

@@ -162,8 +162,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleProcessPointDownSession(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_POINTEREVENT_FOR_MOVE_DRAG):
             return HandleSendPointerEvenForMoveDrag(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_START_MOVE_FLAG):
-            return HandleGetStartMoveFlag(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_START_MOVING):
+            return HandleIsStartMoving(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE):
             return HandleSetSystemEnableDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
@@ -208,16 +208,16 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
-            return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
+            return HandleGetStatusBarHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
-            return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
             return HandleNotifyExtensionEventAsync(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
+            return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
@@ -457,7 +457,7 @@ int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& repl
     TLOGD(WmsLogTag::WMS_EVENT, "In!");
     uint32_t eventId;
     if (!data.ReadUint32(eventId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read eventId failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "read eventId failed");
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_EVENT, "eventId: %{public}d", eventId);
@@ -469,7 +469,7 @@ int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& repl
 int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel& reply)
 {
     bool isLayoutFullScreen = data.ReadBool();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
     WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -510,7 +510,6 @@ int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageP
 int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
 {
     WSError errCode = OnRestoreMainWindow();
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -875,11 +874,18 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
     uint32_t typeId = 0;
     if (!data.ReadUint32(typeId) ||
         typeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read typeId error");
+        return ERR_INVALID_DATA;
+    }
+    WSRect rect {};
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+        !data.ReadInt32(rect.width_) || !data.ReadInt32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
         return ERR_INVALID_DATA;
     }
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
     WLOGFD("HandleGetAvoidArea type:%{public}d", typeId);
-    AvoidArea avoidArea = GetAvoidAreaByType(type);
+    AvoidArea avoidArea = GetAvoidAreaByType(type, rect);
     reply.WriteParcelable(&avoidArea);
     return ERR_NONE;
 }
@@ -1103,8 +1109,12 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
 
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
-    bool enableDrag = data.ReadBool();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "handle, enableDrag: %{public}d", enableDrag);
+    bool enableDrag = false;
+    if (!data.ReadBool(enableDrag)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read enableDrag failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
     WMError errcode = SetSystemWindowEnableDrag(enableDrag);
     reply.WriteInt32(static_cast<int32_t>(errcode));
     return ERR_NONE;
@@ -1141,12 +1151,13 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
-int SessionStub::HandleGetStartMoveFlag(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleIsStartMoving(MessageParcel& data, MessageParcel& reply)
 {
-    bool isMoving = false;
-    WSError errCode = GetStartMoveFlag(isMoving);
-    reply.WriteBool(isMoving);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    bool isMoving = IsStartMoving();
+    if (!reply.WriteBool(isMoving)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write isMoving failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1173,10 +1184,10 @@ int SessionStub::HandleSetCallingSessionId(MessageParcel& data, MessageParcel& r
 
 int SessionStub::HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "run HandleSetCustomDecorHeight!");
+    TLOGD(WmsLogTag::WMS_DECOR, "In");
     int32_t height = 0;
     if (!data.ReadInt32(height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read height error");
+        TLOGE(WmsLogTag::WMS_DECOR, "read height error");
         return ERR_INVALID_DATA;
     }
     SetCustomDecorHeight(height);
@@ -1198,18 +1209,18 @@ int SessionStub::HandleAdjustKeyboardLayout(MessageParcel& data, MessageParcel& 
 
 int SessionStub::HandleUpdatePropertyByAction(MessageParcel& data, MessageParcel& reply)
 {
-    uint32_t actionValue = 0;
-    if (!data.ReadUint32(actionValue)) {
+    uint64_t actionValue = 0;
+    if (!data.ReadUint64(actionValue)) {
         TLOGE(WmsLogTag::DEFAULT, "read action error");
         return ERR_INVALID_DATA;
     }
-    if (actionValue < static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_RECT) ||
-        actionValue > static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST)) {
+    if (actionValue < static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_RECT) ||
+        actionValue > static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_END)) {
         TLOGE(WmsLogTag::DEFAULT, "invalid action");
         return ERR_INVALID_DATA;
     }
     auto action = static_cast<WSPropertyChangeAction>(actionValue);
-    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
+    TLOGD(WmsLogTag::DEFAULT, "action: %{public}" PRIu64, action);
     sptr<WindowSessionProperty> property = nullptr;
     if (data.ReadBool()) {
         property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1234,6 +1245,15 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_DIALOG, "called");
+    bool isEnabled = data.ReadBool();
+    WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply)
 {
     int32_t height = GetStatusBarHeight();
@@ -1242,12 +1262,13 @@ int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& re
     return ERR_NONE;
 }
 
-int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_DIALOG, "called");
-    bool isEnabled = data.ReadBool();
-    WSError ret = SetDialogSessionBackGestureEnabled(isEnabled);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    uint32_t notifyEvent = 0;
+    if (!data.ReadUint32(notifyEvent)) {
+        return ERR_TRANSACTION_FAILED;
+    }
+    NotifyExtensionEventAsync(notifyEvent);
     return ERR_NONE;
 }
 
@@ -1268,16 +1289,6 @@ int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
     }
     WSError ret = RequestFocus(isFocused);
     reply.WriteInt32(static_cast<int32_t>(ret));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
-{
-    uint32_t notifyEvent = 0;
-    if (!data.ReadUint32(notifyEvent)) {
-        return ERR_TRANSACTION_FAILED;
-    }
-    NotifyExtensionEventAsync(notifyEvent);
     return ERR_NONE;
 }
 
@@ -1327,7 +1338,6 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
     }
     TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
     WSError errCode = OnSetWindowRectAutoSave(enabled);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

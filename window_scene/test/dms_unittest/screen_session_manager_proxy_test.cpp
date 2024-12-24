@@ -143,13 +143,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, ProxyForFreeze, Function | SmallTest | L
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->ProxyForFreeze(pidList, isProxy));
-    } else {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->ProxyForFreeze(pidList, isProxy));
-    }
+    ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->ProxyForFreeze(pidList, isProxy));
 }
 
 /**
@@ -167,11 +162,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenStatus, Function | Small
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
-    } else {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
-    }
+
+    EXPECT_NE(expectation, screenSessionManagerProxy->SetVirtualScreenStatus(id, screenStatus));
 }
 
 /**
@@ -189,13 +181,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenSecurityExemption, Funct
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetVirtualScreenSecurityExemption(id, pid, windowIdList));
-    } else {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetVirtualScreenSecurityExemption(id, pid, windowIdList));
-    }
+    ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->SetVirtualScreenSecurityExemption(id, pid, windowIdList));
 }
 
 /**
@@ -215,11 +202,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllDisplayPhysicalResolution, Functio
         allSize = screenSessionManagerProxy->GetAllDisplayPhysicalResolution();
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(!allSize.empty());
-    } else {
-        ASSERT_FALSE(!allSize.empty());
-    }
+
+    ASSERT_TRUE(!allSize.empty());
 }
 
 /**
@@ -241,11 +225,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDefaultDisplayInfo, Function | SmallT
         res = screenSessionManagerProxy->GetDefaultDisplayInfo();
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+
+    ASSERT_NE(res, expectation);
 }
 
 /**
@@ -269,11 +250,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenActiveMode, Function | SmallTes
         res = screenSessionManagerProxy->SetScreenActiveMode(id, modeId);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -297,11 +275,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatio, Function | SmallTe
         res = screenSessionManagerProxy->SetVirtualPixelRatio(id, virtualPixelRatio);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -325,11 +300,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatioSystem, Function | S
         res = screenSessionManagerProxy->SetVirtualPixelRatioSystem(id, virtualPixelRatio);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -355,11 +327,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetResolution, Function | SmallTest | Le
         res = screenSessionManagerProxy->SetResolution(id, width, height, virtualPixelRatio);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -383,11 +352,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDensityInCurResolution, Function | Sm
         res = screenSessionManagerProxy->GetDensityInCurResolution(id, virtualPixelRatio);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -411,11 +377,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenColorGamut, Function | SmallTes
         res = screenSessionManagerProxy->GetScreenColorGamut(id, colorGamut);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -439,11 +402,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorGamut, Function | SmallTes
         res = screenSessionManagerProxy->SetScreenColorGamut(id, colorGamut);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -467,11 +427,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenGamutMap, Function | SmallTest 
         res = screenSessionManagerProxy->GetScreenGamutMap(id, colorGamut);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -495,11 +452,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenGamutMap, Function | SmallTest 
         res = screenSessionManagerProxy->SetScreenGamutMap(id, colorGamut);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -522,11 +476,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenColorTransform, Function | Smal
         res = screenSessionManagerProxy->SetScreenColorTransform(id);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -550,11 +501,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPixelFormat, Function | SmallTest | L
         res = screenSessionManagerProxy->GetPixelFormat(id, pixelFormat);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -578,11 +526,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetPixelFormat, Function | SmallTest | L
         res = screenSessionManagerProxy->SetPixelFormat(id, pixelFormat);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -606,11 +551,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSupportedHDRFormats, Function | Small
         res = screenSessionManagerProxy->GetSupportedHDRFormats(id, hdrFormats);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -634,11 +576,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenHDRFormat, Function | SmallTest
         res = screenSessionManagerProxy->GetScreenHDRFormat(id, hdrFormatS);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -662,11 +601,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenHDRFormat, Function | SmallTest
         res = screenSessionManagerProxy->SetScreenHDRFormat(id, hdrFormatS);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -681,11 +617,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, RegisterDisplayManagerAgent, Function | 
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     DisplayManagerAgentType type = DisplayManagerAgentType::SCREEN_EVENT_LISTENER;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(DMError::DM_OK, screenSessionManagerProxy->RegisterDisplayManagerAgent(displayManagerAgent, type));
-    } else {
-        EXPECT_NE(DMError::DM_OK, screenSessionManagerProxy->RegisterDisplayManagerAgent(displayManagerAgent, type));
-    }
+
+    EXPECT_EQ(DMError::DM_OK, screenSessionManagerProxy->RegisterDisplayManagerAgent(displayManagerAgent, type));
+
     displayManagerAgent = nullptr;
     EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM,
               screenSessionManagerProxy->RegisterDisplayManagerAgent(displayManagerAgent, type));
@@ -703,11 +637,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, UnregisterDisplayManagerAgent, Function 
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     DisplayManagerAgentType type = DisplayManagerAgentType::SCREEN_EVENT_LISTENER;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(DMError::DM_OK, screenSessionManagerProxy->UnregisterDisplayManagerAgent(displayManagerAgent, type));
-    } else {
-        EXPECT_NE(DMError::DM_OK, screenSessionManagerProxy->UnregisterDisplayManagerAgent(displayManagerAgent, type));
-    }
+
+    EXPECT_EQ(DMError::DM_OK, screenSessionManagerProxy->UnregisterDisplayManagerAgent(displayManagerAgent, type));
+
     displayManagerAgent = nullptr;
     EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM,
               screenSessionManagerProxy->UnregisterDisplayManagerAgent(displayManagerAgent, type));
@@ -726,11 +658,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpBegin, Function | SmallTest | Leve
 
     PowerStateChangeReason reason {0};
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->WakeUpBegin(reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->WakeUpBegin(reason));
-    }
+
+    EXPECT_EQ(expectation, screenSessionManagerProxy->WakeUpBegin(reason));
 }
 
 /**
@@ -745,11 +674,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, WakeUpEnd, Function | SmallTest | Level1
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->WakeUpEnd());
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->WakeUpEnd());
-    }
+
+    EXPECT_EQ(expectation, screenSessionManagerProxy->WakeUpEnd());
 }
 
 /**
@@ -765,11 +691,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SuspendBegin, Function | SmallTest | Lev
 
     PowerStateChangeReason reason {0};
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SuspendBegin(reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SuspendBegin(reason));
-    }
+
+    EXPECT_EQ(expectation, screenSessionManagerProxy->SuspendBegin(reason));
 }
 
 /**
@@ -784,11 +707,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SuspendEnd, Function | SmallTest | Level
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SuspendEnd());
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SuspendEnd());
-    }
+
+    EXPECT_EQ(expectation, screenSessionManagerProxy->SuspendEnd());
 }
 
 /**
@@ -807,11 +727,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerById, Function | SmallTest
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
-    }
+
+    EXPECT_EQ(expectation, screenSessionManagerProxy->SetScreenPowerById(id, state, reason));
 }
 
 /**
@@ -846,11 +763,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetSpecifiedScreenPower, Function | Smal
     ScreenId id = 1001;
     PowerStateChangeReason reason {1};
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SetSpecifiedScreenPower(id, state, reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SetSpecifiedScreenPower(id, state, reason));
-    }
+
+    EXPECT_EQ(expectation, screenSessionManagerProxy->SetSpecifiedScreenPower(id, state, reason));
 }
 
 /**
@@ -867,11 +781,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPowerForAll, Function | SmallTe
     ScreenPowerState state {0};
     PowerStateChangeReason reason {1};
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->SetScreenPowerForAll(state, reason));
-    } else {
-        EXPECT_NE(expectation, screenSessionManagerProxy->SetScreenPowerForAll(state, reason));
-    }
+
+    EXPECT_EQ(expectation, screenSessionManagerProxy->SetScreenPowerForAll(state, reason));
 }
 
 /**
@@ -886,11 +797,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayState, Function | SmallTest | 
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     DisplayId displayId {0};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DisplayState::UNKNOWN, screenSessionManagerProxy->GetDisplayState(displayId));
-    } else {
-        EXPECT_EQ(DisplayState::UNKNOWN, screenSessionManagerProxy->GetDisplayState(displayId));
-    }
+
+    EXPECT_NE(DisplayState::UNKNOWN, screenSessionManagerProxy->GetDisplayState(displayId));
 }
 
 /**
@@ -905,11 +813,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, TryToCancelScreenOff, Function | SmallTe
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool expectation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
-    } else {
-        EXPECT_EQ(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
-    }
+
+    EXPECT_NE(expectation, screenSessionManagerProxy->TryToCancelScreenOff());
 }
 
 /**
@@ -946,11 +851,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenPower, Function | SmallTest | L
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     ScreenId dmsScreenId = 1001;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(ScreenPowerState::INVALID_STATE, screenSessionManagerProxy->GetScreenPower(dmsScreenId));
-    } else {
-        EXPECT_EQ(ScreenPowerState::INVALID_STATE, screenSessionManagerProxy->GetScreenPower(dmsScreenId));
-    }
+
+    EXPECT_NE(ScreenPowerState::INVALID_STATE, screenSessionManagerProxy->GetScreenPower(dmsScreenId));
 }
 
 /**
@@ -966,13 +868,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenCanvasRotation, Fu
 
     ScreenId ScreenId = 1001;
     bool canvasRotation = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-            screenSessionManagerProxy->SetVirtualMirrorScreenCanvasRotation(ScreenId, canvasRotation));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-            screenSessionManagerProxy->SetVirtualMirrorScreenCanvasRotation(ScreenId, canvasRotation));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+        screenSessionManagerProxy->SetVirtualMirrorScreenCanvasRotation(ScreenId, canvasRotation));
 }
 
 /**
@@ -988,13 +886,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenScaleMode, Functio
 
     ScreenId ScreenId = 1001;
     ScreenScaleMode scaleMode {0};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetVirtualMirrorScreenScaleMode(ScreenId, scaleMode));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetVirtualMirrorScreenScaleMode(ScreenId, scaleMode));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->SetVirtualMirrorScreenScaleMode(ScreenId, scaleMode));
 }
 
 /**
@@ -1027,13 +921,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, DestroyVirtualScreen, Function | SmallTe
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     ScreenId ScreenId = 1001;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->DestroyVirtualScreen(ScreenId));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->DestroyVirtualScreen(ScreenId));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->DestroyVirtualScreen(ScreenId));
 }
 
 /**
@@ -1050,13 +940,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeMirror, Function | SmallTest | Level
     ScreenId Id = 1001;
     std::vector<ScreenId> mirrorScreenIds = {1003, 1004, 1005};
     ScreenId screenGroupId = 1002;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->MakeMirror(Id, mirrorScreenIds, screenGroupId));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->MakeMirror(Id, mirrorScreenIds, screenGroupId));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->MakeMirror(Id, mirrorScreenIds, screenGroupId));
 }
 
 /**
@@ -1071,13 +957,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, StopMirror, Function | SmallTest | Level
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     const std::vector<ScreenId> mirrorScreenIds = {1003, 1004, 1005};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->StopMirror(mirrorScreenIds));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->StopMirror(mirrorScreenIds));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->StopMirror(mirrorScreenIds));
 }
 
 /**
@@ -1092,13 +974,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, DisableMirror, Function | SmallTest | Le
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool disableOrNot = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->DisableMirror(disableOrNot));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->DisableMirror(disableOrNot));
-    }
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->DisableMirror(disableOrNot));
 }
 
 /**
@@ -1115,13 +992,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeExpand, Function | SmallTest | Level
     std::vector<ScreenId> screenId = {1003, 1004, 1005};
     std::vector<Point> startPoint {};
     ScreenId screenGroupId = 1001;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->MakeExpand(screenId, startPoint, screenGroupId));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->MakeExpand(screenId, startPoint, screenGroupId));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->MakeExpand(screenId, startPoint, screenGroupId));
 }
 
 /**
@@ -1136,13 +1009,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, StopExpand, Function | SmallTest | Level
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     const std::vector<ScreenId> expandScreenIds = {1003, 1004, 1005};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->StopExpand(expandScreenIds));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->StopExpand(expandScreenIds));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->StopExpand(expandScreenIds));
 }
 
 /**
@@ -1212,11 +1081,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, Function | SmallTest
         res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+
+    ASSERT_NE(res, expectation);
 }
 
 /**
@@ -1239,11 +1105,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, Function | SmallTest
         res = screenSessionManagerProxy->GetDisplayInfoById(displayId);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+
+    ASSERT_NE(res, expectation);
 }
 
 /**
@@ -1266,11 +1129,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByScreen, Function | Small
         res = screenSessionManagerProxy->GetDisplayInfoByScreen(screenId);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+
+    ASSERT_NE(res, expectation);
 }
 
 /**
@@ -1315,11 +1175,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenInfoById, Function | SmallTest 
         res = screenSessionManagerProxy->GetScreenInfoById(Id);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+
+    ASSERT_NE(res, expectation);
 }
 
 /**
@@ -1334,13 +1191,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetAllScreenInfos, Function | SmallTest 
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     std::vector<sptr<ScreenInfo>> screenInfos {};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->GetAllScreenInfos(screenInfos));
-    } else {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->GetAllScreenInfos(screenInfos));
-    }
+
+    ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->GetAllScreenInfos(screenInfos));
 }
 
 /**
@@ -1356,13 +1209,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenSupportedColorGamuts, Function 
 
     ScreenId screenId = 1001;
     std::vector<ScreenColorGamut> colorGamuts {};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->GetScreenSupportedColorGamuts(screenId, colorGamuts));
-    } else {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->GetScreenSupportedColorGamuts(screenId, colorGamuts));
-    }
+    ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->GetScreenSupportedColorGamuts(screenId, colorGamuts));
 }
 
 /**
@@ -1378,13 +1226,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetOrientation, Function | SmallTest | L
 
     ScreenId screenId = 1001;
     Orientation orientation = Orientation::BEGIN;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetOrientation(screenId, orientation));
-    } else {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetOrientation(screenId, orientation));
-    }
+
+    ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->SetOrientation(screenId, orientation));
 }
 
 /**
@@ -1399,13 +1243,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLocked, Function | Smal
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool isLocked = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetScreenRotationLocked(isLocked));
-    } else {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetScreenRotationLocked(isLocked));
-    }
+
+    ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->SetScreenRotationLocked(isLocked));
 }
 
 /**
@@ -1420,13 +1260,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenRotationLockedFromJs, Function 
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool isLocked = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetScreenRotationLockedFromJs(isLocked));
-    } else {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetScreenRotationLockedFromJs(isLocked));
-    }
+
+    ASSERT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->SetScreenRotationLockedFromJs(isLocked));
 }
 
 /**
@@ -1450,11 +1286,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenMode, Function | SmallTest
         res = screenSessionManagerProxy->SetMultiScreenMode(mainScreenId, secondaryScreenId, screenMode);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -1479,11 +1312,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetMultiScreenRelativePosition, Function
         res = screenSessionManagerProxy->SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -1507,11 +1337,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenMaxRefreshRate, Function
         res = screenSessionManagerProxy->SetVirtualScreenMaxRefreshRate(id, refreshRate, actualRefreshRate);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
-    }
+
+    ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
 }
 
 /**
@@ -1526,13 +1353,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsScreenRotationLocked, Function | Small
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool isLocked = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->IsScreenRotationLocked(isLocked));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->IsScreenRotationLocked(isLocked));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->IsScreenRotationLocked(isLocked));
 }
 
 /**
@@ -1555,11 +1378,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, Function | SmallTest | Le
         res = screenSessionManagerProxy->GetCutoutInfo(displayId);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, expectation);
-    } else {
-        ASSERT_EQ(res, expectation);
-    }
+
+    ASSERT_NE(res, expectation);
 }
 
 /**
@@ -1574,13 +1394,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, Function | SmallTest
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
     bool immersive = true;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
 }
 
 /**
@@ -1619,13 +1435,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasPrivateWindow, Function | SmallTest |
 
     bool hasPrivateWindow = true;
     DisplayId displayId = 0;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->HasPrivateWindow(displayId, hasPrivateWindow));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->HasPrivateWindow(displayId, hasPrivateWindow));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->HasPrivateWindow(displayId, hasPrivateWindow));
 }
 
 /**
@@ -1708,13 +1520,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, Function | Sma
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
-    }
+    EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
 }
 
 /**
@@ -1860,13 +1667,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, Function | SmallTest |
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     
     const std::vector<ScreenId> screenIds {1001, 1002, 1003};
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds));
-    }
+
+    EXPECT_NE(DMError::DM_ERROR_NULLPTR,
+        screenSessionManagerProxy->MakeUniqueScreen(screenIds));
 }
 
 /**
@@ -2322,12 +2125,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, Function | SmallTest |
         res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
     };
     func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        if (errorCode == DmErrorCode::DM_OK) {
-            ASSERT_NE(res, nullptr);
-        } else {
-            ASSERT_EQ(res, nullptr);
-        }
+
+    if (errorCode == DmErrorCode::DM_OK) {
+        ASSERT_NE(res, nullptr);
     } else {
         ASSERT_EQ(res, nullptr);
     }

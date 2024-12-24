@@ -254,6 +254,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled03, Function | SmallTest |
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled03");
+    option->SetSubWindowDecorEnable(true);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
@@ -1296,6 +1297,12 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     res = window->UnregisterWindowTitleButtonRectChangeListener(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    ISystemDensityChangeListenerSptr listener11 = nullptr;
+    res = window->RegisterSystemDensityChangeListener(listener11);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterSystemDensityChangeListener(listener11);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
 
@@ -2044,6 +2051,37 @@ HWTEST_F(WindowSessionImplTest, SetUniqueVirtualPixelRatio, Function | SmallTest
     ASSERT_NE(window, nullptr);
     window->SetUniqueVirtualPixelRatio(true, 3.25f);
     window->SetUniqueVirtualPixelRatio(false, 3.25f);
+}
+
+/**
+ * @tc.name: EnableDrag
+ * @tc.desc: EnableDrag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, EnableDrag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("EnableDrag");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2101);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    auto result = window->EnableDrag(true);
+    ASSERT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    result = window->EnableDrag(true);
+    ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    result = window->EnableDrag(true);
+    ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 /**

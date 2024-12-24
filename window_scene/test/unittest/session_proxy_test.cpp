@@ -41,8 +41,8 @@ namespace {
 HWTEST_F(SessionProxyTest, OnSessionEvent, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: OnSessionEvent start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
     WSError res = sProxy->OnSessionEvent(event);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -57,8 +57,8 @@ HWTEST_F(SessionProxyTest, OnSessionEvent, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, UpdateSessionRect, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateSessionRect start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     WSRect rect{.posX_ = 1, .posY_ = 1, .width_ = 100, .height_ = 100};
     SizeChangeReason reason = SizeChangeReason::RECOVER;
     WSError res = sProxy->UpdateSessionRect(rect, reason);
@@ -152,8 +152,8 @@ HWTEST_F(SessionProxyTest, RaiseAboveTarget, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, OnNeedAvoid, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: OnNeedAvoid start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     bool status = false;
     WSError res = sProxy->OnNeedAvoid(status);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -169,8 +169,8 @@ HWTEST_F(SessionProxyTest, OnNeedAvoid, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, RequestSessionBack, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: RequestSessionBack start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     bool needMoveToBackground = true;
     WSError res = sProxy->RequestSessionBack(needMoveToBackground);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -186,8 +186,8 @@ HWTEST_F(SessionProxyTest, RequestSessionBack, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, MarkProcessed, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: MarkProcessed start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     int32_t eventId = 0;
     WSError res = sProxy->MarkProcessed(eventId);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -203,8 +203,8 @@ HWTEST_F(SessionProxyTest, MarkProcessed, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, SetGlobalMaximizeMode, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: SetGlobalMaximizeMode start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     MaximizeMode mode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
     WSError res = sProxy->SetGlobalMaximizeMode(mode);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -220,8 +220,8 @@ HWTEST_F(SessionProxyTest, SetGlobalMaximizeMode, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: GetGlobalMaximizeMode start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     MaximizeMode mode = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
     WSError res = sProxy->GetGlobalMaximizeMode(mode);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -237,8 +237,8 @@ HWTEST_F(SessionProxyTest, GetGlobalMaximizeMode, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, SetAspectRatio, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: SetAspectRatio start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     float ratio = 10;
     WSError res = sProxy->SetAspectRatio(ratio);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -254,8 +254,8 @@ HWTEST_F(SessionProxyTest, SetAspectRatio, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, UpdateWindowSceneAfterCustomAnimation, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateWindowSceneAfterCustomAnimation start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     bool isAdd = false;
     WSError res = sProxy->UpdateWindowSceneAfterCustomAnimation(isAdd);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -271,8 +271,8 @@ HWTEST_F(SessionProxyTest, UpdateWindowSceneAfterCustomAnimation, Function | Sma
 HWTEST_F(SessionProxyTest, SetSystemWindowEnableDrag, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: SetSystemWindowEnableDrag start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     bool enableDrag = false;
     WMError res = sProxy->SetSystemWindowEnableDrag(enableDrag);
     ASSERT_EQ(res, WMError::WM_OK);
@@ -288,8 +288,8 @@ HWTEST_F(SessionProxyTest, SetSystemWindowEnableDrag, Function | SmallTest | Lev
 HWTEST_F(SessionProxyTest, TransferAbilityResult, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: TransferAbilityResult start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     uint32_t resultCode = 0;
     AAFwk::Want want;
     WSError res = sProxy->TransferAbilityResult(resultCode, want);
@@ -306,8 +306,8 @@ HWTEST_F(SessionProxyTest, TransferAbilityResult, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, NotifyExtensionDied, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyExtensionDied start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sProxy->NotifyExtensionDied();
 
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyExtensionDied end";
@@ -321,8 +321,8 @@ HWTEST_F(SessionProxyTest, NotifyExtensionDied, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, NotifyExtensionTimeout, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyExtensionTimeout start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sProxy->NotifyExtensionTimeout(2);
 
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyExtensionTimeout end";
@@ -336,8 +336,8 @@ HWTEST_F(SessionProxyTest, NotifyExtensionTimeout, Function | SmallTest | Level2
 HWTEST_F(SessionProxyTest, UpdateWindowAnimationFlag, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdateWindowAnimationFlag start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     bool needDefaultAnimationFlag = false;
     WSError res = sProxy->UpdateWindowAnimationFlag(needDefaultAnimationFlag);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -353,8 +353,8 @@ HWTEST_F(SessionProxyTest, UpdateWindowAnimationFlag, Function | SmallTest | Lev
 HWTEST_F(SessionProxyTest, TransferAccessibilityEvent, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: TransferAccessibilityEvent start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
     WSError res = sProxy->TransferAccessibilityEvent(info, uiExtensionIdLevel);
@@ -464,11 +464,26 @@ HWTEST_F(SessionProxyTest, GetGlobalScaledRect, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyTest, GetStatusBarHeight, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     int32_t res = sProxy->GetStatusBarHeight();
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetStatusBarHeight end";
+}
+
+/**
+ * @tc.name: SetDialogSessionBackGestureEnabled
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    WSError res = sProxy->SetDialogSessionBackGestureEnabled(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled end";
 }
 
 /**
@@ -487,36 +502,6 @@ HWTEST_F(SessionProxyTest, GetAppForceLandscapeConfig, Function | SmallTest | Le
     auto res = sProxy->GetAppForceLandscapeConfig(config);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetAppForceLandscapeConfig end";
-}
-
-/**
- * @tc.name: SetDialogSessionBackGestureEnabled
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, SetDialogSessionBackGestureEnabled, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    WSError res = sProxy->SetDialogSessionBackGestureEnabled(true);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: SetDialogSessionBackGestureEnabled end";
-}
-
-/**
- * @tc.name: RequestFocus
- * @tc.desc: RequestFocus Test
- * @tc.type: FUNC
- */
-HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    WSError res = sProxy->RequestFocus(true);
-    ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus end";
 }
 
 /**
@@ -542,6 +527,21 @@ HWTEST_F(SessionProxyTest, NotifyExtensionEventAsync, Function | SmallTest | Lev
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     sProxy->NotifyExtensionEventAsync(0);
     MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: RequestFocus
+ * @tc.desc: RequestFocus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, RequestFocus, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    WSError res = sProxy->RequestFocus(true);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: RequestFocus end";
 }
 
 /**

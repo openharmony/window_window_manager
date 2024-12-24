@@ -90,7 +90,7 @@ HWTEST_F(SessionProxyPropertyTest, UpdateSessionPropertyByAction, Function | Sma
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,

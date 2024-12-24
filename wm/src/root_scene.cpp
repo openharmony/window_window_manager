@@ -23,6 +23,7 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
+#include "ability_context.h"
 #include "app_mgr_client.h"
 #include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
@@ -79,6 +80,7 @@ RootScene::RootScene()
 
 RootScene::~RootScene()
 {
+    TLOGI(WmsLogTag::WMS_MAIN, "destroyed");
     uiContent_ = nullptr;
 }
 
@@ -95,6 +97,7 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
         return;
     }
 
+    context_ = context->weak_from_this();
     uiContent_->Initialize(this, contentUrl, storage);
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
@@ -155,16 +158,16 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
 void RootScene::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}d", GetWindowId());
         return;
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d", GetWindowId());
     uiContent_->UpdateConfigurationSyncForAll(configuration);
 }
 
 void RootScene::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "in");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     if (staticRootScene_ != nullptr) {
         staticRootScene_->UpdateConfigurationSync(configuration);
     }
@@ -233,14 +236,14 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
     if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     avoidArea = getSessionAvoidAreaByTypeCallback_(type);
-    TLOGI(WmsLogTag::WMS_IMMS, "root scene type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
 
@@ -269,7 +272,7 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (avoidAreaChangeListeners_.find(listener) == avoidAreaChangeListeners_.end()) {
-            TLOGI(WmsLogTag::WMS_IMMS, "register success.");
+            TLOGI(WmsLogTag::WMS_IMMS, "register success");
             avoidAreaChangeListeners_.insert(listener);
             firstInserted = true;
         }
@@ -286,7 +289,7 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "unregister success.");
+    TLOGI(WmsLogTag::WMS_IMMS, "unregister success");
     std::lock_guard<std::mutex> lock(mutex_);
     avoidAreaChangeListeners_.erase(listener);
     return WMError::WM_OK;
@@ -294,7 +297,7 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
 
 void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "type: %{public}d, area: %{public}s.", type, avoidArea->ToString().c_str());
+    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto& listener : avoidAreaChangeListeners_) {
         if (listener != nullptr) {

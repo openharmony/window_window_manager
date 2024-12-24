@@ -41,7 +41,7 @@ JsWindowStage::~JsWindowStage()
 
 void JsWindowStage::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("Finalizer");
+    WLOGFI("[NAPI]");
     std::unique_ptr<JsWindowStage>(static_cast<JsWindowStage*>(data));
 }
 
@@ -146,9 +146,16 @@ napi_value JsWindowStage::DisableWindowDecor(napi_env env, napi_callback_info in
 
 napi_value JsWindowStage::SetDefaultDensityEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "SetDefaultDensityEnabled");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindowStage::SetCustomDensity(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
+    return (me != nullptr) ? me->OnSetCustomDensity(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::RemoveStartingWindow(napi_env env, napi_callback_info info)
@@ -293,7 +300,7 @@ napi_value JsWindowStage::OnEvent(napi_env env, napi_callback_info info)
     }
     auto ret = g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "register event %{public}s failed, ret = %{public}d", eventString.c_str(), ret);
+        TLOGE(WmsLogTag::DEFAULT, "register event %{public}s failed, ret=%{public}d", eventString.c_str(), ret);
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
         return NapiGetUndefined(env);
     }
@@ -341,7 +348,7 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
         }
     }
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "unregister event %{public}s failed, ret = %{public}d", eventString.c_str(), ret);
+        TLOGE(WmsLogTag::DEFAULT, "unregister event %{public}s failed, ret=%{public}d", eventString.c_str(), ret);
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
         return NapiGetUndefined(env);
     }
@@ -367,7 +374,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
         task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
             "Window load content failed"));
     }
-    WLOGI("Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+    WLOGI("Window [%{public}u, %{public}s] load content end, ret=%{public}d",
         weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     return;
 }
@@ -651,7 +658,7 @@ napi_value JsWindowStage::OnSetShowOnLockScreen(napi_env env, napi_callback_info
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
             window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED));
     }
-    WLOGI("Window [%{public}u, %{public}s] SetShowOnLockScreen %{public}u, ret = %{public}u",
+    WLOGFI("Window [%{public}u, %{public}s] %{public}u, ret=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), showOnLockScreen, ret);
 
     return CreateJsValue(env, static_cast<int32_t>(ret));
@@ -686,34 +693,67 @@ napi_value JsWindowStage::OnSetDefaultDensityEnabled(napi_env env, napi_callback
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
     }
 
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowScene is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowScene is null");
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
     }
 
     auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
     }
 
     bool enabled = false;
     if (!ConvertFromJsValue(env, argv[0], enabled)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to boolean");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to boolean");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u,%{public}s] SetDefaultDensityEnabled=%{public}u ret=%{public}u",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] enabled=%{public}u ret=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
 
+    return CreateJsValue(env, static_cast<int32_t>(ret));
+}
+
+napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    double density = UNDEFINED_DENSITY;
+    if (!ConvertFromJsValue(env, argv[0], density)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to double");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowScene is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Window is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, result=%{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
     return CreateJsValue(env, static_cast<int32_t>(ret));
 }
 
@@ -946,6 +986,8 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
         objValue, "disableWindowDecor", moduleName, JsWindowStage::DisableWindowDecor);
     BindNativeFunction(env,
         objValue, "setDefaultDensityEnabled", moduleName, JsWindowStage::SetDefaultDensityEnabled);
+    BindNativeFunction(env,
+        objValue, "setCustomDensity", moduleName, JsWindowStage::SetCustomDensity);
     BindNativeFunction(env,
         objValue, "removeStartingWindow", moduleName, JsWindowStage::RemoveStartingWindow);
     BindNativeFunction(env,

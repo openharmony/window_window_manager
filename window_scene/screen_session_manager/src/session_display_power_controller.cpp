@@ -37,6 +37,43 @@ void SessionDisplayPowerController::SetDisplayStateToOn(DisplayState& state)
     }
 }
 
+bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state)
+{
+    DisplayState lastState = displayState_;
+    displayState_ = state;
+    if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
+        {
+            std::lock_guard<std::mutex> notifyLock(notifyMutex_);
+            canCancelSuspendNotify_ = false;
+            if (needCancelNotify_) {
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully before notify");
+                needCancelNotify_ = false;
+                displayState_ = lastState;
+                ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
+                    DisplayState::UNKNOWN);
+                return true;
+            }
+            DisplayPowerEvent displayPowerEvent = state == DisplayState::OFF ?
+                DisplayPowerEvent::DISPLAY_OFF : DisplayPowerEvent::DISPLAY_DOZE;
+            ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(displayPowerEvent,
+                EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
+        }
+        if (isSuspendBegin_) {
+            WaitScreenOffNotify(state);
+        }
+        isSuspendBegin_ = false;
+        if (canceledSuspend_) {
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully after notify");
+            canceledSuspend_ = false;
+            displayState_ = lastState;
+            ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
+                DisplayState::UNKNOWN);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
 {
     TLOGI(WmsLogTag::DMS, "[UL_POWER]state:%{public}u", state);
@@ -45,36 +82,16 @@ bool SessionDisplayPowerController::SetDisplayState(DisplayState state)
             SetDisplayStateToOn(state);
             break;
         }
+        case DisplayState::DOZE:
         case DisplayState::OFF: {
-            DisplayState lastState = displayState_;
-            displayState_ = state;
-            if (!ScreenSessionManager::GetInstance().IsMultiScreenCollaboration()) {
-                {
-                    std::lock_guard<std::mutex> notifyLock(notifyMutex_);
-                    canCancelSuspendNotify_ = false;
-                    if (needCancelNotify_) {
-                        TLOGI(WmsLogTag::DMS, "[UL_POWER]"
-                            "SetDisplayState to OFF is canceled successfully before notify");
-                        needCancelNotify_ = false;
-                        displayState_ = lastState;
-                        ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
-                            DisplayState::UNKNOWN);
-                        return false;
-                    }
-                    ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
-                        EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
-                }
-                WaitScreenOffNotify(state);
-
-                if (canceledSuspend_) {
-                    TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully after notify");
-                    canceledSuspend_ = false;
-                    displayState_ = lastState;
-                    ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
-                        DisplayState::UNKNOWN);
-                    return false;
-                }
+            if (HandleSetDisplayStateOff(state)) {
+                return false;
             }
+            break;
+        }
+        case DisplayState::DOZE_SUSPEND: {
+            ScreenSessionManager::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_DOZE_SUSPEND,
+                EventStatus::BEGIN, PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
             break;
         }
         default: {

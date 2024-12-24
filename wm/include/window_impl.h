@@ -160,7 +160,8 @@ public:
     {
         state_ = state;
     }
-    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
+        const Rect& rect = {0, 0, 0, 0}) override;
 
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
@@ -336,6 +337,10 @@ private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> void ClearUselessListeners(std::map<uint32_t, T>& listeners, uint32_t winId)
+    {
+        listeners.erase(winId);
+    }
+    template<typename T> void ClearUselessListeners(std::unordered_map<uint32_t, T>& listeners, uint32_t winId)
     {
         listeners.erase(winId);
     }
