@@ -578,6 +578,7 @@ public:
      */
     void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
+    bool IsMissionHighlighted();
 
     /*
      * system keyboard
