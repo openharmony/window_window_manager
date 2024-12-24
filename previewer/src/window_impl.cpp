@@ -121,6 +121,26 @@ void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Con
     }
 }
 
+void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "winId: %{public}d", GetWindowId());
+    uiContent_->UpdateConfigurationSyncForAll(configuration);
+}
+
+void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    std::lock_guard<std::mutex> lock(globalMutex_);
+    for (const auto& winPair : windowMap_) {
+        if (auto window = winPair.second.second) {
+            window->UpdateConfigurationSync(configuration);
+        }
+    }
+}
+
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 {
     return surfaceNode_;
@@ -274,8 +294,8 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
     return;
 }
 
-WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo,
-    napi_env env, napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
     WLOGFD("NapiSetUIContent: %{public}s", contentInfo.c_str());
     if (uiContent_) {
@@ -291,8 +311,9 @@ WMError WindowImpl::NapiSetUIContent(const std::string& contentInfo,
         WLOGFE("fail to NapiSetUIContent");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (isdistributed) {
-        uiContent->Restore(this, contentInfo, storage);
+    if (type != BackupAndRestoreType::NONE) {
+        uiContent->Restore(this, contentInfo, storage, type == BackupAndRestoreType::CONTINUATION ?
+            Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
     } else {
         uiContent->Initialize(this, contentInfo, storage);
     }
@@ -316,7 +337,7 @@ Ace::UIContent* WindowImpl::GetUIContent() const
     return uiContent_.get();
 }
 
-std::string WindowImpl::GetContentInfo()
+std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
 {
     return "";
 }

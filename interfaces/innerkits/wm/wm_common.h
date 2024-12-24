@@ -329,9 +329,9 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
-    WINDOW_FLAG_HANDWRITING = 1 << 7,
-    WINDOW_FLAG_IS_TOAST = 1 << 8,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
     WINDOW_FLAG_END = 1 << 9,
 };
 
@@ -383,8 +383,14 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
+    DRAG_MOVE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(WindowSizeChangeReason reason)
+{
+    return reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE;
+}
 
 /**
  * @brief Enumerates layout mode of window.
@@ -437,9 +443,19 @@ enum class WindowGravity : uint32_t {
  */
 enum class WindowSetUIContentType: uint32_t {
     DEFAULT,
-    DISTRIBUTE,
+    RESTORE,
     BY_NAME,
     BY_ABC,
+};
+
+/**
+ * @brief Enumerates restore type.
+ */
+enum class BackupAndRestoreType : int32_t {
+    NONE = 0,                       // no backup and restore
+    CONTINUATION = 1,               // distribute
+    APP_RECOVERY = 2,               // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,  // app is killed due to resource schedule
 };
 
 /**
@@ -757,9 +773,11 @@ enum class UIExtensionUsage : uint32_t {
  * @brief UIExtension info for event
  */
 struct ExtensionWindowEventInfo {
-    int32_t persistentId  = 0;
+    int32_t persistentId = 0;
     int32_t pid = -1;
-    Rect windowRect {0, 0, 0, 0};
+    Rect windowRect { 0, 0, 0, 0 }; // Calculated from global rect and UIExtension windowRect
+    Rect uiExtRect { 0, 0, 0, 0 };  // Transferred from arkUI
+    bool hasUpdatedRect = false;
 };
 
 /**

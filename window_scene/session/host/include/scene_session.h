@@ -57,6 +57,7 @@ using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, 
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
 using NotifySubModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
+using NotifyMainModalTypeChangeFunc = std::function<void(bool isModal)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
 using SetWindowPatternOpacityFunc = std::function<void(float opacity)>;
 using NotifyIsCustomAnimationPlayingCallback = std::function<void(bool isFinish)>;
@@ -93,6 +94,7 @@ using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
+using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
@@ -107,6 +109,7 @@ public:
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
         UpdateAvoidAreaByTypeCallback onUpdateAvoidAreaByType_;
+        GetStatusBarDefaultVisibilityByDisplayIdFunc onGetStatusBarDefaultVisibilityByDisplayId_;
         UpdateOccupiedAreaIfNeedCallback onUpdateOccupiedAreaIfNeed_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;
         NotifyWindowPidChangeCallback onWindowInputPidChangeCallback_;
@@ -177,7 +180,7 @@ public:
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
-    WSError OnSystemSessionEvent(SessionEvent event) override;
+    WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
 
@@ -273,11 +276,20 @@ public:
     /**
      * PC Window
      */
+    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
     void SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc&& func);
     virtual bool IsModal() const { return false; }
+    virtual bool IsApplicationModal() const { return false; }
+    bool IsDialogWindow() const;
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
-    void SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func);
+    void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
+
+    /*
+     * PC Window Layout
+     */
+    void SetIsLayoutFullScreen(bool isLayoutFullScreen);
+    bool IsLayoutFullScreen() const;
 
     /**
      * Window Immersive
@@ -295,6 +307,7 @@ public:
     bool GetIsDisplayStatusBarTemporarily() const;
     void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
+    void RetrieveStatusBarDefaultVisibility();
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
@@ -547,9 +560,10 @@ protected:
     /**
      * PC Window
      */
+    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
-    NotifyRestoreMainWindowFunc onRestoreMainWindowFunc_;
+    NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
 
     /*
      * PiP Window
@@ -603,6 +617,11 @@ private:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
+
+    /*
+     * UIExtension
+     */
+    void UpdateAllModalUIExtensions(const WSRect& globalRect);
 
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
@@ -767,6 +786,11 @@ private:
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
+
+    /*
+     * PC Window Layout
+     */
+    bool isLayoutFullScreen_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

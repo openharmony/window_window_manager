@@ -29,6 +29,7 @@ bool g_setWriteInterfaceTokenErrorFlag = false;
 bool g_setReadUint32ErrorFlag = false;
 bool g_setReadInt32ErrorFlag = false;
 bool g_setReadInt64ErrorFlag = false;
+bool g_setReadStringVectorErrorFlag = false;
 #ifdef ENABLE_MOCK_WRITE_STRING
 const static std::string ERROR_FLAG = "error";
 #endif
@@ -53,6 +54,7 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setReadUint32ErrorFlag = false;
     g_setReadInt32ErrorFlag = false;
     g_setReadInt64ErrorFlag = false;
+    g_setReadStringVectorErrorFlag = false;
 }
 
 void MockMessageParcel::SetWriteBoolErrorFlag(bool flag)
@@ -108,6 +110,11 @@ void MockMessageParcel::SetReadInt32ErrorFlag(bool flag)
 void MockMessageParcel::SetReadInt64ErrorFlag(bool flag)
 {
     g_setReadInt64ErrorFlag = flag;
+}
+
+void MockMessageParcel::SetReadStringVectorErrorFlag(bool flag)
+{
+    g_setReadStringVectorErrorFlag = flag;
 }
 }
 
@@ -227,4 +234,12 @@ bool Parcel::WriteStringVector(const std::vector<std::string>& val)
     return true;
 }
 #endif
+
+bool Parcel::ReadStringVector(std::vector<std::string>* val)
+{
+    if (g_setReadStringVectorErrorFlag) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS
