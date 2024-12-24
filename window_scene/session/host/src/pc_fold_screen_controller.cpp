@@ -46,18 +46,18 @@ void PcFoldScreenController::OnConnect()
         [weakThis = wptr(this)](DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus) {
             auto controller = weakThis.promote();
             if (controller == nullptr) {
-                TLOGNE(WmsLogTag::WMS_LAYOUT, "controller is nullptr");
+                TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "controller is nullptr");
                 return;
             }
             auto sceneSession = controller->weakSceneSession_.promote();
             if (sceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id: %{public}d", controller->GetPersistentId());
+                TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id: %{public}d", controller->GetPersistentId());
                 return;
             }
             sceneSession->PostTask([weakThis, displayId, status, prevStatus] {
                 auto controller = weakThis.promote();
                 if (controller == nullptr) {
-                    TLOGNE(WmsLogTag::WMS_LAYOUT, "controller is nullptr");
+                    TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "controller is nullptr");
                     return;
                 }
                 if (status != SuperFoldStatus::KEYBOARD && status != prevStatus) {
@@ -92,7 +92,7 @@ void PcFoldScreenController::FoldStatusChangeForSupportEnterWaterfallMode(
     supportEnterWaterfallMode_ = status == SuperFoldStatus::HALF_FOLDED && !isFullScreenWaterfallMode_;
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "session is nullptr, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id: %{public}d", GetPersistentId());
         return;
     }
     if (!sceneSession->IsMissionHighlighted()) {
@@ -243,18 +243,14 @@ void PcFoldScreenController::UnregisterFullScreenWaterfallModeChangeCallback()
 
 void PcFoldScreenController::UpdateSupportEnterWaterfallMode()
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "last: %{public}d, curr: %{public}d",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "last: %{public}d, curr: %{public}d",
         lastSupportEnterWaterfallMode_, supportEnterWaterfallMode_);
     if (lastSupportEnterWaterfallMode_ == supportEnterWaterfallMode_) {
         return;
     }
     auto sceneSession = weakSceneSession_.promote();
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
-        return;
-    }
-    if (sceneSession->sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage is nullptr, id: %{public}d", GetPersistentId());
+    if (sceneSession == nullptr || sceneSession->sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session stage unavailable, id: %{public}d", GetPersistentId());
         return;
     }
     lastSupportEnterWaterfallMode_ = supportEnterWaterfallMode_;

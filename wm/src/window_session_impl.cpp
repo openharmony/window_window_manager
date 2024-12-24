@@ -1308,15 +1308,15 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        handler_->PostTask([weakThis = wptr(this)] {
+        handler_->PostTask([weakThis = wptr(this), where = __func__] {
             auto window = weakThis.promote();
             if (window == nullptr) {
-                TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "window is null");
+                TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is null", where);
                 return;
             }
             std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
             if (uiContent == nullptr || !window->IsDecorEnable()) {
-                TLOGND(WmsLogTag::WMS_LAYOUT_PC, "uiContent not avaliable");
+                TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s uiContent unavailable", where);
                 return;
             }
             uiContent->OnContainerModalEvent("scb_waterfall_visibility",

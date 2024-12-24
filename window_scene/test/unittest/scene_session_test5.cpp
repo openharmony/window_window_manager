@@ -1710,7 +1710,6 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, Function | Smal
     info.bundleName_ = "MoveUnderInteriaAndNotifyRectChange";
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(mainSession, nullptr);
     ASSERT_NE(mainSession->pcFoldScreenController_, nullptr);
     auto controller = mainSession->pcFoldScreenController_;
     WSRect rect = { 0, 0, 100, 100 };

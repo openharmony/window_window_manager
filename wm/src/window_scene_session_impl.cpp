@@ -2376,7 +2376,7 @@ WMError WindowSceneSessionImpl::Recover()
         SetFullScreenWaterfallMode(false);
         WMError ret = Maximize();
         if (ret != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "recover to fullscreen failed");
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recover to fullscreen failed");
             SetFullScreenWaterfallMode(true);
         }
         return ret;
@@ -4598,14 +4598,12 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 
 WSError WindowSceneSessionImpl::SetSupportEnterWaterfallMode(bool isSupportEnter)
 {
-    const char* const where = __func__;
-    handler_->PostTask([weakThis = wptr(this), isSupportEnter, where] {
+    handler_->PostTask([weakThis = wptr(this), isSupportEnter, where = __func__] {
         auto window = weakThis.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is null", where);
             return;
         }
-        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s start", where);
         if (window->supportEnterWaterfallMode_ == isSupportEnter) {
             return;
         }
@@ -4614,7 +4612,7 @@ WSError WindowSceneSessionImpl::SetSupportEnterWaterfallMode(bool isSupportEnter
         window->supportEnterWaterfallMode_ = isSupportEnter;
         std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
         if (uiContent == nullptr || !window->IsDecorEnable()) {
-            TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s uiContent not avaliable", where);
+            TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s uiContent unavailable", where);
             return;
         }
         uiContent->OnContainerModalEvent("scb_waterfall_visibility",
