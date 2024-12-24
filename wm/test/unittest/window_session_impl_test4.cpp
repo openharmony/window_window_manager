@@ -75,11 +75,9 @@ namespace {
 HWTEST_F(WindowSessionImplTest4, GetRequestWindowState, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetRequestWindowStatetest01 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetRequestWindowState");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     auto ret = window->GetRequestWindowState();
     ASSERT_EQ(ret, WindowState::STATE_INITIAL);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetRequestWindowStatetest01 end";
@@ -93,11 +91,9 @@ HWTEST_F(WindowSessionImplTest4, GetRequestWindowState, Function | SmallTest | L
 HWTEST_F(WindowSessionImplTest4, GetFocusable, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetFocusabletest01 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetFocusable");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     bool ret = window->GetFocusable();
     ASSERT_EQ(ret, true);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetFocusabletest01 end";
@@ -111,10 +107,8 @@ HWTEST_F(WindowSessionImplTest4, GetFocusable, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionImplTest4, TransferAccessibilityEvent, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: TransferAccessibilityEvent start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     Accessibility::AccessibilityEventInfo info;
     int64_t uiExtensionIdLevel = 0;
     ASSERT_EQ(WMError::WM_OK, window->TransferAccessibilityEvent(info, uiExtensionIdLevel));
@@ -128,10 +122,9 @@ HWTEST_F(WindowSessionImplTest4, TransferAccessibilityEvent, Function | SmallTes
  */
 HWTEST_F(WindowSessionImplTest4, SetSingleFrameComposerEnabled01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetSingleFrameComposerEnabled01");
-    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     WMError retCode = window->SetSingleFrameComposerEnabled(false);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
@@ -155,10 +148,9 @@ HWTEST_F(WindowSessionImplTest4, SetSingleFrameComposerEnabled01, Function | Sma
  */
 HWTEST_F(WindowSessionImplTest4, SetTopmost, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTopmost");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     WMError res = window->SetTopmost(true);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
@@ -183,9 +175,9 @@ HWTEST_F(WindowSessionImplTest4, SetTopmost, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, IsTopmost, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsTopmost");
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     bool res = window->IsTopmost();
     ASSERT_FALSE(res);
@@ -198,16 +190,13 @@ HWTEST_F(WindowSessionImplTest4, IsTopmost, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMainWindowTopmost");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     WMError res = window->SetMainWindowTopmost(true);
@@ -221,10 +210,9 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionImplTest4, IsMainWindowTopmost, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsMainWindowTopmost");
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     bool res = window->IsMainWindowTopmost();
     ASSERT_FALSE(res);
@@ -238,11 +226,9 @@ HWTEST_F(WindowSessionImplTest4, IsMainWindowTopmost, Function | SmallTest | Lev
 HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetDecorVisibletest01 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetDecorVisible");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
@@ -460,11 +446,9 @@ HWTEST_F(WindowSessionImplTest4, GetVirtualPixelRatio01, Function | SmallTest | 
 HWTEST_F(WindowSessionImplTest4, GetDecorHeight, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorHeighttest01 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetDecorHeight");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
@@ -563,11 +547,9 @@ HWTEST_F(WindowSessionImplTest4, SetDecorButtonStyle, Function | SmallTest | Lev
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonArea, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetTitleButtonAreatest01 start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonArea");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
@@ -588,10 +570,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonArea, Function | SmallTest | Leve
 HWTEST_F(WindowSessionImplTest4, GetUIContentRemoteObj, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetUIContentRemoteObj start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     sptr<IRemoteObject> remoteObj;
     WSError res = window->GetUIContentRemoteObj(remoteObj);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
@@ -609,11 +589,9 @@ HWTEST_F(WindowSessionImplTest4, GetUIContentRemoteObj, Function | SmallTest | L
 HWTEST_F(WindowSessionImplTest4, RegisterExtensionAvoidAreaChangeListener, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: RegisterExtensionAvoidAreaChangeListener start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonArea");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     WMError res = window->RegisterExtensionAvoidAreaChangeListener(listener);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
@@ -641,11 +619,9 @@ HWTEST_F(WindowSessionImplTest4, RegisterExtensionAvoidAreaChangeListener, Funct
 HWTEST_F(WindowSessionImplTest4, UnregisterExtensionAvoidAreaChangeListener, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: UnregisterExtensionAvoidAreaChangeListener start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonArea");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     sptr<IAvoidAreaChangedListener> listener = nullptr;
     WMError res = window->UnregisterExtensionAvoidAreaChangeListener(listener);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
@@ -672,11 +648,9 @@ HWTEST_F(WindowSessionImplTest4, UnregisterExtensionAvoidAreaChangeListener, Fun
 HWTEST_F(WindowSessionImplTest4, SetPipActionEvent, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetPipActionEvent start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonArea");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_EQ(nullptr, window->GetUIContentWithId(10000));
     window->property_->SetPersistentId(1);
 
@@ -719,12 +693,10 @@ HWTEST_F(WindowSessionImplTest4, SetPiPControlEvent, Function | SmallTest | Leve
 HWTEST_F(WindowSessionImplTest4, SetUIContentInner, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetUIContentInner start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetUIContentInner");
     option->SetIsUIExtFirstSubWindow(true);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     std::string url = "";
     EXPECT_TRUE(window->IsWindowSessionInvalid());
@@ -742,17 +714,14 @@ HWTEST_F(WindowSessionImplTest4, SetUIContentInner, Function | SmallTest | Level
 HWTEST_F(WindowSessionImplTest4, TestGetUIContentWithId, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: TestGetUIContentWithId start";
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(nullptr, option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("TestGetUIContentWithId");
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_EQ(nullptr, window->GetUIContentWithId(10000));
     window->property_->SetPersistentId(1);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "TestGetUIContentWithId", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -770,17 +739,15 @@ HWTEST_F(WindowSessionImplTest4, TestGetUIContentWithId, Function | SmallTest | 
  */
 HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetCallingWindowRect");
-    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     Rect rect = {0, 0, 0, 0};
     WMError retCode = window->GetCallingWindowRect(rect);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     window->GetCallingWindowRect(rect);
@@ -793,16 +760,16 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowRect, Function | SmallTest | Le
  */
 HWTEST_F(WindowSessionImplTest4, GetCallingWindowWindowStatus, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetCallingWindowWindowStatus");
-    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
     WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     WMError retCode = window->GetCallingWindowWindowStatus(windowStatus);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
@@ -816,8 +783,8 @@ HWTEST_F(WindowSessionImplTest4, GetCallingWindowWindowStatus, Function | SmallT
  */
 HWTEST_F(WindowSessionImplTest4, GetParentId, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     const int32_t res = window->GetParentId();
     ASSERT_EQ(res, 0);
     ASSERT_EQ(true, window->IsSupportWideGamut());
@@ -830,10 +797,8 @@ HWTEST_F(WindowSessionImplTest4, GetParentId, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, PreNotifyKeyEvent, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     window->ConsumePointerEvent(pointerEvent);
 
@@ -855,10 +820,8 @@ HWTEST_F(WindowSessionImplTest4, PreNotifyKeyEvent, Function | SmallTest | Level
  */
 HWTEST_F(WindowSessionImplTest4, CheckIfNeedCommitRsTransaction, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     bool res = false;
     WindowSizeChangeReason wmReason = WindowSizeChangeReason::UNDEFINED;
@@ -884,11 +847,10 @@ HWTEST_F(WindowSessionImplTest4, CheckIfNeedCommitRsTransaction, Function | Smal
  */
 HWTEST_F(WindowSessionImplTest4, UpdateRectForRotation, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+        sptr<WindowSessionImpl>::MakeSptr(option);
 
     Rect wmRect;
     wmRect.posX_ = 0;
@@ -926,9 +888,8 @@ HWTEST_F(WindowSessionImplTest4, UpdateRectForRotation, Function | SmallTest | L
  */
 HWTEST_F(WindowSessionImplTest4, NotifyRotationAnimationEnd, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->NotifyRotationAnimationEnd();
 
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
@@ -945,9 +906,8 @@ HWTEST_F(WindowSessionImplTest4, NotifyRotationAnimationEnd, Function | SmallTes
  */
 HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     bool isMaximizeVisible = true;
     bool isMinimizeVisible = true;
     bool isSplitVisible = true;
@@ -972,11 +932,10 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible, Function | SmallTest | L
  */
 HWTEST_F(WindowSessionImplTest4, IsFocused, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowSessionImpl> window =
-        new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+        sptr<WindowSessionImpl>::MakeSptr(option);
     bool res = window->IsFocused();
     ASSERT_EQ(res, false);
 
@@ -984,8 +943,7 @@ HWTEST_F(WindowSessionImplTest4, IsFocused, Function | SmallTest | Level2)
 
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
                                "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     int32_t persistentId = window->GetPersistentId();
     if (persistentId == INVALID_SESSION_ID) {
@@ -1009,12 +967,10 @@ HWTEST_F(WindowSessionImplTest4, IsFocused, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, NapiSetUIContent, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NapiSetUIContent");
     option->SetIsUIExtFirstSubWindow(true);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     std::string url = "";
     AppExecFwk::Ability* ability = nullptr;
@@ -1033,11 +989,9 @@ HWTEST_F(WindowSessionImplTest4, NapiSetUIContent, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionImplTest4, GetAbcContent, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetAbcContent");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     std::string abcPath = "";
     std::shared_ptr<std::vector<uint8_t>> res = window->GetAbcContent(abcPath);
     std::filesystem::path abcFile{abcPath};
@@ -1083,16 +1037,14 @@ HWTEST_F(WindowSessionImplTest4, GetAbcContent, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, SetLandscapeMultiWindow, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetLandscapeMultiWindow");
-    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     WMError retCode = window->SetLandscapeMultiWindow(false);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     retCode = window->SetLandscapeMultiWindow(false);
@@ -1106,11 +1058,9 @@ HWTEST_F(WindowSessionImplTest4, SetLandscapeMultiWindow, Function | SmallTest |
  */
 HWTEST_F(WindowSessionImplTest4, GetTouchable, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTouchable");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->GetTouchable();
     window->GetBrightness();
     ASSERT_NE(window, nullptr);
@@ -1123,14 +1073,13 @@ HWTEST_F(WindowSessionImplTest4, GetTouchable, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, Notify03, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Notify03");
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule",
                                "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     window->NotifyAfterResumed();
@@ -1150,11 +1099,9 @@ HWTEST_F(WindowSessionImplTest4, Notify03, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, Filter, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Filter");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     window->FilterKeyEvent(keyEvent);
     ASSERT_EQ(window->keyEventFilter_, nullptr);
@@ -1175,11 +1122,9 @@ HWTEST_F(WindowSessionImplTest4, Filter, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, UpdateOrientation, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateOrientation");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     auto ret = window->UpdateOrientation();
     ASSERT_EQ(WSError::WS_OK, ret);
 }
@@ -1192,11 +1137,9 @@ HWTEST_F(WindowSessionImplTest4, UpdateOrientation, Function | SmallTest | Level
 HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible01 start";
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTitleButtonVisible");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
@@ -1217,11 +1160,9 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible01, Function | SmallTest |
 HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible02, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible02 start";
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTitleButtonVisible");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WMError res = window->SetTitleButtonVisible(false, false, false, true);
@@ -1237,11 +1178,9 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible02, Function | SmallTest |
 HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible03, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible03 start";
-    sptr option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTitleButtonVisible");
-    sptr window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -1264,11 +1203,9 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible03, Function | SmallTest |
  */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonVisible01");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     uint32_t windowModeSupportType = 1 | (1 << 1) | (1 << 2);
     window->property_->SetWindowModeSupportType(windowModeSupportType);
@@ -1295,10 +1232,9 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest |
  */
 HWTEST_F(WindowSessionImplTest4, UpdateRect03, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("WindowSessionCreateCheck");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     WSRect rect;
     rect.posX_ = 0;
@@ -1333,11 +1269,9 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect03, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonVisible02");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     // only not support WINDOW_MODE_SUPPORT_SPLIT
     uint32_t windowModeSupportType = 1 | (1 << 1);
@@ -1364,12 +1298,10 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, Function | SmallTest |
  */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonVisible03");
     option->SetDisplayId(1);
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     ASSERT_EQ(1, window->GetDisplayId());
     // only not support WINDOW_MODE_SUPPORT_SPLIT
@@ -1397,16 +1329,13 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, Function | SmallTest |
  */
 HWTEST_F(WindowSessionImplTest4, GetAppForceLandscapeConfig01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetAppForceLandscapeConfig01");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     AppForceLandscapeConfig config = {};
     window->GetAppForceLandscapeConfig(config);
@@ -1422,16 +1351,13 @@ HWTEST_F(WindowSessionImplTest4, GetAppForceLandscapeConfig01, Function | SmallT
  */
 HWTEST_F(WindowSessionImplTest4, UpdatePiPControlStatus01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdatePiPControlStatus01");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     auto controlType = PiPControlType::VIDEO_PLAY_PAUSE;
     auto status = PiPControlStatus::ENABLED;
@@ -1471,19 +1397,16 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyWindowVisibility01");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->NotifyWindowVisibility(false);
-    sptr<IWindowVisibilityChangedListener> listener = new IWindowVisibilityChangedListener();
+    sptr<IWindowVisibilityChangedListener> listener = sptr<IWindowVisibilityChangedListener>::MakeSptr();
     window->RegisterWindowVisibilityChangeListener(listener);
     window->NotifyWindowVisibility(false);
     window->UnregisterWindowVisibilityChangeListener(listener);
@@ -1553,11 +1476,9 @@ HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, Function | SmallTest |
 HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 start";
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
@@ -1574,11 +1495,9 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, Function | SmallTest
 HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 start";
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     std::string activeColor = "#00000000";
     std::string inactiveColor = "#00000000";
@@ -1595,11 +1514,9 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, Function | SmallTest
 HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 start";
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
@@ -1620,11 +1537,9 @@ HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, Function | SmallTest
 HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 start";
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
@@ -2275,12 +2190,10 @@ HWTEST_F(WindowSessionImplTest4, FlushLayoutSize, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest4, RegisterDisplayIdChangeListener01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RegisterDisplayIdChangeListener01");
 
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     sptr<IDisplayIdChangeListener> listener = nullptr;
     WMError ret = window->RegisterDisplayIdChangeListener(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
@@ -2305,12 +2218,10 @@ HWTEST_F(WindowSessionImplTest4, RegisterDisplayIdChangeListener01, Function | S
  */
 HWTEST_F(WindowSessionImplTest4, UnregisterDisplayIdChangeListener01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnregisterDisplayIdChangeListener01");
 
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     sptr<IDisplayIdChangeListener> listener = nullptr;
     WMError ret = window->UnregisterDisplayIdChangeListener(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
@@ -2335,15 +2246,13 @@ HWTEST_F(WindowSessionImplTest4, UnregisterDisplayIdChangeListener01, Function |
  */
 HWTEST_F(WindowSessionImplTest4, NotifyDisplayIdChange01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
-    ASSERT_NE(option, nullptr);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyDisplayIdChange01");
 
-    sptr<WindowSessionImpl> window = new WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessioninfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new SessionMocker(sessioninfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
     ASSERT_NE(session, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     DisplayId displayId = 12;
