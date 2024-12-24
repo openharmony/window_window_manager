@@ -2690,8 +2690,9 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
     }
 
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, isFullScreen, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, isFullScreen, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
@@ -2706,7 +2707,7 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window SetFullScreen failed."));
             }
         };
@@ -2740,8 +2741,9 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
         }
     }
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, isLayoutFullScreen, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, isLayoutFullScreen, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
@@ -2756,7 +2758,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
             if (ret == WMError::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env,
                     ret, "Window OnSetLayoutFullScreen failed."));
             }
@@ -2860,7 +2862,7 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
             if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, ret);
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window OnSetLayoutFullScreen failed."));
             }
         };
@@ -2984,9 +2986,10 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
+    const char* const where = __func__;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask,
-        systemBarType, systemBarEnable, systemBarEnableAnimation] {
+        systemBarType, systemBarEnable, systemBarEnableAnimation, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
@@ -3001,7 +3004,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "set system bar enable failed, errcode: %{public}d", errCode);
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s, errcode: %{public}d", where, errCode);
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
                 "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
