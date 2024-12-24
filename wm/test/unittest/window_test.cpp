@@ -1487,6 +1487,21 @@ HWTEST_F(WindowTest, NapiSetUIContent, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: NapiSetUIContentByName
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, NapiSetUIContentByName, Function | SmallTest | Level2)
+{
+    auto window = sptr<Window>::MakeSptr();
+    napi_env env = nullptr;
+    napi_value storage = nullptr;
+    auto ret = window->NapiSetUIContentByName("info", env, storage);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: SetUIContentByAbc
  * @tc.desc: get
  * @tc.type: FUNC
