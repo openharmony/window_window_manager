@@ -713,6 +713,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_COMBINATION: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto screenCombination = GetScreenCombination(screenId);
+            reply.WriteUint32(static_cast<uint32_t>(screenCombination));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO: {
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenComponentRotation = data.ReadFloat();
