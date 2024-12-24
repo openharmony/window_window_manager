@@ -3210,7 +3210,7 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     ParseAvoidAreaParam(env, info, errCode, avoidAreaType);
     wptr<Window> weakToken(windowToken_);
-    const *char const where = __func__;
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, errCode, avoidAreaType, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
@@ -7109,7 +7109,7 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    const *char const where = __func__;
+    const char* const where = __func__;
     auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
