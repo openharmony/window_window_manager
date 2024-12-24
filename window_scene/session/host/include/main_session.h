@@ -58,6 +58,8 @@ public:
     bool IsModal() const override;
     bool IsApplicationModal() const override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
+    WSError NotifySupportWindowModesChange(
+        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

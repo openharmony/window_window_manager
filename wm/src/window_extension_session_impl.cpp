@@ -522,6 +522,19 @@ void WindowExtensionSessionImpl::ArkUIFrameworkSupport()
 WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
+    return SetUIContentInner(contentInfo, env, storage, token, ability);
+}
+
+WMError WindowExtensionSessionImpl::NapiSetUIContentByName(const std::string& contentName, napi_env env,
+    napi_value storage, BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "name: %{public}s", contentName.c_str());
+    return SetUIContentInner(contentName, env, storage, token, ability, true);
+}
+
+WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
+    sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName)
+{
     WLOGFD("%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->Destroy();
@@ -541,7 +554,11 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
         if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
         }
-        uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
+        if (initByName) {
+            uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
+        } else {
+            uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
+        }
         // make uiContent available after Initialize/Restore
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
