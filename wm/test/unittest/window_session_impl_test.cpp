@@ -233,7 +233,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     ASSERT_FALSE(WindowHelper::IsMainWindow(window->GetType()));
     retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_TYPE);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 }
 
 /**
@@ -256,7 +256,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled03, Function | SmallTest |
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     WMError retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_TYPE);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     retCode = window->SetResizeByDragEnabled(true);
