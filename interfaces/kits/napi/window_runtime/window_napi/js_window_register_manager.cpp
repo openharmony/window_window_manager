@@ -247,7 +247,6 @@ WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<J
         TLOGE(WmsLogTag::DEFAULT, "window or listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    IDisplayIdChangeListenerSptr thisListener(listener);
     return isRegister ?
         WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener)) :
         WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
