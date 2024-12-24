@@ -789,17 +789,10 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
         TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
-    WindowSessionImpl* windowSessionImpl = static_cast<WindowSessionImpl*>(windowImpl.GetRefPtr());
-    if (windowSessionImpl->GetProperty()->GetUIExtensionUsage() != UIExtensionUsage::EMBEDDED) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtension usage is not embedded");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-    }
-    constexpr size_t argcMin = 1;
-    constexpr size_t argcMax = 2;
-    size_t argc = 3;
-    napi_value argv[3] = {nullptr};
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < argcMin || argc > argcMax) {
+    if (argc < 1) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -808,25 +801,18 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to callbackType");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (cbType == "rectChange") {
-        if (!windowImpl->IsPcWindow()) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-        }
-    }
 
-    napi_value cbValue = nullptr;
+    napi_value value = nullptr;
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (argc == 1) {
-        ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, cbValue);
+        ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, value);
     } else {
-        cbValue = argv[1];
-        if (cbValue == nullptr || !NapiIsCallable(env, cbValue)) {
+        value = argv[1];
+        if (value == nullptr || !NapiIsCallable(env, value)) {
             ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
                 env, nullptr);
         } else {
-            ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env,
-                cbValue);
+            ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, value);
         }
     }
 
