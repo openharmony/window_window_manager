@@ -293,6 +293,7 @@ public:
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
+    int32_t SetScreenOnDelayTime(int32_t delay) override;
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
@@ -534,6 +535,7 @@ private:
     std::mutex screenOffMutex_;
     std::condition_variable screenOffCV_;
     int32_t screenOffDelay_ {0};
+    int32_t screenOnDelay_ {0};
 
     std::vector<ScreenId> mirrorScreenIds_;
     std::mutex snapBypickerMutex_;
