@@ -447,6 +447,37 @@ HWTEST_F(MainSessionTest, IsApplicationModal, Function | SmallTest | Level2)
     sceneSession->SetSessionProperty(property);
     EXPECT_EQ(sceneSession->IsApplicationModal(), true);
 }
+
+/**
+ * @tc.name: NotifySupportWindowModesChange
+ * @tc.desc: NotifySupportWindowModesChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySupportWindowModesChange";
+    info.bundleName_ = "NotifySupportWindowModesChange";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes = {
+        AppExecFwk::SupportWindowMode::FULLSCREEN,
+        AppExecFwk::SupportWindowMode::SPLIT,
+        AppExecFwk::SupportWindowMode::FLOATING
+    };
+
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
+
+    session->onSetSupportWindowModesFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
+
+    session->onSetSupportWindowModesFunc_ = [](
+        std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes) {
+        return;
+    };
+
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
+}
 }
 }
 }
