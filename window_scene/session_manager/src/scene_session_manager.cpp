@@ -3936,24 +3936,24 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
 {
     auto resourceMgr = GetResourceManager(abilityInfo);
     if (!resourceMgr) {
-        WLOGFE("resourceMgr is nullptr.");
+        TLOGE(WmsLogTag::WMS_PATTERN, "resourceMgr is nullptr.");
         return false;
     }
 
     if (resourceMgr->GetColorById(abilityInfo.startWindowBackgroundId, bgColor) != Global::Resource::RState::SUCCESS) {
-        WLOGFE("Failed to get background color, id %{public}d.", abilityInfo.startWindowBackgroundId);
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get background color, id %{public}d.", abilityInfo.startWindowBackgroundId);
         return false;
     }
 
     if (resourceMgr->GetMediaById(abilityInfo.startWindowIconId, path) != Global::Resource::RState::SUCCESS) {
-        WLOGFE("Failed to get icon, id %{public}d.", abilityInfo.startWindowIconId);
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get icon, id %{public}d.", abilityInfo.startWindowIconId);
         return false;
     }
 
     if (!abilityInfo.hapPath.empty()) { // zipped hap
         auto pos = path.find_last_of('.');
         if (pos == std::string::npos) {
-            WLOGFE("Format error, path %{private}s.", path.c_str());
+            TLOGE(WmsLogTag::WMS_PATTERN, "Format error, path %{private}s.", path.c_str());
             return false;
         }
         path = "resource:///" + std::to_string(abilityInfo.startWindowIconId) + path.substr(pos);
@@ -3964,12 +3964,12 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
 {
     if (!bundleMgr_) {
-        WLOGFE("bundleMgr_ is nullptr.");
+        TLOGE(WmsLogTag::WMS_PATTERN, "bundleMgr_ is nullptr.");
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartupPage");
     if (GetStartingWindowInfoFromCache(sessionInfo, path, bgColor)) {
-        WLOGFI("Found in cache: %{public}s, %{public}x", path.c_str(), bgColor);
+        TLOGI(WmsLogTag::WMS_PATTERN, "Found in cache: %{public}s, %{public}x", path.c_str(), bgColor);
         return;
     }
     AAFwk::Want want;
@@ -3977,14 +3977,14 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::st
     AppExecFwk::AbilityInfo abilityInfo;
     if (!bundleMgr_->QueryAbilityInfo(
         want, AppExecFwk::GET_ABILITY_INFO_DEFAULT, AppExecFwk::Constants::ANY_USERID, abilityInfo)) {
-        WLOGFE("Get ability info from BMS failed!");
+        TLOGE(WmsLogTag::WMS_PATTERN, "Get ability info from BMS failed!");
         return;
     }
 
     if (GetStartupPageFromResource(abilityInfo, path, bgColor)) {
         CacheStartingWindowInfo(abilityInfo, path, bgColor);
     }
-    WLOGFI("%{public}d, %{public}d, %{public}s, %{public}x",
+    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}d, %{public}s, %{public}x",
         abilityInfo.startWindowIconId, abilityInfo.startWindowBackgroundId, path.c_str(), bgColor);
 }
 
@@ -10392,7 +10392,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
-        WLOGFE("get scene session is nullptr");
+        TLOGE(WmsLogTag::WMS_MAIN, "get scene session is nullptr");
         return nullptr;
     }
 
