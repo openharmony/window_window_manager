@@ -663,10 +663,10 @@ int SessionStageStub::HandleSetFullScreenWaterfallMode(MessageParcel& data, Mess
 
 int SessionStageStub::HandleSetSupportEnterWaterfallMode(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
     bool isSupportEnter = false;
     if (!data.ReadBool(isSupportEnter)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isSupportEnter failed.");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read isSupportEnter failed.");
         return ERR_INVALID_DATA;
     }
     SetSupportEnterWaterfallMode(isSupportEnter);

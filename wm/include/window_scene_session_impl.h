@@ -195,10 +195,10 @@ public:
     WMError GetGestureBackEnabled(bool& enable) override;
 
     /*
-     * PC Screen Manager
+     * PC Fold Screen
      */
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
-    WSError SetSupportEnterWaterfallMode(bool isWaterfallMode) override;
+    WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
 
     /*

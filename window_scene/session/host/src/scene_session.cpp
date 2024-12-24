@@ -4222,14 +4222,14 @@ void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<v
 
 bool SceneSession::IsMissionHighlighted()
 {
-    if(!SessionHelper::IsMainWindow(GetWindowType())) {
+    if (!SessionHelper::IsMainWindow(GetWindowType())) {
         return false;
     }
     if (IsFocused()) {
         return true;
     }
     return std::any_of(subSession_.begin(), subSession_.end(),
-        [](sptr<SceneSession> sceneSession) {
+        [](const sptr<SceneSession>& sceneSession) {
             return sceneSession != nullptr && sceneSession->IsMissionHighlighted();
         });
 }

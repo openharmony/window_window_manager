@@ -739,7 +739,6 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, Function |
     controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_NE(controller_->lastSupportEnterWaterfallMode_, controller_->supportEnterWaterfallMode_);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
     mainSession_->sessionStage_ = mockSessionStage;
     controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_EQ(controller_->lastSupportEnterWaterfallMode_, controller_->supportEnterWaterfallMode_);
