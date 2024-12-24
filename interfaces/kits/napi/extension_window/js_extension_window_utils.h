@@ -32,6 +32,9 @@
 
 namespace OHOS {
 namespace Rosen {
+    enum class ComponentRectChangeReason : uint32_t {
+        HOST_WINDOW_RECT_CHANGE = 1,
+    };
     napi_value ComponentRectChangeReasonInit(napi_env env);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
@@ -40,10 +43,6 @@ namespace Rosen {
     bool NapiIsCallable(napi_env env, napi_value value);
     napi_value NapiGetUndefined(napi_env env);
     napi_value NapiThrowError(napi_env env, WmErrorCode errCode);
-
-    enum class ComponentRectChangeReason : uint32_t {
-        HOST_WINDOW_RECT_CHANGE = 1,
-    };
 }  // namespace Rosen
 }  // namespace OHOS
 #endif  // OHOS_JS_EXTENSION_WINDOW_UTILS_H

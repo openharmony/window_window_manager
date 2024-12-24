@@ -28,7 +28,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
-const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
+const std::string WINDOW_RECT_CHANGE_CB = "rectChange";
 const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
@@ -114,7 +114,7 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
     ComponentRectChangeReason componentRectChangeReason = ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE;
-    if (currRect_ == rect && currentRectChangeReason_ == componentRectChangeReason) {
+    if (currRect_ == rect) {
         TLOGD(WmsLogTag::WMS_UIEXT, "Skip redundant rect update");
         return;
     }

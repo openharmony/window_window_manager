@@ -292,6 +292,7 @@ public:
     /*
      * PC Window
      */
+    WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
