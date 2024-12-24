@@ -2128,9 +2128,9 @@ HWTEST_F(WindowTest, IDialogDeathRecipientListener, Function | SmallTest | Level
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     auto ret = true;
-    sptr<IDialogDeathRecipientListener> listener = new IDialogDeathRecipientListener();
+    sptr<IDialogDeathRecipientListener> listener = sptr<IDialogDeathRecipientListener>::MakeSptr();
     Rect rect = {0, 0, 0, 0};
-    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect, 80);
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect, 80);
     listener->OnDialogDeathRecipient();
     ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
