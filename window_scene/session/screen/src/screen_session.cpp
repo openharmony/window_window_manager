@@ -39,7 +39,6 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
 const int32_t NO_EXIST_UID_VERSION = -1;
-constexpr uint32_t GLOBAL_FULL_ROTATION_OFFSET = 3;
 ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
@@ -1032,7 +1031,8 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
-        rotation = static_cast<Rotation>(static_cast<uint32_t>(rotation) + GLOBAL_FULL_ROTATION_OFFSET);
+        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
+        rotation = static_cast<Rotation>(temp);
     }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();

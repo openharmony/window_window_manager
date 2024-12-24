@@ -109,6 +109,7 @@ private:
     void RegisterInputEventListener();
 
     std::unique_ptr<Ace::UIContent> uiContent_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
     DisplayId displayId_ = DISPLAY_ID_INVALID;

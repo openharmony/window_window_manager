@@ -175,7 +175,20 @@ void RootScene::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::
 
 void RootScene::RegisterInputEventListener()
 {
-    if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uiContent_.get()))) {
+    auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+    if (mainEventRunner) {
+        WLOGFD("MainEventRunner is available");
+        eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
+    } else {
+        WLOGFD("MainEventRunner is not available");
+        eventHandler_ = AppExecFwk::EventHandler::Current();
+        if (!eventHandler_) {
+            eventHandler_ =
+                std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
+        }
+    }
+    if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(
+        uiContent_.get(), eventHandler_))) {
         WLOGFE("EnableInputEventListener fail");
     }
     InputTransferStation::GetInstance().MarkRegisterToMMI();

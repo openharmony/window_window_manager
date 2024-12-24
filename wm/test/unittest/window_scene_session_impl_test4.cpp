@@ -2000,6 +2000,7 @@ HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChanged01, Function | Small
     auto ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(true, ret);
 
+    window->lastSystemDensity_ = 1.5f;
     ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(false, ret);
 }

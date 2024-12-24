@@ -292,16 +292,16 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
     }
 }
 
-bool JsScreenSessionManager::OnTakeOverShutdown(bool isReboot)
+bool JsScreenSessionManager::OnTakeOverShutdown(const PowerMgr::TakeOverInfo& info)
 {
     if (!shutdownCallback_) {
         return false;
     }
     TLOGD(WmsLogTag::DMS, "[NAPI]OnTakeOverShutdown");
     std::shared_ptr<NativeReference> callback_ = shutdownCallback_;
-    auto asyncTask = [callback_, isReboot, env = env_]() {
+    auto asyncTask = [callback_, info, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSessionManager::OnTakeOverShutdown");
-        napi_value argv[] = {CreateJsValue(env, isReboot)};
+        napi_value argv[] = {CreateJsValue(env, info.intfParam_)};
         napi_value method = callback_->GetNapiValue();
         if (method == nullptr) {
             TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
