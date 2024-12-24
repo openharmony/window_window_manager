@@ -276,7 +276,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     } else {
         task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window load content failed"));
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] end, ret=%{public}d",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
 }
 

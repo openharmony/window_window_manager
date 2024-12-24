@@ -125,11 +125,11 @@ public:
     sptr<DisplayInfo> GetDisplayInfo() const;
 
     /**
-     * @brief Get info of the display by JS.
+     * @brief Get info of the display with cache.
      *
      * @return Info of the display.
      */
-    sptr<DisplayInfo> GetDisplayInfoByJs() const;
+    sptr<DisplayInfo> GetDisplayInfoWithCache() const;
 
     /**
      * @brief Get cutout info of the display.

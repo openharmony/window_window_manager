@@ -765,134 +765,6 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml08, Function | SmallTest 
 }
 
 /**
- * @tc.name: ConfigKeyboardAnimation01
- * @tc.desc: call ConfigKeyboardAnimation default
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation01, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>abv</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>abv</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                        "<curve name=\"cubic\">0.2 0.0 0.2 1.0</curve>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr1);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
-    ASSERT_EQ(ssm_->systemConfig_.animationOut_.duration_, static_cast<uint32_t>(300));
-}
-
-/**
- * @tc.name: ConfigKeyboardAnimation02
- * @tc.desc: call ConfigKeyboardAnimation default
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation02, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                        "<duration>600</duration>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.animationOut_.duration_, static_cast<uint32_t>(300));
-}
-
-/**
- * @tc.name: ConfigKeyboardAnimation03
- * @tc.desc: call ConfigKeyboardAnimation default
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation03, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                    "</timing>"
-                "</animationIn>"
-                "<animationOut>"
-                    "<timing>"
-                        "<duration>300</duration>"
-                        "<duration>400</duration>"
-                    "</timing>"
-                "</animationOut>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
-}
-
-/**
- * @tc.name: ConfigKeyboardAnimation04
- * @tc.desc: call ConfigKeyboardAnimation default
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigKeyboardAnimation04, Function | SmallTest | Level3)
-{
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-            "<keyboardAnimation>"
-                "<animationIn>"
-                    "<timing>"
-                        "<duration>500</duration>"
-                    "</timing>"
-                "</animationIn>"
-            "</keyboardAnimation>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, static_cast<uint32_t>(500));
-}
-
-/**
  * @tc.name: ConfigWindowAnimation01
  * @tc.desc: call ConfigWindowAnimation default
  * @tc.type: FUNC
@@ -1310,14 +1182,13 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, Function | SmallTe
             "</systemUIStatusBar>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     sceneSessionManager->ConfigWindowSceneXml();
     ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_, 1);
     ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str(),
         "#4c000000");
     ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.
         immersiveStatusBarContentColor_.c_str(), "#ffffee");
-    delete sceneSessionManager;
 }
 
 /**
@@ -1995,10 +1866,9 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, Function | SmallTe
             "</systemUIStatusBar>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(sceneSessionManager, nullptr);
     sceneSessionManager->ConfigWindowSceneXml();
-    delete sceneSessionManager;
 }
 
 /**

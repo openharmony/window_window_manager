@@ -31,7 +31,6 @@ public:
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
     WMError NotifyDrawingCompleted() override;
-    WMError NotifyRemoveStartingWindow() override;
     WMError SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight) override;
     void PreProcessCreate();
     void SetDefaultProperty();
@@ -62,7 +61,7 @@ public:
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
@@ -107,6 +106,7 @@ public:
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
+    WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
 
@@ -195,9 +195,10 @@ public:
     WMError GetGestureBackEnabled(bool& enable) override;
 
     /*
-     * PC Screen Manager
+     * PC Fold Screen
      */
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
+    WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
 
     /*
@@ -205,6 +206,9 @@ public:
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    float GetCustomDensity() const override;
+    WMError SetCustomDensity(float density) override;
+    WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
 
     /*
      * Window Decor
@@ -212,6 +216,11 @@ public:
     WMError SetWindowTitle(const std::string& title) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
+
+    /*
+     * Starting Window
+     */
+    WMError NotifyRemoveStartingWindow() override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -229,7 +238,7 @@ protected:
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
-    float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
+    float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
@@ -301,10 +310,13 @@ private:
     bool gestureBackEnabled_ = true;
 
     /*
-     * Window Property.
+     * Window Property
      */
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
+    bool IsDefaultDensityEnabled();
+    float GetMainWindowCustomDensity();
+    float customDensity_ = UNDEFINED_DENSITY;
 
     /*
      * Sub Window
@@ -326,6 +338,7 @@ private:
      * PC Fold Screen
      */
     std::atomic_bool isFullScreenWaterfallMode_ { false };
+    std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 };
 } // namespace Rosen
 } // namespace OHOS

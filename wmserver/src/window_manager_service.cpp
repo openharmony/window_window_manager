@@ -1068,7 +1068,7 @@ WMError WindowManagerService::RequestFocus(uint32_t windowId)
     return PostSyncTask(task, "RequestFocus");
 }
 
-AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType, const Rect& rect)
 {
     auto task = [this, windowId, avoidAreaType]() {
         WLOGI("[WMS] GetAvoidAreaByType: %{public}u, Type: %{public}u", windowId,

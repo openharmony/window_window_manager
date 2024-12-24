@@ -581,7 +581,7 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken03, Function | SmallTes
 
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     WSError result03 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_EQ(result03, WSError::WS_OK);
 }
 
 /**
@@ -1903,6 +1903,7 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
     ssm_->sceneSessionMap_.insert({-1, nullptr});
     skip = true;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
+    usleep(WAIT_SYNC_IN_NS_ONE);
     ASSERT_EQ(result, WMError::WM_OK);
     skip = false;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
@@ -2339,10 +2340,9 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
 HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest | Level3)
 {
     std::string key = "com.example.recposentryEntryAbility";
-    bool enabled = false;
+    bool enabled = true;
     ssm_->SetIsWindowRectAutoSave(key, enabled);
-    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(ssm_->isWindowRectAutoSaveMap_.at(key), true);
 }
 
 /**

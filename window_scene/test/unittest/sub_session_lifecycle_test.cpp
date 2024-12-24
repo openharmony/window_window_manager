@@ -178,20 +178,6 @@ HWTEST_F(SessionStubLifecycleTest, Hide02, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Hide03
- * @tc.desc: check func Hide
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubLifecycleTest, Hide03, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = nullptr;
-    ASSERT_TRUE(subSession_ != nullptr);
-    subSession_->SetSessionProperty(property);
-    auto result = subSession_->Hide();
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
  * @tc.name: Hide04
  * @tc.desc: check func Hide
  * @tc.type: FUNC

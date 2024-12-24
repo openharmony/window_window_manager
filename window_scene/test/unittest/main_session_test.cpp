@@ -204,13 +204,6 @@ HWTEST_F(MainSessionTest, SetTopmost02, Function | SmallTest | Level1)
     mainSession_->SetSessionProperty(property);
     ASSERT_TRUE(mainSession_->GetSessionProperty() != nullptr);
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
-
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    ASSERT_TRUE(sessionChangeCallback != nullptr);
-
-    mainSession_->RegisterSessionChangeCallback(sessionChangeCallback);
-    EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(false));
 }
 
 /**

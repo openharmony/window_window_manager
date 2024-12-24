@@ -495,6 +495,40 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetKeyboardTouchHotAreas
+ * @tc.desc: SetKeyboardTouchHotAreas test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetKeyboardTouchHotAreas, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(nullptr, property);
+    KeyboardTouchHotAreas hotAreas;
+    Rect rect { 4, 4, 4, 4 };
+    hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
+    hotAreas.landscapePanelHotAreas_.push_back(rect);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
+    hotAreas.portraitPanelHotAreas_.push_back(rect);
+    property->SetPersistentId(0);
+    property->SetSessionPropertyChangeCallback(nullptr);
+    EXPECT_EQ(nullptr, property->touchHotAreasChangeCallback_);
+    property->SetKeyboardTouchHotAreas(hotAreas);
+
+    auto func = [](){};
+    property->SetPersistentId(1);
+    property->SetSessionPropertyChangeCallback(func);
+    property->SetKeyboardTouchHotAreas(hotAreas);
+    EXPECT_NE(nullptr, property->touchHotAreasChangeCallback_);
+
+    Rect rect1 { 5, 5, 5, 5 };
+    hotAreas.landscapeKeyboardHotAreas_.push_back(rect1);
+    hotAreas.landscapePanelHotAreas_.push_back(rect1);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect1);
+    hotAreas.portraitPanelHotAreas_.push_back(rect1);
+    property->SetKeyboardTouchHotAreas(hotAreas);
+}
+
+/**
  * @tc.name: UnmarshallingWindowLimits
  * @tc.desc: UnmarshallingWindowLimits test
  * @tc.type: FUNC
@@ -542,6 +576,28 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
 }
 
 /**
+ * @tc.name: UnmarshallingKeyboardTouchHotAreas
+ * @tc.desc: UnmarshallingKeyboardTouchHotAreas test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingKeyboardTouchHotAreas, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    KeyboardTouchHotAreas hotAreas;
+    Rect rect { 4, 4, 4, 4 };
+    hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
+    hotAreas.landscapePanelHotAreas_.push_back(rect);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
+    hotAreas.portraitPanelHotAreas_.push_back(rect);
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.SetKeyboardTouchHotAreas(hotAreas);
+    windowSessionProperty.MarshallingKeyboardTouchHotAreas(parcel);
+    windowSessionProperty.UnmarshallingKeyboardTouchHotAreas(parcel, property);
+}
+
+/**
  * @tc.name: UnmarshallingPiPTemplateInfo
  * @tc.desc: UnmarshallingPiPTemplateInfo test
  * @tc.type: FUNC
@@ -558,7 +614,6 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingPiPTemplateInfo, Function | Sma
     property->SetPiPTemplateInfo(pipTemplateInfo);
     property->MarshallingPiPTemplateInfo(parcel);
     property->UnmarshallingPiPTemplateInfo(parcel, property);
-    delete property;
 }
 
 /**
@@ -901,6 +956,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
 
@@ -1189,6 +1245,29 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTe
 }
 
 /**
+ * @tc.name: MarshallingKeyboardTouchHotAreas
+ * @tc.desc: MarshallingKeyboardTouchHotAreas test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingKeyboardTouchHotAreas, Function | SmallTest | Level2)
+{
+    Parcel parcel = Parcel();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    KeyboardTouchHotAreas hotAreas;
+    for (int i = 0; i < 55; i++) {
+        Rect rect { i, i, i, i };
+        hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
+        hotAreas.landscapePanelHotAreas_.push_back(rect);
+        hotAreas.portraitKeyboardHotAreas_.push_back(rect);
+        hotAreas.portraitPanelHotAreas_.push_back(rect);
+    }
+    property->SetKeyboardTouchHotAreas(hotAreas);
+    bool result = property->MarshallingKeyboardTouchHotAreas(parcel);
+    ASSERT_EQ(result, false);
+}
+
+/**
  * @tc.name: UnmarshallingPiPTemplateInfo02
  * @tc.desc: UnmarshallingPiPTemplateInfo test
  * @tc.type: FUNC
@@ -1278,6 +1357,35 @@ HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest
     ASSERT_EQ(false, property->IsSystemKeyboard());
     property->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, property->IsSystemKeyboard());
+}
+
+/**
+ * @tc.name: SetAvoidAreaOption
+ * @tc.desc: SetAvoidAreaOption Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint32_t avoidAreaOption = 0;
+    property->SetAvoidAreaOption(avoidAreaOption);
+    ASSERT_EQ(avoidAreaOption, property->GetAvoidAreaOption());
+    avoidAreaOption = 2;
+    property->SetAvoidAreaOption(avoidAreaOption);
+    ASSERT_EQ(avoidAreaOption, property->GetAvoidAreaOption());
+}
+
+/**
+ * @tc.name: GetAvoidAreaOption
+ * @tc.desc: GetAvoidAreaOption Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint32_t avoidAreaOption = 2;
+    property->SetAvoidAreaOption(avoidAreaOption);
+    ASSERT_EQ(2, property->GetAvoidAreaOption());
 }
 } // namespace
 } // namespace Rosen

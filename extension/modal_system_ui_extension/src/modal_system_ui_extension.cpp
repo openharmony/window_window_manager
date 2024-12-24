@@ -55,7 +55,7 @@ bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
     dialogConnectionCallback_ = sptr<DialogAbilityConnection>::MakeSptr(want);
     auto result = abilityManagerClient->ConnectAbility(systemUIWant, dialogConnectionCallback_, INVALID_USERID);
     if (result != ERR_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "ConnectAbility failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::WMS_UIEXT, "ConnectAbility failed, result=%{public}d", result);
         return false;
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "ConnectAbility success");
@@ -140,7 +140,7 @@ void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
         }
         auto result = abilityManagerClient->DisconnectAbility(connection);
         if (result != ERR_OK) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "DisconnectAbility failed, result = %{public}d", result);
+            TLOGE(WmsLogTag::WMS_UIEXT, "DisconnectAbility failed, result=%{public}d", result);
         } else {
             TLOGI(WmsLogTag::WMS_UIEXT, "DisconnectAbility success");
         }

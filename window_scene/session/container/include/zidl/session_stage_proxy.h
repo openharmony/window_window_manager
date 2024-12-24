@@ -77,12 +77,9 @@ public:
     WSError SetSplitButtonVisible(bool isVisible) override;
     WSError SetEnableDragBySystem(bool dragEnable) override;
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
+    WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
 
 private:
-    bool ReadSmallStringVectorFromParcel(
-        MessageParcel& reply, std::vector<std::string>& infos);
-    bool ReadBigStringVectorFromParcel(
-        MessageParcel& reply, std::vector<std::string>& infos);
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
 } // namespace OHOS::Rosen

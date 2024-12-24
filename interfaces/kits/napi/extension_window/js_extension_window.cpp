@@ -85,7 +85,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
 napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<Rosen::Window> window,
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "JsExtensionWindow CreateJsExtensionWindow");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -128,167 +128,167 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
 
 void JsExtensionWindow::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Finalizer is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     std::unique_ptr<JsExtensionWindow>(static_cast<JsExtensionWindow*>(data));
 }
 
 napi_value JsExtensionWindow::GetWindowAvoidArea(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "GetWindowAvoidArea is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowAvoidArea(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::RegisterExtensionWindowCallback(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "RegisterExtensionWindowCallback is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnRegisterExtensionWindowCallback(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::UnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "UnRegisterExtensionWindowCallback is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnUnRegisterExtensionWindowCallback(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::HideNonSecureWindows(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnHideNonSecureWindows(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::CreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "CreateSubWindowWithOptions is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnCreateSubWindowWithOptions(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::SetWaterMarkFlag(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetWaterMark is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetWaterMarkFlag(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::HidePrivacyContentForHost(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "enter");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnHidePrivacyContentForHost(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::LoadContent(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "LoadContent is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, false) : nullptr;
 }
 
 napi_value JsExtensionWindow::LoadContentByName(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "LoadContentByName is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }
 
 napi_value JsExtensionWindow::ShowWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "ShowWindow is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnShowWindow(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::IsWindowShowingSync(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "IsShowing is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnIsWindowShowingSync(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::SetUIContent(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "LoadContent is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetUIContent(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::DestroyWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Destroy is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnDestroyWindow(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::SetWindowBackgroundColorSync(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetBackgroundColor is called");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowBackgroundColorSync(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::GetWindowPropertiesSync(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "GetProperties is called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowPropertiesSync(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::MoveWindowTo(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "MoveTo");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnMoveWindowTo(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::ResizeWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Resize");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnResizeWindow(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetSystemBarEnable");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetSpecificSystemBarEnabled(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::SetPreferredOrientation(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "SetPreferredOrientation");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "GetPreferredOrientation");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::GetUIContext(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "GetUIContext");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnGetUIContext(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::SetWindowBrightness(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetBrightness");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowBrightness(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::SetWindowKeepScreenOn(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetKeepScreenOn");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowKeepScreenOn(env, info) : nullptr;
 }
@@ -317,7 +317,7 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     } else {
         task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "Window load content failed"));
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+    TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] end, ret=%{public}d",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
 }
 
@@ -492,7 +492,7 @@ napi_value JsExtensionWindow::OnDestroyWindow(napi_env env, napi_callback_info i
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowImpl->Destroy());
-        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] destroy end, ret=%{public}d",
             windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
         if (ret != WmErrorCode::WM_OK) {
             task->Reject(env,
@@ -517,7 +517,7 @@ napi_value JsExtensionWindow::OnIsWindowShowingSync(napi_env env, napi_callback_
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     bool state = (windowImpl->GetWindowState() == WindowState::STATE_SHOWN);
-    TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] get show state end, state = %{public}u",
+    TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] get show state end, state=%{public}u",
         windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), state);
     return CreateJsValue(env, state);
 }
@@ -552,7 +552,7 @@ napi_value JsExtensionWindow::OnShowWindow(napi_env env, napi_callback_info info
             task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
         }
-        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show end, ret = %{public}d",
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show end, ret=%{public}d",
             windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -743,7 +743,7 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
         TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "Register end, window [%{public}u, %{public}s], type = %{public}s",
+    TLOGI(WmsLogTag::WMS_UIEXT, "Register end, window [%{public}u, %{public}s], type=%{public}s",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str());
     return NapiGetUndefined(env);
 }
@@ -785,7 +785,7 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "UnRegister end, window [%{public}u, %{public}s], type = %{public}s",
+    TLOGI(WmsLogTag::WMS_UIEXT, "UnRegister end, window [%{public}u, %{public}s], type=%{public}s",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str());
     return NapiGetUndefined(env);
 }
@@ -819,7 +819,7 @@ napi_value JsExtensionWindow::OnHideNonSecureWindows(napi_env env, napi_callback
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "OnHideNonSecureWindows end, window [%{public}u, %{public}s], shouldHide:%{public}u",
+    TLOGI(WmsLogTag::WMS_UIEXT, "end, window [%{public}u, %{public}s], shouldHide:%{public}u",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), shouldHide);
     return NapiGetUndefined(env);
 }
@@ -853,7 +853,7 @@ napi_value JsExtensionWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_inf
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "OnSetWaterMark end, window [%{public}u, %{public}s], isEnable:%{public}u.",
+    TLOGI(WmsLogTag::WMS_UIEXT, "end, window [%{public}u, %{public}s], isEnable:%{public}u.",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), isEnable);
     return NapiGetUndefined(env);
 }

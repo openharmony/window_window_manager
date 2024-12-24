@@ -116,6 +116,8 @@ public:
      */
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
+        bool isCloseVisible) override;
     void SetTargetAPIVersion(uint32_t targetAPIVersion);
     uint32_t GetTargetAPIVersion() const;
 
@@ -217,8 +219,6 @@ public:
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
     WSErrorCode NotifyTransferComponentDataSync(const AAFwk::WantParams& wantParams,
         AAFwk::WantParams& reWantParams) override;
-    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
-    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyScreenshot() override;
     void DumpSessionElementInfo(const std::vector<std::string>& params) override;
@@ -268,8 +268,6 @@ public:
     WMError GetTitleButtonArea(TitleButtonRect& titleButtonRect) override;
     WMError SetAPPWindowLabel(const std::string& label) override;
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
-    WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
-        bool isCloseVisible) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
 
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
@@ -289,7 +287,6 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
-    virtual WMError EnableDrag(bool enableDrag) override;
     WMError SetContinueState(int32_t continueState) override;
 
     /*
@@ -300,6 +297,7 @@ public:
     /*
      * Window Layout
      */
+    WMError EnableDrag(bool enableDrag) override;
     WSError SetEnableDragBySystem(bool enableDrag) override;
 
     /*
@@ -317,6 +315,10 @@ public:
      */
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override;
+    WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override;
+    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
 
     /*
      * Window Property
@@ -350,7 +352,7 @@ protected:
     uint32_t GetBackgroundColor() const;
     virtual WMError SetLayoutFullScreenByApiVersion(bool status);
     float GetVirtualPixelRatio() override;
-    virtual float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo);
+    virtual float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const sptr<DisplayInfo>& info = nullptr,
@@ -459,6 +461,11 @@ protected:
      * Window Immersive
      */
     uint32_t GetStatusBarHeight() override;
+
+    /*
+     * PC Fold Screen
+     */
+    bool supportEnterWaterfallMode_ { false };
 
     /*
      * Window Property

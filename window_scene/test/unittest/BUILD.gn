@@ -34,6 +34,7 @@ group("unittest") {
     ":ws_main_session_test",
     ":ws_move_drag_controller_test",
     ":ws_multi_instance_manager_test",
+    ":ws_pc_fold_screen_controller_test",
     ":ws_root_scene_session_test",
     ":ws_scb_system_session_test",
     ":ws_scene_board_judgement_test",
@@ -87,6 +88,7 @@ group("unittest") {
     ":ws_session_stub_property_test",
     ":ws_session_stub_test",
     ":ws_session_test",
+    ":ws_ssmgr_specific_window_test",
     ":ws_sub_session_lifecycle_test",
     ":ws_sub_session_test",
     ":ws_system_session_lifecycle_test",
@@ -847,6 +849,26 @@ ohos_unittest("ws_scene_session_manager_test12") {
   ]
 }
 
+ohos_unittest("ws_ssmgr_specific_window_test") {
+  module_out_path = module_out_path
+
+  sources = [ "ssmgr_specific_window_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:mission_info",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_scene_session_manager_proxy_test") {
   module_out_path = module_out_path
 
@@ -1152,7 +1174,7 @@ ohos_unittest("ws_multi_instance_manager_test") {
 ohos_unittest("ws_pc_fold_screen_controller_test") {
   module_out_path = module_out_path
 
-  sources = [ "pc_fold_screen_controller.cpp" ]
+  sources = [ "pc_fold_screen_controller_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1670,9 +1692,6 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/session_manager:session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
     "${window_base_path}/wm:libwm",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libxml2:libxml2",
   ]
 
   public_deps = [
@@ -1687,9 +1706,12 @@ ohos_static_library("ws_unittest_common") {
     "accessibility:accessibility_common",
     "accessibility:accessibility_interface",
     "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "libxml2:libxml2",
   ]
 
   public_external_deps = [

@@ -137,7 +137,7 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) = 0;
-    virtual DMError MakeMirror(ScreenId mainScreenId, ScreenId mirrorScreenId,
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         DMRect mainScreenRegion, ScreenId& screenGroupId)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;

@@ -15,6 +15,7 @@
 
 #include "session/host/include/main_session.h"
 
+#include "common/include/fold_screen_state_internel.h"
 #include "session_helper.h"
 #include "window_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -234,6 +235,17 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
         sessionStage_->NotifyForegroundInteractiveStatus(interactive);
         isClientInteractive_ = interactive;
     }
+}
+
+/**
+ * Notify when updating highlight instead after hightlight functionality enabled
+ */
+WSError MainSession::UpdateFocus(bool isFocused)
+{
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && !IsFocused() && isFocused && pcFoldScreenController_) {
+        pcFoldScreenController_->UpdateSupportEnterWaterfallMode();
+    }
+    return Session::UpdateFocus(isFocused);
 }
 
 WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
