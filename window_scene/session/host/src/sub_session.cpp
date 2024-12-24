@@ -55,10 +55,10 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
         auto parentSession = session->GetParentSession();
-        if (parentSession && session->shouldFollowParentWhenShow_) {
+        if (parentSession && session->GetShouldFollowParentWhenShow()) {
             session->CheckAndMoveDisplayIdRecursively(parentSession->GetSessionProperty()->GetDisplayId());
         } else {
-            TLOGNE(WmsLogTag::WMS_SUB, "session do no has parent, id: %{public}d", session->GetPersistentId());
+            TLOGNE(WmsLogTag::WMS_SUB, "session has no parent, id: %{public}d", session->GetPersistentId());
         }
         // use property from client
         auto sessionProperty = session->GetSessionProperty();
@@ -77,7 +77,7 @@ void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason re
     const RectAnimationConfig& rectAnimationConfig)
 {
     if (reason == SizeChangeReason::DRAG_END) {
-        shouldFollowParentWhenShow_ = false;
+        SetShouldFollowParentWhenShow(false);
     }
     SceneSession::NotifySessionRectChange(rect, reason, displayId, rectAnimationConfig);
 }
@@ -86,7 +86,7 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
     const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
 {
     if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
-        shouldFollowParentWhenShow_ = false;
+        SetShouldFollowParentWhenShow(false);
     }
     SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration, rectAnimationConfig);
 }
