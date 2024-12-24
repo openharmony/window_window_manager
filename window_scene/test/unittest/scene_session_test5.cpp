@@ -1710,7 +1710,6 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, Function | Smal
     info.bundleName_ = "MoveUnderInteriaAndNotifyRectChange";
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(mainSession, nullptr);
     ASSERT_NE(mainSession->pcFoldScreenController_, nullptr);
     auto controller = mainSession->pcFoldScreenController_;
     WSRect rect = { 0, 0, 100, 100 };
@@ -1755,6 +1754,56 @@ HWTEST_F(SceneSessionTest5, SetBehindWindowFilterEnabled, Function | SmallTest |
 
     session->SetBehindWindowFilterEnabled(false);
     session->SetBehindWindowFilterEnabled(true);
+}
+
+/**
+ * @tc.name: MarkSystemSceneUIFirst
+ * @tc.desc: MarkSystemSceneUIFirst function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "MarkSystemSceneUIFirst";
+    info.bundleName_ = "MarkSystemSceneUIFirst";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->MarkSystemSceneUIFirst(true, true);
+ 
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->leashWinSurfaceNode_ = nullptr;
+    session->MarkSystemSceneUIFirst(true, true);
+    session->leashWinSurfaceNode_ = surfaceNode;
+    session->MarkSystemSceneUIFirst(true, true);
+    EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
+}
+
+/**
+ * @tc.name: IsMissionHighlighted
+ * @tc.desc: IsMissionHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsMissionHighlighted, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsMissionHighlighted";
+    info.bundleName_ = "IsMissionHighlighted";
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    mainSession->isFocused_ = true;
+    EXPECT_TRUE(mainSession->IsMissionHighlighted());
+    mainSession->isFocused_ = false;
+
+    SessionInfo subInfo;
+    subInfo.abilityName_ = "IsMissionHighlightedSub";
+    subInfo.bundleName_ = "IsMissionHighlightedSub";
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subInfo, nullptr);
+    mainSession->subSession_.push_back(subSession);
+    subSession->isFocused_ = true;
+    EXPECT_TRUE(mainSession->IsMissionHighlighted());
+    subSession->isFocused_ = false;
+    EXPECT_FALSE(mainSession->IsMissionHighlighted());
 }
 }
 }

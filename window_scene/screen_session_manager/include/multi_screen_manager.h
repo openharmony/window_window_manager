@@ -50,6 +50,8 @@ public:
 
     bool AreScreensTouching(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondScreenSession,
         MultiScreenPositionOptions mainScreenOptions, MultiScreenPositionOptions secondScreenOption);
+
+    void MultiScreenReportDataToRss(std::string multiScreenType, std::string status);
 private:
     MultiScreenManager();
     ~MultiScreenManager();

@@ -33,7 +33,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Displa
 const static uint32_t MAX_RETRY_NUM = 6;
 const static uint32_t RETRY_WAIT_MS = 500;
 const static uint32_t MAX_DISPLAY_SIZE = 32;
-const static uint32_t MAX_INTERVAL_US = 25000;
+const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
+const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
 }
@@ -602,7 +603,7 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
     auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
-    if (defaultDisplayId_ != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+    if (defaultDisplayId_ != DISPLAY_ID_INVALID && interval < APP_GET_DISPLAY_INTERVAL_US) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = displayMap_.find(defaultDisplayId_);
         if (iter != displayMap_.end()) {
@@ -644,12 +645,15 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto lastRequestIter = displayUptateTimeMap_.find(displayId);
+        static uint32_t getDisplayIntervalUs_ = (std::string(program_invocation_name) != "com.ohos.sceneboard")
+             ? APP_GET_DISPLAY_INTERVAL_US : SCB_GET_DISPLAY_INTERVAL_US;
         if (displayId != DISPLAY_ID_INVALID && lastRequestIter != displayUptateTimeMap_.end()) {
             auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestIter->second)
                 .count();
-            if (interval < MAX_INTERVAL_US) {
+            if (interval < getDisplayIntervalUs_) {
                 auto iter = displayMap_.find(displayId);
                 if (iter != displayMap_.end()) {
+                    WLOGFW("update display from cache, Id: %{public}" PRIu64" ", displayId);
                     return displayMap_[displayId];
                 }
             }
@@ -2263,7 +2267,7 @@ sptr<Display> DisplayManager::Impl::GetPrimaryDisplaySync()
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
     auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
-    if (primaryDisplayId_ != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+    if (primaryDisplayId_ != DISPLAY_ID_INVALID && interval < APP_GET_DISPLAY_INTERVAL_US) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = displayMap_.find(primaryDisplayId_);
         if (iter != displayMap_.end()) {

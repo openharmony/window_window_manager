@@ -642,6 +642,29 @@ HWTEST_F(WindowSceneSessionImplTest3, SetTouchHotAreas, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: SetKeyboardTouchHotAreas
+ * @tc.desc: SetKeyboardTouchHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, SetKeyboardTouchHotAreas, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetKeyboardTouchHotAreas");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    KeyboardTouchHotAreas hotAreas;
+    Rect rect = {800, 800, 1200, 1200};
+    hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
+    hotAreas.landscapePanelHotAreas_.push_back(rect);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
+    hotAreas.portraitPanelHotAreas_.push_back(rect);
+    auto ret = windowSceneSessionImpl->SetKeyboardTouchHotAreas(hotAreas);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
  * @tc.name: GetWindowLimits01
  * @tc.desc: GetWindowLimits
  * @tc.type: FUNC
@@ -2049,27 +2072,29 @@ HWTEST_F(WindowSceneSessionImplTest3, PreLayoutOnShow, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: InitSystemSessionDragEnable
- * @tc.desc: InitSystemSessionDragEnable Test
+ * @tc.name: InitSystemSessionDragEnable_IsDialogOrNot
+ * @tc.desc: InitSystemSessionDragEnable Test, is dialog window or not
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable_IsDialogOrNot, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("InitSystemSessionDragEnable");
-    sptr<WindowSceneSessionImpl> window = new (std::nothrow) WindowSceneSessionImpl(option);
-    ASSERT_NE(nullptr, window);
-    ASSERT_NE(nullptr, window->property_);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("InitSystemSessionDragEnable_IsDialogOrNot");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
+
+    window->property_->SetDragEnabled(true);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     window->InitSystemSessionDragEnable();
+    ASSERT_EQ(window->property_->GetDragEnabled(), false);
+
+    window->property_->SetDragEnabled(true);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    window->InitSystemSessionDragEnable();
+    ASSERT_EQ(window->property_->GetDragEnabled(), true);
 }
 
 /**

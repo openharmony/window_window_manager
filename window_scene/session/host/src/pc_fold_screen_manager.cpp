@@ -29,7 +29,8 @@ const RSAnimationTimingCurve MOVING_CURVE =
 
 // throw-slip
 constexpr float TAN_25_DEG = 0.4663; // throw slip angle = 25 deg
-constexpr float VEL_THRESHOLD = 0.13445; // 134.45 dp/s
+constexpr float VEL_B_THRESHOLD = 1.732; // 1732 dp/s
+constexpr float VEL_C_THRESHOLD = 1.345; // 1345 dp/s
 constexpr float THROW_SLIP_TIME = 416.0f;
 constexpr float THROW_SLIP_DAMPING_RATIO = 0.9934f; // stiffness = 228, damping = 30
 const RSAnimationTimingProtocol THROW_SLIP_TIMING_PROTOCOL(std::round(THROW_SLIP_TIME)); // animation time
@@ -194,11 +195,11 @@ bool PcFoldScreenManager::NeedDoThrowSlip(ScreenSide startSide, const WSRectF& v
     TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, velocity: %{public}s",
         static_cast<int32_t>(startSide), velocity.ToString().c_str());
     float vpr = GetVpr();
-    if (startSide == ScreenSide::FOLD_B && velocity.posY_ > VEL_THRESHOLD * vpr &&
+    if (startSide == ScreenSide::FOLD_B && velocity.posY_ > VEL_B_THRESHOLD * vpr &&
         std::abs(velocity.posX_ / MathHelper::NonZero(velocity.posY_)) < TAN_25_DEG) {
         return true;
     }
-    if (startSide == ScreenSide::FOLD_C && velocity.posY_ < -VEL_THRESHOLD * vpr &&
+    if (startSide == ScreenSide::FOLD_C && velocity.posY_ < -VEL_C_THRESHOLD * vpr &&
         std::abs(velocity.posX_ / MathHelper::NonZero(velocity.posY_)) < TAN_25_DEG) {
         return true;
     }

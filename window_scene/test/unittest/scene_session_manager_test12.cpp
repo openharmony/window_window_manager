@@ -217,6 +217,7 @@ HWTEST_F(SceneSessionManagerTest12, RequestKeyboardPanelSession, Function | Smal
 {
     sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
     ASSERT_NE(nullptr, ssm);
+
     std::string panelName = "SystemKeyboardPanel";
     ASSERT_NE(nullptr, ssm->RequestKeyboardPanelSession(panelName, 0)); // 0 is screenId
     ssm->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -234,12 +235,9 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | Sma
     keyboardInfo.abilityName_ = "CreateKeyboardPanelSession03";
     keyboardInfo.bundleName_ = "CreateKeyboardPanelSession03";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardInfo, nullptr, nullptr);
-    ASSERT_NE(nullptr, keyboardSession);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
     sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
-    ASSERT_NE(nullptr, ssm);
-
     // the keyboard panel enabled flag of ssm is false
     ssm->CreateKeyboardPanelSession(keyboardSession);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
@@ -271,12 +269,9 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession04, Function | Sma
     keyboardInfo.abilityName_ = "CreateKeyboardPanelSession04";
     keyboardInfo.bundleName_ = "CreateKeyboardPanelSession04";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardInfo, nullptr, nullptr);
-    ASSERT_NE(nullptr, keyboardSession);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
     sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
-    ASSERT_NE(nullptr, ssm);
-
     // the keyboard panel enabled flag of ssm is true
     ssm->isKeyboardPanelEnabled_ = true;
     ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
@@ -290,11 +285,11 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession04, Function | Sma
 }
 
 /**
- * @tc.name: CheckSystemWindowPermission02
- * @tc.desc: test CheckSystemWindowPermission
+ * @tc.name: TestCheckSystemWindowPermission_01
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_UI_EXTENSION then false
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, CheckSystemWindowPermission02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_01, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, ssm_);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -302,25 +297,116 @@ HWTEST_F(SceneSessionManagerTest12, CheckSystemWindowPermission02, Function | Sm
 
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_02
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_APP_MAIN_WINDOW then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW); // main window is not system window
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_03
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_INPUT_METHOD_FLOAT then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_03, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_04
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_INPUT_METHOD_STATUS_BAR then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_04, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_05
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_INPUT_METHOD_FLOAT then false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_05, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetIsSystemKeyboard(true);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_06
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_DIALOG then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_06, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_07
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_PIP then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_07, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_08
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_FLOAT then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_08, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_09
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_TOAST then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_09, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));

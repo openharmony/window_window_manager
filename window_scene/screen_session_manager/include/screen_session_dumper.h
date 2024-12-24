@@ -38,7 +38,7 @@ public:
     ~ScreenSessionDumper() = default;
 
     bool IsNumber(std::string str);
-    void ExcuteDumpCmd();
+    void ExecuteDumpCmd();
     void DumpEventTracker(EventTracker& tracker);
     void DumpFreezedPidList(std::set<int32_t> pidList);
     void DumpMultiUserInfo(std::vector<int32_t> oldScbPids, int32_t userId, int32_t ScbPid);
@@ -58,15 +58,13 @@ private:
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
-    void ExcuteInjectCmd();
-    void ExcuteInjectCmd2();
-/*
-    hidumper 命令注入隔离
- */
+    void ExecuteInjectCmd();
+    void ExecuteInjectCmd2();
+
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
-    void SetMotionSensorvalue(std::string input);
-    void SetRotationLockedvalue(std::string input);
+    void SetMotionSensorValue(std::string input);
+    void SetRotationLockedValue(std::string input);
     void SetEnterOrExitTentMode(std::string input);
     void SetHoverStatusChange(std::string input);
     void SetSuperFoldStatusChange(std::string input);

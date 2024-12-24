@@ -81,6 +81,7 @@ enum class ListenerFuncType : uint32_t {
     TITLE_DOCK_HOVER_SHOW_CB,
     SET_WINDOW_RECT_AUTO_SAVE_CB,
     UPDATE_APP_USE_CONTROL_CB,
+    SESSION_DISPLAY_ID_CHANGE_CB,
 };
 
 class SceneSession;
@@ -254,6 +255,7 @@ private:
     void ProcessCreateSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
+    void ProcessSessionDisplayIdChangeRegister();
     void ProcessSessionPiPControlStatusChangeRegister();
     void ProcessAutoStartPiPStatusChangeRegister();
     void ProcessRaiseToTopRegister();
@@ -302,6 +304,7 @@ private:
     void OnSessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
+    void OnSessionDisplayIdChange(uint64_t displayId);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority);
     void OnRaiseToTop();
@@ -351,7 +354,6 @@ private:
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
     int32_t persistentId_ = -1;
-    wptr<SceneSession::SessionChangeCallback> sessionchangeCallback_ = nullptr;
     std::shared_mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;

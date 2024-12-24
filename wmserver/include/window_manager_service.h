@@ -98,7 +98,8 @@ public:
     void NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
-    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
+    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType,
+        const Rect& rect = {0, 0, 0, 0}) override;
     void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) override;
     void ProcessPointDown(uint32_t windowId, bool isPointDown) override;

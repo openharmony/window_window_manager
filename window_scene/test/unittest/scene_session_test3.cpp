@@ -223,8 +223,10 @@ HWTEST_F(SceneSessionTest3, NotifyClientToUpdateRectTask, Function | SmallTest |
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
     sceneSession->isKeyboardPanelEnabled_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->isScbCoreEnabled_ = false;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
+    ASSERT_EQ(WSError::WS_OK,
+        sceneSession->NotifyClientToUpdateRectTask("SceneSessionTest3", nullptr));
 
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sceneSession->SetSessionProperty(property);
@@ -262,13 +264,10 @@ HWTEST_F(SceneSessionTest3, BindDialogSessionTarget1, Function | SmallTest | Lev
     WSError result = sceneSession->BindDialogSessionTarget(sceneSession1);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    sceneSession->sessionChangeCallback_ = nullptr;
     sptr<SceneSession> sceneSession2 = sceneSession;
     result = sceneSession->BindDialogSessionTarget(sceneSession2);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sceneSession1->sessionChangeCallback_ = sptr<MainSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sceneSession1->sessionChangeCallback_, nullptr);
     sceneSession1->onBindDialogTarget_ = [](const sptr<SceneSession>&) {};
     result = sceneSession->BindDialogSessionTarget(sceneSession1);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -305,10 +304,7 @@ HWTEST_F(SceneSessionTest3, ClearSpecificSessionCbMap1, Function | SmallTest | L
     EXPECT_NE(nullptr, sceneSession);
     sceneSession->ClearSpecificSessionCbMap();
 
-    sptr<MainSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<MainSession::SessionChangeCallback>::MakeSptr();
     sceneSession->clearCallbackMapFunc_ = [](bool) {};
-    sceneSession->sessionChangeCallback_ = sessionChangeCallback;
     sceneSession->ClearSpecificSessionCbMap();
 }
 
@@ -569,12 +565,8 @@ HWTEST_F(SceneSessionTest3, RegisterDefaultAnimationFlagChangeCallback, Function
     sceneSession->RegisterDefaultAnimationFlagChangeCallback([sceneSession](const bool flag) {
         return;
     });
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    sceneSession->RegisterSessionChangeCallback(nullptr);
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateWindowAnimationFlag(true));
 
-    sceneSession->RegisterSessionChangeCallback(sessionChangeCallback);
     sceneSession->RegisterDefaultAnimationFlagChangeCallback([sceneSession](const bool flag) {
         return;
     });
@@ -780,7 +772,7 @@ HWTEST_F(SceneSessionTest3, CompatibleFullScreenClose, Function | SmallTest | Le
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_ = windowSessionProperty;
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
-    ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, sceneSession->CompatibleFullScreenClose());
     sceneSession->SetSessionState(SessionState::STATE_CONNECT);
     ASSERT_EQ(WSError::WS_OK, sceneSession->CompatibleFullScreenClose());
 }

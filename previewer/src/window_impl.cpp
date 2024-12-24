@@ -908,7 +908,7 @@ void WindowImpl::NotifySystemBarChange(WindowType type, const SystemBarProperty&
     auto systemBarEnableListeners = GetListeners<IWindowSystemBarEnableListener>();
     for (auto& listener : systemBarEnableListeners) {
         if (listener != nullptr) {
-            WLOGFD("type = %{public}u", type);
+            WLOGFD("type=%{public}u", type);
             listener->OnSetSpecificBarProperty(type, property);
         }
     }
@@ -919,7 +919,7 @@ void WindowImpl::NotifySetIgnoreSafeArea(bool value)
     auto ignoreSafeAreaListeners = GetListeners<IIgnoreViewSafeAreaListener>();
     for (auto& listener : ignoreSafeAreaListeners) {
         if (listener != nullptr) {
-            WLOGFD("value = %{public}d", value);
+            WLOGFD("value=%{public}d", value);
             listener->SetIgnoreViewSafeArea(value);
         }
     }
@@ -930,7 +930,7 @@ void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAr
     auto avoidAreaChangeListeners = GetListeners<IAvoidAreaChangedListener>();
     for (auto& listener : avoidAreaChangeListeners) {
         if (listener != nullptr) {
-            WLOGFD("type = %{public}u", type);
+            WLOGFD("type=%{public}u", type);
             listener->OnAvoidAreaChanged(*avoidArea, type);
         }
     }

@@ -57,12 +57,12 @@ public:
             if (iter->second != nullptr) {
                 auto ret = ffrt::skip(iter->second);
                 if (ret != 0) {
-                    WLOGI("Failed to cancel task, taskName = %{public}s, retcode = %{public}d", taskName.c_str(), ret);
+                    WLOGI("Failed to cancel task, taskName=%{public}s, retcode=%{public}d", taskName.c_str(), ret);
                 }
             }
             taskMap_.erase(iter);
         } else {
-            WLOGI("Task is not existed, taskName = %{public}s", taskName.c_str());
+            WLOGI("Task is not existed, taskName=%{public}s", taskName.c_str());
         }
     }
 
@@ -107,7 +107,7 @@ void WSFFRTHelper::SubmitTask(std::function<void()>&& task, const std::string& t
     }
     ffrt::task_handle handle = ffrtQueue_->submit_h(std::move(localTask));
     if (handle == nullptr) {
-        WLOGE("Failed to post task, taskName = %{public}s", taskName.c_str());
+        WLOGE("Failed to post task, taskName=%{public}s", taskName.c_str());
         return;
     }
     taskHandleMap_->SaveTask(taskName, std::move(handle));

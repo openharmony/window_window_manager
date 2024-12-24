@@ -462,33 +462,38 @@ napi_value OnMakeMirrorWithRegion(napi_env env, napi_callback_info info)
     if (argc < ARGC_THREE) {
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need 3 args at least!");
     }
-
     int64_t mainScreenId;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], mainScreenId)) {
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to mainScreenId");
     }
-
-    int64_t mirrorScreenId;
-    if (!ConvertFromJsValue(env, argv[INDEX_ONE], mirrorScreenId)) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
-            "Failed to convert parameter to mirrorScreenId");
+    napi_value array = argv[INDEX_ONE];
+    if (array == nullptr) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get mirrorScreen, is nullptr");
     }
-
+    uint32_t size = 0;
+    napi_get_array_length(env, array, &size);
+    std::vector<ScreenId> mirrorScreenIds;
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t screenId;
+        napi_value value = nullptr;
+        napi_get_element(env, array, i, &value);
+        if (!ConvertFromJsValue(env, value, screenId)) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
+        }
+        mirrorScreenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
     DMRect mainScreenRegion;
     if (GetRectFromJs(env, argv[INDEX_TWO], mainScreenRegion) == -1) {
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
-            "Failed to convert parameter to mainScreenRegion");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert to mainScreenRegion");
     }
-
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [mainScreenId, mirrorScreenId, mainScreenRegion, env, task = napiAsyncTask.get()]() {
+    auto asyncTask = [mainScreenId, mirrorScreenIds, mainScreenRegion, env, task = napiAsyncTask.get()]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeMirrorWithRegion");
         ScreenId screenGroupId = INVALID_SCREEN_ID;
-        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<ScreenManager>().MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion,
-                screenGroupId));
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<ScreenManager>().MakeMirror(mainScreenId,
+            mirrorScreenIds, mainScreenRegion, screenGroupId));
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, CreateJsValue(env, static_cast<uint32_t>(screenGroupId)));
         } else {

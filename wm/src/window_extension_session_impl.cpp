@@ -849,7 +849,7 @@ void WindowExtensionSessionImpl::NotifySessionBackground(uint32_t reason, bool w
 void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
                                                               const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY = %{public}f, KeyBoardHeight = %{public}d",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY=%{public}f, KeyBoardHeight=%{public}d",
         info->textFieldPositionY_, info->rect_.height_);
     if (occupiedAreaChangeListener_) {
         occupiedAreaChangeListener_->OnSizeChange(info, rsTransaction);
@@ -870,12 +870,13 @@ WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
     WLOGFI("type %{public}d", type);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    avoidArea = hostSession->GetAvoidAreaByType(type);
+    WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+    avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect);
     return WMError::WM_OK;
 }
 
@@ -954,7 +955,7 @@ WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, f
     return WSError::WS_OK;
 }
 
-float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+float WindowExtensionSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo)
 {
     if (isDensityFollowHost_ && hostDensityValue_ != std::nullopt) {
         return hostDensityValue_->load();
@@ -1217,7 +1218,7 @@ bool WindowExtensionSessionImpl::GetFreeMultiWindowModeEnabledState()
 {
     bool enable = false;
     SingletonContainer::Get<WindowAdapter>().GetFreeMultiWindowEnableState(enable);
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable = %{public}u", enable);
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable=%{public}u", enable);
     return enable;
 }
 
@@ -1285,7 +1286,7 @@ void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
 WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string>& params,
     std::vector<std::string>& info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "Received dump request, persistentId=%{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d", GetPersistentId());
     auto uiContentSharedPtr = GetUIContentSharedPtr();
     if (uiContentSharedPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "uiContent is nullptr");

@@ -975,8 +975,6 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, sceneSession->sessionStage_);
     sceneSession->NotifyTouchOutside();
 
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
     auto func = [sceneSession]() {
         sceneSession->SaveUpdatedIcon(nullptr);
     };
@@ -1002,8 +1000,6 @@ HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | Smal
     info.bundleName_ = "CheckTouchOutsideCallbackRegistered";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
     auto func = [sceneSession]() {
         sceneSession->NotifyWindowVisibility();
     };
@@ -1012,10 +1008,6 @@ HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | Smal
     EXPECT_EQ(true, result);
 
     sceneSession->onTouchOutside_ = nullptr;
-    result = sceneSession->CheckTouchOutsideCallbackRegistered();
-    EXPECT_EQ(false, result);
-
-    sceneSession->sessionChangeCallback_ = nullptr;
     result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(false, result);
 }
@@ -1080,29 +1072,12 @@ HWTEST_F(SceneSessionTest2, NotifyForceHideChange, Function | SmallTest | Level2
     sceneSession->NotifyForceHideChange(true);
 
     sptr<Session> session = sptr<Session>::MakeSptr(info);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     auto func = [sceneSession](bool hide) {
         sceneSession->SetPrivacyMode(hide);
     };
     sceneSession->onForceHideChangeFunc_ = func;
     EXPECT_NE(nullptr, &func);
     sceneSession->NotifyForceHideChange(true);
-}
-
-/**
- * @tc.name: RegisterSessionChangeCallback
- * @tc.desc: RegisterSessionChangeCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, RegisterSessionChangeCallback, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "RegisterSessionChangeCallback";
-    info.bundleName_ = "RegisterSessionChangeCallback";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<SceneSession::SessionChangeCallback> callback = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sceneSession->RegisterSessionChangeCallback(callback);
 }
 
 /**
@@ -1395,7 +1370,6 @@ HWTEST_F(SceneSessionTest2, ClearSpecificSessionCbMap01, Function | SmallTest | 
     EXPECT_NE(nullptr, sceneSession);
     sptr<Session> session;
     session = sptr<Session>::MakeSptr(info);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     sceneSession->ClearSpecificSessionCbMap();
 
     bool isFromClient = true;
@@ -1429,12 +1403,9 @@ HWTEST_F(SceneSessionTest2, OnSessionEvent01, Function | SmallTest | Level2)
     sceneSession->leashWinSurfaceNode_ = nullptr;
     SessionEvent event = SessionEvent::EVENT_START_MOVE;
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1, WindowType::WINDOW_TYPE_FLOAT);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     sceneSession->OnSessionEvent(event);
 
     sceneSession->moveDragController_->isStartDrag_ = true;
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    EXPECT_NE(sceneSession->sessionChangeCallback_, nullptr);
     auto result = sceneSession->OnSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_OK);
     event = SessionEvent::EVENT_DRAG_START;
@@ -1457,7 +1428,6 @@ HWTEST_F(SceneSessionTest2, SetSessionRectChangeCallback, Function | SmallTest |
 
     NotifySessionRectChangeFunc func;
     sceneSession->SetSessionRectChangeCallback(func);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
 
     sceneSession->RaiseToAppTop();
     sceneSession = nullptr;
@@ -1516,7 +1486,6 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, Function | SmallTest | Leve
 
     WSError result = sceneSession->RaiseAppMainWindowToTop();
     EXPECT_EQ(WSError::WS_OK, result);
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     bool status = true;
     sceneSession->OnNeedAvoid(status);
 
@@ -1734,7 +1703,6 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
     session.jsSceneSessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
     sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
 
-    sceneSession->sessionChangeCallback_ = sptr<SceneSession::SessionChangeCallback>::MakeSptr();
     sceneSession->NotifyPiPWindowPrepareClose();
 
     bool isLandscapeMultiWindow = true;

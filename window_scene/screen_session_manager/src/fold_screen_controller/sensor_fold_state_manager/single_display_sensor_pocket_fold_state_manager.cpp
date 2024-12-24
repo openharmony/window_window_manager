@@ -84,10 +84,14 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    TLOGI(WmsLogTag::DMS, "isInCameraFoldStrategy_:%{public}d", isInCameraFoldStrategy_);
     SetCameraFoldStrategy(angle);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
         SetCameraRotationStatusChange(angle, hall);
+        if (hall == HALL_THRESHOLD) {
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+        }
         return;
     }
     SetCameraRotationStatusChange(angle, hall);

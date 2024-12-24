@@ -30,10 +30,13 @@ public:
         const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy) override;
 private:
     FoldStatus GetNextFoldState(const std::vector<float> &angles, const std::vector<uint16_t> &halls);
-    FoldStatus GetNextFoldStateHalf(float angle, int hall, FoldStatus myNextStatus);
-    FoldStatus GetGlobalFoldState(FoldStatus, FoldStatus);
-    void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, uint16_t);
-    int allowUserSensorForLargeFoldDevice = 0;
+    FoldStatus GetNextFoldStateHalf(float angle, uint16_t hall, FoldStatus myNextStatus,
+        int32_t allowUserSensorForLargeFoldDevice);
+    FoldStatus GetGlobalFoldState(FoldStatus PrimaryFoldState, FoldStatus SecondaryFoldState);
+    FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle, uint16_t hall, FoldStatus state);
+    FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle, uint16_t hall, FoldStatus state);
+    int32_t allowUserSensorForLargeFoldDeviceAB = 0;
+    int32_t allowUserSensorForLargeFoldDeviceBC = 0;
     FoldStatus mNextStateAB = FoldStatus::UNKNOWN;
     FoldStatus mNextStateBC = FoldStatus::UNKNOWN;
 };

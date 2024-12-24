@@ -23,6 +23,7 @@
 #include <ui_content.h>
 #include <viewport_config.h>
 
+#include "ability_context.h"
 #include "app_mgr_client.h"
 #include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
@@ -79,6 +80,7 @@ RootScene::RootScene()
 
 RootScene::~RootScene()
 {
+    TLOGI(WmsLogTag::WMS_MAIN, "destroyed");
     uiContent_ = nullptr;
 }
 
@@ -95,6 +97,7 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
         return;
     }
 
+    context_ = context->weak_from_this();
     uiContent_->Initialize(this, contentUrl, storage);
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
@@ -233,7 +236,7 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
     if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");

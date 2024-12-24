@@ -24,6 +24,7 @@
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
+#include "data_handler_interface.h"
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -907,9 +908,27 @@ public:
      *
      * @param type avoid area type.@see reference
      * @param avoidArea
+     * @param rect
      * @return WMError
      */
-    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) { return WMError::WM_OK; }
+    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
+        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set whether the system or app sub window can obtain area
+     *
+     * @param avoidAreaOption from low to high, the first bit means system window, the second bit means app sub window
+     * @return WMError
+     */
+    virtual WMError SetAvoidAreaOption(uint32_t avoidAreaOption) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the Avoid Area of system or app sub window Enabled object
+     *
+     * @param avoidAreaOption from low to high, the first bit means system window, the second bit means app sub window
+     * @return WMError
+     */
+    virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
 
     /**
      * @brief Set this window layout full screen, with hide status bar and nav bar above on this window
@@ -1691,6 +1710,13 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) { return WMError::WM_OK; }
+    /**
+     * @brief Set keyboard touch hot areas.
+     *
+     * @param rects Keybaord hot areas of touching.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) { return WMError::WM_OK; }
 
     /**
      * @brief Get requested touch hot areas.
@@ -1803,8 +1829,9 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief start move system window. It is called by application.
+     * @brief Start move window. It is called by application.
      *
+     * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
@@ -2358,6 +2385,29 @@ public:
     virtual bool GetDefaultDensityEnabled() { return false; }
 
     /**
+     * @brief Set custom density of window.
+     *
+     * @param density the custom density of window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get custom density of window.
+     *
+     * @return custom density.
+     */
+    virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
+
+    /**
+     * @brief Get the window density of current window.
+     *
+     * @param densityInfo the struct representing system density, default density and custom density.
+     * @return WMError.
+     */
+    virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) { return WMError::WM_OK; }
+
+    /**
      * @brief Get virtual pixel ratio.
      *
      * @return Value of PixelRatio obtained from displayInfo.
@@ -2695,6 +2745,11 @@ public:
      * @param errorCode error code when UIExtension timeout
      */
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+
+    /**
+     * @brief Get Data Handler of UIExtension
+     */
+    virtual std::shared_ptr<IDataHandler> GetExtensionDataHandler() const { return nullptr; }
 
     /**
      * @brief Get the real parent id of UIExtension

@@ -284,4 +284,9 @@ WSError SceneSessionManagerLite::NotifyAppUseControlList(
 {
     return SceneSessionManager::GetInstance().NotifyAppUseControlList(type, userId, controlList);
 }
+
+WMError SceneSessionManagerLite::MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId)
+{
+    return SceneSessionManager::GetInstance().MinimizeMainSession(bundleName, appIndex, userId);
+}
 } // namespace OHOS::Rosen

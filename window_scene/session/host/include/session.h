@@ -51,6 +51,7 @@ class RSSyncTransactionController;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
+using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
@@ -299,7 +300,6 @@ public:
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
     sptr<Session> GetParentSession() const;
-    sptr<Session> GetMainSession() const;
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
     std::vector<sptr<Session>> GetDialogVector() const;
@@ -564,6 +564,12 @@ public:
      */
     std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
 
+    /*
+     * PC Window
+     */
+    sptr<Session> GetMainSession() const;
+    sptr<Session> GetMainOrFloatSession() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -697,6 +703,7 @@ protected:
     WSRect globalRect_;     // globalRect include translate
     SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
+    NotifySessionDisplayIdChangeFunc sessionDisplayIdChangeFunc_;
     float clientScaleX_ = 1.0f;
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;

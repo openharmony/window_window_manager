@@ -1271,8 +1271,8 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
     return ret;
 }
 
-DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
-                                              ScreenId mirrorScreenId, DMRect mainScreenRegion, ScreenId& screenGroupId)
+DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+                                              DMRect mainScreenRegion, ScreenId& screenGroupId)
 {
     WLOGFW("ScreenSessionManagerProxy::MakeMirror: ENTER");
     sptr<IRemoteObject> remote = Remote();
@@ -1289,7 +1289,7 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
-        data.WriteUint64(static_cast<uint64_t>(mirrorScreenId));
+        data.WriteUInt64Vector(mirrorScreenIds);
     if (!res) {
         WLOGFE("ScreenSessionManagerProxy::MakeMirror: create mirror fail: write screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;

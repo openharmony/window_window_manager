@@ -60,7 +60,7 @@ public:
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
@@ -114,9 +114,9 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 
-     /*
-      * Starting Window
-      */
+    /*
+     * Starting Window
+     */
     WSError RemoveStartingWindow() override;
 
 private:
