@@ -581,6 +581,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     }
 
     bool isSpecificSession = false;
+    const auto& initRect = GetRequestRect();
     if (GetHostSession()) { // main window
         SetDefaultDisplayIdIfNeed();
         ret = Connect();
@@ -614,6 +615,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         AddSetUIContentTimeoutCheck();
         SetUIExtensionDestroyCompleteInSubWindow();
         InputTransferStation::GetInstance().AddInputWindow(this);
+        if (WindowHelper::IsSubWindow(GetType()) && !initRect.IsUninitializedRect()) {
+            Resize(initRect.width_, initRect.height_);
+        }
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
         "id:%{public}d], state:%{public}u, mode:%{public}u",
