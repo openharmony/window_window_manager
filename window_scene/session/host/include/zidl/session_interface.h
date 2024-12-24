@@ -314,10 +314,8 @@ public:
      * @param supportWindowModes Indicates the {@link AppExecFwk::SupportWindowMode}.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
-    {
-        return WSError::WS_OK;
-    }
+    virtual WSError NotifySupportWindowModesChange(
+        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

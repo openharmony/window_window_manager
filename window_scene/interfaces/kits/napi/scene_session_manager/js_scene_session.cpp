@@ -148,7 +148,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
     {SESSION_DISPLAY_ID_CHANGE_CB,          ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB},
-    {SET_SUPPORT_WINDOW_MODES_CB,          ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB},
+    {SET_SUPPORT_WINDOW_MODES_CB,           ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -5311,22 +5311,22 @@ void JsSceneSession::ProcessSetSupportWindowModesRegister()
     }
     const char* const where = __func__;
     session->RegisterSupportWindowModesCallback([weakThis = wptr(this), where](
-        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) {
+        std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnSetSupportWindowModes(supportWindowModes);
+        jsSceneSession->OnSetSupportWindowModes(std::move(supportWindowModes));
     });
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "success");
 }
 
-void JsSceneSession::OnSetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+void JsSceneSession::OnSetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)
 {
     const char* const where = __func__;
-    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, supportWindowModes,
-        env = env_, where] {
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_,
+        supportWindowModes = std::move(supportWindowModes), env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: jsSceneSession id:%{public}d has been destroyed",

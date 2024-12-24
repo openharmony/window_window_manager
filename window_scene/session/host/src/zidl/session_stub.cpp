@@ -1353,8 +1353,8 @@ int SessionStub::HandleSetSupportWindowModes(MessageParcel& data, MessageParcel&
                 static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
         }
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "size: %{public}d", size);
-    OnSetSupportWindowModes(supportWindowModes);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "size: %{public}u", size);
+    NotifySupportWindowModesChange(supportWindowModes);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -2539,7 +2539,6 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
 WMError WindowSceneSessionImpl::SetSupportWindowModes(
     const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -2555,14 +2554,13 @@ WMError WindowSceneSessionImpl::SetSupportWindowModes(
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    uint32_t windowModeSupportType = 0;
     auto size = supportWindowModes.size();
     if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportWindowModes);
+    uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportWindowModes);
     if (windowModeSupportType == 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is 0");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2575,7 +2573,7 @@ WMError WindowSceneSessionImpl::SetSupportWindowModes(
 
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    hostSession->OnSetSupportWindowModes(supportWindowModes);
+    hostSession->NotifySupportWindowModesChange(supportWindowModes);
 
     UpdateTitleButtonVisibility();
     bool onlySupportFullScreen =

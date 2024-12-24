@@ -963,19 +963,18 @@ napi_value JsWindowStage::OnSetSupportWindowModes(napi_env env, napi_callback_in
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSupportWindowModes(supportWindowModes));
         if (ret != WmErrorCode::WM_OK) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window [%{public}u, %{public}s] "
-                "set window support modes failed!", where, window->GetWindowId(),
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "window [%{public}u, %{public}s] "
+                "set window support modes failed!", window->GetWindowId(),
                 window->GetWindowName().c_str());
-            task->Reject(env, JsErrUtils::CreateJsError(env,
-                ret, "set window support modes failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set window support modes failed."));
         } else {
-            TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window [%{public}u, %{public}s] "
-                "set window support modes succeed.", where, window->GetWindowId(),
+            TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "window [%{public}u, %{public}s] "
+                "set window support modes succeed.", window->GetWindowId(),
                 window->GetWindowName().c_str());
             task->Resolve(env, NapiGetUndefined(env));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }

@@ -2190,7 +2190,8 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::OnSetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+WSError SessionProxy::NotifySupportWindowModesChange(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
 {
     MessageParcel data;
     MessageParcel reply;
