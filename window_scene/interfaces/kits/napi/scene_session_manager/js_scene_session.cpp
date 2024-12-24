@@ -2947,7 +2947,8 @@ void JsSceneSession::OnMainWindowTopmostChange(bool isTopmost)
 {
     TLOGD(WmsLogTag::WMS_HIERARCHY, "isTopmost: %{public}u", isTopmost);
     const char* const where = __func__;
-    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, isTopmost, env = env_, where] {
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_,
+        isTopmost, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s jsSceneSession id:%{public}d has been destroyed",
