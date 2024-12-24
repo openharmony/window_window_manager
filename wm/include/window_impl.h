@@ -507,12 +507,11 @@ private:
         return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
     }
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
     bool needNotifyFocusLater_ = false;
     bool escKeyEventTriggered_ = false;
     bool enableImmersiveMode_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
-
-    std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 };
 } // namespace Rosen
 } // namespace OHOS
