@@ -2996,7 +2996,6 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         auto property = window->GetSystemBarPropertyByType(systemBarType);
         property.enable_ = systemBarEnable;
         property.enableAnimation_ = systemBarEnableAnimation;
-        property.settingFlag_ = property.settingFlag_ | SystemBarSettingFlag::ENABLE_SETTING;
         auto errCode =
             WM_JS_TO_ERROR_CODE_MAP.at(window->SetSpecificBarProperty(systemBarType, property));
         if (errCode == WmErrorCode::WM_OK) {
