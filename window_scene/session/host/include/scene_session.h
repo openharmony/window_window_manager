@@ -101,7 +101,7 @@ using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportWindowModesFunc = std::function<void(
-    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)>;
+    std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };

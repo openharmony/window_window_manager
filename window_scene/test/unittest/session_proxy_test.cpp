@@ -818,26 +818,25 @@ HWTEST_F(SessionProxyTest, DrawingCompleted, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: OnSetSupportWindowModes
+ * @tc.name: NotifySupportWindowModesChange
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, OnSetSupportWindowModes, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, NotifySupportWindowModesChange, Function | SmallTest | Level2)
 {
-    GTEST_LOG_(INFO) << "SessionProxyTest: OnSetSupportWindowModes start";
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySupportWindowModesChange start";
     auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes = {
         AppExecFwk::SupportWindowMode::FULLSCREEN,
         AppExecFwk::SupportWindowMode::SPLIT,
         AppExecFwk::SupportWindowMode::FLOATING
     };
-    WSError res = sProxy->OnSetSupportWindowModes(supportWindowModes);
+    WSError res = sProxy->NotifySupportWindowModesChange(supportWindowModes);
     ASSERT_EQ(res, WSError::WS_OK);
-    GTEST_LOG_(INFO) << "SessionProxyTest: OnSetSupportWindowModes end";
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySupportWindowModesChange end";
 }
 } // namespace
 } // namespace Rosen

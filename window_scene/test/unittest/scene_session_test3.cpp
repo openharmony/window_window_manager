@@ -819,7 +819,7 @@ HWTEST_F(SceneSessionTest3, RegisterSupportWindowModesCallback, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     NotifySetSupportWindowModesFunc func1 = [sceneSession](
-        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) {
+        std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes) {
         return;
     };
 

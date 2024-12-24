@@ -355,7 +355,7 @@ private:
     /*
      * PC Window Layout
      */
-    void OnSetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
+    void OnSetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

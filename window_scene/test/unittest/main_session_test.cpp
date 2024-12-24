@@ -456,15 +456,15 @@ HWTEST_F(MainSessionTest, IsApplicationModal, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: OnSetSupportWindowModes
- * @tc.desc: OnSetSupportWindowModes
+ * @tc.name: NotifySupportWindowModesChange
+ * @tc.desc: NotifySupportWindowModesChange
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, OnSetSupportWindowModes, Function | SmallTest | Level2)
+HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnSetSupportWindowModes";
-    info.bundleName_ = "OnSetSupportWindowModes";
+    info.abilityName_ = "NotifySupportWindowModesChange";
+    info.bundleName_ = "NotifySupportWindowModesChange";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes = {
@@ -473,18 +473,17 @@ HWTEST_F(MainSessionTest, OnSetSupportWindowModes, Function | SmallTest | Level2
         AppExecFwk::SupportWindowMode::FLOATING
     };
 
-    EXPECT_EQ(WSError::WS_OK, session->OnSetSupportWindowModes(supportWindowModes));
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
 
     session->onSetSupportWindowModesFunc_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->OnSetSupportWindowModes(supportWindowModes));
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
 
-    NotifySetSupportWindowModesFunc func = [](
-        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) {
+    session->onSetSupportWindowModesFunc_ = [](
+        std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes) {
         return;
     };
 
-    session->onSetSupportWindowModesFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->OnSetSupportWindowModes(supportWindowModes));
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
 }
 }
 }
