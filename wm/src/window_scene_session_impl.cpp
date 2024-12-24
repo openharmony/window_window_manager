@@ -2149,7 +2149,6 @@ WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType
 
 WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u", GetWindowId());
     auto currProperties = property_->GetSystemBarProperty();
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = currProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
     return WMError::WM_OK;
