@@ -190,6 +190,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
+    ScreenCombination GetScreenCombination(ScreenId screenId) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
