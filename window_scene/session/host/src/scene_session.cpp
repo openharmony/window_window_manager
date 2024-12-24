@@ -96,7 +96,7 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
 
 SceneSession::~SceneSession()
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "~SceneSession, id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
 }
 
 WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
