@@ -58,6 +58,8 @@ public:
 
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
@@ -148,6 +150,8 @@ private:
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
     void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
+    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
+        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false);
 
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
