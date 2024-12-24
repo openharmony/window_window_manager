@@ -182,6 +182,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetEnableDragBySystem(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_FULLSCREEN_WATERFALL_MODE):
             return HandleSetFullScreenWaterfallMode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SUPPORT_ENTER_WATERFALL_MODE):
+            return HandleSetSupportEnterWaterfallMode(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -656,6 +658,18 @@ int SessionStageStub::HandleSetFullScreenWaterfallMode(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     SetFullScreenWaterfallMode(isWaterfallMode);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetSupportEnterWaterfallMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    bool isSupportEnter = false;
+    if (!data.ReadBool(isSupportEnter)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read isSupportEnter failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetSupportEnterWaterfallMode(isSupportEnter);
     return ERR_NONE;
 }
 

@@ -463,6 +463,11 @@ protected:
     uint32_t GetStatusBarHeight() override;
 
     /*
+     * PC Fold Screen
+     */
+    bool supportEnterWaterfallMode_ { false };
+
+    /*
      * Window Property
      */
     float lastSystemDensity_ = UNDEFINED_DENSITY;

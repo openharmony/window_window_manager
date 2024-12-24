@@ -644,6 +644,18 @@ HWTEST_F(SessionStageProxyTest, SetFullScreenWaterfallMode, Function | SmallTest
     WSError res = sessionStage_->SetFullScreenWaterfallMode(false);
     ASSERT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: SetSupportEnterWaterfallMode
+ * @tc.desc: test function : SetSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetSupportEnterWaterfallMode, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetSupportEnterWaterfallMode(false);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
 }
 }
 }

@@ -33,32 +33,72 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112;
 } // namespace
 
 PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession, int32_t persistentId)
-    : weakSceneSession_(std::move(weakSession)), persistentId_(persistentId)
+    : weakSceneSession_(std::move(weakSession)), persistentId_(persistentId) {}
+
+PcFoldScreenController::~PcFoldScreenController()
+{
+    PcFoldScreenManager::GetInstance().UnregisterFoldScreenStatusChangeCallback(GetPersistentId());
+}
+
+void PcFoldScreenController::OnConnect()
 {
     onFoldScreenStatusChangeCallback_ = std::make_shared<FoldScreenStatusChangeCallback>(
         [weakThis = wptr(this)](DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus) {
             auto controller = weakThis.promote();
             if (controller == nullptr) {
-                TLOGNE(WmsLogTag::WMS_LAYOUT, "controller is nullptr");
+                TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "controller is nullptr");
                 return;
             }
-            if (status != SuperFoldStatus::KEYBOARD && status != prevStatus) {
-                controller->UpdateRect();
-            }
-            if ((prevStatus == SuperFoldStatus::HALF_FOLDED && status == SuperFoldStatus::FOLDED) ||
-                (prevStatus == SuperFoldStatus::FOLDED && status == SuperFoldStatus::HALF_FOLDED)) {
+            auto sceneSession = controller->weakSceneSession_.promote();
+            if (sceneSession == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id: %{public}d", controller->GetPersistentId());
                 return;
             }
-            controller->UpdateFullScreenWaterfallMode(false);
+            sceneSession->PostTask([weakThis, displayId, status, prevStatus] {
+                auto controller = weakThis.promote();
+                if (controller == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "controller is nullptr");
+                    return;
+                }
+                if (status != SuperFoldStatus::KEYBOARD && status != prevStatus) {
+                    controller->UpdateRect();
+                }
+                controller->FoldStatusChangeForFullScreenWaterfallMode(displayId, status, prevStatus);
+                controller->FoldStatusChangeForSupportEnterWaterfallMode(displayId, status, prevStatus);
+            });
         }
     );
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(GetPersistentId(),
         std::weak_ptr<FoldScreenStatusChangeCallback>(onFoldScreenStatusChangeCallback_));
+
+    supportEnterWaterfallMode_ = PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId());
+    UpdateSupportEnterWaterfallMode();
 }
 
-PcFoldScreenController::~PcFoldScreenController()
+void PcFoldScreenController::FoldStatusChangeForFullScreenWaterfallMode(
+    DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus)
 {
-    PcFoldScreenManager::GetInstance().UnregisterFoldScreenStatusChangeCallback(GetPersistentId());
+    if ((prevStatus == SuperFoldStatus::HALF_FOLDED && status == SuperFoldStatus::FOLDED) ||
+        (prevStatus == SuperFoldStatus::FOLDED && status == SuperFoldStatus::HALF_FOLDED)) {
+        return;
+    }
+    UpdateFullScreenWaterfallMode(false);
+}
+
+void PcFoldScreenController::FoldStatusChangeForSupportEnterWaterfallMode(
+    DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus)
+{
+    lastSupportEnterWaterfallMode_ = supportEnterWaterfallMode_;
+    supportEnterWaterfallMode_ = status == SuperFoldStatus::HALF_FOLDED && !isFullScreenWaterfallMode_;
+    auto sceneSession = weakSceneSession_.promote();
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id: %{public}d", GetPersistentId());
+        return;
+    }
+    if (!sceneSession->IsMissionHighlighted()) {
+        return;
+    }
+    UpdateSupportEnterWaterfallMode();
 }
 
 bool PcFoldScreenController::IsHalfFolded(DisplayId displayId)
@@ -183,6 +223,9 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
         }
         controller->isFullScreenWaterfallMode_ = isWaterfallMode;
         controller->ExecuteFullScreenWaterfallModeChangeCallback();
+        controller->supportEnterWaterfallMode_ =
+            !controller->isFullScreenWaterfallMode_ && controller->IsHalfFolded(controller->GetScreenId());
+        controller->UpdateSupportEnterWaterfallMode();
     }, __func__);
 }
 
@@ -196,6 +239,22 @@ void PcFoldScreenController::RegisterFullScreenWaterfallModeChangeCallback(
 void PcFoldScreenController::UnregisterFullScreenWaterfallModeChangeCallback()
 {
     fullScreenWaterfallModeChangeCallback_ = nullptr;
+}
+
+void PcFoldScreenController::UpdateSupportEnterWaterfallMode()
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "last: %{public}d, curr: %{public}d",
+        lastSupportEnterWaterfallMode_, supportEnterWaterfallMode_);
+    if (lastSupportEnterWaterfallMode_ == supportEnterWaterfallMode_) {
+        return;
+    }
+    auto sceneSession = weakSceneSession_.promote();
+    if (sceneSession == nullptr || sceneSession->sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session stage unavailable, id: %{public}d", GetPersistentId());
+        return;
+    }
+    lastSupportEnterWaterfallMode_ = supportEnterWaterfallMode_;
+    sceneSession->sessionStage_->SetSupportEnterWaterfallMode(supportEnterWaterfallMode_);
 }
 
 void PcFoldScreenController::ExecuteFullScreenWaterfallModeChangeCallback()
@@ -220,6 +279,16 @@ void PcFoldScreenController::ExecuteFullScreenWaterfallModeChangeCallback()
 int32_t PcFoldScreenController::GetPersistentId() const
 {
     return persistentId_;
+}
+
+DisplayId PcFoldScreenController::GetScreenId()
+{
+    auto sceneSession = weakSceneSession_.promote();
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id: %{public}d", GetPersistentId());
+        return SCREEN_ID_INVALID;
+    }
+    return sceneSession->GetScreenId();
 }
 
 /**
