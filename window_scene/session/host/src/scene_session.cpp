@@ -2804,7 +2804,7 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
                 funcName, session->GetPersistentId(), session->winRect_.ToString().c_str());
             session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
-            session->ResetDragDirtyFlags();
+            session->ResetDirtyDragFlags();
         }
     });
 }
@@ -3018,7 +3018,7 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         sceneSession->winRect_ = rect;
-        sceneSession->dragDirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+        sceneSession->dirtyDragFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
         return WSError::WS_OK;
     }, funcName);
 }
@@ -5147,7 +5147,12 @@ bool SceneSession::IsDirtyWindow()
 
 bool SceneSession::IsDirtyDragWindow()
 {
-    return dragDirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+    return dirtyDragFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+}
+
+void SceneSession::ResetDirtyDragFlags()
+{
+    dirtyDragFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
 }
 
 void SceneSession::NotifyUILostFocus()
