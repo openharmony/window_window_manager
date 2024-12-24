@@ -908,6 +908,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetCameraStatus(cameraStatus, cameraPosition);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ON_DELAY_TIME: {
+            int32_t delay = data.ReadInt32();
+            int32_t ret = SetScreenOnDelayTime(delay);
+            static_cast<void>(reply.WriteInt32(ret));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
