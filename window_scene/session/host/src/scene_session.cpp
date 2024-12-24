@@ -2429,11 +2429,12 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
     }
     // modify the window coordinates when move end
     MMI::PointerEvent::PointerItem pointerItem;
-    if (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP && needNotifyClient &&
-        pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+    if ((action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_MOVE) &&
+        needNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
         int32_t windowX = pointerItem.GetDisplayX() - winRect_.posX_;
         int32_t windowY = pointerItem.GetDisplayY() - winRect_.posY_;
-        TLOGD(WmsLogTag::WMS_EVENT, "move end position: windowX:%{private}d windowY:%{private}d", windowX, windowY);
+        TLOGD(WmsLogTag::WMS_EVENT, "move end position: windowX:%{private}d windowY:%{private}d action:%{public}d",
+            windowX, windowY, action);
         pointerItem.SetWindowX(windowX);
         pointerItem.SetWindowY(windowY);
         pointerEvent->AddPointerItem(pointerItem);
