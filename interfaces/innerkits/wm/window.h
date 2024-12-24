@@ -1591,7 +1591,7 @@ public:
      * @param contentName content info path
      * @param env Napi environment
      * @param storage Napi storage
-     * @param type restore type.
+     * @param type restore type
      * @param token parent token
      * @param ability Ability instance
      * @return WMError
