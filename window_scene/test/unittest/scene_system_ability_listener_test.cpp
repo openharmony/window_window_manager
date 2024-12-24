@@ -57,15 +57,15 @@ HWTEST_F(SceneSystemAbilityListenerTest, OnAddSystemAbilityTest, Function | Smal
     std::string ssmTid = std::to_string(78);
     std::string scbBundleName = "scb";
     std::string ssmThreadName = "ssm";
-    OHOS::Rosen::SCBThreadInfo threadInfo = {.scbUid_ = scbUid, .scbPid_ = scbPid, .scbTid_ = scbTid,
+    SCBThreadInfo threadInfo = {.scbUid_ = scbUid, .scbPid_ = scbPid, .scbTid_ = scbTid,
         .ssmTid_ = ssmTid, .scbBundleName_ = scbBundleName, .ssmThreadName_ = ssmThreadName};
     SceneSystemAbilityListener listener(threadInfo);
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    OHOS::ResourceSchedule::ResSchedClient::GetInstance().rss_ = nullptr;
+    ResourceSchedule::ResSchedClient::GetInstance().rss_ = nullptr;
     listener.OnAddSystemAbility(RENDER_SERVICE, "");
-    EXPECT_EQ(OHOS::ResourceSchedule::ResSchedClient::GetInstance().rss_, nullptr);
+    EXPECT_EQ(ResourceSchedule::ResSchedClient::GetInstance().rss_, nullptr);
     listener.OnAddSystemAbility(RES_SCHED_SYS_ABILITY_ID, "");
-    EXPECT_NE(OHOS::ResourceSchedule::ResSchedClient::GetInstance().rss_, nullptr);
+    EXPECT_NE(ResourceSchedule::ResSchedClient::GetInstance().rss_, nullptr);
 #else
     EXPECT_EQ(listener.info_, threadInfo);
 #endif

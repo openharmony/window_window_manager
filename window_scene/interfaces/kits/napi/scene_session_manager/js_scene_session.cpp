@@ -1028,20 +1028,20 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
 
 void JsSceneSession::ProcessSessionDisplayIdChangeRegister()
 {
-    NotifySessionDisplayIdChangeFunc func = [weakThis = wptr(this)](uint64_t displayId) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "ProcessSessionDisplayIdChangeRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnSessionDisplayIdChange(displayId);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetSessionDisplayIdChangeCallback(func);
+    const char* const where = __func__;
+    session->SetSessionDisplayIdChangeCallback([where, weakThis = wptr(this)](uint64_t displayId) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSessionDisplayIdChange(displayId);
+    });
 }
 
 void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
