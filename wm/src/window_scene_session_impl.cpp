@@ -2283,6 +2283,10 @@ WMError WindowSceneSessionImpl::Maximize()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is not shown, id:%{public}d", property_->GetPersistentId());
+        return WMError::WM_OK;
+    }
     if (WindowHelper::IsMainWindow(GetType())) {
         SetLayoutFullScreen(enableImmersiveMode_);
     }
@@ -2305,6 +2309,10 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     // The device is not supported
     if (!windowSystemConfig_.IsPcWindow() && !IsFreeMultiWindowMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
+        return WMError::WM_OK;
+    }
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is not shown, id:%{public}d", property_->GetPersistentId());
         return WMError::WM_OK;
     }
     titleHoverShowEnabled_ = true;
