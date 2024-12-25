@@ -30,6 +30,7 @@ public:
     ~JsWindowSceneConfig();
     static napi_value CreateWindowSceneConfig(napi_env env, const AppWindowSceneConfig& config);
     static napi_value CreateFreeMultiWindowConfig(napi_env env, const SystemSessionConfig& config);
+    static napi_value CreateSystemConfig(napi_env env, const SystemSessionConfig& config);
 
 private:
     static napi_value CreateShadowValue(napi_env env, const AppWindowSceneConfig& config, bool focused);

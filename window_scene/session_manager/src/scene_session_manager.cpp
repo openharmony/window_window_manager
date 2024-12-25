@@ -435,6 +435,13 @@ void SceneSessionManager::ConfigWindowSceneXml()
     if (item.IsMap()) {
         ConfigStartingWindowAnimation(item);
     }
+    item = config["maxMidSceneNum"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) {
+            systemConfig_.maxMidSceneNum_ = static_cast<uint32_t>(numbers[0]);
+        }
+    }
     ConfigFreeMultiWindow();
     ConfigWindowSizeLimits();
     ConfigSnapshotScale();
