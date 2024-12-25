@@ -175,7 +175,8 @@ public:
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
     DeviceScreenConfig GetDeviceScreenConfig() override;
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
-    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override;
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {}) override;
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
