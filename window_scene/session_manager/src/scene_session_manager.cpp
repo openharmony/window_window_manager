@@ -10115,6 +10115,11 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         FlushWindowInfoToMMI();
         sessionMapDirty_ = 0;
         {
+	    if (sceneSession->GetSessionInfo().screenId_ != SCREEN_ID_INVALID) &&
+                sceneSession->GetSessionInfo().screenId_ != screenId) {
+		    continue;
+	    }
+
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& item : sceneSessionMap_) {
                 auto sceneSession = item.second;
