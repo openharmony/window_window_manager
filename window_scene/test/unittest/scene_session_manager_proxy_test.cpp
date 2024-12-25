@@ -1068,7 +1068,7 @@ HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Funct
  * @tc.desc: IsPcWindow
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, isPcWindow, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
