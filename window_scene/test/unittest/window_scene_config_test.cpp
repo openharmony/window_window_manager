@@ -404,6 +404,26 @@ HWTEST_F(WindowSceneConfigTest, ReadStringConfigInfo, Function | SmallTest | Lev
     ASSERT_EQ(0, result.size());
 }
 
+/**
+ * @tc.name: MaxMidSceneNumConfig01
+ * @tc.desc: set maxMidSceneNum with 3.
+ * @tc.type: FUNC
+ * @tc.require: issueI68QCO
+ */
+HWTEST_F(WindowSceneConfigTest, MaxMidSceneNumConfig01, Function | SmallTest | Level2)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<maxMidSceneNum>3</maxMidSceneNum>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    WindowSceneConfig::ConfigItem item = WindowSceneConfig::config_["maxMidSceneNum"];
+    ASSERT_EQ(false, item.IsMap());
+    ASSERT_EQ(true, item.IsInts());
+    auto value = *item.intsValue_;
+    ASSERT_EQ(true, value.size() >= 1);
+    ASSERT_EQ(3, value[0]);
+}
 
 } // namespace
 } // namespace Rosen
