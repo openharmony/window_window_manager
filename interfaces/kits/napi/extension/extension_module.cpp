@@ -21,7 +21,7 @@ static napi_module g_extensionModule = {
     .nm_modname = "uiExtension",
 };
 
-extern "C" __attribute__((constructor)) void NapiExtensionAutoRegister()
+extern "C" __attribute__((constructor)) void NapiOhosRosenExtensionAutoRegister()
 {
     napi_module_register(&g_extensionModule);
 }
