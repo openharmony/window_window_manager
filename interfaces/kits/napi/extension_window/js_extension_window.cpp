@@ -752,7 +752,7 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
         WmErrorCode ret = extensionRegisterManager_->RegisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
-            env, value);
+            env, cbValue);
         if (ret != WmErrorCode::WM_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[2]) is not callable");
             TLOGI(WmsLogTag::WMS_UIEXT, "Register failed, window [%{public}u, %{public}s], type=%{public}s,\
