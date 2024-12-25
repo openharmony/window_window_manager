@@ -761,8 +761,8 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
             return NapiThrowError(env, ret);
         }
         TLOGI(WmsLogTag::WMS_UIEXT, "Register success, window [%{public}u, %{public}s], type=%{public}s,\
-                reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str(),
-                reasons);
+            reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str(),
+            reasons);
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
