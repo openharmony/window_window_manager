@@ -3824,12 +3824,12 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
             WLOGFE("jsCallBack is nullptr");
             return;
         }
-        napi_value jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
-        if (jsSessionStateObj == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsSessionStateObj is nullptr", where);
+        napi_value jsArrayObject = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
+        if (jsArrayObject == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsArrayObject is nullptr", where);
             return;
         }
-        napi_value argv[] = {jsSessionStateObj};
+        napi_value argv[] = {jsArrayObject};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSystemBarPropertyChange");
