@@ -534,6 +534,8 @@ RRect ScreenProperty::GetPhysicalTouchBounds()
 void ScreenProperty::SetPhysicalTouchBounds(bool isSecondaryDevice)
 {
     if (!isSecondaryDevice) {
+        physicalTouchBounds_.rect_.width_ = bounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = bounds_.rect_.height_;
         return;
     }
     if (rotation_ == SECONDARY_ROTATION_90 || rotation_ == SECONDARY_ROTATION_270) {
