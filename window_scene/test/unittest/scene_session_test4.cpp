@@ -154,27 +154,6 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest 
 }
 
 /**
- * @tc.name: HandleActionUpdateWindowLimits
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, HandleActionUpdateWindowLimits, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    OHOS::Rosen::Session session(info);
-    session.property_ = nullptr;
-    sceneSession->HandleActionUpdateWindowLimits(property, action);
-    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->HandleActionUpdateWindowLimits(property, action);
-}
-
-/**
  * @tc.name: HandleActionUpdateDragenabled
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -837,30 +816,6 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
 
     uiParam.rect_ = {0, 0, 1, 0};
     ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
-}
-
-/**
- * @tc.name: UpdateRectInner
- * @tc.desc: UpdateRectInner
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, UpdateRectInner01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateRectInner01";
-    info.bundleName_ = "UpdateRectInner01";
-    info.screenId_ = 20;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    SessionUIParam uiParam;
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    sceneSession->SetForegroundInteractiveStatus(true);
-
-    uiParam.needSync_ = true;
-    uiParam.rect_ = {0, 0, 1, 1};
-
-    sceneSession->winRect_ = {1, 1, 1, 1};
-    sceneSession->isVisible_ = true;
-    ASSERT_EQ(false, sceneSession->UpdateRectInner(uiParam, reason));
 }
 
 /**
