@@ -19,7 +19,9 @@
 
 namespace OHOS {
 namespace Rosen {
-static const uint32_t HOST_WINDOW_RECT_CHANGE = 1;
+namespace {
+const uint32_t HOST_WINDOW_RECT_CHANGE = 1;
+}
 
 void ExtensionManager::Finalizer(napi_env env, void* data, void* hint)
 {
@@ -27,18 +29,18 @@ void ExtensionManager::Finalizer(napi_env env, void* data, void* hint)
     std::unique_ptr<ExtensionManager>(static_cast<ExtensionManager*>(data));
 }
 
-static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, uint32_t value)
+static napi_status SetNamedProperty(napi_env env, napi_value obj, const std::string& name, uint32_t value)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
     napi_value property = nullptr;
     napi_status status = napi_create_uint32(env, value, &property);
     if (status != napi_ok) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed to call napi_create_uint32");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to call napi_create_uint32");
         return status;
     }
     status = napi_set_named_property(env, obj, name.c_str(), property);
     if (status != napi_ok) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed to call napi_set_named_property");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to call napi_set_named_property");
         return status;
     }
     return status;
@@ -50,11 +52,11 @@ static napi_value ExportRectChangeReasonType(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     if (result == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get object");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to create object");
         return nullptr;
     }
 
-    (void)SetNamedProperty(env, result, "HOST_WINDOW_RECT_CHANGE", HOST_WINDOW_RECT_CHANGE);
+    static_cast<void>(SetNamedProperty(env, result, "HOST_WINDOW_RECT_CHANGE", HOST_WINDOW_RECT_CHANGE));
 
     napi_object_freeze(env, result);
     return result;
