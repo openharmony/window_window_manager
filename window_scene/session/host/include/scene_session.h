@@ -92,6 +92,7 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
+using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
@@ -270,8 +271,15 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+
+    /*
+     * Window Hierarchy
+     */
     virtual WSError SetTopmost(bool topmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsTopmost() const { return false; }
+    virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
+    virtual bool IsMainWindowTopmost() const { return false; }
+    void SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func);
 
     /**
      * PC Window
@@ -552,6 +560,11 @@ protected:
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
 
     /*
+     * Window Hierarchy
+     */
+    NotifyMainWindowTopmostChangeFunc mainWindowTopmostChangeFunc_;
+
+    /*
      * Window Immersive
      */
     NotifyNeedAvoidFunc onNeedAvoid_;
@@ -695,6 +708,8 @@ private:
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+    WMError HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
     WMError HandleActionUpdateModeSupportInfo(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,

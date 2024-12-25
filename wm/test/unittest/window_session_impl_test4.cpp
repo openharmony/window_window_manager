@@ -191,6 +191,39 @@ HWTEST_F(WindowSessionImplTest4, IsTopmost, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetMainWindowTopmost
+ * @tc.desc: SetMainWindowTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetMainWindowTopmost");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    WMError res = window->SetMainWindowTopmost(true);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
+ * @tc.name: IsMainWindowTopmost
+ * @tc.desc: IsMainWindowTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsMainWindowTopmost, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsMainWindowTopmost");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    bool res = window->IsMainWindowTopmost();
+    ASSERT_FALSE(res);
+}
+
+/**
  * @tc.name: SetDecorVisible
  * @tc.desc: SetDecorVisible and check the retCode
  * @tc.type: FUNC
