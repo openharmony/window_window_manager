@@ -5096,8 +5096,7 @@ void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId disp
     taskScheduler_->PostAsyncTask([this, displayId, visible] {
         statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
         TLOGNI(WmsLogTag::WMS_IMMS, "set default visibility, "
-            "display id %{public}" PRIu64 " visible %{public}d",
-            displayId, visible);
+            "display id %{public}" PRIu64 " visible %{public}d", displayId, visible);
     }, __func__);
 }
 
