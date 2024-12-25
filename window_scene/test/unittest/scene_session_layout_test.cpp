@@ -33,7 +33,6 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
-constexpr int WAIT_ASYNC_US = 1000000;
 class SceneSessionLayoutTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -367,9 +366,11 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, Function | SmallT
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     session->isKeyboardPanelEnabled_ = true;
     info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
+        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
+        session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     EXPECT_EQ(WSError::WS_ERROR_REPEAT_OPERATION,
