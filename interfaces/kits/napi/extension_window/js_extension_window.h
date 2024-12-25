@@ -63,7 +63,7 @@ public:
     
 private:
     napi_value OnGetWindowAvoidArea(napi_env env, napi_callback_info info);
-    napi_value OnRegisterRectChangeCallback(napi_env, size_t argc, napi_value* argv,
+    napi_value OnRegisterRectChangeCallback(napi_env env, size_t argc, napi_value* argv,
         const sptr<Window>& windowImpl);
     napi_value OnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
     napi_value OnUnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
