@@ -135,6 +135,8 @@ public:
     WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
+        int32_t targetPersistentId, int32_t deviceId) override;
 
 private:
     template<typename T>

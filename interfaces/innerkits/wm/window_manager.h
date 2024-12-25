@@ -945,6 +945,16 @@ public:
      */
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
+    /**
+     * @brief Shift window pointer event within the same application. Only main window and subwindow.
+     *
+     * @param sourcePersistentId Window id which the pointer event shift from
+     * @param targetPersistentId Window id which the pointer event shift to
+     * @param deviceId - Device id which the pointer event generate from
+     * @return WM_OK means shift window pointer event success, others means failed.
+     */
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId, int32_t deviceId);
+
 private:
     WindowManager();
     ~WindowManager();

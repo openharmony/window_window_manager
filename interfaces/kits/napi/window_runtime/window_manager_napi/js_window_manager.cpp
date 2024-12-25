@@ -165,6 +165,12 @@ napi_value JsWindowManager::GetWindowsByCoordinate(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnGetWindowsByCoordinate(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::ShiftAppWindowPointerEvent(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnShiftAppWindowPointerEvent(env, info) : nullptr;
+}
+
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
 {
     AppExecFwk::Ability* ability = nullptr;
@@ -1261,6 +1267,51 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
     return result;
 }
 
+napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO || argc > ARGC_THREE) { // min param num 2, max param num 3
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t sourcePersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
+    int32_t targetPersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourcePersistentId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourcePersistentId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], targetPersistentId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetPersistentId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (sourcePersistentId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        targetPersistentId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
+        TLOGE(WmsLogTag::WMS_PC, "invalid sourcePersistentId or targetPersistentId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t deviceId = -1;
+    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARGC_TWO], deviceId)) {
+        deviceId = -1;
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [sourcePersistentId, targetPersistentId, deviceId, env, task = napiAsyncTask] {
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+            ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, deviceId));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "shiftAppWindowPointerEvent failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGFD("[NAPI]");
@@ -1308,6 +1359,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
+    BindNativeFunction(env, exportObj, "shiftAppWindowPointerEvent", moduleName,
+        JsWindowManager::ShiftAppWindowPointerEvent);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
