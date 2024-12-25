@@ -446,4 +446,25 @@ WSError ExtensionSession::Background(bool isFromClient, const std::string& ident
     DelayedSingleton<ANRManager>::GetInstance()->OnBackground(persistentId_);
     return WSError::WS_OK;
 }
+
+void ExtensionSession::NotifyExtensionEventAsync(uint32_t notifyEvent)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "notifyEvent: %{public}d", notifyEvent);
+    if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->notifyExtensionEventFunc_ != nullptr) {
+        extSessionEventCallback_->notifyExtensionEventFunc_(notifyEvent);
+    }
+}
+
+WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId=%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session stage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyDumpInfo(params, info);
+}
 } // namespace OHOS::Rosen

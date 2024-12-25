@@ -95,6 +95,9 @@ public:
     Rotation GetScreenRotation() const;
     void UpdateScreenRotation(Rotation rotation);
 
+    Rotation GetDeviceRotation() const;
+    void UpdateDeviceRotation(Rotation rotation);
+
     void SetOrientation(Orientation orientation);
     Orientation GetOrientation() const;
 
@@ -104,6 +107,15 @@ public:
     void SetDisplayOrientation(DisplayOrientation displayOrientation);
     DisplayOrientation GetDisplayOrientation() const;
     void CalcDefaultDisplayOrientation();
+
+    void SetDeviceOrientation(DisplayOrientation displayOrientation);
+    DisplayOrientation GetDeviceOrientation() const;
+
+    void SetPhysicalRotation(float rotation);
+    float GetPhysicalRotation() const;
+
+    void SetScreenComponentRotation(float rotation);
+    float GetScreenComponentRotation() const;
 
     float GetXDpi();
     float GetYDpi();
@@ -137,6 +149,8 @@ private:
         return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
     }
     float rotation_ { 0.0f };
+    float physicalRotation_ { 0.0f };
+    float screenComponentRotation_ { 0.0f };
     RRect bounds_;
     RRect phyBounds_;
 
@@ -162,7 +176,9 @@ private:
 
     Orientation orientation_ { Orientation::UNSPECIFIED };
     DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
+    DisplayOrientation deviceOrientation_ { DisplayOrientation::UNKNOWN };
     Rotation screenRotation_ { Rotation::ROTATION_0 };
+    Rotation deviceRotation_ { Rotation::ROTATION_0 };
     Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
     DisplayState displayState_ { DisplayState::UNKNOWN };
 
