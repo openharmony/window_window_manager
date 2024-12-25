@@ -828,7 +828,7 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
     if (argc == ARG_COUNT_ONE) {
         ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, value);
     } else {
-        value = argv[INDEX];
+        value = argv[INDEX_ONE];
         if (value == nullptr || !NapiIsCallable(env, value)) {
             ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
                 env, nullptr);
