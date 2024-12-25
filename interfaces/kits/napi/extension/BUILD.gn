@@ -27,6 +27,7 @@ ohos_shared_library("uiextension_napi") {
     cfi_vcall_icall_only = true
     debug = false
   }
+
   sources = [
     "extension_manager.cpp",
     "extension_module.cpp",
