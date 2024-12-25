@@ -72,6 +72,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRectChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT):
             return HandleSessionEvent(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SYNC_SESSION_EVENT):
+            return HandleSyncSessionEvent(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_RECT):
             return HandleUpdateSessionRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_GLOBAL_SCALED_RECT):
@@ -120,6 +122,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSendPointerEvenForMoveDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_START_MOVING):
             return HandleIsStartMoving(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SYSTEM_DRAG_ENABLE):
+            return HandleSetSystemEnableDrag(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_CLIENT_RECT):
             return HandleUpdateClientRect(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CALLING_SESSION_ID):
@@ -166,12 +170,16 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
+            return HandleNotifyExtensionEventAsync(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
             return HandleNotifySubModalTypeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_MODAL_TYPE_CHANGE):
+            return HandleNotifyMainModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE):
             return HandleSetWindowRectAutoSave(data, reply);
         default:
@@ -367,6 +375,15 @@ int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
     WLOGFD("HandleSessionEvent eventId: %{public}d", eventId);
     WSError errCode = OnSessionEvent(static_cast<SessionEvent>(eventId));
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSyncSessionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t eventId = data.ReadUint32();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "eventId: %{public}d", eventId);
+    WSError errCode = SyncSessionEvent(static_cast<SessionEvent>(eventId));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -848,6 +865,15 @@ int SessionStub::HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
+{
+    bool enableDrag = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
+    WMError errcode = SetSystemWindowEnableDrag(enableDrag);
+    reply.WriteInt32(static_cast<int32_t>(errcode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleProcessPointDownSession!");
@@ -961,6 +987,16 @@ int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t notifyEvent = 0;
+    if (!data.ReadUint32(notifyEvent)) {
+        return ERR_TRANSACTION_FAILED;
+    }
+    NotifyExtensionEventAsync(notifyEvent);
+    return ERR_NONE;
+}
+
 int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called");
@@ -997,6 +1033,17 @@ int SessionStub::HandleNotifySubModalTypeChange(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     NotifySubModalTypeChange(static_cast<SubWindowModalType>(subWindowModalType));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isModal = false;
+    if (!data.ReadBool(isModal)) {
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "isModal: %{public}d", isModal);
+    NotifyMainModalTypeChange(isModal);
     return ERR_NONE;
 }
 

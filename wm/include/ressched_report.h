@@ -103,6 +103,7 @@ class ResSchedReport {
                     windowDragBoost_ = true;
                     break;
                 }
+                case WindowSizeChangeReason::DRAG_MOVE:
                 case WindowSizeChangeReason::MOVE: {
                     RequestPerf(PERF_MOVE_CODE, PERF_TIME_OUT);
                     windowMovingBoost_ = true;

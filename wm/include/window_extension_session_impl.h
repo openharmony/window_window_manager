@@ -54,8 +54,8 @@ public:
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError HidePrivacyContentForHost(bool needHide) override;
 
-    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isdistributed, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
@@ -102,11 +102,19 @@ public:
     int32_t GetRealParentId() const override;
     WindowType GetParentWindowType() const override;
     void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) override;
+    void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
     /*
      * PC Window
      */
     bool IsPcOrPadFreeMultiWindowMode() const override;
+
+	/*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;

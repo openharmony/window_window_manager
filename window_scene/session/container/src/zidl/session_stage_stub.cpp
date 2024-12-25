@@ -25,6 +25,66 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStageStub"};
+constexpr size_t MAX_PARCEL_CAPACITY = 100 * 1024 * 1024; // 100M
+constexpr size_t CAPACITY_THRESHOLD = 8 * 100 * 1024; // 800k
+constexpr size_t RESERVED_SPACE = 4 * 1024; // 4k
+
+bool CalculateDumpInfoSize(const std::vector<std::string>& infos)
+{
+    size_t dataSize = 0;
+    for (const auto& info : infos) {
+        auto infoSize = info.length();
+        if (MAX_PARCEL_CAPACITY - dataSize < infoSize) {
+            return false;
+        }
+
+        dataSize += info.length();
+    }
+    return dataSize + RESERVED_SPACE <= CAPACITY_THRESHOLD;
+}
+
+bool WriteLittleStringVector(const std::vector<std::string>& infos, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
+    reply.SetMaxCapacity(CAPACITY_THRESHOLD);
+    if (!reply.WriteStringVector(infos)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write infos failed");
+        return false;
+    }
+    return true;
+}
+
+bool WriteLargeStringVector(const std::vector<std::string>& infos, MessageParcel& reply)
+{
+    Parcel writeParcel;
+    writeParcel.SetMaxCapacity(MAX_PARCEL_CAPACITY);
+    if (!writeParcel.WriteInt32(static_cast<int32_t>(infos.size()))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write infosSize failed");
+        return false;
+    }
+
+    for (const auto& info : infos) {
+        if (!writeParcel.WriteString(info)) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "write info failed");
+            return false;
+        }
+    }
+
+    size_t dataSize = writeParcel.GetDataSize();
+    TLOGD(WmsLogTag::WMS_UIEXT, "dataSize: %{public}zu", dataSize);
+    if (!reply.WriteInt32(static_cast<int32_t>(dataSize))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write dataSize failed");
+        return false;
+    }
+
+    if (!reply.WriteRawData(
+        reinterpret_cast<uint8_t*>(writeParcel.GetData()), dataSize)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write rawData failed");
+        return false;
+    }
+
+    return true;
+}
 }
 
 int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -106,6 +166,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
             return HandleNotifySessionFullScreen(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO):
+            return HandleNotifyDumpInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM):
             return HandleSetEnableDragBySystem(data, reply);
         default:
@@ -497,6 +559,37 @@ int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessagePa
         return ERR_INVALID_DATA;
     }
     SetEnableDragBySystem(enableDrag);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
+    std::vector<std::string> params;
+    if (!data.ReadStringVector(&params)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to read string vector");
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<std::string> infos;
+    WSError errCode = NotifyDumpInfo(params, infos);
+    bool isLittleSize = CalculateDumpInfoSize(infos);
+    if (!reply.WriteBool(isLittleSize)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write isLittleSize failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    bool writeResult = isLittleSize ? WriteLittleStringVector(infos, reply) :
+        WriteLargeStringVector(infos, reply);
+    if (!writeResult) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write data failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write errCode failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

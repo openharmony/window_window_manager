@@ -20,7 +20,7 @@
 #include <system_ability_definition.h>
 #include <transaction/rs_transaction.h>
 #include <transaction/rs_interfaces.h>
-
+#include "dm_common.h"
 #include "pipeline/rs_node_map.h"
 #include "window_manager_hilog.h"
 
@@ -280,14 +280,16 @@ FoldDisplayMode ScreenSessionManagerClient::GetFoldDisplayMode() const
     return displayMode_;
 }
 
-void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
-    ScreenPropertyChangeType screenPropertyChangeType)
+void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds,
+    ScreenDirectionInfo directionInfo, ScreenPropertyChangeType screenPropertyChangeType)
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation, screenPropertyChangeType);
+    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_);
+    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, directionInfo.notifyRotation_,
+        screenPropertyChangeType);
 
     // not need update property to input manager
     if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END ||
@@ -300,7 +302,10 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
-    screenSession->UpdateToInputManager(bounds, rotation, foldDisplayMode);
+    screenSession->SetPhysicalRotation(directionInfo.rotation_, foldDisplayMode);
+    screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
+    screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
+        foldDisplayMode);
 }
 
 void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)

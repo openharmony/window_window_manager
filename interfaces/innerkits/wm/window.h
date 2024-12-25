@@ -389,6 +389,20 @@ public:
 using IWindowVisibilityListenerSptr = sptr<IWindowVisibilityChangedListener>;
 
 /**
+ * @class IDisplayIdChangeListener
+ *
+ * @brief Listener to observe one window displayId changed.
+ */
+class IDisplayIdChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window displayId changed.
+     */
+    virtual void OnDisplayIdChanged(DisplayId displayId) {}
+};
+using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
+
+/**
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
@@ -598,6 +612,14 @@ public:
      * @param configuration configuration for app
      */
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+	/**
+     * @brief Update configuration synchronously for all windows.
+	 *
+     * @param configuration configuration for app.
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
     /**
      * @brief Get surface node from RS
      *
@@ -748,6 +770,19 @@ public:
      * @return True means window is topmost
      */
     virtual bool IsTopmost() const { return false; }
+    /**
+     * @brief Set whether the main window is topmost
+     *
+     * @param isTopmost whether main window is topmost
+     * @return WMError
+     */
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
+     * @brief Get whether main window is topmost
+     *
+     * @return True means main window is topmost
+     */
+    virtual bool IsMainWindowTopmost() const { return false; }
     /**
      * @brief Set alpha of window.
      *
@@ -1182,6 +1217,14 @@ public:
      * @param configuration Window configuration.
      */
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
+	/**
+     * @brief Update configuration synchronously.
+	 *
+     * @param configuration Window configuration.
+     */
+    virtual void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
     /**
      * @brief Register window lifecycle listener.
      *
@@ -1388,8 +1431,8 @@ public:
      * @param ability
      * @return WMError
      */
-    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env,
-        napi_value storage, bool isDistributed = false, sptr<IRemoteObject> token = nullptr,
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {
         return WMError::WM_OK;
@@ -1428,7 +1471,19 @@ public:
      *
      * @return UI content info.
      */
-    virtual std::string GetContentInfo() { return std::string(); }
+    virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION)
+    {
+        return {};
+    }
+    /**
+     * @brief Set uiability restored router stack.
+     *
+     * @return WMError.
+     */
+    virtual WMError SetRestoredRouterStack(const std::string& routerStack)
+    {
+        return WMError::WM_OK;
+    }
     /**
      * @brief Get ui content object.
      *
@@ -1579,6 +1634,14 @@ public:
      * @return true means main window is moving. Otherwise is not moving.
      */
     virtual bool IsStartMoving() { return false; }
+
+    /**
+     * @brief Start move window. It is called by application.
+     *
+     * @return Errorcode of window.
+     */
+    virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
     /**
      * @brief Set flag that need remove window input channel.
      *
@@ -1830,6 +1893,24 @@ public:
     }
 
     /**
+     * @brief Register window displayId change listener.
+     *
+     * @param listener IDisplayIdChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterDisplayIdChangeListener(
+        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister window displayId change listener.
+     *
+     * @param listener IDisplayIdChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterDisplayIdChangeListener(
+        const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
@@ -1939,6 +2020,22 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Enable or disable move window by title bar.
+     *
+     * @param enable The value true means to enable window moving, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Enable drag window.
+     *
+     * @param enableDrag The value true means to enable window dragging, and false means the opposite.
+     * @return Errorcode of window.
+     */
+    virtual WMError EnableDrag(bool enableDrag) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set whether to display the maximize, minimize, split buttons of main window.
@@ -2059,6 +2156,14 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Set the application modality of main window.
+     *
+     * @param isModal bool.
+     * @return WMError
+     */
+    virtual WMError SetWindowModal(bool isModal) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set the modality of window.
@@ -2317,7 +2422,7 @@ public:
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
     virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
-
+    
     /**
      * @brief Get the window status of current window.
      *
@@ -2346,6 +2451,14 @@ public:
      * @param byLoadContent True when called by loading content, false when called by creating non topmost subwindow
      */
     virtual void NotifyModalUIExtensionMayBeCovered(bool byLoadContent) {}
+
+    /**
+     * @brief Notify extension asynchronously
+     *
+     * @param notifyEvent event type
+     * @return void
+     */
+    virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
 
     /**
      * @brief Get IsUIExtensionFlag of window.

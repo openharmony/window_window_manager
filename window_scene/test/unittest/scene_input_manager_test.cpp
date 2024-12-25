@@ -261,7 +261,7 @@ HWTEST_F(SceneInputManagerTest, UpdateFocusedSessionId, Function | SmallTest | L
 {
     auto sceneInputManager = &SceneInputManager::GetInstance();
     ASSERT_NE(sceneInputManager, nullptr);
-    EXPECT_EQ(sceneInputManager->focusedSessionId_, 0);
+    EXPECT_EQ(sceneInputManager->focusedSessionId_, -1);
 
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);

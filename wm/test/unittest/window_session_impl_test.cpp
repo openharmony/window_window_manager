@@ -233,7 +233,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest |
     window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     ASSERT_FALSE(WindowHelper::IsMainWindow(window->GetType()));
     retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_TYPE);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 }
 
 /**
@@ -256,7 +256,7 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled03, Function | SmallTest |
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     WMError retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_TYPE);
+    ASSERT_EQ(retCode, WMError::WM_OK);
 
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     retCode = window->SetResizeByDragEnabled(true);
@@ -1241,10 +1241,16 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     res = window->UnregisterWindowVisibilityChangeListener(listener8);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
-    sptr<IWindowTitleButtonRectChangedListener> listener9 = nullptr;
-    res = window->RegisterWindowTitleButtonRectChangeListener(listener9);
+    IDisplayIdChangeListenerSptr listener9 = nullptr;
+    res = window->RegisterDisplayIdChangeListener(listener9);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterWindowTitleButtonRectChangeListener(listener9);
+    res = window->UnregisterDisplayIdChangeListener(listener9);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IWindowTitleButtonRectChangedListener> listener10 = nullptr;
+    res = window->RegisterWindowTitleButtonRectChangeListener(listener10);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowTitleButtonRectChangeListener(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
@@ -1409,7 +1415,8 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterUnfocused, Function | SmallTest | Lev
     ASSERT_EQ(res, 0);
 
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr, aceRet);
+    window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT,
+                          BackupAndRestoreType::NONE, nullptr, aceRet);
     window->NotifyAfterUnfocused(true);
     ASSERT_NE(window->GetUIContentSharedPtr(), nullptr);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
@@ -1466,7 +1473,8 @@ HWTEST_F(WindowSessionImplTest, NotifyBeforeDestroy, Function | SmallTest | Leve
 
     // uiContent!=nullptr
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT, nullptr, aceRet);
+    window->InitUIContent("NotifyAfterUnfocused", nullptr, nullptr, WindowSetUIContentType::DEFAULT,
+                          BackupAndRestoreType::NONE, nullptr, aceRet);
     ASSERT_NE(window->uiContent_, nullptr);
     window->NotifyBeforeDestroy(windowName);
     ASSERT_EQ(window->uiContent_, nullptr);
@@ -1820,18 +1828,39 @@ HWTEST_F(WindowSessionImplTest, SetRaiseByClickEnabled01, Function | SmallTest |
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("SetRaiseByClickEnabled01");
-    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(nullptr, window);
+
     WMError retCode = window->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_PARENT);
+
+    option->SetWindowName("SetRaiseByClickForFloatWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<WindowSessionImpl> floatWindow = new (std::nothrow) WindowSessionImpl(option);
+    floatWindow->property_->SetParentPersistentId(1);
+    ASSERT_NE(nullptr, floatWindow);
+
+    retCode = floatWindow->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_CALLING);
+
+    option->SetWindowName("SetRaiseByClickForSubWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> subWindow = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, subWindow);
+
+    subWindow->property_->SetParentPersistentId(1);
+    subWindow->Hide();
+    retCode = subWindow->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(retCode, WMError::WM_DO_NOTHING);
+
+    subWindow->state_ = WindowState::STATE_SHOWN;
+    retCode = subWindow->SetRaiseByClickEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    window->state_ = WindowState::STATE_CREATED;
-    window->SetRaiseByClickEnabled(true);
-    ASSERT_NE(nullptr, session);
+    
+    subWindow->property_->SetParentPersistentId(2);
+    subWindow->SetRaiseByClickEnabled(true);
+    ASSERT_EQ(subWindow->property_->GetRaiseEnabled(), true);
 }
 
 /**
@@ -1983,6 +2012,37 @@ HWTEST_F(WindowSessionImplTest, SetUiDvsyncSwitchSucc, Function | SmallTest | Le
     ASSERT_NE(window, nullptr);
     window->SetUiDvsyncSwitch(true);
     window->SetUiDvsyncSwitch(false);
+}
+
+/**
+ * @tc.name: EnableDrag
+ * @tc.desc: EnableDrag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, EnableDrag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("EnableDrag");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2101);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PHONE;
+    auto result = window->EnableDrag(true);
+    ASSERT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    result = window->EnableDrag(true);
+    ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    result = window->EnableDrag(true);
+    ASSERT_NE(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 /**

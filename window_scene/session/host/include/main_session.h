@@ -31,8 +31,15 @@ public:
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
+
+    /*
+     * Window Hierarchy
+     */
     WSError SetTopmost(bool topmost) override;
     bool IsTopmost() const override;
+    WSError SetMainWindowTopmost(bool isTopmost) override;
+    bool IsMainWindowTopmost() const override;
+
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
 
@@ -43,6 +50,9 @@ public:
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
     WSError OnSetWindowRectAutoSave(bool enabled) override;
+    bool IsModal() const override;
+    bool IsApplicationModal() const override;
+    WSError NotifyMainModalTypeChange(bool isModal) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;

@@ -137,6 +137,7 @@ public:
 
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDeviceOrientation(Rotation rotation) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
 
@@ -168,9 +169,10 @@ public:
     void SetTouchEnabledFromJs(bool isTouchEnabled);
     bool IsTouchEnabled();
 
-    void UpdateToInputManager(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateRotationOrientation(int rotation);
     void UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
@@ -217,6 +219,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
     void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
     Rotation ConvertIntToRotation(int rotation);
+    void SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode);
+    void SetScreenComponentRotation(int rotation);
 
 private:
     ScreenProperty property_;
@@ -238,6 +242,7 @@ private:
     SetScreenSceneDpiFunc SetScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
+    int32_t GetApiVersion();
 };
 
 class ScreenSessionGroup : public ScreenSession {
