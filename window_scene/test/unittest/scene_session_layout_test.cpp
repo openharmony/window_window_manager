@@ -378,7 +378,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, Function | SmallT
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, 
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
         session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
