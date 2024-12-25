@@ -1348,7 +1348,7 @@ HWTEST_F(WindowSessionImplTest4, DestroySubWindow, Function | SmallTest | Level2
     sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
     ASSERT_NE(nullptr, subSession);
     subWindow->hostSession_ = subSession;
-    window->windowSystemConfig_.uiType_ = "pc";
+    subWindow->windowSystemConfig_.uiType_ = "pc";
     std::vector<sptr<WindowSessionImpl>> vec;
     WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
         std::vector<sptr<WindowSessionImpl>>>(1, vec));
@@ -1389,7 +1389,7 @@ HWTEST_F(WindowSessionImplTest4, UpdateSubWindowStateAndNotify01, Function | Sma
     sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
     ASSERT_NE(nullptr, subSession);
     subWindow->hostSession_ = subSession;
-    window->windowSystemConfig_.uiType_ = "pc";
+    subWindow->windowSystemConfig_.uiType_ = "pc";
     std::vector<sptr<WindowSessionImpl>> vec;
     WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
         std::vector<sptr<WindowSessionImpl>>>(1, vec));
