@@ -2460,28 +2460,28 @@ WMError SceneSessionManagerProxy::IsPcWindow(bool& isPcWindow)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_SUB, "Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "Remote is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     bool repliedValue = false;
     if (!reply.ReadBool(repliedValue)) {
-        TLOGE(WmsLogTag::WMS_SUB, "Read isPcWindow failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read isPcWindow failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_SUB, "Read ret failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     isPcWindow = repliedValue;

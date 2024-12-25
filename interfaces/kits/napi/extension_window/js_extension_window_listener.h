@@ -60,7 +60,6 @@ public:
 
 private:
     Rect currRect_;
-    ComponentRectChangeReason currentRectChangeReason_ = ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE;
     napi_env env_ = nullptr;
     WindowState state_ {WindowState::STATE_INITIAL};
     std::shared_ptr<NativeReference> jsCallBack_;

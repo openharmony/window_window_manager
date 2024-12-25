@@ -63,6 +63,8 @@ public:
     
 private:
     napi_value OnGetWindowAvoidArea(napi_env env, napi_callback_info info);
+    napi_value OnRegisterRectChangeCallback(napi_env, size_t argc, napi_value* argv,
+        const sptr<Window>& windowImpl);
     napi_value OnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
     napi_value OnUnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
     napi_value OnHideNonSecureWindows(napi_env env, napi_callback_info info);
@@ -92,6 +94,7 @@ private:
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
+    const std::string RECT_CHANGE_CB = "rectChange";
 };
 }  // namespace Rosen
 }  // namespace OHOS
