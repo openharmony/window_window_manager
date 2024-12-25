@@ -3032,16 +3032,12 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         // some system types could be created by normal app
         return true;
     }
-    if (type == WindowType::WINDOW_TYPE_FLOAT) {
+    if (type == WindowType::WINDOW_TYPE_FLOAT &&
+        SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
-        if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
-            (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
-             systemConfig_.supportTypeFloatWindow_)) {
-            TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success.");
+        if (systemConfig_.supportTypeFloatWindow_) {
+            WLOGFD("check create float window permission success on 2in1 device.");
             return true;
-        } else {
-            TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission failed.");
-            return false;
         }
     }
     if (type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW) {
@@ -4367,10 +4363,17 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
         if (sceneSession->keepScreenLock_ == nullptr) {
             return;
         }
-        bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession);
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "keep screen on: [%{public}s, %{public}d, %{public}d, %{public}d, %{public}d]",
+        auto curScreenId = weakSceneSession->GetSessionInfo().screenId_;
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(curScreenId);
+        auto sourceMode = ScreenSourceMode::SCREEN_ALONE;
+        if (screenSession != nullptr) {
+            sourceMode = screenSession->GetSourceMode();
+        }
+        bool shouldLock = requireLock && IsSessionVisibleForeground(sceneSession) && sourceMode != ScreenSourceMode::SCREEN_UNIQUE;
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE,
+            "keep screen on: [%{public}s, %{public}d, %{public}d, %{public}d, %{public}d, %{public}llu, %{public}d]",
             sceneSession->GetWindowName().c_str(), sceneSession->GetSessionState(),
-            sceneSession->IsVisible(), requireLock, shouldLock);
+            sceneSession->IsVisible(), requireLock, shouldLock, curScreenId, sourceMode);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
         std::string identity = IPCSkeleton::ResetCallingIdentity();
@@ -4407,30 +4410,43 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     if (GetDisplayBrightness() != brightness &&
         GetFocusedSessionId() == sceneSession->GetPersistentId()) {
-        bool setBrightnessRet = false;
-        if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-            auto task = []() {
-                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
-            };
-            setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
-            SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
-        } else {
-            auto task = [brightness]() {
-                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
-                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
-            };
-            setBrightnessRet = eventHandler_->PostTask(task, "DisplayPowerMgr:OverrideBrightness", 0);
-            SetDisplayBrightness(brightness);
-        }
-        if (!setBrightnessRet) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "post task failed. task is SetBrightness");
-        }
+        PostBrightnessTask(brightness);
     }
 #else
     WLOGFD("Can not found the sub system of DisplayPowerMgr");
 #endif
     brightnessSessionId_ = sceneSession->GetPersistentId();
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::PostBrightnessTask(float brightness)
+{
+    bool postTaskRet = true;
+    bool isPC = systemConfig_.IsPcWindow();
+    if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
+        if (!isPC) {
+            auto task = [] {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            };
+            postTaskRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
+        }
+        SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+    } else {
+        auto task = [brightness, isPC] {
+            if (isPC) {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
+                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            } else {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            }
+        };
+        postTaskRet = eventHandler_->PostTask(task, "DisplayPowerMgr:OverrideBrightness", 0);
+        SetDisplayBrightness(brightness);
+    }
+    if (!postTaskRet) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "post task failed. task is SetBrightness");
+    }
 }
 
 WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
@@ -4447,18 +4463,26 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     }
     auto brightness = sceneSession->GetBrightness();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (GetDisplayBrightness() != brightness) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
-            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            if (!isPC) {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            }
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
         }
         brightnessSessionId_ = INVALID_WINDOW_ID;
     } else {
         if (GetDisplayBrightness() != brightness) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with value");
-            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
-                static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            if (isPC) {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
+                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            } else {
+                DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                    static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
+            }
             SetDisplayBrightness(brightness);
         }
         brightnessSessionId_ = sceneSession->GetPersistentId();
@@ -5095,8 +5119,8 @@ void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId disp
 {
     taskScheduler_->PostAsyncTask([this, displayId, visible] {
         statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
-        TLOGNI(WmsLogTag::WMS_IMMS, "set default visibility, display id %{public}" PRIu64 " visible %{public}d",
-            displayId, visible);
+        TLOGNI(WmsLogTag::WMS_IMMS, "set default visibility, "
+            "display id %{public}" PRIu64 " visible %{public}d", displayId, visible);
     }, __func__);
 }
 
@@ -8791,15 +8815,17 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
 {
     const auto callingPid = IPCSkeleton::GetCallingRealPid();
-    auto task = [this, persistentId, haveListener, callingPid]() {
-        TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d haveListener %{public}d", persistentId, haveListener);
+    const char* const where = __func__;
+    auto task = [this, persistentId, haveListener, callingPid, where]() {
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d haveListener %{public}d",
+            where, persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            TLOGND(WmsLogTag::WMS_IMMS, "sceneSession is nullptr");
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s sceneSession is nullptr", where);
             return WSError::WS_DO_NOTHING;
         }
         if (callingPid != sceneSession->GetCallingPid()) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "Permission denied, not called by the same process");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s Permission denied, not called by the same process", where);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (haveListener) {
@@ -8975,25 +9001,27 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
 
 void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type)
 {
-    auto task = [this, persistentId, type] {
+    const char* const where = __func__;
+    auto task = [this, persistentId, type, where] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d is nullptr or invisible", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d is nullptr or invisible", where, persistentId);
             return;
         }
         if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d has no listener, no need update", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d has no listener, no need update",
+                where, persistentId);
             return;
         }
         if (sceneSession->IsImmersiveType()) {
-            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d is immersive type", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d is immersive type", where, persistentId);
             return;
         }
         auto avoidArea = sceneSession->GetAvoidAreaByType(type);
         if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
             isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
             TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d AI bar check false, visible %{public}d "
-                "avoidarea %{public}s rect %{public}s", persistentId, isAINavigationBarVisible_,
+                "avoid area %{public}s rect %{public}s", persistentId, isAINavigationBarVisible_,
                 avoidArea.ToString().c_str(), sceneSession->GetSessionRect().ToString().c_str());
             return;
         }
@@ -9004,7 +9032,8 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
 
 void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
 {
-    auto task = [this, persistentId] {
+    const char* const where = __func__;
+    auto task = [this, persistentId, where] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !sceneSession->GetEnableGestureBackHadSet()) {
             TLOGNI(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable");
@@ -9027,7 +9056,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
             gestureNavigationEnabledChangeFunc_(needEnableGestureBack,
                 sceneSession->GetSessionInfo().bundleName_, GestureBackType::GESTURE_SIDE);
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "callback func is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s callback func is null", where);
         }
     };
     taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled: PID: " + std::to_string(persistentId));
@@ -9081,7 +9110,8 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
 {
     TLOGI(WmsLogTag::WMS_IMMS, "isVisible %{public}u "
         "area %{public}s, displayId %{public}" PRIu64, isVisible, barArea.ToString().c_str(), displayId);
-    auto task = [this, isVisible, barArea, displayId]() {
+    const char* const where = __func__;
+    auto task = [this, isVisible, barArea, displayId, where] {
         bool isNeedUpdate = true;
         {
             std::unique_lock<std::shared_mutex> lock(currAINavigationBarAreaMapMutex_);
@@ -9094,13 +9124,13 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 currAINavigationBarAreaMap_[displayId] = barArea;
             }
             if (isNeedUpdate && !isVisible && !barArea.IsEmpty()) {
-                TLOGND(WmsLogTag::WMS_IMMS, "barArea should be empty if invisible");
+                TLOGND(WmsLogTag::WMS_IMMS, "%{public}s barArea should be empty if invisible", where);
                 currAINavigationBarAreaMap_[displayId] = WSRect();
             }
         }
         if (isNeedUpdate) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "isVisible %{public}u bar area %{public}s",
-                isVisible, barArea.ToString().c_str());
+            TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isVisible %{public}u bar area %{public}s",
+                where, isVisible, barArea.ToString().c_str());
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionAINavigationBarChange(persistentId);
             }
@@ -9119,7 +9149,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
     }
     bool isLastFrameLayoutFinished = true;
     IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] layout finished %{public}d",
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d layout finished %{public}d",
         persistentId, isLastFrameLayoutFinished);
     if (isLastFrameLayoutFinished) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
@@ -9127,7 +9157,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
             sceneSession->GetSessionRect().height_)) {
             return;
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] aibar avoid area %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d AI bar avoid area %{public}s",
             persistentId, avoidArea.ToString().c_str());
         UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
             AvoidAreaType::TYPE_NAVIGATION_INDICATOR);

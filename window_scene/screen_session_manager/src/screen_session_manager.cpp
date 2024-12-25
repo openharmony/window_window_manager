@@ -6044,6 +6044,17 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetDisplayNode(ScreenId scr
     return screenSession->GetDisplayNode();
 }
 
+ScreenCombination ScreenSessionManager::GetScreenCombination(ScreenId screenId)
+{
+    DmsXcollie dmsXcollie("DMS:GetScreenCombination", XCOLLIE_TIMEOUT_10S);
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGI(WmsLogTag::DMS, "screenSession is null");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+    return screenSession->GetScreenCombination();
+}
+
 int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
 {
     TLOGI(WmsLogTag::DMS, "Dump begin");
@@ -6160,7 +6171,8 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
         return;
     }
     if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() &&
-        !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        !FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
     }
     /* Avoid fold to expand process queues */

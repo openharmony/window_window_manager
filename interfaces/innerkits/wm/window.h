@@ -36,6 +36,7 @@ class AxisEvent;
 namespace OHOS::AppExecFwk {
 class Configuration;
 class Ability;
+enum class SupportWindowMode;
 }
 
 namespace OHOS::AbilityRuntime {
@@ -1607,6 +1608,21 @@ public:
     /**
      * @brief set window ui content
      *
+     * @param contentName content info path
+     * @param env Napi environment
+     * @param storage Napi storage
+     * @param type restore type
+     * @param token parent token
+     * @param ability Ability instance
+     * @return WMError
+     */
+    virtual WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr) { return WMError::WM_OK; }
+
+    /**
+     * @brief set window ui content
+     *
      * @param contentInfo content info path
      * @param engine
      * @param storage
@@ -2493,6 +2509,17 @@ public:
      * @return WM_OK means set success, others means failed.
      */
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set support window modes.
+     *
+     * @param supportWindowModes Support window modes of the window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get the rect of host window.

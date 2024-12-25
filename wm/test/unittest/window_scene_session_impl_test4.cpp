@@ -859,9 +859,9 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveToAsync02, Function | SmallTest | Leve
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("MoveToAsync02");
-    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-
+    
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(10001);
@@ -919,9 +919,9 @@ HWTEST_F(WindowSceneSessionImplTest4, ResizeAsync02, Function | SmallTest | Leve
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("ResizeAsync02");
-    option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-
+    
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect rect;
@@ -2000,6 +2000,7 @@ HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChanged01, Function | Small
     auto ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(true, ret);
 
+    window->lastSystemDensity_ = 1.5f;
     ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(false, ret);
 }

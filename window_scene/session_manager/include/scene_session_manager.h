@@ -420,12 +420,6 @@ public:
     int32_t GetCustomDecorHeight(int32_t persistentId);
 
     /*
-     * Window Property
-     */
-    WMError ReleaseForegroundSessionScreenLock() override;
-    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
-
-    /*
      * Free Multi Window
      */
     WSError SwitchFreeMultiWindow(bool enable);
@@ -447,6 +441,12 @@ public:
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
+
+    /*
+     * Window Property
+     */
+    WMError ReleaseForegroundSessionScreenLock() override;
+    void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
 
     /*
      * Multi Window
@@ -714,6 +714,7 @@ private:
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
+    void PostBrightnessTask(float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;

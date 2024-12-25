@@ -2493,6 +2493,33 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManagerProxy::GetDisplayNode(ScreenI
     return displayNode;
 }
 
+ScreenCombination ScreenSessionManagerProxy::GetScreenCombination(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("GetScreenCombination: remote is null");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_COMBINATION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+    return static_cast<ScreenCombination>(reply.ReadUint32());
+}
+
 void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation,
     float rotation)
 {

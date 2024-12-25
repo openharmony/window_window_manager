@@ -2848,13 +2848,13 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
             NapiAsyncTask& task, int32_t status) {
             auto window = weakToken.promote();
             if (window == nullptr) {
-                TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                     "Invalidate params."));
                 return;
             }
             if (window->IsPcOrPadFreeMultiWindowMode()) {
-                TLOGNE(WmsLogTag::WMS_IMMS, "device not support");
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device not support", where);
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
@@ -2973,7 +2973,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
     std::string name;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], name) ||
         (name.compare("status") != 0 && name.compare("navigation") != 0 && name.compare("navigationIndicator") != 0)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "invalid systemBar name.");
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid systemBar name");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     auto systemBarType = name.compare("status") == 0 ? WindowType::WINDOW_TYPE_STATUS_BAR :
@@ -2992,7 +2992,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         systemBarType, systemBarEnable, systemBarEnableAnimation, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -3004,7 +3004,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s, errcode: %{public}d", where, errCode);
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, errCode);
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
                 "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
@@ -3211,24 +3211,25 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     ParseAvoidAreaParam(env, info, errCode, avoidAreaType);
     wptr<Window> weakToken(windowToken_);
+    const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-        [weakToken, errCode, avoidAreaType](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [weakToken, errCode, avoidAreaType, where](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
                 return;
             }
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
-                TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr or get invalid param");
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr or get invalid param", where);
                 return;
             }
             // getAvoidRect by avoidAreaType
             AvoidArea avoidArea;
             WMError ret = weakWindow->GetAvoidAreaByType(avoidAreaType, avoidArea);
             if (ret != WMError::WM_OK) {
-                TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, ret);
                 avoidArea.topRect_ = g_emptyRect;
                 avoidArea.leftRect_ = g_emptyRect;
                 avoidArea.rightRect_ = g_emptyRect;
@@ -7109,25 +7110,26 @@ napi_value JsWindow::OnSetGestureBackEnabled(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled] {
+    const char* const where = __func__;
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         if (!WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "invalid window type");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s invalid window type", where);
             *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetGestureBackEnabled(enabled));
     };
-    auto complete = [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "set failed, ret %{public}d", *errCodePtr);
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s set failed, ret %{public}d", where, *errCodePtr);
             task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set failed."));
         }
     };
