@@ -1451,11 +1451,11 @@ int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel
     bool isPcWindow = false;
     WMError errCode = IsPcWindow(isPcWindow);
     if (!reply.WriteBool(isPcWindow)) {
-        TLOGE(WmsLogTag::WMS_SUB, "Write isPcWindow fail.");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write isPcWindow fail.");
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_SUB, "Write errCode fail.");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

@@ -113,14 +113,13 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 
 void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
-    ComponentRectChangeReason componentRectChangeReason = ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE;
     if (currRect_ == rect) {
         TLOGD(WmsLogTag::WMS_UIEXT, "Skip redundant rect update");
         return;
     }
     // js callback should run in js thread
     const char* const where = __func__;
-    auto jsCallback = [self = weakRef_, rect, componentRectChangeReason, env = env_, where] {
+    auto jsCallback = [self = weakRef_, rect, env = env_, where] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::OnRectChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
@@ -140,7 +139,8 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
             return;
         }
         napi_set_named_property(env, objValue, "rect", rectObjValue);
-        napi_set_named_property(env, objValue, "reason", CreateJsValue(env, componentRectChangeReason));
+        napi_set_named_property(env, objValue, "reason", CreateJsValue(env,
+            ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE));
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
@@ -148,7 +148,6 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
     currRect_ = rect;
-    currentRectChangeReason_ = componentRectChangeReason;
 }
 
 void JsExtensionWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
