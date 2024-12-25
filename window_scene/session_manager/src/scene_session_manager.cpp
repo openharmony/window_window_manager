@@ -1593,7 +1593,7 @@ void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& wi
 sptr<SceneSession> SceneSessionManager::GetKeyboardSession(DisplayId displayId, bool isSystemKeyboard)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "displayId is invalid.");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "displayId: %{public}" PRIu64 " is invalid.", displayId);
         return nullptr;
     }
     sptr<SceneSession> keyboardSession = nullptr;
