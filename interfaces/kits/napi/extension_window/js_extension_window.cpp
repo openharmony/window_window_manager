@@ -713,7 +713,7 @@ napi_value JsExtensionWindow::OnGetWindowAvoidArea(napi_env env, napi_callback_i
     }
 }
 
-napi_value JsExtensionWindow::OnRegisterRectChangeCallback(napi_env, size_t argc, napi_value* argv,
+napi_value JsExtensionWindow::OnRegisterRectChangeCallback(napi_env env, size_t argc, napi_value* argv,
     const sptr<Window>& windowImpl)
 {
     if (!windowImpl->IsPcWindow()) {
@@ -738,16 +738,16 @@ napi_value JsExtensionWindow::OnRegisterRectChangeCallback(napi_env, size_t argc
         TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[2]) is not callable");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WmErrorCode ret = extensionRegisterManager_->RegisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
+    WmErrorCode ret = extensionRegisterManager_->RegisterListener(windowImpl, RECT_CHANGE_CB, CaseType::CASE_WINDOW,
         env, cbValue);
     if (ret != WmErrorCode::WM_OK) {
         TLOGI(WmsLogTag::WMS_UIEXT, "Register failed, window [%{public}u, %{public}s], type=%{public}s,\
-            reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str(),
+            reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), RECT_CHANGE_CB.c_str(),
             reasons);
         return NapiThrowError(env, ret);
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "Register success, window [%{public}u, %{public}s], type=%{public}s,\
-        reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), cbType.c_str(),
+        reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), RECT_CHANGE_CB.c_str(),
         reasons);
     return NapiGetUndefined(env);
 }
