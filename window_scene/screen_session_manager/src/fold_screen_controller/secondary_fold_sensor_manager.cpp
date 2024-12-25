@@ -148,23 +148,17 @@ void SecondaryFoldSensorManager::HandlePostureData(const SensorEvent * const eve
 
 void SecondaryFoldSensorManager::NotifyFoldAngleChanged(const std::vector<float> &angles)
 {
-    size_t size = angles.size();
-    std::vector<bool> flags(true, size);
-    for (size_t i = 0; i < size; i++) {
-        if (fabs(angles[i] - oldFoldAngle[i]) < MINI_NOTIFY_FOLD_ANGLE) {
-            flags[i] = false;
-        }
-        oldFoldAngle[i] = angles[i];
-    }
-    bool flag = false;
-    for (bool f : flags) {
-        flag = flag | f;
-    }
-    if (!flag) {
+    if (angles.size() < SECONDARY_HALL_SIZE) {
         return;
     }
-    std::vector<float> notifyAngles = {angles[FIRST_DATA], angles[SECOND_DATA]};
-    ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(notifyAngles);
+    bool bcFlag = fabs(angles[0] - oldFoldAngle[0]) > MINI_NOTIFY_FOLD_ANGLE;
+    bool abFlag = fabs(angles[1] - oldFoldAngle[1]) > MINI_NOTIFY_FOLD_ANGLE;
+    if (bcFlag || abFlag) {
+        oldFoldAngle[0] = angles[0];
+        oldFoldAngle[1] = angles[1];
+        std::vector<float> notifyAngles = {angles[0], angles[1]};
+        ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(notifyAngles);
+    }
 }
 
 void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const event)
