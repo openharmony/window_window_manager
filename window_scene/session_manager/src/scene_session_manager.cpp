@@ -5093,12 +5093,11 @@ void SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneL
 
 void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible)
 {
-    const char* const where = __func__;
-    taskScheduler_->PostAsyncTask([this, displayId, visible, where] {
+    taskScheduler_->PostAsyncTask([this, displayId, visible] {
         statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s set default visibility, "
+        TLOGNI(WmsLogTag::WMS_IMMS, "set default visibility, "
             "display id %{public}" PRIu64 " visible %{public}d",
-            where, displayId, visible);
+            displayId, visible);
     }, __func__);
 }
 
@@ -8998,8 +8997,8 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
         auto avoidArea = sceneSession->GetAvoidAreaByType(type);
         if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
             isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d AI bar check false, visible %{public}d "
-                "avoidarea %{public}s rect %{public}s", where, persistentId, isAINavigationBarVisible_,
+            TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d AI bar check false, visible %{public}d "
+                "avoid area %{public}s rect %{public}s", persistentId, isAINavigationBarVisible_,
                 avoidArea.ToString().c_str(), sceneSession->GetSessionRect().ToString().c_str());
             return;
         }
