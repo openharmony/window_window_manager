@@ -729,7 +729,7 @@ napi_value JsExtensionWindow::OnRegisterRectChangeCallback(napi_env, size_t argc
         TLOGE(WmsLogTag::WMS_UIEXT, "Unsupported rect change reasons");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (argc < 3) {
+    if (argc < 3) { // 3: params num for rectChange
         TLOGE(WmsLogTag::WMS_UIEXT, "OnRectChange: argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
