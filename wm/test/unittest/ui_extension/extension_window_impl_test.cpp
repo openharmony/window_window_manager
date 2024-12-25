@@ -102,10 +102,8 @@ HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, Function | SmallTest | Level
  */
 HWTEST_F(ExtensionWindowImplTest, IsPcWindow, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
-    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<MockWindowExtensionSessionImpl> window = sptr<MockWindowExtensionSessionImpl>::MakeSptr(option);
     ExtensionWindowImpl extensionWindowImpl(window);
    
     EXPECT_EQ(extensionWindowImpl.IsPcWindow(), window->IsPcWindow());

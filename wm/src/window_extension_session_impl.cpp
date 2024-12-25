@@ -1305,7 +1305,7 @@ bool WindowExtensionSessionImpl::IsPcWindow() const
     bool isPcWindow = false;
     WMError ret = SingletonContainer::Get<WindowAdapter>().IsPcWindow(isPcWindow);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "cant't find isPcWindow, err: %{public}u",
+        TLOGE(WmsLogTag::WMS_UIEXT, "can't find isPcWindow, err: %{public}u",
             static_cast<uint32_t>(ret));
     }
     return isPcWindow;

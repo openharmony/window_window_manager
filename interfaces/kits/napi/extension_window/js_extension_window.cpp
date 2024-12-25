@@ -30,6 +30,15 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr Rect g_emptyRect = {0, 0, 0, 0};
+constexpr size_t INDEX_ZERO = 0;
+constexpr size_t INDEX_ONE = 1;
+constexpr size_t INDEX_TWO = 2;
+constexpr size_t INDEX_THREE = 3;
+constexpr size_t INDEX_FOUR = 4;
+constexpr size_t ARG_COUNT_ONE = 1;
+constexpr size_t ARG_COUNT_TWO = 2;
+constexpr size_t ARG_COUNT_THREE = 3;
+constexpr size_t FOUR_PARAMS_SIZE = 4;
 } // namespace
 
 JsExtensionWindow::JsExtensionWindow(
@@ -716,12 +725,16 @@ napi_value JsExtensionWindow::OnGetWindowAvoidArea(napi_env env, napi_callback_i
 napi_value JsExtensionWindow::OnRegisterRectChangeCallback(napi_env env, size_t argc, napi_value* argv,
     const sptr<Window>& windowImpl)
 {
+    if (argc < ARG_COUNT_THREE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "OnRectChange: argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     if (!windowImpl->IsPcWindow()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Device is not PC");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
     uint32_t reasons = 0;
-    if (!ConvertFromJsValue(env, argv[1], reasons)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], reasons)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to rectChangeReasons");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -729,11 +742,7 @@ napi_value JsExtensionWindow::OnRegisterRectChangeCallback(napi_env env, size_t 
         TLOGE(WmsLogTag::WMS_UIEXT, "Unsupported rect change reasons");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (argc < 3) { // 3: params num for rectChange
-        TLOGE(WmsLogTag::WMS_UIEXT, "OnRectChange: argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-    napi_value cbValue = argv[2];
+    napi_value cbValue = argv[INDEX_TWO];
     if (!NapiIsCallable(env, cbValue)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[2]) is not callable");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -741,14 +750,12 @@ napi_value JsExtensionWindow::OnRegisterRectChangeCallback(napi_env env, size_t 
     WmErrorCode ret = extensionRegisterManager_->RegisterListener(windowImpl, RECT_CHANGE_CB, CaseType::CASE_WINDOW,
         env, cbValue);
     if (ret != WmErrorCode::WM_OK) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "Register failed, window [%{public}u, %{public}s], type=%{public}s,\
-            reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), RECT_CHANGE_CB.c_str(),
-            reasons);
+        TLOGI(WmsLogTag::WMS_UIEXT, "Failed, window [%{public}u, %{public}s], type=%{public}s, reasons=%{public}u",
+            windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), RECT_CHANGE_CB.c_str(), reasons);
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "Register success, window [%{public}u, %{public}s], type=%{public}s,\
-        reasons=%{public}u", windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), RECT_CHANGE_CB.c_str(),
-        reasons);
+    TLOGI(WmsLogTag::WMS_UIEXT, "Success, window [%{public}u, %{public}s], type=%{public}s, reasons=%{public}u",
+        windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), RECT_CHANGE_CB.c_str(), reasons);
     return NapiGetUndefined(env);
 }
 
@@ -759,22 +766,22 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
         TLOGE(WmsLogTag::WMS_UIEXT, "WindowImpl is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[INDEX_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 2) { // 2: params num
+    if (argc < ARG_COUNT_TWO) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     std::string cbType;
-    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], cbType)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to callbackType");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (cbType == RECT_CHANGE_CB) {
         return OnRegisterRectChangeCallback(env, argc, argv, windowImpl);
     }
-    napi_value value = argv[1];
+    napi_value value = argv[INDEX_ONE];
     if (!NapiIsCallable(env, value)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -797,15 +804,15 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
         TLOGE(WmsLogTag::WMS_UIEXT, "windowImpl is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[INDEX_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
+    if (argc < ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     std::string cbType;
-    if (!ConvertFromJsValue(env, argv[0], cbType)) {
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], cbType)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to callbackType");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -818,10 +825,10 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
 
     napi_value value = nullptr;
     WmErrorCode ret = WmErrorCode::WM_OK;
-    if (argc == 1) {
+    if (argc == ARG_COUNT_ONE) {
         ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, value);
     } else {
-        value = argv[1];
+        value = argv[INDEX];
         if (value == nullptr || !NapiIsCallable(env, value)) {
             ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
                 env, nullptr);

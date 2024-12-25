@@ -407,15 +407,12 @@ HWTEST_F(WindowSessionImplTest4, IsPcWindow, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcWindow start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("IsPcWindow");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(true, window->IsPcWindow());
