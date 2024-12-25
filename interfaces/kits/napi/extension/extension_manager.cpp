@@ -13,32 +13,27 @@
  * limitations under the License.
  */
 
-#include "window_manager_hilog.h"
 #include "extension_manager.h"
+
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
-ExtensionManager::ExtensionManager()
-{
-}
+static const uint32_t HOST_WINDOW_RECT_CHANGE = 1;
 
-ExtensionManager::~ExtensionManager()
+void ExtensionManager::Finalizer(napi_env env, void* data, void* hint)
 {
-}
-
-void ExtensionManager::Finalizer(napi_en env, void* data, void* hint)
-{
-    TLOGD(WmsLogTag::WMS_UIEXT, "Finalizer");
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
     std::unique_ptr<ExtensionManager>(static_cast<ExtensionManager*>(data));
 }
 
-static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, int32_t value)
+static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, uint32_t value)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
     napi_value property = nullptr;
-    napi_status status = napi_create_int32(env, value, &property);
+    napi_status status = napi_create_uint32(env, value, &property);
     if (status != napi_ok) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed to call napi_create_int32");
+        TLOGE(WmsLogTag::WMS_UIEXT, "failed to call napi_create_uint32");
         return status;
     }
     status = napi_set_named_property(env, obj, name.c_str(), property);
@@ -49,9 +44,9 @@ static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::st
     return status;
 }
 
-static napi_value ExportRectChangeReasonType(napi_en env)
+static napi_value ExportRectChangeReasonType(napi_env env)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
     napi_value result = nullptr;
     napi_create_object(env, &result);
     if (result == nullptr) {
@@ -59,7 +54,7 @@ static napi_value ExportRectChangeReasonType(napi_en env)
         return nullptr;
     }
 
-    (void)SetNamedProperty(env, result, "HOST_WINDOW_RECT_CHANGE", static_cast<int32_t>(1));
+    (void)SetNamedProperty(env, result, "HOST_WINDOW_RECT_CHANGE", HOST_WINDOW_RECT_CHANGE);
 
     napi_object_freeze(env, result);
     return result;
@@ -67,14 +62,14 @@ static napi_value ExportRectChangeReasonType(napi_en env)
 
 napi_value ExtensionModuleInit(napi_env env, napi_value exportObj)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
     if (env == nullptr || exportObj == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "env or exportObj is nullptr");
         return nullptr;
     }
     std::unique_ptr<ExtensionManager> extensionManager = std::make_unique<ExtensionManager>();
     napi_wrap(env, exportObj, extensionManager.release(), ExtensionManager::Finalizer, nullptr, nullptr);
-    
+
     napi_set_named_property(env, exportObj, "RectChangeReason", ExportRectChangeReasonType(env));
 
     napi_value result = nullptr;

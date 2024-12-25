@@ -28,8 +28,8 @@ ohos_shared_library("uiextension_napi") {
     debug = false
   }
   sources = [
-    "extension_module.cpp",
     "extension_manager.cpp",
+    "extension_module.cpp",
   ]
 
   configs = [
@@ -40,7 +40,6 @@ ohos_shared_library("uiextension_napi") {
   deps = [
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
-    "../../../../wm:libwm",
   ]
 
   external_deps = [
@@ -48,7 +47,7 @@ ohos_shared_library("uiextension_napi") {
     "hilog:libhilog",
     "napi:ace_napi",
   ]
-  
+
   relative_install_dir = "module/arkui"
   part_name = "window_manager"
   subsystem_name = "window"

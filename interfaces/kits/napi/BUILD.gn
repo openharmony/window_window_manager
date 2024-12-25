@@ -17,8 +17,8 @@ group("napi_packages") {
   deps = [
     "display_runtime:display_napi",
     "embeddable_window_stage:embeddablewindowstage_kit",
-    "extension_window:extensionwindow_napi",
     "extension:uiextension_napi",
+    "extension_window:extensionwindow_napi",
     "picture_in_picture_napi:pipwindow_napi",
     "picture_in_picture_napi/inner:pip_napi",
     "screen_runtime:screen_napi",
