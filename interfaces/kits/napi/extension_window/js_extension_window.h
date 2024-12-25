@@ -94,7 +94,7 @@ private:
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
-    static inline const std::string RECT_CHANGE_CB = "rectChange";
+    static inline const std::string RECT_CHANGE = "rectChange";
 };
 }  // namespace Rosen
 }  // namespace OHOS
