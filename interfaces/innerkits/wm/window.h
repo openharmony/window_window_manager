@@ -771,6 +771,19 @@ public:
      */
     virtual bool IsTopmost() const { return false; }
     /**
+     * @brief Set whether the main window is topmost
+     *
+     * @param isTopmost whether main window is topmost
+     * @return WMError
+     */
+    virtual WMError SetMainWindowTopmost(bool isTopmost) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    /**
+     * @brief Get whether main window is topmost
+     *
+     * @return True means main window is topmost
+     */
+    virtual bool IsMainWindowTopmost() const { return false; }
+    /**
      * @brief Set alpha of window.
      *
      * @param alpha Alpha of window.
