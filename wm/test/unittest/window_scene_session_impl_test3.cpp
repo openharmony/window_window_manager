@@ -514,38 +514,6 @@ HWTEST_F(WindowSceneSessionImplTest3, SetDefaultProperty, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetAspectRatio01
- * @tc.desc: SetAspectRatio
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetAspectRatio01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("SetAspectRatio01");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    windowSceneSessionImpl->hostSession_ = session;
-    auto ret = windowSceneSessionImpl->SetAspectRatio(MathHelper::INF);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->property_->SetPersistentId(1);
-    ret = windowSceneSessionImpl->SetAspectRatio(MathHelper::INF);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = windowSceneSessionImpl->SetAspectRatio(MathHelper::NAG_INF);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = windowSceneSessionImpl->SetAspectRatio(std::sqrt(-1.0));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = windowSceneSessionImpl->SetAspectRatio(0.0f);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
-    ret = windowSceneSessionImpl->SetAspectRatio(1.0f);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: SetCallingWindow
  * @tc.desc: SetCallingWindow
  * @tc.type: FUNC
@@ -710,92 +678,6 @@ HWTEST_F(WindowSceneSessionImplTest3, GetWindowLimits02, Function | SmallTest | 
     windowSceneSessionImpl->hostSession_ = nullptr;
     auto ret = windowSceneSessionImpl->GetWindowLimits(windowLimits);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-}
-
-/**
- * @tc.name: SetWindowLimits01
- * @tc.desc: SetWindowLimits
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowLimits01");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    WindowLimits windowLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
-
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-}
-
-/**
- * @tc.name: SetWindowLimits02
- * @tc.desc: SetWindowLimits
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits02, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowLimits02");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    WindowLimits windowLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
-
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetPersistentId(1);
-    windowSceneSessionImpl->property_->SetDisplayId(0);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: SetWindowLimits03
- * @tc.desc: SetWindowLimits
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits03, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> subWindow = sptr<WindowOption>::MakeSptr();
-    subWindow->SetWindowName("SetWindowLimits03");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(subWindow);
-    WindowLimits windowLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
-    windowSceneSessionImpl->SetWindowLimits(windowLimits);
-    windowSceneSessionImpl->property_->SetPersistentId(1004);
-    windowSceneSessionImpl->property_->SetDisplayId(0);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_LAUNCHING);
-    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: SetWindowLimits04
- * @tc.desc: SetWindowLimits
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits04, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> subWindow = sptr<WindowOption>::MakeSptr();
-    subWindow->SetWindowName("SetWindowLimits04");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(subWindow);
-    WindowLimits windowLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
-    windowSceneSessionImpl->SetWindowLimits(windowLimits);
-    windowSceneSessionImpl->property_->SetPersistentId(1005);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_ = subSession;
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits));
 }
 
 /**
@@ -1068,32 +950,6 @@ HWTEST_F(WindowSceneSessionImplTest3, Resize01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, subWindow->Resize(200, 200));
 }
 
-/**
- * @tc.name: ResetAspectRatio
- * @tc.desc: ResetAspectRatio
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest3, ResetAspectRatio, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    option->SetWindowName("ResetAspectRatio");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
-
-    windowSceneSessionImpl->hostSession_ = nullptr;
-    auto ret = windowSceneSessionImpl->ResetAspectRatio();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
-    windowSceneSessionImpl->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
-    ret = windowSceneSessionImpl->ResetAspectRatio();
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
 
 /**
  * @tc.name: GetAvoidAreaByType
