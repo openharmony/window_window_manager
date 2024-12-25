@@ -35,7 +35,6 @@ namespace Rosen {
     enum class ComponentRectChangeReason : uint32_t {
         HOST_WINDOW_RECT_CHANGE = 1,
     };
-    napi_value ComponentRectChangeReasonInit(napi_env env);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
     napi_value CreateJsExtensionWindowPropertiesObject(napi_env env, sptr<Window>& window);

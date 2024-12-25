@@ -753,6 +753,21 @@ HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, Function | SmallTes
 }
 
 /**
+ * @tc.name: IsPcWindow
+ * @tc.desc: WindowAdapter/IsPcWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsPcWindow, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    bool isPcWindow = false;
+    auto err = windowAdapter.IsPcWindow(isPcWindow);
+    ASSERT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: WindowAdapter/IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
