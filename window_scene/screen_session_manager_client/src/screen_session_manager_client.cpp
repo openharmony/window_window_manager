@@ -420,6 +420,15 @@ int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
     return screenSessionManager_->SetScreenOffDelayTime(delay);
 }
 
+int32_t ScreenSessionManagerClient::SetScreenOnDelayTime(int32_t delay)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return 0;
+    }
+    return screenSessionManager_->SetScreenOnDelayTime(delay);
+}
+
 void ScreenSessionManagerClient::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
 {
     if (!screenSessionManager_) {

@@ -67,6 +67,7 @@ public:
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
     int32_t SetScreenOffDelayTime(int32_t delay);
+    int32_t SetScreenOnDelayTime(int32_t delay);
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
     FoldStatus GetFoldStatus();
