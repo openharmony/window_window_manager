@@ -742,7 +742,7 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
             TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to rectChangeReasons");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
-        if (reason != static_cast<uint32_t>(ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE)) {
+        if (reasons != static_cast<uint32_t>(ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE)) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Unsupported rect change reasons");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         }
