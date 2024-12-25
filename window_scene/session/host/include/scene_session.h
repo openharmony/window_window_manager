@@ -967,7 +967,7 @@ private:
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     std::shared_ptr<RSBehindWindowFilterEnabledModifier>
         behindWindowFilterEnabledModifier_; // Only accessed on main thread
-    uint32_t dirtyDragFlags_ = 0;
+    uint32_t dirtyDragEndFlags_ = 0;
 
     /*
      * Window Immersive
