@@ -200,10 +200,9 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMainWindowTopmost");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
