@@ -110,6 +110,8 @@ public:
         bool isCloseVisible) override;
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
     WMError SetWindowModal(bool isModal) override;
+    void SetTargetAPIVersion(uint32_t targetAPIVersion);
+    uint32_t GetTargetAPIVersion() const;
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
@@ -541,6 +543,11 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+
+    /*
+     * PC Window
+     */
+    uint32_t targetAPIVersion_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

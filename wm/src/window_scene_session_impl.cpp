@@ -360,6 +360,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
         // update subWindowSessionMap_
         subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+        SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
     } else if (isUiExtSubWindow || isUiExtSubWindowToast) {
         property_->SetParentPersistentId(property_->GetParentId());
         // creat sub session by parent session
@@ -606,6 +607,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     bool isSpecificSession = false;
     if (GetHostSession()) { // main window
         ret = Connect();
+        SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
+        TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
         TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type = %{public}d", GetType());
         isSpecificSession = true;
