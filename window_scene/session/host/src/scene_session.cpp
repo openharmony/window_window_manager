@@ -1915,7 +1915,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
     if (cutoutAreas.empty()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutoutAreas");
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout area");
         return;
     }
     for (auto& cutoutArea : cutoutAreas) {
@@ -4145,18 +4145,19 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
 
 WMError SceneSession::SetGestureBackEnabled(bool isEnabled)
 {
-    PostTask([weakThis = wptr(this), isEnabled] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), isEnabled, where] {
         auto sceneSession = weakThis.promote();
         if (!sceneSession) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session is invalid");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is invalid", where);
             return;
         }
         if (sceneSession->isEnableGestureBack_ == isEnabled) {
-            TLOGND(WmsLogTag::WMS_IMMS, "isEnabled equals last.");
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s isEnabled equals last", where);
             return;
         }
-        TLOGNI(WmsLogTag::WMS_IMMS, "id: %{public}d, isEnabled: %{public}d",
-            sceneSession->GetPersistentId(), isEnabled);
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d isEnabled %{public}d",
+            where, sceneSession->GetPersistentId(), isEnabled);
         sceneSession->isEnableGestureBack_ = isEnabled;
         sceneSession->isEnableGestureBackHadSet_ = true;
         sceneSession->UpdateGestureBackEnabled();

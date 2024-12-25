@@ -3817,7 +3817,8 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
 void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, propertyMap, env = env_] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, propertyMap, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "OnSystemBarPropertyChange jsSceneSession id:%{public}d has been destroyed",
@@ -3829,12 +3830,12 @@ void JsSceneSession::OnSystemBarPropertyChange(const std::unordered_map<WindowTy
             WLOGFE("jsCallBack is nullptr");
             return;
         }
-        napi_value jsSessionStateObj = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
-        if (jsSessionStateObj == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "jsSessionStateObj is nullptr");
+        napi_value jsArrayObject = CreateJsSystemBarPropertyArrayObject(env, propertyMap);
+        if (jsArrayObject == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s jsArrayObject is nullptr", where);
             return;
         }
-        napi_value argv[] = {jsSessionStateObj};
+        napi_value argv[] = {jsArrayObject};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSystemBarPropertyChange");
@@ -4580,7 +4581,7 @@ napi_value JsSceneSession::OnNotifyDisplayStatusBarTemporarily(napi_env env, nap
     }
     session->SetIsDisplayStatusBarTemporarily(isTempDisplay);
 
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] isTempDisplay:%{public}u",
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] isTempDisplay %{public}u",
         session->GetPersistentId(), session->GetWindowName().c_str(), isTempDisplay);
     return NapiGetUndefined(env);
 }

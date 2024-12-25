@@ -1900,7 +1900,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     };
     avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect);
     getAvoidAreaCnt_++;
-    TLOGI(WmsLogTag::WMS_IMMS, "Win [%{public}u %{public}s] type %{public}d times %{public}u area %{public}s",
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}d times %{public}u area %{public}s",
           GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_.load(), avoidArea.ToString().c_str());
     return WMError::WM_OK;
 }
@@ -4601,14 +4601,14 @@ bool WindowSceneSessionImpl::GetIsUIExtAnySubWindow() const
 WMError WindowSceneSessionImpl::SetGestureBackEnabled(bool enable)
 {
     if (windowSystemConfig_.IsPcWindow()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "device is not support.");
+        TLOGI(WmsLogTag::WMS_IMMS, "device is not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsMainFullScreenWindow(GetType(), property_->GetWindowMode())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window.");
+        TLOGI(WmsLogTag::WMS_IMMS, "not full screen main window");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u, enable %{public}u", GetWindowId(), enable);
     gestureBackEnabled_ = enable;
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
