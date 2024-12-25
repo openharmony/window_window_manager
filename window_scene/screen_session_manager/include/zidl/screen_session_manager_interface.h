@@ -211,6 +211,7 @@ public:
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
     }
+    virtual ScreenCombination GetScreenCombination(ScreenId screenId) { return ScreenCombination::SCREEN_ALONE; }
 };
 } // namespace Rosen
 } // namespace OHOS

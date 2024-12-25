@@ -349,6 +349,7 @@ public:
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode) override;
+    ScreenCombination GetScreenCombination(ScreenId screenId) override;
 
 protected:
     ScreenSessionManager();
