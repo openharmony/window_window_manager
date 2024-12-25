@@ -3998,6 +3998,12 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
+        if (IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14) { // 14: isolated version
+            windowStatus = GetImmersiveModeEnabledState() ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
+                WindowStatus::WINDOW_STATUS_MAXIMIZE;
+        } else {
+            windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
+        }
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
@@ -4231,6 +4237,16 @@ WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
     TLOGI(WmsLogTag::WMS_LAYOUT, "enableDrag:%{publlic}d", enableDrag);
     property_->SetDragEnabled(enableDrag);
     return WSError::WS_OK;
+}
+
+void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
+{
+    targetAPIVersion_ = targetAPIVersion;
+}
+
+uint32_t WindowSessionImpl::GetTargetAPIVersion() const
+{
+    return targetAPIVersion_;
 }
 } // namespace Rosen
 } // namespace OHOS
