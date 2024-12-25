@@ -5116,8 +5116,8 @@ void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId disp
 {
     taskScheduler_->PostAsyncTask([this, displayId, visible] {
         statusBarDefaultVisibilityPerDisplay_[displayId] = visible;
-        TLOGNI(WmsLogTag::WMS_IMMS, "set default visibility, display id %{public}" PRIu64 " visible %{public}d",
-            displayId, visible);
+        TLOGNI(WmsLogTag::WMS_IMMS, "set default visibility, "
+            "display id %{public}" PRIu64 " visible %{public}d", displayId, visible);
     }, __func__);
 }
 
@@ -8812,15 +8812,17 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
 {
     const auto callingPid = IPCSkeleton::GetCallingRealPid();
-    auto task = [this, persistentId, haveListener, callingPid]() {
-        TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d haveListener %{public}d", persistentId, haveListener);
+    const char* const where = __func__;
+    auto task = [this, persistentId, haveListener, callingPid, where]() {
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d haveListener %{public}d",
+            where, persistentId, haveListener);
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
-            TLOGND(WmsLogTag::WMS_IMMS, "sceneSession is nullptr");
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s sceneSession is nullptr", where);
             return WSError::WS_DO_NOTHING;
         }
         if (callingPid != sceneSession->GetCallingPid()) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "Permission denied, not called by the same process");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s Permission denied, not called by the same process", where);
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         if (haveListener) {
@@ -8996,25 +8998,27 @@ void SceneSessionManager::UpdateAvoidArea(int32_t persistentId)
 
 void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type)
 {
-    auto task = [this, persistentId, type] {
+    const char* const where = __func__;
+    auto task = [this, persistentId, type, where] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
-            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d is nullptr or invisible", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d is nullptr or invisible", where, persistentId);
             return;
         }
         if (avoidAreaListenerSessionSet_.find(persistentId) == avoidAreaListenerSessionSet_.end()) {
-            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d has no listener, no need update", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d has no listener, no need update",
+                where, persistentId);
             return;
         }
         if (sceneSession->IsImmersiveType()) {
-            TLOGND(WmsLogTag::WMS_IMMS, "win %{public}d is immersive type", persistentId);
+            TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d is immersive type", where, persistentId);
             return;
         }
         auto avoidArea = sceneSession->GetAvoidAreaByType(type);
         if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && !CheckAvoidAreaForAINavigationBar(
             isAINavigationBarVisible_, avoidArea, sceneSession->GetSessionRect().height_)) {
             TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d AI bar check false, visible %{public}d "
-                "avoidarea %{public}s rect %{public}s", persistentId, isAINavigationBarVisible_,
+                "avoid area %{public}s rect %{public}s", persistentId, isAINavigationBarVisible_,
                 avoidArea.ToString().c_str(), sceneSession->GetSessionRect().ToString().c_str());
             return;
         }
@@ -9025,7 +9029,8 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
 
 void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
 {
-    auto task = [this, persistentId] {
+    const char* const where = __func__;
+    auto task = [this, persistentId, where] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !sceneSession->GetEnableGestureBackHadSet()) {
             TLOGNI(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable");
@@ -9048,7 +9053,7 @@ void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
             gestureNavigationEnabledChangeFunc_(needEnableGestureBack,
                 sceneSession->GetSessionInfo().bundleName_, GestureBackType::GESTURE_SIDE);
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "callback func is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s callback func is null", where);
         }
     };
     taskScheduler_->PostAsyncTask(task, "UpdateGestureBackEnabled: PID: " + std::to_string(persistentId));
@@ -9102,7 +9107,8 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
 {
     TLOGI(WmsLogTag::WMS_IMMS, "isVisible %{public}u "
         "area %{public}s, displayId %{public}" PRIu64, isVisible, barArea.ToString().c_str(), displayId);
-    auto task = [this, isVisible, barArea, displayId]() {
+    const char* const where = __func__;
+    auto task = [this, isVisible, barArea, displayId, where] {
         bool isNeedUpdate = true;
         {
             std::unique_lock<std::shared_mutex> lock(currAINavigationBarAreaMapMutex_);
@@ -9115,13 +9121,13 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 currAINavigationBarAreaMap_[displayId] = barArea;
             }
             if (isNeedUpdate && !isVisible && !barArea.IsEmpty()) {
-                TLOGND(WmsLogTag::WMS_IMMS, "barArea should be empty if invisible");
+                TLOGND(WmsLogTag::WMS_IMMS, "%{public}s barArea should be empty if invisible", where);
                 currAINavigationBarAreaMap_[displayId] = WSRect();
             }
         }
         if (isNeedUpdate) {
-            TLOGNI(WmsLogTag::WMS_IMMS, "isVisible %{public}u bar area %{public}s",
-                isVisible, barArea.ToString().c_str());
+            TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isVisible %{public}u bar area %{public}s",
+                where, isVisible, barArea.ToString().c_str());
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionAINavigationBarChange(persistentId);
             }
@@ -9140,7 +9146,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
     }
     bool isLastFrameLayoutFinished = true;
     IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] layout finished %{public}d",
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d layout finished %{public}d",
         persistentId, isLastFrameLayoutFinished);
     if (isLastFrameLayoutFinished) {
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
@@ -9148,7 +9154,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
             sceneSession->GetSessionRect().height_)) {
             return;
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}d] aibar avoid area %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d AI bar avoid area %{public}s",
             persistentId, avoidArea.ToString().c_str());
         UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea,
             AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
