@@ -525,18 +525,18 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
 WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
     if (event != SessionEvent::EVENT_START_MOVE) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "This is not start move event, eventId = %{public}d", event);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event, eventId=%{public}d", event);
         return WSError::WS_ERROR_NULLPTR;
     }
     const char* const funcName = __func__;
     return PostSyncTask([weakThis = wptr(this), event, funcName] {
         auto session = weakThis.promote();
         if (!session || !session->moveDragController_) {
-            TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s: session or moveDragController is null", funcName);
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: session or moveDragController is null", funcName);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->moveDragController_->GetStartMoveFlag()) {
-            TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s: Repeat operation, system window is moving", funcName);
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: Repeat operation, system window is moving", funcName);
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         session->OnSessionEvent(event);
@@ -4830,12 +4830,7 @@ WMError SceneSession::SetSystemWindowEnableDrag(bool enableDrag)
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, enableDrag:%{public}d",
             funcName, session->GetPersistentId(), enableDrag);
-        auto sessionProperty = session->GetSessionProperty();
-        if (!sessionProperty) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: sessionProperty is null", funcName);
-            return;
-        }
-        sessionProperty->SetDragEnabled(enableDrag);
+        session->GetSessionProperty()->SetDragEnabled(enableDrag);
         session->NotifySessionInfoChange();
     }, funcName);
     return WMError::WM_OK;

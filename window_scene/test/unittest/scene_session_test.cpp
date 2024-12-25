@@ -1175,33 +1175,6 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest
 }
 
 /**
- * @tc.name: TransferPointerEventSystemDialog
- * @tc.desc: TransferPointerEventSystemDialog
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, TransferPointerEventSystemDialog, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "TransferPointerEventSystemDialog";
-    info.bundleName_ = "TransferPointerEventSystemDialogBundle";
-    info.windowType_ = 2123;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        new SceneSession::SpecificSessionCallback();
-    sptr<SceneSession> sceneSession = new SceneSession(info, specificCallback);
-    sceneSession->moveDragController_ = new MoveDragController(12);
-    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetMaximizeMode(MaximizeMode::MODE_FULL_FILL);
-    property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    property->SetDecorEnable(true);
-    property->SetDragEnabled(true);
-    property->SetPersistentId(13);
-    sceneSession->property_ = property;
-    EXPECT_NE(sceneSession, nullptr);
-}
-
-/**
  * @tc.name: CalculateAvoidAreaRect
  * @tc.desc: CalculateAvoidAreaRect
  * @tc.type: FUNC
@@ -1450,10 +1423,9 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "SyncSessionEvent";
     info.bundleName_ = "SyncSessionEvent";
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     property->isSystemCalling_ = true;
     sceneSession->SetSessionProperty(property);
