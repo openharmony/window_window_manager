@@ -366,6 +366,10 @@ protected:
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    bool FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    bool IsAxisEvent(int32_t action);
+    bool FilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    bool FilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool IsVerticalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
@@ -417,6 +421,10 @@ protected:
     static bool isUIExtensionAbilityProcess_;
     virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     virtual WMError ClearKeyEventFilter() override;
+    virtual WMError SetMouseEventFilter(MouseEventFilterFunc filter) override;
+    virtual WMError ClearMouseEventFilter() override;
+    virtual WMError SetTouchEventFilter(TouchEventFilterFunc filter) override;
+    virtual WMError ClearTouchEventFilter() override;
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
@@ -611,6 +619,10 @@ private:
     std::string dialogTitle_ = { "" };
     std::shared_mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
+    std::shared_mutex mouseEventFilterMutex_;
+    MouseEventFilterFunc mouseEventFilter_;
+    std::shared_mutex touchEventFilterMutex_;
+    TouchEventFilterFunc touchEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
 

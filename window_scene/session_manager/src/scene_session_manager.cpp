@@ -12283,4 +12283,54 @@ WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, 
     }, __func__);
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId, int32_t deviceId)
+{
+    TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d deviceId %{public}d",
+        sourcePersistentId, targetPersistentId, deviceId);
+    if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (sourcePersistentId == targetPersistentId) {
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    sptr<SceneSession> sourceSession = nullptr;
+    sourceSession = GetSceneSession(sourcePersistentId);
+    if (sourceSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession(%{public}d) is nullptr", sourcePersistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (sourceSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        sourceSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession(%{public}d) is not main window or sub window", sourcePersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    sptr<SceneSession> targetSession = nullptr;
+    targetSession = GetSceneSession(targetPersistentId);
+    if (targetSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is nullptr", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (targetSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        targetSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is not main window or sub window", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
+        TLOGE(WmsLogTag::WMS_PC, "verify bundle failed, source name is %{public}s but target name is %{public}s)",
+            sourceSession->GetSessionInfo().bundleName_.c_str(), targetSession->GetSessionInfo().bundleName_.c_str());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!SessionPermission::IsSameBundleNameAsCalling(targetSession->GetSessionInfo().bundleName_)) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is not same bundle as calling", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto task = [] {
+        int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId);
+        TLOGI(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
+            sourcePersistentId, targetPersistentId, deviceId, ret);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+}
 } // namespace OHOS::Rosen
