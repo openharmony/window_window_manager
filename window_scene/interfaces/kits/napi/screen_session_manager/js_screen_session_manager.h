@@ -50,6 +50,7 @@ private:
     static napi_value NotifyScreenLockEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateAvailableArea(napi_env env, napi_callback_info info);
     static napi_value SetScreenOffDelayTime(napi_env env, napi_callback_info info);
+    static napi_value SetScreenOnDelayTime(napi_env env, napi_callback_info info);
     static napi_value NotifyFoldToExpandCompletion(napi_env env, napi_callback_info info);
     static napi_value SetCameraStatus(napi_env env, napi_callback_info info);
     static napi_value GetFoldStatus(napi_env env, napi_callback_info info);
@@ -65,6 +66,7 @@ private:
     napi_value OnNotifyScreenLockEvent(napi_env env, const napi_callback_info info);
     napi_value OnUpdateAvailableArea(napi_env env, const napi_callback_info info);
     napi_value OnSetScreenOffDelayTime(napi_env env, const napi_callback_info info);
+    napi_value OnSetScreenOnDelayTime(napi_env env, const napi_callback_info info);
     napi_value OnSetCameraStatus(napi_env env, napi_callback_info info);
     napi_value OnNotifyFoldToExpandCompletion(napi_env env, const napi_callback_info info);
     napi_value OnGetFoldStatus(napi_env env, const napi_callback_info info);

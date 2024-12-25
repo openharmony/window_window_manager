@@ -2850,7 +2850,6 @@ void ScreenSessionManagerProxy::SetCameraStatus(int32_t cameraStatus, int32_t ca
     }
 }
 
-
 DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect& area)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -3426,5 +3425,32 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
         return nullptr;
     }
     return pixelMap;
+}
+
+int32_t ScreenSessionManagerProxy::SetScreenOnDelayTime(int32_t delay)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SetScreenOnDelayTime: remote is null");
+        return 0;
+    }
+
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return 0;
+    }
+    if (!data.WriteInt32(delay)) {
+        WLOGFE("Write delay failed");
+        return 0;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ON_DELAY_TIME),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return 0;
+    }
+    return reply.ReadInt32();
 }
 } // namespace OHOS::Rosen
