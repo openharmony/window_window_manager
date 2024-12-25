@@ -2474,8 +2474,8 @@ WMError SceneSessionManagerProxy::IsPcWindow(bool& isPcWindow)
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    bool repliedValue = false;
-    if (!reply.ReadBool(repliedValue)) {
+    bool result = false;
+    if (!reply.ReadBool(result)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Read isPcWindow failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -2484,7 +2484,7 @@ WMError SceneSessionManagerProxy::IsPcWindow(bool& isPcWindow)
         TLOGE(WmsLogTag::WMS_UIEXT, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    isPcWindow = repliedValue;
+    isPcWindow = result;
     return static_cast<WMError>(ret);
 }
 

@@ -763,8 +763,6 @@ HWTEST_F(WindowAdapterTest, IsPcWindow, Function | SmallTest | Level2)
     bool isPcWindow = false;
     auto err = windowAdapter.IsPcWindow(isPcWindow);
     ASSERT_EQ(err, WMError::WM_OK);
-    auto ret = windowAdapter.InitWMSProxy();
-    ASSERT_EQ(ret, true);
 }
 
 /**

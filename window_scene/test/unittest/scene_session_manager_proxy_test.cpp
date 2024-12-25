@@ -1071,9 +1071,7 @@ HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Funct
 HWTEST_F(sceneSessionManagerProxyTest, isPcWindow, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
-        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
-    EXPECT_NE(sceneSessionManagerProxy, nullptr);
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     bool isPcWindow = false;
     ASSERT_EQ(sceneSessionManagerProxy->IsPcWindow(isPcWindow),
         WMError::WM_ERROR_IPC_FAILED);
