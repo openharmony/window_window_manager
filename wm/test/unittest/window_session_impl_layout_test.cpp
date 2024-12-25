@@ -156,7 +156,6 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateRect02, Function | SmallTest | Level
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: UpdateRect02 end";
 }
 
-
 /**
  * @tc.name: SetResizeByDragEnabled01
  * @tc.desc: SetResizeByDragEnabled and check the retCode
@@ -167,7 +166,6 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled01, Function | Small
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     WMError retCode = window->SetResizeByDragEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
 }
@@ -204,12 +202,10 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, Function | Small
     option->SetWindowName("SetResizeByDragEnabled03");
     option->SetSubWindowDecorEnable(true);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
@@ -224,7 +220,6 @@ HWTEST_F(WindowSessionImplLayoutTest, SetResizeByDragEnabled03, Function | Small
     retCode = window->SetResizeByDragEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_TYPE);
 }
-
 
 /**
  * @tc.name: UpdateViewportConfig
@@ -274,7 +269,7 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, Function | SmallTe
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateViewportConfig01");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     Rect rectW;
     rectW.posX_ = 0;
     rectW.posY_ = 0;

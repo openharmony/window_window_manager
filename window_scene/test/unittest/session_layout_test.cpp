@@ -29,7 +29,6 @@
 #include "session_info.h"
 #include "key_event.h"
 #include "wm_common.h"
-#include "window_event_channel_base.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;
@@ -92,19 +91,14 @@ void SessionLayoutTest::SetUp()
     info.bundleName_ = "testSession3";
     session_ = sptr<Session>::MakeSptr(info);
     session_->surfaceNode_ = CreateRSSurfaceNode();
-    EXPECT_NE(nullptr, session_);
     ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
     auto isScreenLockedCallback = [this]() {
         return ssm_->IsScreenLocked();
     };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
-
     mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage_, nullptr);
-
     mockEventChannel_ = sptr<WindowEventChannelMocker>::MakeSptr(mockSessionStage_);
-    ASSERT_NE(mockEventChannel_, nullptr);
 }
 
 void SessionLayoutTest::TearDown()
@@ -187,7 +181,6 @@ HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
     info.abilityName_ = "testSession1";
     info.bundleName_ = "testSession3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
     WSRect rect = {0, 0, 320, 240}; // width: 320, height: 240
     auto result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
