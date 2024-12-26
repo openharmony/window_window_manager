@@ -615,15 +615,14 @@ bool WindowSessionProperty::IsFloatingWindowAppType() const
     return isFloatingWindowAppType_;
 }
 
-void WindowSessionProperty::setTouchHotAreasInner(std::vector<Rect>& touchHotAreas, const std::vector<Rect>& rects)
+void WindowSessionProperty::setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas)
 {
     if (GetPersistentId() != 0 && rects != touchHotAreas) {
-        std::string rectStr;
+        std::ostringstream oss;
         for (const auto& rect : rects) {
-            rectStr = rectStr + "[" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_) +
-                "," + std::to_string(rect.width_) + "," + std::to_string(rect.height_) + "]";
+            oss << "[" << rect.posX_ << "," << rect.posY_ << "," << rect.width_ << "," << rect.height_ << "]";
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d hot:%{public}s", GetPersistentId(), rectStr.c_str());
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d hot:%{public}s", GetPersistentId(), oss.str().c_str());
     }
     touchHotAreas = rects;
 }
@@ -631,8 +630,8 @@ void WindowSessionProperty::setTouchHotAreasInner(std::vector<Rect>& touchHotAre
 void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 {
     {
-        std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
-        setTouchHotAreasInner(touchHotAreas_, rects);
+        std::lock_guard lock(touchHotAreasMutex_);
+        setTouchHotAreasInner(rects, touchHotAreas_);
     }
     if (touchHotAreasChangeCallback_) {
         touchHotAreasChangeCallback_();
@@ -642,15 +641,15 @@ void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 void WindowSessionProperty::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& keyboardTouchHotAreas)
 {
     {
-        std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
+        std::lock_guard lock(touchHotAreasMutex_);
         setTouchHotAreasInner(
-            keyboardTouchHotAreas_.landscapeKeyboardHotAreas_, keyboardTouchHotAreas.landscapeKeyboardHotAreas_);
+            keyboardTouchHotAreas.landscapeKeyboardHotAreas_, keyboardTouchHotAreas_.landscapeKeyboardHotAreas_);
         setTouchHotAreasInner(
-            keyboardTouchHotAreas_.portraitKeyboardHotAreas_, keyboardTouchHotAreas.portraitKeyboardHotAreas_);
+            keyboardTouchHotAreas.portraitKeyboardHotAreas_, keyboardTouchHotAreas_.portraitKeyboardHotAreas_);
         setTouchHotAreasInner(
-            keyboardTouchHotAreas_.landscapePanelHotAreas_, keyboardTouchHotAreas.landscapePanelHotAreas_);
+            keyboardTouchHotAreas.landscapePanelHotAreas_, keyboardTouchHotAreas_.landscapePanelHotAreas_);
         setTouchHotAreasInner(
-            keyboardTouchHotAreas_.portraitPanelHotAreas_, keyboardTouchHotAreas.portraitPanelHotAreas_);
+            keyboardTouchHotAreas.portraitPanelHotAreas_, keyboardTouchHotAreas_.portraitPanelHotAreas_);
     }
     if (touchHotAreasChangeCallback_) {
         touchHotAreasChangeCallback_();
@@ -659,13 +658,13 @@ void WindowSessionProperty::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas
 
 void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
 {
-    std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
+    std::lock_guard lock(touchHotAreasMutex_);
     rects = touchHotAreas_;
 }
 
 KeyboardTouchHotAreas WindowSessionProperty::GetKeyboardTouchHotAreas() const
 {
-    std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
+    std::lock_guard lock(touchHotAreasMutex_);
     return keyboardTouchHotAreas_;
 }
 
@@ -777,8 +776,8 @@ bool WindowSessionProperty::MarshallingTouchHotAreasInner(const std::vector<Rect
         return false;
     }
     for (const auto& rect : touchHotAreas) {
-        if (!(parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
-            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_))) {
+        if (!parcel.WriteInt32(rect.posX_) || !parcel.WriteInt32(rect.posY_) ||
+            !parcel.WriteUint32(rect.width_) || !parcel.WriteUint32(rect.height_)) {
             return false;
         }
     }
@@ -793,12 +792,12 @@ bool WindowSessionProperty::MarshallingTouchHotAreas(Parcel& parcel) const
 bool WindowSessionProperty::MarshallingKeyboardTouchHotAreas(Parcel& parcel) const
 {
     return MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapeKeyboardHotAreas_, parcel) &&
-        MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitKeyboardHotAreas_, parcel) &&
-        MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapePanelHotAreas_, parcel) &&
-        MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitPanelHotAreas_, parcel);
+           MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitKeyboardHotAreas_, parcel) &&
+           MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapePanelHotAreas_, parcel) &&
+           MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitPanelHotAreas_, parcel);
 }
 
-void WindowSessionProperty::UnmarshallingTouchHotAreasInner(std::vector<Rect>& touchHotAreas, Parcel& parcel)
+void WindowSessionProperty::UnmarshallingTouchHotAreasInner(Parcel& parcel, std::vector<Rect>& touchHotAreas)
 {
     uint32_t size = parcel.ReadUint32();
     if (size > TOUCH_HOT_AREA_MAX_NUM) {
@@ -808,22 +807,19 @@ void WindowSessionProperty::UnmarshallingTouchHotAreasInner(std::vector<Rect>& t
         touchHotAreas.emplace_back(
             Rect{ parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() });
     }
-    return;
 }
 
 void WindowSessionProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property)
 {
-    UnmarshallingTouchHotAreasInner(property->touchHotAreas_, parcel);
-    return;
+    UnmarshallingTouchHotAreasInner(parcel, property->touchHotAreas_);
 }
 
 void WindowSessionProperty::UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property)
 {
-    UnmarshallingTouchHotAreasInner(property->keyboardTouchHotAreas_.landscapeKeyboardHotAreas_, parcel);
-    UnmarshallingTouchHotAreasInner(property->keyboardTouchHotAreas_.portraitKeyboardHotAreas_, parcel);
-    UnmarshallingTouchHotAreasInner(property->keyboardTouchHotAreas_.landscapePanelHotAreas_, parcel);
-    UnmarshallingTouchHotAreasInner(property->keyboardTouchHotAreas_.portraitPanelHotAreas_, parcel);
-    return;
+    UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapeKeyboardHotAreas_);
+    UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitKeyboardHotAreas_);
+    UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapePanelHotAreas_);
+    UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitPanelHotAreas_);
 }
 
 bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
@@ -1295,6 +1291,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     trans_ = property->trans_;
     isFloatingWindowAppType_ = property->isFloatingWindowAppType_;
     touchHotAreas_ = property->touchHotAreas_;
+    keyboardTouchHotAreas_ = property->keyboardTouchHotAreas_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
     forceHide_ = property->forceHide_;
     keepKeyboardFlag_ = property->keepKeyboardFlag_;

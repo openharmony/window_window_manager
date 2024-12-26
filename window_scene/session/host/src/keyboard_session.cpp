@@ -51,11 +51,7 @@ sptr<SceneSession> KeyboardSession::GetKeyboardPanelSession() const
 
 SessionGravity KeyboardSession::GetKeyboardGravity() const
 {
-    SessionGravity gravity = SessionGravity::SESSION_GRAVITY_DEFAULT;
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        gravity = static_cast<SessionGravity>(sessionProperty->GetKeyboardLayoutParams().gravity_);
-    }
+    SessionGravity gravity = static_cast<SessionGravity>(GetSessionProperty()->GetKeyboardLayoutParams().gravity_);
     TLOGD(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}d", gravity);
     return gravity;
 }
@@ -427,7 +423,7 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
     if (oriPosYBeforeRaisedByKeyboard != 0 && isCallingSessionFloating) {
         callingSessionRect.posY_ = oriPosYBeforeRaisedByKeyboard;
     }
-    /* update panel rect for avoid area caculate */
+    // update panel rect for avoid area caculate
     WSRect panelAvoidRect = keyboardPanelRect;
     RecalculatePanelRectForAvoidArea(panelAvoidRect);
     if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(panelAvoidRect, callingSessionRect, 0, 0)) &&
@@ -664,7 +660,7 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     if (params.landscapeAvoidHeight_ < 0 || params.portraitAvoidHeight_ < 0) {
         return;
     }
-    /* need to get screen property if the landscape width is same to the portrait */
+    // need to get screen property if the landscape width is same to the portrait
     if (params.LandscapePanelRect_.width_ != params.PortraitPanelRect_.width_) {
         if (static_cast<uint32_t>(panelRect.width_) == params.LandscapePanelRect_.width_) {
             panelRect.height_ = params.landscapeAvoidHeight_;
@@ -679,14 +675,13 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     }
     uint32_t screenWidth = 0;
     uint32_t screenHeight = 0;
-    bool ret = GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
-    if (!ret) {
+    bool result = GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
+    if (!result) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "getScreenWidthAndHeight failed");
         return;
     }
-    bool isLandscape = screenHeight < screenWidth ? true : false;
+    bool isLandscape = screenHeight < screenWidth;
     panelRect.height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
-    return;
 }
 } // namespace OHOS::Rosen
