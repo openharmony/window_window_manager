@@ -2521,7 +2521,7 @@ ScreenCombination ScreenSessionManagerProxy::GetScreenCombination(ScreenId scree
 }
 
 void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation,
-    float rotation)
+    float rotation, ScreenPropertyChangeType screenPropertyChangeType)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2546,6 +2546,10 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
     }
     if (!data.WriteFloat(rotation)) {
         WLOGFE("Write rotation failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
+        WLOGFE("Write screenPropertyChangeType failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO),

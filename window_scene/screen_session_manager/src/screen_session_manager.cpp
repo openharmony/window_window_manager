@@ -2858,8 +2858,13 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     IPCSkeleton::SetCallingIdentity(identity);
 }
 
-void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation)
+void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
+    ScreenPropertyChangeType screenPropertyChangeType)
 {
+    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
+        TLOGI(WmsLogTag::DMS, "ROTATION_END");
+        return;
+    }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"",
