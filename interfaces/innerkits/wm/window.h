@@ -2017,6 +2017,13 @@ public:
     virtual bool IsFloatingWindowAppType() const { return false; }
 
     /**
+     * @brief Is pc window or not.
+     *
+     * @return True means pc window, false means the opposite.
+     */
+    virtual bool IsPcWindow() const { return false; }
+
+    /**
      * @brief Is pc window of app type or not.
      *
      * @return True means pc window of app type, false means the opposite.

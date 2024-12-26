@@ -38,6 +38,8 @@ public:
 
     virtual WMError HidePrivacyContentForHost(bool needHide) = 0;
 
+    virtual bool IsPcWindow() const = 0;
+
     virtual bool IsPcOrPadFreeMultiWindowMode() const = 0;
 };
 } // namespace Rosen
