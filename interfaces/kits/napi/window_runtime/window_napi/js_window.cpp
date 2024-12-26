@@ -998,7 +998,7 @@ napi_value JsWindow::StartMoving(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::StopMoving(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnStopMoving(env, info) : nullptr;
 }
@@ -7105,7 +7105,7 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken_ is nullptr.");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "windowToken is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     wptr<Window> weakToken(windowToken_);
@@ -7116,14 +7116,14 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
     auto asyncTask = [this, windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
         auto window = windowToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr.", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
         if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
             !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
             !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s This is not valid window.", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window.", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
             return;
         }
@@ -7134,7 +7134,7 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Stop move window failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }

@@ -717,8 +717,8 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
         }
         if (event == SessionEvent::EVENT_END_MOVE) {
             if (!session->moveDragController_->GetStartMoveFlag()) {
-                TLOGNW(WmsLogTag::WMS_LAYOUT, "Repeat operation,system window is not moving");
-                return WSError::WS_ERROR_REPEAT_OPERATION;
+                TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "Repeat operation, window is not moving");
+                return WSError::WS_OK;
             }
             session->moveDragController_->MoveDragInterrupted();
             return WSError::WS_OK;

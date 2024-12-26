@@ -3691,7 +3691,9 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         return;
     }
-    if (FilterPointerEvent(pointerEvent)) return;
+    if (FilterPointerEvent(pointerEvent)) {
+        return;
+    }
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
             TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());

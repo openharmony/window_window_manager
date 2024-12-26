@@ -12314,9 +12314,8 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         TLOGE(WmsLogTag::WMS_PC, "sourceSession(%{public}d) is nullptr", sourcePersistentId);
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    if (sourceSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-        sourceSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        TLOGE(WmsLogTag::WMS_PC, "sourceSession(%{public}d) is not main window or sub window", sourcePersistentId);
+    if (!WindowHelper::IsAppWindow(sourceSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession(%{public}d) is not app window", sourcePersistentId);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     sptr<SceneSession> targetSession = nullptr;
@@ -12325,9 +12324,8 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is nullptr", targetPersistentId);
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    if (targetSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-        targetSession->GetWindowType() != WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is not main window or sub window", targetPersistentId);
+    if (!WindowHelper::IsAppWindow(targetSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is not app window", targetPersistentId);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
@@ -12339,12 +12337,11 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is not same bundle as calling", targetPersistentId);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    auto task = [sourcePersistentId, targetPersistentId] {
+    return taskScheduler_->PostSyncTask([sourcePersistentId, targetPersistentId] {
         int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId, true);
-        TLOGI(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
+        TLOGNI(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
             sourcePersistentId, targetPersistentId, ret);
         return WMError::WM_OK;
-    };
-    return taskScheduler_->PostSyncTask(task, __func__);
+    }, __func__);
 }
 } // namespace OHOS::Rosen
