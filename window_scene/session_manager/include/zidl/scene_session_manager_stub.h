@@ -82,6 +82,8 @@ private:
     int HandleRaiseWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowExtensionVisibilityChange(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleWatchGestureConsumeResult(MessageParcel& data, MessageParcel& reply);
+    int HandleWatchFocusActiveChange(MessageParcel& data, MessageParcel& reply);
     int HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);

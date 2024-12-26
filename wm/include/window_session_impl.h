@@ -325,6 +325,14 @@ public:
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
 
+    /*
+     * Window Input Event
+     */
+    WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
+    WMError NotifyWatchFocusActiveChange(bool isActived);
+    void RegisterWatchFocusActiveChangeCallback();
+    void NotifyResultToFloatWindow(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed);
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -472,6 +480,12 @@ protected:
      */
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
+
+    /*
+     * Window Input Event
+     */
+    bool GetWatchGestureConsumed();
+    void SetWatchGestureConsumed(bool isWatchGestureConsumed);
 
 private:
     //Trans between colorGamut and colorSpace
@@ -640,6 +654,11 @@ private:
      * PC Window
      */
     uint32_t targetAPIVersion_ = 0;
+
+    /*
+     * Window Input Event
+     */
+    bool isWatchGestureConsumed_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
