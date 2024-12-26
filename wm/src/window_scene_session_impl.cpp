@@ -3612,7 +3612,7 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
 
 WMError WindowSceneSessionImpl::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas)
 {
-    if (GetType() != WindowType::WINDOW_TYPE_DIALOG) {
+    if (GetType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     KeyboardTouchHotAreas lastKeyboardTouchHotAreas = property_->GetKeyboardTouchHotAreas();
