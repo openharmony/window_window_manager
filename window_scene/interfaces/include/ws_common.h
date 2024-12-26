@@ -606,6 +606,7 @@ struct SessionEventParam {
     int32_t pointerY_ = 0;
     int32_t sessionWidth_ = 0;
     int32_t sessionHeight_ = 0;
+    uint32_t dragResizeType = 0;
 };
 
 /**
