@@ -14,12 +14,9 @@
 import("//build/test.gni")
 import("../../../../windowmanager_aafwk.gni")
 
-
 group("unittest") {
   testonly = true
-  deps = [
-    ":extension_data_handler_test"
-  ]
+  deps = [ ":extension_data_handler_test" ]
 }
 
 module_out_path = "window_manager/window_scene/ui_extension"
