@@ -45,6 +45,7 @@ group("unittest") {
     ":wm_window_manager_test",
     ":wm_window_option_test",
     ":wm_window_scene_effect_test",
+    ":wm_window_scene_session_impl_layout_test",
     ":wm_window_scene_session_impl_test",
     ":wm_window_scene_session_impl_test2",
     ":wm_window_scene_session_impl_test3",
@@ -488,6 +489,23 @@ ohos_unittest("wm_window_scene_session_impl_test5") {
   deps = [
     ":wm_unittest_common",
     "${window_base_path}/test/common/utils:libtestutil",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("wm_window_scene_session_impl_layout_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_scene_session_impl_layout_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
   external_deps = [
