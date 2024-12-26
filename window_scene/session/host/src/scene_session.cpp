@@ -3004,7 +3004,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             }
             screenSession->GetDisplayNode()->RemoveCrossParentChild(
                 movedSurfaceNode, moveDragController_->GetInitParentNodeId());
-                movedSurfaceNode->SetIsCrossNode(false);
+            movedSurfaceNode->SetIsCrossNode(false);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
         }
     }
