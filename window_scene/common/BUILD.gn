@@ -37,10 +37,10 @@ ohos_shared_library("window_scene_common") {
     debug = false
   }
   sources = [
+    "src/extension_data_handler.cpp",
     "src/session_permission.cpp",
     "src/task_scheduler.cpp",
     "src/window_session_property.cpp",
-    "src/extension_data_handler.cpp",
   ]
 
   public_configs = [ ":window_scene_common_public_config" ]

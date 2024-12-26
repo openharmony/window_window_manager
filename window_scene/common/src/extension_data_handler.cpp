@@ -24,6 +24,7 @@
 #include <hitrace_meter.h>
 #include <iremote_proxy.h>
 #include <message_parcel.h>
+#include <securec.h>
 #include <want.h>
 
 #include "window_manager_hilog.h"
@@ -38,10 +39,9 @@ bool DataTransferConfig::Marshalling(Parcel& parcel) const
 
 DataTransferConfig* DataTransferConfig::Unmarshalling(Parcel& parcel)
 {
-    auto config = new (std::nothrow) DataTransferConfig();
+    auto config = new DataTransferConfig();
     uint8_t subSystemIdValue = static_cast<uint8_t>(SubSystemId::INVALID);
-    parcel.ReadUint8(subSystemIdValue);
-    if (subSystemIdValue >= static_cast<uint8_t>(SubSystemId::INVALID)) {
+    if (!parcel.ReadUint8(subSystemIdValue) || subSystemIdValue >= static_cast<uint8_t>(SubSystemId::INVALID)) {
         delete config;
         return nullptr;
     }
@@ -56,10 +56,15 @@ DataTransferConfig* DataTransferConfig::Unmarshalling(Parcel& parcel)
 
 std::string DataTransferConfig::ToString() const
 {
-    std::stringstream ss;
-    ss << "subSystemId: " << static_cast<uint16_t>(subSystemId) << ", customId: " << customId
-       << ", needReply: " << needReply << ", needSyncSend: " << needSyncSend;
-    return ss.str();
+    std::string str;
+    constexpr int BUFFER_SIZE = 128;
+    char buffer[BUFFER_SIZE] = { 0 };
+    if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+                   "subSystemId: %hu, customId: %u, needReply: %d, needSyncSend: %d",
+                   static_cast<uint16_t>(subSystemId), customId, needReply, needSyncSend) > 0) {
+        str.append(buffer);
+    }
+    return str;
 }
 
 DataHandlerErr DataHandler::RegisterDataConsumer(SubSystemId subSystemId, DataConsumeCallback&& callback)
@@ -108,8 +113,8 @@ DataHandlerErr DataHandler::ParseReply(MessageParcel& replyParcel, AAFwk::Want& 
         return DataHandlerErr::OK;
     }
 
-    uint32_t replayCode = 0;
-    if (!replyParcel.ReadUint32(replayCode)) {
+    uint32_t replyCode = 0;
+    if (!replyParcel.ReadUint32(replyCode)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
         return DataHandlerErr::READ_PARCEL_ERROR;
     }
@@ -123,7 +128,7 @@ DataHandlerErr DataHandler::ParseReply(MessageParcel& replyParcel, AAFwk::Want& 
         reply = *response;
     }
 
-    return static_cast<DataHandlerErr>(replayCode);
+    return static_cast<DataHandlerErr>(replyCode);
 }
 
 // process data from peer
@@ -153,8 +158,6 @@ void DataHandler::NotifyDataConsumer(MessageParcel& data, MessageParcel& replyPa
     if (config->needReply && reply) {
         replyParcel.WriteParcelable(&(reply.value()));
     }
-
-    return;
 }
 
 void DataHandler::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& eventHandler)
@@ -232,36 +235,35 @@ DataHandlerErr DataHandler::NotifyDataConsumer(AAFwk::Want&& data, std::optional
 
     // async mode
     auto task = [input = std::move(data), subSystemId = config.subSystemId, customId = config.customId,
-                 func = callback]() mutable {
+                 func = std::move(callback)]() mutable {
         std::optional<AAFwk::Want> reply;
         auto ret = func(subSystemId, customId, std::move(input), reply);
         TLOGNI(WmsLogTag::WMS_UIEXT, "subSystemId: %{public}hhu, customId: %{public}u, ret: %{public}d", subSystemId,
                customId, ret);
     };
 
-    std::stringstream ss;
-    ss << "NotifyDataConsumer_" << static_cast<uint32_t>(config.subSystemId) << "_" << config.customId;
-    PostAsyncTask(std::move(task), ss.str(), 0);
+    std::stringstream oss;
+    oss << "NotifyDataConsumer_" << static_cast<uint32_t>(config.subSystemId) << "_" << config.customId;
+    PostAsyncTask(std::move(task), oss.str(), 0);
     return DataHandlerErr::OK;
 }
 
 void DataHandler::PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime)
 {
     if (!eventHandler_) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "uiext:%s", name.c_str());
         task();
         return;
     }
 
-    auto runner = eventHandler_->GetEventRunner();
-    if (!runner || runner->IsCurrentRunnerThread()) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
+    if (auto runner = eventHandler_->GetEventRunner(); !runner || runner->IsCurrentRunnerThread()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "uiext:%s", name.c_str());
         task();
         return;
     }
 
     auto localTask = [task = std::move(task), name] {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "s:%s", name.c_str());
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "uiext:%s", name.c_str());
         task();
     };
 

@@ -73,7 +73,7 @@ public:
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseAppMainWindowToTop() override;
 
-    /**
+    /*
      * UI Extension
      */
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
