@@ -862,6 +862,22 @@ JsSessionType GetApiType(WindowType type)
     }
 }
 
+static napi_value CreateSupportWindowModes(napi_env env,
+    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, supportWindowModes.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+    int32_t index = 0;
+    for (const auto supportWindowMode : supportWindowModes) {
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(supportWindowMode)));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
 {
     napi_value objValue = nullptr;
@@ -913,6 +929,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
     }
+    napi_set_named_property(env, objValue, "supportWindowModes",
+        CreateSupportWindowModes(env, sessionInfo.supportWindowModes));
     return objValue;
 }
 

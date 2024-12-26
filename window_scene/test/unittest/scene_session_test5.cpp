@@ -371,7 +371,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
     SystemSessionConfig systemConfig;
     systemConfig.isSystemDecorEnable_ = false;
-    systemConfig.decorModeSupportInfo_ = 2;
+    systemConfig.decorWindowModeSupportType_ = 2;
     session->SetSystemConfig(systemConfig);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->TransferPointerEvent(pointerEvent, false));
 
@@ -732,7 +732,7 @@ HWTEST_F(SceneSessionTest5, FixRectByAspectRatio01, Function | SmallTest | Level
 
     SystemSessionConfig systemConfig;
     systemConfig.isSystemDecorEnable_ = true;
-    systemConfig.decorModeSupportInfo_ = 2;
+    systemConfig.decorWindowModeSupportType_ = 2;
     session->SetSystemConfig(systemConfig);
     EXPECT_EQ(true, session->FixRectByAspectRatio(rect));
 
@@ -1225,15 +1225,15 @@ HWTEST_F(SceneSessionTest5, HandleUpdatePropertyByAction02, Function | SmallTest
 }
 
 /**
- * @tc.name: HandleActionUpdateModeSupportInfo
- * @tc.desc: HandleActionUpdateModeSupportInfo function01
+ * @tc.name: HandleActionUpdateWindowModeSupportType
+ * @tc.desc: HandleActionUpdateWindowModeSupportType function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, HandleActionUpdateModeSupportInfo, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, HandleActionUpdateWindowModeSupportType, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "HandleActionUpdateModeSupportInfo";
-    info.bundleName_ = "HandleActionUpdateModeSupportInfo";
+    info.abilityName_ = "HandleActionUpdateWindowModeSupportType";
+    info.bundleName_ = "HandleActionUpdateWindowModeSupportType";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     sptr<SceneSession> session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -1242,12 +1242,12 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateModeSupportInfo, Function | SmallT
     property->isSystemCalling_ = true;
     ASSERT_NE(session, nullptr);
     session->SetSessionProperty(nullptr);
-    ASSERT_EQ(WMError::WM_OK, session->HandleActionUpdateModeSupportInfo(property, session2,
+    ASSERT_EQ(WMError::WM_OK, session->HandleActionUpdateWindowModeSupportType(property, session2,
         WSPropertyChangeAction::ACTION_UPDATE_RECT));
 
     property->isSystemCalling_ = false;
     session->SetSessionProperty(property);
-    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, session->HandleActionUpdateModeSupportInfo(property, session2,
+    ASSERT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, session->HandleActionUpdateWindowModeSupportType(property, session2,
         WSPropertyChangeAction::ACTION_UPDATE_RECT));
 }
 

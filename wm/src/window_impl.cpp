@@ -395,14 +395,14 @@ uint32_t WindowImpl::GetWindowFlags() const
     return property_->GetWindowFlags();
 }
 
-uint32_t WindowImpl::GetRequestModeSupportInfo() const
+uint32_t WindowImpl::GetRequestWindowModeSupportType() const
 {
-    return property_->GetRequestModeSupportInfo();
+    return property_->GetRequestWindowModeSupportType();
 }
 
-uint32_t WindowImpl::GetModeSupportInfo() const
+uint32_t WindowImpl::GetWindowModeSupportType() const
 {
-    return property_->GetModeSupportInfo();
+    return property_->GetWindowModeSupportType();
 }
 
 bool WindowImpl::IsMainHandlerAvailable() const
@@ -464,7 +464,7 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), mode)) {
+    if (!WindowHelper::IsWindowModeSupported(GetWindowModeSupportType(), mode)) {
         WLOGE("window %{public}u do not support mode: %{public}u",
             property_->GetWindowId(), static_cast<uint32_t>(mode));
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
@@ -985,7 +985,7 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
     WLOGI("Window %{public}u status: %{public}u", property_->GetWindowId(), status);
     if (!IsWindowValid() ||
-        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        !WindowHelper::IsWindowModeSupported(GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1032,7 +1032,7 @@ WMError WindowImpl::SetFullScreen(bool status)
 {
     WLOGI("Window %{public}u status: %{public}d", property_->GetWindowId(), status);
     if (!IsWindowValid() ||
-        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        !WindowHelper::IsWindowModeSupported(GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1053,7 +1053,7 @@ WMError WindowImpl::SetFloatingMaximize(bool isEnter)
 {
     WLOGFI("id:%{public}d SetFloatingMaximize status: %{public}d", property_->GetWindowId(), isEnter);
     if (!IsWindowValid() ||
-        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        !WindowHelper::IsWindowModeSupported(GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         WLOGFE("invalid window or maximize mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1177,13 +1177,13 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
     }
 
     // get support modes configuration
-    uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(abilityInfo->windowModes);
-    if (modeSupportInfo == 0) {
+    uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(abilityInfo->windowModes);
+    if (windowModeSupportType == 0) {
         WLOGFD("mode config param is 0, all modes is supported");
-        modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+        windowModeSupportType = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     }
-    WLOGFD("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
-    SetRequestModeSupportInfo(modeSupportInfo);
+    WLOGFD("winId: %{public}u, windowModeSupportType: %{public}u", GetWindowId(), windowModeSupportType);
+    SetRequestWindowModeSupportType(windowModeSupportType);
 
     // get window size limits configuration
     WindowLimits sizeLimits;
@@ -1218,12 +1218,12 @@ void WindowImpl::UpdateTitleButtonVisibility()
     if (uiContent_ == nullptr || !IsDecorEnable()) {
         return;
     }
-    auto modeSupportInfo = GetModeSupportInfo();
-    bool hideSplitButton = !(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    auto windowModeSupportType = GetWindowModeSupportType();
+    bool hideSplitButton = !(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     // not support fullscreen in split and floating mode, or not support float in fullscreen mode
-    bool hideMaximizeButton = (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
+    bool hideMaximizeButton = (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
         (GetMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetMode()))) ||
-        (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
+        (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
         GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     WLOGD("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
     uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false, false);
@@ -1620,10 +1620,11 @@ bool WindowImpl::NeedToStopShowing()
     }
     // show failed when current mode is not support or window only supports split mode and can show when locked
     bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
-    if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), GetMode()) ||
-        WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetModeSupportInfo())) {
-        WLOGFE("current mode is not supported, windowId: %{public}u, modeSupportInfo: %{public}u, winMode: %{public}u",
-            property_->GetWindowId(), GetModeSupportInfo(), GetMode());
+    if (!WindowHelper::IsWindowModeSupported(GetWindowModeSupportType(), GetMode()) ||
+        WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetWindowModeSupportType())) {
+        WLOGFE("current mode is not supported, windowId: %{public}u, "
+            "windowModeSupportType: %{public}u, winMode: %{public}u",
+            property_->GetWindowId(), GetWindowModeSupportType(), GetMode());
         return true;
     }
     return false;
@@ -1682,7 +1683,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     SetDefaultOption();
-    SetModeSupportInfo(GetRequestModeSupportInfo());
+    SetWindowModeSupportType(GetRequestWindowModeSupportType());
     AdjustWindowAnimationFlag(withAnimation);
 
     if (NeedToStopShowing()) { // true means stop showing
@@ -2220,7 +2221,7 @@ WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
     TLOGD(WmsLogTag::WMS_IMMS, "WindowImpl id: %{public}u SetImmersiveModeEnabledState: %{public}u",
         property_->GetWindowId(), static_cast<uint32_t>(enable));
     if (!IsWindowValid() ||
-        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        !WindowHelper::IsWindowModeSupported(GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
         TLOGE(WmsLogTag::WMS_IMMS, "invalid window or fullscreen mode is not be supported, winId:%{public}u",
             property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -2716,15 +2717,15 @@ void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
     aceAbilityHandler_ = handler;
 }
 
-void WindowImpl::SetRequestModeSupportInfo(uint32_t modeSupportInfo)
+void WindowImpl::SetRequestWindowModeSupportType(uint32_t windowModeSupportType)
 {
-    property_->SetRequestModeSupportInfo(modeSupportInfo);
-    SetModeSupportInfo(modeSupportInfo);
+    property_->SetRequestWindowModeSupportType(windowModeSupportType);
+    SetWindowModeSupportType(windowModeSupportType);
 }
 
-void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
+void WindowImpl::SetWindowModeSupportType(uint32_t windowModeSupportType)
 {
-    property_->SetModeSupportInfo(modeSupportInfo);
+    property_->SetWindowModeSupportType(windowModeSupportType);
 }
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
@@ -2819,10 +2820,10 @@ void WindowImpl::UpdateMode(WindowMode mode)
     UpdateDecorEnable(true);
 }
 
-void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
+void WindowImpl::UpdateWindowModeSupportType(uint32_t windowModeSupportType)
 {
-    WLOGFD("modeSupportInfo: %{public}u, winId: %{public}u", modeSupportInfo, GetWindowId());
-    SetModeSupportInfo(modeSupportInfo);
+    WLOGFD("windowModeSupportType: %{public}u, winId: %{public}u", windowModeSupportType, GetWindowId());
+    SetWindowModeSupportType(windowModeSupportType);
     UpdateTitleButtonVisibility();
 }
 
@@ -3487,7 +3488,7 @@ void WindowImpl::UpdateDecorEnable(bool needNotify)
     WLOGFD("Start");
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         bool enable = windowSystemConfig_.isSystemDecorEnable_ &&
-            WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorModeSupportInfo_, GetMode());
+            WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorWindowModeSupportType_, GetMode());
         WLOGFD("Decor enable: %{public}d", static_cast<int32_t>(enable));
         property_->SetDecorEnable(enable);
     } else {

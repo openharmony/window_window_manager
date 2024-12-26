@@ -80,7 +80,7 @@ public:
         }
         return WMError::WM_OK;
     }
-    WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override
+    WMError UpdateWindowModeSupportType(uint32_t windowModeSupportType) override
     {
         return WMError::WM_OK;
     }
