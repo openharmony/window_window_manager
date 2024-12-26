@@ -129,6 +129,8 @@ using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
+using ProcessWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
+using ProcessWatchFocusActiveChangeFunc = std::function<void(bool isActived)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -197,6 +199,14 @@ public:
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
+
+    /*
+     * Window Input Event
+     */
+    void RegisterWatchGestureConsumeResultCallback(const ProcessWatchGestureConsumeResultFunc& func);
+    WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override;
+    void RegisterWatchFocusActiveChangeCallback(const ProcessWatchFocusActiveChangeFunc& func);
+    WMError NotifyWatchFocusActiveChange(bool isActived) override;
 
     /*
      * Window Rotate Animation
@@ -854,6 +864,8 @@ private:
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
+    ProcessWatchGestureConsumeResultFunc onWatchGestureConsumeResultFunc_;
+    ProcessWatchFocusActiveChangeFunc onWatchFocusActiveChangeFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
 
