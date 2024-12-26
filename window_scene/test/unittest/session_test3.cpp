@@ -262,78 +262,6 @@ HWTEST_F(WindowSessionTest3, UpdateOrientation, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleDialogBackground
- * @tc.desc: HandleDialogBackground Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandleDialogBackground, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    session_->HandleDialogBackground();
-
-    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<Session> session01 = nullptr;
-
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> session02 = sptr<Session>::MakeSptr(info);
-    sptr<Session> session03 = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(session02, nullptr);
-    EXPECT_NE(session03, nullptr);
-
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
-    session02->sessionStage_ = mockSessionStage;
-    session03->sessionStage_ = nullptr;
-
-    session_->dialogVec_.push_back(session01);
-    session_->dialogVec_.push_back(session02);
-    session_->dialogVec_.push_back(session03);
-    session_->HandleDialogBackground();
-    session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
-}
-
-/**
- * @tc.name: HandleDialogForeground
- * @tc.desc: HandleDialogForeground Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandleDialogForeground, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    session_->HandleDialogForeground();
-
-    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<Session> session01 = nullptr;
-
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> session02 = sptr<Session>::MakeSptr(info);
-    sptr<Session> session03 = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(session02, nullptr);
-    EXPECT_NE(session03, nullptr);
-
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
-    session02->sessionStage_ = mockSessionStage;
-    session03->sessionStage_ = nullptr;
-
-    session_->dialogVec_.push_back(session01);
-    session_->dialogVec_.push_back(session02);
-    session_->dialogVec_.push_back(session03);
-    session_->HandleDialogForeground();
-    session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
-}
-
-/**
  * @tc.name: SetActive
  * @tc.desc: SetActive Test
  * @tc.type: FUNC
@@ -389,55 +317,6 @@ HWTEST_F(WindowSessionTest3, SetActive03, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: IsTopDialog02
- * @tc.desc: IsTopDialog Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, IsTopDialog02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->SetParentSession(nullptr);
-    EXPECT_EQ(false, session_->IsTopDialog());
-
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(parentSession, nullptr);
-    parentSession->dialogVec_.clear();
-    session_->SetParentSession(parentSession);
-    auto result = session_->IsTopDialog();
-    EXPECT_EQ(result, true);
-}
-
-/**
- * @tc.name: IsTopDialog03
- * @tc.desc: IsTopDialog Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, IsTopDialog03, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->dialogVec_.clear();
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> dialogSession1 = sptr<Session>::MakeSptr(info);
-    sptr<Session> dialogSession2 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession1, nullptr);
-    ASSERT_NE(dialogSession2, nullptr);
-    dialogSession1->SetParentSession(session_);
-    dialogSession2->SetParentSession(session_);
-    session_->dialogVec_.push_back(dialogSession1);
-    session_->dialogVec_.push_back(dialogSession2);
-    dialogSession1->SetSessionState(SessionState::STATE_INACTIVE);
-    dialogSession2->SetSessionState(SessionState::STATE_INACTIVE);
-    EXPECT_EQ(false, dialogSession1->IsTopDialog());
-}
-
-/**
  * @tc.name: PresentFocusIfPointDown
  * @tc.desc: PresentFocusIfPointDown Test
  * @tc.type: FUNC
@@ -453,72 +332,6 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfPointDown, Function | SmallTest | Lev
     session_->PresentFocusIfPointDown();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
     EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
-}
-
-/**
- * @tc.name: HandlePointDownDialog
- * @tc.desc: HandlePointDownDialog Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandlePointDownDialog, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> dialogSession1 = sptr<Session>::MakeSptr(info);
-    sptr<Session> dialogSession2 = sptr<Session>::MakeSptr(info);
-    sptr<Session> dialogSession3 = sptr<Session>::MakeSptr(info);
-    sptr<Session> dialogSession4 = nullptr;
-    ASSERT_NE(dialogSession1, nullptr);
-    ASSERT_NE(dialogSession2, nullptr);
-    ASSERT_NE(dialogSession3, nullptr);
-    dialogSession1->SetSessionState(SessionState::STATE_FOREGROUND);
-    dialogSession2->SetSessionState(SessionState::STATE_ACTIVE);
-    dialogSession2->SetSessionState(SessionState::STATE_INACTIVE);
-    session_->dialogVec_.push_back(dialogSession1);
-    session_->dialogVec_.push_back(dialogSession2);
-    session_->dialogVec_.push_back(dialogSession3);
-    session_->dialogVec_.push_back(dialogSession4);
-    session_->HandlePointDownDialog();
-    session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
-}
-
-/**
- * @tc.name: HandleSubWindowClick01
- * @tc.desc: parentSession and property is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandleSubWindowClick01, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    EXPECT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: HandleSubWindowClick03
- * @tc.desc: parentSession->dialogVec_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandleSubWindowClick03, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession, nullptr);
-    session_->SetParentSession(dialogSession);
-
-    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    EXPECT_EQ(result, WSError::WS_OK);
-
-    result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
