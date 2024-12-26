@@ -688,9 +688,9 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent01, Function | Sma
     ssm_->sceneSessionMap_.insert({targetSceneSession->GetPersistentId(), targetSceneSession});
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(INVALID_SESSION_ID, targetSceneSession->GetPersistentId(), 0);
+    WMError result = ssm_->ShiftAppWindowPointerEvent(INVALID_SESSION_ID, targetSceneSession->GetPersistentId());
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
-    result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID, 0);
+    result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(targetSceneSession->GetPersistentId());
@@ -718,9 +718,9 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent02, Function | Sma
     int mainWindowPersistentId = mainWindowSession->GetPersistentId();
     int systemWindowPersistentId = systemWindowSession->GetPersistentId();
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(mainWindowPersistentId, systemWindowPersistentId, 0);
+    WMError result = ssm_->ShiftAppWindowPointerEvent(mainWindowPersistentId, systemWindowPersistentId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
-    result = ssm_->ShiftAppWindowPointerEvent(systemWindowPersistentId, mainWindowPersistentId, 0);
+    result = ssm_->ShiftAppWindowPointerEvent(systemWindowPersistentId, mainWindowPersistentId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
     ssm_->sceneSessionMap_.erase(systemWindowSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(mainWindowSession->GetPersistentId());
@@ -741,11 +741,11 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent03, Function | Sma
 
     int32_t sourcePersistentId = sourceSceneSession->GetPersistentId();
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId, 0);
+    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId);
     EXPECT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId, 0);
+    result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
 }
@@ -781,9 +781,9 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent04, Function | Sma
     int32_t otherSourcePersistentId = otherSourceSession->GetPersistentId();
     int32_t otherTargetPersistentId = otherTargetSession->GetPersistentId();
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, otherTargetPersistentId, 0);
+    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, otherTargetPersistentId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
-    result = ssm_->ShiftAppWindowPointerEvent(otherSourcePersistentId, otherTargetPersistentId, 0);
+    result = ssm_->ShiftAppWindowPointerEvent(otherSourcePersistentId, otherTargetPersistentId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(otherSourceSession->GetPersistentId());
