@@ -1013,11 +1013,10 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     info.abilityName_ = "Background01";
     info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
 
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     SystemBarProperty statusBarProperty;
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
