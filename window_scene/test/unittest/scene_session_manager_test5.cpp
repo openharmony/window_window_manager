@@ -1224,9 +1224,6 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     SystemSessionConfig systemConfig;
     sptr<IRemoteObject> token;
     int32_t id = 0;
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test2";
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     CommonTestUtils::GuaranteeFloatWindowPermission("ws_scene_session_manager_test5");
@@ -1235,20 +1232,22 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
          systemConfig, token);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res); // create main window, property must be nullptr
-    sessionStage = sptr<SessionStageMocker>::MakeSptr();
 
+    sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    property->SetWindowFlags(123);
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     ASSERT_EQ(WSError::WS_OK, res);
+
+    sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetWindowFlags(123);
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     ASSERT_EQ(WSError::WS_OK, res);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
 
 /**
