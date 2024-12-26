@@ -37,7 +37,7 @@ static constexpr unsigned int HILOG_DOMAIN_DISPLAY = 0xD004201;
 #define WLOGFW(fmt, ...) WLOGW("%{public}s: " fmt, C_W_FUNC, ##__VA_ARGS__)
 #define WLOGFE(fmt, ...) WLOGE("%{public}s: " fmt, C_W_FUNC, ##__VA_ARGS__)
 
-enum class WmsLogTag : uint8_t {
+enum class WmsLogTag {
     DEFAULT = 0,               // C04200
     DMS,                       // C04201
     WMS_MAIN,                  // C04202
