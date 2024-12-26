@@ -5252,6 +5252,8 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
+    TLOGI(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d, setmode: %{public}d",
+        SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid(), displayMode);
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
