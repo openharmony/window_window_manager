@@ -563,6 +563,7 @@ public:
      */
     bool IsDirtyWindow();
     bool IsDirtyDragWindow();
+    void ResetDirtyDragFlags();
     void ResetSizeChangeReasonIfDirty();
     void SetRequestNextVsyncFunc(RequestVsyncFunc&& func);
     void OnNextVsyncReceivedWhenDrag();
@@ -966,6 +967,7 @@ private:
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     std::shared_ptr<RSBehindWindowFilterEnabledModifier>
         behindWindowFilterEnabledModifier_; // Only accessed on main thread
+    bool isDragEnd_ = false;
 
     /*
      * Window Immersive
