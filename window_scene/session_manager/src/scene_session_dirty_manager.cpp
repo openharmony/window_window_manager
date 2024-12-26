@@ -222,18 +222,15 @@ static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, 
     sptr<SceneSession> session = (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) ?
         sceneSession->GetKeyboardSession() : sceneSession;
     auto sessionProperty = session->GetSessionProperty();
-
     KeyboardTouchHotAreas keyboardTouchHotAreas = sessionProperty->GetKeyboardTouchHotAreas();
-
     auto displayId = sessionProperty->GetDisplayId();
     std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
         return;
     }
-    auto screenProperty = screensProperties[displayId];
+    const auto& screenProperty = screensProperties[displayId];
     bool isLandscape = screenProperty.GetBounds().rect_.GetWidth() > screenProperty.GetBounds().rect_.GetHeight();
-
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         if (keyboardTouchHotAreas.isKeyboardEmpty()) {
             return;

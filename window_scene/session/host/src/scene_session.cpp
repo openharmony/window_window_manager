@@ -4491,25 +4491,19 @@ WMError SceneSession::HandleActionUpdateAnimationFlag(const sptr<WindowSessionPr
 WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        std::vector<Rect> touchHotAreas;
-        property->GetTouchHotAreas(touchHotAreas);
-        sessionProperty->SetTouchHotAreas(touchHotAreas);
-    }
+    std::vector<Rect> touchHotAreas;
+    property->GetTouchHotAreas(touchHotAreas);
+    GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    if (GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
+    if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return WMError::WM_ERROR_INVALID_TYPE;
     }
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        sessionProperty->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
-    }
+    GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
     return WMError::WM_OK;
 }
 

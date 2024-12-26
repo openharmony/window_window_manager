@@ -99,14 +99,10 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, Function | SmallTest
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateTouchHotArea(property, action);
-    OHOS::Rosen::Session session(info);
-    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->HandleActionUpdateTouchHotArea(property, action);
+    WMError ret = sceneSession->HandleActionUpdateTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -118,14 +114,10 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea, Function | S
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
-    OHOS::Rosen::Session session(info);
-    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    WMError ret = sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
