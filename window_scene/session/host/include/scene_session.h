@@ -326,7 +326,7 @@ public:
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
-    virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) { return; }
+    virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) {}
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
