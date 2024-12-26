@@ -33,7 +33,6 @@ constexpr Rect g_emptyRect = {0, 0, 0, 0};
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
-constexpr size_t INDEX_FOUR = 4;
 constexpr size_t ARG_COUNT_ONE = 1;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
