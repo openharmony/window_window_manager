@@ -259,8 +259,8 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sp
 
     if (isTent) {
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_ENTER_TENT_MODE);
-        FoldStatus currentState = GetCurrentState();
-        foldScreenPolicy->ChangeOnTentMode(currentState);
+        foldScreenPolicy->SetFoldStatus(FoldStatus::FOLDED);
+        foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
     } else {
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
         foldScreenPolicy->ChangeOffTentMode();
