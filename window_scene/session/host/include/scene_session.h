@@ -504,6 +504,12 @@ public:
     bool GetEnableGestureBackHadSet();
 
     /*
+     * Move Drag
+     */
+    void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
+    DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
+
+    /*
      * Window Layout
      */
     void ResetSizeChangeReasonIfDirty();
@@ -628,6 +634,14 @@ private:
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
 
     /*
+     * Move Drag
+     */
+    bool IsDragResizeWhenEnd(SizeChangeReason reason);
+    void SetDragResizeTypeDuringDrag(DragResizeType dragResizeType) { dragResizeTypeDuringDrag_ = dragResizeType; }
+    DragResizeType GetDragResizeTypeDuringDrag() const { return dragResizeTypeDuringDrag_; }
+    void HandleSessionDragEvent(SessionEvent event);
+
+    /*
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
@@ -741,7 +755,7 @@ private:
     std::atomic_bool isDeviceWakeupByApplication_ { false };
     std::atomic_bool needStartingWindowExitAnimation_ { true };
     bool needDefaultAnimationFlag_ = true;
-    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0 };
+    SessionEventParam sessionEventParam_ = { 0, 0, 0, 0, 0 };
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
@@ -773,6 +787,12 @@ private:
     // WMSPipeline-related: only accessed on SSM thread
     PostProcessFocusState postProcessFocusState_;
     bool postProcessProperty_ { false };
+
+    /*
+     * Move Drag
+     */
+    DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
 
     /**
      * Gesture Back
