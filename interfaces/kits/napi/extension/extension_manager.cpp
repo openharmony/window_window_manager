@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-const uint32_t HOST_WINDOW_RECT_CHANGE = 1;
+constexpr uint32_t HOST_WINDOW_RECT_CHANGE = 1;
 }
 
 void ExtensionManager::Finalizer(napi_env env, void* data, void* hint)
