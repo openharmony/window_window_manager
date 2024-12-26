@@ -1231,7 +1231,7 @@ int SceneSessionManagerStub::HandleGetGlobalDragResizeType(MessageParcel& data, 
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     WMError errCode = GetGlobalDragResizeType(dragResizeType);
-    if (!data.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
+    if (!reply.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write dragResizeType failed.");
         return ERR_INVALID_DATA;
     }
@@ -1275,7 +1275,7 @@ int SceneSessionManagerStub::HandleGetAppDragResizeType(MessageParcel& data, Mes
     }
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     WMError errCode = GetAppDragResizeType(bundleName, dragResizeType);
-    if (!data.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
+    if (!reply.WriteUint32(static_cast<uint32_t>(dragResizeType))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write dragResizeType failed.");
         return ERR_INVALID_DATA;
     }
