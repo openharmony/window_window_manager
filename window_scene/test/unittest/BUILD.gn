@@ -185,7 +185,10 @@ ohos_unittest("ws_system_session_lifecycle_test") {
 ohos_unittest("ws_keyboard_session_test") {
   module_out_path = module_out_path
 
-  sources = [ "keyboard_session_test.cpp" ]
+  sources = [
+    "keyboard_session_layout_test.cpp",
+    "keyboard_session_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -250,7 +253,10 @@ ohos_unittest("ws_main_session_lifecycle_test") {
 ohos_unittest("ws_scb_system_session_test") {
   module_out_path = module_out_path
 
-  sources = [ "scb_system_session_test.cpp" ]
+  sources = [
+    "scb_system_session_layout_test.cpp",
+    "scb_system_session_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1462,7 +1468,10 @@ ohos_unittest("ws_hidumper_controller_test") {
 ohos_unittest("ws_session_stub_test") {
   module_out_path = module_out_path
 
-  sources = [ "session_stub_test.cpp" ]
+  sources = [
+    "session_stub_layout_test.cpp",
+    "session_stub_test.cpp",
+  ]
 
   deps = [ ":ws_unittest_common" ]
 
