@@ -411,6 +411,7 @@ ohos_unittest("ws_session_test") {
   module_out_path = module_out_path
 
   sources = [
+    "session_layout_test.cpp",
     "session_test.cpp",
     "session_test2.cpp",
     "session_test3.cpp",
