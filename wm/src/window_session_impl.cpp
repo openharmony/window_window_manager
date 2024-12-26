@@ -226,6 +226,11 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
 }
 
+bool WindowSessionImpl::IsPcWindow() const
+{
+    return windowSystemConfig_.IsPcWindow();
+}
+
 bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 {
     return WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() || property_->GetIsPcAppInPad();

@@ -112,6 +112,7 @@ public:
     /*
      * PC Window
      */
+    bool IsPcWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
