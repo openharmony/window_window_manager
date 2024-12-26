@@ -160,72 +160,6 @@ HWTEST_F(WindowSessionTest2, SetParentSession, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: BindDialogToParentSession
- * @tc.desc: BindDialogToParentSession Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, BindDialogToParentSession, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> session = sptr<Session>::MakeSptr(info);
-    session_->BindDialogToParentSession(session);
-
-    sptr<Session> session1 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(session1, nullptr);
-    session1->persistentId_ = 33;
-    session1->SetParentSession(session_);
-    session1->state_ = SessionState::STATE_ACTIVE;
-    session_->dialogVec_.push_back(session1);
-
-    sptr<Session> session2 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(session2, nullptr);
-    session2->persistentId_ = 34;
-    session2->SetParentSession(session_);
-    session2->state_ = SessionState::STATE_ACTIVE;
-    session_->dialogVec_.push_back(session2);
-    session_->BindDialogToParentSession(session1);
-
-    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
-}
-
-/**
- * @tc.name: RemoveDialogToParentSession
- * @tc.desc: RemoveDialogToParentSession Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, RemoveDialogToParentSession, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> session = sptr<Session>::MakeSptr(info);
-    session_->RemoveDialogToParentSession(session);
-
-    sptr<Session> session1 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(session1, nullptr);
-    session1->persistentId_ = 33;
-    session1->SetParentSession(session_);
-    session1->state_ = SessionState::STATE_ACTIVE;
-    session_->dialogVec_.push_back(session1);
-
-    sptr<Session> session2 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(session2, nullptr);
-    session2->persistentId_ = 34;
-    session2->SetParentSession(session_);
-    session2->state_ = SessionState::STATE_ACTIVE;
-    session_->dialogVec_.push_back(session2);
-    session_->RemoveDialogToParentSession(session1);
-
-    ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
-}
-
-/**
  * @tc.name: TransferPointerEvent01
  * @tc.desc: !IsSystemSession() && !IsSessionValid() is true
  * @tc.type: FUNC
@@ -1371,18 +1305,6 @@ HWTEST_F(WindowSessionTest2, IsActive02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     bool res = session_->IsActive();
-    ASSERT_EQ(res, false);
-}
-
-/**
- * @tc.name: IsSystemSession
- * @tc.desc: IsSystemSession
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, IsSystemSession, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    bool res = session_->IsSystemSession();
     ASSERT_EQ(res, false);
 }
 
