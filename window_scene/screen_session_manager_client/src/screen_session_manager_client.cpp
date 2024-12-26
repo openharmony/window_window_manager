@@ -118,6 +118,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         config.property = screenSessionManager_->GetScreenProperty(screenId);
         config.displayNode = screenSessionManager_->GetDisplayNode(screenId);
         sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+        screenSession->SetScreenCombination(screenSessionManager_->GetScreenCombination(screenId));
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
@@ -417,6 +418,15 @@ int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
         return 0;
     }
     return screenSessionManager_->SetScreenOffDelayTime(delay);
+}
+
+int32_t ScreenSessionManagerClient::SetScreenOnDelayTime(int32_t delay)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return 0;
+    }
+    return screenSessionManager_->SetScreenOnDelayTime(delay);
 }
 
 void ScreenSessionManagerClient::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)

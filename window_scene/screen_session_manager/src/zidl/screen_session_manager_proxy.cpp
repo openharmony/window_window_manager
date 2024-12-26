@@ -2493,6 +2493,33 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManagerProxy::GetDisplayNode(ScreenI
     return displayNode;
 }
 
+ScreenCombination ScreenSessionManagerProxy::GetScreenCombination(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("GetScreenCombination: remote is null");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_COMBINATION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+    return static_cast<ScreenCombination>(reply.ReadUint32());
+}
+
 void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation,
     float rotation)
 {
@@ -2823,7 +2850,6 @@ void ScreenSessionManagerProxy::SetCameraStatus(int32_t cameraStatus, int32_t ca
     }
 }
 
-
 DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect& area)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -3002,7 +3028,8 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenRefreshRate(ScreenId screenId
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3022,6 +3049,10 @@ void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std
     }
     if (!data.WriteUInt64Vector(windowIdList)) {
         WLOGFE("Write windowIdList failed");
+        return;
+    }
+    if (!data.WriteUInt64Vector(surfaceIdList)) {
+        WLOGFE("Write surfaceIdList failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST),
@@ -3399,5 +3430,32 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
         return nullptr;
     }
     return pixelMap;
+}
+
+int32_t ScreenSessionManagerProxy::SetScreenOnDelayTime(int32_t delay)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SetScreenOnDelayTime: remote is null");
+        return 0;
+    }
+
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return 0;
+    }
+    if (!data.WriteInt32(delay)) {
+        WLOGFE("Write delay failed");
+        return 0;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ON_DELAY_TIME),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return 0;
+    }
+    return reply.ReadInt32();
 }
 } // namespace OHOS::Rosen

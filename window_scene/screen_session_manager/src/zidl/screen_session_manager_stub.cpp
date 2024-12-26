@@ -713,6 +713,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_COMBINATION: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto screenCombination = GetScreenCombination(screenId);
+            reply.WriteUint32(static_cast<uint32_t>(screenCombination));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO: {
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenComponentRotation = data.ReadFloat();
@@ -836,7 +842,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 TLOGE(WmsLogTag::DMS, "Failed to receive windowIdList in stub");
                 break;
             }
-            SetVirtualScreenBlackList(screenId, windowIdList);
+            std::vector<uint64_t> surfaceIdList;
+            if (!data.ReadUInt64Vector(&surfaceIdList)) {
+                TLOGE(WmsLogTag::DMS, "Failed to receive surfaceIdList in stub");
+                break;
+            }
+            SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL: {
@@ -906,6 +917,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             int32_t cameraStatus = data.ReadInt32();
             int32_t cameraPosition = data.ReadInt32();
             SetCameraStatus(cameraStatus, cameraPosition);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ON_DELAY_TIME: {
+            int32_t delay = data.ReadInt32();
+            int32_t ret = SetScreenOnDelayTime(delay);
+            static_cast<void>(reply.WriteInt32(ret));
             break;
         }
         default:

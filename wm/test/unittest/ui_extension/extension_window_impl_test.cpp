@@ -96,6 +96,20 @@ HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: IsPcWindow
+ * @tc.desc: IsPcWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, IsPcWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<MockWindowExtensionSessionImpl> window = sptr<MockWindowExtensionSessionImpl>::MakeSptr(option);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(extensionWindowImpl.IsPcWindow(), window->IsPcWindow());
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: IsPcOrPadFreeMultiWindowMode Test
  * @tc.type: FUNC

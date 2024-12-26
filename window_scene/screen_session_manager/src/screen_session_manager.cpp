@@ -73,6 +73,7 @@ const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 const int32_t CV_WAIT_SCBSWITCH_MS = 3000;
 const int64_t SWITCH_USER_DISPLAYMODE_CHANGE_DELAY = 500;
+const int32_t SCREEN_OFF_MIN_DELAY_TIME = 300;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
@@ -146,6 +147,7 @@ ScreenSessionManager::ScreenSessionManager()
     screenEventTracker_.RecordEvent("Dms construct.");
     LoadScreenSceneXml();
     screenOffDelay_ = CV_WAIT_SCREENOFF_MS;
+    screenOnDelay_ = CV_WAIT_SCREENON_MS;
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD);
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
@@ -2158,7 +2160,7 @@ void ScreenSessionManager::BlockScreenOnByCV(void)
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOnCV_ set");
         needScreenOnWhenKeyguardNotify_ = true;
         std::unique_lock<std::mutex> lock(screenOnMutex_);
-        if (screenOnCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_SCREENON_MS)) == std::cv_status::timeout) {
+        if (screenOnCV_.wait_for(lock, std::chrono::milliseconds(screenOnDelay_)) == std::cv_status::timeout) {
             TLOGI(WmsLogTag::DMS, "[UL_POWER]wait ScreenOnCV_ timeout");
         }
     }
@@ -2166,7 +2168,7 @@ void ScreenSessionManager::BlockScreenOnByCV(void)
 
 void ScreenSessionManager::BlockScreenOffByCV(void)
 {
-    if (gotScreenOffNotify_  == false) {
+    if (gotScreenOffNotify_ == false) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]screenOffCV_ set, delay:%{public}d", screenOffDelay_);
         needScreenOffNotify_ = true;
         std::unique_lock<std::mutex> lock(screenOffMutex_);
@@ -2249,7 +2251,7 @@ int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
         return 0;
     }
 
-    if (delay < CV_WAIT_SCREENOFF_MS) {
+    if (delay > SCREEN_OFF_MIN_DELAY_TIME && delay < CV_WAIT_SCREENOFF_MS) {
         screenOffDelay_ = CV_WAIT_SCREENOFF_MS;
     } else if (delay > CV_WAIT_SCREENOFF_MS_MAX) {
         screenOffDelay_ = CV_WAIT_SCREENOFF_MS_MAX;
@@ -2259,6 +2261,24 @@ int32_t ScreenSessionManager::SetScreenOffDelayTime(int32_t delay)
     TLOGI(WmsLogTag::DMS, "delay:%{public}d, screenOffDelay_:%{public}d",
         delay, screenOffDelay_);
     return screenOffDelay_;
+}
+
+int32_t ScreenSessionManager::SetScreenOnDelayTime(int32_t delay)
+{
+    DmsXcollie dmsXcollie("DMS:SetScreenOnDelayTime", XCOLLIE_TIMEOUT_10S);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set screen on delay time permission denied!");
+        return 0;
+    }
+
+    if (delay > CV_WAIT_SCREENON_MS) {
+        screenOnDelay_ = CV_WAIT_SCREENON_MS;
+    } else {
+        screenOnDelay_ = delay;
+    }
+    TLOGI(WmsLogTag::DMS, "delay:%{public}d, screenOnDelay_:%{public}d",
+        delay, screenOnDelay_);
+    return screenOnDelay_;
 }
 
 void ScreenSessionManager::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
@@ -6024,6 +6044,17 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetDisplayNode(ScreenId scr
     return screenSession->GetDisplayNode();
 }
 
+ScreenCombination ScreenSessionManager::GetScreenCombination(ScreenId screenId)
+{
+    DmsXcollie dmsXcollie("DMS:GetScreenCombination", XCOLLIE_TIMEOUT_10S);
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGI(WmsLogTag::DMS, "screenSession is null");
+        return ScreenCombination::SCREEN_ALONE;
+    }
+    return screenSession->GetScreenCombination();
+}
+
 int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
 {
     TLOGI(WmsLogTag::DMS, "Dump begin");
@@ -6294,29 +6325,46 @@ void ScreenSessionManager::RegisterApplicationStateObserver()
 #endif
 }
 
-void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
     TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64, screenId);
-    if (windowIdList.empty()) {
-        TLOGE(WmsLogTag::DMS, "WindowIdList is empty");
-        return;
-    }
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
         TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return;
+    }
+    if (windowIdList.empty()) {
+        TLOGI(WmsLogTag::DMS, "WindowIdList is empty");
+        rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceIdList);
         return;
     }
     if (!clientProxy_) {
         TLOGE(WmsLogTag::DMS, "clientProxy_ is nullptr");
         return;
     }
-    std::vector<uint64_t> surfaceNodeIds;
-    clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIds, true);
-    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIds);
+    std::vector<uint64_t> surfaceNodeIdsToRS;
+    clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIdsToRS, true);
+    if (!surfaceIdList.empty()) {
+        for (auto surfaceId : surfaceIdList) {
+            auto it = std::find(surfaceNodeIdsToRS.begin(), surfaceNodeIdsToRS.end(), surfaceId);
+            if (it != surfaceNodeIdsToRS.end()) {
+                continue;
+            }
+            surfaceNodeIdsToRS.push_back(surfaceId);
+        }
+    }
+    std::ostringstream oss;
+    oss << "surfaceNodeIdsToRS: ";
+    for (auto val : surfaceNodeIdsToRS) {
+        oss << val << " ";
+    }
+    TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIdsToRS);
 }
 
 void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
