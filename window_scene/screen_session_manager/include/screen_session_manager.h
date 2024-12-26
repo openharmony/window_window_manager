@@ -242,6 +242,7 @@ public:
     bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
+    SuperFoldStatus GetSuperFoldStatus() override;
     bool GetTentMode();
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);

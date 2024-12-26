@@ -2322,6 +2322,29 @@ FoldStatus ScreenSessionManagerProxy::GetFoldStatus()
     return static_cast<FoldStatus>(reply.ReadUint32());
 }
 
+SuperFoldStatus ScreenSessionManagerProxy::GetSuperFoldStatus()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return SuperFoldStatus::UNKNOWN;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return SuperFoldStatus::UNKNOWN;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return SuperFoldStatus::UNKNOWN;
+    }
+    return static_cast<SuperFoldStatus>(reply.ReadUint32());
+}
+
 sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
 {
     sptr<IRemoteObject> remote = Remote();
