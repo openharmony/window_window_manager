@@ -52,7 +52,6 @@ WindowImpl::~WindowImpl()
 {
     WLOGFI("windowName: %{public}s, windowId: %{public}d, deConstructorCnt: %{public}d",
         GetWindowName().c_str(), GetWindowId(), ++deConstructorCnt);
-    Destroy();
 }
 
 void WindowImpl::CreateSurfaceNode(const std::string name, const SendRenderDataCallback& callback)

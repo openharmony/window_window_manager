@@ -114,7 +114,6 @@ if (!ispreview) {
       "../interfaces/kits/napi/window_runtime/window_napi/js_window.cpp",
       "../interfaces/kits/napi/window_runtime/window_napi/js_window_utils.cpp",
       "../interfaces/kits/napi/window_runtime/window_stage_napi/js_window_stage.cpp",
-      "../utils/src/window_manager_hilog.cpp",
 
       # mock
       "mock/js_transition_controller.cpp",
@@ -124,6 +123,9 @@ if (!ispreview) {
       "mock/pixel_map_napi.cpp",
       "mock/window_manager_napi/js_window_manager.cpp",
       "mock/window_manager_napi/window_manager_module.cpp",
+
+      # utils
+      "../utils/src/window_manager_hilog.cpp",
     ]
 
     include_dirs = [
@@ -183,7 +185,7 @@ if (!ispreview) {
                 "/window/window_manager/libpreviewer_window" + suffix ]
     deps = [ ":previewer_window" ]
 
-    if (current_os == "mingw" || current_os == "mac") {
+    if (current_os == "mingw" || current_os == "mac" || current_os == "linux") {
       deps += [ ":window_stage_copy_modules" ]
       shared_library_path =
           get_label_info(":previewer_window_napi", "root_out_dir")
