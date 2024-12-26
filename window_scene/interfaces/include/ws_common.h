@@ -32,6 +32,7 @@ class StartWindowOption;
 }
 namespace OHOS::AppExecFwk {
 struct AbilityInfo;
+enum class SupportWindowMode;
 }
 
 namespace OHOS::Rosen {
@@ -41,6 +42,7 @@ constexpr int32_t INVALID_SESSION_ID = 0;
 const std::string UI_TYPE_PHONE = "phone";
 const std::string UI_TYPE_PC = "pc";
 const std::string UI_TYPE_PAD = "pad";
+constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -346,6 +348,11 @@ struct SessionInfo {
     uint32_t uiExtensionUsage_ = 0;
     bool isAsyncModalBinding_ = false;
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
+
+    /**
+     * PC Window
+     */
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
 };
 
 enum class SessionFlag : uint32_t {

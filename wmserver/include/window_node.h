@@ -81,7 +81,7 @@ public:
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetRequestedOrientation(Orientation orientation);
     void SetShowingDisplays(const std::vector<DisplayId>& displayIdVec);
-    void SetModeSupportInfo(uint32_t modeSupportInfo);
+    void SetWindowModeSupportType(uint32_t windowModeSupportType);
     void SetDragType(DragType dragType);
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
@@ -123,7 +123,7 @@ public:
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
     Orientation GetRequestedOrientation() const;
     std::vector<DisplayId> GetShowingDisplays() const;
-    uint32_t GetModeSupportInfo() const;
+    uint32_t GetWindowModeSupportType() const;
     DragType GetDragType() const;
     bool GetStretchable() const;
     const Rect& GetOriginRect() const;

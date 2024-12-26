@@ -254,7 +254,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig01, Function | SmallTest | Level2)
     WindowManagerConfig::config_ = ReadConfig(xmlStr);
     WindowManagerService::GetInstance().ConfigureWindowManagerService();
     ASSERT_EQ(true, WindowManagerService::GetInstance().systemConfig_.isSystemDecorEnable_);
-    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL == sysConfig.decorModeSupportInfo_);
+    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL == sysConfig.decorWindowModeSupportType_);
 
     xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
@@ -263,7 +263,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig01, Function | SmallTest | Level2)
     WindowManagerConfig::config_ = ReadConfig(xmlStr);
     WindowManagerService::GetInstance().ConfigureWindowManagerService();
     ASSERT_EQ(false, WindowManagerService::GetInstance().systemConfig_.isSystemDecorEnable_);
-    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL == sysConfig.decorModeSupportInfo_);
+    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL == sysConfig.decorWindowModeSupportType_);
 }
 
 /**
@@ -284,7 +284,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig02, Function | SmallTest | Level2)
     WindowManagerConfig::config_ = ReadConfig(xmlStr);
     WindowManagerService::GetInstance().ConfigureWindowManagerService();
     ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
-    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN == sysConfig.decorModeSupportInfo_);
+    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN == sysConfig.decorWindowModeSupportType_);
 }
 
 /**
@@ -305,7 +305,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig03, Function | SmallTest | Level2)
     WindowManagerConfig::config_ = ReadConfig(xmlStr);
     WindowManagerService::GetInstance().ConfigureWindowManagerService();
     ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
-    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING == sysConfig.decorModeSupportInfo_);
+    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING == sysConfig.decorWindowModeSupportType_);
 }
 
 /**
@@ -327,7 +327,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig04, Function | SmallTest | Level2)
     WindowManagerService::GetInstance().ConfigureWindowManagerService();
     ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
     ASSERT_TRUE((WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
-        WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) == sysConfig.decorModeSupportInfo_);
+        WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) == sysConfig.decorWindowModeSupportType_);
 }
 
 /**
@@ -349,7 +349,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig05, Function | SmallTest | Level2)
     WindowManagerService::GetInstance().ConfigureWindowManagerService();
     ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
     ASSERT_TRUE((WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY) == sysConfig.decorModeSupportInfo_);
+        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY) == sysConfig.decorWindowModeSupportType_);
 }
 
 /**
@@ -370,7 +370,7 @@ HWTEST_F(WindowManagerConfigTest, DecorConfig06, Function | SmallTest | Level2)
     WindowManagerConfig::config_ = ReadConfig(xmlStr);
     WindowManagerService::GetInstance().ConfigureWindowManagerService();
     ASSERT_EQ(true, sysConfig.isSystemDecorEnable_);
-    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL == sysConfig.decorModeSupportInfo_);
+    ASSERT_TRUE(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL == sysConfig.decorWindowModeSupportType_);
 }
 } // namespace
 } // namespace Rosen

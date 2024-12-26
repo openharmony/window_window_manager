@@ -506,7 +506,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN));
 }
 
@@ -524,7 +524,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor02, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
 }
 
@@ -543,7 +543,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor03, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
 }
 
@@ -562,7 +562,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor04, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
 }
 
@@ -581,7 +581,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor05, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
         WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
 }
@@ -601,7 +601,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, Function | SmallTest | Level3)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorModeSupportInfo_,
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
         WINDOW_MODE_SUPPORT_ALL);
 }
 
