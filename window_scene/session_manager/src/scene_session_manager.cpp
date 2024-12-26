@@ -2400,7 +2400,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW &&
-        property->GetExtensionFlag() == true && SessionPermission::IsStartedByUIExtension()) {
+        property->GetExtensionFlag() && property->GetIsUIExtensionAbilityProcess() &&
+        SessionPermission::IsStartedByUIExtension()) {
         auto extensionParentSession = GetSceneSession(property->GetParentPersistentId());
         if (extensionParentSession == nullptr) {
             WLOGFE("extensionParentSession is invalid with %{public}d", property->GetParentPersistentId());
@@ -3131,6 +3132,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
+        DestroyUIServiceExtensionSubWindow(sceneSession);
     }
     {
         std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -3142,6 +3144,19 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
     ClearSpecificSessionRemoteObjectMap(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy specific session end, id: %{public}d", persistentId);
     return ret;
+}
+
+void SceneSessionManager::DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession)
+{
+    if (!sceneSession) {
+        TLOGE(WmsLogTag::WMS_SUB,"sceneSession is null");
+        return;
+    }
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty && sessionProperty->GetExtensionFlag() == true &&
+        !sessionProperty->GetIsUIExtensionAbilityProcess()) {
+        sceneSession->NotifyDestroy();
+    }
 }
 
 WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
@@ -11172,5 +11187,29 @@ void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool e
 void SceneSessionManager::RemoveAppInfo(const std::string& bundleName)
 {
     AbilityInfoManager::GetInstance().RemoveAppInfo(bundleName);
+}
+
+WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
+{
+    if (!SessionPermission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    const char* const where = __func__;
+    auto task = [this, persistentId, &hostWindowId, where]() {
+        hostWindowId = INVALID_WINDOW_ID;
+        sptr<Session> session = GetSceneSession(persistentId);
+        while (session && SessionHelper::IsSubWindow(session->GetWindowType()))
+        {
+            session = session->GetParentSession();
+        }
+        if (session && SessionHelper::IsMainWindow(session->GetWindowType())) {
+            hostWindowId = session->GetPersistentId();
+        }
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: persistentId:%{public}d hostWindowId:%{public}d",
+            where, persistentId, hostWindowId);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, where);
 }
 } // namespace OHOS::Rosen

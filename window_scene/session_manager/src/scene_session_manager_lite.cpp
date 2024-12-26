@@ -267,4 +267,9 @@ WSError SceneSessionManagerLite::NotifyAppUseControlList(
 {
     return SceneSessionManager::GetInstance().NotifyAppUseControlList(type, userId, controlList);
 }
+
+WMError SceneSessionManagerLite::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
+{
+    return SceneSessionManager::GetInstance().GetRootMainWindowId(persistentId, hostWindowId);
+}
 } // namespace OHOS::Rosen

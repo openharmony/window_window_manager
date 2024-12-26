@@ -980,6 +980,18 @@ bool CheckCallingPermission(std::string permission)
     return true;
 }
 
+bool ParseSystemWindowTypeForApiWindowType(int32_t apiWindowType, WindowType& windowType)
+{
+    if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(static_cast<ApiWindowType>(apiWindowType)) != 0) {
+        windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(apiWindowType));
+        if (WindowHelper::IsSystemWindow(windowType)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability)
 {
     napi_value global;
@@ -1136,6 +1148,25 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     return ParseModalityParam(env, jsObject, windowOption);
+}
+
+napi_value ExtensionWindowAttributeInit(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to create object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "SYSTEM_WINDOW",
+        CreateJsValue(env, static_cast<int32_t>(ExtensionWindowAttribute::SYSTEM_WINDOW)));
+    napi_set_named_property(env, objValue, "SUB_WINDOW",
+        CreateJsValue(env, static_cast<int32_t>(ExtensionWindowAttribute::SUB_WINDOW)));
+    return objValue;
 }
 } // namespace Rosen
 } // namespace OHOS

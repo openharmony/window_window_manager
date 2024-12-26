@@ -79,6 +79,7 @@ public:
     WMError GetCurrentPiPWindowInfo(std::string& bundleName) override;
     WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
         const std::vector<AppUseControlInfo>& controlList) override;
+    WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) override;
 
 protected:
     SceneSessionManagerLite() = default;
