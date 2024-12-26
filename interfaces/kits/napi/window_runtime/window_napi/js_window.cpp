@@ -7108,7 +7108,6 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "windowToken is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -7120,9 +7119,9 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
-            !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
-            !WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        if (!WindowHelper::IsSystemWindow(window->GetType()) &&
+            !WindowHelper::IsMainWindow(window->GetType()) &&
+            !WindowHelper::IsSubWindow(window->GetType())) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window.", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
             return;
