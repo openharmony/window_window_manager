@@ -21,14 +21,14 @@
 
 namespace OHOS::Rosen {
 enum class SystemKeyboardAvoidChangeReason {
-    KEYBOARD_BEGIN = 0,
-    KEYBOARD_CREATED = 1,
-    KEYBOARD_SHOW = 2,
-    KEYBOARD_HIDE = 3,
-    KEYBOARD_DISCONNECT = 4,
-    KEYBOARD_GRAVITY_BOTTOM = 5,
-    KEYBOARD_GRAVITY_FLOAT = 6,
-    KEYBOARD_END = 7,
+    KEYBOARD_BEGIN,
+    KEYBOARD_CREATED,
+    KEYBOARD_SHOW,
+    KEYBOARD_HIDE,
+    KEYBOARD_DISCONNECT,
+    KEYBOARD_GRAVITY_BOTTOM,
+    KEYBOARD_GRAVITY_FLOAT,
+    KEYBOARD_END,
 };
 
 using OnGetSceneSessionCallback = std::function<sptr<SceneSession>(uint32_t callingSessionId)>;

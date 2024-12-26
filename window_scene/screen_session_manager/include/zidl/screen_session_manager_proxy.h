@@ -161,6 +161,7 @@ public:
     void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
+    int32_t SetScreenOnDelayTime(int32_t delay) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
@@ -175,7 +176,8 @@ public:
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
     DeviceScreenConfig GetDeviceScreenConfig() override;
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
-    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override;
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {}) override;
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
@@ -190,6 +192,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
+    ScreenCombination GetScreenCombination(ScreenId screenId) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

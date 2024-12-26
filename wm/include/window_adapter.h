@@ -143,6 +143,7 @@ public:
     /*
      * PC Window
      */
+    virtual WMError IsPcWindow(bool& isPcWindow);
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
     virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t deviceId);

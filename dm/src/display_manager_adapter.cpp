@@ -812,10 +812,11 @@ DMError ScreenManagerAdapter::SetVirtualScreenRefreshRate(ScreenId screenId, uin
     return displayManagerServiceProxy_->SetVirtualScreenRefreshRate(screenId, refreshInterval);
 }
 
-void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
 {
     INIT_PROXY_CHECK_RETURN();
-    displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList);
+    displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
 }
 
 void DisplayManagerAdapter::DisablePowerOffRenderControl(ScreenId screenId)

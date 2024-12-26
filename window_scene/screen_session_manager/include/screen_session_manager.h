@@ -293,6 +293,7 @@ public:
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
+    int32_t SetScreenOnDelayTime(int32_t delay) override;
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
@@ -306,7 +307,8 @@ public:
 
     DeviceScreenConfig GetDeviceScreenConfig() override;
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override;
-    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override;
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {}) override;
     // notify scb virtual screen change
     void OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     DMError VirtualScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
@@ -348,6 +350,7 @@ public:
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode) override;
+    ScreenCombination GetScreenCombination(ScreenId screenId) override;
 
 protected:
     ScreenSessionManager();
@@ -534,6 +537,7 @@ private:
     std::mutex screenOffMutex_;
     std::condition_variable screenOffCV_;
     int32_t screenOffDelay_ {0};
+    int32_t screenOnDelay_ {0};
 
     std::vector<ScreenId> mirrorScreenIds_;
     std::mutex snapBypickerMutex_;

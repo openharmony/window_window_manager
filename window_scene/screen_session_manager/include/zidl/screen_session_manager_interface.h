@@ -167,6 +167,7 @@ public:
     virtual void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
     virtual int32_t SetScreenOffDelayTime(int32_t delay) { return 0; }
+    virtual int32_t SetScreenOnDelayTime(int32_t delay) { return 0; }
     virtual void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) {}
     virtual uint32_t GetCurvedCompressionArea() { return 0; }
     virtual ScreenProperty GetPhyScreenProperty(ScreenId screenId) { return ScreenProperty(); }
@@ -190,7 +191,8 @@ public:
     {
         return DMError::DM_OK;
     }
-    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override {}
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {}) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
 
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override
@@ -210,6 +212,7 @@ public:
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
     }
+    virtual ScreenCombination GetScreenCombination(ScreenId screenId) { return ScreenCombination::SCREEN_ALONE; }
 };
 } // namespace Rosen
 } // namespace OHOS
