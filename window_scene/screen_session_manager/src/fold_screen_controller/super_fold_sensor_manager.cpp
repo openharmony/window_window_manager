@@ -31,7 +31,7 @@ namespace Rosen {
 namespace {
 constexpr float ANGLE_MIN_VAL = 30.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
-constexpr float ANGLE_FLAT_THRESHOLD = 150.0F;
+constexpr float ANGLE_FLAT_THRESHOLD = 160.0F;
 constexpr float ANGLE_SENSOR_THRESHOLD = 177.0F;
 constexpr float ANGLE_HALF_FOLD_THRESHOLD = 135.0F;
 constexpr uint16_t HALL_HAVE_KEYBOARD_THRESHOLD = 0B0100;
