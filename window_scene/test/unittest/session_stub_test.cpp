@@ -250,8 +250,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleNotifyExtensionTimeout(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-    res = session_->HandleSetSystemEnableDrag(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -485,6 +483,24 @@ HWTEST_F(SessionStubTest, HandleUpdateClientRect01, Function | SmallTest | Level
     data.WriteUint32(800);
     data.WriteUint32(800);
     res = session_->HandleUpdateClientRect(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleSetSystemEnableDrag_TestReadBool
+ * @tc.desc: Check whether the enableDrag is read successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSystemEnableDrag_TestReadBool, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_NE(session_, nullptr);
+    auto res = session_->HandleSetSystemEnableDrag(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteBool(true);
+    res = session_->HandleSetSystemEnableDrag(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
 }
