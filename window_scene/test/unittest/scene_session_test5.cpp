@@ -22,6 +22,7 @@
 #include "key_event.h"
 
 #include "mock/mock_session_stage.h"
+#include "mock/mock_scene_session.h"
 #include "pointer_event.h"
 
 #include "screen_manager.h"
@@ -1804,6 +1805,101 @@ HWTEST_F(SceneSessionTest5, IsMissionHighlighted, Function | SmallTest | Level2)
     EXPECT_TRUE(mainSession->IsMissionHighlighted());
     subSession->isFocused_ = false;
     EXPECT_FALSE(mainSession->IsMissionHighlighted());
+}
+
+/**
+ * @tc.name: SetSessionDisplayIdChangeCallback
+ * @tc.desc: SetSessionDisplayIdChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSessionDisplayIdChangeCallback, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionDisplayIdChangeCallback([] (uint64_t displayId) {
+        return;
+    });
+    ASSERT_NE(sceneSession->sessionDisplayIdChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NotifySessionDisplayIdChange
+ * @tc.desc: NotifySessionDisplayIdChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifySessionDisplayIdChange, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint64_t checkDisplayId = 345;
+    uint64_t moveDisplayId = 456;
+    sceneSession->sessionDisplayIdChangeFunc_ = [&checkDisplayId] (uint64_t displayId) {
+        checkDisplayId = displayId;
+    };
+    sceneSession->NotifySessionDisplayIdChange(moveDisplayId);
+    ASSERT_EQ(moveDisplayId, checkDisplayId);
+}
+
+/**
+ * @tc.name: CheckAndMoveDisplayIdRecursively
+ * @tc.desc: CheckAndMoveDisplayIdRecursively
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, CheckAndMoveDisplayIdRecursively, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    uint64_t displayId = 234;
+    sptr<SceneSessionMocker> subSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sceneSession->subSession_.push_back(subSession);
+    EXPECT_CALL(*sceneSession, CheckAndMoveDisplayIdRecursively(displayId))
+        .WillRepeatedly([sceneSession](uint64_t displayId) {
+        return sceneSession->SceneSession::CheckAndMoveDisplayIdRecursively(displayId);
+    });
+    sceneSession->property_->SetDisplayId(displayId);
+    sceneSession->shouldFollowParentWhenShow_ = true;
+    EXPECT_CALL(*sceneSession, SetScreenId(displayId)).Times(0);
+    sceneSession->CheckAndMoveDisplayIdRecursively(displayId);
+    sceneSession->property_->SetDisplayId(123);
+    sceneSession->shouldFollowParentWhenShow_ = false;
+    EXPECT_CALL(*sceneSession, SetScreenId(displayId)).Times(0);
+    sceneSession->CheckAndMoveDisplayIdRecursively(displayId);
+    sceneSession->property_->SetDisplayId(123);
+    sceneSession->shouldFollowParentWhenShow_ = true;
+    EXPECT_CALL(*sceneSession, SetScreenId(displayId)).Times(1);
+    EXPECT_CALL(*subSession, CheckAndMoveDisplayIdRecursively(displayId)).Times(1);
+    sceneSession->CheckAndMoveDisplayIdRecursively(displayId);
+    ASSERT_EQ(sceneSession->property_->GetDisplayId(), displayId);
+}
+
+/**
+ * @tc.name: SetShouldFollowParentWhenShow
+ * @tc.desc: SetShouldFollowParentWhenShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetShouldFollowParentWhenShow, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetShouldFollowParentWhenShow(false);
+    ASSERT_EQ(sceneSession->shouldFollowParentWhenShow_, false);
+}
+
+HWTEST_F(SceneSessionTest5, CheckSubSessionShouldFollowParent, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->subSession_.push_back(subSession);
+    subSession->state_ = SessionState::STATE_ACTIVE;
+    uint64_t displayIdBase = 123;
+    uint64_t displayIdDiff = 345;
+    subSession->property_->SetDisplayId(displayIdBase);
+    sceneSession->CheckSubSessionShouldFollowParent(displayIdBase);
+    sceneSession->CheckSubSessionShouldFollowParent(displayIdBase);
+    EXPECT_EQ(subSession->shouldFollowParentWhenShow_, true);
+    sceneSession->CheckSubSessionShouldFollowParent(displayIdDiff);
+    EXPECT_EQ(subSession->shouldFollowParentWhenShow_, false);
 }
 }
 }
