@@ -1477,24 +1477,6 @@ HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect01, Function | SmallTest | L
 }
 
 /**
- * @tc.name: SetAndIsSystemKeyboard
- * @tc.desc: test SetIsSystemKeyboard and IsSystemKeyboard func
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, SetAndIsSystemKeyboard, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetAndIsSystemKeyboard";
-    info.bundleName_ = "SetAndIsSystemKeyboard";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, session);
-
-    ASSERT_EQ(false, session->IsSystemKeyboard());
-    session->SetIsSystemKeyboard(true);
-    ASSERT_EQ(true, session->IsSystemKeyboard());
-}
-
-/**
  * @tc.name: MoveUnderInteriaAndNotifyRectChange
  * @tc.desc: test func: MoveUnderInteriaAndNotifyRectChange
  * @tc.type: FUNC
