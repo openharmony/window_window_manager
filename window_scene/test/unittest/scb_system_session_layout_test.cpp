@@ -14,10 +14,11 @@
  */
 
 #include <gtest/gtest.h>
-#include "session/host/include/scb_system_session.h"
+
 #include "common/include/session_permission.h"
 #include "key_event.h"
 #include "mock/mock_session_stage.h"
+#include "session/host/include/scb_system_session.h"
 #include "session/host/include/session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -34,7 +35,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     SessionInfo info;
-    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SCBSystemSession> scbSystemSession_;
 };
 
@@ -52,7 +53,7 @@ void SCBSystemSessionLayoutTest::SetUp()
     info.abilityName_ = "testSCBSystemSession1";
     info.moduleName_ = "testSCBSystemSession2";
     info.bundleName_ = "testSCBSystemSession3";
-    scbSystemSession_ = sptr<SCBSystemSession>::MakeSptr(info, specificCallback);
+    scbSystemSession_ = sptr<SCBSystemSession>::MakeSptr(info, specificCallback_);
 }
 
 void SCBSystemSessionLayoutTest::TearDown()
@@ -75,17 +76,6 @@ HWTEST_F(SCBSystemSessionLayoutTest, UpdateWindowMode, Function | SmallTest | Le
     scbSystemSession_->UpdatePointerArea(rect);
     auto ret = scbSystemSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
-}
-
-/**
- * @tc.name: NotifyClientToUpdateRect01
- * @tc.desc: check func NotifyClientToUpdateRect
- * @tc.type: FUNC
- */
-HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect01, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, scbSystemSession_);
-    scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
 }
 
 /**
@@ -134,7 +124,7 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, Function | Smal
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback;
-    property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
 
     auto ret = scbSystemSession_->SetSessionProperty(property);
     ASSERT_EQ(WSError::WS_OK, ret);
@@ -156,7 +146,7 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, Function | Smal
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 
-    property->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = scbSystemSession_->SetSessionProperty(property);
     ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;

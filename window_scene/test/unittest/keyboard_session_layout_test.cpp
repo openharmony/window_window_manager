@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "session/host/include/keyboard_session.h"
 #include <gtest/gtest.h>
 
 #include "interfaces/include/ws_common.h"
-#include "mock/mock_session_stage.h"
 #include "mock/mock_keyboard_session.h"
-#include "session/host/include/session.h"
+#include "mock/mock_session_stage.h"
+#include "session/host/include/keyboard_session.h"
 #include "session/host/include/scene_session.h"
+#include "session/host/include/session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -63,10 +63,8 @@ sptr<SceneSession> KeyboardSessionLayoutTest::GetSceneSession(const std::string&
     SessionInfo info;
     info.abilityName_ = abilityName;
     info.bundleName_ = bundleName;
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
-    return sceneSession;
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    return sptr<SceneSession>::MakeSptr(info, specificCb);
 }
 
 namespace {

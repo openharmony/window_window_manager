@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "window_helper.h"
-#include "display_manager.h"
-#include "pointer_event.h"
-
 #include <gtest/gtest.h>
+#include <pointer_event.h>
+#include <ui/rs_surface_node.h>
+
+#include "display_manager.h"
+#include "input_event.h"
 #include "key_event.h"
+#include "mock/mock_session_stage.h"
+#include "pointer_event.h"
+#include "session/host/include/main_session.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
-#include "session/host/include/main_session.h"
+#include "window_helper.h"
 #include "wm_common.h"
-#include "mock/mock_session_stage.h"
-#include "input_event.h"
-#include <pointer_event.h>
-#include <ui/rs_surface_node.h>
 
 using namespace testing;
 using namespace testing::ext;

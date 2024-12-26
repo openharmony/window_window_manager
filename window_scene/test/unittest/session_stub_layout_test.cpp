@@ -16,12 +16,13 @@
 #include <gtest/gtest.h>
 #include <ipc_types.h>
 #include <pointer_event.h>
+
+#include "ability_start_setting.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stub.h"
-#include "session/host/include/zidl/session_stub.h"
-#include "ability_start_setting.h"
 #include "parcel/accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
+#include "session/host/include/zidl/session_stub.h"
 #include "want.h"
 #include "ws_common.h"
 
