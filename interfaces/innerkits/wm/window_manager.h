@@ -950,10 +950,9 @@ public:
      *
      * @param sourcePersistentId Window id which the pointer event shift from
      * @param targetPersistentId Window id which the pointer event shift to
-     * @param deviceId - Device id which the pointer event generate from
      * @return WM_OK means shift window pointer event success, others means failed.
      */
-    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId, int32_t deviceId);
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId);
 
 private:
     WindowManager();

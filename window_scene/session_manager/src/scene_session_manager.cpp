@@ -12284,10 +12284,10 @@ WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, 
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId, int32_t deviceId)
+WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
 {
-    TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d deviceId %{public}d",
-        sourcePersistentId, targetPersistentId, deviceId);
+    TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d",
+        sourcePersistentId, targetPersistentId);
     if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -12325,10 +12325,10 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is not same bundle as calling", targetPersistentId);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    auto task = [] {
-        int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId);
+    auto task = [sourcePersistentId, targetPersistentId] {
+        int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId, true);
         TLOGI(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
-            sourcePersistentId, targetPersistentId, deviceId, ret);
+            sourcePersistentId, targetPersistentId, ret);
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);

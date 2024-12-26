@@ -255,8 +255,8 @@ public:
         DragResizeType dragResizeType) { return WMError::WM_OK; }
     virtual WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) { return WMError::WM_OK; }
-    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
-        int32_t deviceId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
+        int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

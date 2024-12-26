@@ -1601,12 +1601,7 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
         TLOGE(WmsLogTag::WMS_PC, "read targetPersistentId failed");
         return ERR_INVALID_DATA;
     }
-    int32_t deviceId;
-    if (!data.ReadInt32(deviceId)) {
-        TLOGE(WmsLogTag::WMS_PC, "read deviceId failed");
-        return ERR_INVALID_DATA;
-    }
-    WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, deviceId);
+    WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

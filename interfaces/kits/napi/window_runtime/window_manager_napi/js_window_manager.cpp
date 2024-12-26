@@ -1269,10 +1269,10 @@ napi_value JsWindowManager::OnGetWindowsByCoordinate(napi_env env, napi_callback
 
 napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_THREE;
-    napi_value argv[ARGC_THREE] = { nullptr };
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO || argc > ARGC_THREE) { // min param num 2, max param num 3
+    if (argc > ARGC_TWO) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t sourcePersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
@@ -1290,15 +1290,11 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
         TLOGE(WmsLogTag::WMS_PC, "invalid sourcePersistentId or targetPersistentId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    int32_t deviceId = -1;
-    if (argc > ARGC_TWO && !ConvertFromJsValue(env, argv[ARGC_TWO], deviceId)) {
-        deviceId = -1;
-    }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [sourcePersistentId, targetPersistentId, deviceId, env, task = napiAsyncTask] {
+    auto asyncTask = [sourcePersistentId, targetPersistentId, env, task = napiAsyncTask] {
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
-            ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, deviceId));
+            ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {

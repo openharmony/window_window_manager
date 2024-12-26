@@ -2673,8 +2673,7 @@ WMError SceneSessionManagerProxy::GetAppDragResizeType(const std::string& bundle
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
-    int32_t targetPersistentId, int32_t deviceId)
+WMError SceneSessionManagerProxy::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2689,10 +2688,6 @@ WMError SceneSessionManagerProxy::ShiftAppWindowPointerEvent(int32_t sourcePersi
     }
     if (!data.WriteInt32(targetPersistentId)) {
         TLOGE(WmsLogTag::WMS_PC, "Write targetPersistentId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(deviceId)) {
-        TLOGE(WmsLogTag::WMS_PC, "Write deviceId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
