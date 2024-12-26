@@ -1303,15 +1303,16 @@ void SceneSession::SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChang
     }, __func__);
 }
 
-void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
+void SceneSession::SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func)
 {
-    PostTask([weakThis = wptr(this), func] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session or func is null");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s session or func is null", where);
             return;
         }
-        session->mainWindowTopmostChangeFunc_ = func;
+        session->mainWindowTopmostChangeFunc_ = std::move(func);
     }, __func__);
 }
 
