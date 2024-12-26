@@ -678,13 +678,11 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent01, Function | Sma
     SessionInfo sourceInfo;
     sourceInfo.windowType_ = 1;
     sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
-    ASSERT_NE(nullptr, sourceSceneSession);
     ssm_->sceneSessionMap_.insert({sourceSceneSession->GetPersistentId(), sourceSceneSession});
 
     SessionInfo targetInfo;
     targetInfo.windowType_ = 1;
     sptr<SceneSession> targetSceneSession = sptr<SceneSession>::MakeSptr(targetInfo, nullptr);
-    ASSERT_NE(nullptr, targetSceneSession);
     ssm_->sceneSessionMap_.insert({targetSceneSession->GetPersistentId(), targetSceneSession});
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -706,13 +704,11 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent02, Function | Sma
     SessionInfo systemWindowInfo;
     systemWindowInfo.windowType_ = 2000;
     sptr<SceneSession> systemWindowSession = sptr<SceneSession>::MakeSptr(systemWindowInfo, nullptr);
-    ASSERT_NE(nullptr, systemWindowSession);
     ssm_->sceneSessionMap_.insert({systemWindowSession->GetPersistentId(), systemWindowSession});
 
     SessionInfo mainWindowInfo;
     mainWindowInfo.windowType_ = 1;
     sptr<SceneSession> mainWindowSession = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
-    ASSERT_NE(nullptr, mainWindowSession);
     ssm_->sceneSessionMap_.insert({mainWindowSession->GetPersistentId(), mainWindowSession});
 
     int mainWindowPersistentId = mainWindowSession->GetPersistentId();
@@ -736,7 +732,6 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent03, Function | Sma
     SessionInfo sourceInfo;
     sourceInfo.windowType_ = 1;
     sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
-    ASSERT_NE(nullptr, sourceSceneSession);
     ssm_->sceneSessionMap_.insert({sourceSceneSession->GetPersistentId(), sourceSceneSession});
 
     int32_t sourcePersistentId = sourceSceneSession->GetPersistentId();
@@ -760,21 +755,18 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent04, Function | Sma
     SessionInfo sourceInfo;
     sourceInfo.windowType_ = 1;
     sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
-    ASSERT_NE(nullptr, sourceSceneSession);
     ssm_->sceneSessionMap_.insert({sourceSceneSession->GetPersistentId(), sourceSceneSession});
 
     SessionInfo otherSourceInfo;
     otherSourceInfo.bundleName_ = "other";
     otherSourceInfo.windowType_ = 1;
     sptr<SceneSession> otherSourceSession = sptr<SceneSession>::MakeSptr(otherSourceInfo, nullptr);
-    ASSERT_NE(nullptr, otherSourceSession);
     ssm_->sceneSessionMap_.insert({otherSourceSession->GetPersistentId(), otherSourceSession});
 
     SessionInfo otherTargetInfo;
     otherTargetInfo.bundleName_ = "other";
     otherTargetInfo.windowType_ = 1;
     sptr<SceneSession> otherTargetSession = sptr<SceneSession>::MakeSptr(otherTargetInfo, nullptr);
-    ASSERT_NE(nullptr, otherTargetSession);
     ssm_->sceneSessionMap_.insert({otherTargetSession->GetPersistentId(), otherTargetSession});
 
     int32_t sourcePersistentId = sourceSceneSession->GetPersistentId();
