@@ -3156,6 +3156,10 @@ void SceneSessionManager::DestroyUIServiceExtensionSubWindow(const sptr<SceneSes
     if (sessionProperty && sessionProperty->GetExtensionFlag() == true &&
         !sessionProperty->GetIsUIExtensionAbilityProcess()) {
         sceneSession->NotifyDestroy();
+        int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->
+            TerminateUIServiceExtensionAbility(sceneSession->GetAbilityToken());
+        TLOGI(WmsLogTag::WMS_SUB,"TerminateUIServiceExtensionAbility id:%{public}d errCode:%{public}d",
+            sceneSession->GetPersistentId(), errCode);
     }
 }
 
