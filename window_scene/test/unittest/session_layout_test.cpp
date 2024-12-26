@@ -140,7 +140,6 @@ namespace {
  */
 HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
 {
-    sptr<ISession> sessionToken = nullptr;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));

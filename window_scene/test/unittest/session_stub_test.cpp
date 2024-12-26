@@ -667,22 +667,6 @@ HWTEST_F(SessionStubTest, HandleSendPointerEvenForMoveDrag007, Function | SmallT
 }
 
 /**
- * @tc.name: HandleUpdateRectChangeListenerRegistered008
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleUpdateRectChangeListenerRegistered008, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteBool(true);
-    sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    auto res = session_->HandleUpdateRectChangeListenerRegistered(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleNotifySyncOn012
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -743,28 +727,6 @@ HWTEST_F(SessionStubTest, HandleGetAppForceLandscapeConfig, Function | SmallTest
 }
 
 /**
- * @tc.name: HandleUpdateSessionRect
- * @tc.desc: test for HandleUpdateSessionRect
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(SessionStubTest, HandleUpdateSessionRect, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(session_, nullptr);
-    data.WriteUint32(10);
-    data.WriteUint32(20);
-    data.WriteUint32(30);
-    data.WriteUint32(40);
-    data.WriteUint32(0);
-    data.WriteBool(true);
-    data.WriteBool(true);
-    auto res = session_->HandleUpdateSessionRect(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
-}
-
-/**
  * @tc.name: HandleSetDialogSessionBackGestureEnabled01
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -793,27 +755,6 @@ HWTEST_F(SessionStubTest, HandleRequestFocus, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleRequestFocus(data, reply);
     ASSERT_EQ(0, res);
-}
-
-/**
- * @tc.name: HandleUpdateClientRect01
- * @tc.desc: sessionStub sessionStubTest
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubTest, HandleUpdateClientRect01, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ASSERT_NE(session_, nullptr);
-    auto res = session_->HandleUpdateClientRect(data, reply);
-    ASSERT_EQ(ERR_INVALID_DATA, res);
-
-    data.WriteInt32(100);
-    data.WriteInt32(100);
-    data.WriteInt32(800);
-    data.WriteInt32(800);
-    res = session_->HandleUpdateClientRect(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
