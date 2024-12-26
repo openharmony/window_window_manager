@@ -2982,6 +2982,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
             screenSession->GetDisplayNode()->AddCrossParentChild(movedSurfaceNode, -1);
+            moveSurfaceNode->SetIsCrossNode(true);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
         }
         if (rsTransaction != nullptr) {
@@ -3003,6 +3004,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             }
             screenSession->GetDisplayNode()->RemoveCrossParentChild(
                 movedSurfaceNode, moveDragController_->GetInitParentNodeId());
+                moveSurfaceNode->SetIsCrossNode(false);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
         }
     }
