@@ -1492,11 +1492,10 @@ WMError WindowManager::GetAppDragResizeType(const std::string& bundleName, DragR
     return ret;
 }
 
-WMError WindowManager::ShiftAppWindowPointerEvent(
-    int32_t sourcePersistentId, int32_t targetPersistentId, int32_t deviceId)
+WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(
-        sourcePersistentId, targetPersistentId, deviceId);
+        sourcePersistentId, targetPersistentId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "failed");
     }
