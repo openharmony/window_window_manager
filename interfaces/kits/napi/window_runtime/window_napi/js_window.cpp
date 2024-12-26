@@ -4451,7 +4451,8 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
                 wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Hide non-system floating windows failed"));
+                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
+                    "Hide non-system floating windows failed"));
             }
             WLOGI("Window [%{public}u, %{public}s] hide non-system floating windows end",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
