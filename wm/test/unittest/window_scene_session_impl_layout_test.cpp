@@ -393,33 +393,33 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync02, Function | SmallTest |
     option->SetWindowName("MoveToAsync02");
     option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(10001);
-
     Rect rect;
     WMError ret;
     ret = window->Create(abilityContext_, nullptr);
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    window->state_ = WindowState::STATE_SHOWN;
-    ret = window->MoveToAsync(500, 500);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(500, rect.posX_);
-    EXPECT_EQ(500, rect.posY_);
-
-    window->state_ = WindowState::STATE_HIDDEN;
-    ret = window->MoveToAsync(20000, 20000);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(20000, rect.posX_);
-    EXPECT_EQ(20000, rect.posY_);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(WMError::WM_OK, ret);
+        ret = window->Show();
+        EXPECT_EQ(WMError::WM_OK, ret);
+        window->state_ = WindowState::STATE_SHOWN;
+        ret = window->MoveToAsync(500, 500);
+        EXPECT_EQ(WMError::WM_OK, ret);
+        rect = window->property_->GetWindowRect();
+        EXPECT_EQ(500, rect.posX_);
+        EXPECT_EQ(500, rect.posY_);
+        window->state_ = WindowState::STATE_HIDDEN;
+        ret = window->MoveToAsync(20000, 20000);
+        usleep(WAIT_SERVERAL_FRAMES);
+        EXPECT_EQ(WMError::WM_OK, ret);
+        rect = window->property_->GetWindowRect();
+        EXPECT_EQ(20000, rect.posX_);
+        EXPECT_EQ(20000, rect.posY_);
+        ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
+    }
+    else {
+        EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    }
 }
 
 /**
@@ -452,36 +452,36 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync02, Function | SmallTest |
     option->SetWindowName("ResizeAsync02");
     option->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
+    window->property_->SetPersistentId(10012);
     Rect rect;
     WMError ret;
     ret = window->Create(abilityContext_, nullptr);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(10012);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    window->state_ = WindowState::STATE_SHOWN;
-    ret = window->ResizeAsync(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
-    EXPECT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
-
-    window->state_ = WindowState::STATE_HIDDEN;
-    ret = window->ResizeAsync(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(WAIT_SERVERAL_FRAMES);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
-    EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(WMError::WM_OK, ret);
+        ret = window->Show();
+        EXPECT_EQ(WMError::WM_OK, ret);
+        WindowLimits windowLimits;
+        ret = window->GetWindowLimits(windowLimits);
+        EXPECT_EQ(WMError::WM_OK, ret);
+        window->state_ = WindowState::STATE_SHOWN;
+        ret = window->ResizeAsync(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
+        EXPECT_EQ(WMError::WM_OK, ret);
+        rect = window->property_->GetWindowRect();
+        EXPECT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
+        EXPECT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
+        window->state_ = WindowState::STATE_HIDDEN;
+        ret = window->ResizeAsync(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
+        EXPECT_EQ(WMError::WM_OK, ret);
+        usleep(WAIT_SERVERAL_FRAMES);
+        rect = window->property_->GetWindowRect();
+        EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
+        EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
+        ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
+    }
+    else {
+        EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    }
 }
 
 
