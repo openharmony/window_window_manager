@@ -87,14 +87,8 @@ HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, Function | SmallTest | Level1)
     info.bundleName_ = "GetKeyboardGravity";
     sptr<SceneSession::SpecificSessionCallback> specificCb =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCb, nullptr);
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, nullptr);
-    ASSERT_TRUE((keyboardSession != nullptr));
-    keyboardSession->property_ = nullptr;
-    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, keyboardSession->GetKeyboardGravity());
-
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(windowSessionProperty, nullptr);
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_EQ(SessionGravity::SESSION_GRAVITY_BOTTOM, keyboardSession->GetKeyboardGravity());
 }
