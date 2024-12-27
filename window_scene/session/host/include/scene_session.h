@@ -495,6 +495,7 @@ public:
     bool GetPostProcessProperty() const;
     void PostProcessNotifyAvoidArea();
     bool IsImmersiveType() const;
+    bool SetFrameGravity(Gravity gravity);
 
     /*
      * Gesture Back

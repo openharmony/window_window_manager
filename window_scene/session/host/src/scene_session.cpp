@@ -5257,6 +5257,17 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
     PostTask(task, __func__);
 }
 
+bool SceneSession::SetFrameGravity(Gravity gravity)
+{
+    if (surfaceNode_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "fail id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
+    surfaceNode_->SetFrameGravity(gravity);
+    return true;
+}
+
 void SceneSession::MarkAvoidAreaAsDirty()
 {
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);

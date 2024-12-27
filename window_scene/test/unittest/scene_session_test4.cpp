@@ -766,6 +766,27 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | L
     WSRect newGlobalRect = { 150, 150, 100, 100 };
     session->UpdateAllModalUIExtensions(newGlobalRect);
 }
+
+/**
+ * @tc.name: SetFrameGravity
+ * @tc.desc: SetFrameGravity Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, SetFrameGravity, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetFrameGravity";
+    info.bundleName_ = "SetFrameGravity";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    ASSERT_EQ(true, session->SetFrameGravity(Gravity::RESIZE));
+    session->surfaceNode_ = nullptr;
+    ASSERT_EQ(false, session->SetFrameGravity(Gravity::TOP_LEFT));
+}
 }
 }
 }
