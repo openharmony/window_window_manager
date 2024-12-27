@@ -953,10 +953,10 @@ void ScreenSessionManager::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, Scre
         lastScreenChangeEvent_ = event;
     }
     auto task = [=] {
-        TLOGI(WmsLogTag::DMS, "NotifyScreenChanged,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+        TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", agent size: %{public}u",
+            screenInfo->GetScreenId(), static_cast<uint32_t>(agents.size()));
         if (agents.empty()) {
-            TLOGI(WmsLogTag::DMS, "NotifyScreenChanged agents is empty");
             return;
         }
         for (auto& agent : agents) {
@@ -2162,16 +2162,15 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
         return;
     }
     auto task = [=] {
-        if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
-            TLOGD(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64"",
-                event, displayInfo->GetDisplayId());
-        } else {
-            TLOGI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64"",
-                event, displayInfo->GetDisplayId());
-        }
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
+            TLOGD(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
+                event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
+        } else {
+            TLOGI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
+                event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
+        }
         if (agents.empty()) {
-            TLOGI(WmsLogTag::DMS, "NotifyDisplayChanged agents is empty");
             return;
         }
         for (auto& agent : agents) {
@@ -3717,7 +3716,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
                 TLOGE(WmsLogTag::DMS, "GetScreenSnapshot displayInfo is nullptr!");
                 continue;
             }
-            TLOGI(WmsLogTag::DMS, "GetScreenSnapshot: displayId %{public}" PRIu64"", displayInfo->GetDisplayId());
             if (displayId == displayInfo->GetDisplayId()) {
                 displayNode = screenSession->GetDisplayNode();
                 screenId = sessionIt.first;
@@ -3931,10 +3929,10 @@ void ScreenSessionManager::NotifyDisplayCreate(sptr<DisplayInfo> displayInfo)
         return;
     }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    TLOGI(WmsLogTag::DMS, "start, agent size: %{public}u", static_cast<uint32_t>(agents.size()));
     if (agents.empty()) {
         return;
     }
-    TLOGI(WmsLogTag::DMS, "NotifyDisplayCreate");
     for (auto& agent : agents) {
         int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
         if (!IsFreezed(agentPid, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER)) {
@@ -3946,10 +3944,10 @@ void ScreenSessionManager::NotifyDisplayCreate(sptr<DisplayInfo> displayInfo)
 void ScreenSessionManager::NotifyDisplayDestroy(DisplayId displayId)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    TLOGI(WmsLogTag::DMS, "agent size: %{public}u", static_cast<uint32_t>(agents.size()));
     if (agents.empty()) {
         return;
     }
-    TLOGI(WmsLogTag::DMS, "NotifyDisplayDestroy");
     for (auto& agent : agents) {
         int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
         if (!IsFreezed(agentPid, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER)) {
@@ -4634,7 +4632,6 @@ uint32_t ScreenSessionManager::GetCurvedCompressionArea()
 
 void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
 {
-    TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged foldStatus:%{public}d", foldStatus);
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession != nullptr) {
         if (foldStatus == FoldStatus::FOLDED) {
@@ -4646,8 +4643,9 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
         }
     }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
+    TLOGI(WmsLogTag::DMS, "foldStatus:%{public}d, agent size: %{public}u",
+        foldStatus, static_cast<uint32_t>(agents.size()));
     if (agents.empty()) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged agents is empty");
         return;
     }
     for (auto& agent : agents) {
@@ -4683,7 +4681,6 @@ void ScreenSessionManager::NotifyCaptureStatusChanged()
     bool isCapture = IsCaptured();
     isScreenShot_ = false;
     if (agents.empty()) {
-        TLOGI(WmsLogTag::DMS, "agents is empty");
         return;
     }
     for (auto& agent : agents) {
@@ -4698,7 +4695,6 @@ void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
     if (agents.empty()) {
-        TLOGI(WmsLogTag::DMS, "Agents is empty");
         return;
     }
     {
@@ -4715,11 +4711,11 @@ void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
 
 void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
-    TLOGI(WmsLogTag::DMS, "DisplayMode:%{public}d", displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
+    TLOGI(WmsLogTag::DMS, "DisplayMode:%{public}d, agent size: %{public}u",
+        displayMode, static_cast<uint32_t>(agents.size()));
     if (agents.empty()) {
-        TLOGI(WmsLogTag::DMS, "Agents is empty");
         return;
     }
     for (auto& agent : agents) {
@@ -5128,10 +5124,9 @@ int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam
 
 void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area)
 {
-    TLOGI(WmsLogTag::DMS, "NotifyAvailableAreaChanged call");
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
+    TLOGI(WmsLogTag::DMS, "entry, agent size: %{public}u", static_cast<uint32_t>(agents.size()));
     if (agents.empty()) {
-        TLOGI(WmsLogTag::DMS, "NotifyAvailableAreaChanged agents is empty");
         return;
     }
     for (auto& agent : agents) {
