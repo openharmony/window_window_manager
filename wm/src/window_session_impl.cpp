@@ -1418,14 +1418,14 @@ void WindowSessionImpl::RegisterWatchFocusActiveChangeCallback()
     uiContent_->AddFocusActiveChangeCallback(callback);
 }
 
-WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActived)
+WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "isActived: %{public}d", isActived);
+    TLOGD(WmsLogTag::WMS_LIFE, "isActive: %{public}d", isActive);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is invalid!");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SingletonContainer::Get<WindowAdapter>().NotifyWatchFocusActiveChange(isActived);
+    return SingletonContainer::Get<WindowAdapter>().NotifyWatchFocusActiveChange(isActive);
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -3785,7 +3785,6 @@ void WindowSessionImpl::NotifyResultToFloatWindow(const std::shared_ptr<MMI::Key
         TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "wid:%{public}d, keyCode:%{public}d, isConsumed:%{public}d",
             GetWindowId(), keyEvent->GetKeyCode(), isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
-        SetWatchGestureConsumed(false);
     }
 }
 

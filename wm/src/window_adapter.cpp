@@ -1050,12 +1050,12 @@ WMError WindowAdapter::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isC
     return wmsProxy->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
 }
 
-WMError WindowAdapter::NotifyWatchFocusActiveChange(bool isActived)
+WMError WindowAdapter::NotifyWatchFocusActiveChange(bool isActive)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->NotifyWatchFocusActiveChange(isActived);
+    return wmsProxy->NotifyWatchFocusActiveChange(isActive);
 }
 } // namespace Rosen
 } // namespace OHOS

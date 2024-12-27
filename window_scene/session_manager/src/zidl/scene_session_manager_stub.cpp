@@ -1089,13 +1089,13 @@ int SceneSessionManagerStub::HandleWatchGestureConsumeResult(MessageParcel& data
 
 int SceneSessionManagerStub::HandleWatchFocusActiveChange(MessageParcel& data, MessageParcel& reply)
 {
-    bool isActived = false;
-    if (!data.ReadBool(isActived)) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "read isActived failed");
+    bool isActive = false;
+    if (!data.ReadBool(isActive)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isActive failed");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_EVENT, "isActived:%{public}d", isActived);
-    WMError ret = NotifyWatchFocusActiveChange(isActived);
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
+    WMError ret = NotifyWatchFocusActiveChange(isActive);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }

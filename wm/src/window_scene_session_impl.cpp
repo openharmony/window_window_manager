@@ -848,9 +848,9 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
         isConsumed && keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
         TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "wid:%{public}d, keyCode:%{public}d, isConsumed:%{public}d",
             GetWindowId(), keyEvent->GetKeyCode(), isConsumed);
-        SetWatchGestureConsumed(isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
     }
+    SetWatchGestureConsumed(isConsumed);
     return isConsumed;
 }
 

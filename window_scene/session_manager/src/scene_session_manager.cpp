@@ -3586,17 +3586,17 @@ WMError SceneSessionManager::NotifyWatchGestureConsumeResult(int32_t keyCode, bo
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::RegisterWatchGestureConsumeResultCallback(const ProcessWatchGestureConsumeResultFunc& func)
+void SceneSessionManager::RegisterWatchGestureConsumeResultCallback(NotifyWatchGestureConsumeResultFunc&& func)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "in");
-    onWatchGestureConsumeResultFunc_ = func;
+    onWatchGestureConsumeResultFunc_ = std::move(func);
 }
 
-WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActived)
+WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActive)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "isActived:%{public}d", isActived);
+    TLOGD(WmsLogTag::WMS_EVENT, "isActived:%{public}d", isActive);
     if (onWatchFocusActiveChangeFunc_) {
-        onWatchFocusActiveChangeFunc_(isActived);
+        onWatchFocusActiveChangeFunc_(isActive);
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "onWatchFocusActiveChangeFunc is null");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -3604,10 +3604,10 @@ WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActived)
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::RegisterWatchFocusActiveChangeCallback(const ProcessWatchFocusActiveChangeFunc& func)
+void SceneSessionManager::RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "in");
-    onWatchFocusActiveChangeFunc_ = func;  
+    onWatchFocusActiveChangeFunc_ = std::move(func);  
 }
 
 void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistentId)

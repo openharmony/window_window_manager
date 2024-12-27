@@ -257,7 +257,7 @@ public:
         DragResizeType& dragResizeType) { return WMError::WM_OK; }
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode,
         bool isConsumed) { return WMError::WM_OK; }
-    virtual WMError NotifyWatchFocusActiveChange(bool isActived) { return WMError::WM_OK; }
+    virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }
 };
 }
 }

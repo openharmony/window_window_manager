@@ -914,6 +914,63 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
     WMError res = window->GetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(res, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: NotifyWatchGestureConsumeResult
+ * @tc.desc: NotifyWatchGestureConsumeResult test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyWatchGestureConsumeResult, Function | SmallTest | Level2)
+{
+    int32_t keyCode = 2054;
+    bool isConsumed = false;
+    ASSERT_NE(window_, nullptr);
+    WMError ret = window_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifyWatchFocusActiveChange
+ * @tc.desc: NotifyWatchFocusActiveChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyWatchFocusActiveChange, Function | SmallTest | Level2)
+{
+    bool isActive = false;
+    ASSERT_NE(window_, nullptr);
+    WMError ret = window_->NotifyWatchFocusActiveChange(isActive);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetWatchGestureConsumed
+ * @tc.desc: SetWatchGestureConsumed test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, Function | SmallTest | Level2)
+{
+    bool isWatchGestureConsumed = false;
+    ASSERT_NE(window_, nullptr);
+    window_->SetWatchGestureConsumed(isWatchGestureConsumed);
+    ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
+}
+
+/**
+ * @tc.name: NotifyResultToFloatWindow
+ * @tc.desc: NotifyResultToFloatWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyResultToFloatWindow, Function | SmallTest | Level2)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    bool isConsumed = false;
+    ASSERT_NE(window_, nullptr);
+    window_->SetWatchGestureConsumed(false);
+    window_->NotifyResultToFloatWindow(keyEvent, isConsumed);
+    ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
