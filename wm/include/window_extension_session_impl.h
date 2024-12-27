@@ -108,6 +108,7 @@ public:
     /*
      * PC Window
      */
+    bool IsPcWindow() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
 
 	/*
