@@ -123,6 +123,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
+    virtual ScreenPowerState GetScreenPower() { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual bool TryToCancelScreenOff() = 0;

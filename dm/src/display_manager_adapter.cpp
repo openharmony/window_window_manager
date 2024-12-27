@@ -288,6 +288,12 @@ ScreenPowerState ScreenManagerAdapter::GetScreenPower(ScreenId dmsScreenId)
     return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
 }
 
+ScreenPowerState ScreenManagerAdapter::GetScreenPower()
+{
+    INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+    return displayManagerServiceProxy_->GetScreenPower();
+}
+
 DMError ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

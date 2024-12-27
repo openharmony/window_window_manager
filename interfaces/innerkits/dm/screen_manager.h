@@ -266,6 +266,13 @@ public:
     ScreenPowerState GetScreenPower(ScreenId screenId);
 
     /**
+     * @brief Get screen power state.
+     *
+     * @return Power state of screen.
+     */
+    ScreenPowerState GetScreenPower();
+
+    /**
      * @brief Set screen rotation lock status.
      *
      * @param isLocked True means forbid to rotate screen, false means the opposite.
