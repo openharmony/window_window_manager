@@ -105,7 +105,7 @@ using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(float density, const Rect& rect)>;
-using DumpUITreeFunc = std::function<void(uint64_t, std::string& dumpInfo)>;
+using DumpUITreeFunc = std::function<void(std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
@@ -600,7 +600,7 @@ private:
     int GetRemoteSessionInfos(const std::string& deviceId, int32_t numMax,
                               std::vector<SessionInfoBean>& sessionInfos);
     int GetRemoteSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo);
-    WSError GetTotalUITreeInfo(const std::string& strId, std::string& dumpInfo);
+    WSError GetTotalUITreeInfo(std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
     WSError RequestSceneSessionActivationInner(sptr<SceneSession>& scnSession, bool isNewActive);
