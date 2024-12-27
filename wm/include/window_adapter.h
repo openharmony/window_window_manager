@@ -146,6 +146,11 @@ public:
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
 
+    virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
+    virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
+    virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
+    virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     void ReregisterWindowManagerAgent();
