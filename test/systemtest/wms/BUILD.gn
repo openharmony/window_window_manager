@@ -47,13 +47,13 @@ group("systemtest") {
     ":wms_window_water_mark_test",
   ]
   if (!window_manager_use_sceneboard) {
-    deps += [ ":wms_window_move_drag_test" ]
-  }
-  if (window_manager_use_sceneboard) {
     deps += [
       ":wms_window_focus_test",
-      ":wms_window_layout_test",
+      ":wms_window_move_drag_test",
     ]
+  }
+  if (window_manager_use_sceneboard) {
+    deps += [ ":wms_window_layout_test" ]
   }
 }
 
