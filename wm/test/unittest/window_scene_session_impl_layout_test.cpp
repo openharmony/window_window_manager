@@ -416,8 +416,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync02, Function | SmallTest |
         EXPECT_EQ(20000, rect.posX_);
         EXPECT_EQ(20000, rect.posY_);
         ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
-    }
-    else {
+    } else {
         EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     }
 }
@@ -478,8 +477,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, ResizeAsync02, Function | SmallTest |
         EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
         EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
         ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
-    }
-    else {
+    } else {
         EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     }
 }

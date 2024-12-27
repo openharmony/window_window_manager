@@ -78,10 +78,8 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect01, Function | Small
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect01";
     info.bundleName_ = "NotifyClientToUpdateRect01";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
@@ -100,16 +98,13 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect02, Function | Small
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect02";
     info.bundleName_ = "NotifyClientToUpdateRect02";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     keyboardSession->reason_ = SizeChangeReason::MOVE;
     keyboardSession->isKeyboardPanelEnabled_ = true;
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     keyboardSession->SetSessionProperty(windowSessionProperty);
     auto ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionLayoutTest", nullptr);
@@ -126,10 +121,8 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect03, Function | Small
     SessionInfo info;
     info.abilityName_ = "NotifyClientToUpdateRect03";
     info.bundleName_ = "NotifyClientToUpdateRect03";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
 
     // NotifyClientToUpdateRectTask return not ok
@@ -137,8 +130,7 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect03, Function | Small
     ASSERT_EQ(ret, WSError::WS_OK);
 
     // NotifyClientToUpdateRectTask return ok and session->reason_ is UNDEFINED
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    keyboardSession->sessionStage_ = mockSessionStage;
+    keyboardSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     keyboardSession->state_ = SessionState::STATE_CONNECT;
     ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionLayoutTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);

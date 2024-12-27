@@ -60,7 +60,6 @@ void SessionStubLayoutTest::TearDownTestCase()
 void SessionStubLayoutTest::SetUp()
 {
     session_ = sptr<SessionStubMocker>::MakeSptr();
-    EXPECT_NE(nullptr, session_);
 }
 
 void SessionStubLayoutTest::TearDown()

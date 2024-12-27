@@ -34,7 +34,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    SessionInfo info;
     sptr<SCBSystemSession::SpecificSessionCallback> specificCallback_ = nullptr;
     sptr<SCBSystemSession> scbSystemSession_;
 };
@@ -85,8 +84,8 @@ HWTEST_F(SCBSystemSessionLayoutTest, UpdateWindowMode, Function | SmallTest | Le
  */
 HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect02, Function | SmallTest | Level3)
 {
-    sptr<SCBSystemSession::SpecificSessionCallback> specificCallback1 =
-        sptr<SCBSystemSession::SpecificSessionCallback>::MakeSptr();
+    auto specificCallback1 = sptr<SCBSystemSession::SpecificSessionCallback>::MakeSptr();
+    SessionInfo info;
     sptr<SCBSystemSession> scbSystemSession = sptr<SCBSystemSession>::MakeSptr(info, specificCallback1);
     UpdateAvoidAreaCallback onUpdateAvoidArea;
     ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags;
@@ -123,11 +122,11 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect02, Function | Smal
 HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, Function | SmallTest | Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback;
     property->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
 
     auto ret = scbSystemSession_->SetSessionProperty(property);
     ASSERT_EQ(WSError::WS_OK, ret);
+    KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback;
     scbSystemSession_->keyboardPanelRectUpdateCallback_ = keyboardPanelRectUpdateCallback;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
@@ -179,8 +178,7 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, Function | Smal
  */
 HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect04, Function | SmallTest | Level1)
 {
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    scbSystemSession_->sessionStage_ = mockSessionStage;
+    scbSystemSession_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     auto ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }
