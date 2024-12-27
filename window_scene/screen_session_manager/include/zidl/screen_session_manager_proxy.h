@@ -145,6 +145,7 @@ public:
     bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
+    SuperFoldStatus GetSuperFoldStatus() override;
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 

@@ -507,6 +507,15 @@ FoldStatus ScreenSessionManagerClient::GetFoldStatus()
     return screenSessionManager_->GetFoldStatus();
 }
 
+SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return SuperFoldStatus::UNKNOWN;
+    }
+    return screenSessionManager_->GetSuperFoldStatus();
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(ScreenId screenId,
     float scaleX, float scaleY)
 {
