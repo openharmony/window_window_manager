@@ -7108,7 +7108,6 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "windowToken is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
