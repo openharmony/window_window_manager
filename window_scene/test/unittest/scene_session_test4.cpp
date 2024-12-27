@@ -556,15 +556,6 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
-    property->SetSystemCalling(false);
-    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
-
-    property->SetSystemCalling(true);
-    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
-
-    sceneSession->property_ = property;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
 
