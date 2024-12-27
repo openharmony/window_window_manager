@@ -1854,7 +1854,7 @@ public:
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Stop move window. It is called by application.
+     * @brief Stop move window. It is called by application. Support pc window and pad free multi-window.
      *
      * @return Error code of window.
      */

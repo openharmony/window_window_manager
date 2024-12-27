@@ -673,7 +673,7 @@ HWTEST_F(SceneSessionManagerTest12, IsKeyboardForeground, Function | SmallTest |
  * @tc.desc: ShiftAppWindowPointerEvent,
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_01, Function | SmallTest | Level3)
 {
     SessionInfo sourceInfo;
     sourceInfo.windowType_ = 1;
@@ -699,7 +699,7 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent01, Function | Sma
  * @tc.desc: ShiftAppWindowPointerEvent,
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_02, Function | SmallTest | Level3)
 {
     SessionInfo systemWindowInfo;
     systemWindowInfo.windowType_ = 2000;
@@ -727,7 +727,7 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent02, Function | Sma
  * @tc.desc: ShiftAppWindowPointerEvent,
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_03, Function | SmallTest | Level3)
 {
     SessionInfo sourceInfo;
     sourceInfo.windowType_ = 1;
@@ -750,7 +750,7 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent03, Function | Sma
  * @tc.desc: ShiftAppWindowPointerEvent,
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_04, Function | SmallTest | Level3)
 {
     SessionInfo sourceInfo;
     sourceInfo.windowType_ = 1;

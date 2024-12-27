@@ -26,32 +26,32 @@
 using namespace OHOS::Rosen;
 
 static const std::unordered_map<int32_t, Input_KeyEventAction> keyEventActionMap = {
-    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_CANCEL, Input_KeyEventAction::KEY_ACTION_CANCEL},
-    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_DOWN, Input_KeyEventAction::KEY_ACTION_DOWN},
-    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_UP, Input_KeyEventAction::KEY_ACTION_UP},
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_CANCEL,    Input_KeyEventAction::KEY_ACTION_CANCEL },
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_DOWN,      Input_KeyEventAction::KEY_ACTION_DOWN   },
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_UP,        Input_KeyEventAction::KEY_ACTION_UP     },
 };
 
 static const std::unordered_map<int32_t, Input_TouchEventAction> touchEventActionMap = {
-    {OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL, Input_TouchEventAction::TOUCH_ACTION_CANCEL},
-    {OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN, Input_TouchEventAction::TOUCH_ACTION_DOWN},
-    {OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE, Input_TouchEventAction::TOUCH_ACTION_MOVE},
-    {OHOS::MMI::PointerEvent::POINTER_ACTION_UP, Input_TouchEventAction::TOUCH_ACTION_UP},
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL,    Input_TouchEventAction::TOUCH_ACTION_CANCEL },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN,      Input_TouchEventAction::TOUCH_ACTION_DOWN   },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE,      Input_TouchEventAction::TOUCH_ACTION_MOVE   },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_UP,        Input_TouchEventAction::TOUCH_ACTION_UP     },
 };
 
 static const std::unordered_map<int32_t, Input_MouseEventAction> mouseEventActionMap = {
-    {OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL, Input_MouseEventAction::MOUSE_ACTION_CANCEL},
-    {OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE, Input_MouseEventAction::MOUSE_ACTION_MOVE},
-    {OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, Input_MouseEventAction::MOUSE_ACTION_BUTTON_DOWN},
-    {OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP, Input_MouseEventAction::MOUSE_ACTION_BUTTON_UP},
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL,         Input_MouseEventAction::MOUSE_ACTION_CANCEL      },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE,           Input_MouseEventAction::MOUSE_ACTION_MOVE        },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN,    Input_MouseEventAction::MOUSE_ACTION_BUTTON_DOWN },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP,      Input_MouseEventAction::MOUSE_ACTION_BUTTON_UP   },
 };
 
 static const std::unordered_map<int32_t, Input_MouseEventButton> mouseEventButtonMap = {
-    {OHOS::MMI::PointerEvent::BUTTON_NONE, Input_MouseEventButton::MOUSE_BUTTON_NONE},
-    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_LEFT, Input_MouseEventButton::MOUSE_BUTTON_LEFT},
-    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE, Input_MouseEventButton::MOUSE_BUTTON_MIDDLE},
-    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_RIGHT, Input_MouseEventButton::MOUSE_BUTTON_RIGHT},
-    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_FORWARD, Input_MouseEventButton::MOUSE_BUTTON_FORWARD},
-    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_BACK, Input_MouseEventButton::MOUSE_BUTTON_BACK},
+    {OHOS::MMI::PointerEvent::BUTTON_NONE,             Input_MouseEventButton::MOUSE_BUTTON_NONE    },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_LEFT,       Input_MouseEventButton::MOUSE_BUTTON_LEFT    },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE,     Input_MouseEventButton::MOUSE_BUTTON_MIDDLE  },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_RIGHT,      Input_MouseEventButton::MOUSE_BUTTON_RIGHT   },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_FORWARD,    Input_MouseEventButton::MOUSE_BUTTON_FORWARD },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_BACK,       Input_MouseEventButton::MOUSE_BUTTON_BACK    },
 };
 
 KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)

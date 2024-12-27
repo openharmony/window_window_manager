@@ -705,7 +705,7 @@ void SceneSession::UpdateWaterfallMode(SessionEvent event)
 WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
     if (event != SessionEvent::EVENT_START_MOVE && event != SessionEvent::EVENT_END_MOVE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event or end move event, eventId=%{public}d", event);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event or end move event, eventId=%{public}u", event);
         return WSError::WS_ERROR_NULLPTR;
     }
     const char* const funcName = __func__;

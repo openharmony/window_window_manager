@@ -382,8 +382,6 @@ protected:
      */
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    bool FilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    bool FilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool IsAxisEvent(int32_t action);
     WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     WMError ClearKeyEventFilter() override;
