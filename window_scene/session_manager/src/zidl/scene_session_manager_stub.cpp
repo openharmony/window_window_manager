@@ -1608,12 +1608,12 @@ int SceneSessionManagerStub::HandleGetAppDragResizeType(MessageParcel& data, Mes
 
 int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t sourcePersistentId;
+    int32_t sourcePersistentId = INVALID_WINDOW_ID;
     if (!data.ReadInt32(sourcePersistentId)) {
         TLOGE(WmsLogTag::WMS_PC, "read sourcePersistentId failed");
         return ERR_INVALID_DATA;
     }
-    int32_t targetPersistentId;
+    int32_t targetPersistentId = INVALID_WINDOW_ID;
     if (!data.ReadInt32(targetPersistentId)) {
         TLOGE(WmsLogTag::WMS_PC, "read targetPersistentId failed");
         return ERR_INVALID_DATA;

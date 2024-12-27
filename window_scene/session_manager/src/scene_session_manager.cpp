@@ -12308,24 +12308,22 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     if (sourcePersistentId == targetPersistentId) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    sptr<SceneSession> sourceSession = nullptr;
-    sourceSession = GetSceneSession(sourcePersistentId);
+    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
     if (sourceSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "sourceSession(%{public}d) is nullptr", sourcePersistentId);
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is nullptr", sourcePersistentId);
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     if (!WindowHelper::IsAppWindow(sourceSession->GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_PC, "sourceSession(%{public}d) is not app window", sourcePersistentId);
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is not app window", sourcePersistentId);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    sptr<SceneSession> targetSession = nullptr;
-    targetSession = GetSceneSession(targetPersistentId);
+    sptr<SceneSession> targetSession = GetSceneSession(targetPersistentId);
     if (targetSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is nullptr", targetPersistentId);
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is nullptr", targetPersistentId);
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     if (!WindowHelper::IsAppWindow(targetSession->GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is not app window", targetPersistentId);
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is not app window", targetPersistentId);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
@@ -12334,12 +12332,12 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!SessionPermission::IsSameBundleNameAsCalling(targetSession->GetSessionInfo().bundleName_)) {
-        TLOGE(WmsLogTag::WMS_PC, "targetSession(%{public}d) is not same bundle as calling", targetPersistentId);
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is not same bundle as calling", targetPersistentId);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     return taskScheduler_->PostSyncTask([sourcePersistentId, targetPersistentId] {
         int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId, true);
-        TLOGNI(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
+        TLOGND(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
             sourcePersistentId, targetPersistentId, ret);
         return WMError::WM_OK;
     }, __func__);
