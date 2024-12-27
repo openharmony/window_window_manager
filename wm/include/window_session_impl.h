@@ -329,7 +329,7 @@ public:
      * Window Input Event
      */
     WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
-    WMError NotifyWatchFocusActiveChange(bool isActived);
+    WMError NotifyWatchFocusActiveChange(bool isActive);
     void RegisterWatchFocusActiveChangeCallback();
     void NotifyResultToFloatWindow(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed);
 

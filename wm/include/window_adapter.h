@@ -141,7 +141,7 @@ public:
         int32_t x, int32_t y, std::vector<int32_t>& windowIds);
     virtual WMError ReleaseForegroundSessionScreenLock();
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
-    virtual WMError NotifyWatchFocusActiveChange(bool isActived);
+    virtual WMError NotifyWatchFocusActiveChange(bool isActive);
 
     /*
      * PC Window

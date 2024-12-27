@@ -3920,11 +3920,11 @@ void JsSceneSessionManager::OnNotifyAppUseControlList(
 
 void JsSceneSessionManager::RegisterWatchGestureConsumeResultCallback()
 {
-    ProcessWatchGestureConsumeResultFunc func = [this](int32_t keyCode, bool isConsumed) {
-        WLOGFD("RegisterWatchGestureConsumeResultCallback called");
-        this->OnWatchGestureConsumeResult(keyCode, isConsumed);
-    };
-    SceneSessionManager::GetInstance().RegisterWatchGestureConsumeResultCallback(func);
+    SceneSessionManager::GetInstance().RegisterWatchGestureConsumeResultCallback(
+        [this](int32_t keyCode, bool isConsumed) {
+            TLOGND(WmsLogTag::WMS_EVENT, "RegisterWatchGestureConsumeResultCallback called");
+            this->OnWatchGestureConsumeResult(keyCode, isConsumed);
+        });
 }
 
 void JsSceneSessionManager::OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
@@ -3942,8 +3942,8 @@ void JsSceneSessionManager::OnWatchGestureConsumeResult(int32_t keyCode, bool is
             TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
             return;
         }
-        napi_set_named_property(env, objValue, "keyCode", CreateJsValue(env_, keyCode));
-        napi_set_named_property(env, objValue, "isConsumed", CreateJsValue(env_, isConsumed));
+        napi_set_named_property(env, objValue, "keyCode", CreateJsValue(env, keyCode));
+        napi_set_named_property(env, objValue, "isConsumed", CreateJsValue(env, isConsumed));
         napi_value argv[] = { objValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
@@ -3951,17 +3951,16 @@ void JsSceneSessionManager::OnWatchGestureConsumeResult(int32_t keyCode, bool is
 
 void JsSceneSessionManager::RegisterWatchFocusActiveChangeCallback()
 {
-    ProcessWatchFocusActiveChangeFunc func = [this](bool isActived) {
-        WLOGFD("RegisterWatchFocusActiveChangeCallback called");
-        this->OnWatchFocusActiveChange(isActived);
-    };
-    SceneSessionManager::GetInstance().RegisterWatchFocusActiveChangeCallback(func);
+    SceneSessionManager::GetInstance().RegisterWatchFocusActiveChangeCallback([this](bool isActive) {
+        TLOGND(WmsLogTag::WMS_EVENT, "RegisterWatchFocusActiveChangeCallback called");
+        this->OnWatchFocusActiveChange(isActive);
+    });
 }
 
-void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActived)
+void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActive)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "in");
-    taskScheduler_->PostMainThreadTask([this, isActived,
+    taskScheduler_->PostMainThreadTask([this, isActive,
         jsCallBack = GetJSCallback(WATCH_FOCUS_ACTIVE_CHANGE_CB), env = env_] {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
@@ -3973,7 +3972,7 @@ void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActived)
             TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
             return;
         }
-        napi_set_named_property(env, objValue, "isActived", CreateJsValue(env_, isActived));
+        napi_set_named_property(env, objValue, "isActive", CreateJsValue(env, isActive));
         napi_value argv[] = { objValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);

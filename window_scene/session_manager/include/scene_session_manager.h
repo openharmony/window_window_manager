@@ -129,8 +129,8 @@ using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
-using ProcessWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
-using ProcessWatchFocusActiveChangeFunc = std::function<void(bool isActived)>;
+using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
+using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -203,10 +203,10 @@ public:
     /*
      * Window Input Event
      */
-    void RegisterWatchGestureConsumeResultCallback(const ProcessWatchGestureConsumeResultFunc& func);
+    void RegisterWatchGestureConsumeResultCallback(NotifyWatchGestureConsumeResultFunc&& func);
     WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override;
-    void RegisterWatchFocusActiveChangeCallback(const ProcessWatchFocusActiveChangeFunc& func);
-    WMError NotifyWatchFocusActiveChange(bool isActived) override;
+    void RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func);
+    WMError NotifyWatchFocusActiveChange(bool isActive) override;
 
     /*
      * Window Rotate Animation
@@ -822,8 +822,8 @@ private:
     /*
      * Window Input Event
      */
-    ProcessWatchGestureConsumeResultFunc onWatchGestureConsumeResultFunc_;
-    ProcessWatchFocusActiveChangeFunc onWatchFocusActiveChangeFunc_;
+    NotifyWatchGestureConsumeResultFunc onWatchGestureConsumeResultFunc_;
+    NotifyWatchFocusActiveChangeFunc onWatchFocusActiveChangeFunc_;
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;

@@ -261,7 +261,7 @@ private:
     void RegisterWatchGestureConsumeResultCallback();
     void OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     void RegisterWatchFocusActiveChangeCallback();
-    void OnWatchFocusActiveChange(bool isActived);
+    void OnWatchFocusActiveChange(bool isActive);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

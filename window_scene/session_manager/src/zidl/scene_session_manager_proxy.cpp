@@ -1744,26 +1744,26 @@ WMError SceneSessionManagerProxy::NotifyWatchGestureConsumeResult(int32_t keyCod
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("Write interface token failed.");
+        TLOGE(WmsLogTag::WMS_EVENT, "Write interface token failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(keyCode)) {
-        WLOGFE("Write keyCode failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "Write keyCode failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isConsumed)) {
-        WLOGFE("Write isConsumed failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "Write isConsumed failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_GESTURE_CONSUME_RESULT),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
@@ -1773,29 +1773,29 @@ WMError SceneSessionManagerProxy::NotifyWatchGestureConsumeResult(int32_t keyCod
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::NotifyWatchFocusActiveChange(bool isActived)
+WMError SceneSessionManagerProxy::NotifyWatchFocusActiveChange(bool isActive)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "isActived:%{public}d", isActived);
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("Write interface token failed.");
+        TLOGE(WmsLogTag::WMS_EVENT, "Write interface token failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(isActived)) {
-        WLOGFE("Write isActived failed");
+    if (!data.WriteBool(isActive)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write isActive failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
