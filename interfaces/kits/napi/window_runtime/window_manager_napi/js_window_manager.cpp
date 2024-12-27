@@ -1272,7 +1272,7 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > ARGC_TWO) {
+    if (argc != ARGC_TWO) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t sourcePersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
