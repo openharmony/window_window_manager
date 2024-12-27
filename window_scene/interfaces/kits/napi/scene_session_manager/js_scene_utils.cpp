@@ -821,6 +821,20 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload)
     return true;
 }
 
+bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType)
+{
+    uint32_t dragResizeTypeValue;
+    if (!ConvertFromJsValue(env, value, dragResizeTypeValue)) {
+        return false;
+    }
+    if (dragResizeTypeValue > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragResizeType");
+        return false;
+    }
+    dragResizeType = static_cast<DragResizeType>(dragResizeTypeValue);
+    return true;
+}
+
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector)
 {
     if (array == nullptr) {
@@ -1283,6 +1297,24 @@ napi_value CreateJsSessionGravity(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsSessionDragResizeType(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "RESIZE_TYPE_UNDEFINED", CreateJsValue(env,
+        static_cast<uint32_t>(DragResizeType::RESIZE_TYPE_UNDEFINED)));
+    napi_set_named_property(env, objValue, "RESIZE_EACH_FRAME", CreateJsValue(env,
+        static_cast<uint32_t>(DragResizeType::RESIZE_EACH_FRAME)));
+    napi_set_named_property(env, objValue, "RESIZE_WHEN_DRAG_END", CreateJsValue(env,
+        static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)));
+    return objValue;
+}
+
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect)
 {
@@ -1315,6 +1347,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "pointerY", CreateJsValue(env, param.pointerY_));
     napi_set_named_property(env, objValue, "sessionWidth", CreateJsValue(env, param.sessionWidth_));
     napi_set_named_property(env, objValue, "sessionHeight", CreateJsValue(env, param.sessionHeight_));
+    napi_set_named_property(env, objValue, "dragResizeType", CreateJsValue(env, param.dragResizeType));
     return objValue;
 }
 

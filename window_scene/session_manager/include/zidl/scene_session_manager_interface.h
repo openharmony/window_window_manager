@@ -117,6 +117,10 @@ public:
         TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
         TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
         TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE,
+        TRANS_ID_SET_GLOBAL_DRAG_RESIZE_TYPE,
+        TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE,
+        TRANS_ID_SET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_GET_APP_DRAG_RESIZE_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -284,6 +288,13 @@ public:
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
     
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
+
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override { return WMError::WM_OK; }
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError SetAppDragResizeType(const std::string& bundleName,
+        DragResizeType dragResizeType) override { return WMError::WM_OK; }
+    WMError GetAppDragResizeType(const std::string& bundleName,
+        DragResizeType& dragResizeType) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
