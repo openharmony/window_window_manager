@@ -48,6 +48,7 @@ bool SessionDisplayPowerController::HandleSetDisplayStateOff(DisplayState& state
             if (needCancelNotify_) {
                 TLOGI(WmsLogTag::DMS, "[UL_POWER]SetDisplayState to OFF is canceled successfully before notify");
                 needCancelNotify_ = false;
+                isSuspendBegin_ = false;
                 displayState_ = lastState;
                 ScreenSessionManager::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID,
                     DisplayState::UNKNOWN);
