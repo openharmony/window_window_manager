@@ -182,7 +182,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     NapiAsyncTask::CompleteCallback complete = [rootSceneSession = rootSceneSession_,
         contentUrl, contextWeakPtr, contentStorage](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (rootSceneSession == nullptr) {
-            WLOGFE("rootSceneSession is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "rootSceneSession is nullptr");
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
             return;
         }
@@ -234,20 +234,20 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     napi_env& env_ref = env_;
     auto task = [sessionInfo, jsCallBack = GetJSCallback(PENDING_SCENE_CB), env_ref]() {
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSessionInfo is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSessionInfo is nullptr");
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGI(WmsLogTag::WMS_LIFE, "pend active success, id:%{public}d",
+        TLOGNI(WmsLogTag::WMS_LIFE, "pend active success, id:%{public}d",
             sessionInfo->persistentId_);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
