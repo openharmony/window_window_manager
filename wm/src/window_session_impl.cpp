@@ -1408,7 +1408,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 
 void WindowSessionImpl::RegisterWatchFocusActiveChangeCallback()
 {
-    if (uiContent_ == nullptr) {
+    if (GetUIContentSharedPtr() == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent is nullptr");
         return;
     }

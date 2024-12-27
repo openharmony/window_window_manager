@@ -1766,7 +1766,10 @@ WMError SceneSessionManagerProxy::NotifyWatchGestureConsumeResult(int32_t keyCod
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     return static_cast<WMError>(ret);
 }
 
@@ -1795,7 +1798,10 @@ WMError SceneSessionManagerProxy::NotifyWatchFocusActiveChange(bool isActived)
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     return static_cast<WMError>(ret);
 }
 

@@ -838,20 +838,20 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
 
 bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    bool ret = false;
+    bool isConsumed = false;
     if (auto uiContent = GetUIContentSharedPtr()) {
-        ret = uiContent->ProcessKeyEvent(keyEvent, true);
+        isConsumed = uiContent->ProcessKeyEvent(keyEvent, true);
     }
     RefreshNoInteractionTimeoutMonitor();
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
          keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) &&
-        ret && keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
-        TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "wid:%{public}d, keyCode:%{public}d, ret:%{public}d",
-            GetWindowId(), keyEvent->GetKeyCode(), ret);
-        SetWatchGestureConsumed(ret);
-        NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), ret);
+        isConsumed && keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
+        TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "wid:%{public}d, keyCode:%{public}d, isConsumed:%{public}d",
+            GetWindowId(), keyEvent->GetKeyCode(), isConsumed);
+        SetWatchGestureConsumed(isConsumed);
+        NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
     }
-    return ret;
+    return isConsumed;
 }
 
 void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
