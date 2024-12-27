@@ -709,7 +709,7 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
 int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
-    NotifyDataConsumer(data, reply);
+    NotifyExtensionDataConsumer(data, reply);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

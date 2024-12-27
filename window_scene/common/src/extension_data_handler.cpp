@@ -15,11 +15,7 @@
 
 #include "common/include/extension_data_handler.h"
 
-#include <cstdint>
-#include <optional>
 #include <sstream>
-#include <string>
-#include <utility>
 
 #include <hitrace_meter.h>
 #include <iremote_proxy.h>
@@ -60,8 +56,8 @@ std::string DataTransferConfig::ToString() const
     constexpr int BUFFER_SIZE = 128;
     char buffer[BUFFER_SIZE] = { 0 };
     if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
-                   "subSystemId: %hu, customId: %u, needReply: %d, needSyncSend: %d",
-                   static_cast<uint16_t>(subSystemId), customId, needReply, needSyncSend) > 0) {
+                   "subSystemId: %hhu, customId: %u, needReply: %d, needSyncSend: %d", subSystemId, customId, needReply,
+                   needSyncSend) > 0) {
         str.append(buffer);
     }
     return str;
@@ -70,14 +66,12 @@ std::string DataTransferConfig::ToString() const
 DataHandlerErr DataHandler::RegisterDataConsumer(SubSystemId subSystemId, DataConsumeCallback&& callback)
 {
     std::lock_guard lock(mutex_);
-    auto it = consumers_.find(subSystemId);
-    if (it != consumers_.end()) {
-        // A consumer already exists for this SubSystemId
+    if (consumers_.find(subSystemId) != consumers_.end()) {
+        // A consumer already exists for this subSystemId
         TLOGE(WmsLogTag::WMS_UIEXT, "Consumer already exists for subSystemId: %{public}hhu", subSystemId);
         return DataHandlerErr::DUPLICATE_REGISTRATION;
     }
-
-    consumers_[subSystemId] = std::move(callback);
+    consumers_.emplace(subSystemId, std::move(callback));
     return DataHandlerErr::OK;
 }
 
@@ -88,20 +82,21 @@ void DataHandler::UnregisterDataConsumer(SubSystemId subSystemId)
     TLOGI(WmsLogTag::WMS_UIEXT, "Unregister consumer for subSystemId: %{public}hhu", subSystemId);
 }
 
-DataHandlerErr DataHandler::PrepareData(MessageParcel& data, AAFwk::Want& toSend, const DataTransferConfig& config)
+DataHandlerErr DataHandler::PrepareSendData(MessageParcel& data, const DataTransferConfig& config,
+                                            const AAFwk::Want& toSend)
 {
     if (!WriteInterfaceToken(data)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_UIEXT, "write interface token failed, %{public}s", config.ToString().c_str());
         return DataHandlerErr::WRITE_PARCEL_ERROR;
     }
 
     if (!data.WriteParcelable(&config)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_UIEXT, "write config failed, %{public}s", config.ToString().c_str());
         return DataHandlerErr::WRITE_PARCEL_ERROR;
     }
 
     if (!data.WriteParcelable(&toSend)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_UIEXT, "write toSend failed, %{public}s", config.ToString().c_str());
         return DataHandlerErr::WRITE_PARCEL_ERROR;
     }
     return DataHandlerErr::OK;
@@ -115,14 +110,14 @@ DataHandlerErr DataHandler::ParseReply(MessageParcel& replyParcel, AAFwk::Want& 
 
     uint32_t replyCode = 0;
     if (!replyParcel.ReadUint32(replyCode)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_UIEXT, "read replyCode failed, %{public}s", config.ToString().c_str());
         return DataHandlerErr::READ_PARCEL_ERROR;
     }
 
     if (config.needReply) {
-        auto response = replyParcel.ReadParcelable<AAFwk::Want>();
+        sptr<AAFwk::Want> response = replyParcel.ReadParcelable<AAFwk::Want>();
         if (!response) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+            TLOGE(WmsLogTag::WMS_UIEXT, "read response failed, %{public}s", config.ToString().c_str());
             return DataHandlerErr::READ_PARCEL_ERROR;
         }
         reply = *response;
@@ -132,31 +127,31 @@ DataHandlerErr DataHandler::ParseReply(MessageParcel& replyParcel, AAFwk::Want& 
 }
 
 // process data from peer
-void DataHandler::NotifyDataConsumer(MessageParcel& data, MessageParcel& replyParcel)
+void DataHandler::NotifyDataConsumer(MessageParcel& data, MessageParcel& reply)
 {
-    auto config = data.ReadParcelable<DataTransferConfig>();
+    sptr<DataTransferConfig> config = data.ReadParcelable<DataTransferConfig>();
     if (config == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed");
-        replyParcel.WriteUint32(static_cast<uint32_t>(DataHandlerErr::READ_PARCEL_ERROR));
+        TLOGE(WmsLogTag::WMS_UIEXT, "read config failed");
+        reply.WriteUint32(static_cast<uint32_t>(DataHandlerErr::READ_PARCEL_ERROR));
         return;
     }
 
-    auto want = data.ReadParcelable<AAFwk::Want>();
-    if (want == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed");
-        replyParcel.WriteUint32(static_cast<uint32_t>(DataHandlerErr::READ_PARCEL_ERROR));
+    sptr<AAFwk::Want> sendWant = data.ReadParcelable<AAFwk::Want>();
+    if (sendWant == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read want failed");
+        reply.WriteUint32(static_cast<uint32_t>(DataHandlerErr::READ_PARCEL_ERROR));
         return;
     }
 
-    std::optional<AAFwk::Want> reply;
+    std::optional<AAFwk::Want> replyWant;
     if (config->needReply) {
-        reply = std::make_optional<AAFwk::Want>();
+        replyWant = std::make_optional<AAFwk::Want>();
     }
 
-    auto ret = NotifyDataConsumer(std::move(*want), reply, *config);
-    replyParcel.WriteUint32(static_cast<uint32_t>(ret));
-    if (config->needReply && reply) {
-        replyParcel.WriteParcelable(&(reply.value()));
+    auto ret = NotifyDataConsumer(std::move(*sendWant), replyWant, *config);
+    reply.WriteUint32(static_cast<uint32_t>(ret));
+    if (config->needReply) {
+        reply.WriteParcelable(&(replyWant.value()));
     }
 }
 
@@ -214,14 +209,14 @@ DataHandlerErr DataHandler::NotifyDataConsumer(AAFwk::Want&& data, std::optional
         std::lock_guard lock(mutex_);
         auto it = consumers_.find(config.subSystemId);
         if (it == consumers_.end()) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+            TLOGE(WmsLogTag::WMS_UIEXT, "not found, %{public}s", config.ToString().c_str());
             return DataHandlerErr::NO_CONSUME_CALLBACK;
         }
         callback = it->second;
     }
 
     if (!callback) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_UIEXT, "not callable, %{public}s", config.ToString().c_str());
         return DataHandlerErr::INVALID_CALLBACK;
     }
 
@@ -242,7 +237,7 @@ DataHandlerErr DataHandler::NotifyDataConsumer(AAFwk::Want&& data, std::optional
                customId, ret);
     };
 
-    std::stringstream oss;
+    std::ostringstream oss;
     oss << "NotifyDataConsumer_" << static_cast<uint32_t>(config.subSystemId) << "_" << config.customId;
     PostAsyncTask(std::move(task), oss.str(), 0);
     return DataHandlerErr::OK;

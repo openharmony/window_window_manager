@@ -2032,7 +2032,7 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
     }
 }
 
-WSError SessionProxy::SendExtensionData(MessageParcel& data, MessageOption& option, MessageParcel& reply)
+WSError SessionProxy::SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
