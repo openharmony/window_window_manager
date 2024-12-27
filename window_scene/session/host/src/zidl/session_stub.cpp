@@ -1286,7 +1286,7 @@ int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, Messa
 int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
-    NotifyDataConsumer(data, reply);
+    NotifyExtensionDataConsumer(data, reply);
     return ERR_NONE;
 }
 

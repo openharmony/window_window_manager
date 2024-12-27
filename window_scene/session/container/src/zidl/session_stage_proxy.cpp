@@ -1320,7 +1320,7 @@ WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params
     return static_cast<WSError>(ret);
 }
 
-WSError SessionStageProxy::SendExtensionData(MessageParcel& data, MessageOption& option, MessageParcel& reply)
+WSError SessionStageProxy::SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {

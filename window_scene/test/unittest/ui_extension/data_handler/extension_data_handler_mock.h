@@ -26,9 +26,9 @@ public:
     MockDataHandler() = default;
     ~MockDataHandler() override = default;
 
-    MOCK_METHOD(DataHandlerErr, SendData, (AAFwk::Want & data, AAFwk::Want& reply, const DataTransferConfig& config),
+    MOCK_METHOD(DataHandlerErr, SendData, (AAFwk::Want& data, AAFwk::Want& reply, const DataTransferConfig& config),
                 (override));
-    MOCK_METHOD(bool, WriteInterfaceToken, (MessageParcel & data), (override));
+    MOCK_METHOD(bool, WriteInterfaceToken, (MessageParcel& data), (override));
 
     // Helper methods to expose protected methods for testing
     using DataHandler::NotifyDataConsumer;

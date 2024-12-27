@@ -60,7 +60,7 @@ protected:
     DataHandlerErr NotifyDataConsumer(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply,
                                       const DataTransferConfig& config);
     virtual DataHandlerErr SendData(AAFwk::Want& data, AAFwk::Want& reply, const DataTransferConfig& config) = 0;
-    DataHandlerErr PrepareData(MessageParcel& data, AAFwk::Want& toSend, const DataTransferConfig& config);
+    DataHandlerErr PrepareSendData(MessageParcel& data, const DataTransferConfig& config, const AAFwk::Want& toSend);
     virtual bool WriteInterfaceToken(MessageParcel& data) = 0;
     DataHandlerErr ParseReply(MessageParcel& data, AAFwk::Want& reply, const DataTransferConfig& config);
     void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime);
