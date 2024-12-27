@@ -819,6 +819,12 @@ private:
     void UpdateGestureBackEnabled(int32_t persistentId);
     std::unordered_set<int32_t> gestureBackEnableWindowIdSet_; // ONLY Accessed on OS_sceneSession thread
 
+    /*
+     * Window Input Event
+     */
+    ProcessWatchGestureConsumeResultFunc onWatchGestureConsumeResultFunc_;
+    ProcessWatchFocusActiveChangeFunc onWatchFocusActiveChangeFunc_;
+
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;
     mutable std::shared_mutex sceneSessionMapMutex_;
@@ -864,8 +870,6 @@ private:
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
-    ProcessWatchGestureConsumeResultFunc onWatchGestureConsumeResultFunc_;
-    ProcessWatchFocusActiveChangeFunc onWatchFocusActiveChangeFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
 

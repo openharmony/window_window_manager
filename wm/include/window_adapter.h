@@ -142,6 +142,7 @@ public:
     virtual WMError ReleaseForegroundSessionScreenLock();
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     virtual WMError NotifyWatchFocusActiveChange(bool isActived);
+
     /*
      * PC Window
      */

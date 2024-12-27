@@ -88,7 +88,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {START_PIP_FAILED_CB,          ListenerFunctionType::START_PIP_FAILED_CB},
     {NOTIFY_APP_USE_CONTROL_LIST_CB, ListenerFunctionType::NOTIFY_APP_USE_CONTROL_LIST_CB},
     {WATCH_GESTURE_CONSUME_RESULT_CB,          ListenerFunctionType::WATCH_GESTURE_CONSUME_RESULT_CB},
-    {WATCH_FOCUS_ACTIVE_CHANGE_CB, ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB},
+    {WATCH_FOCUS_ACTIVE_CHANGE_CB,             ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB},
 };
 } // namespace
 
@@ -3944,7 +3944,7 @@ void JsSceneSessionManager::OnWatchGestureConsumeResult(int32_t keyCode, bool is
         }
         napi_set_named_property(env, objValue, "keyCode", CreateJsValue(env_, keyCode));
         napi_set_named_property(env, objValue, "isConsumed", CreateJsValue(env_, isConsumed));
-        napi_value argv[] = {objValue};
+        napi_value argv[] = { objValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }
@@ -3974,7 +3974,7 @@ void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActived)
             return;
         }
         napi_set_named_property(env, objValue, "isActived", CreateJsValue(env_, isActived));
-        napi_value argv[] = {objValue};
+        napi_value argv[] = { objValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }
