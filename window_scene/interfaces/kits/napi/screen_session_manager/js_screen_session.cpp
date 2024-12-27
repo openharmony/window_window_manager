@@ -88,9 +88,9 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
     screenScene_ = new(std::nothrow) ScreenScene(name);
     if (screenSession_) {
         SetScreenSceneDpiFunc func = [this](float density) {
-            WLOGI("Screen Scene Dpi change, new density = %{public}f", density);
+            TLOGNI(WmsLogTag::DMS, "Screen Scene Dpi change, new density = %{public}f", density);
             if (!screenScene_ || !screenSession_) {
-                WLOGFE("[NAPI]screenScene or screenSession is nullptr");
+                TLOGNE(WmsLogTag::DMS, "[NAPI]screenScene or screenSession is nullptr");
                 return;
             }
             auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
@@ -221,11 +221,11 @@ napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callbac
             SingletonContainer::Get<ScreenManager>().SetScreenRotationLockedFromJs(isLocked));
         if (res == DmErrorCode::DM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
-            WLOGFI("OnSetScreenRotationLocked success");
+            TLOGNI(WmsLogTag::DMS, "OnSetScreenRotationLocked success");
         } else {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(res),
                                                 "JsScreenSession::OnSetScreenRotationLocked failed."));
-            WLOGFE("OnSetScreenRotationLocked failed");
+            TLOGNE(WmsLogTag::DMS, "OnSetScreenRotationLocked failed");
         }
         delete task;
     };
@@ -397,18 +397,19 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSession::CallJsCallback");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         if (callbackType == ON_CONNECTION_CALLBACK || callbackType == ON_DISCONNECTION_CALLBACK) {
             auto screenSession = screenSessionWeak.promote();
             if (screenSession == nullptr) {
-                WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+                TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, screenSession is null!",
+                    callbackType.c_str());
                 return;
             }
             napi_value argv[] = { JsScreenUtils::CreateJsScreenProperty(
@@ -418,7 +419,7 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
             napi_value argv[] = {};
             napi_call_function(env, NapiGetUndefined(env), method, 0, argv, nullptr);
         }
-        WLOGI("The js callback has been executed: %{public}s.", callbackType.c_str());
+        TLOGNI(WmsLogTag::DMS, "The js callback has been executed: %{public}s.", callbackType.c_str());
     };
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
@@ -452,17 +453,17 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId scre
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, sensorRotation, env = env_]() {
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         auto screenSession = screenSessionWeak.promote();
         if (screenSession == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
         napi_value argv[] = { CreateJsValue(env, sensorRotation) };
@@ -493,17 +494,17 @@ void JsScreenSession::OnScreenOrientationChange(float screenOrientation, ScreenI
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, screenOrientation, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenOrientationChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         auto screenSession = screenSessionWeak.promote();
         if (screenSession == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
         napi_value argv[] = { CreateJsValue(env, screenOrientation) };
@@ -533,17 +534,17 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, newProperty, reason, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnPropertyChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         auto screenSession = screenSessionWeak.promote();
         if (screenSession == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
         napi_value propertyChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
@@ -574,17 +575,17 @@ void JsScreenSession::OnScreenDensityChange()
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenDensityChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         auto screenSession = screenSessionWeak.promote();
         if (screenSession == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
         napi_value argv[] = {};
@@ -614,17 +615,17 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, event, eventStatus, reason, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnPowerStatusChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("[UL_POWER]%{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "[UL_POWER]%{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("[UL_POWER]%{public}s failed, method is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "[UL_POWER]%{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         auto screenSession = screenSessionWeak.promote();
         if (screenSession == nullptr) {
-            WLOGFE("[UL_POWER]%{public}s failed, screenSession is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "[UL_POWER]%{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
         napi_value displayPowerEvent = CreateJsValue(env, static_cast<int32_t>(event));
@@ -658,12 +659,12 @@ void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId scree
     auto asyncTask = [jsCallbackRef, callbackType, isLocked, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenRotationLockedChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         napi_value argv[] = { CreateJsValue(env, isLocked) };
@@ -691,12 +692,12 @@ void JsScreenSession::OnScreenExtendChange(ScreenId mainScreenId, ScreenId exten
     auto asyncTask = [jsCallbackRef, callbackType, mainScreenId, extendScreenId, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenDensityChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback failed, jsCallbackRef is null!");
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, jsCallbackRef is null!");
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback failed, method is null!");
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, method is null!");
             return;
         }
         napi_value mainId = CreateJsValue(env, static_cast<int64_t>(mainScreenId));
@@ -728,17 +729,17 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId
     auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, hoverStatus, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnHoverStatusChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, method is null!", callbackType.c_str());
             return;
         }
         auto screenSession = screenSessionWeak.promote();
         if (screenSession == nullptr) {
-            WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+            TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
         napi_value argv[] = { CreateJsValue(env, hoverStatus) };
@@ -765,12 +766,12 @@ void JsScreenSession::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, 
     auto asyncTask = [jsCallbackRef, callbackType, mainScreenId, uid, clientName, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenCaptureNotify");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback failed, jsCallbackRef is null!");
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, jsCallbackRef is null!");
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback failed, method is null!");
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, method is null!");
             return;
         }
         napi_value mainId = CreateJsValue(env, static_cast<int64_t>(mainScreenId));
@@ -801,12 +802,12 @@ void JsScreenSession::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus
     auto asyncTask = [jsCallbackRef, callbackType, screenId, superFoldStatus, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnSuperFoldStatusChange");
         if (jsCallbackRef == nullptr) {
-            WLOGFE("Call js callback failed, jsCallbackRef is null!");
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, jsCallbackRef is null!");
             return;
         }
         auto method = jsCallbackRef->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Call js callback failed, method is null!");
+            TLOGNE(WmsLogTag::DMS, "Call js callback failed, method is null!");
             return;
         }
         napi_value id = CreateJsValue(env, static_cast<int64_t>(screenId));
