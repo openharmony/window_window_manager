@@ -2677,21 +2677,18 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (auto hostSession = GetHostSession()) {
-        WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_END_MOVE);
-        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d , errorCode: %{public}d",
-              GetPersistentId(), static_cast<int>(errorCode));
-        switch (errorCode) {
-            case WSError::WS_ERROR_NULLPTR: {
-                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            }
-            default: {
-                return WmErrorCode::WM_OK;
-            }
-        }
-    } else {
+    auto hostSession = GetHostSession()
+    if (!hostSession) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "hostSession is nullptr");
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_END_MOVE);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d , errorCode: %{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+    if (errorCode == WSError::WS_ERROR_NULLPTR) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    } else {
+        return WmErrorCode::WM_OK;
     }
 }
 
