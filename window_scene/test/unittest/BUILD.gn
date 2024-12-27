@@ -416,6 +416,7 @@ ohos_unittest("ws_session_test") {
     "session_test.cpp",
     "session_test2.cpp",
     "session_test3.cpp",
+    "session_test4.cpp",
   ]
 
   deps = [ ":ws_unittest_common" ]
