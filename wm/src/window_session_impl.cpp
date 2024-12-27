@@ -1768,15 +1768,15 @@ WMError WindowSessionImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption)
 }
 
 /** @note @window.immersive */
-bool WindowSessionImpl::GetIsSystemWindow()
+bool WindowSessionImpl::IsSystemWindow()
 {
-    return WindowHelper::IsSystemWindow(property_->GetWindowType());
+    return WindowHelper::IsSystemWindow(GetType());
 }
 
 /** @note @window.immersive */
-bool WindowSessionImpl::GetIsAppWindow()
+bool WindowSessionImpl::IsAppWindow()
 {
-    return WindowHelper::IsAppWindow(property_->GetWindowType());
+    return WindowHelper::IsAppWindow(GetType());
 }
 
 WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
