@@ -26,6 +26,7 @@
 #include "dm_common.h"
 #include "focus_change_info.h"
 #include "window_visibility_info.h"
+#include "window_layout_info.h"
 #include "window_drawing_content_info.h"
 #include "window.h"
 #include "window_pid_visibility_info.h"
@@ -729,6 +730,14 @@ public:
      */
     WMError GetUnreliableWindowInfo(int32_t windowId,
         std::vector<sptr<UnreliableWindowInfo>>& infos) const;
+
+    /**
+     * @brief Get window layout info.
+     *
+     * @param infos Visible window infos
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<windowLayoutInfo>>& infos) const;
 
     /**
      * @brief Get visibility window info.

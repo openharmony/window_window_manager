@@ -153,6 +153,12 @@ napi_value JsWindowManager::ShiftAppWindowFocus(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnShiftAppWindowFocus(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::GetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetAllWindowLayoutInfo(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::GetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -1183,6 +1189,46 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info (env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if(displayId < 0 ||
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [displayId, env, task = napiAsyncTask]{
+        std::vector<sptr<WindowLayoutInfo>> infos;
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, CreateJsWindowLayoutInfoArrayObject(env, infos));
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "success");
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -1306,6 +1352,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetGestureNavigationEnabled);
     BindNativeFunction(env, exportObj, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
+    BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     return NapiGetUndefined(env);
