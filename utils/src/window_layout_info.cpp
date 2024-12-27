@@ -13,38 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_LAYOUT_INFO_H
-#define OHOS_ROSEN_WINDOW_LAYOUT_INFO_H
-
-#include "wm_common.h"
+#include "window_layout_info.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-    /*
-     * @class WindowLayoutInfo
-     *
-     * @brief Info for all windos on the screen.
-     */
-class WindowLayoutInfo : public Parcelable {
-public:
-    /*
-     * @brief Default construct of WindowLayoutInfo.
-     */
-    WindowLayoutInfo() = default;
 
-    /*
-     * @brief Construct of WindowLayoutInfo.
-     *
-     * @param rect rect of the window, { posX, posY, width, height }
-     */
-    WindowLayoutInfo(Rect rect) : rect_(rect) {};
+bool WindowLayoutInfo::Marshalling(Parcel& parcel) const
+{
+    return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
+        parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_);
 
-    ~WindowLayoutInfo() = default;
+WindowLayoutInfo* WindowLayoutInfo::Unmarshalling(Parcel& parcel)
+{
+    auto WindowLayoutInfo = new (std::nothrow) (class WindowLayoutInfo)();
+    if (WindowLayoutInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Display window info is nullptr.");
+        return nullptr;
+    }
 
-    virtual bool Marshalling(Parcel& parcel) const override;
+    windowPidVisibilityInfo->rect_ = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
 
-    static WindowLayoutInfo* Unmarshalling(Parcel& parcel);
-
-    Rect rect_ = { 0, 0, 0, 0 };
-};
+    return windowPidVisibilityInfo;
+}
 } // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_WINDOW_LAYOUT_INFO_H
