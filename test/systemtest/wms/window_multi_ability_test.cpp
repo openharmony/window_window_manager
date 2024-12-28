@@ -120,6 +120,7 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
 
     ASSERT_NE(WMError::WM_OK, scene3->GoBackground());
     ASSERT_NE(WMError::WM_OK, scene3->GoDestroy());
+    }
 }
 
 /**
