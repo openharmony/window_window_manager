@@ -1113,17 +1113,17 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
-    auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            WLOGFE("session is nullptr");
-            return;
-        }
-        session->NotifySessionInfoChange();
-    };
-    property->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
 
     InitSystemSessionDragEnable(property);
+    property->SetSessionPropertyChangeCallback(
+        [weakThis = wptr(this)]() {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                WLOGFE("session is nullptr");
+                return;
+            }
+            session->NotifySessionInfoChange();
+        });
 
     Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
         static_cast<uint32_t>(winRect_.height_)};
@@ -2759,7 +2759,7 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 
 WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty>& property)
 {
-    property_.CopyFrom(property);
+    property_->CopyFrom(property);
 
     auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
