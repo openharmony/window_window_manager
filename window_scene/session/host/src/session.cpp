@@ -1191,7 +1191,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
-    SetSessionPropertyFroReconnect(property);
+    SetSessionPropertyForReconnect(property);
     persistentId_ = property->GetPersistentId();
     SetCallingPid(pid);
     callingUid_ = uid;
@@ -2757,7 +2757,7 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
     return WSError::WS_OK;
 }
 
-WSError Session::SetSessionPropertyFroReconnect(const sptr<WindowSessionProperty>& property)
+WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty>& property)
 {
     property_.CopyFrom(property);
 
