@@ -10497,7 +10497,8 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
-WMError SceneSessionManager::GetAllWindowLayoutInfo(std::vector<sptr<WindowLayoutInfo>>& infos)
+WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
+    std::vector<sptr<WindowLayoutInfo>>& infos)
 {
     auto task = [inputDisplayId, this, &infos] {
         bool isVirtualDisplay = false;
