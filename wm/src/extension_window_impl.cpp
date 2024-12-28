@@ -69,5 +69,29 @@ bool ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
     TLOGI(WmsLogTag::WMS_UIEXT, "in");
     return windowExtensionSessionImpl_->IsPcOrPadFreeMultiWindowMode();
 }
+
+WMError ExtensionWindowImpl::OccupyEvents(int32_t eventFlags)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "events: %{public}d", eventFlags);
+    auto dataHandler = windowExtensionSessionImpl_->GetExtensionDataHandler();
+    if (!dataHandler)
+    {
+        TLOGE(WmsLogTag::WMS_UIEXT, "null dataHandler");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    AAFwk::Want want;
+    want.SetParam("type": std::string("OccupyEvents"));
+    want.SetParam("eventFlags": static_cast<int32_t>(eventFlags));
+    constexpr uint32_t customId = 1001;
+    bool result = dataHandler->SendDataAsync(SubSystenId::ARKUI_UIEXT, customId, want);
+    if (!result)
+    {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
