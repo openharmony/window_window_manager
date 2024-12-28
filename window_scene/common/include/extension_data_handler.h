@@ -46,23 +46,24 @@ public:
     DataHandler() = default;
     virtual ~DataHandler() = default;
 
-    DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data,
+    DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend,
                                 AAFwk::Want& reply) override;
-    DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data) override;
-    DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data) override;
-    DataHandlerErr RegisterDataConsumer(SubSystemId dataId, DataConsumeCallback&& callback) override;
-    void UnregisterDataConsumer(SubSystemId dataId) override;
-    void NotifyDataConsumer(MessageParcel& data, MessageParcel& reply);
+    DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override;
+    DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override;
+    DataHandlerErr RegisterDataConsumer(SubSystemId subSystemId, DataConsumeCallback&& callback) override;
+    void UnregisterDataConsumer(SubSystemId subSystemId) override;
+    void NotifyDataConsumer(MessageParcel& recieved, MessageParcel& reply);
     void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& eventHandler);
     void SetRemoteProxyObject(const sptr<IRemoteObject>& remoteObject);
 
 protected:
     DataHandlerErr NotifyDataConsumer(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply,
                                       const DataTransferConfig& config);
-    virtual DataHandlerErr SendData(AAFwk::Want& data, AAFwk::Want& reply, const DataTransferConfig& config) = 0;
+    virtual DataHandlerErr SendData(const AAFwk::Want& toSend, AAFwk::Want& reply,
+                                    const DataTransferConfig& config) = 0;
     DataHandlerErr PrepareSendData(MessageParcel& data, const DataTransferConfig& config, const AAFwk::Want& toSend);
     virtual bool WriteInterfaceToken(MessageParcel& data) = 0;
-    DataHandlerErr ParseReply(MessageParcel& data, AAFwk::Want& reply, const DataTransferConfig& config);
+    DataHandlerErr ParseReply(MessageParcel& recieved, AAFwk::Want& reply, const DataTransferConfig& config);
     void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime);
 
 protected:
