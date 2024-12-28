@@ -956,6 +956,96 @@ HWTEST_F(WindowSessionImplTest3, IsAppWindow, Function | SmallTest | Level2)
     bool res = window->IsAppWindow();
     ASSERT_EQ(res, true);
 }
+
+/**
+ * @tc.name: SetMouseEventFilter
+ * @tc.desc: SetMouseEventFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetMouseEventFilter, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetMouseEventFilter");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    MouseEventFilterFunc filter = [](OHOS::MMI::PointerEvent& event) {
+        return true;
+    };
+    WMError res = window->SetMouseEventFilter(filter);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ClearMouseEventFilter
+ * @tc.desc: ClearMouseEventFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, ClearMouseEventFilter, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("ClearMouseEventFilter");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    WMError res = window->ClearMouseEventFilter();
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetTouchEventFilter
+ * @tc.desc: SetTouchEventFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetTouchEventFilter, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTouchEventFilter");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    TouchEventFilterFunc filter = [](OHOS::MMI::PointerEvent& event) {
+        return true;
+    };
+    WMError res = window->SetTouchEventFilter(filter);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ClearTouchEventFilter
+ * @tc.desc: ClearTouchEventFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("ClearTouchEventFilter");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    WMError res = window->ClearTouchEventFilter();
+    ASSERT_EQ(res, WMError::WM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
