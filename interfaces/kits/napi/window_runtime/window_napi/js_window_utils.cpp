@@ -555,7 +555,7 @@ napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<s
     uint32_t index = 0;
     for (size_t i = 0; i < infos.size(); i++) {
         auto info = infos[i];
-        napi_set_element(env, arrayValue, index++, CreateJsWindowLayoutInfoObject(env, info));
+        napi_set_element(env, arrayValue, index++, CreateJSWindowLayoutInfoObject(env, info));
     }
     return arrayValue;
 }

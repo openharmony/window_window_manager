@@ -1773,7 +1773,7 @@ WMError SceneSessionManagerProxy::GetParentMainWindowId(int32_t windowId, int32_
 }
 
 WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
-    std::vector<sptr<WidnowLayoutInfo>>& infos)
+    std::vector<sptr<WindowLayoutInfo>>& infos)
 {
     MessageParcel data;
     MessageParcel reply;
