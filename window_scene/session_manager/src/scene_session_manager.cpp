@@ -3594,7 +3594,7 @@ void SceneSessionManager::RegisterWatchGestureConsumeResultCallback(NotifyWatchG
 
 WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActive)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "isActived:%{public}d", isActive);
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
     if (onWatchFocusActiveChangeFunc_) {
         onWatchFocusActiveChangeFunc_(isActive);
     } else {

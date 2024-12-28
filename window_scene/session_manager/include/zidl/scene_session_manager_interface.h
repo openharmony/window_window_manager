@@ -173,9 +173,9 @@ public:
     }
 
     /**
-     * @brief notifying watch gesture event consumption results
+     * @brief notify watch gesture event consumption results
      *
-     * This function provides the ability for Notify watch gesture event consumption results
+     * This function provides the ability for notifying watch gesture event consumption results
      *
      * @param keycode keyEvent codes
      * @param isConsumed consume result
@@ -185,11 +185,11 @@ public:
     WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override { return WMError::WM_OK; }
 
     /**
-     * @brief notifying watch focus active change
+     * @brief notify watch focus active change
      *
-     * This function provides the ability for Notify watch focus active change
+     * This function provides the ability for notifying watch focus active change
      *
-     * @param isActived focus status
+     * @param isActive focus status
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      * @permission Make sure the caller has system permission.
      */
