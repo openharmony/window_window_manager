@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_session_impl.h"
-
 #include <gtest/gtest.h>
-
 #include "ability_context_impl.h"
 #include "display_info.h"
 #include "mock_session.h"
@@ -24,6 +21,7 @@
 #include "mock_window.h"
 #include "parameters.h"
 #include "scene_board_judgement.h"
+#include "window_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -921,7 +919,7 @@ HWTEST_F(WindowSessionImplTest3, IsSystemWindow, Function | SmallTest | Level2)
     option->SetWindowName("IsSystemWindow");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
@@ -942,7 +940,7 @@ HWTEST_F(WindowSessionImplTest3, IsAppWindow, Function | SmallTest | Level2)
     option->SetWindowName("IsAppWindow");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
