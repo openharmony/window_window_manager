@@ -3840,6 +3840,8 @@ void WindowSessionImpl::NotifyConsumeResultToFloatWindow
             GetWindowId(), keyEvent->GetKeyCode(), isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
     }
+}
+
 bool WindowSessionImpl::IsAxisEvent(int32_t action)
 {
     if (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
