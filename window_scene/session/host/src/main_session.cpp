@@ -200,7 +200,6 @@ bool MainSession::IsMainWindowTopmost() const
     return GetSessionProperty()->IsMainWindowTopmost();
 }
 
-
 void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;
