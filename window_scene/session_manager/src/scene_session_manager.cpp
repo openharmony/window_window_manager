@@ -10538,8 +10538,10 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
         auto session = iter.second;
         if (session == nullptr || !IsWindowLayoutInfoNeeded(session) ||
             session->GetSessionProperty()->GetDisplayId() != displayId ||
-            (!isVirtualDisplay && displayId == 0 && !IsOnVirtualDisplay(session)) ||
-            (isVirtualDisplay && displayId == 0 && !IsVirtualDisplayShow(session)) ||
+            (!isVirtualDisplay && displayId == 0 && !IsOnVirtualDisplay(session) &&
+                session->GetSessionProperty()->GetDisplayId() == 0 ) ||
+            (isVirtualDisplay && !IsVirtualDisplayShow(session) &&
+                session->GetSessionProperty()->GetDisplayId() == 0) ||
             session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
             continue;
         }
@@ -10576,7 +10578,7 @@ bool SceneSessionManager::IsOnVirtualDisplay(sptr<SceneSesion> session)
     int32_t lowerScreenPosY = 
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-        session->GetSessionRect().posY_ < lowerScreenPosY) {
+        session->GetSessionRect().posY_ >= lowerScreenPosY) {
         return true;
     }
     return false;
