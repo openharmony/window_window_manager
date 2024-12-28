@@ -61,7 +61,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t 
 typedef bool (*OH_NativeWindowManager_MouseEventFilter)(Input_MouseEvent* mouseEvent);
 
 /**
- * @brief Registers a  filter callback for the window ,the callback is called when the
+ * @brief Registers a filter callback for the window ,the callback is called when the
  * window is dispatched to the event
  *
  * @param windowId windowId when window is created
@@ -90,7 +90,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterMouseEventFilter(int32_
 typedef bool (*OH_NativeWindowManager_TouchEventFilter)(Input_TouchEvent* touchEvent);
 
 /**
- * @brief Registers a  filter callback for the window ,the callback is called when the
+ * @brief Registers a filter callback for the window ,the callback is called when the
  * window is dispatched to the event
  *
  * @param windowId windowId when window is created
