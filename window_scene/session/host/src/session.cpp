@@ -80,6 +80,7 @@ bool Session::isScbCoreEnabled_ = false;
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
     property_ = sptr<WindowSessionProperty>::MakeSptr();
+    lastProperty_ = sptr<WindowSessionProperty>::MakeSptr();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
 
     if (!mainHandler_) {
@@ -1113,8 +1114,17 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
+    auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is nullptr");
+            return;
+        }
+        session->NotifySessionInfoChange();
+    };
+    property->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
+
     InitSystemSessionDragEnable(property);
-    SetSessionProperty(property);
 
     Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
         static_cast<uint32_t>(winRect_.height_)};
@@ -1147,6 +1157,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(GetSessionProperty()->GetIsPcAppInPad());
     }
+    SetSessionProperty(property);
 }
 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
@@ -2744,16 +2755,6 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
     property_ = property;
     
     NotifySessionInfoChange();
-
-    auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            WLOGFE("session is nullptr");
-            return;
-        }
-        session->NotifySessionInfoChange();
-    };
-    property->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
     return WSError::WS_OK;
 }
 
