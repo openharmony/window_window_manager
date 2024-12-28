@@ -223,7 +223,10 @@ public:
     {
         return WMError::WM_OK;
     }
-    WMError GetAllWindowLayoutInfo(Display displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
+    WMError GetAllWindowLayoutInfo(Display displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override
+    {
+        return WMError::WM_OK;
+    }
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override { return WMError::WM_OK; }
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override
     {
