@@ -1205,7 +1205,6 @@ public:
     {
         return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
             parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_);
-
     }
 
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
