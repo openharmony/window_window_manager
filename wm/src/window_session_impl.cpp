@@ -1777,13 +1777,13 @@ WMError WindowSessionImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption)
 }
 
 /** @note @window.immersive */
-bool WindowSessionImpl::IsSystemWindow()
+bool WindowSessionImpl::IsSystemWindow() const
 {
     return WindowHelper::IsSystemWindow(GetType());
 }
 
 /** @note @window.immersive */
-bool WindowSessionImpl::IsAppWindow()
+bool WindowSessionImpl::IsAppWindow() const
 {
     return WindowHelper::IsAppWindow(GetType());
 }
