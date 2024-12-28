@@ -265,7 +265,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO: {
             uint64_t displayId = 0;
-            if(!data.ReadUint64(displayId)) {
+            if (!data.ReadUint64(displayId)) {
                 WLOGFE("Failed to readInt32 displayId");
                 return ERR_INVALID_DATA;
             }
