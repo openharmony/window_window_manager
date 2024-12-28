@@ -223,7 +223,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    WMError GetAllWindowLayoutInfo(Display displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override
     {
         return WMError::WM_OK;
     }
