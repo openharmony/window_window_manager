@@ -932,6 +932,20 @@ public:
     virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
 
     /**
+     * @brief Is system window or not
+     *
+     * @return True means the window is system window, false means the window is not system window
+     */
+    virtual bool IsSystemWindow() const { return false; }
+
+    /**
+     * @brief Is app window or not
+     *
+     * @return True means the window is app window, false means the window is not app window
+     */
+    virtual bool IsAppWindow() const { return false; }
+
+    /**
      * @brief Set this window layout full screen, with hide status bar and nav bar above on this window
      *
      * @param status
