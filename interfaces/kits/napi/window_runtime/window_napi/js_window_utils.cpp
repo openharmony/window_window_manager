@@ -619,7 +619,7 @@ bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButto
     return !emptyParam;
 }
 
-napi_value CreateWindowLayoutInfoObject(napi_env env, const sptr<windowLayoutInfo>& info)
+napi_value CreateWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info)
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
