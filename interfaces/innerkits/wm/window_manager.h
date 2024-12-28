@@ -25,12 +25,10 @@
 #include "wm_common.h"
 #include "dm_common.h"
 #include "focus_change_info.h"
-#include "window.h"
-#include "window_drawing_content_info.h"
-#include "window_layout_info.h"
-#include "window_pid_visibility_info.h"
 #include "window_visibility_info.h"
-
+#include "window_drawing_content_info.h"
+#include "window.h"
+#include "window_pid_visibility_info.h"
 
 namespace OHOS {
 namespace Rosen {
