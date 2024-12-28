@@ -10561,7 +10561,7 @@ bool SceneSessionManager::IsWindowLayoutInfoNeeded(sptr<SceneSession> session)
 {
     std::string name = session->GetWindowName();
     int32_t checker = name.length() - 1;
-    while(checker != -1 isdigit(name[checker])) {
+    while(checker != -1 && isdigit(name[checker])) {
         name.erase(name.end() - 1);
         checker--;
     }
