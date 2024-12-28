@@ -123,6 +123,23 @@ HWTEST_F(SessionStubLayoutTest, HandleUpdateClientRect01, Function | SmallTest |
     res = session_->HandleUpdateClientRect(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
+
+/**
+ * @tc.name: HandleSetSystemEnableDrag_TestReadBool
+ * @tc.desc: Check whether the enableDrag is read successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubLayoutTest, HandleSetSystemEnableDrag_TestReadBool, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = session_->HandleSetSystemEnableDrag(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteBool(true);
+    res = session_->HandleSetSystemEnableDrag(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
