@@ -1558,7 +1558,7 @@ void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenI
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(DisplayId displayId,
-                                                                               DmErrorCode* errorCode)
+    DmErrorCode* errorCode, bool isUseDma)
 {
     WLOGFD("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
     sptr<IRemoteObject> remote = Remote();
@@ -1577,6 +1577,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
 
     if (!data.WriteUint64(displayId)) {
         WLOGFE("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: Write displayId failed");
+        return nullptr;
+    }
+
+    if (!data.WriteBool(isUseDma)) {
+        WLOGFE("isUseDma fail: data write failed");
         return nullptr;
     }
 
