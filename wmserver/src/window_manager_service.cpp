@@ -1433,6 +1433,14 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
     return PostSyncTask(task, "GetVisibilityWindowInfo");
 }
 
+WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    auto task = [this, &infos]() {
+        return windowController_->GetVisibilityWindowInfo(infos);
+    };
+    return PostSyncTask(task, "GetVisibilityWindowInfo");
+}
+
 /** @note @window.hierarchy */
 WMError WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
