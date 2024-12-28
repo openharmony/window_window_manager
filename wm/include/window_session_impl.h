@@ -376,7 +376,6 @@ protected:
     void NotifyTransformChange(const Transform& transForm) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
-    bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool IsVerticalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
@@ -387,6 +386,19 @@ protected:
 
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
+
+    /*
+     * PC Event Filter
+     */
+    bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    bool FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    bool IsAxisEvent(int32_t action);
+    WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
+    WMError ClearKeyEventFilter() override;
+    WMError SetMouseEventFilter(MouseEventFilterFunc filter) override;
+    WMError ClearMouseEventFilter() override;
+    WMError SetTouchEventFilter(TouchEventFilterFunc filter) override;
+    WMError ClearTouchEventFilter() override;
 
     /*
      * Sub Window
@@ -426,8 +438,6 @@ protected:
     bool escKeyEventTriggered_ = false;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
-    virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
-    virtual WMError ClearKeyEventFilter() override;
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
@@ -626,8 +636,6 @@ private:
 
     std::string subWindowTitle_ = { "" };
     std::string dialogTitle_ = { "" };
-    std::shared_mutex keyEventFilterMutex_;
-    KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
 
@@ -662,6 +670,16 @@ private:
      * Window Input Event
      */
     bool isWatchGestureConsumed_ = false;
+
+    /*
+     * PC Event Filter
+     */
+    std::shared_mutex keyEventFilterMutex_;
+    KeyEventFilterFunc keyEventFilter_;
+    std::shared_mutex mouseEventFilterMutex_;
+    MouseEventFilterFunc mouseEventFilter_;
+    std::shared_mutex touchEventFilterMutex_;
+    TouchEventFilterFunc touchEventFilter_;
 };
 } // namespace Rosen
 } // namespace OHOS
