@@ -10507,9 +10507,9 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
             displayId = 0;
             isVirtualDisplay = ture;
         }
-        std::vector<std::pair<int32_t, sptr<SceneSession>>> processingSessions;
-        GetAllWindowLayoutInfo(displayId, isVirtualDisplay, processingSessions);
-        for (auto& iter : processingSessions) {
+        std::vector<std::pair<int32_t, sptr<SceneSession>>> FiltedSessions;
+        FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, FiltedSessions);
+        for (auto& iter : FiltedSessions) {
             auto session = iter.second;
             WSRect hostRect;
             if (!systemConfig_.IsPcWindow()) {
@@ -10531,8 +10531,8 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
-WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
-    std::vector<std::pair<int32_t, sptr<SceneSession>>> processingSessions)
+WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+    std::vector<std::pair<int32_t, sptr<SceneSession>>> FiltedSessions)
 {
     for (auto& iter : sceneSessionMap_) {
         auto session = iter.second;
@@ -10550,7 +10550,7 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId, bool is
         uint32_t rhsZOrder = rhs.second != nullptr ? rhs.second->GetZOrder() : 0;
         return lhsZOrder > rhsZOrder;
     };
-    std::sort(processingSessions.begin(), processingSessions.end(), cmp);
+    std::sort(FiltedSessions.begin(), FiltedSessions.end(), cmp);
     return WMError::WM_OK;
 }
 
