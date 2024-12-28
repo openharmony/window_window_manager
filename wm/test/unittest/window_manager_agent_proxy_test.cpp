@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <gtest/gtest.h>
 #include "display_manager_adapter.h"
-#include <functional>
-#include "window_manager_agent_proxy.h"
 #include "window_manager_agent.h"
+#include "window_manager_agent_proxy.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,21 +29,16 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void WindowManagerAgentProxyTest::SetUpTestCase()
-{
-}
+void WindowManagerAgentProxyTest::SetUpTestCase() {}
 
-void WindowManagerAgentProxyTest::TearDownTestCase()
-{
-}
+void WindowManagerAgentProxyTest::TearDownTestCase() {}
 
-void WindowManagerAgentProxyTest::SetUp()
-{
-}
+void WindowManagerAgentProxyTest::SetUp() {}
 
 void WindowManagerAgentProxyTest::TearDown()
 {
@@ -68,8 +63,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, Function | SmallT
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateFocusChangeInfo(focusChangeInfo, focused);
         resultValue = 1;
     };
@@ -91,8 +85,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, Function | SmallT
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateFocusChangeInfo(nullptr, false);
         resultValue = 1;
     };
@@ -115,8 +108,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo, Function | Small
 
     int resultValue = 0;
     WindowModeType type = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateWindowModeTypeInfo(type);
         resultValue = 1;
     };
@@ -141,8 +133,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, Function | Sma
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateSystemBarRegionTints(displayId, tints);
         resultValue = 1;
     };
@@ -167,8 +158,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, Function | 
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyAccessibilityWindowInfo(infos, type);
         resultValue = 1;
     };
@@ -192,8 +182,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo, Function | Sma
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateWindowVisibilityInfo(visibilityInfos);
         resultValue = 1;
     };
@@ -217,8 +206,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, Function |
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
         resultValue = 1;
     };
@@ -243,8 +231,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, Function | 
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
         resultValue = 1;
     };
@@ -268,8 +255,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, Function
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyWaterMarkFlagChangedResult(showWaterMark);
         resultValue = 1;
     };
@@ -295,8 +281,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, Function | SmallTe
     info.visibleWindowNum = 1;
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     visibleWindowNumInfo.push_back(info);
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateVisibleWindowNum(visibleWindowNumInfo);
         resultValue = 1;
     };
@@ -320,8 +305,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, Func
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyGestureNavigationEnabledResult(enable);
         resultValue = 1;
     };
@@ -346,8 +330,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, Function | Small
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
         resultValue = 1;
     };
@@ -371,8 +354,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, Function | SmallT
     ASSERT_TRUE(windowManagerAgentProxy != nullptr);
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyWindowStyleChange(type);
         resultValue = 1;
     };
@@ -397,8 +379,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, Function
     sptr<WindowPidVisibilityInfo> info = new WindowPidVisibilityInfo();
 
     int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
+    std::function<void()> func = [&]() {
         windowManagerAgentProxy->NotifyWindowPidVisibilityChanged(info);
         resultValue = 1;
     };

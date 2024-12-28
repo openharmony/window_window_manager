@@ -31,21 +31,13 @@ public:
     void TearDown() override;
 };
 
-void WindowAdapterLiteTest::SetUpTestCase()
-{
-}
+void WindowAdapterLiteTest::SetUpTestCase() {}
 
-void WindowAdapterLiteTest::TearDownTestCase()
-{
-}
+void WindowAdapterLiteTest::TearDownTestCase() {}
 
-void WindowAdapterLiteTest::SetUp()
-{
-}
+void WindowAdapterLiteTest::SetUp() {}
 
-void WindowAdapterLiteTest::TearDown()
-{
-}
+void WindowAdapterLiteTest::TearDown() {}
 
 namespace {
 /**
@@ -61,7 +53,7 @@ HWTEST_F(WindowAdapterLiteTest, UnregisterWindowManagerAgent, Function | SmallTe
     }
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
 
-    std::set<sptr<IWindowManagerAgent>> iWindowManagerAgent = {nullptr};
+    std::set<sptr<IWindowManagerAgent>> iWindowManagerAgent = { nullptr };
     windowAdapterLite_->windowManagerLiteAgentMap_.insert(
         std::make_pair(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT, iWindowManagerAgent));
     int32_t pid = 0;
@@ -115,6 +107,6 @@ HWTEST_F(WindowAdapterLiteTest, GetWindowStyleType, Function | SmallTest | Level
     ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
 }
 
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
