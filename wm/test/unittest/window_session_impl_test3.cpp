@@ -932,7 +932,6 @@ HWTEST_F(WindowSessionImplTest3, IsSystemWindow, Function | SmallTest | Level2)
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
-    window->SetWindowType()
     bool res = window->IsSystemWindow();
     ASSERT_EQ(res, true);
 }
