@@ -1192,7 +1192,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
-    SetSessionProperty(property);
+    SetSessionPropertyFroReconnect(property);
     persistentId_ = property->GetPersistentId();
     SetCallingPid(pid);
     callingUid_ = uid;
@@ -2752,7 +2752,25 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    property_ = property;
+    property_.CopyFrom(property);
+
+    NotifySessionInfoChange();
+    return WSError::WS_OK;
+}
+
+WSError Session::SetSessionPropertyFroReconnect(const sptr<WindowSessionProperty>& property)
+{
+    property_.CopyFrom(property);
+
+    auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            WLOGFE("session is nullptr");
+            return;
+        }
+        session->NotifySessionInfoChange();
+    };
+    property_->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
     
     NotifySessionInfoChange();
     return WSError::WS_OK;
