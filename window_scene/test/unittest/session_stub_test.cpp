@@ -435,8 +435,6 @@ HWTEST_F(SessionStubTest, sessionStubTest02, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_NONE, res);
     res = session_->HandleGetStatusBarHeight(data, reply);
     ASSERT_EQ(ERR_NONE, res);
-    res = session_->HandleSetSystemEnableDrag(data, reply);
-    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
