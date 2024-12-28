@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
-#include "window_manager.h"
 #include "mock_window_adapter.h"
-#include "singleton_mocker.h"
 #include "scene_board_judgement.h"
 #include "scene_session_manager.h"
+#include "singleton_mocker.h"
+#include "window_manager.h"
 
 #include "window_manager.cpp"
 
@@ -87,8 +87,10 @@ public:
 
 class TestDisplayInfoChangedListener : public IDisplayInfoChangedListener {
 public:
-    void OnDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId, float density,
-        DisplayOrientation orientation) override
+    void OnDisplayInfoChange(const sptr<IRemoteObject>& token,
+                             DisplayId displayId,
+                             float density,
+                             DisplayOrientation orientation) override
     {
         TLOGI(WmsLogTag::DMS, "TestDisplayInfoChangedListener");
     }
@@ -148,21 +150,13 @@ public:
     void TearDown() override;
 };
 
-void WindowManagerTest::SetUpTestCase()
-{
-}
+void WindowManagerTest::SetUpTestCase() {}
 
-void WindowManagerTest::TearDownTestCase()
-{
-}
+void WindowManagerTest::TearDownTestCase() {}
 
-void WindowManagerTest::SetUp()
-{
-}
+void WindowManagerTest::SetUp() {}
 
-void WindowManagerTest::TearDown()
-{
-}
+void WindowManagerTest::TearDown() {}
 
 namespace {
 /**
@@ -301,7 +295,6 @@ HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, Functi
     ASSERT_EQ(2, windowManager.pImpl_->cameraFloatWindowChangedListeners_.size());
 
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterCameraFloatWindowChangedListener(listener1));
-
 
     EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterCameraFloatWindowChangedListener(listener2));
@@ -470,7 +463,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, Function | SmallTe
  */
 HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListener01, Function | SmallTest | Level2)
 {
-    auto &windowManager = WindowManager::GetInstance();
+    auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowModeListenerAgent_;
     auto oldListeners = windowManager.pImpl_->windowModeListeners_;
     windowManager.pImpl_->windowModeListenerAgent_ = nullptr;
@@ -503,7 +496,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListener01, Function | Smal
  */
 HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListener01, Function | SmallTest | Level2)
 {
-    auto &windowManager = WindowManager::GetInstance();
+    auto& windowManager = WindowManager::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowModeListenerAgent_;
     auto oldListeners = windowManager.pImpl_->windowModeListeners_;
     windowManager.pImpl_->windowModeListenerAgent_ = sptr<WindowManagerAgent>::MakeSptr();
@@ -595,7 +588,6 @@ HWTEST_F(WindowManagerTest, UnregisterSystemBarChangedListener01, Function | Sma
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     windowManager.RegisterSystemBarChangedListener(listener2);
     ASSERT_EQ(2, windowManager.pImpl_->systemBarChangedListeners_.size());
-
 
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterSystemBarChangedListener(listener1));
     EXPECT_CALL(m->Mock(), UnregisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -735,7 +727,7 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, F
     sptr<TestGestureNavigationEnabledChangedListener> listener2 =
         sptr<TestGestureNavigationEnabledChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
+              windowManager.UnregisterGestureNavigationEnabledChangedListener(listener1));
 
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     windowManager.RegisterGestureNavigationEnabledChangedListener(listener1);
@@ -1478,7 +1470,7 @@ HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | Small
  */
 HWTEST_F(WindowManagerTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
 {
-    const std::vector<uint64_t> windowIds = {1, 2};
+    const std::vector<uint64_t> windowIds = { 1, 2 };
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     auto ret = WindowManager::GetInstance().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -1533,6 +1525,6 @@ HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
     auto ret = WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

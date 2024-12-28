@@ -16,8 +16,8 @@
 #include <gtest/gtest.h>
 #include <transaction/rs_sync_transaction_controller.h>
 
-#include "window_stub.h"
 #include "window_agent.h"
+#include "window_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,13 +33,9 @@ public:
     sptr<WindowAgent> windowAgent_;
 };
 
-void WindowAgentTest::SetUpTestCase()
-{
-}
+void WindowAgentTest::SetUpTestCase() {}
 
-void WindowAgentTest::TearDownTestCase()
-{
-}
+void WindowAgentTest::TearDownTestCase() {}
 
 void WindowAgentTest::SetUp()
 {
@@ -61,7 +57,7 @@ namespace {
  */
 HWTEST_F(WindowAgentTest, UpdateWindowRect, Function | SmallTest | Level2)
 {
-    Rect rect = Rect{0, 0, 0, 0};
+    Rect rect = Rect{ 0, 0, 0, 0 };
     bool status = true;
     WMError err = windowAgent_->UpdateWindowRect(rect, status, WindowSizeChangeReason::HIDE);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -187,7 +183,7 @@ HWTEST_F(WindowAgentTest, UpdateDisplayId, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowAgentTest, UpdateOccupiedAreaChangeInfo, Function | SmallTest | Level2)
 {
-    Rect overlapRect = {0, 0, 0, 0};
+    Rect overlapRect = { 0, 0, 0, 0 };
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
     WMError err = windowAgent_->UpdateOccupiedAreaChangeInfo(info);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -204,12 +200,12 @@ HWTEST_F(WindowAgentTest, UpdateOccupiedAreaChangeInfo, Function | SmallTest | L
  */
 HWTEST_F(WindowAgentTest, UpdateOccupiedAreaAndRect, Function | SmallTest | Level2)
 {
-    Rect overlapRect = {0, 0, 0, 0};
+    Rect overlapRect = { 0, 0, 0, 0 };
     sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
     auto syncTransactionController = RSSyncTransactionController::GetInstance();
 
-    WMError err = windowAgent_->UpdateOccupiedAreaAndRect(
-        info, overlapRect, syncTransactionController->GetRSTransaction());
+    WMError err =
+        windowAgent_->UpdateOccupiedAreaAndRect(info, overlapRect, syncTransactionController->GetRSTransaction());
     ASSERT_EQ(err, WMError::WM_OK);
 
     windowAgent_->window_ = nullptr;
@@ -420,6 +416,6 @@ HWTEST_F(WindowAgentTest, NotifyForegroundInteractiveStatus, Function | SmallTes
     ASSERT_EQ(0, res);
 }
 
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

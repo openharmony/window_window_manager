@@ -48,8 +48,8 @@ public:
 
 class TestDrawingContentChangedListener : public IDrawingContentChangedListener {
 public:
-    void OnWindowDrawingContentChanged(
-        const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingInfo) override {};
+    void OnWindowDrawingContentChanged(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingInfo) override {
+    };
 };
 
 class TestVisibilityChangedListener : public IVisibilityChangedListener {
@@ -92,21 +92,13 @@ public:
     void TearDown() override;
 };
 
-void WindowManagerLiteTest::SetUpTestCase()
-{
-}
+void WindowManagerLiteTest::SetUpTestCase() {}
 
-void WindowManagerLiteTest::TearDownTestCase()
-{
-}
+void WindowManagerLiteTest::TearDownTestCase() {}
 
-void WindowManagerLiteTest::SetUp()
-{
-}
+void WindowManagerLiteTest::SetUp() {}
 
-void WindowManagerLiteTest::TearDown()
-{
-}
+void WindowManagerLiteTest::TearDown() {}
 
 namespace {
 /**
@@ -415,8 +407,9 @@ HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level
 
     int32_t topN = 3;
 
-    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(topNInfoResult),
-        Return(WMError::WM_OK)));
+    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_, _))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<1>(topNInfoResult), Return(WMError::WM_OK)));
 
     WindowManagerLite::GetInstance().GetMainWindowInfos(topN, topNInfo);
 
@@ -573,9 +566,10 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, Function | SmallTest |
     infosResult.push_back(info2);
     infosResult.push_back(info3);
 
-    EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult),
-        Return(WMError::WM_OK)));
-    
+    EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<0>(infosResult), Return(WMError::WM_OK)));
+
     auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
     ASSERT_EQ(WMError::WM_OK, errorCode);
     auto it1 = infos.begin();
@@ -603,7 +597,7 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos002, Function | SmallTest |
     infos.push_back(info1);
 
     EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(0).WillOnce(DoAll(Return(WMError::WM_OK)));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
 }
@@ -619,7 +613,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions001, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds;
 
     EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(0).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -635,7 +629,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds = { 1, 2 };
 
     EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -651,7 +645,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds;
     std::vector<int32_t> clearFailedIds;
     EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(0).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -667,7 +661,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds = { 1, 2 };
     std::vector<int32_t> clearFailedIds;
     EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -1037,8 +1031,9 @@ HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo02, Function | SmallTest 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::string testBundleName = "test";
     bool testState = true;
-    EXPECT_CALL(m->Mock(), GetCurrentPiPWindowInfo(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(testBundleName),
-        Return(WMError::WM_OK)));
+    EXPECT_CALL(m->Mock(), GetCurrentPiPWindowInfo(_))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<0>(testBundleName), Return(WMError::WM_OK)));
 
     std::string bundleName;
     auto errorCode = WindowManagerLite::GetInstance().GetCurrentPiPWindowInfo(bundleName);
@@ -1135,5 +1130,5 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, Function | Sma
     windowManager.pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowUpdateListeners_ = oldListeners;
 }
-}
-}
+} // namespace
+} // namespace OHOS::Rosen

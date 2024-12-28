@@ -16,10 +16,10 @@
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
 #include "display_manager_proxy.h"
+#include "mock_uicontent.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
-#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -56,8 +56,8 @@ public:
 
 class MockWindowChangeListener : public IWindowChangeListener {
 public:
-    MOCK_METHOD3(OnSizeChange, void(Rect rect, WindowSizeChangeReason reason,
-        const std::shared_ptr<RSTransaction>& rsTransaction));
+    MOCK_METHOD3(OnSizeChange,
+                 void(Rect rect, WindowSizeChangeReason reason, const std::shared_ptr<RSTransaction>& rsTransaction));
     MOCK_METHOD2(OnModeChange, void(WindowMode mode, bool hasDeco));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
 };
@@ -98,20 +98,15 @@ public:
 
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
-void WindowImplTest3::SetUpTestCase()
-{
-}
+void WindowImplTest3::SetUpTestCase() {}
 
-void WindowImplTest3::TearDownTestCase()
-{
-}
+void WindowImplTest3::TearDownTestCase() {}
 
-void WindowImplTest3::SetUp()
-{
-}
+void WindowImplTest3::SetUp() {}
 
 void WindowImplTest3::TearDown()
 {
@@ -318,8 +313,8 @@ HWTEST_F(WindowImplTest3, HandleBackKeyPressedEvent, Function | SmallTest | Leve
     window->HandleBackKeyPressedEvent(keyEvent);
 
     window->inputEventConsumer_.reset(new MockInputEventConsumer);
-    EXPECT_CALL(*reinterpret_cast<MockInputEventConsumer*>(window->inputEventConsumer_.get()),
-        OnInputEvent(keyEvent)).WillOnce(Return(true));
+    EXPECT_CALL(*reinterpret_cast<MockInputEventConsumer*>(window->inputEventConsumer_.get()), OnInputEvent(keyEvent))
+        .WillOnce(Return(true));
     window->HandleBackKeyPressedEvent(keyEvent);
 }
 
@@ -343,8 +338,7 @@ HWTEST_F(WindowImplTest3, ConsumeKeyEvent, Function | SmallTest | Level3)
     window->ConsumeKeyEvent(keyEvent);
 
     window->inputEventConsumer_.reset(new MockInputEventConsumer);
-    EXPECT_CALL(*reinterpret_cast<MockInputEventConsumer*>(window->inputEventConsumer_.get()),
-        OnInputEvent(keyEvent));
+    EXPECT_CALL(*reinterpret_cast<MockInputEventConsumer*>(window->inputEventConsumer_.get()), OnInputEvent(keyEvent));
     window->ConsumeKeyEvent(keyEvent);
 
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
@@ -415,7 +409,7 @@ HWTEST_F(WindowImplTest3, UpdatePointerEventForStretchableWindow, Function | Sma
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     window->property_->SetWindowRect(Rect{ 0, 0, 10, 10 });
     window->property_->SetOriginRect(Rect{ 0, 0, 100, 100 });
-    std::shared_ptr<MMI::PointerEvent> pointerEvent =  std::make_shared<MockPointerEvent>();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MockPointerEvent>();
     MMI::PointerEvent::PointerItem item;
     ASSERT_FALSE(pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), item));
     window->UpdatePointerEventForStretchableWindow(pointerEvent);
@@ -456,7 +450,7 @@ HWTEST_F(WindowImplTest3, MoveDrag, Function | SmallTest | Level3)
     window->moveDragProperty_->pointEventStarted_ = false;
     window->StartMove();
 
-    std::shared_ptr<MMI::PointerEvent> pointerEvent =  std::make_shared<MockPointerEvent>();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MockPointerEvent>();
     MMI::PointerEvent::PointerItem item;
     pointerEvent->SetTargetDisplayId(0);
     item.SetDisplayX(10000);
@@ -467,8 +461,8 @@ HWTEST_F(WindowImplTest3, MoveDrag, Function | SmallTest | Level3)
     window->moveDragProperty_->startMoveFlag_ = true;
     window->moveDragProperty_->startDragFlag_ = true;
     EXPECT_CALL(m->Mock(), ProcessPointUp(_)).Times(2);
-    window->EndMoveOrDragWindow(uint32_t(), uint32_t(),
-        window->moveDragProperty_->startPointerId_, window->moveDragProperty_->sourceType_);
+    window->EndMoveOrDragWindow(
+        uint32_t(), uint32_t(), window->moveDragProperty_->startPointerId_, window->moveDragProperty_->sourceType_);
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -485,7 +479,7 @@ HWTEST_F(WindowImplTest3, TransferPointerEvent, Function | SmallTest | Level3)
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent =  std::make_shared<MockPointerEvent>();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MockPointerEvent>();
     window->windowSystemConfig_.isStretchable_ = true;
     window->TransferPointerEvent(pointerEvent);
     window->windowSystemConfig_.isStretchable_ = false;
@@ -497,7 +491,7 @@ HWTEST_F(WindowImplTest3, TransferPointerEvent, Function | SmallTest | Level3)
 
     window->inputEventConsumer_.reset(new MockInputEventConsumer);
     EXPECT_CALL(*reinterpret_cast<MockInputEventConsumer*>(window->inputEventConsumer_.get()),
-        OnInputEvent(pointerEvent));
+                OnInputEvent(pointerEvent));
     window->TransferPointerEvent(pointerEvent);
 }
 
@@ -710,7 +704,6 @@ HWTEST_F(WindowImplTest3, UpdateWindowStateWhenShow, Function | SmallTest | Leve
         ASSERT_NE(WMError::WM_OK, mainWindow->Create(INVALID_WINDOW_ID));
     }
 
-
     ASSERT_EQ(WmErrorCode::WM_OK, mainWindow->UpdateWindowStateWhenShow());
 
     option = sptr<WindowOption>::MakeSptr();
@@ -911,7 +904,7 @@ HWTEST_F(WindowImplTest3, GetRequestRect, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    Rect a{0, 0, 0, 0};
+    Rect a{ 0, 0, 0, 0 };
     ASSERT_EQ(a, window->GetRequestRect());
 }
 
@@ -1363,19 +1356,15 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithId03, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(Return(WMError::WM_ERROR_DEVICE_NOT_SUPPORT));
     ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
 
-    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(DoAll(
-        SetArgReferee<1>(windowId),
-        Return(WMError::WM_OK)
-    ));
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(windowId), Return(WMError::WM_OK)));
     ASSERT_NE(nullptr, window->GetTopWindowWithId(mainWinId));
     uint32_t topWinId = 1;
     ASSERT_EQ(WindowImpl::FindWindowById(topWinId), window->GetTopWindowWithId(mainWinId));
 
     uint32_t tempWindowId = 3;
-    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _)).WillRepeatedly(DoAll(
-        SetArgReferee<1>(tempWindowId),
-        Return(WMError::WM_OK)
-    ));
+    EXPECT_CALL(m->Mock(), GetTopWindowId(_, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(tempWindowId), Return(WMError::WM_OK)));
     ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
 
     WindowImpl::windowMap_.erase(winName);
@@ -1433,6 +1422,6 @@ HWTEST_F(WindowImplTest3, SetNeedDefaultAnimation, Function | SmallTest | Level3
     EXPECT_EQ(true, window->needDefaultAnimation_);
     EXPECT_EQ(WMError::WM_OK, window->SetTextFieldAvoidInfo(2.0, 3.0));
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
