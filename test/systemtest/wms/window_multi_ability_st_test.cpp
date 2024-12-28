@@ -49,6 +49,17 @@ void WindowMultiAbilitySTTest::TearDown()
 {
 }
 
+static void DoSceneResource(sptr<WindowScene> windowscene)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, windowscene->GoBackground());
+        ASSERT_EQ(WMError::WM_OK, windowscene->GoDestroy());
+    } else {
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscene->GoBackground());
+        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowscene->GoDestroy());
+    }
+}
+
 /**
  * @tc.name: MultiAbilityWindow01
  * @tc.desc: Five scene process in one thread
@@ -122,12 +133,17 @@ HWTEST_F(WindowMultiAbilitySTTest, MultiAbilityWindow2, Function | MediumTest | 
     sptr<WindowScene> scene4 = Utils::CreateWindowScene();
 
     ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
+
     ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
+
     ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
 
     sptr<WindowScene> scene5 = Utils::CreateWindowScene();
+
     ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
+
     ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
+
     ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
 }
 
@@ -147,8 +163,7 @@ HWTEST_F(WindowMultiAbilitySTTest, MultiAbilityWindow03, Function | MediumTest |
 
     ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
 
-    ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
-    ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
+    DoSceneResource(scene1);
     sptr<WindowScene> scene4 = Utils::CreateWindowScene();
 
     ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
@@ -162,9 +177,7 @@ HWTEST_F(WindowMultiAbilitySTTest, MultiAbilityWindow03, Function | MediumTest |
     ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
 
-    ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
-    ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
-
+    DoSceneResource(scene4);
 
     ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
     ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
