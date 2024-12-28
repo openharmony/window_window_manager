@@ -748,6 +748,8 @@ private:
     void UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid);
     bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+        std::vector<std::pair<int32_t, sptr<SceneSession>>> processingSessions);
     bool IsWindowLayoutInfoNeeded(sptr<SceneSession> session);
     bool IsOnVirtualDisplay(sptr<SceneSession> session);
     bool IsVirtualDisplayShow(sptr<SceneSession> session);
