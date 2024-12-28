@@ -914,6 +914,49 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
     WMError res = window->GetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(res, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: IsSystemWindow
+ * @tc.desc: IsSystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsSystemWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsSystemWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    window_->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
+    window->SetWindowType()
+    bool res = window->IsSystemWindow();
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: IsAppWindow
+ * @tc.desc: IsAppWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsAppWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsAppWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    window_->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    bool res = window->IsAppWindow();
+    ASSERT_EQ(res, true);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
