@@ -355,6 +355,7 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, GetDensityInCurResolution, Function | 
     func();
 
     ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
+
 }
 
 /**
@@ -380,6 +381,7 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, GetScreenColorGamut, Function | SmallT
     func();
 
     ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
+
 }
 
 /**
