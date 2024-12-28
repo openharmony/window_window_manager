@@ -120,23 +120,23 @@ DataHandlerErr DataHandler::ParseReply(MessageParcel& replyParcel, AAFwk::Want& 
             TLOGE(WmsLogTag::WMS_UIEXT, "read response failed, %{public}s", config.ToString().c_str());
             return DataHandlerErr::READ_PARCEL_ERROR;
         }
-        reply = *response;
+        reply = std::move(*response);
     }
 
     return static_cast<DataHandlerErr>(replyCode);
 }
 
 // process data from peer
-void DataHandler::NotifyDataConsumer(MessageParcel& data, MessageParcel& reply)
+void DataHandler::NotifyDataConsumer(MessageParcel& recieved, MessageParcel& reply)
 {
-    sptr<DataTransferConfig> config = data.ReadParcelable<DataTransferConfig>();
+    sptr<DataTransferConfig> config = recieved.ReadParcelable<DataTransferConfig>();
     if (config == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "read config failed");
         reply.WriteUint32(static_cast<uint32_t>(DataHandlerErr::READ_PARCEL_ERROR));
         return;
     }
 
-    sptr<AAFwk::Want> sendWant = data.ReadParcelable<AAFwk::Want>();
+    sptr<AAFwk::Want> sendWant = recieved.ReadParcelable<AAFwk::Want>();
     if (sendWant == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "read want failed");
         reply.WriteUint32(static_cast<uint32_t>(DataHandlerErr::READ_PARCEL_ERROR));
@@ -171,7 +171,7 @@ void DataHandler::SetRemoteProxyObject(const sptr<IRemoteObject>& remoteObject)
     remoteProxy_ = remoteObject;
 }
 
-DataHandlerErr DataHandler::SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data,
+DataHandlerErr DataHandler::SendDataSync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend,
                                          AAFwk::Want& reply)
 {
     DataTransferConfig config;
@@ -179,26 +179,26 @@ DataHandlerErr DataHandler::SendDataSync(SubSystemId subSystemId, uint32_t custo
     config.needReply = true;
     config.subSystemId = subSystemId;
     config.customId = customId;
-    return SendData(data, reply, config);
+    return SendData(toSend, reply, config);
 }
 
-DataHandlerErr DataHandler::SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data)
+DataHandlerErr DataHandler::SendDataSync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend)
 {
     DataTransferConfig config;
     config.needSyncSend = true;
     config.subSystemId = subSystemId;
     config.customId = customId;
     AAFwk::Want reply;
-    return SendData(data, reply, config);
+    return SendData(toSend, reply, config);
 }
 
-DataHandlerErr DataHandler::SendDataAsync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data)
+DataHandlerErr DataHandler::SendDataAsync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend)
 {
     DataTransferConfig config;
     config.subSystemId = subSystemId;
     config.customId = customId;
     AAFwk::Want reply;
-    return SendData(data, reply, config);
+    return SendData(toSend, reply, config);
 }
 
 DataHandlerErr DataHandler::NotifyDataConsumer(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply,
