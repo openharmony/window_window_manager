@@ -736,7 +736,7 @@ public:
      * @param infos window layout infos
      * @return WM_OK means get success, others means get failed.
      */
-    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<windowLayoutInfo>>& infos) const;
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
 
     /**
      * @brief Get visibility window info.
