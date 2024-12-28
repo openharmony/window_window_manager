@@ -2761,6 +2761,7 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
 {
     property_.CopyFrom(property);
 
+    NotifySessionInfoChange();
     auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
@@ -2770,8 +2771,6 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
         session->NotifySessionInfoChange();
     };
     property_->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
-    
-    NotifySessionInfoChange();
     return WSError::WS_OK;
 }
 
