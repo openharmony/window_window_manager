@@ -753,6 +753,7 @@ private:
     bool IsWindowLayoutInfoNeeded(sptr<SceneSession> session);
     bool IsOnVirtualDisplay(sptr<SceneSession> session);
     bool IsVirtualDisplayShow(sptr<SceneSession> session);
+    WMError TransGlobalRectToVirtualDisplayRect(WSRect hostRect);
 
     /*
      * Window Rotate Animation
