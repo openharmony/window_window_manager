@@ -584,7 +584,7 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | L
 {
     DisplayId displayId = -1;
     DmErrorCode* errorCode = nullptr;
-    auto ret = dms_->GetDisplaySnapshot(displayId, errorCode);
+    auto ret = dms_->GetDisplaySnapshot(displayId, errorCode, false);
     ASSERT_EQ(nullptr, ret);
 }
 
