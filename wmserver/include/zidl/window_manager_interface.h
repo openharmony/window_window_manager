@@ -259,6 +259,8 @@ public:
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode,
         bool isConsumed) { return WMError::WM_OK; }
     virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
+        int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

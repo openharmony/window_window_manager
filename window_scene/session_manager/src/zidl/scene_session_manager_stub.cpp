@@ -201,6 +201,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchGestureConsumeResult(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE):
             return HandleWatchFocusActiveChange(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
+            return HandleShiftAppWindowPointerEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1640,6 +1642,23 @@ int SceneSessionManagerStub::HandleGetAppDragResizeType(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t sourcePersistentId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(sourcePersistentId)) {
+        TLOGE(WmsLogTag::WMS_PC, "read sourcePersistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t targetPersistentId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(targetPersistentId)) {
+        TLOGE(WmsLogTag::WMS_PC, "read targetPersistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

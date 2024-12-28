@@ -448,7 +448,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, Function 
     sptr<IRemoteObject> token;
     int32_t id = 0;
     ASSERT_NE(ssm_, nullptr);
-    
+
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     auto res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
@@ -723,6 +723,120 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWatchFocusActiveChange, Function | Sma
     ssm_->onWatchFocusActiveChangeFunc_ = nullptr;
     ret = ssm_->NotifyWatchFocusActiveChange(isActive);
     ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ShiftAppWindowPointerEvent01
+ * @tc.desc: ShiftAppWindowPointerEvent,
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_01, Function | SmallTest | Level3)
+{
+    SessionInfo sourceInfo;
+    sourceInfo.windowType_ = 1;
+    sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({sourceSceneSession->GetPersistentId(), sourceSceneSession});
+
+    SessionInfo targetInfo;
+    targetInfo.windowType_ = 1;
+    sptr<SceneSession> targetSceneSession = sptr<SceneSession>::MakeSptr(targetInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({targetSceneSession->GetPersistentId(), targetSceneSession});
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WMError result = ssm_->ShiftAppWindowPointerEvent(INVALID_SESSION_ID, targetSceneSession->GetPersistentId());
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
+    result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
+    ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(targetSceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: ShiftAppWindowPointerEvent02
+ * @tc.desc: ShiftAppWindowPointerEvent,
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_02, Function | SmallTest | Level3)
+{
+    SessionInfo systemWindowInfo;
+    systemWindowInfo.windowType_ = 2000;
+    sptr<SceneSession> systemWindowSession = sptr<SceneSession>::MakeSptr(systemWindowInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({systemWindowSession->GetPersistentId(), systemWindowSession});
+
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.windowType_ = 1;
+    sptr<SceneSession> mainWindowSession = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({mainWindowSession->GetPersistentId(), mainWindowSession});
+
+    int mainWindowPersistentId = mainWindowSession->GetPersistentId();
+    int systemWindowPersistentId = systemWindowSession->GetPersistentId();
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WMError result = ssm_->ShiftAppWindowPointerEvent(mainWindowPersistentId, systemWindowPersistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
+    result = ssm_->ShiftAppWindowPointerEvent(systemWindowPersistentId, mainWindowPersistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
+    ssm_->sceneSessionMap_.erase(systemWindowSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(mainWindowSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: ShiftAppWindowPointerEvent03
+ * @tc.desc: ShiftAppWindowPointerEvent,
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_03, Function | SmallTest | Level3)
+{
+    SessionInfo sourceInfo;
+    sourceInfo.windowType_ = 1;
+    sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({sourceSceneSession->GetPersistentId(), sourceSceneSession});
+
+    int32_t sourcePersistentId = sourceSceneSession->GetPersistentId();
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
+    ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: ShiftAppWindowPointerEvent04
+ * @tc.desc: ShiftAppWindowPointerEvent,
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_04, Function | SmallTest | Level3)
+{
+    SessionInfo sourceInfo;
+    sourceInfo.windowType_ = 1;
+    sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({sourceSceneSession->GetPersistentId(), sourceSceneSession});
+
+    SessionInfo otherSourceInfo;
+    otherSourceInfo.bundleName_ = "other";
+    otherSourceInfo.windowType_ = 1;
+    sptr<SceneSession> otherSourceSession = sptr<SceneSession>::MakeSptr(otherSourceInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({otherSourceSession->GetPersistentId(), otherSourceSession});
+
+    SessionInfo otherTargetInfo;
+    otherTargetInfo.bundleName_ = "other";
+    otherTargetInfo.windowType_ = 1;
+    sptr<SceneSession> otherTargetSession = sptr<SceneSession>::MakeSptr(otherTargetInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({otherTargetSession->GetPersistentId(), otherTargetSession});
+
+    int32_t sourcePersistentId = sourceSceneSession->GetPersistentId();
+    int32_t otherSourcePersistentId = otherSourceSession->GetPersistentId();
+    int32_t otherTargetPersistentId = otherTargetSession->GetPersistentId();
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, otherTargetPersistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
+    result = ssm_->ShiftAppWindowPointerEvent(otherSourcePersistentId, otherTargetPersistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_CALLING);
+    ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(otherSourceSession->GetPersistentId());
+    ssm_->sceneSessionMap_.erase(otherTargetSession->GetPersistentId());
 }
 }
 } // namespace Rosen

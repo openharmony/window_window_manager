@@ -2678,6 +2678,24 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
     }
 }
 
+WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
+{
+    auto isPC = windowSystemConfig_.IsPcWindow();
+    if (!(isPC || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "hostSession is nullptr");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_END_MOVE);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d , errorCode: %{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+    return errorCode == WSError::WS_ERROR_NULLPTR ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::MainWindowCloseInner()
 {
     auto hostSession = GetHostSession();
