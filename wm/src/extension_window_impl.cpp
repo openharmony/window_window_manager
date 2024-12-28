@@ -83,7 +83,7 @@ WMError ExtensionWindowImpl::OccupyEvents(int32_t eventFlags)
     AAFwk::Want want;
     want.SetParam("type": std::string("OccupyEvents"));
     want.SetParam("eventFlags": static_cast<int32_t>(eventFlags));
-    constexpr uint32_t customId = 1001;
+    constexpr int32_t customId = 1001;
     bool result = dataHandler->SendDataAsync(SubSystenId::ARKUI_UIEXT, customId, want);
     if (!result)
     {
