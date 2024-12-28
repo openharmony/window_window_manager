@@ -1005,6 +1005,29 @@ HWTEST_F(WindowSceneSessionImplTest3, IsLayoutFullScreen, Function | SmallTest |
 }
 
 /**
+ * @tc.name: IsLayoutFullScreen
+ * @tc.desc: IsLayoutFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, IsLayoutFullScreen002, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("IsLayoutFullScreen002");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+}
+
+/**
  * @tc.name: MaximizeFloating
  * @tc.desc: MaximizeFloating
  * @tc.type: FUNC
@@ -1496,6 +1519,24 @@ HWTEST_F(WindowSceneSessionImplTest3, Hide, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: Hide
+ * @tc.desc: reason = WindowStateChangeReason::USER_SWITCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, Hide002, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Hide002");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    windowSceneSessionImpl->hostSession_ = nullptr;
+    auto reason = static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH);
+    auto ret = windowSceneSessionImpl->Hide(reason, false, false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: IsSessionMainWindow
  * @tc.desc: IsSessionMainWindow
  * @tc.type: FUNC
@@ -1613,6 +1654,28 @@ HWTEST_F(WindowSceneSessionImplTest3, Show02, Function | SmallTest | Level2)
     auto ret = windowSceneSessionImpl->Show(0, false, true);
     EXPECT_EQ(WMError::WM_OK, ret);
     ret = windowSceneSessionImpl->Show(0, false, false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: Show02
+ * @tc.desc: Show  withFocus params
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, Show03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Show03");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    auto reason = static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH);
+    auto ret = windowSceneSessionImpl->Show(reason, false, true);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 

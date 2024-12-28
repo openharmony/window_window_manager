@@ -1435,6 +1435,22 @@ HWTEST_F(WindowSceneSessionImplTest4, IsPcOrPadFreeMultiWindowMode, Function | S
     ASSERT_EQ(false, mainWindow->IsPcOrPadFreeMultiWindowMode());
 }
 
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: uitype = padwindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, IsPcOrPadFreeMultiWindowMode002, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionImpl> mainWindow = CreateWindow("mainWindow", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, 100);
+    ASSERT_NE(mainWindow, nullptr);
+    mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    mainWindow->SetFreeMultiWindowMode(true);
+    ASSERT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
+    mainWindow->SetFreeMultiWindowMode(false);
+    ASSERT_EQ(false, mainWindow->IsPcOrPadFreeMultiWindowMode());
+}
+
 static sptr<WindowSceneSessionImpl> CreateWindowWithDisplayId(std::string windowName, WindowType type,
     int64_t displayId = DISPLAY_ID_INVALID, uint32_t parentId = INVALID_WINDOW_ID)
 {
@@ -1627,6 +1643,57 @@ HWTEST_F(WindowSceneSessionImplTest4, MoveTo, Function | SmallTest | Level2)
 
     windowSessionImpl->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
     window->MoveTo(0, 0, true, moveConfiguration);
+}
+
+/**
+ * @tc.name: MoveTo
+ * @tc.desc: MoveTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveTo002, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    option->SetWindowName("MoveTo002");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    MoveConfiguration moveConfiguration;
+    auto ret = window->MoveTo(0, 0, true, moveConfiguration);
+
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    window->state_ = WindowState::STATE_INITIAL;
+    window->property_->SetPersistentId(1);
+    ret = window->MoveTo(0, 0, true, moveConfiguration);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: MoveTo
+ * @tc.desc: MoveTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, MoveTo003, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    option->SetWindowName("MoveTo002");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    MoveConfiguration moveConfiguration;
+    auto ret = window->MoveTo(0, 0, true, moveConfiguration);
+
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    window->state_ = WindowState::STATE_INITIAL;
+    ret = window->MoveTo(0, 0, true, moveConfiguration);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    windowSessionImpl->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
+    int64_t displayId = 12;
+    auto mainWindowContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    sptr<WindowSceneSessionImpl> mainWindow =
+        CreateWindowWithDisplayId("mainWindow", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, displayId);
+    mainWindow->context_ = mainWindowContext;
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ret = window->MoveTo(0, 0, true, moveConfiguration);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
