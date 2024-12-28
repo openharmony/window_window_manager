@@ -10508,23 +10508,7 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
             isVirtualDisplay = ture;
         }
         std::vector<std::pair<int32_t, sptr<SceneSession>>> processingSessions;
-        for (auto& iter : sceneSessionMap_) {
-            auto session = iter.second;
-            if (session == nullptr || !IsWindowLayoutInfoNeeded(session) ||
-                session->GetSessionProperty()->GetDisplayId() != displayId ||
-                (!isVirtualDisplay && displayId == 0 && !IsOnVirtualDisplay(session)) ||
-                (isVirtualDisplay && displayId == 0 && !IsVirtualDisplayShow(session)) ||
-                session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-                continue;
-            }
-            processomhSessions.emplace_back(iter);
-        }
-        CmpFunc cmp = [](std::pair<int32_t, sptr<SceneSession>>& lhs, std::pair<int32_t, sptr<SceneSession>>& rhs) {
-            uint32_t lhsZOrder = lhs.second != nullptr ? lhs.second->GetZOrder() : 0;
-            uint32_t rhsZOrder = rhs.second != nullptr ? rhs.second->GetZOrder() : 0;
-            return lhsZOrder > rhsZOrder;
-        };
-        std::sort(processingSessions.begin(), processingSessions.end(), cmp);
+        GetAllWindowLayoutInfo(displayId, isVirtualDisplay, processingSessions);
         for (auto& iter : processingSessions) {
             auto session = iter.second;
             WSRect hostRect;
@@ -10545,6 +10529,29 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+    std::vector<std::pair<int32_t, sptr<SceneSession>>> processingSessions)
+{
+    for (auto& iter : sceneSessionMap_) {
+        auto session = iter.second;
+        if (session == nullptr || !IsWindowLayoutInfoNeeded(session) ||
+            session->GetSessionProperty()->GetDisplayId() != displayId ||
+            (!isVirtualDisplay && displayId == 0 && !IsOnVirtualDisplay(session)) ||
+            (isVirtualDisplay && displayId == 0 && !IsVirtualDisplayShow(session)) ||
+            session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+            continue;
+        }
+        processomhSessions.emplace_back(iter);
+    }
+    CmpFunc cmp = [](std::pair<int32_t, sptr<SceneSession>>& lhs, std::pair<int32_t, sptr<SceneSession>>& rhs) {
+        uint32_t lhsZOrder = lhs.second != nullptr ? lhs.second->GetZOrder() : 0;
+        uint32_t rhsZOrder = rhs.second != nullptr ? rhs.second->GetZOrder() : 0;
+        return lhsZOrder > rhsZOrder;
+    };
+    std::sort(processingSessions.begin(), processingSessions.end(), cmp);
+    return WMError::WM_OK;
 }
 
 bool SceneSessionManager::IsWindowLayoutInfoNeeded(sptr<SceneSesion> session)
