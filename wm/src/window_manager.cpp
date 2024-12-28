@@ -1123,7 +1123,7 @@ WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<s
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos);
     if (ret != WMError::WM_OK) {
-        WLOGFE("get window visibility info failed");
+        WLOGFE("get window layout info failed");
     }
     return ret;
 }

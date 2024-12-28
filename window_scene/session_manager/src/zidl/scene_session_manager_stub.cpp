@@ -1102,13 +1102,13 @@ int SceneSessionManagerStub::HandleGetAllWindowLayoutInfo(MessageParcel& data, M
 {
     uint64_t displayId = 0;
     if (!data.ReadUint64(displayId)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to readInt32 displayId");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
     std::vector<sptr<WindowLayoutInfo>> infos;
     WMError errCode = GetAllWindowLayoutInfo(displayId, infos);
     if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write window layout info failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to Write window layout info");
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));

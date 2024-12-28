@@ -1425,14 +1425,6 @@ WMError WindowManagerService::GetUnreliableWindowInfo(int32_t windowId,
     return PostSyncTask(task, "GetUnreliableWindowInfo");
 }
 
-WMError WindowManagerService::GetAllWindowLayoutInfo(std::vector<sptr<WindowLayoutInfo>>& infos)
-{
-    auto task = [this, &infos]() {
-        return windowController_->GetAllWindowLayoutInfo(infos);
-    };
-    return PostSyncTask(task, "GetAllWindowLayoutInfo");
-}
-
 WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     auto task = [this, &infos]() {
