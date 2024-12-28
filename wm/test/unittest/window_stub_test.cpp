@@ -14,8 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "window_stub.h"
 #include "window_agent.h"
+#include "window_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,13 +30,9 @@ public:
     sptr<WindowStub> windowStub_;
 };
 
-void WindowStubTest::SetUpTestCase()
-{
-}
+void WindowStubTest::SetUpTestCase() {}
 
-void WindowStubTest::TearDownTestCase()
-{
-}
+void WindowStubTest::TearDownTestCase() {}
 
 void WindowStubTest::SetUp()
 {
@@ -45,9 +41,7 @@ void WindowStubTest::SetUp()
     windowStub_ = new WindowAgent(window);
 }
 
-void WindowStubTest::TearDown()
-{
-}
+void WindowStubTest::TearDown() {}
 
 namespace {
 /**
@@ -308,7 +302,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT);
     windowStub_->OnRemoteRequest(code, data, reply, option);
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS);
-    
+
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_NE(res, 10);
 }
@@ -791,6 +785,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest36, Function | SmallTest | Level2)
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 5);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
