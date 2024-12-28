@@ -943,6 +943,9 @@ HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, Function | Sm
     bool isConsumed = false;
     window_->NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
     ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
+}
+
+/*
  * @tc.name: IsSystemWindow
  * @tc.desc: IsSystemWindow
  * @tc.type: FUNC
