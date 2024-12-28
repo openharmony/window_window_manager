@@ -1418,7 +1418,7 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, Function | SmallTest | Level2
     bool isSupportDragInPcCompatibleMode = true;
     property->SetCompatibleModeInPc(enable);
     ASSERT_EQ(property->GetCompatibleModeInPc(), true);
-    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);;
+    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
     ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
 }
 
