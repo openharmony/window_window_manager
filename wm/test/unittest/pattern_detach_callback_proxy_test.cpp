@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "pattern_detach_callback_proxy.h"
 #include "iremote_object_mocker.h"
+#include "pattern_detach_callback_proxy.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,13 +32,9 @@ public:
     sptr<PatternDetachCallbackProxy> proxy_;
 };
 
-void PatternDetachCallbackProxyTest::SetUpTestCase()
-{
-}
+void PatternDetachCallbackProxyTest::SetUpTestCase() {}
 
-void PatternDetachCallbackProxyTest::TearDownTestCase()
-{
-}
+void PatternDetachCallbackProxyTest::TearDownTestCase() {}
 
 void PatternDetachCallbackProxyTest::SetUp()
 {
@@ -46,9 +42,7 @@ void PatternDetachCallbackProxyTest::SetUp()
     proxy_ = new PatternDetachCallbackProxy(iRemoteObjectMocker);
 }
 
-void PatternDetachCallbackProxyTest::TearDown()
-{
-}
+void PatternDetachCallbackProxyTest::TearDown() {}
 
 namespace {
 /**
@@ -68,6 +62,6 @@ HWTEST_F(PatternDetachCallbackProxyTest, OnPatternDetach, Function | SmallTest |
     ASSERT_EQ(resultValue, 1);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
