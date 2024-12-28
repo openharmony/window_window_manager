@@ -676,7 +676,7 @@ HWTEST_F(SceneSessionManagerTest12, IsKeyboardForeground, Function | SmallTest |
 HWTEST_F(SceneSessionManagerTest12, RegisterWatchGestureConsumeResultCallback, Function | SmallTest | Level3)
 {
     NotifyWatchGestureConsumeResultFunc func = [](int32_t keyCode, bool isConsumed) {};
-    ssm_->RegisterWatchGestureConsumeResultCallback(move(func));
+    ssm_->RegisterWatchGestureConsumeResultCallback(std::move(func));
     ASSERT_NE(ssm_->onWatchGestureConsumeResultFunc_, nullptr);
 }
 
@@ -688,7 +688,7 @@ HWTEST_F(SceneSessionManagerTest12, RegisterWatchGestureConsumeResultCallback, F
 HWTEST_F(SceneSessionManagerTest12, RegisterWatchFocusActiveChangeCallback, Function | SmallTest | Level3)
 {
     NotifyWatchFocusActiveChangeFunc func = [](bool isActive) {};
-    ssm_->RegisterWatchFocusActiveChangeCallback(move(func));
+    ssm_->RegisterWatchFocusActiveChangeCallback(std::move(func));
     ASSERT_NE(ssm_->onWatchFocusActiveChangeFunc_, nullptr);
 }
 

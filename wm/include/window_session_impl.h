@@ -331,7 +331,7 @@ public:
     WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     WMError NotifyWatchFocusActiveChange(bool isActive);
     void RegisterWatchFocusActiveChangeCallback();
-    void NotifyResultToFloatWindow(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed);
+    void NotifyConsumeResultToFloatWindow(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed);
 
 protected:
     WMError Connect();
@@ -484,7 +484,7 @@ protected:
     /*
      * Window Input Event
      */
-    bool GetWatchGestureConsumed();
+    bool GetWatchGestureConsumed() const;
     void SetWatchGestureConsumed(bool isWatchGestureConsumed);
 
 private:
