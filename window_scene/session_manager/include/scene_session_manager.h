@@ -448,7 +448,7 @@ public:
      */
     WMError ReleaseForegroundSessionScreenLock() override;
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
-    WMError GetAllWindowLayoutInfo(Display displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
 
     /*
      * Multi Window
