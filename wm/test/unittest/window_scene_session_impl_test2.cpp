@@ -1782,6 +1782,35 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, Function | SmallTest
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 }
+
+/**
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: IsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave002, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsWindowRectAutoSave002");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->context_ = abilityContext_;
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    bool enabled = false;
+    windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    option->SetWindowName("IsWindowRectAutoSave002");
+    windowSceneSessionImpl->state_ = WindowState::STATE_INITIAL;
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
