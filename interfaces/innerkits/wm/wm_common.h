@@ -1189,10 +1189,44 @@ struct TitleButtonRect {
     }
 };
 
+/*
+ * @class WindowLayoutInfo
+ *
+ * @brief Info for all windos on the screen.
+ */
+class WindowLayoutInfo : public Parcelable {
+public:
+    WindowLayoutInfo() = default;
+    WindowLayoutInfo(Rect rect) : rect_(rect) {};
+
+    ~WindowLayoutInfo() = default;
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
+            parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_);
+
+    }
+
+    static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto WindowLayoutInfo = new (std::nothrow) (class WindowLayoutInfo)();
+        if (WindowLayoutInfo == nullptr) {
+            return nullptr;
+        }
+
+        WindowLayoutInfo->rect_ = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
+
+        return WindowLayoutInfo;
+    }
+
+    Rect rect_ = { 0, 0, 0, 0 };
+};
+
 /**
  * Config of keyboard animation
  */
- 
+
 class KeyboardAnimationCurve : public Parcelable {
 public:
     KeyboardAnimationCurve() = default;
