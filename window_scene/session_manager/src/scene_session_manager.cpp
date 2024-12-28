@@ -10518,8 +10518,8 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
                 hostRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
             } else {
                 hostRect = session->GetSessionRect();
-                if(displayId == VIRTUAL_DISPLAY_ID && IsVirtualDIsplayShow(session)) {
-                    session->TransformGlobalRectToRelativeRect(hostRect);
+                if(isVirtualDisplay) {
+                    TransGlobalRectToVirtualDisplayRect(hostRect);
                 }
             }
             Rect rect = { hostRect.posX_, hostRect.posY_,
@@ -10536,12 +10536,13 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
 {
     for (auto& iter : sceneSessionMap_) {
         auto session = iter.second;
+        bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow(session) &&
+                session->GetSessionProperty()->GetDisplayId() == 0
+        bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == 0 && IsOnVirtualDisplay(session) &&
+                session->GetSessionProperty()->GetDisplayId() == 0;
         if (session == nullptr || !IsWindowLayoutInfoNeeded(session) ||
             session->GetSessionProperty()->GetDisplayId() != displayId ||
-            (!isVirtualDisplay && displayId == 0 && !IsOnVirtualDisplay(session) &&
-                session->GetSessionProperty()->GetDisplayId() == 0 ) ||
-            (isVirtualDisplay && !IsVirtualDisplayShow(session) &&
-                session->GetSessionProperty()->GetDisplayId() == 0) ||
+            isNotVirtualDisplayNeed ||isNotDefaultDisplayNeed ||
             session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
             continue;
         }
@@ -10596,6 +10597,16 @@ bool SceneSessionManager::IsVirtualDisplayShow(sptr<SceneSesion> session)
         return true;
     }
     return false;
+}
+
+WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect hostRect)
+{
+    constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    int32_t lowerScreenPosY = 
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+    hostRect.posY_ -= lowerScreenPosY
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
