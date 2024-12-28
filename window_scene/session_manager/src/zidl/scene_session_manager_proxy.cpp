@@ -1778,20 +1778,24 @@ WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId, st
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetWindowLayoutInfo Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetWindowLayoutInfo Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO_ID), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO), data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WidnowLayoutInfo>(reply, infos)) {
-        WLOGFE("read window layout info failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read window layout info failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(reply.ReadInt32());
