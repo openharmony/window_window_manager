@@ -1114,7 +1114,15 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
     InitSystemSessionDragEnable(property);
-    SetSessionProperty(property);
+    property->SetSessionPropertyChangeCallback(
+        [weakThis = wptr(this)]() {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                WLOGFE("session is nullptr");
+                return;
+            }
+            session->NotifySessionInfoChange();
+        });
 
     Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
         static_cast<uint32_t>(winRect_.height_)};
@@ -1147,6 +1155,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(GetSessionProperty()->GetIsPcAppInPad());
     }
+    SetSessionProperty(property);
 }
 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
@@ -1181,7 +1190,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
-    SetSessionProperty(property);
+    SetSessionPropertyForReconnect(property);
     persistentId_ = property->GetPersistentId();
     SetCallingPid(pid);
     callingUid_ = uid;
@@ -2741,9 +2750,15 @@ bool Session::GetBlockingFocus() const
 
 WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
 {
-    property_ = property;
-    
+    property_->CopyFrom(property);
+
     NotifySessionInfoChange();
+    return WSError::WS_OK;
+}
+
+WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty>& property)
+{
+    property_->CopyFrom(property);
 
     auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
@@ -2753,7 +2768,8 @@ WSError Session::SetSessionProperty(const sptr<WindowSessionProperty>& property)
         }
         session->NotifySessionInfoChange();
     };
-    property->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
+    property_->SetSessionPropertyChangeCallback(hotAreasChangeCallback);
+    NotifySessionInfoChange();
     return WSError::WS_OK;
 }
 
