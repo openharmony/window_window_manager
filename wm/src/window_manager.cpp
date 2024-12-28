@@ -1119,9 +1119,9 @@ WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
     return ret;
 }
 
-WMError WindowManager::GetAllWindowLayoutInfo(std::vector<sptr<WindowLayoutInfo>>& infos) const
+WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(infos);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos);
     if (ret != WMError::WM_OK) {
         WLOGFE("get window visibility info failed");
     }

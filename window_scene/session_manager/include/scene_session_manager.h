@@ -449,9 +449,6 @@ public:
     WMError ReleaseForegroundSessionScreenLock() override;
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError GetAllWindowLayoutInfo(Display displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
-    bool IsWindowLayoutInfoNeeded(sptr<SceneSession> session);
-    bool IsOnVirtualDisplay(sptr<SceneSession> session);
-    bool IsVirtualDisplayShow(sptr<SceneSession> session);
 
     /*
      * Multi Window
@@ -751,6 +748,9 @@ private:
     void UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid);
     bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
+    bool IsWindowLayoutInfoNeeded(sptr<SceneSession> session);
+    bool IsOnVirtualDisplay(sptr<SceneSession> session);
+    bool IsVirtualDisplayShow(sptr<SceneSession> session);
 
     /*
      * Window Rotate Animation
@@ -1149,7 +1149,7 @@ private:
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
     const DisplayId VIRTUAL_DISPLAY_ID = 999;
-    std::unordered_set<std::string> neddedWindows = {"SCBSmartDock"};
+    std::unordered_set<std::string> layoutInfoWhitelist = { "SCBSmartDock" };
     
     /*
      * Move Drag

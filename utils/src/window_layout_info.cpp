@@ -31,8 +31,8 @@ WindowLayoutInfo* WindowLayoutInfo::Unmarshalling(Parcel& parcel)
         return nullptr;
     }
 
-    windowPidVisibilityInfo->rect_ = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
+    WindowLayoutInfo->rect_ = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
 
-    return windowPidVisibilityInfo;
+    return WindowLayoutInfo;
 }
 } // namespace OHOS::Rosen
