@@ -23,8 +23,8 @@
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
-#include "wm_common.h"
 #include "scene_board_judgement.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,17 +40,11 @@ public:
     sptr<WindowSessionImpl> window_;
 };
 
-void WindowSessionImplTest3::SetUpTestCase()
-{
-}
+void WindowSessionImplTest3::SetUpTestCase() {}
 
-void WindowSessionImplTest3::TearDownTestCase()
-{
-}
+void WindowSessionImplTest3::TearDownTestCase() {}
 
-void WindowSessionImplTest3::SetUp()
-{
-}
+void WindowSessionImplTest3::SetUp() {}
 
 void WindowSessionImplTest3::TearDown()
 {
@@ -71,7 +65,7 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
     if (window == nullptr) {
         return nullptr;
     }
-    SessionInfo sessionInfo = {name, name, name};
+    SessionInfo sessionInfo = { name, name, name };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     if (session == nullptr) {
         return nullptr;
@@ -563,7 +557,8 @@ HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, Function | SmallTes
     GTEST_LOG_(INFO) << "WindowSessionImplTest: CopyUniqueDensityParameter start";
     window_ = GetTestWindowImpl("CopyUniqueDensityParameter");
     ASSERT_NE(window_, nullptr);
-    sptr<WindowSessionImpl> parentWindow = GetTestWindowImpl("CopyUniqueDensityParameter01");;
+    sptr<WindowSessionImpl> parentWindow = GetTestWindowImpl("CopyUniqueDensityParameter01");
+    ;
     ASSERT_NE(parentWindow, nullptr);
     window_->useUniqueDensity_ = false;
     window_->virtualPixelRatio_ = 1.0f;
@@ -656,7 +651,7 @@ HWTEST_F(WindowSessionImplTest3, UpdateFrameLayoutCallbackIfNeeded, Function | S
     window_->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
     ASSERT_EQ(window_->enableFrameLayoutFinishCb_, true);
-    
+
     window_->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFrameLayoutCallbackIfNeeded end";
@@ -885,7 +880,7 @@ HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Leve
     option->SetWindowName("SetAvoidAreaOption");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
@@ -905,7 +900,7 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
     option->SetWindowName("GetAvoidAreaOption");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
@@ -914,6 +909,6 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
     WMError res = window->GetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(res, WMError::WM_OK);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
