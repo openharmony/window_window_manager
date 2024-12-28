@@ -985,6 +985,14 @@ WMError WindowAdapter::ReleaseForegroundSessionScreenLock()
     return wmsProxy->ReleaseForegroundSessionScreenLock();
 }
 
+WMError WindowAdapter::IsPcWindow(bool& isPcWindow)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->IsPcWindow(isPcWindow);
+}
+
 WMError WindowAdapter::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

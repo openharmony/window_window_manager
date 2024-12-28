@@ -1640,6 +1640,20 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetFoldStatus, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: GetSuperFoldStatus
+ * @tc.desc: GetSuperFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    screenSessionManagerProxy->GetSuperFoldStatus();
+}
+
+/**
  * @tc.name: GetCurrentFoldCreaseRegion
  * @tc.desc: GetCurrentFoldCreaseRegion
  * @tc.type: FUNC

@@ -669,6 +669,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetFoldStatus())));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS: {
+            static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetSuperFoldStatus())));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION: {
             reply.WriteStrongParcelable(GetCurrentFoldCreaseRegion());
             break;
@@ -723,7 +727,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenComponentRotation = data.ReadFloat();
             auto rotation = data.ReadFloat();
-            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation);
+            auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
+            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation, screenPropertyChangeType);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
@@ -842,7 +847,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 TLOGE(WmsLogTag::DMS, "Failed to receive windowIdList in stub");
                 break;
             }
-            SetVirtualScreenBlackList(screenId, windowIdList);
+            std::vector<uint64_t> surfaceIdList;
+            if (!data.ReadUInt64Vector(&surfaceIdList)) {
+                TLOGE(WmsLogTag::DMS, "Failed to receive surfaceIdList in stub");
+                break;
+            }
+            SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL: {

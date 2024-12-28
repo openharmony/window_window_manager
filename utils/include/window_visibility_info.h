@@ -103,7 +103,11 @@ public:
 
     const std::string& GetBundleName() const { return bundleName_; }
 
+    void SetBundleName(const std::string& bundleName) { bundleName_ = bundleName; }
+
     const std::string& GetAbilityName() const { return abilityName_; }
+
+    void SetAbilityName(const std::string& abilityName) { abilityName_ = abilityName; }
 
     WindowStatus GetWindowStatus() const { return windowStatus_; }
 
@@ -112,6 +116,14 @@ public:
     WindowVisibilityState GetWindowVisibilityState() const { return visibilityState_; }
 
     bool IsFocused() const { return isFocused_; }
+
+    int32_t GetAppIndex() const { return appIndex_; }
+
+    void SetAppIndex(int32_t appIndex) { appIndex_ = appIndex; }
+
+    bool IsSystem() const { return isSystem_; }
+
+    void SetIsSystem(bool isSystem) { isSystem_ = isSystem; }
 
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
@@ -123,6 +135,8 @@ public:
     std::string bundleName_;
     std::string abilityName_;
     bool isFocused_ = false;
+    int32_t appIndex_ { 0 };
+    bool isSystem_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_VISIBILITY_INFO_H

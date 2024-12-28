@@ -59,7 +59,7 @@ private:
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
-    void SetdisplayModeChangeStatus(bool status) override;
+    void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false) override;
     void ChangeOnTentMode(FoldStatus currentState) override;
     void ChangeOffTentMode() override;
     void CloseCoordinationScreen();

@@ -285,7 +285,7 @@ public:
     virtual bool IsTopmost() const { return false; }
     virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
-    void SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func);
+    void SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func);
 
     /*
      * PC Window
@@ -326,7 +326,7 @@ public:
     void RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback);
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
-    virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) { return; }
+    virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) {}
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
@@ -563,6 +563,7 @@ public:
      */
     bool IsDirtyWindow();
     bool IsDirtyDragWindow();
+    void ResetDirtyDragFlags();
     void ResetSizeChangeReasonIfDirty();
     void SetRequestNextVsyncFunc(RequestVsyncFunc&& func);
     void OnNextVsyncReceivedWhenDrag();
@@ -675,7 +676,7 @@ protected:
     virtual void UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
         const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig = {});
     void NotifySessionDisplayIdChange(uint64_t displayId);
-    void CheckAndMoveDisplayIdRecursively(uint64_t displayId);
+    virtual void CheckAndMoveDisplayIdRecursively(uint64_t displayId);
     void SetShouldFollowParentWhenShow(bool shouldFollow) { shouldFollowParentWhenShow_ = shouldFollow; }
     bool GetShouldFollowParentWhenShow() const { return shouldFollowParentWhenShow_; }
     void CheckSubSessionShouldFollowParent(uint64_t displayId);
@@ -966,6 +967,7 @@ private:
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     std::shared_ptr<RSBehindWindowFilterEnabledModifier>
         behindWindowFilterEnabledModifier_; // Only accessed on main thread
+    bool isDragEnd_ = false;
 
     /*
      * Window Immersive

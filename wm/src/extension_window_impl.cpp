@@ -58,6 +58,11 @@ WMError ExtensionWindowImpl::HidePrivacyContentForHost(bool needHide)
     return windowExtensionSessionImpl_->HidePrivacyContentForHost(needHide);
 }
 
+bool ExtensionWindowImpl::IsPcWindow() const
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    return windowExtensionSessionImpl_->IsPcWindow();
+}
 
 bool ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
 {
