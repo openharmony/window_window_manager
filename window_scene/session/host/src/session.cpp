@@ -80,7 +80,6 @@ bool Session::isScbCoreEnabled_ = false;
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
     property_ = sptr<WindowSessionProperty>::MakeSptr();
-    lastProperty_ = sptr<WindowSessionProperty>::MakeSptr();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
 
     if (!mainHandler_) {
